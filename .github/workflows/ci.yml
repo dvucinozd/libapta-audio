@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  header-build:
-    name: Public headers
+  core-build:
+    name: Core build and tests
     runs-on: ubuntu-latest
 
     steps:
@@ -25,5 +25,8 @@ jobs:
       - name: Configure
         run: cmake -S . -B build -DAPTA_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
 
-      - name: Compile C and C++ header checks
+      - name: Compile library and API checks
         run: cmake --build build --parallel 2
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
