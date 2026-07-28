@@ -3,9 +3,9 @@
 **Milestone status:** Complete  
 **Profile status:** Self-tested implementation candidate  
 **API version:** 0.1.0 draft  
-**Verified merge commit:** `b1c9100b2acee13188c650e71e6364bacbae7e7c`  
-**Verification evidence:** GitHub Actions PR CI run `#188` completed successfully  
-**Registered runtime tests:** 43
+**Verified merge commit:** `bb818bbffba75044dc33bace9bfad452e82a32de`  
+**Verification evidence:** GitHub Actions PR CI run `#195` completed successfully  
+**Registered runtime tests:** 45
 
 ## Advertised capabilities
 
@@ -22,7 +22,8 @@ The context exposes only explicitly requested supported capabilities. A detail-e
 
 The current implementation provides:
 
-- push-mode PCM input for mono and stereo sources;
+- push-mode and pull-mode PCM input for mono and stereo sources;
+- synchronous pull callbacks with known/unknown length, `WOULD_BLOCK`, automatic EOF and exact release ownership;
 - S16, packed S24 little-endian, S32 and F32 conversion;
 - deterministic stereo reduction using `(L + R) / 2`;
 - copied bounded PCM queue nodes;
@@ -78,7 +79,7 @@ This mode creates one context-owned, fixed two-slot immutable result pool before
 
 The pool is context-owned because acquired results may outlive the session and caller workspace. The session holds one owner reference and each active result holds one pool reference.
 
-After successful bounded creation, metadata replacement, PCM push, cooperative processing, WOVR/WDTL publication, acquire/release, serialization into caller storage and session destruction do not call the context allocator.
+After successful bounded creation, metadata replacement, PCM push or pull, cooperative processing, WOVR/WDTL publication, acquire/release, serialization into caller storage and session destruction do not call the context allocator.
 
 When application retention occupies both slots, publication returns `APTA_ERROR_RESULT_SLOTS_EXHAUSTED`. Releasing an older result permits deterministic retry without loss of metadata, PCM accumulation or request progress.
 
@@ -104,13 +105,15 @@ The version-1 `.apta` implementation includes:
 
 ## Runtime verification
 
-The verified suite registers 43 runtime tests covering:
+The verified suite registers 45 runtime tests covering:
 
 - core lifecycle, ownership and configuration;
 - allocator failure cleanup;
 - cancellation and cross-thread cancellation visibility;
 - public initializers, ABI prefixes and version rejection;
 - metadata ownership, presence, validation and result lifetime;
+- PCM pull known/unknown length, `WOULD_BLOCK`, EOF, callback validation and release pairing;
+- bounded zero-allocation PCM pull and retained-result lifetime;
 - overview waveform semantics and block-boundary determinism;
 - focus priority;
 - deadline ordering for PCM demand and queued PCM processing;
@@ -137,7 +140,7 @@ The evidence also includes AddressSanitizer/UndefinedBehaviorSanitizer execution
 
 ## Threading contract
 
-The public prototype threading rules are documented in [`../api/APTA-THREADING-0.1.md`](../api/APTA-THREADING-0.1.md).
+The public prototype threading rules are documented in [`../api/APTA-THREADING-0.1.md`](../api/APTA-THREADING-0.1.md). The pull callback ownership contract is documented in [`../api/APTA-PCM-PULL-0.1.md`](../api/APTA-PCM-PULL-0.1.md).
 
 Result acquire/access/release operations may run concurrently with publication. Mutating session calls remain host-serialized except for explicitly thread-safe cancellation request/query operations.
 
@@ -147,7 +150,6 @@ Session destruction must not race with any operation receiving the same session 
 
 The implementation does not yet provide:
 
-- PCM pull-mode analysis;
 - waveform sources with more than two channels;
 - three-band waveform values;
 - multiple detail levels or dynamic tile-cache sizing;
@@ -160,11 +162,11 @@ The implementation does not yet provide:
 
 ## Conformance position
 
-The bounded M2 waveform-processing milestone and its version 0.1 bounded immutable-result publication scope are complete.
+The bounded M2 waveform-processing milestone, Stage S1 push/pull input scope and version 0.1 bounded immutable-result publication scope are complete.
 
 The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not make a formal profile or resource-class claim because cross-endian, shared-library, long-running fuzz, embedded-integration and measured resource evidence remain incomplete.
 
-See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFORM-READINESS-0.1.md) for the requirement-by-requirement readiness matrix.
+See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFORM-READINESS-0.1.md) for the requirement-by-requirement readiness matrix and [`S1-PORTABLE-CORE-STATUS.md`](S1-PORTABLE-CORE-STATUS.md) for the architecture-stage mapping.
 
 ## Next bounded work
 
@@ -174,8 +176,7 @@ The next evidence and feature sequence is:
 2. independent ESP-IDF integration validation;
 3. cross-endian and shared-library export evidence;
 4. maintained long-running fuzz campaign and retained corpus;
-5. pull-mode PCM source ownership path;
-6. optional three-band waveform processing;
-7. tempo and beatgrid milestones.
+5. optional three-band waveform processing;
+6. onset, tempo and beatgrid milestones.
 
 The completed result-slot contract is documented in [`../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md`](../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md).
