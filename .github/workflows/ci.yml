@@ -67,6 +67,7 @@ jobs:
           test -s valid-final.apta
           test -s valid-sparse-partial.apta
           test -s valid-wdtl.apta
+          test -s valid-meta.apta
 
       - name: Run bounded fuzz smoke
         run: >-
