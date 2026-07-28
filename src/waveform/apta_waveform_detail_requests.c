@@ -15,7 +15,6 @@ void apta_internal_detail_update_request_states(apta_session_t *session)
         if (request->request_id == 0u ||
             request->state == APTA_REQUEST_CANCELLED ||
             request->state == APTA_REQUEST_FAILED ||
-            request->state == APTA_REQUEST_SATISFIED ||
             (request->request.feature_mask &
              APTA_FEATURE_WAVEFORM_DETAIL) == 0u) {
             continue;
