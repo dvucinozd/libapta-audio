@@ -102,6 +102,10 @@ add_executable(apta_wdtl_reader_malformed unit/wdtl_reader_malformed.c)
 target_link_libraries(apta_wdtl_reader_malformed PRIVATE apta::core)
 set_target_properties(apta_wdtl_reader_malformed PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_wdtl_reader_allocation_failure unit/wdtl_reader_allocation_failure.c)
+target_link_libraries(apta_wdtl_reader_allocation_failure PRIVATE apta::core)
+set_target_properties(apta_wdtl_reader_allocation_failure PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_result_concurrency unit/result_concurrency.cpp)
 target_link_libraries(apta_result_concurrency PRIVATE apta::core Threads::Threads)
 set_target_properties(apta_result_concurrency PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
@@ -132,6 +136,7 @@ add_test(NAME apta.serialization.wovr_reader_hardening COMMAND apta_wovr_reader_
 add_test(NAME apta.serialization.wovr_reader_allocation_failure COMMAND apta_wovr_reader_allocation_failure)
 add_test(NAME apta.serialization.wdtl_roundtrip COMMAND apta_wdtl_roundtrip)
 add_test(NAME apta.serialization.wdtl_reader_malformed COMMAND apta_wdtl_reader_malformed)
+add_test(NAME apta.serialization.wdtl_reader_allocation_failure COMMAND apta_wdtl_reader_allocation_failure)
 add_test(NAME apta.result.concurrency COMMAND apta_result_concurrency)
 add_test(NAME apta.core.cancellation_thread COMMAND apta_cancellation_thread)
 
