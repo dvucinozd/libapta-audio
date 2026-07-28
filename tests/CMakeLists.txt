@@ -34,6 +34,10 @@ add_executable(apta_version_validation unit/version_validation.c)
 target_link_libraries(apta_version_validation PRIVATE apta::core)
 set_target_properties(apta_version_validation PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_metadata_lifecycle unit/metadata_lifecycle.c)
+target_link_libraries(apta_metadata_lifecycle PRIVATE apta::core)
+set_target_properties(apta_metadata_lifecycle PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_waveform_overview unit/waveform_overview.c)
 target_link_libraries(apta_waveform_overview PRIVATE apta::core)
 set_target_properties(apta_waveform_overview PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
@@ -118,6 +122,22 @@ add_executable(apta_wdtl_reader_allocation_failure unit/wdtl_reader_allocation_f
 target_link_libraries(apta_wdtl_reader_allocation_failure PRIVATE apta::core)
 set_target_properties(apta_wdtl_reader_allocation_failure PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_meta_roundtrip unit/meta_roundtrip.c)
+target_link_libraries(apta_meta_roundtrip PRIVATE apta::core)
+set_target_properties(apta_meta_roundtrip PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
+add_executable(apta_meta_wdtl_roundtrip unit/meta_wdtl_roundtrip.c)
+target_link_libraries(apta_meta_wdtl_roundtrip PRIVATE apta::core)
+set_target_properties(apta_meta_wdtl_roundtrip PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
+add_executable(apta_meta_reader_malformed unit/meta_reader_malformed.c)
+target_link_libraries(apta_meta_reader_malformed PRIVATE apta::core)
+set_target_properties(apta_meta_reader_malformed PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
+add_executable(apta_meta_allocation_failure unit/meta_allocation_failure.c)
+target_link_libraries(apta_meta_allocation_failure PRIVATE apta::core)
+set_target_properties(apta_meta_allocation_failure PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_result_concurrency unit/result_concurrency.cpp)
 target_link_libraries(apta_result_concurrency PRIVATE apta::core Threads::Threads)
 set_target_properties(apta_result_concurrency PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
@@ -131,6 +151,7 @@ add_test(NAME apta.core.allocation_failure COMMAND apta_allocation_failure)
 add_test(NAME apta.core.cancellation COMMAND apta_cancellation)
 add_test(NAME apta.api.initializers COMMAND apta_initializers)
 add_test(NAME apta.api.version_validation COMMAND apta_version_validation)
+add_test(NAME apta.metadata.lifecycle COMMAND apta_metadata_lifecycle)
 add_test(NAME apta.waveform.overview COMMAND apta_waveform_overview)
 add_test(NAME apta.waveform.determinism COMMAND apta_waveform_determinism)
 add_test(NAME apta.waveform.priority COMMAND apta_waveform_priority)
@@ -152,6 +173,10 @@ add_test(NAME apta.serialization.wovr_reader_allocation_failure COMMAND apta_wov
 add_test(NAME apta.serialization.wdtl_roundtrip COMMAND apta_wdtl_roundtrip)
 add_test(NAME apta.serialization.wdtl_reader_malformed COMMAND apta_wdtl_reader_malformed)
 add_test(NAME apta.serialization.wdtl_reader_allocation_failure COMMAND apta_wdtl_reader_allocation_failure)
+add_test(NAME apta.serialization.meta_roundtrip COMMAND apta_meta_roundtrip)
+add_test(NAME apta.serialization.meta_wdtl_roundtrip COMMAND apta_meta_wdtl_roundtrip)
+add_test(NAME apta.serialization.meta_reader_malformed COMMAND apta_meta_reader_malformed)
+add_test(NAME apta.serialization.meta_allocation_failure COMMAND apta_meta_allocation_failure)
 add_test(NAME apta.result.concurrency COMMAND apta_result_concurrency)
 add_test(NAME apta.core.cancellation_thread COMMAND apta_cancellation_thread)
 

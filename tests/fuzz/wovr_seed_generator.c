@@ -12,7 +12,8 @@ static int write_result_seed(
     uint32_t frame_count,
     apta_source_frame_t total_frames,
     int signal_end_of_input,
-    apta_feature_mask_t requested_features)
+    apta_feature_mask_t requested_features,
+    int include_metadata)
 {
     apta_session_config_t session_config;
     apta_session_t *session = NULL;
@@ -20,8 +21,9 @@ static int write_result_seed(
     apta_pcm_block_t block;
     apta_work_budget_t budget;
     apta_serialize_options_t serialize_options;
+    apta_metadata_t metadata;
     int16_t pcm[2048] = {0};
-    uint8_t output[1024];
+    uint8_t output[2048];
     uint64_t required_size = 0u;
     size_t written = 0u;
     uint32_t accepted = 0u;
@@ -42,6 +44,29 @@ static int write_result_seed(
 
     if (apta_session_create(context, &session_config, &session) != APTA_STATUS_OK) {
         goto cleanup;
+    }
+
+    if (include_metadata) {
+        apta_metadata_init(&metadata);
+        metadata.flags =
+            APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT |
+            APTA_METADATA_FLAG_BACKEND_NAME_PRESENT |
+            APTA_METADATA_FLAG_CREATION_TIME_PRESENT |
+            APTA_METADATA_FLAG_COMMENTS_PRESENT;
+        metadata.producer_name.data = "libapta";
+        metadata.producer_name.size = 7u;
+        metadata.backend_name.data = "fuzz-seed";
+        metadata.backend_name.size = 9u;
+        metadata.creation_unix_time = UINT64_C(1700000000);
+        metadata.application_source_id_kind = APTA_METADATA_SOURCE_ID_TEXT;
+        metadata.application_source_id.data =
+            (const uint8_t *)"valid-meta";
+        metadata.application_source_id.size = 10u;
+        metadata.comments.data = "canonical META seed";
+        metadata.comments.size = 19u;
+        if (apta_session_set_metadata(session, &metadata) != APTA_STATUS_OK) {
+            goto cleanup;
+        }
     }
 
     apta_pcm_block_init(&block);
@@ -136,7 +161,8 @@ int main(void)
             2048u,
             2048u,
             1,
-            APTA_FEATURE_WAVEFORM_OVERVIEW) &&
+            APTA_FEATURE_WAVEFORM_OVERVIEW,
+            0) &&
         write_result_seed(
             "valid-sparse-partial.apta",
             context,
@@ -144,7 +170,8 @@ int main(void)
             1024u,
             APTA_TOTAL_FRAMES_UNKNOWN,
             0,
-            APTA_FEATURE_WAVEFORM_OVERVIEW) &&
+            APTA_FEATURE_WAVEFORM_OVERVIEW,
+            0) &&
         write_result_seed(
             "valid-wdtl.apta",
             context,
@@ -153,7 +180,18 @@ int main(void)
             1024u,
             1,
             APTA_FEATURE_WAVEFORM_OVERVIEW |
-                APTA_FEATURE_WAVEFORM_DETAIL);
+                APTA_FEATURE_WAVEFORM_DETAIL,
+            0) &&
+        write_result_seed(
+            "valid-meta.apta",
+            context,
+            0u,
+            1024u,
+            1024u,
+            1,
+            APTA_FEATURE_WAVEFORM_OVERVIEW |
+                APTA_FEATURE_WAVEFORM_DETAIL,
+            1);
 
     if (apta_context_destroy(context) != APTA_STATUS_OK) {
         return 1;

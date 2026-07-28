@@ -14,6 +14,9 @@ _Static_assert(sizeof(apta_fractional_frame_t) == 16u, "fractional frame layout 
 _Static_assert(sizeof(apta_frame_period_t) == 16u, "frame period layout changed");
 _Static_assert(sizeof(apta_waveform_column_t) == 10u, "waveform column layout changed");
 _Static_assert(sizeof(apta_tempo_candidate_t) == 16u, "tempo candidate layout changed");
+_Static_assert(
+    sizeof(apta_metadata_t) == sizeof(apta_metadata_view_t),
+    "metadata input/view layouts diverged");
 
 _Static_assert(offsetof(apta_frame_range_t, struct_size) == 0u, "range prefix changed");
 _Static_assert(offsetof(apta_frame_range_t, api_version) == 4u, "range version offset changed");
@@ -37,6 +40,8 @@ APTA_ASSERT_EXTENSIBLE_PREFIX(apta_waveform_overview_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_waveform_tile_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_tempo_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_grid_view_t);
+APTA_ASSERT_EXTENSIBLE_PREFIX(apta_metadata_t);
+APTA_ASSERT_EXTENSIBLE_PREFIX(apta_metadata_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_serialize_options_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_parse_options_t);
 

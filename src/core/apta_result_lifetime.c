@@ -52,6 +52,7 @@ void apta_internal_result_release(apta_result_t *result)
     }
 
     context = result->context;
+    apta_internal_metadata_cleanup(context, &result->metadata);
     apta_internal_waveform_cleanup_result(result);
     (void)atomic_fetch_sub_explicit(
         &context->result_count,
@@ -90,6 +91,7 @@ apta_status_t apta_internal_publish_result(
     memset(result, 0, sizeof(*result));
     result->context = session->context;
     atomic_init(&result->reference_count, 1u);
+    apta_metadata_view_init(&result->metadata.view);
 
     result->total_source_frames = session->config.total_frames;
     result->source_sample_rate = session->config.source_sample_rate;
@@ -111,8 +113,25 @@ apta_status_t apta_internal_publish_result(
     result->info.lineage_id_high = session->lineage_id_high;
     result->info.lineage_id_low = session->lineage_id_low;
 
+    if (apta_internal_metadata_is_present(&session->metadata)) {
+        status = apta_internal_metadata_copy_from_view(
+            session->context,
+            &session->metadata.view,
+            &result->metadata);
+        if (status < 0) {
+            apta_internal_context_deallocate(session->context, result);
+            if (status == APTA_ERROR_OUT_OF_MEMORY) {
+                apta_result_mark_waveform_publication_pending(session);
+            }
+            return status;
+        }
+    }
+
     status = apta_internal_waveform_build_snapshot(session, result);
     if (status < 0) {
+        apta_internal_metadata_cleanup(
+            session->context,
+            &result->metadata);
         apta_internal_waveform_cleanup_result(result);
         apta_internal_context_deallocate(session->context, result);
         if (status == APTA_ERROR_OUT_OF_MEMORY) {
