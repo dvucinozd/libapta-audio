@@ -1,7 +1,7 @@
 # APTA static session workspace status 0.1
 
-**Status:** Phase-two implementation candidate  
-**Scope:** caller-owned session, accepted-range storage and recyclable queued PCM
+**Status:** Phase-three implementation candidate  
+**Scope:** caller-owned session and mutable overview analysis state
 
 ## Purpose
 
@@ -30,15 +30,18 @@ The library does not free caller workspace memory.
 
 ## Workspace-owned objects
 
-Phase two places the following in caller storage:
+Phase three places the following in caller storage:
 
 - the `apta_session_t` object;
 - the sorted accepted-range array;
-- queued normalized-mono PCM nodes.
+- queued normalized-mono PCM nodes;
+- overview waveform accumulator arrays.
 
-Accepted-range growth remains transactional. A larger replacement is reserved before the old array is returned to the arena. If the workspace cannot temporarily hold the replacement, PCM acceptance reports bounded backpressure rather than falling back to the context allocator.
+Accepted-range and accumulator growth remain transactional. A larger replacement is reserved before the old array is returned to the arena. When the workspace cannot temporarily hold the replacement, the operation returns bounded backpressure or an allocation error rather than falling back to the context allocator.
 
 PCM nodes are allocated from the arena and returned after processing. Adjacent free blocks are coalesced, allowing the same workspace capacity to serve a long sequence of push/process cycles instead of being consumed cumulatively.
+
+Before the overview analyzer consumes queued PCM, the process wrapper counts the distinct overview columns represented by that queue and reserves the required accumulator capacity from the workspace. The existing DSP analyzer then runs unchanged and cannot trigger context allocation for accumulator growth.
 
 ## Context-owned objects
 
@@ -47,10 +50,9 @@ The following remain context-owned:
 - immutable result objects;
 - overview/detail snapshot arrays;
 - session and result metadata copies;
-- overview accumulator arrays;
 - parser-owned objects.
 
-Therefore this phase does **not** claim `APTA-R0-STATIC-128K` or the stronger guarantee "no heap allocation after successful session creation".
+Therefore this phase does **not** claim `APTA-R0-STATIC-128K` or the stronger guarantee "no heap allocation after successful session creation". Result publication and metadata configuration may still allocate through the context allocator.
 
 ## Arena and cleanup compatibility
 
@@ -67,16 +69,19 @@ The workspace test verifies:
 - exact session placement at the caller workspace base;
 - one fewer context allocator call than heap-backed session creation;
 - seven contiguous 128-frame push/process cycles;
-- no context allocation for accepted ranges or queued PCM;
+- no context allocation for accepted ranges, queued PCM or overview accumulators;
 - PCM block recycling after every processing call;
+- seventeen additional sparse one-frame blocks on separate 1024-frame column boundaries;
+- accepted-range growth through capacities 8, 16 and 32;
+- overview accumulator growth from 16 to 32 entries;
 - immutable result validity after workspace session destruction;
 - pointer/size pairing;
 - alignment rejection;
 - undersized-workspace rejection;
 - preservation of the overview/detail feature dependency.
 
-The controlled workload stops at 896 analysed frames, before the first 1024-frame overview column completes. This prevents result publication from obscuring the allocator-call evidence.
+The controlled workload never completes an overview column. This prevents immutable result publication from obscuring the allocator-call evidence. Across all push/process operations, the context allocator remains at the three expected calls: context creation, initial result publication and the `CREATED` to `ACTIVE` result transition.
 
 ## Next bounded phase
 
-The next workspace phase will migrate overview accumulator growth to the arena. Immutable results will remain context-owned so they can continue to outlive the session.
+The next workspace phase will migrate session metadata storage. Immutable results and their copied metadata/snapshot arrays will remain context-owned so they can continue to outlive the session.
