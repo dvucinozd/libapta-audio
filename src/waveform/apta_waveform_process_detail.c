@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../core/apta_session_workspace.h"
 
+#include <stdalign.h>
 #include <string.h>
 
 static int apta_process_ranges_overlap(
@@ -10,6 +12,165 @@ static int apta_process_ranges_overlap(
     apta_source_frame_t end_b)
 {
     return first_a < end_b && first_b < end_a;
+}
+
+static int apta_process_accumulator_exists(
+    const apta_session_t *session,
+    uint32_t column_index)
+{
+    uint32_t low = 0u;
+    uint32_t high = session->overview_accumulator_count;
+
+    while (low < high) {
+        uint32_t middle = low + (high - low) / 2u;
+        uint32_t current =
+            session->overview_accumulators[middle].column_index;
+
+        if (current < column_index) {
+            low = middle + 1u;
+        } else {
+            high = middle;
+        }
+    }
+
+    return low < session->overview_accumulator_count &&
+           session->overview_accumulators[low].column_index == column_index;
+}
+
+static int apta_process_column_seen_before_node(
+    const apta_session_t *session,
+    const apta_internal_pcm_node_t *stop,
+    uint32_t column_index)
+{
+    const apta_internal_pcm_node_t *node;
+
+    for (node = session->pcm_head;
+         node != NULL && node != stop;
+         node = node->next) {
+        apta_source_frame_t first;
+        apta_source_frame_t end;
+        uint64_t first_column;
+        uint64_t last_column;
+
+        if (node->processed_frames >= node->frame_count) {
+            continue;
+        }
+
+        first = node->first_frame + node->processed_frames;
+        end = node->first_frame + node->frame_count;
+        first_column = first / session->overview_frames_per_column;
+        last_column = (end - 1u) / session->overview_frames_per_column;
+        if ((uint64_t)column_index >= first_column &&
+            (uint64_t)column_index <= last_column) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static apta_status_t apta_process_workspace_reserve_accumulators(
+    apta_session_t *session)
+{
+    const apta_internal_pcm_node_t *node;
+    apta_internal_waveform_accumulator_t *replacement;
+    uint32_t additional = 0u;
+    uint32_t needed;
+    uint32_t capacity;
+    size_t bytes;
+
+    if (!apta_internal_session_uses_workspace(session) ||
+        session->pcm_head == NULL) {
+        return APTA_STATUS_OK;
+    }
+
+    for (node = session->pcm_head; node != NULL; node = node->next) {
+        apta_source_frame_t first;
+        apta_source_frame_t end;
+        uint64_t first_column;
+        uint64_t last_column;
+        uint64_t column;
+
+        if (node->processed_frames >= node->frame_count) {
+            continue;
+        }
+
+        first = node->first_frame + node->processed_frames;
+        end = node->first_frame + node->frame_count;
+        if (first >= end) {
+            continue;
+        }
+
+        first_column = first / session->overview_frames_per_column;
+        last_column = (end - 1u) / session->overview_frames_per_column;
+        if (last_column > UINT32_MAX) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+
+        for (column = first_column; column <= last_column; ++column) {
+            uint32_t column_index = (uint32_t)column;
+
+            if (apta_process_accumulator_exists(session, column_index) ||
+                apta_process_column_seen_before_node(
+                    session,
+                    node,
+                    column_index)) {
+                continue;
+            }
+            if (additional == UINT32_MAX) {
+                return APTA_ERROR_LIMIT_EXCEEDED;
+            }
+            additional += 1u;
+        }
+    }
+
+    if (additional == 0u) {
+        return APTA_STATUS_OK;
+    }
+    if (session->overview_accumulator_count > UINT32_MAX - additional) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+    needed = session->overview_accumulator_count + additional;
+    if (session->overview_accumulator_capacity >= needed) {
+        return APTA_STATUS_OK;
+    }
+
+    capacity = session->overview_accumulator_capacity == 0u
+                   ? 16u
+                   : session->overview_accumulator_capacity;
+    while (capacity < needed) {
+        if (capacity > UINT32_MAX / 2u) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+        capacity *= 2u;
+    }
+    if ((size_t)capacity > SIZE_MAX / sizeof(*replacement)) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+    bytes = (size_t)capacity * sizeof(*replacement);
+
+    replacement =
+        (apta_internal_waveform_accumulator_t *)apta_internal_session_allocate(
+            session,
+            bytes,
+            alignof(apta_internal_waveform_accumulator_t),
+            APTA_MEMORY_PERSISTENT);
+    if (replacement == NULL) {
+        return APTA_ERROR_OUT_OF_MEMORY;
+    }
+
+    if (session->overview_accumulator_count != 0u) {
+        memcpy(
+            replacement,
+            session->overview_accumulators,
+            (size_t)session->overview_accumulator_count * sizeof(*replacement));
+    }
+    apta_internal_context_deallocate(
+        session->context,
+        session->overview_accumulators);
+    session->overview_accumulators = replacement;
+    session->overview_accumulator_capacity = capacity;
+    return APTA_STATUS_OK;
 }
 
 static void apta_process_score_node(
@@ -180,6 +341,17 @@ apta_status_t apta_internal_waveform_process(
     }
 
     selected_request_id = apta_process_sort_pcm_queue(session);
+    status = apta_process_workspace_reserve_accumulators(session);
+    if (status < 0) {
+        session->focus.feature_mask = saved_focus_mask;
+        for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+            session->requests[slot].request.feature_mask =
+                saved_request_masks[slot];
+            session->requests[slot].request.priority =
+                saved_request_priorities[slot];
+        }
+        return status;
+    }
 
     for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
         apta_internal_schedule_score_t score;
