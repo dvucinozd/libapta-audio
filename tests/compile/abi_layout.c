@@ -37,6 +37,7 @@ APTA_ASSERT_EXTENSIBLE_PREFIX(apta_waveform_overview_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_waveform_tile_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_tempo_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_grid_view_t);
+APTA_ASSERT_EXTENSIBLE_PREFIX(apta_serialize_options_t);
 
 int apta_abi_layout_compile_probe(void)
 {
