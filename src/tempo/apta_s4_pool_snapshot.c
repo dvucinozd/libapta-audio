@@ -17,6 +17,9 @@ static apta_status_t apta_s4_pool_build(
 {
     const apta_internal_result_pool_layout_t *layout;
     uint8_t *storage;
+    const int completed =
+        atomic_load_explicit(&session->state, memory_order_acquire) ==
+        APTA_SESSION_COMPLETED;
 
     layout = apta_internal_result_pool_get_layout(pool);
     storage = (uint8_t *)apta_internal_result_pool_get_slot_storage(
@@ -46,6 +49,9 @@ static apta_status_t apta_s4_pool_build(
 
         apta_tempo_view_init(&result->tempo);
         result->tempo.selected = session->tempo_value;
+        if (completed) {
+            result->tempo.selected.state = APTA_FEATURE_FINAL;
+        }
         result->tempo.candidate_count = session->tempo_candidate_count;
         result->tempo.candidates = result->tempo_candidates;
         result->info.available_features |= APTA_FEATURE_BPM;
@@ -69,6 +75,9 @@ static apta_status_t apta_s4_pool_build(
                 storage + layout->local_grid_segments_offset);
         *result->local_grid_coverage = session->local_grid_coverage_range;
         *result->local_grid_segments = session->local_grid_segment;
+        if (completed) {
+            result->local_grid_segments[0].state = APTA_FEATURE_FINAL;
+        }
 
         apta_grid_view_init(&result->local_grid);
         result->local_grid.requested_range =
@@ -78,7 +87,9 @@ static apta_status_t apta_s4_pool_build(
         result->local_grid.applicability_range =
             session->local_grid_applicability_range;
         result->local_grid.representation = APTA_GRID_REPRESENTATION_SEGMENTS;
-        result->local_grid.state = session->local_grid_segment.state;
+        result->local_grid.state = completed
+                                       ? APTA_FEATURE_FINAL
+                                       : session->local_grid_segment.state;
         result->local_grid.confidence = session->local_grid_segment.confidence;
         result->local_grid.coverage_range_count = 1u;
         result->local_grid.coverage_ranges = result->local_grid_coverage;
