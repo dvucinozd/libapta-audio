@@ -147,20 +147,26 @@ int main(void)
     allocator_state_t allocator_state = {0u, 0u};
     aligned_workspace_t workspace;
     apta_context_config_t context_config;
+    apta_context_config_t parse_context_config;
     apta_session_config_t session_config;
     apta_memory_requirements_t requirements;
     apta_context_t *context = NULL;
+    apta_context_t *parse_context = NULL;
     apta_session_t *session = NULL;
     const apta_result_t *initial = NULL;
     const apta_result_t *metadata_result = NULL;
     const apta_result_t *partial_result = NULL;
     const apta_result_t *final_result = NULL;
+    const apta_result_t *parsed_result = NULL;
     apta_metadata_t metadata;
     apta_pcm_block_t block;
     apta_work_budget_t budget;
     apta_progress_t progress;
     apta_result_info_t info;
     int16_t pcm[1024];
+    uint8_t *serialized = NULL;
+    uint64_t serialized_size = 0u;
+    size_t written = 0u;
     uint32_t accepted = 0u;
     uint32_t index;
     apta_status_t status;
@@ -295,8 +301,45 @@ int main(void)
     CHECK(result_has_metadata(final_result, "bounded-wovr"));
     CHECK(result_has_overview(final_result, APTA_FEATURE_FINAL));
     CHECK(result_has_detail(final_result, APTA_FEATURE_FINAL));
-    CHECK(apta_context_destroy(context) == APTA_ERROR_BUSY);
 
+    CHECK(apta_result_query_serialized_size(
+              final_result,
+              NULL,
+              &serialized_size) == APTA_STATUS_OK);
+    CHECK(serialized_size > 0u && serialized_size <= SIZE_MAX);
+    serialized = (uint8_t *)malloc((size_t)serialized_size);
+    CHECK(serialized != NULL);
+    CHECK(apta_result_serialize(
+              final_result,
+              NULL,
+              serialized,
+              (size_t)serialized_size,
+              &written) == APTA_STATUS_OK);
+    CHECK(written == (size_t)serialized_size);
+
+    apta_context_config_init(&parse_context_config);
+    parse_context_config.requested_capabilities =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL;
+    CHECK(apta_context_create(&parse_context_config, &parse_context) ==
+          APTA_STATUS_OK);
+    CHECK(apta_result_parse(
+              parse_context,
+              NULL,
+              serialized,
+              written,
+              &parsed_result) == APTA_STATUS_OK);
+    CHECK(result_has_metadata(parsed_result, "bounded-wovr"));
+    CHECK(result_has_overview(parsed_result, APTA_FEATURE_FINAL));
+    CHECK(result_has_detail(parsed_result, APTA_FEATURE_FINAL));
+    apta_result_release(parsed_result);
+    parsed_result = NULL;
+    CHECK(apta_context_destroy(parse_context) == APTA_STATUS_OK);
+    parse_context = NULL;
+    free(serialized);
+    serialized = NULL;
+
+    CHECK(apta_context_destroy(context) == APTA_ERROR_BUSY);
     apta_result_release(final_result);
     final_result = NULL;
     CHECK(allocator_state.outstanding == 1u);
