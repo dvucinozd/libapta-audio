@@ -6,6 +6,10 @@ project(
     VERSION 0.1.0
     LANGUAGES C CXX)
 
+option(APTA_BUILD_TESTS "Build libapta tests" ON)
+option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+option(APTA_BUILD_FUZZING "Build libFuzzer targets" OFF)
+
 add_library(apta_headers INTERFACE)
 add_library(apta::headers ALIAS apta_headers)
 
@@ -21,6 +25,29 @@ target_compile_features(
         c_std_11
         cxx_std_11)
 
+add_library(apta_sanitizers INTERFACE)
+
+if(APTA_ENABLE_SANITIZERS)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(
+            apta_sanitizers
+            INTERFACE
+                -fsanitize=address,undefined
+                -fno-omit-frame-pointer)
+        target_link_options(
+            apta_sanitizers
+            INTERFACE
+                -fsanitize=address,undefined)
+    else()
+        message(FATAL_ERROR "APTA_ENABLE_SANITIZERS requires GCC or Clang")
+    endif()
+endif()
+
+set_source_files_properties(
+    src/serialization/apta_wovr_reader.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_base")
+
 add_library(
     apta_core
     STATIC
@@ -35,6 +62,7 @@ add_library(
         src/core/apta_session_source.c
         src/serialization/apta_crc32c.c
         src/serialization/apta_wovr_reader.c
+        src/serialization/apta_wovr_reader_hardening.c
         src/serialization/apta_wovr_writer.c
         src/waveform/apta_waveform_input.c
         src/waveform/apta_waveform_process.c
@@ -50,7 +78,11 @@ set_target_properties(
         C_STANDARD_REQUIRED YES
         C_EXTENSIONS NO)
 
-target_link_libraries(apta_core PUBLIC apta::headers)
+target_link_libraries(
+    apta_core
+    PUBLIC
+        apta::headers
+        apta_sanitizers)
 
 if(UNIX)
     target_link_libraries(apta_core PRIVATE m)
@@ -68,8 +100,6 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 elseif(MSVC)
     target_compile_options(apta_core PRIVATE /W4)
 endif()
-
-option(APTA_BUILD_TESTS "Build libapta tests" ON)
 
 if(APTA_BUILD_TESTS)
     include(CTest)
