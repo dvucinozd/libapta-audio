@@ -48,11 +48,6 @@ static int apta_session_config_is_valid(
         return 0;
     }
 
-    if ((config->static_workspace == NULL) !=
-        (config->static_workspace_size == 0u)) {
-        return 0;
-    }
-
     return 1;
 }
 
@@ -142,6 +137,11 @@ apta_status_t APTA_CALL apta_session_create(
 
     if (config->input_mode == APTA_INPUT_MODE_PULL &&
         (config->requested_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
+        return APTA_ERROR_UNSUPPORTED;
+    }
+
+    if (config->static_workspace != NULL ||
+        config->static_workspace_size != 0u) {
         return APTA_ERROR_UNSUPPORTED;
     }
 
