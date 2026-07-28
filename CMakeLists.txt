@@ -126,7 +126,17 @@ set_source_files_properties(
 set_source_files_properties(
     src/core/apta_result_accessors.c
     PROPERTIES
-        COMPILE_DEFINITIONS "apta_result_get_feature_state=apta_result_get_feature_state_base;apta_result_get_waveform_tile=apta_result_get_waveform_tile_base")
+        COMPILE_DEFINITIONS "apta_result_get_feature_state=apta_result_get_feature_state_base;apta_result_get_waveform_tile=apta_result_get_waveform_tile_base;apta_result_get_tempo=apta_result_get_tempo_base;apta_result_get_beatgrid=apta_result_get_beatgrid_base")
+
+set_source_files_properties(
+    src/core/apta_result_detail_accessors.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_get_feature_state=apta_result_get_feature_state_s4_base")
+
+set_source_files_properties(
+    src/core/apta_result_pool_snapshot.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_result_pool_create_session_result=apta_internal_result_pool_create_session_result_base")
 
 set_source_files_properties(
     src/waveform/apta_waveform_input.c
@@ -139,9 +149,14 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_base;apta_internal_waveform_next_pcm_request=apta_internal_waveform_next_pcm_request_base")
 
 set_source_files_properties(
+    src/waveform/apta_waveform_process_detail.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_s4_base")
+
+set_source_files_properties(
     src/waveform/apta_waveform_snapshot.c
     PROPERTIES
-        COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")
+        COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_session=apta_internal_waveform_cleanup_session_base;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")
 
 set_source_files_properties(
     src/waveform/apta_waveform_detail_replay.c
@@ -184,6 +199,11 @@ add_library(
         src/serialization/apta_wovr_reader.c
         src/serialization/apta_wovr_reader_hardening.c
         src/serialization/apta_wovr_writer.c
+        src/tempo/apta_s4.c
+        src/tempo/apta_s4_accessors.c
+        src/tempo/apta_s4_cleanup.c
+        src/tempo/apta_s4_pool_snapshot.c
+        src/tempo/apta_s4_process.c
         src/waveform/apta_waveform_detail_mvp.c
         src/waveform/apta_waveform_detail_replay.c
         src/waveform/apta_waveform_detail_replay_hardening.c
