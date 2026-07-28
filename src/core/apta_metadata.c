@@ -278,6 +278,7 @@ static apta_status_t apta_metadata_copy_validated_view(
         }
     }
     metadata_out->storage_size = storage_size;
+    metadata_out->present = 1u;
 
     apta_metadata_copy_utf8(
         &metadata_out->view.producer_name,
@@ -394,12 +395,7 @@ void apta_internal_metadata_cleanup(
 int apta_internal_metadata_is_present(
     const apta_internal_metadata_t *metadata)
 {
-    if (metadata == NULL) {
-        return 0;
-    }
-    return metadata->view.flags != 0u ||
-           metadata->view.application_source_id_kind !=
-               APTA_METADATA_SOURCE_ID_NONE;
+    return metadata != NULL && metadata->present != 0u;
 }
 
 apta_status_t APTA_CALL apta_session_set_metadata(
