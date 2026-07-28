@@ -107,21 +107,22 @@ int main(void)
     CHECK(apta_session_signal_end_of_input(session, 4096u) == APTA_STATUS_OK);
 
     /*
-     * Process and publish the first three columns before arming the failure.
-     * This ensures the next process call performs no accumulator growth before
-     * entering the four-column snapshot publication path.
+     * The portable processor consumes at most 256 frames per step. Process
+     * exactly 3072 frames (three complete overview columns) before arming the
+     * allocator, leaving exactly one 1024-frame column in the PCM queue.
      */
     apta_work_budget_init(&budget);
     budget.maximum_input_frames = 3072u;
-    budget.maximum_steps = 3u;
+    budget.maximum_steps = 12u;
     CHECK(apta_session_process(session, &budget, NULL) == APTA_STATUS_MORE_WORK);
     CHECK(apta_session_get_state(session) == APTA_SESSION_DRAINING);
 
     allocator_state.armed = 1u;
     allocator_state.armed_allocation_count = 0u;
 
+    /* Four 256-frame steps consume and complete the final overview column. */
     budget.maximum_input_frames = 1024u;
-    budget.maximum_steps = 1u;
+    budget.maximum_steps = 4u;
     CHECK(apta_session_process(session, &budget, NULL) == APTA_ERROR_OUT_OF_MEMORY);
     CHECK(allocator_state.failed_once == 1u);
     CHECK(allocator_state.armed_allocation_count == 2u);
