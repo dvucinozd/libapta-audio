@@ -28,10 +28,12 @@ add_library(
         src/core/apta_context.c
         src/core/apta_initializers.c
         src/core/apta_memory.c
-        src/core/apta_result.c
+        src/core/apta_result_accessors.c
+        src/core/apta_result_lifetime.c
         src/core/apta_session_lifecycle.c
         src/core/apta_session_scheduler.c
-        src/core/apta_session_source.c)
+        src/core/apta_session_source.c
+        src/waveform/apta_waveform.c)
 
 add_library(apta::core ALIAS apta_core)
 
@@ -44,6 +46,10 @@ set_target_properties(
         C_EXTENSIONS NO)
 
 target_link_libraries(apta_core PUBLIC apta::headers)
+
+if(UNIX)
+    target_link_libraries(apta_core PRIVATE m)
+endif()
 
 target_include_directories(
     apta_core
