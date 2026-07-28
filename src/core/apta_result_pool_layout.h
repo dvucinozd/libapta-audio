@@ -7,23 +7,6 @@
 #define APTA_INTERNAL_RESULT_SLOT_COUNT 2u
 
 typedef struct {
-    uint32_t active;
-    uint32_t reserved32;
-    size_t storage_offset;
-    size_t storage_size;
-} apta_internal_result_slot_control_t;
-
-typedef struct {
-    apta_context_t *context;
-    atomic_uint reference_count;
-    size_t allocation_size;
-    uint32_t slot_count;
-    uint32_t reserved32;
-    apta_internal_result_slot_control_t
-        slots[APTA_INTERNAL_RESULT_SLOT_COUNT];
-} apta_internal_result_pool_control_t;
-
-typedef struct {
     size_t total_bytes;
     size_t slot_bytes;
     size_t slot_offsets[APTA_INTERNAL_RESULT_SLOT_COUNT];
@@ -42,6 +25,24 @@ typedef struct {
     uint32_t metadata_capacity;
     uint32_t slot_count;
 } apta_internal_result_pool_layout_t;
+
+typedef struct {
+    uint32_t active;
+    uint32_t reserved32;
+    size_t storage_offset;
+    size_t storage_size;
+} apta_internal_result_slot_control_t;
+
+typedef struct {
+    apta_context_t *context;
+    atomic_uint reference_count;
+    size_t allocation_size;
+    uint32_t slot_count;
+    uint32_t reserved32;
+    apta_internal_result_pool_layout_t layout;
+    apta_internal_result_slot_control_t
+        slots[APTA_INTERNAL_RESULT_SLOT_COUNT];
+} apta_internal_result_pool_control_t;
 
 apta_status_t apta_internal_result_pool_calculate_layout(
     const apta_session_config_t *config,
