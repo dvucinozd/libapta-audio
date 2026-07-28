@@ -34,6 +34,7 @@ add_library(
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
         src/serialization/apta_crc32c.c
+        src/serialization/apta_wovr_reader.c
         src/serialization/apta_wovr_writer.c
         src/waveform/apta_waveform_input.c
         src/waveform/apta_waveform_process.c
