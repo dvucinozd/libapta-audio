@@ -26,7 +26,6 @@ typedef struct {
     uint64_t meta_payload_size;
     uint64_t meta_payload_offset;
     uint64_t total_size;
-    uint32_t waveform_section_count;
     uint32_t has_meta;
 } apta_meta_write_layout_t;
 
@@ -129,19 +128,37 @@ static uint8_t *apta_cbor_write_head(
     return output;
 }
 
+static int apta_meta_flag(
+    const apta_metadata_view_t *metadata,
+    uint32_t flag)
+{
+    return (metadata->flags & flag) != 0u;
+}
+
 static uint32_t apta_meta_item_count(const apta_metadata_view_t *metadata)
 {
     uint32_t count = 0u;
 
-    count += metadata->producer_name.size != 0u;
-    count += metadata->producer_version_string.size != 0u;
-    count += metadata->backend_name.size != 0u;
-    count += metadata->backend_version.size != 0u;
-    count += (metadata->flags &
-              APTA_METADATA_FLAG_CREATION_TIME_PRESENT) != 0u;
+    count += apta_meta_flag(
+        metadata,
+        APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT);
+    count += apta_meta_flag(
+        metadata,
+        APTA_METADATA_FLAG_PRODUCER_VERSION_PRESENT);
+    count += apta_meta_flag(
+        metadata,
+        APTA_METADATA_FLAG_BACKEND_NAME_PRESENT);
+    count += apta_meta_flag(
+        metadata,
+        APTA_METADATA_FLAG_BACKEND_VERSION_PRESENT);
+    count += apta_meta_flag(
+        metadata,
+        APTA_METADATA_FLAG_CREATION_TIME_PRESENT);
     count += metadata->application_source_id_kind !=
              APTA_METADATA_SOURCE_ID_NONE;
-    count += metadata->comments.size != 0u;
+    count += apta_meta_flag(
+        metadata,
+        APTA_METADATA_FLAG_COMMENTS_PRESENT);
     return count;
 }
 
@@ -164,21 +181,30 @@ static apta_status_t apta_meta_measure_payload(
     item_count = apta_meta_item_count(metadata);
     size = apta_cbor_head_size(item_count);
 
-    if (metadata->producer_name.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT)) {
         size += apta_meta_text_item_size(metadata->producer_name.size);
     }
-    if (metadata->producer_version_string.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_PRODUCER_VERSION_PRESENT)) {
         size += apta_meta_text_item_size(
             metadata->producer_version_string.size);
     }
-    if (metadata->backend_name.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_BACKEND_NAME_PRESENT)) {
         size += apta_meta_text_item_size(metadata->backend_name.size);
     }
-    if (metadata->backend_version.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_BACKEND_VERSION_PRESENT)) {
         size += apta_meta_text_item_size(metadata->backend_version.size);
     }
-    if ((metadata->flags &
-         APTA_METADATA_FLAG_CREATION_TIME_PRESENT) != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_CREATION_TIME_PRESENT)) {
         size += 1u + apta_cbor_head_size(metadata->creation_unix_time);
     }
     if (metadata->application_source_id_kind !=
@@ -187,7 +213,9 @@ static apta_status_t apta_meta_measure_payload(
                 apta_cbor_head_size(metadata->application_source_id.size) +
                 metadata->application_source_id.size;
     }
-    if (metadata->comments.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_COMMENTS_PRESENT)) {
         size += apta_meta_text_item_size(metadata->comments.size);
     }
 
@@ -258,8 +286,11 @@ static uint8_t *apta_meta_write_text(
 {
     *output++ = key;
     output = apta_cbor_write_head(output, 3u, text->size);
-    memcpy(output, text->data, text->size);
-    return output + text->size;
+    if (text->size != 0u) {
+        memcpy(output, text->data, text->size);
+        output += text->size;
+    }
+    return output;
 }
 
 static uint8_t *apta_meta_write_payload(
@@ -269,32 +300,41 @@ static uint8_t *apta_meta_write_payload(
     uint32_t item_count = apta_meta_item_count(metadata);
 
     output = apta_cbor_write_head(output, 5u, item_count);
-    if (metadata->producer_name.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT)) {
         output = apta_meta_write_text(
             output,
             1u,
             &metadata->producer_name);
     }
-    if (metadata->producer_version_string.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_PRODUCER_VERSION_PRESENT)) {
         output = apta_meta_write_text(
             output,
             2u,
             &metadata->producer_version_string);
     }
-    if (metadata->backend_name.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_BACKEND_NAME_PRESENT)) {
         output = apta_meta_write_text(
             output,
             3u,
             &metadata->backend_name);
     }
-    if (metadata->backend_version.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_BACKEND_VERSION_PRESENT)) {
         output = apta_meta_write_text(
             output,
             4u,
             &metadata->backend_version);
     }
-    if ((metadata->flags &
-         APTA_METADATA_FLAG_CREATION_TIME_PRESENT) != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_CREATION_TIME_PRESENT)) {
         *output++ = 5u;
         output = apta_cbor_write_head(
             output,
@@ -311,13 +351,17 @@ static uint8_t *apta_meta_write_payload(
                 ? 3u
                 : 2u,
             metadata->application_source_id.size);
-        memcpy(
-            output,
-            metadata->application_source_id.data,
-            metadata->application_source_id.size);
-        output += metadata->application_source_id.size;
+        if (metadata->application_source_id.size != 0u) {
+            memcpy(
+                output,
+                metadata->application_source_id.data,
+                metadata->application_source_id.size);
+            output += metadata->application_source_id.size;
+        }
     }
-    if (metadata->comments.size != 0u) {
+    if (apta_meta_flag(
+            metadata,
+            APTA_METADATA_FLAG_COMMENTS_PRESENT)) {
         output = apta_meta_write_text(
             output,
             7u,
