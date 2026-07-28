@@ -7,6 +7,7 @@ void apta_internal_detail_update_request_states(apta_session_t *session)
 
     for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
         apta_internal_request_t *request = &session->requests[slot];
+        int overview_required;
         int overview_satisfied;
         int overview_has_output;
         int detail_satisfied;
@@ -20,15 +21,15 @@ void apta_internal_detail_update_request_states(apta_session_t *session)
             continue;
         }
 
+        overview_required =
+            (request->request.feature_mask &
+             APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u;
         overview_satisfied =
-            (request->request.feature_mask &
-             APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u ||
-            request->state == APTA_REQUEST_SATISFIED;
+            !overview_required || request->state == APTA_REQUEST_SATISFIED;
         overview_has_output =
-            (request->request.feature_mask &
-             APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u ||
-            request->state == APTA_REQUEST_PARTIALLY_SATISFIED ||
-            request->state == APTA_REQUEST_SATISFIED;
+            overview_required &&
+            (request->state == APTA_REQUEST_PARTIALLY_SATISFIED ||
+             request->state == APTA_REQUEST_SATISFIED);
 
         detail_satisfied = apta_internal_detail_range_complete(
             session,
