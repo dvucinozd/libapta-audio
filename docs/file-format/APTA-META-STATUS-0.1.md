@@ -1,6 +1,9 @@
 # APTA META section status 0.1
 
-**Status:** Feature-branch implementation candidate  
+**Status:** Implemented and verified  
+**Implementation merge:** `5a89b3f4c3a6daa45710b23d9178978affacf69e`  
+**Truncation-evidence merge:** `2bdbf32f429a0aa24c30937e0f078e744f0653dd`  
+**Verification:** GitHub Actions PR CI runs `#151` and `#153`  
 **Container section:** optional `META`, version 1  
 **Encoding:** deterministic CBOR map
 
@@ -79,24 +82,25 @@ META decoding rejects:
 
 Unknown ascending integer keys are skipped through a bounded recursive CBOR walker.
 
-## Test package
+## Verified test package
 
-The feature package adds:
+The verified package covers:
 
 - metadata initializer and ABI-prefix checks;
-- session/result ownership and lifetime testing;
-- empty-versus-absent metadata testing;
+- session/result ownership and lifetime;
+- empty-versus-absent metadata;
 - canonical META byte fixture and writer/parser/writer identity;
 - combined `WOVR + WDTL + META` round-trip;
 - malformed META corpus;
 - session-setter and parser allocation-failure cleanup;
-- canonical `valid-meta.apta` fuzz seed and META dictionary tokens.
+- canonical `valid-meta.apta` fuzz seed and META dictionary tokens;
+- every prefix truncation and one-byte trailing-data rejection for canonical META-containing files.
 
-The complete suite registers 33 runtime tests before CI verification.
+The complete suite registers 34 runtime tests. CI run `#151` verified the META implementation and CI run `#153` verified the exhaustive canonical truncation corpus under normal and ASan/UBSan builds, followed by bounded fuzz smoke.
 
 ## Deferred work
 
-The first implementation does not provide:
+The implementation does not provide:
 
 - arbitrary application-defined metadata construction through the public API;
 - lossless preservation of unknown META keys during rewrite;
