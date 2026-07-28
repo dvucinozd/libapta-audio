@@ -138,6 +138,10 @@ add_executable(apta_meta_allocation_failure unit/meta_allocation_failure.c)
 target_link_libraries(apta_meta_allocation_failure PRIVATE apta::core)
 set_target_properties(apta_meta_allocation_failure PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_container_truncation unit/container_truncation.c)
+target_link_libraries(apta_container_truncation PRIVATE apta::core)
+set_target_properties(apta_container_truncation PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_result_concurrency unit/result_concurrency.cpp)
 target_link_libraries(apta_result_concurrency PRIVATE apta::core Threads::Threads)
 set_target_properties(apta_result_concurrency PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
@@ -177,6 +181,7 @@ add_test(NAME apta.serialization.meta_roundtrip COMMAND apta_meta_roundtrip)
 add_test(NAME apta.serialization.meta_wdtl_roundtrip COMMAND apta_meta_wdtl_roundtrip)
 add_test(NAME apta.serialization.meta_reader_malformed COMMAND apta_meta_reader_malformed)
 add_test(NAME apta.serialization.meta_allocation_failure COMMAND apta_meta_allocation_failure)
+add_test(NAME apta.serialization.container_truncation COMMAND apta_container_truncation)
 add_test(NAME apta.result.concurrency COMMAND apta_result_concurrency)
 add_test(NAME apta.core.cancellation_thread COMMAND apta_cancellation_thread)
 
