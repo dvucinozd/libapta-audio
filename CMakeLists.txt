@@ -9,6 +9,7 @@ project(
 option(APTA_BUILD_TESTS "Build libapta tests" ON)
 option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(APTA_BUILD_FUZZING "Build libFuzzer targets" OFF)
+option(APTA_BUILD_DESKTOP_ADAPTERS "Build POSIX and reference decoder adapters" ON)
 
 add_library(apta_headers INTERFACE)
 add_library(apta::headers ALIAS apta_headers)
@@ -259,6 +260,13 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(apta_core PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)
     target_compile_options(apta_core PRIVATE /W4)
+endif()
+
+if(APTA_BUILD_DESKTOP_ADAPTERS)
+    if(NOT UNIX)
+        message(FATAL_ERROR "APTA_BUILD_DESKTOP_ADAPTERS currently requires a POSIX platform")
+    endif()
+    add_subdirectory(src/desktop)
 endif()
 
 if(APTA_BUILD_TESTS)
