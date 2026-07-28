@@ -75,7 +75,7 @@ A zero limit field selects the library default rather than disabling the limit.
 
 ## Runtime and hardening tests
 
-The test suite now registers 18 runtime tests. Serialization and parser coverage includes:
+The test suite now registers 19 runtime tests. Serialization and parser coverage includes:
 
 - canonical final `WOVR` golden-layout validation;
 - sparse partial/unknown-duration writer validation;
@@ -92,7 +92,8 @@ The test suite now registers 18 runtime tests. Serialization and parser coverage
 - invalid reserved waveform-column flags;
 - a valid adjacent two-span final result;
 - rejection of an internal gap in a `FINAL` multi-span result;
-- rejection of duplicate or overlapping packed-column intervals.
+- rejection of duplicate or overlapping packed-column intervals;
+- allocation-failure cleanup for the result object, span array, column array and post-parse hardening interval buffer.
 
 ## Sanitizers and fuzzing
 
@@ -100,10 +101,12 @@ The build provides opt-in hardening controls:
 
 - `APTA_ENABLE_SANITIZERS=ON` enables AddressSanitizer and UndefinedBehaviorSanitizer with GCC or Clang;
 - `APTA_BUILD_FUZZING=ON` builds the Clang/libFuzzer `apta_wovr_reader_fuzz` target;
+- `apta_wovr_seed_generator` creates canonical final and sparse-partial corpus entries through the public analysis and writer APIs;
+- `wovr_reader.dict` supplies format-aware magic, FourCC, version, lifecycle and geometry tokens;
 - the fuzz harness limits input to 1 MiB, aggregate result allocation to 1 MiB and context-owned memory to 2 MiB;
-- the CI parser-hardening job runs the complete test suite under ASan/UBSan and then executes a bounded 2000-run fuzz smoke pass.
+- the CI parser-hardening job runs the complete test suite under ASan/UBSan and then executes a seeded bounded 2000-run fuzz smoke pass.
 
-The fuzz smoke run is a regression guard, not a substitute for long-running continuous fuzzing with a maintained corpus.
+The fuzz smoke run is a regression guard, not a substitute for long-running continuous fuzzing. Reproducible crashes and timeouts MUST be minimized and retained as reviewed regression inputs or explicit unit tests.
 
 ## Deliberate limitations
 
@@ -118,15 +121,16 @@ The implementation does not yet provide:
 - non-zero source fingerprint kinds;
 - multiple overview levels;
 - tempo or beatgrid sections;
-- a maintained seed and regression corpus for long-running fuzzing;
+- a persistent corpus of independently discovered crash regressions;
+- continuous or scheduled long-running fuzz infrastructure;
 - a formal Waveform Profile conformance report.
 
 ## Completion gates
 
 This package can be treated as a verified implementation candidate when:
 
-- the newest GitHub Actions core-build job compiles cleanly and all 18 runtime tests pass;
+- the newest GitHub Actions core-build job compiles cleanly and all 19 runtime tests pass;
 - the parser-hardening job passes ASan and UBSan without findings;
-- the bounded libFuzzer smoke run completes without a crash, timeout or leak;
+- the seeded bounded libFuzzer smoke run completes without a crash, timeout or leak;
 - compiler warnings remain clean;
 - the status document records the verified commit SHA.
