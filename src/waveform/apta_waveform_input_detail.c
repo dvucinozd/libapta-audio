@@ -70,8 +70,13 @@ apta_status_t apta_internal_waveform_accept_pcm(
                 node->first_frame + frame,
                 node->samples[frame]);
 
-        if (detail_status < 0) {
-            /* Preserve the already-committed PCM acceptance contract. */
+        if (detail_status != APTA_STATUS_OK) {
+            /*
+             * NOT_AVAILABLE means the fixed cache intentionally skipped this
+             * unprotected tile. A negative status is also non-transactional
+             * after overview acceptance, so both terminate detail derivation
+             * without changing the accepted PCM result.
+             */
             break;
         }
     }
