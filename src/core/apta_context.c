@@ -115,7 +115,10 @@ apta_status_t APTA_CALL apta_context_create(
     context->allocator = config->allocator;
     context->logger = config->logger;
     context->clock = config->clock;
-    context->capabilities = available_capabilities;
+    context->capabilities =
+        config->requested_capabilities != 0u
+            ? config->requested_capabilities
+            : available_capabilities;
     context->memory_limit_bytes = config->memory_limit_bytes;
     context->flags = config->flags;
 
