@@ -81,6 +81,7 @@ apta_status_t APTA_CALL apta_session_request_region(
 {
     uint32_t slot;
     uint32_t request_id;
+    apta_status_t status;
 
     if (request_id_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -139,11 +140,20 @@ apta_status_t APTA_CALL apta_session_request_region(
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 
+    memset(&session->requests[slot], 0, sizeof(session->requests[slot]));
     session->requests[slot].request_id = request_id;
     session->requests[slot].request = *request;
     session->requests[slot].request.request_id = request_id;
     session->requests[slot].state = APTA_REQUEST_QUEUED;
     session->requests[slot].diagnostic_code = 0u;
+
+    status = apta_internal_scheduler_register_request(
+        session,
+        &session->requests[slot]);
+    if (status < 0) {
+        memset(&session->requests[slot], 0, sizeof(session->requests[slot]));
+        return status;
+    }
 
     *request_id_out = request_id;
     return APTA_STATUS_OK;
