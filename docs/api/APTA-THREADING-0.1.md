@@ -31,6 +31,8 @@ The current prototype does not internally serialize all combinations of those ca
 
 Cancellation is cooperative. The processing owner observes the atomic request at a bounded API boundary and publishes the cancelled lifecycle state.
 
+For pull input, a cancellation already visible at `apta_session_process()` entry is handled before invoking `read_frames()`. A cancellation requested while a source callback is executing is observed after that callback returns; callbacks must therefore remain nonblocking or cooperatively bounded.
+
 ## 3. Immutable result readers
 
 The following operations MAY run concurrently with session processing and result publication:
@@ -89,6 +91,24 @@ A logger callback and monotonic-clock callback MUST follow the reentrancy and th
 
 Callbacks MUST NOT recursively destroy the context or active session that invoked them.
 
+### 7.1. PCM pull callbacks
+
+`apta_pcm_source_t.read_frames()` and `release_frames()` execute synchronously on the thread that calls `apta_session_process()`.
+
+Source callbacks MUST NOT:
+
+- recursively call `apta_session_process()`;
+- call another mutating API on the invoking session;
+- destroy the invoking session or context;
+- retain library-owned output pointers beyond the callback;
+- block indefinitely while waiting for I/O or decoder ownership.
+
+When source data is temporarily unavailable, `read_frames()` returns `APTA_STATUS_WOULD_BLOCK`.
+
+After `read_frames()` returns `APTA_STATUS_OK`, the returned block remains valid until the matching `release_frames()` call. The implementation copies accepted PCM before release and never retains the callback block afterward.
+
+The full source ownership and status contract is documented in [`APTA-PCM-PULL-0.1.md`](APTA-PCM-PULL-0.1.md).
+
 ## 8. Memory visibility
 
 The reference implementation uses C11 atomic reference counts, atomic cancellation state and acquire/release synchronization for current-result publication.
@@ -104,7 +124,7 @@ The 0.1 prototype does not guarantee:
 - concurrent PCM producers;
 - concurrent focus/request mutation with processing;
 - destruction racing with any other call;
-- callback execution on a particular thread;
+- callback execution on a particular thread other than the synchronous processing caller;
 - fairness between arbitrary host threads.
 
 ## 10. Conformance tests
@@ -116,5 +136,7 @@ Threading tests include:
 - result publication while readers hold older generations;
 - generation monotonicity per reader;
 - result lifetime beyond session destruction.
+
+PCM pull tests additionally cover synchronous callback ownership, nonblocking `WOULD_BLOCK`, exact release pairing and cancellation-before-callback behavior.
 
 Race-detector and sanitizer jobs remain required before stable API status.
