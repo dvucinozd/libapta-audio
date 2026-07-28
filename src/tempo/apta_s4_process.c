@@ -15,9 +15,25 @@ apta_status_t apta_internal_waveform_process(
     uint32_t *did_work_out,
     uint32_t *published_output_out)
 {
+    apta_feature_mask_t saved_focus_mask;
+    apta_feature_mask_t saved_request_masks[APTA_INTERNAL_MAX_REGION_REQUESTS];
     apta_status_t status;
     apta_status_t refresh_status;
     apta_feature_mask_t pending;
+    uint32_t slot;
+
+    saved_focus_mask = session->focus.feature_mask;
+    if ((saved_focus_mask & APTA_INTERNAL_S4_FEATURES) != 0u) {
+        session->focus.feature_mask |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    }
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        saved_request_masks[slot] =
+            session->requests[slot].request.feature_mask;
+        if ((saved_request_masks[slot] & APTA_INTERNAL_S4_FEATURES) != 0u) {
+            session->requests[slot].request.feature_mask |=
+                APTA_FEATURE_WAVEFORM_OVERVIEW;
+        }
+    }
 
     status = apta_internal_waveform_process_s4_base(
         session,
@@ -25,6 +41,12 @@ apta_status_t apta_internal_waveform_process(
         progress_out,
         did_work_out,
         published_output_out);
+
+    session->focus.feature_mask = saved_focus_mask;
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        session->requests[slot].request.feature_mask = saved_request_masks[slot];
+    }
+
     if (status < 0) {
         return status;
     }
