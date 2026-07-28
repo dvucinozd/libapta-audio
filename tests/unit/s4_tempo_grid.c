@@ -10,6 +10,7 @@
 #define TEMPO_MILLIBPM 125000u
 #define BEAT_FRAMES 23040u
 #define TOTAL_FRAMES 384000u
+#define PROVISIONAL_FRAMES 144000u
 #define STABLE_FRAMES 288000u
 #define BLOCK_FRAMES 4096u
 
@@ -71,7 +72,7 @@ static int push_range(
 
 static int check_tempo_and_grid(
     const apta_result_t *result,
-    apta_feature_state_t minimum_state,
+    apta_feature_state_t expected_state,
     uint32_t require_locked)
 {
     apta_tempo_view_t tempo;
@@ -84,7 +85,7 @@ static int check_tempo_and_grid(
     CHECK(apta_result_get_tempo(result, NULL, &tempo) == APTA_STATUS_OK);
     CHECK(tempo.selected.tempo_millibpm >= TEMPO_MILLIBPM - 500u);
     CHECK(tempo.selected.tempo_millibpm <= TEMPO_MILLIBPM + 500u);
-    CHECK(tempo.selected.state >= minimum_state);
+    CHECK(tempo.selected.state == expected_state);
     CHECK(tempo.selected.confidence >= 50u);
     CHECK(tempo.candidate_count >= 1u);
     CHECK(tempo.candidate_count <= APTA_REFERENCE_TEMPO_MAX_CANDIDATES);
@@ -100,11 +101,12 @@ static int check_tempo_and_grid(
               NULL,
               &grid) == APTA_STATUS_OK);
     CHECK(grid.representation == APTA_GRID_REPRESENTATION_SEGMENTS);
-    CHECK(grid.state >= minimum_state);
+    CHECK(grid.state == expected_state);
     CHECK(grid.confidence >= 50u);
     CHECK(grid.coverage_range_count == 1u);
     CHECK(grid.segment_count == 1u);
     CHECK(grid.segments != NULL);
+    CHECK(grid.segments[0].state == expected_state);
     CHECK(grid.segments[0].nominal_tempo_millibpm >=
           TEMPO_MILLIBPM - 500u);
     CHECK(grid.segments[0].nominal_tempo_millibpm <=
@@ -125,7 +127,7 @@ static int check_tempo_and_grid(
               NULL,
               &state,
               &confidence) == APTA_STATUS_OK);
-    CHECK(state >= minimum_state);
+    CHECK(state == expected_state);
     CHECK(confidence >= 50u);
     return 0;
 }
@@ -164,7 +166,14 @@ int main(void)
     CHECK(apta_session_create(context, &session_config, &session) ==
           APTA_STATUS_OK);
 
-    CHECK(push_range(session, 0u, STABLE_FRAMES) == 0);
+    CHECK(push_range(session, 0u, PROVISIONAL_FRAMES) == 0);
+    result = apta_session_acquire_result(session);
+    CHECK(result != NULL);
+    CHECK(check_tempo_and_grid(result, APTA_FEATURE_PROVISIONAL, 0u) == 0);
+    apta_result_release(result);
+    result = NULL;
+
+    CHECK(push_range(session, PROVISIONAL_FRAMES, STABLE_FRAMES) == 0);
     result = apta_session_acquire_result(session);
     CHECK(result != NULL);
     CHECK(check_tempo_and_grid(result, APTA_FEATURE_STABLE, 0u) == 0);
