@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
+#include "apta_result_pool_layout.h"
 
 #include <stdalign.h>
 #include <string.h>
@@ -147,6 +148,8 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
     const apta_feature_mask_t supported_features =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
         APTA_FEATURE_WAVEFORM_DETAIL;
+    apta_internal_result_pool_layout_t pool_layout;
+    apta_status_t status;
 
     if (config == NULL || requirements_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -168,6 +171,10 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
 
+    if ((config->flags &
+         ~APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
     if ((config->requested_features & ~supported_features) != 0u) {
         return APTA_ERROR_UNSUPPORTED;
     }
@@ -179,6 +186,27 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
     if (config->input_mode == APTA_INPUT_MODE_PULL &&
         (config->requested_features & supported_features) != 0u) {
         return APTA_ERROR_UNSUPPORTED;
+    }
+
+    if ((config->flags &
+         APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
+        status = apta_internal_result_pool_calculate_layout(
+            config,
+            &pool_layout);
+        if (status < 0) {
+            return status;
+        }
+
+        requirements_out->minimum_bytes = pool_layout.total_bytes;
+        requirements_out->recommended_bytes = pool_layout.total_bytes;
+        requirements_out->required_alignment = alignof(max_align_t);
+        requirements_out->flags =
+            APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL;
+        memset(
+            requirements_out->reserved32,
+            0,
+            sizeof(requirements_out->reserved32));
+        return APTA_STATUS_OK;
     }
 
     requirements_out->minimum_bytes = apta_memory_base_requirement();
