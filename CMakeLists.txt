@@ -69,6 +69,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_meta_base")
 
 set_source_files_properties(
+    src/serialization/apta_meta_reader_hardening.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_meta_hardened")
+
+set_source_files_properties(
     src/serialization/apta_wovr_writer.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_result_query_serialized_size=apta_result_query_serialized_size_wovr;apta_result_serialize=apta_result_serialize_wovr")
@@ -77,6 +82,11 @@ set_source_files_properties(
     src/serialization/apta_wdtl_writer.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_result_query_serialized_size=apta_result_query_serialized_size_waveform;apta_result_serialize=apta_result_serialize_waveform")
+
+set_source_files_properties(
+    src/serialization/apta_meta_writer.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_query_serialized_size=apta_result_query_serialized_size_meta;apta_result_serialize=apta_result_serialize_meta")
 
 set_source_files_properties(
     src/core/apta_metadata.c
@@ -194,6 +204,8 @@ add_library(
         src/serialization/apta_meta_reader.c
         src/serialization/apta_meta_reader_hardening.c
         src/serialization/apta_meta_writer.c
+        src/serialization/apta_s4_reader.c
+        src/serialization/apta_s4_writer.c
         src/serialization/apta_wdtl_reader.c
         src/serialization/apta_wdtl_writer.c
         src/serialization/apta_wovr_reader.c
