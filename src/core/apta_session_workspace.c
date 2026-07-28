@@ -27,6 +27,31 @@ static size_t apta_workspace_align_up(size_t value, size_t alignment)
     return (value + alignment - 1u) & ~(alignment - 1u);
 }
 
+static size_t apta_workspace_payload_prefix_size(void)
+{
+    size_t payload_offset;
+
+    payload_offset = apta_workspace_align_up(
+        sizeof(apta_internal_workspace_block_t) +
+            sizeof(apta_allocation_header_t),
+        alignof(max_align_t));
+    if (payload_offset == SIZE_MAX) {
+        return SIZE_MAX;
+    }
+    return payload_offset - sizeof(apta_internal_workspace_block_t);
+}
+
+static void *apta_workspace_block_payload(
+    apta_internal_workspace_block_t *block)
+{
+    size_t prefix_size = apta_workspace_payload_prefix_size();
+
+    if (block == NULL || prefix_size == SIZE_MAX) {
+        return NULL;
+    }
+    return (uint8_t *)(block + 1) + prefix_size;
+}
+
 static apta_internal_workspace_block_t *apta_workspace_first_block(
     const apta_session_t *session)
 {
@@ -46,18 +71,20 @@ static apta_internal_workspace_block_t *apta_workspace_first_block(
 size_t apta_internal_session_workspace_minimum_size(void)
 {
     size_t offset;
+    size_t prefix_size;
 
     offset = apta_workspace_align_up(
         sizeof(apta_session_t),
         alignof(max_align_t));
-    if (offset == SIZE_MAX ||
+    prefix_size = apta_workspace_payload_prefix_size();
+    if (offset == SIZE_MAX || prefix_size == SIZE_MAX ||
         offset > SIZE_MAX - sizeof(apta_internal_workspace_block_t) -
-                     alignof(max_align_t)) {
+                     prefix_size - alignof(max_align_t)) {
         return SIZE_MAX;
     }
 
     return offset + sizeof(apta_internal_workspace_block_t) +
-           alignof(max_align_t);
+           prefix_size + alignof(max_align_t);
 }
 
 int apta_internal_session_uses_workspace(
@@ -113,6 +140,8 @@ void *apta_internal_session_allocate(
 {
     apta_internal_workspace_block_t *block;
     size_t padded_size;
+    size_t prefix_size;
+    size_t required;
 
     if (session == NULL) {
         return NULL;
@@ -139,9 +168,12 @@ void *apta_internal_session_allocate(
     }
 
     padded_size = apta_workspace_align_up(size, alignof(max_align_t));
-    if (padded_size == SIZE_MAX) {
+    prefix_size = apta_workspace_payload_prefix_size();
+    if (padded_size == SIZE_MAX || prefix_size == SIZE_MAX ||
+        prefix_size > SIZE_MAX - padded_size) {
         return NULL;
     }
+    required = prefix_size + padded_size;
 
     for (block = apta_workspace_first_block(session);
          block != NULL;
@@ -149,16 +181,17 @@ void *apta_internal_session_allocate(
         size_t remaining;
 
         if (block->state.free == 0u ||
-            block->state.capacity < padded_size) {
+            block->state.capacity < required) {
             continue;
         }
 
-        remaining = block->state.capacity - padded_size;
-        if (remaining >= sizeof(*block) + alignof(max_align_t)) {
+        remaining = block->state.capacity - required;
+        if (remaining >= sizeof(*block) +
+                             prefix_size + alignof(max_align_t)) {
             apta_internal_workspace_block_t *next;
             uint8_t *next_address;
 
-            next_address = (uint8_t *)(block + 1) + padded_size;
+            next_address = (uint8_t *)(block + 1) + required;
             next = (apta_internal_workspace_block_t *)next_address;
             memset(next, 0, sizeof(*next));
             next->state.next = block->state.next;
@@ -166,12 +199,27 @@ void *apta_internal_session_allocate(
             next->state.free = 1u;
 
             block->state.next = next;
-            block->state.capacity = padded_size;
+            block->state.capacity = required;
         }
 
         block->state.requested_size = size;
         block->state.free = 0u;
-        return (void *)(block + 1);
+        {
+            void *payload = apta_workspace_block_payload(block);
+            apta_allocation_header_t *header;
+
+            if (payload == NULL) {
+                block->state.requested_size = 0u;
+                block->state.free = 1u;
+                return NULL;
+            }
+            header = (apta_allocation_header_t *)
+                ((uintptr_t)payload - sizeof(*header));
+            header->raw_memory = session;
+            header->allocated_size = 0u;
+            header->requested_size = size;
+            return payload;
+        }
     }
 
     return NULL;
@@ -197,7 +245,7 @@ void apta_internal_session_deallocate(
     for (block = apta_workspace_first_block(session);
          block != NULL;
          block = block->state.next) {
-        if ((void *)(block + 1) == memory) {
+        if (apta_workspace_block_payload(block) == memory) {
             break;
         }
         previous = block;

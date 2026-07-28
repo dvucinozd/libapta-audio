@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
+#include "apta_session_workspace.h"
 
 #include <stdalign.h>
 #include <stdint.h>
@@ -142,6 +143,16 @@ void apta_internal_context_deallocate(
     }
 
     header = (apta_allocation_header_t *)((uintptr_t)memory - sizeof(*header));
+    if (header->allocated_size == 0u && header->raw_memory != NULL) {
+        apta_session_t *owner = (apta_session_t *)header->raw_memory;
+
+        if (owner->context == context &&
+            apta_internal_session_uses_workspace(owner)) {
+            apta_internal_session_deallocate(owner, memory);
+        }
+        return;
+    }
+
     raw_memory = header->raw_memory;
     requested_size = header->requested_size;
 

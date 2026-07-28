@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../core/apta_session_workspace.h"
 
 #include <math.h>
 #include <stdalign.h>
@@ -146,8 +147,8 @@ static apta_status_t apta_ensure_range_capacity(
     }
     bytes = (size_t)capacity * sizeof(*replacement);
 
-    replacement = (apta_internal_range_t *)apta_internal_context_allocate(
-        session->context,
+    replacement = (apta_internal_range_t *)apta_internal_session_allocate(
+        session,
         bytes,
         alignof(apta_internal_range_t),
         APTA_MEMORY_PERSISTENT);
@@ -314,8 +315,8 @@ apta_status_t apta_internal_waveform_accept_pcm(
         }
 
         bytes = sizeof(*node) + (size_t)accepted * sizeof(node->samples[0]);
-        node = (apta_internal_pcm_node_t *)apta_internal_context_allocate(
-            session->context,
+        node = (apta_internal_pcm_node_t *)apta_internal_session_allocate(
+            session,
             bytes,
             alignof(apta_internal_pcm_node_t),
             APTA_MEMORY_LARGE);
