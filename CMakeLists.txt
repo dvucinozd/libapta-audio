@@ -84,6 +84,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_session_set_metadata=apta_session_set_metadata_workspace_base")
 
 set_source_files_properties(
+    src/core/apta_result_lifetime.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_publish_result=apta_internal_publish_result_base")
+
+set_source_files_properties(
     src/core/apta_session_lifecycle.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base;apta_session_destroy=apta_session_destroy_heap_base;apta_session_process=apta_session_process_base")
@@ -146,6 +151,8 @@ add_library(
         src/core/apta_result_lifetime.c
         src/core/apta_result_pool.c
         src/core/apta_result_pool_layout.c
+        src/core/apta_result_pool_publication.c
+        src/core/apta_result_pool_snapshot.c
         src/core/apta_scheduler_policy.c
         src/core/apta_session_detail_contract.c
         src/core/apta_session_lifecycle.c
