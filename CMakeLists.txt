@@ -81,7 +81,7 @@ set_source_files_properties(
 set_source_files_properties(
     src/waveform/apta_waveform_process.c
     PROPERTIES
-        COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_base")
+        COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_base;apta_internal_waveform_next_pcm_request=apta_internal_waveform_next_pcm_request_base")
 
 set_source_files_properties(
     src/waveform/apta_waveform_snapshot.c
@@ -103,6 +103,7 @@ add_library(
         src/core/apta_result_accessors.c
         src/core/apta_result_detail_accessors.c
         src/core/apta_result_lifetime.c
+        src/core/apta_scheduler_policy.c
         src/core/apta_session_detail_contract.c
         src/core/apta_session_lifecycle.c
         src/core/apta_session_scheduler.c
@@ -121,6 +122,7 @@ add_library(
         src/waveform/apta_waveform_input_detail.c
         src/waveform/apta_waveform_process.c
         src/waveform/apta_waveform_process_detail.c
+        src/waveform/apta_waveform_scheduler.c
         src/waveform/apta_waveform_snapshot.c
         src/waveform/apta_waveform_snapshot_combined.c)
 
