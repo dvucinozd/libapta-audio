@@ -1,0 +1,76 @@
+name: Reference fixture
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/reference-fixture.yml"
+      - "tests/fixtures/**"
+      - "tests/unit/external_fixture.c"
+  pull_request:
+    paths:
+      - ".github/workflows/reference-fixture.yml"
+      - "tests/fixtures/**"
+      - "tests/unit/external_fixture.c"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fixture-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reference-fixture:
+    name: Independent container fixture
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Regenerate fixture and compare committed hex
+        run: >-
+          python3 tests/fixtures/generate_reference_fixture.py
+          --output build-fixture/reference-wovr-meta.apta
+          --check-hex tests/fixtures/reference-wovr-meta.apta.hex
+
+      - name: Verify machine-readable manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          manifest_path = Path("tests/fixtures/reference-wovr-meta.manifest.json")
+          fixture_path = Path("build-fixture/reference-wovr-meta.apta")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          fixture = fixture_path.read_bytes()
+
+          assert manifest["manifest_version"] == "apta-fixture-manifest-0.1"
+          assert manifest["fixture_name"] == fixture_path.name
+          assert manifest["size_bytes"] == len(fixture)
+          assert manifest["sha256"] == hashlib.sha256(fixture).hexdigest()
+          assert manifest["generator_path"] == "tests/fixtures/generate_reference_fixture.py"
+          assert manifest["fixture_hex_path"] == "tests/fixtures/reference-wovr-meta.apta.hex"
+          PY
+
+      - name: Configure library
+        run: cmake -S . -B build-fixture/library -DAPTA_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile library
+        run: cmake --build build-fixture/library --parallel 2
+
+      - name: Compile independent fixture consumer
+        run: |
+          cc -std=c11 -Wall -Wextra -Wpedantic \
+            -Iinclude \
+            -DAPTA_EXTERNAL_FIXTURE_HEX_PATH=\"$PWD/tests/fixtures/reference-wovr-meta.apta.hex\" \
+            tests/unit/external_fixture.c \
+            build-fixture/library/libapta.a \
+            -lm -pthread \
+            -o build-fixture/external_fixture
+
+      - name: Parse and reproduce fixture
+        run: build-fixture/external_fixture

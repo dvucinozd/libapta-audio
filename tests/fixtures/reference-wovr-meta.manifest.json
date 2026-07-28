@@ -1,0 +1,39 @@
+{
+  "manifest_version": "apta-fixture-manifest-0.1",
+  "fixture_name": "reference-wovr-meta.apta",
+  "fixture_encoding_in_repository": "lowercase-hex",
+  "fixture_hex_path": "tests/fixtures/reference-wovr-meta.apta.hex",
+  "generator_path": "tests/fixtures/generate_reference_fixture.py",
+  "size_bytes": 303,
+  "sha256": "3129b6c40b348e1674859d73b0299c25f611c0f4762aa9c99819d9f629439a19",
+  "container_version": 1,
+  "specification_version": "0.1",
+  "producer_api_version": "0.1.0",
+  "source": {
+    "total_frames": 1024,
+    "sample_rate": 48000,
+    "channel_count": 1,
+    "channel_layout": "mono"
+  },
+  "sections": [
+    {
+      "fourcc": "WOVR",
+      "version": 1,
+      "required": true,
+      "offset": 176,
+      "stored_size": 90,
+      "level_id": 0,
+      "frames_per_column": 1024,
+      "state": "final"
+    },
+    {
+      "fourcc": "META",
+      "version": 1,
+      "required": false,
+      "offset": 272,
+      "stored_size": 31,
+      "keys": [1, 5, 6, 7]
+    }
+  ],
+  "independence_statement": "The fixture is produced without linking or importing libapta and encodes every multibyte field explicitly."
+}
