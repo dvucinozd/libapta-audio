@@ -3,8 +3,9 @@
 **Milestone status:** Complete  
 **Profile status:** Self-tested implementation candidate  
 **API version:** 0.1.0 draft  
-**Verified merge commit:** `372a9acbc0942d94f36671d397847ce31939578b`  
-**Verification evidence:** GitHub Actions PR CI run `#167` completed successfully
+**Verified merge commit:** `b1c9100b2acee13188c650e71e6364bacbae7e7c`  
+**Verification evidence:** GitHub Actions PR CI run `#188` completed successfully  
+**Registered runtime tests:** 43
 
 ## Advertised capabilities
 
@@ -44,15 +45,15 @@ The current implementation provides:
 - partial, stable and final waveform lifecycle states;
 - progressive request status;
 - final partial-column handling;
-- publication retry after transient allocation failure;
-- concurrent immutable result readers;
+- publication retry after transient allocation failure or bounded slot exhaustion;
+- concurrent immutable result readers during ordinary and pooled publication;
 - cross-thread cooperative cancellation;
 - measurable minimum and recommended memory requirements;
 - context memory-limit enforcement.
 
-## Static session workspace
+## Static workspace and bounded immutable results
 
-Caller-provided workspace sessions now keep mutable session state outside the context allocator:
+Caller-provided workspace sessions keep mutable session state outside the context allocator:
 
 - `apta_session_t`;
 - accepted-range arrays;
@@ -62,7 +63,24 @@ Caller-provided workspace sessions now keep mutable session state outside the co
 
 The internal arena is max-aligned, first-fit, split/coalescing and compatible with existing generic cleanup paths through private allocation tags.
 
-Immutable results, result metadata and overview/detail snapshot arrays remain context-owned because acquired results may outlive the session and caller workspace.
+Known-duration sessions may additionally enable:
+
+```text
+APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS
+```
+
+This mode creates one context-owned, fixed two-slot immutable result pool before session creation returns. Each slot has checked capacity for:
+
+- worst-case sparse overview spans and columns;
+- four detail tile descriptors and 256 packed detail columns;
+- all public metadata fields;
+- one immutable result object and alignment padding.
+
+The pool is context-owned because acquired results may outlive the session and caller workspace. The session holds one owner reference and each active result holds one pool reference.
+
+After successful bounded creation, metadata replacement, PCM push, cooperative processing, WOVR/WDTL publication, acquire/release, serialization into caller storage and session destruction do not call the context allocator.
+
+When application retention occupies both slots, publication returns `APTA_ERROR_RESULT_SLOTS_EXHAUSTED`. Releasing an older result permits deterministic retry without loss of metadata, PCM accumulation or request progress.
 
 ## Container implementation
 
@@ -81,11 +99,12 @@ The version-1 `.apta` implementation includes:
 - complete cleanup across injected WOVR, WDTL and META allocation failures;
 - exhaustive byte-prefix truncation and trailing-byte rejection for canonical WOVR, WDTL and META files;
 - independently produced WOVR+META fixture with SHA-256 manifest and byte-identical library reserialization;
-- sanitizer-backed bounded fuzz smoke with final, sparse-partial, WDTL and META seeds.
+- sanitizer-backed bounded fuzz smoke with final, sparse-partial, WDTL and META seeds;
+- canonical serialization and independent parsing of a pooled final META/WOVR/WDTL result after session/workspace destruction.
 
 ## Runtime verification
 
-The verified suite registers 36 runtime tests covering:
+The verified suite registers 43 runtime tests covering:
 
 - core lifecycle, ownership and configuration;
 - allocator failure cleanup;
@@ -102,7 +121,13 @@ The verified suite registers 36 runtime tests covering:
 - workspace PCM/range recycling;
 - workspace overview accumulator growth;
 - workspace session metadata ownership;
-- publication retry;
+- result-pool layout, storage and slot lifetime;
+- bounded initial, metadata, state-transition, WOVR and WDTL publication;
+- deterministic slot exhaustion and retry;
+- maximum public metadata payload and all four full detail tiles;
+- concurrent pooled readers across 200 publications;
+- pooled serialization after session/workspace destruction;
+- ordinary publication retry;
 - WOVR/WDTL/META canonical writing, parsing, malformed input and round-trip;
 - WOVR/WDTL/META allocation-failure sweeps;
 - exhaustive canonical container truncation;
@@ -126,7 +151,8 @@ The implementation does not yet provide:
 - waveform sources with more than two channels;
 - three-band waveform values;
 - multiple detail levels or dynamic tile-cache sizing;
-- zero-allocation immutable result publication for workspace sessions;
+- unknown-duration bounded-result sessions;
+- configurable result-slot count;
 - arbitrary application-defined or losslessly preserved unknown META keys;
 - tempo or beatgrid analysis;
 - stable API or ABI guarantees;
@@ -134,21 +160,22 @@ The implementation does not yet provide:
 
 ## Conformance position
 
-The bounded M2 waveform-processing milestone is complete.
+The bounded M2 waveform-processing milestone and its version 0.1 bounded immutable-result publication scope are complete.
 
-The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not yet make a formal profile claim because cross-endian, shared-library, long-running fuzz, embedded-integration and measured resource evidence remain incomplete.
+The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not make a formal profile or resource-class claim because cross-endian, shared-library, long-running fuzz, embedded-integration and measured resource evidence remain incomplete.
 
 See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFORM-READINESS-0.1.md) for the requirement-by-requirement readiness matrix.
 
 ## Next bounded work
 
-The next implementation sequence is:
+The next evidence and feature sequence is:
 
-1. bounded context-owned immutable result slots for static-workspace sessions;
-2. measured embedded memory, stack and process-call report;
-3. independent ESP-IDF integration validation;
-4. pull-mode PCM source ownership path;
-5. optional three-band waveform processing;
-6. tempo and beatgrid milestones.
+1. measured embedded memory, stack and process-call report;
+2. independent ESP-IDF integration validation;
+3. cross-endian and shared-library export evidence;
+4. maintained long-running fuzz campaign and retained corpus;
+5. pull-mode PCM source ownership path;
+6. optional three-band waveform processing;
+7. tempo and beatgrid milestones.
 
-The result-slot implementation contract is defined in [`../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md`](../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md).
+The completed result-slot contract is documented in [`../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md`](../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md).
