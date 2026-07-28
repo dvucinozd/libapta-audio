@@ -26,6 +26,7 @@ int main(void)
     apta_tempo_view_t tempo;
     apta_grid_view_t grid;
     apta_serialize_options_t serialization;
+    apta_parse_options_t parsing;
 
     apta_frame_range_init(&range);
     apta_memory_requirements_init(&memory);
@@ -38,6 +39,7 @@ int main(void)
     apta_tempo_view_init(&tempo);
     apta_grid_view_init(&grid);
     apta_serialize_options_init(&serialization);
+    apta_parse_options_init(&parsing);
 
     CHECK_PREFIX(range);
     CHECK_PREFIX(memory);
@@ -50,6 +52,7 @@ int main(void)
     CHECK_PREFIX(tempo);
     CHECK_PREFIX(grid);
     CHECK_PREFIX(serialization);
+    CHECK_PREFIX(parsing);
 
     if (request_progress.requested_range.struct_size !=
             (uint32_t)sizeof(request_progress.requested_range) ||
@@ -69,7 +72,13 @@ int main(void)
         tile.confidence != APTA_CONFIDENCE_UNKNOWN ||
         tempo.selected.confidence != APTA_CONFIDENCE_UNKNOWN ||
         grid.confidence != APTA_CONFIDENCE_UNKNOWN ||
-        serialization.flags != APTA_SERIALIZE_CANONICAL) {
+        serialization.flags != APTA_SERIALIZE_CANONICAL ||
+        parsing.flags != APTA_PARSE_STRICT ||
+        parsing.maximum_section_count == 0u ||
+        parsing.maximum_overview_spans == 0u ||
+        parsing.maximum_waveform_columns == 0u ||
+        parsing.maximum_file_bytes == 0u ||
+        parsing.maximum_allocation_bytes == 0u) {
         return 1;
     }
 
