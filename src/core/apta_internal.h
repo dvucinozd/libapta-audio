@@ -19,6 +19,8 @@
 #define APTA_INTERNAL_MAX_DETAIL_TILES 4u
 #define APTA_INTERNAL_PROCESS_CHUNK_FRAMES 256u
 #define APTA_INTERNAL_MAX_PUSH_FRAMES 4096u
+#define APTA_INTERNAL_SCHEDULER_AGE_STEP 8u
+#define APTA_INTERNAL_SCHEDULER_MAX_SKIPS 32u
 
 typedef struct {
     void *raw_memory;
@@ -31,7 +33,17 @@ typedef struct {
     apta_region_request_t request;
     apta_request_state_t state;
     uint32_t diagnostic_code;
+    uint32_t scheduler_skip_count;
+    uint32_t reserved32;
+    uint64_t scheduler_enqueue_serial;
 } apta_internal_request_t;
+
+typedef struct {
+    uint32_t effective_priority;
+    uint32_t request_id;
+    uint64_t soft_deadline_monotonic_ns;
+    uint64_t enqueue_serial;
+} apta_internal_schedule_score_t;
 
 typedef struct {
     apta_source_frame_t first_frame;
@@ -125,6 +137,7 @@ struct apta_session {
     apta_source_frame_t final_end_frame;
 
     uint32_t next_request_id;
+    uint64_t next_scheduler_enqueue_serial;
     apta_internal_request_t requests[APTA_INTERNAL_MAX_REGION_REQUESTS];
 
     apta_internal_pcm_node_t *pcm_head;
@@ -183,6 +196,22 @@ void apta_internal_result_release(apta_result_t *result);
 apta_status_t apta_internal_session_transition(
     apta_session_t *session,
     apta_session_state_t new_state);
+
+apta_status_t apta_internal_scheduler_register_request(
+    apta_session_t *session,
+    apta_internal_request_t *request);
+
+void apta_internal_scheduler_score_request(
+    const apta_internal_request_t *request,
+    apta_internal_schedule_score_t *score_out);
+
+int apta_internal_scheduler_score_better(
+    const apta_internal_schedule_score_t *candidate,
+    const apta_internal_schedule_score_t *current);
+
+void apta_internal_scheduler_note_choice(
+    apta_session_t *session,
+    uint32_t selected_request_id);
 
 apta_status_t apta_internal_waveform_accept_pcm(
     apta_session_t *session,
