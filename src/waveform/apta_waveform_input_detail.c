@@ -37,10 +37,17 @@ apta_status_t apta_internal_waveform_accept_pcm(
         return status;
     }
 
+    /*
+     * The overview layer has accepted ownership of the PCM at this point.
+     * Detail-cache pressure or an internal cache miss MUST NOT retroactively
+     * turn that accepted push into an error. Detail is a bounded derivative
+     * cache and may degrade independently while overview processing remains
+     * authoritative for PCM acceptance.
+     */
     node = session->pcm_tail;
     if (node == NULL || node->frame_count != *accepted_frames_out ||
         node->first_frame != block->first_frame) {
-        return APTA_ERROR_INTERNAL;
+        return status;
     }
 
     for (frame = 0u; frame < *accepted_frames_out; ++frame) {
@@ -48,8 +55,10 @@ apta_status_t apta_internal_waveform_accept_pcm(
             session,
             node->first_frame + frame,
             node->samples[frame]);
+
         if (detail_status < 0) {
-            return detail_status;
+            /* Preserve the already-committed PCM acceptance contract. */
+            break;
         }
     }
 
