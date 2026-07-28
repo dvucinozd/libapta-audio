@@ -91,6 +91,11 @@ apta_status_t apta_internal_publish_result(
     result->context = session->context;
     atomic_init(&result->reference_count, 1u);
 
+    result->total_source_frames = session->config.total_frames;
+    result->source_sample_rate = session->config.source_sample_rate;
+    result->source_channel_count = session->config.channel_count;
+    result->source_channel_layout = session->config.channel_layout;
+
     next_generation = session->generation + 1u;
     result->info.struct_size = (uint32_t)sizeof(result->info);
     result->info.api_version = APTA_API_VERSION;
