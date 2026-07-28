@@ -9,5 +9,6 @@
 #include <apta/apta_source.h>
 #include <apta/apta_result.h>
 #include <apta/apta_initializers.h>
+#include <apta/apta_serialization.h>
 
 #endif /* APTA_H */
