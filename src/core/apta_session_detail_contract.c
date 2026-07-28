@@ -22,11 +22,39 @@ apta_status_t APTA_CALL apta_session_next_pcm_request_base(
     apta_session_t *session,
     apta_pcm_request_t *request_out);
 
-static int apta_detail_session_mask_is_coherent(
+static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
+{
+    const apta_feature_mask_t waveform_dependency =
+        APTA_FEATURE_WAVEFORM_DETAIL | APTA_INTERNAL_S4_FEATURES;
+
+    if ((feature_mask & waveform_dependency) != 0u &&
+        (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_LOCAL_BEATGRID) != 0u &&
+        (feature_mask & APTA_FEATURE_BPM) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_CONFIDENCE) != 0u &&
+        (feature_mask &
+         (APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID)) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_GRID_LOCKING) != 0u &&
+        (feature_mask & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        return 0;
+    }
+    return 1;
+}
+
+static apta_feature_mask_t apta_translate_dependency_mask(
     apta_feature_mask_t feature_mask)
 {
-    return (feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) == 0u ||
-           (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u;
+    if ((feature_mask &
+         (APTA_FEATURE_WAVEFORM_DETAIL | APTA_INTERNAL_S4_FEATURES)) != 0u) {
+        feature_mask |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    }
+    return feature_mask;
 }
 
 apta_status_t APTA_CALL apta_session_create(
@@ -49,7 +77,7 @@ apta_status_t APTA_CALL apta_session_create(
             config->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
-    if (!apta_detail_session_mask_is_coherent(config->requested_features)) {
+    if (!apta_session_mask_is_coherent(config->requested_features)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -60,6 +88,8 @@ apta_status_t APTA_CALL apta_session_set_focus(
     apta_session_t *session,
     const apta_focus_t *focus)
 {
+    apta_focus_t translated;
+
     if (session == NULL || focus == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -74,7 +104,10 @@ apta_status_t APTA_CALL apta_session_set_focus(
         return APTA_ERROR_INVALID_STATE;
     }
 
-    return apta_session_set_focus_base(session, focus);
+    translated = *focus;
+    translated.feature_mask =
+        apta_translate_dependency_mask(translated.feature_mask);
+    return apta_session_set_focus_base(session, &translated);
 }
 
 apta_status_t APTA_CALL apta_session_request_region(
@@ -82,6 +115,8 @@ apta_status_t APTA_CALL apta_session_request_region(
     const apta_region_request_t *request,
     uint32_t *request_id_out)
 {
+    apta_region_request_t translated;
+
     if (request_id_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -101,9 +136,12 @@ apta_status_t APTA_CALL apta_session_request_region(
         return APTA_ERROR_INVALID_STATE;
     }
 
+    translated = *request;
+    translated.feature_mask =
+        apta_translate_dependency_mask(translated.feature_mask);
     return apta_session_request_region_base(
         session,
-        request,
+        &translated,
         request_id_out);
 }
 
