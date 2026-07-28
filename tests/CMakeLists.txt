@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
+find_package(Threads REQUIRED)
+
 add_library(apta_headers_c OBJECT compile/headers_c.c)
 target_link_libraries(apta_headers_c PRIVATE apta::headers)
 set_target_properties(apta_headers_c PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
@@ -52,6 +54,10 @@ add_executable(apta_memory_requirements unit/memory_requirements.c)
 target_link_libraries(apta_memory_requirements PRIVATE apta::core)
 set_target_properties(apta_memory_requirements PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_result_concurrency unit/result_concurrency.cpp)
+target_link_libraries(apta_result_concurrency PRIVATE apta::core Threads::Threads)
+set_target_properties(apta_result_concurrency PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+
 add_test(NAME apta.core.smoke COMMAND apta_core_smoke)
 add_test(NAME apta.core.allocation_failure COMMAND apta_allocation_failure)
 add_test(NAME apta.core.cancellation COMMAND apta_cancellation)
@@ -62,3 +68,4 @@ add_test(NAME apta.waveform.determinism COMMAND apta_waveform_determinism)
 add_test(NAME apta.waveform.priority COMMAND apta_waveform_priority)
 add_test(NAME apta.waveform.contracts COMMAND apta_waveform_contracts)
 add_test(NAME apta.memory.requirements COMMAND apta_memory_requirements)
+add_test(NAME apta.result.concurrency COMMAND apta_result_concurrency)
