@@ -12,6 +12,10 @@
 extern "C" {
 #endif
 
+#define APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS (1u << 0)
+
+#define APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL (1u << 0)
+
 typedef struct {
     uint32_t struct_size;
     uint32_t api_version;
