@@ -1,7 +1,7 @@
 # APTA bounded result pool storage status 0.1
 
-**Status:** Internal pooled-result lifetime implementation candidate  
-**Public activation:** intentionally disabled
+**Status:** Initial public bounded-session implementation candidate  
+**Publication scope:** initial empty generation only
 
 ## Implemented scope
 
@@ -16,7 +16,39 @@ Pool creation:
 - initializes two atomic slot-state descriptors;
 - assigns each descriptor one distinct max-aligned fixed-size storage region.
 
-The pool can now construct an immutable empty `apta_result_t` inside either slot. The result contains valid source geometry, generation, session state, changed-feature and lineage fields. It intentionally contains no metadata or waveform snapshot data in this phase.
+The pool can construct an immutable empty `apta_result_t` inside either slot. The result contains valid source geometry, generation, session state, changed-feature and lineage fields. It intentionally contains no metadata or waveform snapshot data in this phase.
+
+## Public bounded-session creation
+
+`APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS` is now accepted when:
+
+- a caller-owned static workspace is supplied;
+- source duration is known;
+- overview waveform is requested;
+- the context advertises all requested features;
+- the exact result-pool allocation fits configured context and session budgets.
+
+Creation executes transactionally:
+
+1. validate and prepare the caller workspace session without publishing a heap result;
+2. allocate the exact context-owned result pool;
+3. reserve one slot and construct generation 1 in `APTA_SESSION_CREATED` state;
+4. attach the pool owner and current result to the session;
+5. increment the context session count only after every prior step succeeds.
+
+The successful create path performs no temporary result allocation. With a custom allocator, the only callback allocations are the context object and the complete result pool.
+
+## Temporary mutation guard
+
+The initial result is read-only infrastructure. Until fixed-slot metadata and waveform snapshot builders are implemented, operations that would require a replacement generation return `APTA_ERROR_UNSUPPORTED`:
+
+- `apta_session_set_metadata()`;
+- `apta_session_set_source()`;
+- `apta_session_push_pcm()`;
+- `apta_session_signal_end_of_input()`;
+- `apta_session_process()`.
+
+The initial result remains available through the normal acquire/info/generation/release API. Session state remains `APTA_SESSION_CREATED`.
 
 ## Slot reservation and exhaustion
 
@@ -30,11 +62,21 @@ APTA_ERROR_RESULT_SLOTS_EXHAUSTED
 
 The output pointer remains `NULL`. Releasing one result returns its slot to the pool, and the next construction reuses that fixed address after zero-filling the complete slot storage.
 
-## Result lifetime
+## Result and workspace lifetime
 
 Pooled results use the normal public `apta_result_release()` entry point and existing atomic result reference count.
 
-Each active result holds one pool reference. The pool owner reference can be released before active results. The complete allocation remains alive until the final pooled result reaches a zero public reference count.
+Each active result holds one pool reference. The session holds the pool owner reference until destruction. The complete allocation remains alive until the final pooled result reaches a zero public reference count.
+
+`apta_session_destroy()`:
+
+- removes the session-owned current-result reference;
+- cleans mutable workspace state;
+- decrements context session accounting;
+- releases the pool owner reference;
+- clears the caller workspace.
+
+An application-acquired initial result remains valid after session destruction and after the caller reuses or overwrites the workspace. While the retained result exists, `apta_context_destroy()` returns `APTA_ERROR_BUSY`.
 
 The result release path distinguishes pooled and ordinary results through private internal state:
 
@@ -42,17 +84,18 @@ The result release path distinguishes pooled and ordinary results through privat
 - pooled empty results decrement context result accounting, atomically free the slot and release the slot's pool reference;
 - pooled results are never individually deallocated.
 
-While the owner or any pooled result exists, `apta_context_destroy()` returns `APTA_ERROR_BUSY`.
-
 ## Failure behaviour
 
-Pool creation remains transactional:
+Public bounded create and internal pool creation remain transactional:
 
 - invalid layout/configuration returns the layout error;
+- missing caller workspace returns `APTA_ERROR_INVALID_ARGUMENT`;
 - configured context memory limits are enforced before allocator invocation;
 - allocator failure returns `APTA_ERROR_OUT_OF_MEMORY`;
-- `pool_out` remains `NULL` on every failure;
-- failed allocation reservation is removed from context accounting.
+- `session_out` and `pool_out` remain `NULL` on every failure;
+- prepared workspace state is abandoned and cleared after pool failure;
+- failed allocation reservation is removed from context accounting;
+- context session count is not incremented before the initial result is ready.
 
 Empty-result construction performs no allocator call after pool creation. Its only transient failure is deterministic slot exhaustion.
 
@@ -81,16 +124,23 @@ Empty-result construction performs no allocator call after pool creation. Its on
 - pool-owner release before result release;
 - context busy state until the final pooled result is released.
 
-## Deliberate boundary
+`apta.session.bounded_initial_result` verifies:
 
-`APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS` still returns `APTA_ERROR_UNSUPPORTED` from public session creation.
+- exact two-allocation create behaviour: context object plus pool;
+- generation 1 and `CREATED` result semantics;
+- mutation guards with no additional allocation;
+- allocator and context-memory-limit failure rollback;
+- missing-workspace, unknown-duration and missing-overview rejection;
+- retained result validity after session/workspace destruction;
+- context busy state until the retained result is released.
+
+## Deliberate boundary
 
 This phase does not:
 
-- attach a pool to `apta_session_t`;
-- make a pooled result current on a session;
 - populate result metadata from fixed slot storage;
 - populate overview/detail snapshots from fixed slot storage;
-- change publication retry semantics.
+- enable a second public session generation;
+- change publication retry semantics to handle slot exhaustion.
 
-The next phase will attach the pool to a workspace session and replace its initial empty heap result with one pooled generation without yet enabling subsequent waveform publication.
+The next phase will populate fixed-slot metadata and overview snapshots and route bounded publication through the second slot transactionally.
