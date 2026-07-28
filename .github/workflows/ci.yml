@@ -66,6 +66,7 @@ jobs:
           ../tests/apta_wovr_seed_generator
           test -s valid-final.apta
           test -s valid-sparse-partial.apta
+          test -s valid-wdtl.apta
 
       - name: Run bounded fuzz smoke
         run: >-
