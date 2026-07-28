@@ -70,6 +70,11 @@ struct apta_result {
     atomic_uint reference_count;
     apta_result_info_t info;
 
+    apta_source_frame_t total_source_frames;
+    uint32_t source_sample_rate;
+    uint32_t source_channel_count;
+    apta_channel_layout_t source_channel_layout;
+
     apta_waveform_overview_view_t overview;
     apta_waveform_span_t *overview_spans;
     apta_waveform_column_t *overview_columns;
@@ -175,5 +180,7 @@ apta_status_t apta_internal_waveform_build_snapshot(
 
 void apta_internal_waveform_cleanup_session(apta_session_t *session);
 void apta_internal_waveform_cleanup_result(apta_result_t *result);
+
+uint32_t apta_internal_crc32c(const uint8_t *data, size_t size);
 
 #endif /* APTA_INTERNAL_H */
