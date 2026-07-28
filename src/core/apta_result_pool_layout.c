@@ -79,6 +79,9 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     uint32_t overview_columns;
     uint32_t detail_tiles;
     uint32_t detail_columns;
+    uint32_t tempo_candidates;
+    uint32_t grid_coverage;
+    uint32_t grid_segments;
     size_t slot_offset;
     size_t pool_offset;
     size_t slots_bytes;
@@ -115,6 +118,16 @@ apta_status_t apta_internal_result_pool_calculate_layout(
             : 0u;
     detail_columns =
         detail_tiles * APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE;
+    tempo_candidates =
+        (config->requested_features & APTA_FEATURE_BPM) != 0u
+            ? APTA_INTERNAL_MAX_TEMPO_CANDIDATES
+            : 0u;
+    grid_coverage =
+        (config->requested_features &
+         APTA_FEATURE_LOCAL_BEATGRID) != 0u
+            ? 1u
+            : 0u;
+    grid_segments = grid_coverage;
 
     slot_offset = 0u;
     if (!apta_pool_append_region(
@@ -147,6 +160,24 @@ apta_status_t apta_internal_result_pool_calculate_layout(
             detail_columns,
             sizeof(apta_waveform_column_t),
             &layout_out->detail_columns_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_tempo_candidate_t),
+            tempo_candidates,
+            sizeof(apta_tempo_candidate_t),
+            &layout_out->tempo_candidates_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_frame_range_t),
+            grid_coverage,
+            sizeof(apta_frame_range_t),
+            &layout_out->local_grid_coverage_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_grid_segment_t),
+            grid_segments,
+            sizeof(apta_grid_segment_t),
+            &layout_out->local_grid_segments_offset) ||
         !apta_pool_append_region(
             &slot_offset,
             alignof(uint8_t),
@@ -202,6 +233,9 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     layout_out->overview_column_capacity = overview_columns;
     layout_out->detail_tile_capacity = detail_tiles;
     layout_out->detail_column_capacity = detail_columns;
+    layout_out->tempo_candidate_capacity = tempo_candidates;
+    layout_out->local_grid_coverage_capacity = grid_coverage;
+    layout_out->local_grid_segment_capacity = grid_segments;
     layout_out->metadata_capacity = APTA_METADATA_MAX_TOTAL_BYTES;
     layout_out->slot_count = APTA_INTERNAL_RESULT_SLOT_COUNT;
     return APTA_STATUS_OK;
