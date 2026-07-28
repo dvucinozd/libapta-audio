@@ -134,6 +134,7 @@ add_library(
         src/core/apta_result_accessors.c
         src/core/apta_result_detail_accessors.c
         src/core/apta_result_lifetime.c
+        src/core/apta_result_pool.c
         src/core/apta_result_pool_layout.c
         src/core/apta_scheduler_policy.c
         src/core/apta_session_detail_contract.c
