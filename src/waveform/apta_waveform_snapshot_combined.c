@@ -12,7 +12,12 @@ apta_status_t apta_internal_waveform_build_snapshot(
         return status;
     }
 
-    return apta_internal_detail_build_snapshot(session, result);
+    status = apta_internal_detail_build_snapshot(session, result);
+    if (status < 0) {
+        return status;
+    }
+
+    return apta_internal_s4_build_snapshot(session, result);
 }
 
 void apta_internal_waveform_cleanup_result(apta_result_t *result)
@@ -27,4 +32,5 @@ void apta_internal_waveform_cleanup_result(apta_result_t *result)
     result->detail_tiles = NULL;
     result->detail_columns = NULL;
     result->detail_tile_count = 0u;
+    apta_internal_s4_cleanup_result(result);
 }
