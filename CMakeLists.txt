@@ -74,6 +74,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_result_query_serialized_size=apta_result_query_serialized_size_waveform;apta_result_serialize=apta_result_serialize_waveform")
 
 set_source_files_properties(
+    src/core/apta_metadata.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_set_metadata=apta_session_set_metadata_base")
+
+set_source_files_properties(
     src/core/apta_session_lifecycle.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base;apta_session_destroy=apta_session_destroy_heap_base")
@@ -127,6 +132,7 @@ add_library(
         src/core/apta_scheduler_policy.c
         src/core/apta_session_detail_contract.c
         src/core/apta_session_lifecycle.c
+        src/core/apta_session_metadata_workspace.c
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
         src/core/apta_session_workspace.c

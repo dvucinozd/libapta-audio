@@ -1,7 +1,7 @@
 # APTA static session workspace status 0.1
 
-**Status:** Phase-three implementation candidate  
-**Scope:** caller-owned session and mutable overview analysis state
+**Status:** Phase-four implementation candidate  
+**Scope:** caller-owned session, mutable overview state and session metadata
 
 ## Purpose
 
@@ -30,12 +30,13 @@ The library does not free caller workspace memory.
 
 ## Workspace-owned objects
 
-Phase three places the following in caller storage:
+Phase four places the following in caller storage:
 
 - the `apta_session_t` object;
 - the sorted accepted-range array;
 - queued normalized-mono PCM nodes;
-- overview waveform accumulator arrays.
+- overview waveform accumulator arrays;
+- the session-owned metadata byte block.
 
 Accepted-range and accumulator growth remain transactional. A larger replacement is reserved before the old array is returned to the arena. When the workspace cannot temporarily hold the replacement, the operation returns bounded backpressure or an allocation error rather than falling back to the context allocator.
 
@@ -43,16 +44,20 @@ PCM nodes are allocated from the arena and returned after processing. Adjacent f
 
 Before the overview analyzer consumes queued PCM, the process wrapper counts the distinct overview columns represented by that queue and reserves the required accumulator capacity from the workspace. The existing DSP analyzer then runs unchanged and cannot trigger context allocation for accumulator growth.
 
+`apta_session_set_metadata()` validates and copies caller text/byte fields into the session arena while the session remains `CREATED`. The replacement is installed transactionally: result publication must succeed before the previous session metadata block is returned to the arena.
+
 ## Context-owned objects
 
 The following remain context-owned:
 
 - immutable result objects;
 - overview/detail snapshot arrays;
-- session and result metadata copies;
+- metadata copies owned by immutable results;
 - parser-owned objects.
 
-Therefore this phase does **not** claim `APTA-R0-STATIC-128K` or the stronger guarantee "no heap allocation after successful session creation". Result publication and metadata configuration may still allocate through the context allocator.
+Result-owned metadata intentionally remains outside the session workspace because a result may outlive both the session and the caller-provided storage.
+
+Therefore this phase does **not** claim `APTA-R0-STATIC-128K` or the stronger guarantee "no heap allocation after successful session creation". Initial/result publication and immutable snapshot construction still allocate through the context allocator.
 
 ## Arena and cleanup compatibility
 
@@ -64,7 +69,7 @@ The tag is private implementation state and is not part of the public ABI or ser
 
 ## Verification
 
-The workspace test verifies:
+The workspace tests verify:
 
 - exact session placement at the caller workspace base;
 - one fewer context allocator call than heap-backed session creation;
@@ -74,14 +79,17 @@ The workspace test verifies:
 - seventeen additional sparse one-frame blocks on separate 1024-frame column boundaries;
 - accepted-range growth through capacities 8, 16 and 32;
 - overview accumulator growth from 16 to 32 entries;
-- immutable result validity after workspace session destruction;
+- invalid metadata rejection without allocation or generation change;
+- exactly two context allocations for successful metadata publication: result object plus result-owned metadata copy;
+- caller metadata buffer independence;
+- immutable result metadata validity after workspace session destruction;
 - pointer/size pairing;
 - alignment rejection;
 - undersized-workspace rejection;
 - preservation of the overview/detail feature dependency.
 
-The controlled workload never completes an overview column. This prevents immutable result publication from obscuring the allocator-call evidence. Across all push/process operations, the context allocator remains at the three expected calls: context creation, initial result publication and the `CREATED` to `ACTIVE` result transition.
+The controlled PCM workload never completes an overview column. This prevents immutable result publication from obscuring the allocator-call evidence. Across all push/process operations, the context allocator remains at the three expected calls: context creation, initial result publication and the `CREATED` to `ACTIVE` result transition.
 
 ## Next bounded phase
 
-The next workspace phase will migrate session metadata storage. Immutable results and their copied metadata/snapshot arrays will remain context-owned so they can continue to outlive the session.
+The remaining zero-heap gap is immutable result publication. Closing it requires an explicit bounded result-slot model that preserves the existing rule that acquired results may outlive the session. A result-slot design and backpressure policy must be specified before snapshot allocations can safely move into caller-owned storage.
