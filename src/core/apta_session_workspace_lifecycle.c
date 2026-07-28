@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-APTA_API apta_status_t APTA_CALL apta_session_create_heap_base(
+APTA_API apta_status_t APTA_CALL apta_session_create_contract_base(
     apta_context_t *context,
     const apta_session_config_t *config,
     apta_session_t **session_out);
@@ -20,6 +20,13 @@ static int apta_workspace_sample_format_is_valid(apta_sample_format_t format)
            format == APTA_SAMPLE_S32_NATIVE_INTERLEAVED ||
            format == APTA_SAMPLE_F32_NATIVE_INTERLEAVED ||
            format == APTA_SAMPLE_F32_NATIVE_PLANAR;
+}
+
+static int apta_workspace_feature_mask_is_coherent(
+    apta_feature_mask_t feature_mask)
+{
+    return (feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) == 0u ||
+           (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u;
 }
 
 static int apta_workspace_config_is_valid(
@@ -44,6 +51,10 @@ static int apta_workspace_config_is_valid(
     }
     if (config->channel_layout == APTA_CHANNEL_LAYOUT_STEREO &&
         config->channel_count != 2u) {
+        return 0;
+    }
+    if (!apta_workspace_feature_mask_is_coherent(
+            config->requested_features)) {
         return 0;
     }
     if ((config->requested_features & ~context->capabilities) != 0u) {
@@ -110,7 +121,10 @@ apta_status_t APTA_CALL apta_session_create(
 
     if (config->static_workspace == NULL &&
         config->static_workspace_size == 0u) {
-        return apta_session_create_heap_base(context, config, session_out);
+        return apta_session_create_contract_base(
+            context,
+            config,
+            session_out);
     }
     if (config->static_workspace == NULL ||
         config->static_workspace_size == 0u) {
