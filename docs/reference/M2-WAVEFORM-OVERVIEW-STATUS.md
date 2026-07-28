@@ -3,8 +3,8 @@
 **Milestone status:** Complete  
 **Profile status:** Self-tested implementation candidate  
 **API version:** 0.1.0 draft  
-**Verified merge commit:** `e9eef869578656a25a00ed583b8c657e71549f33`  
-**Verification evidence:** GitHub Actions PR CI run `#147` completed successfully
+**Verified merge commit:** `2bdbf32f429a0aa24c30937e0f078e744f0653dd`  
+**Verification evidence:** GitHub Actions PR CI run `#153` completed successfully
 
 ## Advertised capabilities
 
@@ -40,6 +40,7 @@ The current implementation provides:
 - sparse min/max/RMS accumulation;
 - ties-to-even quantization and clipping flags;
 - immutable overview spans and detail tile snapshots;
+- bounded owned metadata snapshots;
 - partial, stable and final waveform lifecycle states;
 - progressive request status;
 - final partial-column handling;
@@ -57,22 +58,25 @@ The version-1 `.apta` implementation includes:
 - CRC32C Castagnoli;
 - required `WOVR` writer and hardened reader;
 - optional `WDTL` writer and hardened reader;
-- canonical writer → reader → writer byte identity;
+- optional deterministic-CBOR `META` writer and hardened reader;
+- canonical writer → reader → writer byte identity for all emitted section combinations;
 - sparse and partial result preservation;
-- source metadata retained after session destruction;
-- strict range, offset, overlap, geometry and reserved-field validation;
+- source and application metadata retained after session destruction;
+- strict range, offset, overlap, geometry, metadata and reserved-field validation;
 - configurable file, section, span, column and allocation limits;
-- complete cleanup across injected WOVR and WDTL allocation failures;
-- sanitizer-backed bounded fuzz smoke with final, sparse-partial and WDTL seeds.
+- complete cleanup across injected WOVR, WDTL and META allocation failures;
+- exhaustive byte-prefix truncation and trailing-byte rejection for canonical WOVR, WDTL and META files;
+- sanitizer-backed bounded fuzz smoke with final, sparse-partial, WDTL and META seeds.
 
 ## Runtime verification
 
-The verified suite registers 28 runtime tests covering:
+The verified suite registers 34 runtime tests covering:
 
 - core lifecycle, ownership and configuration;
 - allocator failure cleanup;
 - cancellation and cross-thread cancellation visibility;
-- public initializers and version rejection;
+- public initializers, ABI prefixes and version rejection;
+- metadata ownership, presence, validation and result lifetime;
 - overview waveform semantics and block-boundary determinism;
 - focus priority;
 - deadline ordering for PCM demand and queued PCM processing;
@@ -80,11 +84,12 @@ The verified suite registers 28 runtime tests covering:
 - detail geometry, request status, eviction and replay;
 - memory requirements and memory limits;
 - publication retry;
-- WOVR/WDTL canonical writing, parsing, malformed input and round-trip;
-- WOVR/WDTL allocation-failure sweeps;
+- WOVR/WDTL/META canonical writing, parsing, malformed input and round-trip;
+- WOVR/WDTL/META allocation-failure sweeps;
+- exhaustive canonical container truncation;
 - concurrent immutable result access.
 
-The same CI run completed the AddressSanitizer/UndefinedBehaviorSanitizer build, canonical seed generation and bounded libFuzzer smoke run.
+The same CI run completed the AddressSanitizer/UndefinedBehaviorSanitizer build, four canonical seed generations and bounded libFuzzer smoke execution.
 
 ## Threading contract
 
@@ -103,7 +108,7 @@ The implementation does not yet provide:
 - three-band waveform values;
 - multiple detail levels or dynamic tile-cache sizing;
 - static-workspace-only operation;
-- deterministic `META` section support;
+- arbitrary application-defined or losslessly preserved unknown META keys;
 - tempo or beatgrid analysis;
 - stable API or ABI guarantees;
 - measured resource-class or responsiveness claims.
@@ -112,7 +117,7 @@ The implementation does not yet provide:
 
 The bounded M2 waveform-processing milestone is complete.
 
-The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not yet make a formal profile claim because the complete fixture, cross-platform, malformed-boundary and resource-measurement evidence package is not available.
+The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not yet make a formal profile claim because the machine-readable fixture manifest, cross-platform evidence and resource-measurement package are not complete.
 
 See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFORM-READINESS-0.1.md) for the requirement-by-requirement readiness matrix.
 
@@ -120,10 +125,9 @@ See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFO
 
 The next implementation sequence is:
 
-1. deterministic version-1 `META` support and malformed metadata tests;
-2. 32-bit ABI/build job and cross-platform container fixture;
-3. complete fixed-header truncation corpus;
-4. static-workspace allocator design and implementation;
-5. measured embedded memory/stack report;
-6. pull-mode PCM source ownership path;
-7. optional three-band waveform processing.
+1. 32-bit ABI/build job and independently produced cross-platform fixture;
+2. static-workspace allocator design and implementation;
+3. measured embedded memory/stack report;
+4. pull-mode PCM source ownership path;
+5. optional three-band waveform processing;
+6. tempo and beatgrid milestones.
