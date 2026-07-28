@@ -104,6 +104,10 @@ target_link_libraries(apta_result_pool_empty_result PRIVATE apta::core)
 target_include_directories(apta_result_pool_empty_result PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 set_target_properties(apta_result_pool_empty_result PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_bounded_session_initial_result unit/bounded_session_initial_result.c)
+target_link_libraries(apta_bounded_session_initial_result PRIVATE apta::core)
+set_target_properties(apta_bounded_session_initial_result PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_publication_retry unit/publication_retry.c)
 target_link_libraries(apta_publication_retry PRIVATE apta::core)
 set_target_properties(apta_publication_retry PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
@@ -194,6 +198,7 @@ add_test(NAME apta.memory.static_workspace_metadata COMMAND apta_static_workspac
 add_test(NAME apta.memory.result_pool_layout COMMAND apta_result_pool_layout)
 add_test(NAME apta.memory.result_pool_storage COMMAND apta_result_pool_storage)
 add_test(NAME apta.result.pool_empty_result COMMAND apta_result_pool_empty_result)
+add_test(NAME apta.session.bounded_initial_result COMMAND apta_bounded_session_initial_result)
 add_test(NAME apta.result.publication_retry COMMAND apta_publication_retry)
 add_test(NAME apta.serialization.wovr_writer COMMAND apta_wovr_writer)
 add_test(NAME apta.serialization.wovr_writer_partial COMMAND apta_wovr_writer_partial)
