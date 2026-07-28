@@ -12,6 +12,17 @@ int apta_internal_session_uses_workspace(
 apta_status_t apta_internal_session_workspace_initialize(
     apta_session_t *session);
 
+apta_status_t apta_internal_workspace_session_prepare(
+    apta_context_t *context,
+    const apta_session_config_t *config,
+    apta_session_t **session_out);
+
+void apta_internal_workspace_session_commit(
+    apta_session_t *session);
+
+void apta_internal_workspace_session_abandon(
+    apta_session_t *session);
+
 void *apta_internal_session_allocate(
     apta_session_t *session,
     size_t size,
