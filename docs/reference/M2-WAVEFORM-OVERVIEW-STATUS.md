@@ -1,124 +1,129 @@
-# M2 waveform overview status
+# M2 waveform processing status
 
-**Status:** Implementation candidate  
+**Milestone status:** Complete  
+**Profile status:** Self-tested implementation candidate  
 **API version:** 0.1.0 draft  
-**Advertised capability:** `APTA_FEATURE_WAVEFORM_OVERVIEW`  
-**Profile conformance:** Not yet claimed
+**Verified merge commit:** `e9eef869578656a25a00ed583b8c657e71549f33`  
+**Verification evidence:** GitHub Actions PR CI run `#147` completed successfully
 
-## Implemented
+## Advertised capabilities
 
-The current M2 implementation provides:
-
-- push-mode PCM input for mono and stereo sources;
-- S16, packed S24 little-endian, S32 and F32 input conversion;
-- deterministic stereo reduction using `(L + R) / 2`;
-- copied, bounded PCM queue nodes;
-- partial push acceptance and `APTA_STATUS_MORE_WORK`;
-- overlap rejection for already accepted source ranges;
-- out-of-order, non-overlapping PCM delivery;
-- explicit tracking of sparse accepted ranges;
-- background PCM demand that preserves earlier gaps;
-- focus- and request-priority queue selection;
-- bounded cooperative processing by frame and step budget;
-- fixed overview geometry of 1024 source frames per column;
-- sparse per-column min, max and RMS accumulators;
-- normatively specified ties-to-even quantization;
-- explicit clipping flags;
-- explicit coverage spans without fabricated gap columns;
-- immutable overview payloads in result generations;
-- partial, stable and final overview lifecycle states;
-- range-scoped feature-state queries;
-- final partial-column handling after end-of-input;
-- cleanup of queued PCM, accumulators and snapshot payloads;
-- measurable minimum and recommended memory requirements;
-- context memory-limit enforcement;
-- concurrent immutable result readers during publication;
-- cross-thread cooperative cancellation;
-- explicit session/context destruction concurrency rules.
-
-## Advertised behaviour
-
-`apta_context_get_capabilities()` returns:
+A context may advertise:
 
 ```text
 APTA_FEATURE_WAVEFORM_OVERVIEW
+APTA_FEATURE_WAVEFORM_DETAIL
 ```
 
-A session must explicitly request that feature before PCM is retained and analysed.
+The context exposes only explicitly requested supported capabilities. A detail-enabled session currently requires both overview and detail because the overview path remains the authoritative PCM ownership and accepted-range layer.
 
-The current waveform analyser supports push input only. A pull-mode session requesting waveform overview returns `APTA_ERROR_UNSUPPORTED`; this avoids advertising a source path that is not yet implemented.
+## Implemented processing behaviour
 
-Static workspace mode also returns `APTA_ERROR_UNSUPPORTED` until a real workspace allocator exists; the implementation no longer accepts and silently ignores that configuration.
+The current implementation provides:
 
-## Runtime tests
+- push-mode PCM input for mono and stereo sources;
+- S16, packed S24 little-endian, S32 and F32 conversion;
+- deterministic stereo reduction using `(L + R) / 2`;
+- copied bounded PCM queue nodes;
+- partial push acceptance and backpressure;
+- overlap rejection plus feature-specific detail replay;
+- out-of-order non-overlapping PCM delivery;
+- explicit sparse accepted ranges and gap-preserving demand;
+- playback focus and explicit priority-region requests;
+- soft-deadline ordering within one effective-priority class;
+- FIFO tie-breaking;
+- deterministic bounded starvation aging;
+- bounded cooperative processing by frame, step and optional soft-time budget;
+- overview geometry of 1024 source frames per column;
+- detail geometry of 256 source frames per column and 64 columns per tile;
+- bounded four-tile detail cache with focus/request protection and deterministic eviction;
+- sparse min/max/RMS accumulation;
+- ties-to-even quantization and clipping flags;
+- immutable overview spans and detail tile snapshots;
+- partial, stable and final waveform lifecycle states;
+- progressive request status;
+- final partial-column handling;
+- publication retry after transient allocation failure;
+- concurrent immutable result readers;
+- cross-thread cooperative cancellation;
+- measurable minimum and recommended memory requirements;
+- context memory-limit enforcement.
 
-The test suite currently includes twelve runtime tests:
+## Container implementation
 
-- core lifecycle and result ownership;
-- allocation-failure cleanup;
-- cancellation lifecycle;
-- cross-thread cancellation visibility;
-- public structure initializers;
-- incompatible-version rejection;
-- sparse overview coverage and golden peak/RMS columns;
-- waveform block-boundary determinism;
-- focus-region preemption over earlier background PCM;
-- unknown-duration PCM demand and EOF boundary contracts;
-- reported memory requirements and enforced memory limits;
-- concurrent immutable-result readers during repeated waveform publication.
+The version-1 `.apta` implementation includes:
 
-The sparse overview test has been observed passing in GitHub Actions. The complete latest twelve-test package still requires an Actions result for the newest commit before M2 is marked complete.
+- canonical little-endian fixed header and section directory;
+- CRC32C Castagnoli;
+- required `WOVR` writer and hardened reader;
+- optional `WDTL` writer and hardened reader;
+- canonical writer → reader → writer byte identity;
+- sparse and partial result preservation;
+- source metadata retained after session destruction;
+- strict range, offset, overlap, geometry and reserved-field validation;
+- configurable file, section, span, column and allocation limits;
+- complete cleanup across injected WOVR and WDTL allocation failures;
+- sanitizer-backed bounded fuzz smoke with final, sparse-partial and WDTL seeds.
+
+## Runtime verification
+
+The verified suite registers 28 runtime tests covering:
+
+- core lifecycle, ownership and configuration;
+- allocator failure cleanup;
+- cancellation and cross-thread cancellation visibility;
+- public initializers and version rejection;
+- overview waveform semantics and block-boundary determinism;
+- focus priority;
+- deadline ordering for PCM demand and queued PCM processing;
+- bounded starvation aging;
+- detail geometry, request status, eviction and replay;
+- memory requirements and memory limits;
+- publication retry;
+- WOVR/WDTL canonical writing, parsing, malformed input and round-trip;
+- WOVR/WDTL allocation-failure sweeps;
+- concurrent immutable result access.
+
+The same CI run completed the AddressSanitizer/UndefinedBehaviorSanitizer build, canonical seed generation and bounded libFuzzer smoke run.
 
 ## Threading contract
 
 The public prototype threading rules are documented in [`../api/APTA-THREADING-0.1.md`](../api/APTA-THREADING-0.1.md).
 
-Result acquire/access/release operations may run concurrently with publication. Mutating session calls remain host-serialized except for the explicitly thread-safe cancellation request and query functions.
+Result acquire/access/release operations may run concurrently with publication. Mutating session calls remain host-serialized except for explicitly thread-safe cancellation request/query operations.
 
-Session destruction must not race with any operation receiving the same session pointer. Acquired immutable results may outlive their session, but the context remains busy until those results are released.
+Session destruction must not race with any operation receiving the same session pointer. Acquired immutable results may outlive their session, while the context remains busy until those results are released.
 
 ## Deliberate limitations
 
 The implementation does not yet provide:
 
-- waveform detail tiles;
+- PCM pull-mode analysis;
+- waveform sources with more than two channels;
 - three-band waveform values;
-- pull-mode analysis;
-- source formats with more than two channels for waveform analysis;
-- deadline ordering within equal priority;
-- starvation-prevention aging;
+- multiple detail levels or dynamic tile-cache sizing;
 - static-workspace-only operation;
-- `.apta` serialization or parsing;
+- deterministic `META` section support;
 - tempo or beatgrid analysis;
-- stable API or ABI guarantees.
+- stable API or ABI guarantees;
+- measured resource-class or responsiveness claims.
 
 ## Conformance position
 
-No formal APTA profile is claimed yet.
+The bounded M2 waveform-processing milestone is complete.
 
-Although the implementation now covers most behavioural requirements of the Waveform Profile processing path, profile conformance also requires the normative `.apta` `WOVR` reader/writer and the complete applicable conformance suite.
+The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not yet make a formal profile claim because the complete fixture, cross-platform, malformed-boundary and resource-measurement evidence package is not available.
 
-The Adaptive Waveform Profile is not claimed because detail tiles, starvation prevention and measured adaptive scheduling criteria are incomplete.
+See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFORM-READINESS-0.1.md) for the requirement-by-requirement readiness matrix.
 
-## M2 completion gates
+## Next bounded work
 
-M2 can be marked complete when:
+The next implementation sequence is:
 
-- the latest GitHub Actions run builds all source and test modules;
-- all twelve runtime tests pass;
-- compiler warnings remain clean under the configured warning level;
-- this status document records the verified commit SHA.
-
-Race-detector, sanitizer, 32-bit ABI and malformed-container jobs remain required before stable API or profile-conformance status, but they do not block the bounded M2 processing milestone.
-
-## Next implementation work
-
-After the latest M2 Actions run is verified, the next bounded sequence is:
-
-1. version-1 `WOVR` writer and CRC32C support;
-2. hardened `WOVR` reader with configured limits;
-3. malformed-container regression corpus;
-4. writer/reader round-trip golden fixtures;
-5. Waveform Profile conformance report;
-6. detail-tile geometry and adaptive retention;
-7. equal-priority deadline ordering and starvation-prevention aging.
+1. deterministic version-1 `META` support and malformed metadata tests;
+2. 32-bit ABI/build job and cross-platform container fixture;
+3. complete fixed-header truncation corpus;
+4. static-workspace allocator design and implementation;
+5. measured embedded memory/stack report;
+6. pull-mode PCM source ownership path;
+7. optional three-band waveform processing.
