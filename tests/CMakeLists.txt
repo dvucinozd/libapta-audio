@@ -108,6 +108,10 @@ add_executable(apta_bounded_session_initial_result unit/bounded_session_initial_
 target_link_libraries(apta_bounded_session_initial_result PRIVATE apta::core)
 set_target_properties(apta_bounded_session_initial_result PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_bounded_waveform_publication unit/bounded_waveform_publication.c)
+target_link_libraries(apta_bounded_waveform_publication PRIVATE apta::core)
+set_target_properties(apta_bounded_waveform_publication PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_publication_retry unit/publication_retry.c)
 target_link_libraries(apta_publication_retry PRIVATE apta::core)
 set_target_properties(apta_publication_retry PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
@@ -199,6 +203,7 @@ add_test(NAME apta.memory.result_pool_layout COMMAND apta_result_pool_layout)
 add_test(NAME apta.memory.result_pool_storage COMMAND apta_result_pool_storage)
 add_test(NAME apta.result.pool_empty_result COMMAND apta_result_pool_empty_result)
 add_test(NAME apta.session.bounded_initial_result COMMAND apta_bounded_session_initial_result)
+add_test(NAME apta.result.bounded_waveform_publication COMMAND apta_bounded_waveform_publication)
 add_test(NAME apta.result.publication_retry COMMAND apta_publication_retry)
 add_test(NAME apta.serialization.wovr_writer COMMAND apta_wovr_writer)
 add_test(NAME apta.serialization.wovr_writer_partial COMMAND apta_wovr_writer_partial)
