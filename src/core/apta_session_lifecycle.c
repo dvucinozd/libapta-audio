@@ -43,6 +43,11 @@ static int apta_session_config_is_valid(
         return 0;
     }
 
+    if ((config->requested_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u &&
+        config->channel_count > 2u) {
+        return 0;
+    }
+
     if ((config->static_workspace == NULL) !=
         (config->static_workspace_size == 0u)) {
         return 0;
@@ -153,6 +158,8 @@ apta_status_t APTA_CALL apta_session_create(
     session->config = *config;
     session->final_end_frame = APTA_TOTAL_FRAMES_UNKNOWN;
     session->next_request_id = 1u;
+    session->overview_frames_per_column =
+        APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
     session->lineage_id_low = atomic_fetch_add_explicit(
         &context->lineage_counter,
         1u,
@@ -204,6 +211,7 @@ apta_status_t APTA_CALL apta_session_destroy(apta_session_t *session)
     atomic_flag_clear_explicit(&session->result_lock, memory_order_release);
 
     apta_internal_result_release(result);
+    apta_internal_waveform_cleanup_session(session);
 
     (void)atomic_fetch_sub_explicit(
         &context->session_count,
@@ -221,6 +229,9 @@ apta_status_t APTA_CALL apta_session_process(
 {
     apta_session_state_t state;
     apta_status_t status;
+    apta_status_t work_status;
+    uint32_t did_work;
+    uint32_t published_output;
 
     if (session == NULL || budget == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -267,8 +278,41 @@ apta_status_t APTA_CALL apta_session_process(
     }
 
     state = atomic_load_explicit(&session->state, memory_order_acquire);
+    if (state == APTA_SESSION_COMPLETED) {
+        atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
+        return APTA_STATUS_END_OF_INPUT;
+    }
+    if (state == APTA_SESSION_CANCELLED) {
+        atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
+        return APTA_ERROR_CANCELLED;
+    }
+    if (state == APTA_SESSION_FAILED) {
+        atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
+        return APTA_ERROR_INTERNAL;
+    }
 
-    if (state == APTA_SESSION_DRAINING) {
+    did_work = 0u;
+    published_output = 0u;
+    work_status = APTA_STATUS_WOULD_BLOCK;
+
+    if ((session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
+        work_status = apta_internal_waveform_process(
+            session,
+            budget,
+            progress_out,
+            &did_work,
+            &published_output);
+        if (work_status < 0) {
+            atomic_flag_clear_explicit(
+                &session->process_lock,
+                memory_order_release);
+            return work_status;
+        }
+    }
+
+    state = atomic_load_explicit(&session->state, memory_order_acquire);
+    if (state == APTA_SESSION_DRAINING && session->pcm_head == NULL) {
         status = apta_internal_session_transition(
             session,
             APTA_SESSION_COMPLETED);
@@ -281,14 +325,8 @@ apta_status_t APTA_CALL apta_session_process(
 
     atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
 
-    if (state == APTA_SESSION_COMPLETED) {
-        return APTA_STATUS_END_OF_INPUT;
-    }
-    if (state == APTA_SESSION_CANCELLED) {
-        return APTA_ERROR_CANCELLED;
-    }
-    if (state == APTA_SESSION_FAILED) {
-        return APTA_ERROR_INTERNAL;
+    if (did_work != 0u || published_output != 0u) {
+        return work_status;
     }
 
     return APTA_STATUS_WOULD_BLOCK;
