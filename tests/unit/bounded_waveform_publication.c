@@ -258,7 +258,7 @@ int main(void)
     CHECK(apta_result_get_generation(partial_result) == 4u);
     CHECK(result_has_metadata(partial_result, "bounded-wovr"));
     CHECK(result_has_overview(partial_result, APTA_FEATURE_PARTIAL));
-    CHECK(result_has_detail(partial_result, APTA_FEATURE_STABLE));
+    CHECK(result_has_detail(partial_result, APTA_FEATURE_PARTIAL));
 
     CHECK(apta_session_signal_end_of_input(session, 1024u) == APTA_STATUS_OK);
     CHECK(apta_session_get_state(session) == APTA_SESSION_DRAINING);
