@@ -26,6 +26,7 @@ add_library(
     STATIC
         src/core/apta_config.c
         src/core/apta_context.c
+        src/core/apta_initializers.c
         src/core/apta_memory.c
         src/core/apta_result.c
         src/core/apta_session_lifecycle.c
