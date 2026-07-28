@@ -2,15 +2,15 @@
 
 **Status:** APTA Working Draft 0.1  
 **Container version:** 1  
-**Initial profile:** waveform interchange
+**Initial profiles:** waveform interchange and local tempo/grid interchange
 
 ## 1. Scope
 
-This document defines the byte-level `.apta` container and the version-1 waveform sections.
+This document defines the byte-level `.apta` container and the version-1 waveform, tempo-candidate and local-beatgrid sections.
 
 The container is a portable interchange format. Native C structure layout, pointer values, host endianness and compiler padding MUST NOT be written directly.
 
-Tempo, beatgrid and future feature sections require separately defined versioned payloads. Their FourCC values may be reserved before their payloads become normative.
+Global beatgrid, dynamic-tempo and future feature sections require separately defined versioned payloads. Their FourCC values may be reserved before their payloads become normative.
 
 ## 2. Integer encoding
 
@@ -179,18 +179,20 @@ The byte sequence shown is stored literally.
 
 | FourCC | Purpose | Version-1 status |
 |---|---|---|
-| `META` | Deterministic structured metadata | Optional |
+| `META` | Deterministic structured metadata | Optional, normative |
 | `WOVR` | Overview waveform level | Normative |
-| `WDTL` | Detail waveform tiles | Normative |
-| `TEMP` | Tempo values and candidates | Reserved |
-| `BGRD` | Beatgrid | Reserved |
+| `WDTL` | Detail waveform tiles | Optional, normative |
+| `TEMP` | Selected tempo and candidate set | Optional, normative |
+| `LGRD` | Local constant-period beatgrid | Optional, normative |
+| `BGRD` | Global or multi-segment beatgrid | Reserved for Stage S6 |
 | `CONF` | Additional confidence payload | Reserved |
-| `LOCK` | Locked ranges | Reserved |
 | `REVN` | Pending revisions | Reserved |
 
 Multiple `WOVR` sections are permitted only when each carries a distinct `level_id`.
 
 One `WDTL` section may contain multiple tiles. Multiple `WDTL` sections are permitted when their tile identities do not conflict.
+
+`TEMP` and `LGRD` are optional singleton sections. `LGRD` version 1 requires one valid `TEMP` version-1 section in the same container.
 
 ## 11. `META` section version 1
 
@@ -323,19 +325,105 @@ Tile identities `(level_id, tile_index)` MUST be unique in one result generation
 
 Tile descriptors MUST be sorted by `(level_id, tile_index)` in canonical output.
 
-## 14. Duplicate and conflict rules
+## 14. `TEMP` section version 1
+
+`TEMP` stores one selected tempo value and its ordered candidate set. The section flags are zero and the section is optional.
+
+### 14.1. Tempo header
+
+The section begins with a 56-byte header:
+
+| Offset | Size | Field | Meaning |
+|---:|---:|---|---|
+| 0 | 2 | `payload_version` | Value `1`. |
+| 2 | 1 | `feature_state` | `PROVISIONAL`, `STABLE` or `FINAL`. |
+| 3 | 1 | `confidence` | `0..100`. |
+| 4 | 4 | `tempo_flags` | Tempo ambiguity and provenance flags. |
+| 8 | 4 | `tempo_millibpm` | Selected tempo in millibeats per minute. |
+| 12 | 4 | `candidate_set_id` | Revision identifier for this candidate set. |
+| 16 | 8 | `evidence_first_frame` | Inclusive source-frame start. |
+| 24 | 8 | `evidence_end_frame` | Exclusive source-frame end. |
+| 32 | 8 | `applicability_first_frame` | Inclusive range start. |
+| 40 | 8 | `applicability_end_frame` | Exclusive range end. |
+| 48 | 4 | `candidate_count` | `1..3` in reference format version 1. |
+| 52 | 4 | `reserved` | Zero. |
+
+Tempo values MUST be in `40000..300000` millibpm. Evidence and applicability ranges MUST be non-empty.
+
+### 14.2. Tempo candidate entry
+
+Each candidate is exactly 16 bytes:
+
+| Offset | Size | Field |
+|---:|---:|---|
+| 0 | 4 | `tempo_millibpm` |
+| 4 | 2 | `score` |
+| 6 | 1 | `confidence` |
+| 7 | 1 | `relation_to_selected` |
+| 8 | 4 | `flags` |
+| 12 | 4 | `reserved` |
+
+Candidates MUST be ordered by non-increasing score. Candidate confidence MUST be `0..100`. `relation_to_selected` uses the normative tempo-relation identifiers from `tempo.md`.
+
+## 15. `LGRD` section version 1
+
+`LGRD` stores one local constant-period grid segment and one explicit coverage range. It does not represent a global or dynamic-tempo grid.
+
+The payload is exactly 144 bytes:
+
+| Offset | Size | Field | Meaning |
+|---:|---:|---|---|
+| 0 | 2 | `payload_version` | Value `1`. |
+| 2 | 1 | `grid_state` | `PROVISIONAL`, `STABLE` or `FINAL`. |
+| 3 | 1 | `grid_confidence` | `0..100`. |
+| 4 | 4 | `grid_flags` | Grid flags, including `LOCKED`. |
+| 8 | 4 | `representation` | Must be `SEGMENTS`. |
+| 12 | 4 | `segment_count` | Must be `1`. |
+| 16 | 8 | `requested_first_frame` | Requested-range start. |
+| 24 | 8 | `requested_end_frame` | Requested-range end. |
+| 32 | 8 | `evidence_first_frame` | Evidence-range start. |
+| 40 | 8 | `evidence_end_frame` | Evidence-range end. |
+| 48 | 8 | `applicability_first_frame` | Applicability-range start. |
+| 56 | 8 | `applicability_end_frame` | Applicability-range end. |
+| 64 | 8 | `coverage_first_frame` | Coverage-range start. |
+| 72 | 8 | `coverage_end_frame` | Coverage-range end. |
+| 80 | 8 | `anchor_whole_frame` | Integer anchor position. |
+| 88 | 4 | `anchor_fraction_q32` | Fractional anchor component. |
+| 92 | 4 | `reserved_anchor` | Zero. |
+| 96 | 8 | `anchor_ordinal` | Signed two's-complement beat ordinal. |
+| 104 | 8 | `period_whole_frames` | Integer frames per beat; non-zero. |
+| 112 | 4 | `period_fraction_q32` | Fractional period component. |
+| 116 | 4 | `beat_count` | Beats represented inside applicability. |
+| 120 | 4 | `nominal_tempo_millibpm` | Must match selected `TEMP` tempo. |
+| 124 | 4 | `segment_id` | Stable segment identity. |
+| 128 | 4 | `revision` | Segment revision. |
+| 132 | 4 | `segment_flags` | Segment-level flags. |
+| 136 | 1 | `segment_state` | `PROVISIONAL`, `STABLE` or `FINAL`. |
+| 137 | 1 | `segment_confidence` | `0..100`. |
+| 138 | 2 | `reserved16` | Zero. |
+| 140 | 4 | `reserved32` | Zero. |
+
+All requested, evidence, applicability and coverage ranges MUST be non-empty. The nominal tempo MUST equal the selected tempo in the accompanying `TEMP` section.
+
+A locked local grid sets the normative `LOCKED` flag in both grid and segment flags. A reader MUST preserve the locked anchor, period, ordinal, segment identity and applicability range.
+
+## 16. Duplicate and conflict rules
 
 A reader MUST reject:
 
 - two `WOVR` sections with the same `level_id`;
 - two detail tiles with the same identity but different payload;
+- duplicate `TEMP` singleton sections;
+- duplicate `LGRD` singleton sections;
+- `LGRD` without `TEMP`;
+- an `LGRD` nominal tempo that differs from the selected `TEMP` tempo;
 - section ranges that overlap;
 - a required singleton section appearing more than once;
 - conflicting source format information between header and a required section.
 
 An implementation performing a non-canonical recovery MAY ignore a byte-identical duplicate optional tile only when the profile explicitly permits recovery mode. Strict validation rejects duplicates.
 
-## 15. Parser resource limits
+## 17. Parser resource limits
 
 Before allocation, a parser MUST apply configured limits including:
 
@@ -345,6 +433,8 @@ Before allocation, a parser MUST apply configured limits including:
 - maximum overview levels;
 - maximum waveform columns;
 - maximum detail tiles;
+- maximum tempo candidates;
+- maximum local-grid coverage ranges and segments;
 - maximum metadata nesting and item count;
 - maximum aggregate allocation.
 
@@ -352,25 +442,28 @@ Arithmetic used to calculate allocation size MUST be checked before allocation.
 
 A parser MUST NOT allocate `logical_size` bytes merely because an untrusted file requests it.
 
-## 16. Partial results
+## 18. Partial results
 
 A file with `PARTIAL_RESULT` may contain:
 
 - disjoint waveform spans;
-- provisional columns;
+- provisional waveform columns;
+- provisional tempo candidates;
+- a provisional local grid with explicit evidence, applicability and coverage;
 - unknown source duration;
-- missing overview or detail regions.
+- missing overview, detail, tempo or grid regions.
 
 Every partial feature MUST retain exact coverage and state. A reader MUST NOT infer finality from the presence of a section.
 
-## 17. Canonical writer rules
+## 19. Canonical writer rules
 
 A canonical version-1 writer:
 
 - writes a 96-byte header;
 - writes the directory immediately after aligned header bytes;
-- orders directory entries by FourCC, then feature identity;
+- orders known sections as `WOVR`, `WDTL`, `META`, `TEMP`, `LGRD`, omitting absent optional sections;
 - orders overview spans and tile descriptors as required above;
+- orders tempo candidates by non-increasing score;
 - writes zero padding and reserved fields;
 - emits no duplicate sections or tile identities;
 - uses deterministic CBOR for `META`;
@@ -379,7 +472,7 @@ A canonical version-1 writer:
 
 Canonical byte identity is not required between producers when optional metadata or semantically equivalent analysis values differ.
 
-## 18. Security conformance cases
+## 20. Security conformance cases
 
 Malformed-container tests MUST include:
 
@@ -392,8 +485,12 @@ Malformed-container tests MUST include:
 - duplicate required sections;
 - unsupported required FourCC or version;
 - invalid CRC;
-- excessive section and column counts;
+- excessive section, column, candidate or segment counts;
 - malformed deterministic CBOR;
 - WOVR span and column range overflow;
 - WDTL duplicate tile identity;
+- duplicate `TEMP` or `LGRD`;
+- `LGRD` without `TEMP`;
+- invalid tempo, state, confidence, relation or range fields;
+- `TEMP`/`LGRD` nominal-tempo conflict;
 - non-zero reserved values in strict mode.
