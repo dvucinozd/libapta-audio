@@ -19,7 +19,8 @@ apta_status_t APTA_CALL apta_session_next_pcm_request_base(
     apta_session_t *session,
     apta_pcm_request_t *request_out);
 
-static int apta_detail_mask_is_coherent(apta_feature_mask_t feature_mask)
+static int apta_detail_session_mask_is_coherent(
+    apta_feature_mask_t feature_mask)
 {
     return (feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) == 0u ||
            (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u;
@@ -45,7 +46,7 @@ apta_status_t APTA_CALL apta_session_create(
             config->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
-    if (!apta_detail_mask_is_coherent(config->requested_features)) {
+    if (!apta_detail_session_mask_is_coherent(config->requested_features)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -65,9 +66,6 @@ apta_status_t APTA_CALL apta_session_set_focus(
             focus->struct_size,
             focus->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
-    }
-    if (!apta_detail_mask_is_coherent(focus->feature_mask)) {
-        return APTA_ERROR_INVALID_ARGUMENT;
     }
     if ((focus->feature_mask & ~session->config.requested_features) != 0u) {
         return APTA_ERROR_INVALID_STATE;
@@ -96,8 +94,8 @@ apta_status_t APTA_CALL apta_session_request_region(
             request->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
-    if (!apta_detail_mask_is_coherent(request->feature_mask)) {
-        return APTA_ERROR_INVALID_ARGUMENT;
+    if ((request->feature_mask & ~session->config.requested_features) != 0u) {
+        return APTA_ERROR_INVALID_STATE;
     }
 
     return apta_session_request_region_base(
