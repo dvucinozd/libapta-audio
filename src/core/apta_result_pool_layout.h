@@ -27,13 +27,13 @@ typedef struct {
 } apta_internal_result_pool_layout_t;
 
 typedef struct {
-    uint32_t active;
+    atomic_uint active;
     uint32_t reserved32;
     size_t storage_offset;
     size_t storage_size;
 } apta_internal_result_slot_control_t;
 
-typedef struct {
+typedef struct apta_internal_result_pool_control {
     apta_context_t *context;
     atomic_uint reference_count;
     size_t allocation_size;
