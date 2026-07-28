@@ -17,6 +17,7 @@
 
 typedef struct {
     uint32_t armed;
+    uint32_t armed_allocation_count;
     uint32_t failed_once;
     uint32_t outstanding;
 } retry_allocator_state_t;
@@ -33,10 +34,19 @@ static void *APTA_CALL retry_allocate(
     (void)alignment;
     (void)flags;
 
-    if (state->armed && !state->failed_once &&
-        size == 4u * sizeof(apta_waveform_column_t)) {
-        state->failed_once = 1u;
-        return NULL;
+    if (state->armed && !state->failed_once) {
+        state->armed_allocation_count += 1u;
+
+        /*
+         * The first allocation is the new immutable result object. The second
+         * is the waveform-column payload. Failing by allocation order avoids
+         * depending on the allocator wrapper's private header size, pointer
+         * width or alignment padding.
+         */
+        if (state->armed_allocation_count == 2u) {
+            state->failed_once = 1u;
+            return NULL;
+        }
     }
 
     memory = malloc(size);
@@ -60,7 +70,7 @@ static void APTA_CALL retry_deallocate(
 
 int main(void)
 {
-    retry_allocator_state_t allocator_state = {0u, 0u, 0u};
+    retry_allocator_state_t allocator_state = {0u, 0u, 0u, 0u};
     apta_context_config_t context_config;
     apta_session_config_t session_config;
     apta_context_t *context = NULL;
@@ -96,15 +106,28 @@ int main(void)
     CHECK(accepted == 4096u);
     CHECK(apta_session_signal_end_of_input(session, 4096u) == APTA_STATUS_OK);
 
+    /*
+     * Process and publish the first three columns before arming the failure.
+     * This ensures the next process call performs no accumulator growth before
+     * entering the four-column snapshot publication path.
+     */
     apta_work_budget_init(&budget);
-    budget.maximum_input_frames = 4096u;
-    budget.maximum_steps = 16u;
-
-    allocator_state.armed = 1u;
-    CHECK(apta_session_process(session, &budget, NULL) == APTA_ERROR_OUT_OF_MEMORY);
-    CHECK(allocator_state.failed_once == 1u);
+    budget.maximum_input_frames = 3072u;
+    budget.maximum_steps = 3u;
+    CHECK(apta_session_process(session, &budget, NULL) == APTA_STATUS_MORE_WORK);
     CHECK(apta_session_get_state(session) == APTA_SESSION_DRAINING);
 
+    allocator_state.armed = 1u;
+    allocator_state.armed_allocation_count = 0u;
+
+    budget.maximum_input_frames = 1024u;
+    budget.maximum_steps = 1u;
+    CHECK(apta_session_process(session, &budget, NULL) == APTA_ERROR_OUT_OF_MEMORY);
+    CHECK(allocator_state.failed_once == 1u);
+    CHECK(allocator_state.armed_allocation_count == 2u);
+    CHECK(apta_session_get_state(session) == APTA_SESSION_DRAINING);
+
+    /* No PCM remains. The retry must reconstruct completion state and publish. */
     CHECK(apta_session_process(session, &budget, NULL) == APTA_STATUS_END_OF_INPUT);
     CHECK(apta_session_get_state(session) == APTA_SESSION_COMPLETED);
 
