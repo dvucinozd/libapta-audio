@@ -19,6 +19,13 @@ apta_status_t APTA_CALL apta_session_create(
     if (context == NULL || config == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
+    if (!apta_internal_validate_struct(
+            config,
+            sizeof(*config),
+            config->struct_size,
+            config->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
     if ((config->flags &
          ~APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
