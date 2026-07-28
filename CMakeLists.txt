@@ -33,7 +33,9 @@ add_library(
         src/core/apta_session_lifecycle.c
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
-        src/waveform/apta_waveform.c)
+        src/waveform/apta_waveform_input.c
+        src/waveform/apta_waveform_process.c
+        src/waveform/apta_waveform_snapshot.c)
 
 add_library(apta::core ALIAS apta_core)
 
