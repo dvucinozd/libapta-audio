@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
+#include "apta_result_pool.h"
 
 #include <stdalign.h>
 #include <string.h>
@@ -52,6 +53,22 @@ void apta_internal_result_release(apta_result_t *result)
     }
 
     context = result->context;
+    if ((result->result_flags &
+         APTA_INTERNAL_RESULT_FLAG_POOLED) != 0u) {
+        apta_internal_result_pool_control_t *pool =
+            result->result_pool;
+        uint32_t slot_index = result->result_pool_slot_index;
+
+        (void)atomic_fetch_sub_explicit(
+            &context->result_count,
+            1u,
+            memory_order_acq_rel);
+        apta_internal_result_pool_release_result_slot(
+            pool,
+            slot_index);
+        return;
+    }
+
     apta_internal_metadata_cleanup(context, &result->metadata);
     apta_internal_waveform_cleanup_result(result);
     (void)atomic_fetch_sub_explicit(
