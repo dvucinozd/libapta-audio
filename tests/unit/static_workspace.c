@@ -79,7 +79,7 @@ static void configure_session(apta_session_config_t *config)
     config->channel_count = 1u;
     config->sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     config->channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    config->total_frames = 4096u;
+    config->total_frames = 32768u;
     config->requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
 }
 
@@ -131,6 +131,23 @@ int main(void)
         status = apta_session_push_pcm(session, &block, &accepted);
         CHECK(status == APTA_STATUS_OK);
         CHECK(accepted == 128u);
+        CHECK(state.allocate_calls == 3u);
+
+        status = apta_session_process(session, &budget, NULL);
+        CHECK(status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
+        CHECK(state.allocate_calls == 3u);
+    }
+
+    block.frame_count = 1u;
+    budget.maximum_input_frames = 1u;
+    for (cycle = 1u; cycle <= 17u; ++cycle) {
+        uint32_t accepted = 0u;
+        apta_status_t status;
+
+        block.first_frame = (apta_source_frame_t)cycle * 1024u;
+        status = apta_session_push_pcm(session, &block, &accepted);
+        CHECK(status == APTA_STATUS_OK);
+        CHECK(accepted == 1u);
         CHECK(state.allocate_calls == 3u);
 
         status = apta_session_process(session, &budget, NULL);
