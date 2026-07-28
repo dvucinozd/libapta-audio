@@ -24,6 +24,16 @@ add_executable(apta_cancellation unit/cancellation.c)
 target_link_libraries(apta_cancellation PRIVATE apta::core)
 set_target_properties(apta_cancellation PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_initializers unit/initializers.c)
+target_link_libraries(apta_initializers PRIVATE apta::core)
+set_target_properties(apta_initializers PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
+add_executable(apta_version_validation unit/version_validation.c)
+target_link_libraries(apta_version_validation PRIVATE apta::core)
+set_target_properties(apta_version_validation PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_test(NAME apta.core.smoke COMMAND apta_core_smoke)
 add_test(NAME apta.core.allocation_failure COMMAND apta_allocation_failure)
 add_test(NAME apta.core.cancellation COMMAND apta_cancellation)
+add_test(NAME apta.api.initializers COMMAND apta_initializers)
+add_test(NAME apta.api.version_validation COMMAND apta_version_validation)
