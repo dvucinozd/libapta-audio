@@ -25,6 +25,7 @@ int main(void)
     apta_waveform_tile_view_t tile;
     apta_tempo_view_t tempo;
     apta_grid_view_t grid;
+    apta_serialize_options_t serialization;
 
     apta_frame_range_init(&range);
     apta_memory_requirements_init(&memory);
@@ -36,6 +37,7 @@ int main(void)
     apta_waveform_tile_view_init(&tile);
     apta_tempo_view_init(&tempo);
     apta_grid_view_init(&grid);
+    apta_serialize_options_init(&serialization);
 
     CHECK_PREFIX(range);
     CHECK_PREFIX(memory);
@@ -47,6 +49,7 @@ int main(void)
     CHECK_PREFIX(tile);
     CHECK_PREFIX(tempo);
     CHECK_PREFIX(grid);
+    CHECK_PREFIX(serialization);
 
     if (request_progress.requested_range.struct_size !=
             (uint32_t)sizeof(request_progress.requested_range) ||
@@ -65,7 +68,8 @@ int main(void)
     if (overview.confidence != APTA_CONFIDENCE_UNKNOWN ||
         tile.confidence != APTA_CONFIDENCE_UNKNOWN ||
         tempo.selected.confidence != APTA_CONFIDENCE_UNKNOWN ||
-        grid.confidence != APTA_CONFIDENCE_UNKNOWN) {
+        grid.confidence != APTA_CONFIDENCE_UNKNOWN ||
+        serialization.flags != APTA_SERIALIZE_CANONICAL) {
         return 1;
     }
 
