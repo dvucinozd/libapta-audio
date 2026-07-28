@@ -92,11 +92,16 @@ int main(void)
     apta_context_t *context = NULL;
     apta_session_t *session = NULL;
     const apta_result_t *result = NULL;
+    apta_pcm_block_t block;
+    apta_work_budget_t budget;
     aligned_workspace_t workspace;
     aligned_workspace_t tiny_workspace;
+    int16_t pcm[128];
+    uint32_t cycle;
 
     memset(&workspace, 0, sizeof(workspace));
     memset(&tiny_workspace, 0, sizeof(tiny_workspace));
+    memset(pcm, 0, sizeof(pcm));
     configure_context(&context_config, &state);
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
     CHECK(state.allocate_calls == 1u);
@@ -111,11 +116,41 @@ int main(void)
     CHECK(state.allocate_calls == 2u);
     CHECK(state.outstanding == 2u);
 
+    apta_pcm_block_init(&block);
+    block.data = pcm;
+    block.frame_count = 128u;
+    apta_work_budget_init(&budget);
+    budget.maximum_input_frames = 128u;
+    budget.maximum_steps = 1u;
+
+    for (cycle = 0u; cycle < 7u; ++cycle) {
+        uint32_t accepted = 0u;
+        apta_status_t status;
+
+        block.first_frame = (apta_source_frame_t)cycle * 128u;
+        status = apta_session_push_pcm(session, &block, &accepted);
+        CHECK(status == APTA_STATUS_OK);
+        CHECK(accepted == 128u);
+
+        if (cycle == 0u) {
+            CHECK(state.allocate_calls == 3u);
+        } else {
+            CHECK(state.allocate_calls == 4u);
+        }
+
+        status = apta_session_process(session, &budget, NULL);
+        CHECK(status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
+        CHECK(state.allocate_calls == 4u);
+    }
+
+    CHECK(apta_session_get_state(session) == APTA_SESSION_ACTIVE);
+    CHECK(state.outstanding == 3u);
+
     result = apta_session_acquire_result(session);
     CHECK(result != NULL);
     apta_result_info_init(&info);
     CHECK(apta_result_get_info(result, &info) == APTA_STATUS_OK);
-    CHECK(info.session_state == APTA_SESSION_CREATED);
+    CHECK(info.session_state == APTA_SESSION_ACTIVE);
 
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     session = NULL;
@@ -123,7 +158,7 @@ int main(void)
 
     apta_result_info_init(&info);
     CHECK(apta_result_get_info(result, &info) == APTA_STATUS_OK);
-    CHECK(info.session_state == APTA_SESSION_CREATED);
+    CHECK(info.session_state == APTA_SESSION_ACTIVE);
     apta_result_release(result);
     result = NULL;
     CHECK(state.outstanding == 1u);
@@ -164,7 +199,7 @@ int main(void)
           APTA_ERROR_INVALID_ARGUMENT);
     CHECK(session == NULL);
 
-    CHECK(state.allocate_calls == 2u);
+    CHECK(state.allocate_calls == 4u);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     CHECK(state.outstanding == 0u);
     return 0;
