@@ -8,5 +8,6 @@
 #include <apta/apta_config.h>
 #include <apta/apta_source.h>
 #include <apta/apta_result.h>
+#include <apta/apta_initializers.h>
 
 #endif /* APTA_H */
