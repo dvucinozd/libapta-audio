@@ -109,6 +109,7 @@ struct apta_session {
     uint32_t accepted_range_count;
     uint32_t accepted_range_capacity;
     apta_source_frame_t greatest_accepted_end;
+    apta_source_frame_t maximum_accepted_end;
 
     apta_internal_waveform_accumulator_t *overview_accumulators;
     uint32_t overview_accumulator_count;
