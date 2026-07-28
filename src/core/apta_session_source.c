@@ -8,12 +8,16 @@ static int apta_source_format_is_planar(apta_sample_format_t format)
     return format == APTA_SAMPLE_F32_NATIVE_PLANAR;
 }
 
-static apta_status_t apta_source_validate_pcm_block(
+apta_status_t apta_internal_source_validate_pcm_block(
     const apta_session_t *session,
     const apta_pcm_block_t *block)
 {
     uint32_t channel;
     apta_source_frame_t end_frame;
+
+    if (session == NULL || block == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
 
     if (!apta_internal_validate_struct(
             block,
@@ -74,6 +78,8 @@ apta_status_t APTA_CALL apta_session_set_source(
     apta_session_t *session,
     const apta_pcm_source_t *source)
 {
+    apta_source_frame_t source_total;
+
     if (session == NULL || source == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -97,6 +103,19 @@ apta_status_t APTA_CALL apta_session_set_source(
 
     if (source->read_frames == NULL || source->release_frames == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    source_total = APTA_TOTAL_FRAMES_UNKNOWN;
+    if (source->get_total_frames != NULL) {
+        source_total = source->get_total_frames(source->user_data);
+    }
+
+    if (source_total != APTA_TOTAL_FRAMES_UNKNOWN) {
+        if (session->config.total_frames != APTA_TOTAL_FRAMES_UNKNOWN &&
+            session->config.total_frames != source_total) {
+            return APTA_ERROR_CONFLICT;
+        }
+        session->config.total_frames = source_total;
     }
 
     session->pull_source = *source;
@@ -135,7 +154,7 @@ apta_status_t APTA_CALL apta_session_push_pcm(
         return APTA_ERROR_INVALID_STATE;
     }
 
-    status = apta_source_validate_pcm_block(session, block);
+    status = apta_internal_source_validate_pcm_block(session, block);
     if (status < 0) {
         return status;
     }
@@ -161,7 +180,7 @@ apta_status_t APTA_CALL apta_session_push_pcm(
     return APTA_STATUS_OK;
 }
 
-apta_status_t APTA_CALL apta_session_signal_end_of_input(
+apta_status_t apta_internal_session_signal_end_of_input(
     apta_session_t *session,
     apta_source_frame_t final_end_frame)
 {
@@ -173,10 +192,6 @@ apta_status_t APTA_CALL apta_session_signal_end_of_input(
 
     if (session == NULL || final_end_frame == APTA_TOTAL_FRAMES_UNKNOWN) {
         return APTA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (session->config.input_mode != APTA_INPUT_MODE_PUSH) {
-        return APTA_ERROR_INVALID_STATE;
     }
 
     if (session->end_of_input_signalled) {
@@ -229,4 +244,21 @@ apta_status_t APTA_CALL apta_session_signal_end_of_input(
     }
 
     return status;
+}
+
+apta_status_t APTA_CALL apta_session_signal_end_of_input(
+    apta_session_t *session,
+    apta_source_frame_t final_end_frame)
+{
+    if (session == NULL || final_end_frame == APTA_TOTAL_FRAMES_UNKNOWN) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (session->config.input_mode != APTA_INPUT_MODE_PUSH) {
+        return APTA_ERROR_INVALID_STATE;
+    }
+
+    return apta_internal_session_signal_end_of_input(
+        session,
+        final_end_frame);
 }
