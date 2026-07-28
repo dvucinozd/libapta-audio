@@ -78,6 +78,11 @@ set_source_files_properties(
     PROPERTIES
         COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")
 
+set_source_files_properties(
+    src/waveform/apta_waveform_detail_replay.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_detail_next_pcm_request=apta_internal_detail_next_pcm_request_base;apta_internal_detail_accept_replay=apta_internal_detail_accept_replay_base")
+
 add_library(
     apta_core
     STATIC
@@ -98,6 +103,7 @@ add_library(
         src/serialization/apta_wovr_writer.c
         src/waveform/apta_waveform_detail_mvp.c
         src/waveform/apta_waveform_detail_replay.c
+        src/waveform/apta_waveform_detail_replay_hardening.c
         src/waveform/apta_waveform_detail_requests.c
         src/waveform/apta_waveform_input.c
         src/waveform/apta_waveform_input_detail.c
