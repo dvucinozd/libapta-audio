@@ -102,4 +102,8 @@ apta_status_t apta_internal_publish_result(
 void apta_internal_result_retain(apta_result_t *result);
 void apta_internal_result_release(apta_result_t *result);
 
+apta_status_t apta_internal_session_transition(
+    apta_session_t *session,
+    apta_session_state_t new_state);
+
 #endif /* APTA_INTERNAL_H */
