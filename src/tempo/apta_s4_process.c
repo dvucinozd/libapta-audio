@@ -8,6 +8,14 @@ apta_status_t apta_internal_waveform_process_s4_base(
     uint32_t *did_work_out,
     uint32_t *published_output_out);
 
+static int apta_s4_range_changed(
+    const apta_frame_range_t *before,
+    const apta_frame_range_t *after)
+{
+    return before->first_frame != after->first_frame ||
+           before->end_frame != after->end_frame;
+}
+
 apta_status_t apta_internal_waveform_process(
     apta_session_t *session,
     const apta_work_budget_t *budget,
@@ -17,6 +25,10 @@ apta_status_t apta_internal_waveform_process(
 {
     apta_feature_mask_t saved_focus_mask;
     apta_feature_mask_t saved_request_masks[APTA_INTERNAL_MAX_REGION_REQUESTS];
+    apta_frame_range_t old_requested = session->local_grid_requested_range;
+    apta_frame_range_t old_applicability =
+        session->local_grid_applicability_range;
+    uint64_t old_mutation_serial = session->s4_mutation_serial;
     apta_status_t status;
     apta_status_t refresh_status;
     apta_feature_mask_t pending;
@@ -54,6 +66,16 @@ apta_status_t apta_internal_waveform_process(
     refresh_status = apta_internal_s4_refresh(session);
     if (refresh_status < 0) {
         return refresh_status;
+    }
+    if (session->has_local_grid &&
+        session->s4_mutation_serial == old_mutation_serial &&
+        (apta_s4_range_changed(
+             &old_requested,
+             &session->local_grid_requested_range) ||
+         apta_s4_range_changed(
+             &old_applicability,
+             &session->local_grid_applicability_range))) {
+        session->s4_mutation_serial += 1u;
     }
 
     pending = apta_internal_s4_pending_features(session);
