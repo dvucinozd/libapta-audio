@@ -4,11 +4,15 @@
 #include <stdalign.h>
 #include <string.h>
 
-#define APTA_METADATA_FLAG_MASK APTA_METADATA_FLAG_CREATION_TIME_PRESENT
+#define APTA_METADATA_FLAG_MASK                                      \
+    (APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT |                     \
+     APTA_METADATA_FLAG_PRODUCER_VERSION_PRESENT |                  \
+     APTA_METADATA_FLAG_BACKEND_NAME_PRESENT |                      \
+     APTA_METADATA_FLAG_BACKEND_VERSION_PRESENT |                   \
+     APTA_METADATA_FLAG_CREATION_TIME_PRESENT |                     \
+     APTA_METADATA_FLAG_COMMENTS_PRESENT)
 
-static int apta_metadata_bytes_are_zero(
-    const void *data,
-    size_t size)
+static int apta_metadata_bytes_are_zero(const void *data, size_t size)
 {
     const uint8_t *bytes = (const uint8_t *)data;
     size_t index;
@@ -21,9 +25,7 @@ static int apta_metadata_bytes_are_zero(
     return 1;
 }
 
-static int apta_metadata_utf8_is_valid(
-    const char *data,
-    uint32_t size)
+static int apta_metadata_utf8_is_valid(const char *data, uint32_t size)
 {
     const uint8_t *bytes = (const uint8_t *)data;
     uint32_t index = 0u;
@@ -37,59 +39,39 @@ static int apta_metadata_utf8_is_valid(
 
         if (first <= 0x7Fu) {
             index += 1u;
-            continue;
-        }
-
-        if (first >= 0xC2u && first <= 0xDFu) {
-            if (index + 1u >= size ||
-                bytes[index + 1u] < 0x80u ||
+        } else if (first >= 0xC2u && first <= 0xDFu) {
+            if (index + 1u >= size || bytes[index + 1u] < 0x80u ||
                 bytes[index + 1u] > 0xBFu) {
                 return 0;
             }
             index += 2u;
-            continue;
-        }
-
-        if (first == 0xE0u) {
-            if (index + 2u >= size ||
-                bytes[index + 1u] < 0xA0u ||
+        } else if (first == 0xE0u) {
+            if (index + 2u >= size || bytes[index + 1u] < 0xA0u ||
                 bytes[index + 1u] > 0xBFu ||
                 bytes[index + 2u] < 0x80u ||
                 bytes[index + 2u] > 0xBFu) {
                 return 0;
             }
             index += 3u;
-            continue;
-        }
-
-        if ((first >= 0xE1u && first <= 0xECu) ||
-            (first >= 0xEEu && first <= 0xEFu)) {
-            if (index + 2u >= size ||
-                bytes[index + 1u] < 0x80u ||
+        } else if ((first >= 0xE1u && first <= 0xECu) ||
+                   (first >= 0xEEu && first <= 0xEFu)) {
+            if (index + 2u >= size || bytes[index + 1u] < 0x80u ||
                 bytes[index + 1u] > 0xBFu ||
                 bytes[index + 2u] < 0x80u ||
                 bytes[index + 2u] > 0xBFu) {
                 return 0;
             }
             index += 3u;
-            continue;
-        }
-
-        if (first == 0xEDu) {
-            if (index + 2u >= size ||
-                bytes[index + 1u] < 0x80u ||
+        } else if (first == 0xEDu) {
+            if (index + 2u >= size || bytes[index + 1u] < 0x80u ||
                 bytes[index + 1u] > 0x9Fu ||
                 bytes[index + 2u] < 0x80u ||
                 bytes[index + 2u] > 0xBFu) {
                 return 0;
             }
             index += 3u;
-            continue;
-        }
-
-        if (first == 0xF0u) {
-            if (index + 3u >= size ||
-                bytes[index + 1u] < 0x90u ||
+        } else if (first == 0xF0u) {
+            if (index + 3u >= size || bytes[index + 1u] < 0x90u ||
                 bytes[index + 1u] > 0xBFu ||
                 bytes[index + 2u] < 0x80u ||
                 bytes[index + 2u] > 0xBFu ||
@@ -98,12 +80,8 @@ static int apta_metadata_utf8_is_valid(
                 return 0;
             }
             index += 4u;
-            continue;
-        }
-
-        if (first >= 0xF1u && first <= 0xF3u) {
-            if (index + 3u >= size ||
-                bytes[index + 1u] < 0x80u ||
+        } else if (first >= 0xF1u && first <= 0xF3u) {
+            if (index + 3u >= size || bytes[index + 1u] < 0x80u ||
                 bytes[index + 1u] > 0xBFu ||
                 bytes[index + 2u] < 0x80u ||
                 bytes[index + 2u] > 0xBFu ||
@@ -112,12 +90,8 @@ static int apta_metadata_utf8_is_valid(
                 return 0;
             }
             index += 4u;
-            continue;
-        }
-
-        if (first == 0xF4u) {
-            if (index + 3u >= size ||
-                bytes[index + 1u] < 0x80u ||
+        } else if (first == 0xF4u) {
+            if (index + 3u >= size || bytes[index + 1u] < 0x80u ||
                 bytes[index + 1u] > 0x8Fu ||
                 bytes[index + 2u] < 0x80u ||
                 bytes[index + 2u] > 0xBFu ||
@@ -126,19 +100,22 @@ static int apta_metadata_utf8_is_valid(
                 return 0;
             }
             index += 4u;
-            continue;
+        } else {
+            return 0;
         }
-
-        return 0;
     }
 
     return 1;
 }
 
-static int apta_metadata_utf8_field_is_valid(
+static int apta_metadata_text_field_is_valid(
     const apta_utf8_view_t *field,
-    uint32_t maximum_size)
+    uint32_t maximum_size,
+    int present)
 {
+    if (!present) {
+        return field->size == 0u;
+    }
     return field->size <= maximum_size &&
            apta_metadata_utf8_is_valid(field->data, field->size);
 }
@@ -152,7 +129,6 @@ static int apta_metadata_view_is_valid(
     if (view == NULL || storage_size_out == NULL) {
         return 0;
     }
-
     if ((view->flags & ~APTA_METADATA_FLAG_MASK) != 0u ||
         !apta_metadata_bytes_are_zero(
             view->reserved32,
@@ -163,21 +139,31 @@ static int apta_metadata_view_is_valid(
         return 0;
     }
 
-    if (!apta_metadata_utf8_field_is_valid(
+    if (!apta_metadata_text_field_is_valid(
             &view->producer_name,
-            APTA_METADATA_MAX_PRODUCER_NAME_BYTES) ||
-        !apta_metadata_utf8_field_is_valid(
+            APTA_METADATA_MAX_PRODUCER_NAME_BYTES,
+            (view->flags &
+             APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT) != 0u) ||
+        !apta_metadata_text_field_is_valid(
             &view->producer_version_string,
-            APTA_METADATA_MAX_VERSION_STRING_BYTES) ||
-        !apta_metadata_utf8_field_is_valid(
+            APTA_METADATA_MAX_VERSION_STRING_BYTES,
+            (view->flags &
+             APTA_METADATA_FLAG_PRODUCER_VERSION_PRESENT) != 0u) ||
+        !apta_metadata_text_field_is_valid(
             &view->backend_name,
-            APTA_METADATA_MAX_BACKEND_NAME_BYTES) ||
-        !apta_metadata_utf8_field_is_valid(
+            APTA_METADATA_MAX_BACKEND_NAME_BYTES,
+            (view->flags &
+             APTA_METADATA_FLAG_BACKEND_NAME_PRESENT) != 0u) ||
+        !apta_metadata_text_field_is_valid(
             &view->backend_version,
-            APTA_METADATA_MAX_VERSION_STRING_BYTES) ||
-        !apta_metadata_utf8_field_is_valid(
+            APTA_METADATA_MAX_VERSION_STRING_BYTES,
+            (view->flags &
+             APTA_METADATA_FLAG_BACKEND_VERSION_PRESENT) != 0u) ||
+        !apta_metadata_text_field_is_valid(
             &view->comments,
-            APTA_METADATA_MAX_COMMENTS_BYTES)) {
+            APTA_METADATA_MAX_COMMENTS_BYTES,
+            (view->flags &
+             APTA_METADATA_FLAG_COMMENTS_PRESENT) != 0u)) {
         return 0;
     }
 
@@ -187,8 +173,7 @@ static int apta_metadata_view_is_valid(
         }
     } else if (
         view->application_source_id_kind == APTA_METADATA_SOURCE_ID_TEXT) {
-        if (view->application_source_id.size == 0u ||
-            view->application_source_id.size >
+        if (view->application_source_id.size >
                 APTA_METADATA_MAX_SOURCE_ID_BYTES ||
             !apta_metadata_utf8_is_valid(
                 (const char *)view->application_source_id.data,
@@ -197,10 +182,10 @@ static int apta_metadata_view_is_valid(
         }
     } else if (
         view->application_source_id_kind == APTA_METADATA_SOURCE_ID_BYTES) {
-        if (view->application_source_id.size == 0u ||
-            view->application_source_id.size >
+        if (view->application_source_id.size >
                 APTA_METADATA_MAX_SOURCE_ID_BYTES ||
-            view->application_source_id.data == NULL) {
+            (view->application_source_id.size != 0u &&
+             view->application_source_id.data == NULL)) {
             return 0;
         }
     } else {
@@ -232,7 +217,6 @@ static void apta_metadata_copy_utf8(
         destination->data = NULL;
         return;
     }
-
     memcpy(storage + *offset, source->data, source->size);
     destination->data = (const char *)(storage + *offset);
     *offset += source->size;
@@ -249,7 +233,6 @@ static void apta_metadata_copy_bytes(
         destination->data = NULL;
         return;
     }
-
     memcpy(storage + *offset, source->data, source->size);
     destination->data = storage + *offset;
     *offset += source->size;
@@ -261,12 +244,11 @@ static apta_status_t apta_metadata_copy_validated_view(
     apta_internal_metadata_t *metadata_out)
 {
     size_t storage_size;
-    size_t offset;
+    size_t offset = 0u;
 
     if (context == NULL || input == NULL || metadata_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
-
     memset(metadata_out, 0, sizeof(*metadata_out));
     if (!apta_metadata_view_is_valid(input, &storage_size)) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -297,7 +279,6 @@ static apta_status_t apta_metadata_copy_validated_view(
     }
     metadata_out->storage_size = storage_size;
 
-    offset = 0u;
     apta_metadata_copy_utf8(
         &metadata_out->view.producer_name,
         &input->producer_name,
@@ -413,21 +394,12 @@ void apta_internal_metadata_cleanup(
 int apta_internal_metadata_is_present(
     const apta_internal_metadata_t *metadata)
 {
-    const apta_metadata_view_t *view;
-
     if (metadata == NULL) {
         return 0;
     }
-    view = &metadata->view;
-    return view->producer_name.size != 0u ||
-           view->producer_version_string.size != 0u ||
-           view->backend_name.size != 0u ||
-           view->backend_version.size != 0u ||
-           (view->flags &
-            APTA_METADATA_FLAG_CREATION_TIME_PRESENT) != 0u ||
-           view->application_source_id_kind !=
-               APTA_METADATA_SOURCE_ID_NONE ||
-           view->comments.size != 0u;
+    return metadata->view.flags != 0u ||
+           metadata->view.application_source_id_kind !=
+               APTA_METADATA_SOURCE_ID_NONE;
 }
 
 apta_status_t APTA_CALL apta_session_set_metadata(
@@ -455,6 +427,7 @@ apta_status_t APTA_CALL apta_session_set_metadata(
     }
 
     memset(&replacement, 0, sizeof(replacement));
+    apta_metadata_view_init(&replacement.view);
     if (metadata != NULL) {
         status = apta_internal_metadata_copy_from_input(
             session->context,
