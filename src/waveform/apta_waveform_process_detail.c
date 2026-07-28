@@ -168,8 +168,6 @@ apta_status_t apta_internal_waveform_process(
     }
 
     for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
-        apta_internal_schedule_score_t score;
-
         saved_request_masks[slot] =
             session->requests[slot].request.feature_mask;
         saved_request_priorities[slot] =
@@ -179,6 +177,12 @@ apta_status_t apta_internal_waveform_process(
             session->requests[slot].request.feature_mask |=
                 APTA_FEATURE_WAVEFORM_OVERVIEW;
         }
+    }
+
+    selected_request_id = apta_process_sort_pcm_queue(session);
+
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        apta_internal_schedule_score_t score;
 
         apta_internal_scheduler_score_request(
             &session->requests[slot],
@@ -188,8 +192,6 @@ apta_status_t apta_internal_waveform_process(
                 (uint8_t)score.effective_priority;
         }
     }
-
-    selected_request_id = apta_process_sort_pcm_queue(session);
 
     status = apta_internal_waveform_process_base(
         session,
