@@ -199,6 +199,30 @@ static uint32_t apta_nonoverlapping_prefix(
     return requested_frames;
 }
 
+static void apta_refresh_accepted_ends(apta_session_t *session)
+{
+    apta_source_frame_t contiguous_end;
+    uint32_t index;
+
+    contiguous_end = 0u;
+    for (index = 0u; index < session->accepted_range_count; ++index) {
+        const apta_internal_range_t *range = &session->accepted_ranges[index];
+
+        if (range->first_frame > contiguous_end) {
+            break;
+        }
+        if (range->end_frame > contiguous_end) {
+            contiguous_end = range->end_frame;
+        }
+    }
+
+    session->greatest_accepted_end = contiguous_end;
+    session->maximum_accepted_end =
+        session->accepted_range_count == 0u
+            ? 0u
+            : session->accepted_ranges[session->accepted_range_count - 1u].end_frame;
+}
+
 static void apta_insert_accepted_range(
     apta_session_t *session,
     apta_source_frame_t first_frame,
@@ -244,9 +268,7 @@ static void apta_insert_accepted_range(
         session->accepted_range_count -= 1u;
     }
 
-    if (end_frame > session->greatest_accepted_end) {
-        session->greatest_accepted_end = end_frame;
-    }
+    apta_refresh_accepted_ends(session);
 }
 
 apta_status_t apta_internal_waveform_accept_pcm(
