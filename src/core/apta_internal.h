@@ -46,6 +46,12 @@ typedef struct {
 } apta_internal_schedule_score_t;
 
 typedef struct {
+    apta_metadata_view_t view;
+    uint8_t *storage;
+    size_t storage_size;
+} apta_internal_metadata_t;
+
+typedef struct {
     apta_source_frame_t first_frame;
     apta_source_frame_t end_frame;
 } apta_internal_range_t;
@@ -104,6 +110,8 @@ struct apta_result {
     uint32_t source_channel_count;
     apta_channel_layout_t source_channel_layout;
 
+    apta_internal_metadata_t metadata;
+
     apta_waveform_overview_view_t overview;
     apta_waveform_span_t *overview_spans;
     apta_waveform_column_t *overview_columns;
@@ -126,6 +134,8 @@ struct apta_session {
     apta_generation_t generation;
     uint64_t lineage_id_high;
     uint64_t lineage_id_low;
+
+    apta_internal_metadata_t metadata;
 
     uint32_t has_pull_source;
     apta_pcm_source_t pull_source;
@@ -196,6 +206,23 @@ void apta_internal_result_release(apta_result_t *result);
 apta_status_t apta_internal_session_transition(
     apta_session_t *session,
     apta_session_state_t new_state);
+
+apta_status_t apta_internal_metadata_copy_from_input(
+    apta_context_t *context,
+    const apta_metadata_t *input,
+    apta_internal_metadata_t *metadata_out);
+
+apta_status_t apta_internal_metadata_copy_from_view(
+    apta_context_t *context,
+    const apta_metadata_view_t *input,
+    apta_internal_metadata_t *metadata_out);
+
+void apta_internal_metadata_cleanup(
+    apta_context_t *context,
+    apta_internal_metadata_t *metadata);
+
+int apta_internal_metadata_is_present(
+    const apta_internal_metadata_t *metadata);
 
 apta_status_t apta_internal_scheduler_register_request(
     apta_session_t *session,
