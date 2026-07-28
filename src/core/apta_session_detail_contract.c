@@ -22,11 +22,29 @@ apta_status_t APTA_CALL apta_session_next_pcm_request_base(
     apta_session_t *session,
     apta_pcm_request_t *request_out);
 
-static int apta_detail_session_mask_is_coherent(
-    apta_feature_mask_t feature_mask)
+static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
 {
-    return (feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) == 0u ||
-           (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u;
+    const apta_feature_mask_t waveform_dependency =
+        APTA_FEATURE_WAVEFORM_DETAIL | APTA_INTERNAL_S4_FEATURES;
+
+    if ((feature_mask & waveform_dependency) != 0u &&
+        (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_LOCAL_BEATGRID) != 0u &&
+        (feature_mask & APTA_FEATURE_BPM) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_CONFIDENCE) != 0u &&
+        (feature_mask &
+         (APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID)) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_GRID_LOCKING) != 0u &&
+        (feature_mask & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        return 0;
+    }
+    return 1;
 }
 
 apta_status_t APTA_CALL apta_session_create(
@@ -38,7 +56,6 @@ apta_status_t APTA_CALL apta_session_create(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     *session_out = NULL;
-
     if (config == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -49,10 +66,9 @@ apta_status_t APTA_CALL apta_session_create(
             config->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
-    if (!apta_detail_session_mask_is_coherent(config->requested_features)) {
+    if (!apta_session_mask_is_coherent(config->requested_features)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
-
     return apta_session_create_base(context, config, session_out);
 }
 
@@ -73,7 +89,6 @@ apta_status_t APTA_CALL apta_session_set_focus(
     if ((focus->feature_mask & ~session->config.requested_features) != 0u) {
         return APTA_ERROR_INVALID_STATE;
     }
-
     return apta_session_set_focus_base(session, focus);
 }
 
@@ -86,7 +101,6 @@ apta_status_t APTA_CALL apta_session_request_region(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     *request_id_out = 0u;
-
     if (session == NULL || request == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -100,7 +114,6 @@ apta_status_t APTA_CALL apta_session_request_region(
     if ((request->feature_mask & ~session->config.requested_features) != 0u) {
         return APTA_ERROR_INVALID_STATE;
     }
-
     return apta_session_request_region_base(
         session,
         request,
@@ -111,7 +124,10 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
     apta_session_t *session,
     apta_pcm_request_t *request_out)
 {
+    apta_feature_mask_t saved_focus_mask;
+    apta_feature_mask_t saved_request_masks[APTA_INTERNAL_MAX_REGION_REQUESTS];
     apta_status_t status;
+    uint32_t slot;
 
     if (session == NULL || request_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -135,5 +151,23 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
         return status;
     }
 
-    return apta_session_next_pcm_request_base(session, request_out);
+    saved_focus_mask = session->focus.feature_mask;
+    if ((saved_focus_mask & APTA_INTERNAL_S4_FEATURES) != 0u) {
+        session->focus.feature_mask |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    }
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        saved_request_masks[slot] =
+            session->requests[slot].request.feature_mask;
+        if ((saved_request_masks[slot] & APTA_INTERNAL_S4_FEATURES) != 0u) {
+            session->requests[slot].request.feature_mask |=
+                APTA_FEATURE_WAVEFORM_OVERVIEW;
+        }
+    }
+
+    status = apta_session_next_pcm_request_base(session, request_out);
+    session->focus.feature_mask = saved_focus_mask;
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        session->requests[slot].request.feature_mask = saved_request_masks[slot];
+    }
+    return status;
 }

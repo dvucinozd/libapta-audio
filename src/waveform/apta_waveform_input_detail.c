@@ -8,13 +8,17 @@ apta_status_t apta_internal_waveform_accept_pcm(
     const apta_pcm_block_t *block,
     uint32_t *accepted_frames_out)
 {
+    const int detail_enabled =
+        (session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_DETAIL) != 0u;
+    const int s4_enabled =
+        (session->config.requested_features &
+         APTA_INTERNAL_S4_FEATURES) != 0u;
     apta_status_t status;
     apta_internal_pcm_node_t *node;
     uint32_t frame;
 
-    if ((session->config.requested_features &
-         APTA_FEATURE_WAVEFORM_DETAIL) != 0u &&
-        block->frame_count != 0u) {
+    if (detail_enabled && block->frame_count != 0u) {
         const apta_source_frame_t last_frame =
             block->first_frame + (apta_source_frame_t)block->frame_count - 1u;
         const uint64_t tile_index =
@@ -27,14 +31,20 @@ apta_status_t apta_internal_waveform_accept_pcm(
         }
     }
 
+    if (s4_enabled) {
+        status = apta_internal_s4_prepare(session);
+        if (status < 0) {
+            *accepted_frames_out = 0u;
+            return status;
+        }
+    }
+
     status = apta_internal_waveform_accept_pcm_base(
         session,
         block,
         accepted_frames_out);
 
-    if (status == APTA_ERROR_CONFLICT &&
-        (session->config.requested_features &
-         APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
+    if (status == APTA_ERROR_CONFLICT && detail_enabled) {
         const apta_status_t replay_status =
             apta_internal_detail_accept_replay(
                 session,
@@ -47,15 +57,13 @@ apta_status_t apta_internal_waveform_accept_pcm(
     }
 
     if (status < 0 || *accepted_frames_out == 0u ||
-        (session->config.requested_features &
-         APTA_FEATURE_WAVEFORM_DETAIL) == 0u) {
+        (!detail_enabled && !s4_enabled)) {
         return status;
     }
 
     /*
-     * The overview layer has accepted ownership of the PCM at this point.
-     * Detail-cache pressure or degradation MUST NOT retroactively change the
-     * accepted frame count or turn an accepted push into an error.
+     * The overview layer owns a copied, normalized PCM node at this point.
+     * Derived detail/onset work therefore cannot invalidate the accepted push.
      */
     node = session->pcm_tail;
     if (node == NULL || node->frame_count != *accepted_frames_out ||
@@ -64,23 +72,29 @@ apta_status_t apta_internal_waveform_accept_pcm(
     }
 
     for (frame = 0u; frame < *accepted_frames_out; ++frame) {
-        const apta_status_t detail_status =
-            apta_internal_detail_process_sample(
+        if (detail_enabled) {
+            const apta_status_t detail_status =
+                apta_internal_detail_process_sample(
+                    session,
+                    node->first_frame + frame,
+                    node->samples[frame]);
+            if (detail_status != APTA_STATUS_OK) {
+                break;
+            }
+        }
+        if (s4_enabled) {
+            const apta_status_t s4_status = apta_internal_s4_process_sample(
                 session,
                 node->first_frame + frame,
                 node->samples[frame]);
-
-        if (detail_status != APTA_STATUS_OK) {
-            /*
-             * NOT_AVAILABLE means the fixed cache intentionally skipped this
-             * unprotected tile. A negative status is also non-transactional
-             * after overview acceptance, so both terminate detail derivation
-             * without changing the accepted PCM result.
-             */
-            break;
+            if (s4_status != APTA_STATUS_OK) {
+                break;
+            }
         }
     }
 
-    apta_internal_detail_refresh_completed(session);
+    if (detail_enabled) {
+        apta_internal_detail_refresh_completed(session);
+    }
     return status;
 }

@@ -76,7 +76,11 @@ apta_status_t APTA_CALL apta_context_create(
 {
     const apta_feature_mask_t available_capabilities =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
-        APTA_FEATURE_WAVEFORM_DETAIL;
+        APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_FEATURE_BPM |
+        APTA_FEATURE_LOCAL_BEATGRID |
+        APTA_FEATURE_CONFIDENCE |
+        APTA_FEATURE_GRID_LOCKING;
     apta_context_t *context;
 
     if (context_out == NULL) {

@@ -23,6 +23,16 @@
 #define APTA_INTERNAL_SCHEDULER_MAX_SKIPS 32u
 #define APTA_INTERNAL_RESULT_FLAG_POOLED (1u << 0)
 
+#define APTA_INTERNAL_ONSET_FRAMES_PER_BIN 256u
+#define APTA_INTERNAL_ONSET_BIN_CAPACITY 4096u
+#define APTA_INTERNAL_MIN_TEMPO_BINS 512u
+#define APTA_INTERNAL_STABLE_TEMPO_BINS 1024u
+#define APTA_INTERNAL_MAX_TEMPO_CANDIDATES 3u
+
+#define APTA_INTERNAL_S4_FEATURES \
+    (APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID | \
+     APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING)
+
 typedef struct {
     void *raw_memory;
     size_t allocated_size;
@@ -88,6 +98,14 @@ typedef struct {
         accumulators[APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE];
 } apta_internal_detail_tile_t;
 
+typedef struct {
+    uint64_t bin_index;
+    double sum_absolute;
+    uint32_t sample_count;
+    uint8_t occupied;
+    uint8_t reserved8[3];
+} apta_internal_onset_bin_t;
+
 typedef struct apta_internal_result_pool_control
     apta_internal_result_pool_control_t;
 
@@ -128,6 +146,13 @@ struct apta_result {
     uint32_t detail_tile_count;
     apta_waveform_tile_view_t *detail_tiles;
     apta_waveform_column_t *detail_columns;
+
+    apta_tempo_view_t tempo;
+    apta_tempo_candidate_t *tempo_candidates;
+
+    apta_grid_view_t local_grid;
+    apta_frame_range_t *local_grid_coverage;
+    apta_grid_segment_t *local_grid_segments;
 };
 
 struct apta_session {
@@ -180,6 +205,24 @@ struct apta_session {
     uint64_t detail_access_serial;
     uint64_t detail_mutation_serial;
     uint64_t detail_published_serial;
+
+    apta_internal_onset_bin_t *onset_bins;
+    uint32_t onset_bin_capacity;
+    uint32_t tempo_candidate_count;
+    apta_tempo_value_t tempo_value;
+    apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    apta_grid_segment_t local_grid_segment;
+    apta_frame_range_t local_grid_requested_range;
+    apta_frame_range_t local_grid_evidence_range;
+    apta_frame_range_t local_grid_applicability_range;
+    apta_frame_range_t local_grid_coverage_range;
+    uint32_t has_tempo;
+    uint32_t has_local_grid;
+    uint32_t local_grid_locked;
+    uint32_t tempo_candidate_set_id;
+    uint32_t local_grid_segment_id;
+    uint64_t s4_mutation_serial;
+    uint64_t s4_published_serial;
 };
 
 int apta_internal_validate_struct(
@@ -307,6 +350,21 @@ int apta_internal_detail_range_has_output(
 apta_status_t apta_internal_detail_build_snapshot(
     apta_session_t *session,
     apta_result_t *result);
+
+apta_status_t apta_internal_s4_prepare(apta_session_t *session);
+apta_status_t apta_internal_s4_process_sample(
+    apta_session_t *session,
+    apta_source_frame_t source_frame,
+    float sample);
+apta_status_t apta_internal_s4_refresh(apta_session_t *session);
+apta_feature_mask_t apta_internal_s4_pending_features(
+    const apta_session_t *session);
+void apta_internal_s4_mark_published(apta_session_t *session);
+apta_status_t apta_internal_s4_build_snapshot(
+    apta_session_t *session,
+    apta_result_t *result);
+void apta_internal_s4_cleanup_session(apta_session_t *session);
+void apta_internal_s4_cleanup_result(apta_result_t *result);
 
 void apta_internal_waveform_cleanup_session(apta_session_t *session);
 void apta_internal_waveform_cleanup_result(apta_result_t *result);
