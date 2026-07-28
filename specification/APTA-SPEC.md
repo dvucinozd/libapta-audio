@@ -59,20 +59,28 @@ The specification is divided into the following documents:
 3. [`time-model.md`](time-model.md)
 4. [`pcm-input.md`](pcm-input.md)
 5. [`progressive-scheduling.md`](progressive-scheduling.md)
-6. `waveform.md`
-7. `tempo.md`
-8. `beatgrid.md`
-9. `lifecycle.md`
-10. `confidence.md`
-11. `result-model.md`
+6. [`waveform.md`](waveform.md)
+7. [`tempo.md`](tempo.md)
+8. [`beatgrid.md`](beatgrid.md)
+9. [`lifecycle.md`](lifecycle.md)
+10. [`confidence.md`](confidence.md)
+11. [`result-model.md`](result-model.md)
 12. `file-format.md`
 13. `profiles.md`
 14. `extensions.md`
 15. `conformance.md`
 
-Documents that do not yet exist are planned work and do not create normative requirements.
+Documents without links do not yet exist. They are planned work and do not create normative requirements.
 
-## 6. Separation of responsibilities
+## 6. Public API prototype
+
+The current non-stable public API prototype is maintained under [`../include/apta/`](../include/apta/).
+
+The headers are an implementation vehicle for validating this specification. They do not override normative documents and do not yet constitute a stable ABI.
+
+Public API and ABI policy is documented in [`../docs/api/APTA-PUBLIC-API-ABI-POLICY-0.1.md`](../docs/api/APTA-PUBLIC-API-ABI-POLICY-0.1.md).
+
+## 7. Separation of responsibilities
 
 The APTA core owns:
 
@@ -93,7 +101,7 @@ The APTA core does not own:
 
 A platform adapter MAY provide helpers for those facilities, but the portable core MUST remain usable without them.
 
-## 7. Conformance model
+## 8. Conformance model
 
 A conforming implementation MUST:
 
@@ -105,7 +113,7 @@ A conforming implementation MUST:
 
 Algorithmic identity is not generally required. A third-party implementation MAY use different DSP algorithms while preserving specified units, ranges, state transitions, serialization and observable API behaviour.
 
-## 8. Version separation
+## 9. Version separation
 
 The project maintains three independent version domains:
 
@@ -115,7 +123,7 @@ The project maintains three independent version domains:
 
 Compatibility in one domain MUST NOT be inferred from a version number in another domain.
 
-## 9. Document precedence
+## 10. Document precedence
 
 When requirements conflict, precedence is:
 
