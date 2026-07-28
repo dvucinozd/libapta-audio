@@ -16,6 +16,7 @@ The host MUST serialize these mutating operations for the same session:
 - `apta_session_request_region()`;
 - `apta_session_cancel_region_request()`;
 - `apta_session_next_pcm_request()`;
+- `apta_session_lock_grid_range()`;
 - `apta_session_process()`;
 - `apta_session_destroy()`.
 
@@ -31,8 +32,6 @@ The current prototype does not internally serialize all combinations of those ca
 
 Cancellation is cooperative. The processing owner observes the atomic request at a bounded API boundary and publishes the cancelled lifecycle state.
 
-For pull input, a cancellation already visible at `apta_session_process()` entry is handled before invoking `read_frames()`. A cancellation requested while a source callback is executing is observed after that callback returns; callbacks must therefore remain nonblocking or cooperatively bounded.
-
 ## 3. Immutable result readers
 
 The following operations MAY run concurrently with session processing and result publication:
@@ -41,7 +40,7 @@ The following operations MAY run concurrently with session processing and result
 - `apta_result_get_info()`;
 - `apta_result_get_generation()`;
 - `apta_result_get_available_features()`;
-- all feature accessors on an acquired result;
+- all feature accessors on an acquired result, including tempo and beatgrid accessors;
 - `apta_result_release()`.
 
 Each acquired result generation is immutable. Pointers returned through a result view remain valid until the corresponding acquired result is released.
@@ -62,6 +61,8 @@ A reader observes either:
 A reader MUST NOT observe a partially initialized generation.
 
 Generation identifiers increase monotonically within one session lineage. Different reader threads are not guaranteed to observe every intermediate generation.
+
+Focus movement, Stage S4 tempo/grid refresh and grid-range locking may each publish a new immutable generation.
 
 ## 5. Session destruction
 
@@ -89,25 +90,9 @@ A custom allocator used by a context MUST be safe for every thread from which th
 
 A logger callback and monotonic-clock callback MUST follow the reentrancy and thread-safety requirements of the host's calling pattern.
 
+PCM pull callbacks are invoked synchronously by the host-serialized `apta_session_process()` owner. They MUST follow the PCM pull contract, MUST NOT recursively call a mutating API on the same session and MUST NOT destroy the invoking session or context.
+
 Callbacks MUST NOT recursively destroy the context or active session that invoked them.
-
-### 7.1. PCM pull callbacks
-
-`apta_pcm_source_t.read_frames()` and `release_frames()` execute synchronously on the thread that calls `apta_session_process()`.
-
-Source callbacks MUST NOT:
-
-- recursively call `apta_session_process()`;
-- call another mutating API on the invoking session;
-- destroy the invoking session or context;
-- retain library-owned output pointers beyond the callback;
-- block indefinitely while waiting for I/O or decoder ownership.
-
-When source data is temporarily unavailable, `read_frames()` returns `APTA_STATUS_WOULD_BLOCK`.
-
-After `read_frames()` returns `APTA_STATUS_OK`, the returned block remains valid until the matching `release_frames()` call. The implementation copies accepted PCM before release and never retains the callback block afterward.
-
-The full source ownership and status contract is documented in [`APTA-PCM-PULL-0.1.md`](APTA-PCM-PULL-0.1.md).
 
 ## 8. Memory visibility
 
@@ -122,9 +107,9 @@ The 0.1 prototype does not guarantee:
 - lock-free result acquisition;
 - hard real-time behavior;
 - concurrent PCM producers;
-- concurrent focus/request mutation with processing;
+- concurrent focus/request/grid-lock mutation with processing;
 - destruction racing with any other call;
-- callback execution on a particular thread other than the synchronous processing caller;
+- callback execution on a particular thread;
 - fairness between arbitrary host threads.
 
 ## 10. Conformance tests
@@ -135,8 +120,7 @@ Threading tests include:
 - multiple concurrent immutable-result readers;
 - result publication while readers hold older generations;
 - generation monotonicity per reader;
-- result lifetime beyond session destruction.
-
-PCM pull tests additionally cover synchronous callback ownership, nonblocking `WOULD_BLOCK`, exact release pairing and cancellation-before-callback behavior.
+- result lifetime beyond session destruction;
+- focus-driven Stage S4 publication while older results remain immutable.
 
 Race-detector and sanitizer jobs remain required before stable API status.
