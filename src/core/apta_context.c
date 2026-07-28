@@ -75,8 +75,7 @@ apta_status_t APTA_CALL apta_context_create(
     apta_context_t **context_out)
 {
     const apta_feature_mask_t available_capabilities =
-        APTA_FEATURE_WAVEFORM_OVERVIEW |
-        APTA_FEATURE_WAVEFORM_DETAIL;
+        APTA_FEATURE_WAVEFORM_OVERVIEW;
     apta_context_t *context;
 
     if (context_out == NULL) {

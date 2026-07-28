@@ -48,36 +48,6 @@ set_source_files_properties(
     PROPERTIES
         COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_base")
 
-set_source_files_properties(
-    src/core/apta_session_lifecycle.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base")
-
-set_source_files_properties(
-    src/core/apta_session_scheduler.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_session_set_focus=apta_session_set_focus_base;apta_session_request_region=apta_session_request_region_base;apta_session_next_pcm_request=apta_session_next_pcm_request_base")
-
-set_source_files_properties(
-    src/core/apta_result_accessors.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_result_get_feature_state=apta_result_get_feature_state_base;apta_result_get_waveform_tile=apta_result_get_waveform_tile_base")
-
-set_source_files_properties(
-    src/waveform/apta_waveform_input.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_internal_waveform_accept_pcm=apta_internal_waveform_accept_pcm_base")
-
-set_source_files_properties(
-    src/waveform/apta_waveform_process.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_base")
-
-set_source_files_properties(
-    src/waveform/apta_waveform_snapshot.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")
-
 add_library(
     apta_core
     STATIC
@@ -86,9 +56,7 @@ add_library(
         src/core/apta_initializers.c
         src/core/apta_memory.c
         src/core/apta_result_accessors.c
-        src/core/apta_result_detail_accessors.c
         src/core/apta_result_lifetime.c
-        src/core/apta_session_detail_contract.c
         src/core/apta_session_lifecycle.c
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
@@ -96,14 +64,9 @@ add_library(
         src/serialization/apta_wovr_reader.c
         src/serialization/apta_wovr_reader_hardening.c
         src/serialization/apta_wovr_writer.c
-        src/waveform/apta_waveform_detail.c
-        src/waveform/apta_waveform_detail_requests.c
         src/waveform/apta_waveform_input.c
-        src/waveform/apta_waveform_input_detail.c
         src/waveform/apta_waveform_process.c
-        src/waveform/apta_waveform_process_detail.c
-        src/waveform/apta_waveform_snapshot.c
-        src/waveform/apta_waveform_snapshot_combined.c)
+        src/waveform/apta_waveform_snapshot.c)
 
 add_library(apta::core ALIAS apta_core)
 

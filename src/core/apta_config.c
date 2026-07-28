@@ -104,39 +104,28 @@ static size_t apta_memory_base_requirement(void)
     return sizeof(apta_session_t) + sizeof(apta_result_t);
 }
 
-static size_t apta_memory_waveform_recommendation(
-    apta_feature_mask_t requested_features)
+static size_t apta_memory_waveform_recommendation(void)
 {
     const size_t result_generations = 2u * sizeof(apta_result_t);
-    const size_t accepted_ranges = 8u * sizeof(apta_internal_range_t);
+    const size_t accepted_ranges =
+        8u * sizeof(apta_internal_range_t);
     const size_t accumulators =
         16u * sizeof(apta_internal_waveform_accumulator_t);
     const size_t pcm_queue =
         sizeof(apta_internal_pcm_node_t) +
         (size_t)APTA_INTERNAL_MAX_PUSH_FRAMES * sizeof(float);
-    const size_t overview_snapshot_columns =
+    const size_t snapshot_columns =
         8u * sizeof(apta_waveform_column_t);
-    const size_t overview_snapshot_spans =
+    const size_t snapshot_spans =
         2u * sizeof(apta_waveform_span_t);
-    size_t detail_snapshot = 0u;
-
-    if ((requested_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
-        detail_snapshot =
-            (size_t)APTA_INTERNAL_MAX_DETAIL_TILES *
-                sizeof(apta_waveform_tile_view_t) +
-            (size_t)APTA_INTERNAL_MAX_DETAIL_TILES *
-                APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE *
-                sizeof(apta_waveform_column_t);
-    }
 
     return sizeof(apta_session_t) +
            result_generations +
            accepted_ranges +
            accumulators +
            pcm_queue +
-           overview_snapshot_columns +
-           overview_snapshot_spans +
-           detail_snapshot;
+           snapshot_columns +
+           snapshot_spans;
 }
 
 apta_status_t APTA_CALL apta_query_memory_requirements(
@@ -144,8 +133,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
     apta_memory_requirements_t *requirements_out)
 {
     const apta_feature_mask_t supported_features =
-        APTA_FEATURE_WAVEFORM_OVERVIEW |
-        APTA_FEATURE_WAVEFORM_DETAIL;
+        APTA_FEATURE_WAVEFORM_OVERVIEW;
 
     if (config == NULL || requirements_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -170,20 +158,16 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
     if ((config->requested_features & ~supported_features) != 0u) {
         return APTA_ERROR_UNSUPPORTED;
     }
-    if ((config->requested_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u &&
-        (config->requested_features & APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u) {
-        return APTA_ERROR_INVALID_ARGUMENT;
-    }
 
     if (config->input_mode == APTA_INPUT_MODE_PULL &&
-        (config->requested_features & supported_features) != 0u) {
+        (config->requested_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
         return APTA_ERROR_UNSUPPORTED;
     }
 
     requirements_out->minimum_bytes = apta_memory_base_requirement();
     requirements_out->recommended_bytes =
-        (config->requested_features & supported_features) != 0u
-            ? apta_memory_waveform_recommendation(config->requested_features)
+        (config->requested_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u
+            ? apta_memory_waveform_recommendation()
             : requirements_out->minimum_bytes;
     requirements_out->required_alignment = alignof(max_align_t);
     requirements_out->flags = 0u;
