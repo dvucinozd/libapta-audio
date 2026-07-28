@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,11 @@
             return 1;                                                        \
         }                                                                    \
     } while (0)
+
+typedef union {
+    max_align_t alignment;
+    uint8_t bytes[64];
+} aligned_small_workspace_t;
 
 static void configure_waveform_session(apta_session_config_t *config)
 {
@@ -35,12 +41,13 @@ int main(void)
     apta_pcm_block_t block;
     apta_work_budget_t budget;
     int16_t pcm[4096];
-    uint8_t workspace[64];
+    aligned_small_workspace_t workspace;
     uint32_t accepted;
     apta_status_t status;
     uint32_t guard;
 
     memset(pcm, 0, sizeof(pcm));
+    memset(&workspace, 0, sizeof(workspace));
     configure_waveform_session(&session_config);
     apta_memory_requirements_init(&requirements);
 
@@ -64,18 +71,19 @@ int main(void)
     apta_context_config_init(&context_config);
     context_config.memory_limit_bytes = requirements.minimum_bytes;
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
-    CHECK(apta_session_create(context, &session_config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_create(context, &session_config, &session) ==
+          APTA_STATUS_OK);
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     session = NULL;
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     context = NULL;
 
-    session_config.static_workspace = workspace;
-    session_config.static_workspace_size = sizeof(workspace);
+    session_config.static_workspace = workspace.bytes;
+    session_config.static_workspace_size = sizeof(workspace.bytes);
     apta_context_config_init(&context_config);
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
     CHECK(apta_session_create(context, &session_config, &session) ==
-          APTA_ERROR_UNSUPPORTED);
+          APTA_ERROR_OUT_OF_MEMORY);
     CHECK(session == NULL);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     context = NULL;
@@ -85,7 +93,8 @@ int main(void)
     apta_context_config_init(&context_config);
     context_config.memory_limit_bytes = requirements.recommended_bytes;
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
-    CHECK(apta_session_create(context, &session_config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_create(context, &session_config, &session) ==
+          APTA_STATUS_OK);
 
     apta_pcm_block_init(&block);
     block.data = pcm;

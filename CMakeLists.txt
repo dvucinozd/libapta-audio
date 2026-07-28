@@ -76,7 +76,12 @@ set_source_files_properties(
 set_source_files_properties(
     src/core/apta_session_lifecycle.c
     PROPERTIES
-        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base")
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base;apta_session_destroy=apta_session_destroy_heap_base")
+
+set_source_files_properties(
+    src/core/apta_session_detail_contract.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_contract_base")
 
 set_source_files_properties(
     src/core/apta_session_scheduler.c
@@ -124,6 +129,8 @@ add_library(
         src/core/apta_session_lifecycle.c
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
+        src/core/apta_session_workspace.c
+        src/core/apta_session_workspace_lifecycle.c
         src/serialization/apta_crc32c.c
         src/serialization/apta_meta_reader.c
         src/serialization/apta_meta_reader_hardening.c
