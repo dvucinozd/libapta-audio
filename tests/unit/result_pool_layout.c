@@ -43,6 +43,8 @@ int main(void)
     apta_context_config_t context_config;
     apta_context_t *context = NULL;
     apta_session_t *session = NULL;
+    const apta_result_t *result = NULL;
+    apta_result_info_t info;
     aligned_workspace_t workspace;
     size_t required_bytes;
 
@@ -116,8 +118,21 @@ int main(void)
     config.static_workspace = workspace.bytes;
     config.static_workspace_size = sizeof(workspace.bytes);
     CHECK(apta_session_create(context, &config, &session) ==
-          APTA_ERROR_UNSUPPORTED);
-    CHECK(session == NULL);
+          APTA_STATUS_OK);
+    CHECK(session == (apta_session_t *)(void *)workspace.bytes);
+
+    result = apta_session_acquire_result(session);
+    CHECK(result != NULL);
+    apta_result_info_init(&info);
+    CHECK(apta_result_get_info(result, &info) == APTA_STATUS_OK);
+    CHECK(info.generation == 1u);
+    CHECK(info.session_state == APTA_SESSION_CREATED);
+    CHECK(info.available_features == 0u);
+    apta_result_release(result);
+    result = NULL;
+
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
 
     invalid_config = config;
     invalid_config.api_version = APTA_API_VERSION + 1u;

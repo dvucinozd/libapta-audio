@@ -79,9 +79,14 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_session_set_metadata=apta_session_set_metadata_base")
 
 set_source_files_properties(
+    src/core/apta_session_metadata_workspace.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_set_metadata=apta_session_set_metadata_workspace_base")
+
+set_source_files_properties(
     src/core/apta_session_lifecycle.c
     PROPERTIES
-        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base;apta_session_destroy=apta_session_destroy_heap_base")
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base;apta_session_destroy=apta_session_destroy_heap_base;apta_session_process=apta_session_process_base")
 
 set_source_files_properties(
     src/core/apta_session_detail_contract.c
@@ -92,6 +97,11 @@ set_source_files_properties(
     src/core/apta_session_workspace_lifecycle.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_workspace_base")
+
+set_source_files_properties(
+    src/core/apta_session_source.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_set_source=apta_session_set_source_base;apta_session_push_pcm=apta_session_push_pcm_base;apta_session_signal_end_of_input=apta_session_signal_end_of_input_base")
 
 set_source_files_properties(
     src/core/apta_session_scheduler.c
@@ -139,6 +149,7 @@ add_library(
         src/core/apta_scheduler_policy.c
         src/core/apta_session_detail_contract.c
         src/core/apta_session_lifecycle.c
+        src/core/apta_session_metadata_bounded_guard.c
         src/core/apta_session_metadata_workspace.c
         src/core/apta_session_result_pool_activation.c
         src/core/apta_session_scheduler.c

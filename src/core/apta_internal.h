@@ -140,6 +140,7 @@ struct apta_session {
     atomic_flag result_lock;
 
     apta_result_t *current_result;
+    apta_internal_result_pool_control_t *result_pool;
     apta_generation_t generation;
     uint64_t lineage_id_high;
     uint64_t lineage_id_low;

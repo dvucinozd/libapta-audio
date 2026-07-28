@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_session_workspace.h"
+#include "apta_result_pool.h"
 
 #include <stdalign.h>
 #include <stdint.h>
@@ -102,7 +103,7 @@ static apta_status_t apta_workspace_validate_config(
     return APTA_STATUS_OK;
 }
 
-apta_status_t APTA_CALL apta_session_create(
+apta_status_t apta_internal_workspace_session_prepare(
     apta_context_t *context,
     const apta_session_config_t *config,
     apta_session_t **session_out)
@@ -115,18 +116,8 @@ apta_status_t APTA_CALL apta_session_create(
     }
     *session_out = NULL;
 
-    if (context == NULL || config == NULL) {
-        return APTA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (config->static_workspace == NULL &&
-        config->static_workspace_size == 0u) {
-        return apta_session_create_contract_base(
-            context,
-            config,
-            session_out);
-    }
-    if (config->static_workspace == NULL ||
+    if (context == NULL || config == NULL ||
+        config->static_workspace == NULL ||
         config->static_workspace_size == 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -161,18 +152,78 @@ apta_status_t APTA_CALL apta_session_create(
         return status;
     }
 
-    status = apta_internal_publish_result(session, 0u);
+    *session_out = session;
+    return APTA_STATUS_OK;
+}
+
+void apta_internal_workspace_session_commit(apta_session_t *session)
+{
+    if (session != NULL && session->context != NULL) {
+        (void)atomic_fetch_add_explicit(
+            &session->context->session_count,
+            1u,
+            memory_order_acq_rel);
+    }
+}
+
+void apta_internal_workspace_session_abandon(apta_session_t *session)
+{
+    apta_context_t *context;
+
+    if (session == NULL || session->context == NULL) {
+        return;
+    }
+
+    context = session->context;
+    apta_internal_metadata_cleanup(context, &session->metadata);
+    apta_internal_waveform_cleanup_session(session);
+    memset(session, 0, sizeof(*session));
+}
+
+apta_status_t APTA_CALL apta_session_create(
+    apta_context_t *context,
+    const apta_session_config_t *config,
+    apta_session_t **session_out)
+{
+    apta_session_t *session;
+    apta_status_t status;
+
+    if (session_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    *session_out = NULL;
+
+    if (context == NULL || config == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (config->static_workspace == NULL &&
+        config->static_workspace_size == 0u) {
+        return apta_session_create_contract_base(
+            context,
+            config,
+            session_out);
+    }
+    if (config->static_workspace == NULL ||
+        config->static_workspace_size == 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    status = apta_internal_workspace_session_prepare(
+        context,
+        config,
+        &session);
     if (status < 0) {
-        apta_internal_metadata_cleanup(context, &session->metadata);
-        memset(session, 0, sizeof(*session));
         return status;
     }
 
-    (void)atomic_fetch_add_explicit(
-        &context->session_count,
-        1u,
-        memory_order_acq_rel);
+    status = apta_internal_publish_result(session, 0u);
+    if (status < 0) {
+        apta_internal_workspace_session_abandon(session);
+        return status;
+    }
 
+    apta_internal_workspace_session_commit(session);
     *session_out = session;
     return APTA_STATUS_OK;
 }
@@ -180,6 +231,7 @@ apta_status_t APTA_CALL apta_session_create(
 apta_status_t APTA_CALL apta_session_destroy(apta_session_t *session)
 {
     apta_result_t *result;
+    apta_internal_result_pool_control_t *result_pool;
     apta_context_t *context;
 
     if (session == NULL) {
@@ -196,6 +248,7 @@ apta_status_t APTA_CALL apta_session_destroy(apta_session_t *session)
     }
 
     context = session->context;
+    result_pool = session->result_pool;
     while (atomic_flag_test_and_set_explicit(
         &session->result_lock,
         memory_order_acquire)) {
@@ -213,6 +266,7 @@ apta_status_t APTA_CALL apta_session_destroy(apta_session_t *session)
         1u,
         memory_order_acq_rel);
 
+    apta_internal_result_pool_release(result_pool);
     memset(session, 0, sizeof(*session));
     return APTA_STATUS_OK;
 }
