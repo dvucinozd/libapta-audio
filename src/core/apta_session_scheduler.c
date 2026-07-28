@@ -113,6 +113,10 @@ apta_status_t APTA_CALL apta_session_request_region(
         return APTA_ERROR_UNSUPPORTED;
     }
 
+    if ((request->feature_mask & ~session->config.requested_features) != 0u) {
+        return APTA_ERROR_INVALID_STATE;
+    }
+
     if (request->request_id != 0u &&
         apta_scheduler_request_id_exists(session, request->request_id)) {
         return APTA_ERROR_CONFLICT;
@@ -201,7 +205,10 @@ apta_status_t APTA_CALL apta_session_get_request_progress(
             progress_out->progress_permille =
                 session->requests[slot].state == APTA_REQUEST_SATISFIED
                     ? 1000u
-                    : 0u;
+                    : (session->requests[slot].state ==
+                               APTA_REQUEST_PARTIALLY_SATISFIED
+                           ? 500u
+                           : 0u);
             progress_out->diagnostic_code =
                 session->requests[slot].diagnostic_code;
             return APTA_STATUS_OK;
@@ -232,6 +239,11 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
     request_out->api_version = APTA_API_VERSION;
     request_out->range.struct_size = (uint32_t)sizeof(request_out->range);
     request_out->range.api_version = APTA_API_VERSION;
+
+    if ((session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
+        return apta_internal_waveform_next_pcm_request(session, request_out);
+    }
 
     return APTA_STATUS_NOT_AVAILABLE;
 }
