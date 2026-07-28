@@ -25,6 +25,8 @@ int main(void)
     apta_waveform_tile_view_t tile;
     apta_tempo_view_t tempo;
     apta_grid_view_t grid;
+    apta_metadata_t metadata;
+    apta_metadata_view_t metadata_view;
     apta_serialize_options_t serialization;
     apta_parse_options_t parsing;
 
@@ -38,6 +40,8 @@ int main(void)
     apta_waveform_tile_view_init(&tile);
     apta_tempo_view_init(&tempo);
     apta_grid_view_init(&grid);
+    apta_metadata_init(&metadata);
+    apta_metadata_view_init(&metadata_view);
     apta_serialize_options_init(&serialization);
     apta_parse_options_init(&parsing);
 
@@ -51,6 +55,8 @@ int main(void)
     CHECK_PREFIX(tile);
     CHECK_PREFIX(tempo);
     CHECK_PREFIX(grid);
+    CHECK_PREFIX(metadata);
+    CHECK_PREFIX(metadata_view);
     CHECK_PREFIX(serialization);
     CHECK_PREFIX(parsing);
 
@@ -72,6 +78,10 @@ int main(void)
         tile.confidence != APTA_CONFIDENCE_UNKNOWN ||
         tempo.selected.confidence != APTA_CONFIDENCE_UNKNOWN ||
         grid.confidence != APTA_CONFIDENCE_UNKNOWN ||
+        metadata.flags != 0u ||
+        metadata.application_source_id_kind !=
+            APTA_METADATA_SOURCE_ID_NONE ||
+        metadata_view.flags != 0u ||
         serialization.flags != APTA_SERIALIZE_CANONICAL ||
         parsing.flags != APTA_PARSE_STRICT ||
         parsing.maximum_section_count == 0u ||
