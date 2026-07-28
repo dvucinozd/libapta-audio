@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-#include "../core/apta_internal.h"
+#include "apta_waveform_detail_internal.h"
 
 #include <stdint.h>
 
@@ -15,9 +15,9 @@ apta_status_t apta_internal_waveform_accept_pcm(
     if ((session->config.requested_features &
          APTA_FEATURE_WAVEFORM_DETAIL) != 0u &&
         block->frame_count != 0u) {
-        apta_source_frame_t last_frame =
+        const apta_source_frame_t last_frame =
             block->first_frame + (apta_source_frame_t)block->frame_count - 1u;
-        uint64_t tile_index =
+        const uint64_t tile_index =
             last_frame / APTA_INTERNAL_DETAIL_TILE_FRAMES;
 
         if (tile_index >
@@ -31,6 +31,21 @@ apta_status_t apta_internal_waveform_accept_pcm(
         session,
         block,
         accepted_frames_out);
+
+    if (status == APTA_ERROR_CONFLICT &&
+        (session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
+        const apta_status_t replay_status =
+            apta_internal_detail_accept_replay(
+                session,
+                block,
+                accepted_frames_out);
+
+        if (replay_status != APTA_STATUS_NOT_AVAILABLE) {
+            return replay_status;
+        }
+    }
+
     if (status < 0 || *accepted_frames_out == 0u ||
         (session->config.requested_features &
          APTA_FEATURE_WAVEFORM_DETAIL) == 0u) {
@@ -39,10 +54,8 @@ apta_status_t apta_internal_waveform_accept_pcm(
 
     /*
      * The overview layer has accepted ownership of the PCM at this point.
-     * Detail-cache pressure or an internal cache miss MUST NOT retroactively
-     * turn that accepted push into an error. Detail is a bounded derivative
-     * cache and may degrade independently while overview processing remains
-     * authoritative for PCM acceptance.
+     * Detail-cache pressure or degradation MUST NOT retroactively change the
+     * accepted frame count or turn an accepted push into an error.
      */
     node = session->pcm_tail;
     if (node == NULL || node->frame_count != *accepted_frames_out ||
@@ -51,10 +64,11 @@ apta_status_t apta_internal_waveform_accept_pcm(
     }
 
     for (frame = 0u; frame < *accepted_frames_out; ++frame) {
-        apta_status_t detail_status = apta_internal_detail_process_sample(
-            session,
-            node->first_frame + frame,
-            node->samples[frame]);
+        const apta_status_t detail_status =
+            apta_internal_detail_process_sample(
+                session,
+                node->first_frame + frame,
+                node->samples[frame]);
 
         if (detail_status < 0) {
             /* Preserve the already-committed PCM acceptance contract. */
