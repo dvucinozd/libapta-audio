@@ -89,6 +89,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_contract_base")
 
 set_source_files_properties(
+    src/core/apta_session_workspace_lifecycle.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_workspace_base")
+
+set_source_files_properties(
     src/core/apta_session_scheduler.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_set_focus=apta_session_set_focus_base;apta_session_request_region=apta_session_request_region_base;apta_session_next_pcm_request=apta_session_next_pcm_request_base")
@@ -129,10 +134,12 @@ add_library(
         src/core/apta_result_accessors.c
         src/core/apta_result_detail_accessors.c
         src/core/apta_result_lifetime.c
+        src/core/apta_result_pool_layout.c
         src/core/apta_scheduler_policy.c
         src/core/apta_session_detail_contract.c
         src/core/apta_session_lifecycle.c
         src/core/apta_session_metadata_workspace.c
+        src/core/apta_session_result_pool_activation.c
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
         src/core/apta_session_workspace.c
