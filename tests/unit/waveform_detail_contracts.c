@@ -60,7 +60,7 @@ int main(void)
     request.range.first_frame = region_first;
     request.range.end_frame = region_end;
     request.feature_mask = APTA_FEATURE_WAVEFORM_DETAIL;
-    request.priority = APTA_PRIORITY_URGENT;
+    request.priority = APTA_PRIORITY_PLAYBACK_CRITICAL;
     CHECK(apta_session_request_region(session, &request, &request_id) ==
           APTA_STATUS_OK);
     CHECK(request_id != 0u);
