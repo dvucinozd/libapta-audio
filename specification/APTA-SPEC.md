@@ -66,9 +66,10 @@ The specification is divided into the following documents:
 10. [`confidence.md`](confidence.md)
 11. [`result-model.md`](result-model.md)
 12. [`file-format.md`](file-format.md)
-13. [`profiles.md`](profiles.md)
-14. [`extensions.md`](extensions.md)
-15. [`conformance.md`](conformance.md)
+13. [`wovr-state-flags.md`](wovr-state-flags.md)
+14. [`profiles.md`](profiles.md)
+15. [`extensions.md`](extensions.md)
+16. [`conformance.md`](conformance.md)
 
 ## 6. Public API prototype
 
