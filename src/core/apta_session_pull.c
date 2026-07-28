@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
+#include "apta_session_pull.h"
 
 #include <stdint.h>
 
