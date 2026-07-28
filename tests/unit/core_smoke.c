@@ -48,7 +48,11 @@ int main(void)
     CHECK(context != NULL);
     CHECK(apta_context_get_capabilities(context) ==
           (APTA_FEATURE_WAVEFORM_OVERVIEW |
-           APTA_FEATURE_WAVEFORM_DETAIL));
+           APTA_FEATURE_WAVEFORM_DETAIL |
+           APTA_FEATURE_BPM |
+           APTA_FEATURE_LOCAL_BEATGRID |
+           APTA_FEATURE_CONFIDENCE |
+           APTA_FEATURE_GRID_LOCKING));
 
     apta_session_config_init(&session_config);
     session_config.source_sample_rate = 48000u;
