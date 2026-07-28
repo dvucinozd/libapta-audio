@@ -20,5 +20,10 @@ add_executable(apta_allocation_failure unit/allocation_failure.c)
 target_link_libraries(apta_allocation_failure PRIVATE apta::core)
 set_target_properties(apta_allocation_failure PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_cancellation unit/cancellation.c)
+target_link_libraries(apta_cancellation PRIVATE apta::core)
+set_target_properties(apta_cancellation PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_test(NAME apta.core.smoke COMMAND apta_core_smoke)
 add_test(NAME apta.core.allocation_failure COMMAND apta_allocation_failure)
+add_test(NAME apta.core.cancellation COMMAND apta_cancellation)
