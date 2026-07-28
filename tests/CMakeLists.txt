@@ -74,6 +74,10 @@ add_executable(apta_wovr_reader_malformed unit/wovr_reader_malformed.c)
 target_link_libraries(apta_wovr_reader_malformed PRIVATE apta::core)
 set_target_properties(apta_wovr_reader_malformed PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_wovr_reader_hardening unit/wovr_reader_hardening.c)
+target_link_libraries(apta_wovr_reader_hardening PRIVATE apta::core)
+set_target_properties(apta_wovr_reader_hardening PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_result_concurrency unit/result_concurrency.cpp)
 target_link_libraries(apta_result_concurrency PRIVATE apta::core Threads::Threads)
 set_target_properties(apta_result_concurrency PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
@@ -97,5 +101,22 @@ add_test(NAME apta.serialization.wovr_writer COMMAND apta_wovr_writer)
 add_test(NAME apta.serialization.wovr_writer_partial COMMAND apta_wovr_writer_partial)
 add_test(NAME apta.serialization.wovr_roundtrip COMMAND apta_wovr_roundtrip)
 add_test(NAME apta.serialization.wovr_reader_malformed COMMAND apta_wovr_reader_malformed)
+add_test(NAME apta.serialization.wovr_reader_hardening COMMAND apta_wovr_reader_hardening)
 add_test(NAME apta.result.concurrency COMMAND apta_result_concurrency)
 add_test(NAME apta.core.cancellation_thread COMMAND apta_cancellation_thread)
+
+if(APTA_BUILD_FUZZING)
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
+        message(FATAL_ERROR "APTA_BUILD_FUZZING requires Clang and libFuzzer")
+    endif()
+
+    add_executable(apta_wovr_reader_fuzz fuzz/wovr_reader_fuzz.c)
+    target_link_libraries(apta_wovr_reader_fuzz PRIVATE apta::core)
+    target_compile_options(apta_wovr_reader_fuzz PRIVATE -fsanitize=fuzzer)
+    target_link_options(apta_wovr_reader_fuzz PRIVATE -fsanitize=fuzzer)
+    set_target_properties(
+        apta_wovr_reader_fuzz
+        PROPERTIES
+            C_STANDARD 11
+            C_STANDARD_REQUIRED YES)
+endif()
