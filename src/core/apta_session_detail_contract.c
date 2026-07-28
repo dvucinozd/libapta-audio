@@ -108,11 +108,40 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
     apta_session_t *session,
     apta_pcm_request_t *request_out)
 {
-    apta_status_t status = apta_session_next_pcm_request_base(
-        session,
-        request_out);
+    apta_feature_mask_t saved_focus_mask = 0u;
+    apta_feature_mask_t saved_request_masks[APTA_INTERNAL_MAX_REGION_REQUESTS];
+    uint32_t slot;
+    apta_status_t status;
 
-    if (status == APTA_STATUS_OK && session != NULL &&
+    if (session == NULL) {
+        return apta_session_next_pcm_request_base(session, request_out);
+    }
+
+    saved_focus_mask = session->focus.feature_mask;
+    if (session->has_focus &&
+        (session->focus.feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
+        session->focus.feature_mask |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    }
+
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        saved_request_masks[slot] =
+            session->requests[slot].request.feature_mask;
+        if ((saved_request_masks[slot] &
+             APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
+            session->requests[slot].request.feature_mask |=
+                APTA_FEATURE_WAVEFORM_OVERVIEW;
+        }
+    }
+
+    status = apta_session_next_pcm_request_base(session, request_out);
+
+    session->focus.feature_mask = saved_focus_mask;
+    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
+        session->requests[slot].request.feature_mask =
+            saved_request_masks[slot];
+    }
+
+    if (status == APTA_STATUS_OK &&
         (session->config.requested_features &
          APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
         request_out->feature_mask |= APTA_FEATURE_WAVEFORM_DETAIL;
