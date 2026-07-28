@@ -169,6 +169,7 @@ apta_status_t APTA_CALL apta_session_create(
         &context->lineage_counter,
         1u,
         memory_order_acq_rel) + 1u;
+    apta_metadata_view_init(&session->metadata.view);
 
     atomic_init(&session->state, APTA_SESSION_CREATED);
     atomic_init(&session->cancel_requested, 0u);
@@ -177,6 +178,7 @@ apta_status_t APTA_CALL apta_session_create(
 
     status = apta_internal_publish_result(session, 0u);
     if (status < 0) {
+        apta_internal_metadata_cleanup(context, &session->metadata);
         apta_internal_context_deallocate(context, session);
         return status;
     }
@@ -216,6 +218,7 @@ apta_status_t APTA_CALL apta_session_destroy(apta_session_t *session)
     atomic_flag_clear_explicit(&session->result_lock, memory_order_release);
 
     apta_internal_result_release(result);
+    apta_internal_metadata_cleanup(context, &session->metadata);
     apta_internal_waveform_cleanup_session(session);
 
     (void)atomic_fetch_sub_explicit(
