@@ -3,8 +3,8 @@
 **Milestone status:** Complete  
 **Profile status:** Self-tested implementation candidate  
 **API version:** 0.1.0 draft  
-**Verified merge commit:** `2bdbf32f429a0aa24c30937e0f078e744f0653dd`  
-**Verification evidence:** GitHub Actions PR CI run `#153` completed successfully
+**Verified merge commit:** `372a9acbc0942d94f36671d397847ce31939578b`  
+**Verification evidence:** GitHub Actions PR CI run `#167` completed successfully
 
 ## Advertised capabilities
 
@@ -50,6 +50,20 @@ The current implementation provides:
 - measurable minimum and recommended memory requirements;
 - context memory-limit enforcement.
 
+## Static session workspace
+
+Caller-provided workspace sessions now keep mutable session state outside the context allocator:
+
+- `apta_session_t`;
+- accepted-range arrays;
+- recyclable normalized PCM nodes;
+- overview accumulator arrays, including 16-to-32 growth;
+- session-owned metadata bytes.
+
+The internal arena is max-aligned, first-fit, split/coalescing and compatible with existing generic cleanup paths through private allocation tags.
+
+Immutable results, result metadata and overview/detail snapshot arrays remain context-owned because acquired results may outlive the session and caller workspace.
+
 ## Container implementation
 
 The version-1 `.apta` implementation includes:
@@ -66,11 +80,12 @@ The version-1 `.apta` implementation includes:
 - configurable file, section, span, column and allocation limits;
 - complete cleanup across injected WOVR, WDTL and META allocation failures;
 - exhaustive byte-prefix truncation and trailing-byte rejection for canonical WOVR, WDTL and META files;
+- independently produced WOVR+META fixture with SHA-256 manifest and byte-identical library reserialization;
 - sanitizer-backed bounded fuzz smoke with final, sparse-partial, WDTL and META seeds.
 
 ## Runtime verification
 
-The verified suite registers 34 runtime tests covering:
+The verified suite registers 36 runtime tests covering:
 
 - core lifecycle, ownership and configuration;
 - allocator failure cleanup;
@@ -83,13 +98,17 @@ The verified suite registers 34 runtime tests covering:
 - bounded starvation aging;
 - detail geometry, request status, eviction and replay;
 - memory requirements and memory limits;
+- caller-owned session workspace placement;
+- workspace PCM/range recycling;
+- workspace overview accumulator growth;
+- workspace session metadata ownership;
 - publication retry;
 - WOVR/WDTL/META canonical writing, parsing, malformed input and round-trip;
 - WOVR/WDTL/META allocation-failure sweeps;
 - exhaustive canonical container truncation;
 - concurrent immutable result access.
 
-The same CI run completed the AddressSanitizer/UndefinedBehaviorSanitizer build, four canonical seed generations and bounded libFuzzer smoke execution.
+The evidence also includes AddressSanitizer/UndefinedBehaviorSanitizer execution, four canonical seed generations, bounded libFuzzer smoke, actual GCC/G++ `-m32` execution and the independent producer fixture workflow.
 
 ## Threading contract
 
@@ -107,7 +126,7 @@ The implementation does not yet provide:
 - waveform sources with more than two channels;
 - three-band waveform values;
 - multiple detail levels or dynamic tile-cache sizing;
-- static-workspace-only operation;
+- zero-allocation immutable result publication for workspace sessions;
 - arbitrary application-defined or losslessly preserved unknown META keys;
 - tempo or beatgrid analysis;
 - stable API or ABI guarantees;
@@ -117,7 +136,7 @@ The implementation does not yet provide:
 
 The bounded M2 waveform-processing milestone is complete.
 
-The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not yet make a formal profile claim because the machine-readable fixture manifest, cross-platform evidence and resource-measurement package are not complete.
+The implementation satisfies the currently listed functional requirements for `APTA-WAVEFORM-0.1` and the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`. It does not yet make a formal profile claim because cross-endian, shared-library, long-running fuzz, embedded-integration and measured resource evidence remain incomplete.
 
 See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFORM-READINESS-0.1.md) for the requirement-by-requirement readiness matrix.
 
@@ -125,9 +144,11 @@ See [`../conformance/APTA-WAVEFORM-READINESS-0.1.md`](../conformance/APTA-WAVEFO
 
 The next implementation sequence is:
 
-1. 32-bit ABI/build job and independently produced cross-platform fixture;
-2. static-workspace allocator design and implementation;
-3. measured embedded memory/stack report;
+1. bounded context-owned immutable result slots for static-workspace sessions;
+2. measured embedded memory, stack and process-call report;
+3. independent ESP-IDF integration validation;
 4. pull-mode PCM source ownership path;
 5. optional three-band waveform processing;
 6. tempo and beatgrid milestones.
+
+The result-slot implementation contract is defined in [`../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md`](../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md).

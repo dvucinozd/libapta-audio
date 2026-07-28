@@ -2,9 +2,9 @@
 
 **Report type:** self-tested implementation readiness, not certification  
 **Implementation:** `libapta` 0.1.0 draft  
-**Source commit:** `2bdbf32f429a0aa24c30937e0f078e744f0653dd`  
-**Primary verification:** GitHub Actions PR CI run `#153`  
-**Runtime tests:** 34  
+**Source commit:** `372a9acbc0942d94f36671d397847ce31939578b`  
+**Primary verification:** GitHub Actions PR CI run `#167`  
+**Runtime tests:** 36  
 **Resource-class claim:** none
 
 ## Claim position
@@ -14,18 +14,18 @@ The current implementation satisfies the functional requirements currently liste
 - `APTA-WAVEFORM-0.1`; and
 - the waveform-processing portion of `APTA-ADAPTIVE-WAVEFORM-0.1`.
 
-A formal profile claim is intentionally withheld because the complete conformance evidence package is not yet available. In particular, the repository does not yet contain a finalized machine-readable fixture manifest and hash, 32-bit/cross-endian validation, measured resource-class results or independent ESP-IDF integration evidence.
+A formal profile claim is intentionally withheld because the complete conformance evidence package is not yet available. The repository still lacks measured resource-class results, cross-endian execution, shared-library export evidence, a maintained long-running fuzz campaign and independent ESP-IDF integration evidence.
 
 ## Common baseline
 
 | Requirement | Implementation | Evidence position |
 |---|---|---|
 | Source-frame time and half-open ranges | Implemented | Runtime waveform, region and container tests |
-| Fixed-width public values | Implemented | C11/C++11 compile and ABI-layout checks |
+| Fixed-width public values | Implemented | C11/C++11 compile, ABI-layout and 32-bit execution checks |
 | Immutable result generations | Implemented | Result lifecycle, metadata ownership and concurrency tests |
 | Lifecycle and confidence rules | Implemented for waveform features | Overview/detail accessors and serialization tests |
 | Unsupported feature rejection | Implemented | Core/API contract tests |
-| Bounded allocation and configured limits | Implemented | Memory-limit, parser-limit and allocation-sweep tests |
+| Bounded allocation and configured limits | Implemented | Memory-limit, parser-limit, allocation-sweep and static-workspace tests |
 | No mandatory codec/filesystem/USB/network/UI ownership | Implemented | Public API and core architecture |
 
 ## `APTA-WAVEFORM-0.1`
@@ -81,27 +81,42 @@ Writer/reader/writer byte identity is covered for overview-only, detail-containi
 
 Every byte-prefix truncation of writer-generated canonical WOVR, WDTL and META fixtures is rejected as corrupt. A valid file with one trailing byte is also rejected.
 
+An independently implemented Python producer generates a committed 303-byte WOVR+META fixture with a machine-readable SHA-256 manifest. The C library parser accepts it and the library writer reproduces it byte-identically.
+
 ## Safety and hardening evidence
 
-The CI configuration currently runs:
+The CI configuration and verified evidence currently include:
 
 - ISO C11 and C++11 public-header compilation;
-- normal optimized build and 34 runtime tests;
+- normal optimized build and 36 runtime tests;
 - AddressSanitizer and UndefinedBehaviorSanitizer runtime tests;
+- actual GCC/G++ `-m32` compilation and execution of the runtime suite;
 - canonical final, sparse-partial, WDTL and META fuzz seeds;
 - bounded libFuzzer smoke execution;
 - allocation-failure sweeps for WOVR, WDTL and META parser-owned allocations;
 - exhaustive canonical prefix truncation for WOVR, WDTL and META;
+- independent producer, fixture manifest and byte-identity consumer test;
 - concurrent immutable-result reader testing;
-- cross-thread cancellation testing.
+- cross-thread cancellation testing;
+- caller-owned session workspace tests for PCM, accepted ranges, overview accumulators and session metadata.
+
+## Static workspace position
+
+Workspace sessions now keep mutable session state in caller-owned storage:
+
+- session object;
+- queued PCM;
+- accepted ranges;
+- overview accumulators;
+- session metadata.
+
+Immutable results and their snapshot/metadata arrays remain context-owned so retained results can outlive the session and workspace. No zero-heap resource-class claim is made until a bounded result-slot implementation is completed and measured.
 
 ## Missing evidence for a formal claim
 
 The following items remain open:
 
-- machine-readable fixture manifest with a recorded cryptographic manifest hash;
-- 32-bit ABI/build execution;
-- cross-endian or independently produced container fixtures;
+- cross-endian execution or an independently verified big-endian consumer;
 - shared-library symbol/export checks on supported platforms;
 - long-running fuzz campaign report and retained minimized corpus;
 - measured peak stack and process-call latency;
