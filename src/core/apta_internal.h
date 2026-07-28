@@ -9,6 +9,9 @@
 #include <apta/apta.h>
 
 #define APTA_INTERNAL_MAX_REGION_REQUESTS 16u
+#define APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN 1024u
+#define APTA_INTERNAL_PROCESS_CHUNK_FRAMES 256u
+#define APTA_INTERNAL_MAX_PUSH_FRAMES 4096u
 
 typedef struct {
     void *raw_memory;
@@ -22,6 +25,30 @@ typedef struct {
     apta_request_state_t state;
     uint32_t diagnostic_code;
 } apta_internal_request_t;
+
+typedef struct {
+    apta_source_frame_t first_frame;
+    apta_source_frame_t end_frame;
+} apta_internal_range_t;
+
+typedef struct apta_internal_pcm_node {
+    struct apta_internal_pcm_node *next;
+    apta_source_frame_t first_frame;
+    uint32_t frame_count;
+    uint32_t processed_frames;
+    float samples[];
+} apta_internal_pcm_node_t;
+
+typedef struct {
+    uint32_t column_index;
+    uint32_t sample_count;
+    double sum_squares;
+    float minimum;
+    float maximum;
+    uint8_t clipped;
+    uint8_t complete;
+    uint16_t reserved16;
+} apta_internal_waveform_accumulator_t;
 
 struct apta_context {
     apta_allocator_t allocator;
@@ -42,6 +69,10 @@ struct apta_result {
     apta_context_t *context;
     atomic_uint reference_count;
     apta_result_info_t info;
+
+    apta_waveform_overview_view_t overview;
+    apta_waveform_span_t *overview_spans;
+    apta_waveform_column_t *overview_columns;
 };
 
 struct apta_session {
@@ -69,6 +100,21 @@ struct apta_session {
 
     uint32_t next_request_id;
     apta_internal_request_t requests[APTA_INTERNAL_MAX_REGION_REQUESTS];
+
+    apta_internal_pcm_node_t *pcm_head;
+    apta_internal_pcm_node_t *pcm_tail;
+    uint64_t queued_pcm_frames;
+
+    apta_internal_range_t *accepted_ranges;
+    uint32_t accepted_range_count;
+    uint32_t accepted_range_capacity;
+    apta_source_frame_t greatest_accepted_end;
+
+    apta_internal_waveform_accumulator_t *overview_accumulators;
+    uint32_t overview_accumulator_count;
+    uint32_t overview_accumulator_capacity;
+    uint32_t overview_complete_count;
+    uint32_t overview_frames_per_column;
 };
 
 int apta_internal_validate_struct(
@@ -105,5 +151,28 @@ void apta_internal_result_release(apta_result_t *result);
 apta_status_t apta_internal_session_transition(
     apta_session_t *session,
     apta_session_state_t new_state);
+
+apta_status_t apta_internal_waveform_accept_pcm(
+    apta_session_t *session,
+    const apta_pcm_block_t *block,
+    uint32_t *accepted_frames_out);
+
+apta_status_t apta_internal_waveform_process(
+    apta_session_t *session,
+    const apta_work_budget_t *budget,
+    apta_progress_t *progress_out,
+    uint32_t *did_work_out,
+    uint32_t *published_output_out);
+
+apta_status_t apta_internal_waveform_next_pcm_request(
+    apta_session_t *session,
+    apta_pcm_request_t *request_out);
+
+apta_status_t apta_internal_waveform_build_snapshot(
+    apta_session_t *session,
+    apta_result_t *result);
+
+void apta_internal_waveform_cleanup_session(apta_session_t *session);
+void apta_internal_waveform_cleanup_result(apta_result_t *result);
 
 #endif /* APTA_INTERNAL_H */
