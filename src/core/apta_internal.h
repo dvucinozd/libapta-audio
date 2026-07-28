@@ -49,6 +49,8 @@ typedef struct {
     apta_metadata_view_t view;
     uint8_t *storage;
     size_t storage_size;
+    uint32_t present;
+    uint32_t reserved32;
 } apta_internal_metadata_t;
 
 typedef struct {
