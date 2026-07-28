@@ -44,6 +44,11 @@ if(APTA_ENABLE_SANITIZERS)
 endif()
 
 set_source_files_properties(
+    src/core/apta_config.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_query_memory_requirements=apta_query_memory_requirements_base")
+
+set_source_files_properties(
     src/serialization/apta_wovr_reader.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_base")
@@ -104,6 +109,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_workspace_base")
 
 set_source_files_properties(
+    src/core/apta_session_result_pool_activation.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_activation_base;apta_session_process=apta_session_process_activation_base")
+
+set_source_files_properties(
     src/core/apta_session_source.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_set_source=apta_session_set_source_base;apta_session_push_pcm=apta_session_push_pcm_base;apta_session_signal_end_of_input=apta_session_signal_end_of_input_base")
@@ -158,6 +168,8 @@ add_library(
         src/core/apta_session_lifecycle.c
         src/core/apta_session_metadata_bounded_guard.c
         src/core/apta_session_metadata_workspace.c
+        src/core/apta_session_pull.c
+        src/core/apta_session_pull_activation.c
         src/core/apta_session_result_pool_activation.c
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c

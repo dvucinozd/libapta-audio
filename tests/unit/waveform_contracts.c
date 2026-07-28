@@ -6,8 +6,8 @@
 
 #define CHECK(condition)                                                     \
     do {                                                                     \
-        if (!(condition)) {                                                   \
-            fprintf(stderr, "CHECK failed at %s:%d: %s\n",                  \
+        if (!(condition)) {                                                  \
+            fprintf(stderr, "CHECK failed at %s:%d: %s\n",               \
                     __FILE__, __LINE__, #condition);                         \
             return 1;                                                        \
         }                                                                    \
@@ -21,6 +21,7 @@ int main(void)
     apta_session_t *session = NULL;
     apta_pcm_block_t block;
     apta_pcm_request_t request;
+    apta_work_budget_t budget;
     int16_t pcm[1024] = {0};
     uint32_t accepted;
 
@@ -36,8 +37,12 @@ int main(void)
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
     session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
     CHECK(apta_session_create(context, &session_config, &session) ==
-          APTA_ERROR_UNSUPPORTED);
-    CHECK(session == NULL);
+          APTA_STATUS_OK);
+    apta_work_budget_init(&budget);
+    CHECK(apta_session_process(session, &budget, NULL) ==
+          APTA_ERROR_INVALID_STATE);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
 
     apta_session_config_init(&session_config);
     session_config.input_mode = APTA_INPUT_MODE_PUSH;
@@ -47,7 +52,8 @@ int main(void)
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
     session_config.total_frames = APTA_TOTAL_FRAMES_UNKNOWN;
     session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
-    CHECK(apta_session_create(context, &session_config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_create(context, &session_config, &session) ==
+          APTA_STATUS_OK);
 
     apta_pcm_block_init(&block);
     block.data = pcm;
