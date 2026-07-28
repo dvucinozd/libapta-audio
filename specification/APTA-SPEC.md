@@ -65,12 +65,10 @@ The specification is divided into the following documents:
 9. [`lifecycle.md`](lifecycle.md)
 10. [`confidence.md`](confidence.md)
 11. [`result-model.md`](result-model.md)
-12. `file-format.md`
-13. `profiles.md`
-14. `extensions.md`
-15. `conformance.md`
-
-Documents without links do not yet exist. They are planned work and do not create normative requirements.
+12. [`file-format.md`](file-format.md)
+13. [`profiles.md`](profiles.md)
+14. [`extensions.md`](extensions.md)
+15. [`conformance.md`](conformance.md)
 
 ## 6. Public API prototype
 
