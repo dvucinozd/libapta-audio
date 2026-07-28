@@ -1,29 +1,18 @@
 # APTA bounded immutable result slots 0.1
 
-**Status:** Layout and API scaffold implementation candidate  
-**Purpose:** close the remaining post-create allocation gap without weakening immutable result lifetime
-
-## Current implementation boundary
-
-The repository now defines:
-
-- `APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS`;
-- `APTA_ERROR_RESULT_SLOTS_EXHAUSTED`;
-- `APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL`;
-- one checked layout calculator shared by the memory-query path and future pool creation;
-- a fixed two-slot layout with worst-case overview span/column, detail and metadata capacities.
-
-`apta_query_memory_requirements()` reports the exact pool block for a valid known-duration bounded configuration and rejects unknown duration, unsupported feature geometry, arithmetic overflow and insufficient nonzero `memory_budget_bytes`.
-
-Runtime activation is intentionally not enabled in this scaffold. `apta_session_create()` returns `APTA_ERROR_UNSUPPORTED` when the bounded-result flag is present. Existing sessions continue through the unchanged publication path until pool allocation, ownership, release and retry semantics are separately implemented and tested.
+**Status:** Implemented and CI-verified implementation candidate  
+**Purpose:** provide post-create bounded publication without weakening immutable result lifetime  
+**Verified implementation merge:** `b1c9100b2acee13188c650e71e6364bacbae7e7c`  
+**Primary verification:** GitHub Actions PR CI run `#188`
 
 ## Problem statement
 
-The static session workspace now owns mutable session state: the session object, queued PCM, accepted ranges, overview accumulators and session metadata.
+Caller-owned session workspace storage is appropriate for mutable state, but not for immutable results. An acquired `apta_result_t` may remain valid after `apta_session_destroy()` returns, at which point the caller may immediately reuse the session workspace.
 
-Immutable results cannot simply move into that workspace. The public lifetime contract allows an acquired `apta_result_t` to remain valid after `apta_session_destroy()` returns. The caller is then free to reuse or release the session workspace, so any result object, snapshot array or metadata pointer stored inside it would become invalid.
+Version 0.1 therefore uses:
 
-The remaining bounded-memory solution therefore requires a context-owned result pool allocated before successful session creation returns.
+- caller-owned storage for the session object, queued PCM, accepted ranges, overview accumulators and session metadata;
+- one context-owned, preallocated result pool for immutable generations that may outlive the session.
 
 ## Activation
 
@@ -33,99 +22,112 @@ The mode is opt-in through:
 APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS
 ```
 
-Existing heap-backed and current static-workspace behaviour remains unchanged when the flag is absent.
+The public API also defines:
 
-Version 0.1 bounded-result mode requires:
+```text
+APTA_ERROR_RESULT_SLOTS_EXHAUSTED
+APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL
+```
+
+A valid bounded configuration requires:
 
 - a caller-provided static session workspace;
 - known `total_frames`;
-- waveform-overview support;
-- only section/features whose maximum snapshot capacities are derivable at creation time;
-- successful preallocation of the complete pool before the session is returned.
+- waveform overview support;
+- only features whose maximum snapshot geometry is derivable at creation time;
+- successful preallocation of the complete pool before session creation returns.
 
-Unknown-duration input is rejected for the first bounded-result implementation because the worst-case overview column and span counts are not finite without an additional declared source limit.
+Unknown-duration input is rejected because overview span and column capacity would otherwise have no finite creation-time upper bound.
+
+Sessions without the flag retain the original heap-backed result path.
 
 ## Fixed slot count
 
-Version 0.1 uses two result slots.
+Version 0.1 uses exactly two result slots.
 
-Two slots permit normal double-buffered publication:
+Two slots implement double-buffered publication:
 
 1. one slot contains the current immutable generation;
-2. the other slot is constructed as the next generation;
-3. after atomic publication, the session releases its reference to the old generation;
-4. the old slot becomes reusable when no application references remain.
+2. the other slot is constructed as the replacement;
+3. publication atomically swaps the current pointer;
+4. the session releases its old result reference;
+5. the old slot becomes reusable only after all application references are released.
 
-The slot count is deliberately fixed in 0.1 so ABI and memory-accounting work can be completed before exposing a configurable count.
+The fixed count keeps the ABI and memory query deterministic. A configurable slot count is not part of version 0.1.
 
 ## Capacity derivation
 
-At session creation, the pool layout is calculated with checked arithmetic.
+The query and create paths share one checked layout calculator.
 
-Each slot reserves capacity for:
+Each slot reserves:
 
 - one `apta_result_t`;
-- worst-case overview columns:
-  `ceil(total_frames / overview_frames_per_column)`;
-- worst-case overview spans equal to the overview column count;
-- all fixed detail tile descriptors;
-- all fixed detail packed columns;
-- up to `APTA_METADATA_MAX_TOTAL_BYTES` of result-owned metadata;
-- required alignment padding.
+- `ceil(total_frames / 1024)` overview columns;
+- the same count of overview spans, covering the worst case of one sparse span per logical column;
+- four `apta_waveform_tile_view_t` detail descriptors;
+- 256 packed detail columns;
+- `APTA_METADATA_MAX_TOTAL_BYTES` metadata storage;
+- all alignment padding required by the contained types.
 
-A sparse source can produce one span per logical column, so using the logical column count as span capacity is required for a strict upper bound.
+The layout rejects arithmetic overflow, unsupported bounded geometry and a nonzero session memory budget smaller than the complete pool.
 
-Tempo, beatgrid and future variable-size feature snapshots are unsupported in bounded-result mode until their creation-time capacity rules are normative.
+Although each slot reserves 8,192 metadata bytes, the current public per-field limits allow at most 5,884 input bytes across all metadata fields. That complete public maximum is covered by runtime tests.
 
 ## Pool ownership
 
-The result pool is one context-owned allocation created during `apta_session_create()`.
+The pool is one context-owned allocation created before the bounded session is committed.
 
-The pool carries:
+It contains:
 
 - an atomic pool reference count;
-- a session-owner reference;
-- two slot descriptors;
-- slot state and generation identity;
-- fixed pointer/capacity assignments for every snapshot region.
+- one session-owner reference;
+- two atomic slot descriptors;
+- the checked fixed layout;
+- all result, metadata, overview and detail storage.
 
-An active result slot holds one pool reference. The session holds a separate owner reference until destruction.
+Each active result holds one pool reference. Session destruction releases the current result and the session-owner reference. If an application still retains any result, the pool and context remain alive. The last pooled result release frees the pool.
 
-`apta_session_destroy()` releases the current result and then the session-owner reference. If an application still retains a result, the pool and context remain alive. The final retained result release frees the pool only after all slot references and the session-owner reference are gone.
+This preserves the rule that `apta_context_destroy()` returns `APTA_ERROR_BUSY` while acquired results remain.
 
-This preserves the existing rule that context destruction returns busy while acquired results remain.
+## Transactional publication
 
-## Slot publication
+Bounded publication performs these steps:
 
-Publication is transactional:
+1. reserve a free slot with atomic compare-and-exchange;
+2. zero the complete slot storage;
+3. initialize result identity, source geometry, lineage, generation and session state;
+4. copy session metadata into fixed slot storage;
+5. build sparse WOVR spans and columns in fixed regions;
+6. build the bounded WDTL tile cache and packed columns in fixed regions;
+7. validate every count and pointer range;
+8. atomically replace `session->current_result`;
+9. release the previous session-owned result reference.
 
-1. select a free non-current slot;
-2. clear its previous logical contents without releasing the pool allocation;
-3. construct metadata and waveform snapshots within fixed slot capacities;
-4. validate every resulting count and pointer range;
-5. initialize the result reference count to one session-owned reference;
-6. atomically replace `session->current_result`;
-7. release the previous current result.
+If any construction step fails, the new result is never published and the reserved slot is returned to the pool.
 
-A partially constructed slot is never visible through `apta_session_acquire_result()`.
+The dispatcher is internal and mode-specific:
 
-Publication must not mutate the previous current generation or session publication bookkeeping until the replacement is complete.
+- bounded sessions use fixed-slot publication;
+- ordinary sessions use the unchanged allocation-backed publication path.
 
 ## Exhaustion and retry
 
-When both slots are retained — one as current and one by an application — no replacement slot is available.
-
-The implementation returns a dedicated transient error:
+When both slots are active, no replacement can be safely constructed. The operation returns:
 
 ```text
 APTA_ERROR_RESULT_SLOTS_EXHAUSTED
 ```
 
-No PCM, request-state or published-generation data may be lost. The host can release an older result and retry the same process or metadata operation.
+The error is transient and distinct from out-of-memory failure.
 
-This condition is distinct from allocator failure: the complete pool already exists, but application retention prevents safe slot reuse.
+Retry behaviour is feature-aware:
 
-Existing publication-retry logic must treat slot exhaustion as retryable in the same places where transient snapshot allocation failure is currently retried.
+- metadata replacement preserves the previous metadata, generation and current result;
+- session-state transitions roll back if their replacement generation cannot be published;
+- overview samples remain accumulated, while completion markers are reset so a later process call reconstructs completion and retries publication;
+- detail mutation serials remain pending until a later successful publication.
+
+No PCM data, request state or published result is silently discarded. Releasing an older retained result allows the same operation to progress.
 
 ## Result release
 
@@ -133,57 +135,72 @@ A pooled result is not individually deallocated.
 
 When its public reference count reaches zero:
 
-- owned logical pointers/counts are reset;
-- the slot becomes free;
+- the slot is atomically marked free;
 - the slot releases its pool reference;
-- the pool is freed only if the session-owner reference is also gone and no other slot is active.
+- the complete pool is deallocated only after the session-owner reference and every result reference are gone.
 
-Non-pooled results retain the current allocation and cleanup path.
+Non-pooled results retain their existing cleanup and deallocation behaviour.
 
 ## No-allocation guarantee
 
-After successful creation of a bounded-result workspace session, the following operations must not call the context allocator:
+After successful bounded session creation, these operations have verified zero context-allocator callbacks:
 
-- metadata replacement within fixed metadata limits;
+- metadata replacement within public limits;
 - PCM push and backpressure;
 - cooperative processing;
-- overview/detail publication within fixed capacities;
-- result acquire/release;
-- serialization size query and serialization into caller storage;
+- partial and final overview publication;
+- detail publication up to the full four-tile capacity;
+- result acquire and release;
+- serialized-size query and serialization into caller storage;
 - session destruction.
 
-Container parsing remains a separate context-owned operation and is not covered by the session guarantee.
+Successful creation itself makes exactly one pool allocation in addition to the context object. Container parsing is a separate context-owned operation and is not covered by this guarantee.
 
 ## Memory requirement reporting
 
-`apta_query_memory_requirements()` includes the complete two-slot pool when the bounded-result flag is present.
+When the bounded flag is present, `apta_query_memory_requirements()` reports the complete two-slot pool and sets:
 
-The query and creation layout calculators share one implementation so the reported required bytes cannot diverge from allocation behaviour.
+```text
+APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL
+```
 
-The report includes checked alignment and rejects configurations whose pool size cannot be represented by `size_t` or exceeds a nonzero configured memory budget.
+The minimum and recommended byte counts are equal for the current fixed layout. Query and create use the same calculator, preventing reported and allocated sizes from diverging.
 
-## Required tests
+## Verification matrix
 
-Activation cannot merge until tests cover:
+The following contract gates are implemented and tested:
 
-- exact query/create pool-size agreement;
-- Nth-allocation failure during pool creation;
-- zero allocator calls after successful creation;
-- final and partial WOVR publication;
-- WDTL publication at maximum fixed tile capacity;
-- maximum metadata copy;
-- retained old generation plus current generation;
-- deterministic slot-exhaustion error on third publication;
-- successful retry after releasing the retained generation;
-- acquired pooled result validity after session/workspace destruction;
-- context busy state until the last pooled result is released;
-- concurrent result acquire/release during publication;
-- 32-bit build and execution;
-- ASan/UBSan execution;
-- unchanged heap-session result lifetime and allocation-failure behaviour.
+| Gate | Evidence |
+|---|---|
+| Exact query/create pool-size agreement | `apta.memory.result_pool_layout`, `apta.memory.result_pool_storage` |
+| Pool allocation and memory-limit failure | `apta.memory.result_pool_storage`, `apta.session.bounded_initial_result` |
+| Zero allocator calls after successful create | bounded initial, waveform, capacity and concurrency tests |
+| Partial and final WOVR | `apta.result.bounded_waveform_publication` |
+| Maximum fixed WDTL cache | `apta.memory.bounded_pool_capacity` |
+| Maximum public metadata input | `apta.memory.bounded_pool_capacity` |
+| Retained old plus current generation | bounded waveform and concurrency tests |
+| Deterministic third-publication exhaustion | pooled empty-result and bounded waveform tests |
+| Retry after retained-result release | bounded waveform and concurrency tests |
+| Result validity after session/workspace destruction | initial, waveform, capacity and concurrency tests |
+| Context busy until final result release | all bounded lifetime tests |
+| Concurrent acquire/release during pooled publication | `apta.result.bounded_concurrency` |
+| Serialization after workspace destruction | `apta.result.bounded_waveform_publication` |
+| 32-bit execution | repository CI matrix |
+| ASan/UBSan | CI run `#188` |
+| Ordinary result-path regressions | complete 43-test suite |
+
+The registered runtime suite contains 43 tests. GitHub Actions PR CI run `#188` completed successfully for merge `b1c9100b2acee13188c650e71e6364bacbae7e7c`.
 
 ## Conformance position
 
-This design is necessary for a future `APTA-R0-STATIC-128K` claim, but it does not itself establish that claim.
+The bounded result-slot implementation is complete for its version 0.1 scope. It does not itself establish an `APTA-R0-STATIC-128K` or other resource-class claim.
 
-A resource-class claim additionally requires a declared workload, measured total context/workspace/stack use, fixed source limits and proof that the complete pool plus session workspace fits the class ceiling.
+A resource-class claim still requires:
+
+- a declared workload and source limit;
+- measured total context, pool, workspace and stack consumption;
+- measured process-call latency;
+- proof that the complete configuration fits the class ceiling;
+- independent target integration evidence.
+
+Tempo, beatgrid, unknown-duration bounded sessions and other variable-size feature snapshots remain outside the implemented scope.
