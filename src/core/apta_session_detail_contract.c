@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
+#include "../waveform/apta_waveform_detail_internal.h"
+
+#include <string.h>
 
 apta_status_t APTA_CALL apta_session_create_base(
     apta_context_t *context,
@@ -108,43 +111,29 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
     apta_session_t *session,
     apta_pcm_request_t *request_out)
 {
-    apta_feature_mask_t saved_focus_mask = 0u;
-    apta_feature_mask_t saved_request_masks[APTA_INTERNAL_MAX_REGION_REQUESTS];
-    uint32_t slot;
     apta_status_t status;
 
-    if (session == NULL) {
-        return apta_session_next_pcm_request_base(session, request_out);
+    if (session == NULL || request_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_validate_struct(
+            request_out,
+            sizeof(*request_out),
+            request_out->struct_size,
+            request_out->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
 
-    saved_focus_mask = session->focus.feature_mask;
-    if (session->has_focus &&
-        (session->focus.feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
-        session->focus.feature_mask |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    memset(request_out, 0, sizeof(*request_out));
+    request_out->struct_size = (uint32_t)sizeof(*request_out);
+    request_out->api_version = APTA_API_VERSION;
+    request_out->range.struct_size = (uint32_t)sizeof(request_out->range);
+    request_out->range.api_version = APTA_API_VERSION;
+
+    status = apta_internal_detail_next_pcm_request(session, request_out);
+    if (status == APTA_STATUS_OK || status < 0) {
+        return status;
     }
 
-    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
-        saved_request_masks[slot] =
-            session->requests[slot].request.feature_mask;
-        if ((saved_request_masks[slot] &
-             APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
-            session->requests[slot].request.feature_mask |=
-                APTA_FEATURE_WAVEFORM_OVERVIEW;
-        }
-    }
-
-    status = apta_session_next_pcm_request_base(session, request_out);
-
-    session->focus.feature_mask = saved_focus_mask;
-    for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
-        session->requests[slot].request.feature_mask =
-            saved_request_masks[slot];
-    }
-
-    if (status == APTA_STATUS_OK &&
-        (session->config.requested_features &
-         APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
-        request_out->feature_mask |= APTA_FEATURE_WAVEFORM_DETAIL;
-    }
-    return status;
+    return apta_session_next_pcm_request_base(session, request_out);
 }
