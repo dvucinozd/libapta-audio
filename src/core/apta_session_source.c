@@ -149,7 +149,14 @@ apta_status_t APTA_CALL apta_session_push_pcm(
         }
     }
 
-    /* M1 validates lifecycle and ownership but has no enabled analyser yet. */
+    if ((session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
+        return apta_internal_waveform_accept_pcm(
+            session,
+            block,
+            accepted_frames_out);
+    }
+
     *accepted_frames_out = block->frame_count;
     return APTA_STATUS_OK;
 }
@@ -180,6 +187,10 @@ apta_status_t APTA_CALL apta_session_signal_end_of_input(
 
     if (session->config.total_frames != APTA_TOTAL_FRAMES_UNKNOWN &&
         session->config.total_frames != final_end_frame) {
+        return APTA_ERROR_CONFLICT;
+    }
+
+    if (session->greatest_accepted_end > final_end_frame) {
         return APTA_ERROR_CONFLICT;
     }
 
