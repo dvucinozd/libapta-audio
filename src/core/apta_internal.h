@@ -21,6 +21,7 @@
 #define APTA_INTERNAL_MAX_PUSH_FRAMES 4096u
 #define APTA_INTERNAL_SCHEDULER_AGE_STEP 8u
 #define APTA_INTERNAL_SCHEDULER_MAX_SKIPS 32u
+#define APTA_INTERNAL_RESULT_FLAG_POOLED (1u << 0)
 
 typedef struct {
     void *raw_memory;
@@ -87,6 +88,9 @@ typedef struct {
         accumulators[APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE];
 } apta_internal_detail_tile_t;
 
+typedef struct apta_internal_result_pool_control
+    apta_internal_result_pool_control_t;
+
 struct apta_context {
     apta_allocator_t allocator;
     apta_logger_t logger;
@@ -105,6 +109,9 @@ struct apta_context {
 struct apta_result {
     apta_context_t *context;
     atomic_uint reference_count;
+    apta_internal_result_pool_control_t *result_pool;
+    uint32_t result_pool_slot_index;
+    uint32_t result_flags;
     apta_result_info_t info;
 
     apta_source_frame_t total_source_frames;
