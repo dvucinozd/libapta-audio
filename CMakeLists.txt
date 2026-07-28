@@ -49,6 +49,16 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_base")
 
 set_source_files_properties(
+    src/serialization/apta_wovr_reader_hardening.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_wovr_hardened")
+
+set_source_files_properties(
+    src/serialization/apta_wovr_writer.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_query_serialized_size=apta_result_query_serialized_size_wovr;apta_result_serialize=apta_result_serialize_wovr")
+
+set_source_files_properties(
     src/core/apta_session_lifecycle.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_base")
@@ -98,6 +108,8 @@ add_library(
         src/core/apta_session_scheduler.c
         src/core/apta_session_source.c
         src/serialization/apta_crc32c.c
+        src/serialization/apta_wdtl_reader.c
+        src/serialization/apta_wdtl_writer.c
         src/serialization/apta_wovr_reader.c
         src/serialization/apta_wovr_reader_hardening.c
         src/serialization/apta_wovr_writer.c
