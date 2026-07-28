@@ -146,6 +146,7 @@ struct apta_session {
     apta_internal_detail_tile_t detail_tiles[APTA_INTERNAL_MAX_DETAIL_TILES];
     uint64_t detail_access_serial;
     uint64_t detail_mutation_serial;
+    uint64_t detail_published_serial;
 };
 
 int apta_internal_validate_struct(
@@ -188,7 +189,19 @@ apta_status_t apta_internal_waveform_accept_pcm(
     const apta_pcm_block_t *block,
     uint32_t *accepted_frames_out);
 
+apta_status_t apta_internal_waveform_accept_pcm_base(
+    apta_session_t *session,
+    const apta_pcm_block_t *block,
+    uint32_t *accepted_frames_out);
+
 apta_status_t apta_internal_waveform_process(
+    apta_session_t *session,
+    const apta_work_budget_t *budget,
+    apta_progress_t *progress_out,
+    uint32_t *did_work_out,
+    uint32_t *published_output_out);
+
+apta_status_t apta_internal_waveform_process_base(
     apta_session_t *session,
     const apta_work_budget_t *budget,
     apta_progress_t *progress_out,
@@ -213,6 +226,7 @@ apta_status_t apta_internal_detail_process_sample(
     float sample);
 
 void apta_internal_detail_refresh_completed(apta_session_t *session);
+void apta_internal_detail_update_request_states(apta_session_t *session);
 
 int apta_internal_detail_range_complete(
     const apta_session_t *session,
@@ -230,6 +244,7 @@ apta_status_t apta_internal_detail_build_snapshot(
 
 void apta_internal_waveform_cleanup_session(apta_session_t *session);
 void apta_internal_waveform_cleanup_result(apta_result_t *result);
+void apta_internal_waveform_cleanup_result_base(apta_result_t *result);
 
 uint32_t apta_internal_crc32c(const uint8_t *data, size_t size);
 
