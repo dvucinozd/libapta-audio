@@ -16,4 +16,9 @@ add_executable(apta_core_smoke unit/core_smoke.c)
 target_link_libraries(apta_core_smoke PRIVATE apta::core)
 set_target_properties(apta_core_smoke PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_allocation_failure unit/allocation_failure.c)
+target_link_libraries(apta_allocation_failure PRIVATE apta::core)
+set_target_properties(apta_allocation_failure PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_test(NAME apta.core.smoke COMMAND apta_core_smoke)
+add_test(NAME apta.core.allocation_failure COMMAND apta_allocation_failure)
