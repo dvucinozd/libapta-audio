@@ -1,7 +1,21 @@
 # APTA bounded immutable result slots 0.1
 
-**Status:** Proposed implementation contract  
+**Status:** Layout and API scaffold implementation candidate  
 **Purpose:** close the remaining post-create allocation gap without weakening immutable result lifetime
+
+## Current implementation boundary
+
+The repository now defines:
+
+- `APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS`;
+- `APTA_ERROR_RESULT_SLOTS_EXHAUSTED`;
+- `APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL`;
+- one checked layout calculator shared by the memory-query path and future pool creation;
+- a fixed two-slot layout with worst-case overview span/column, detail and metadata capacities.
+
+`apta_query_memory_requirements()` reports the exact pool block for a valid known-duration bounded configuration and rejects unknown duration, unsupported feature geometry, arithmetic overflow and insufficient nonzero `memory_budget_bytes`.
+
+Runtime activation is intentionally not enabled in this scaffold. `apta_session_create()` returns `APTA_ERROR_UNSUPPORTED` when the bounded-result flag is present. Existing sessions continue through the unchanged publication path until pool allocation, ownership, release and retry semantics are separately implemented and tested.
 
 ## Problem statement
 
@@ -13,13 +27,13 @@ The remaining bounded-memory solution therefore requires a context-owned result 
 
 ## Activation
 
-The first implementation will add an explicit session flag:
+The mode is opt-in through:
 
 ```text
 APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS
 ```
 
-The mode is opt-in. Existing heap-backed and current static-workspace behaviour remains unchanged when the flag is absent.
+Existing heap-backed and current static-workspace behaviour remains unchanged when the flag is absent.
 
 Version 0.1 bounded-result mode requires:
 
@@ -101,7 +115,7 @@ Publication must not mutate the previous current generation or session publicati
 
 When both slots are retained — one as current and one by an application — no replacement slot is available.
 
-The implementation will return a dedicated transient error:
+The implementation returns a dedicated transient error:
 
 ```text
 APTA_ERROR_RESULT_SLOTS_EXHAUSTED
@@ -142,11 +156,11 @@ Container parsing remains a separate context-owned operation and is not covered 
 
 ## Memory requirement reporting
 
-`apta_query_memory_requirements()` must include the complete two-slot pool when the bounded-result flag is present.
+`apta_query_memory_requirements()` includes the complete two-slot pool when the bounded-result flag is present.
 
-The query and creation layout calculators must share one implementation so the reported required bytes cannot diverge from allocation behaviour.
+The query and creation layout calculators share one implementation so the reported required bytes cannot diverge from allocation behaviour.
 
-The report must include checked alignment and must reject configurations whose pool size cannot be represented by `size_t` or exceeds a nonzero configured memory budget.
+The report includes checked alignment and rejects configurations whose pool size cannot be represented by `size_t` or exceeds a nonzero configured memory budget.
 
 ## Required tests
 
