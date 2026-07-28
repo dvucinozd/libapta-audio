@@ -190,7 +190,7 @@ apta_status_t APTA_CALL apta_session_signal_end_of_input(
         return APTA_ERROR_CONFLICT;
     }
 
-    if (session->greatest_accepted_end > final_end_frame) {
+    if (session->maximum_accepted_end > final_end_frame) {
         return APTA_ERROR_CONFLICT;
     }
 
