@@ -28,7 +28,7 @@ The writer performs no temporary heap allocation.
 
 ## Implemented reader behaviour
 
-The bounded version-1 reader validates before constructing an immutable result:
+The bounded version-1 reader validates before returning an immutable result:
 
 - minimum header length and magic;
 - supported container and specification versions;
@@ -46,11 +46,20 @@ The bounded version-1 reader validates before constructing an immutable result:
 - logical column bounds and source-frame geometry;
 - shorter known final column handling;
 - valid lifecycle and container-flag combinations;
+- continuous source-frame and logical-column coverage for `FINAL` results;
+- non-overlapping packed-column intervals across all spans;
 - valid waveform column ranges and reserved column flag bits;
 - strict zero requirements for defined reserved fields;
 - source fingerprint kind `NONE` and its required zero bytes.
 
 Successful parsing returns an immutable reference-counted `apta_result_t`. The result owns copied spans and waveform columns and does not retain pointers into the input buffer.
+
+The public parser is layered as:
+
+1. bounded container and `WOVR` decoding;
+2. immutable result construction;
+3. final-coverage and packed-interval hardening;
+4. publication to the caller only after all checks pass.
 
 ## Parse limits
 
@@ -64,9 +73,9 @@ Successful parsing returns an immutable reference-counted `apta_result_t`. The r
 
 A zero limit field selects the library default rather than disabling the limit.
 
-## Runtime tests
+## Runtime and hardening tests
 
-The current serialization tests include:
+The test suite now registers 18 runtime tests. Serialization and parser coverage includes:
 
 - canonical final `WOVR` golden-layout validation;
 - sparse partial/unknown-duration writer validation;
@@ -80,7 +89,21 @@ The current serialization tests include:
 - unknown required section;
 - strict and non-strict reserved-directory behaviour;
 - invalid span geometry;
-- invalid reserved waveform-column flags.
+- invalid reserved waveform-column flags;
+- a valid adjacent two-span final result;
+- rejection of an internal gap in a `FINAL` multi-span result;
+- rejection of duplicate or overlapping packed-column intervals.
+
+## Sanitizers and fuzzing
+
+The build provides opt-in hardening controls:
+
+- `APTA_ENABLE_SANITIZERS=ON` enables AddressSanitizer and UndefinedBehaviorSanitizer with GCC or Clang;
+- `APTA_BUILD_FUZZING=ON` builds the Clang/libFuzzer `apta_wovr_reader_fuzz` target;
+- the fuzz harness limits input to 1 MiB, aggregate result allocation to 1 MiB and context-owned memory to 2 MiB;
+- the CI parser-hardening job runs the complete test suite under ASan/UBSan and then executes a bounded 2000-run fuzz smoke pass.
+
+The fuzz smoke run is a regression guard, not a substitute for long-running continuous fuzzing with a maintained corpus.
 
 ## Deliberate limitations
 
@@ -95,16 +118,15 @@ The implementation does not yet provide:
 - non-zero source fingerprint kinds;
 - multiple overview levels;
 - tempo or beatgrid sections;
-- a fuzzing corpus integrated with a sanitizer matrix;
+- a maintained seed and regression corpus for long-running fuzzing;
 - a formal Waveform Profile conformance report.
 
 ## Completion gates
 
 This package can be treated as a verified implementation candidate when:
 
-- the newest GitHub Actions run compiles the reader on the configured C and C++ header probes;
-- all 17 runtime tests pass;
+- the newest GitHub Actions core-build job compiles cleanly and all 18 runtime tests pass;
+- the parser-hardening job passes ASan and UBSan without findings;
+- the bounded libFuzzer smoke run completes without a crash, timeout or leak;
 - compiler warnings remain clean;
-- sanitizer and fuzz targets are added for untrusted parser input;
-- final multi-span coverage and duplicate packed-data edge cases are represented in the malformed corpus;
 - the status document records the verified commit SHA.
