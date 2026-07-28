@@ -134,24 +134,28 @@ void apta_internal_context_deallocate(
     void *memory)
 {
     apta_allocation_header_t *header;
+    void *raw_memory;
+    size_t requested_size;
 
     if (context == NULL || memory == NULL) {
         return;
     }
 
     header = (apta_allocation_header_t *)((uintptr_t)memory - sizeof(*header));
+    raw_memory = header->raw_memory;
+    requested_size = header->requested_size;
 
     if (context->allocator.deallocate != NULL) {
         context->allocator.deallocate(
             context->allocator.user_data,
-            header->raw_memory);
+            raw_memory);
     } else {
-        free(header->raw_memory);
+        free(raw_memory);
     }
 
     (void)atomic_fetch_sub_explicit(
         &context->allocated_bytes,
-        header->requested_size,
+        requested_size,
         memory_order_relaxed);
 }
 
