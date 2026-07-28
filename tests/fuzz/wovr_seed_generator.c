@@ -11,7 +11,8 @@ static int write_result_seed(
     apta_source_frame_t first_frame,
     uint32_t frame_count,
     apta_source_frame_t total_frames,
-    int signal_end_of_input)
+    int signal_end_of_input,
+    apta_feature_mask_t requested_features)
 {
     apta_session_config_t session_config;
     apta_session_t *session = NULL;
@@ -20,7 +21,7 @@ static int write_result_seed(
     apta_work_budget_t budget;
     apta_serialize_options_t serialize_options;
     int16_t pcm[2048] = {0};
-    uint8_t output[512];
+    uint8_t output[1024];
     uint64_t required_size = 0u;
     size_t written = 0u;
     uint32_t accepted = 0u;
@@ -37,7 +38,7 @@ static int write_result_seed(
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
     session_config.total_frames = total_frames;
-    session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    session_config.requested_features = requested_features;
 
     if (apta_session_create(context, &session_config, &session) != APTA_STATUS_OK) {
         goto cleanup;
@@ -120,7 +121,9 @@ int main(void)
     int success;
 
     apta_context_config_init(&context_config);
-    context_config.requested_capabilities = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    context_config.requested_capabilities =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL;
     if (apta_context_create(&context_config, &context) != APTA_STATUS_OK) {
         return 1;
     }
@@ -132,14 +135,25 @@ int main(void)
             0u,
             2048u,
             2048u,
-            1) &&
+            1,
+            APTA_FEATURE_WAVEFORM_OVERVIEW) &&
         write_result_seed(
             "valid-sparse-partial.apta",
             context,
             2048u,
             1024u,
             APTA_TOTAL_FRAMES_UNKNOWN,
-            0);
+            0,
+            APTA_FEATURE_WAVEFORM_OVERVIEW) &&
+        write_result_seed(
+            "valid-wdtl.apta",
+            context,
+            0u,
+            1024u,
+            1024u,
+            1,
+            APTA_FEATURE_WAVEFORM_OVERVIEW |
+                APTA_FEATURE_WAVEFORM_DETAIL);
 
     if (apta_context_destroy(context) != APTA_STATUS_OK) {
         return 1;
