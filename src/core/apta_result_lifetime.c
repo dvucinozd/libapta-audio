@@ -15,6 +15,17 @@ static void apta_result_unlock(atomic_flag *lock)
     atomic_flag_clear_explicit(lock, memory_order_release);
 }
 
+static void apta_result_mark_waveform_publication_pending(
+    apta_session_t *session)
+{
+    uint32_t index;
+
+    for (index = 0u; index < session->overview_accumulator_count; ++index) {
+        session->overview_accumulators[index].complete = 0u;
+    }
+    session->overview_complete_count = 0u;
+}
+
 void apta_internal_result_retain(apta_result_t *result)
 {
     if (result != NULL) {
@@ -72,6 +83,7 @@ apta_status_t apta_internal_publish_result(
         alignof(apta_result_t),
         APTA_MEMORY_PERSISTENT);
     if (result == NULL) {
+        apta_result_mark_waveform_publication_pending(session);
         return APTA_ERROR_OUT_OF_MEMORY;
     }
 
@@ -98,6 +110,9 @@ apta_status_t apta_internal_publish_result(
     if (status < 0) {
         apta_internal_waveform_cleanup_result(result);
         apta_internal_context_deallocate(session->context, result);
+        if (status == APTA_ERROR_OUT_OF_MEMORY) {
+            apta_result_mark_waveform_publication_pending(session);
+        }
         return status;
     }
 
