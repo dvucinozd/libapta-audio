@@ -74,6 +74,8 @@ apta_status_t APTA_CALL apta_context_create(
     const apta_context_config_t *config,
     apta_context_t **context_out)
 {
+    const apta_feature_mask_t available_capabilities =
+        APTA_FEATURE_WAVEFORM_OVERVIEW;
     apta_context_t *context;
 
     if (context_out == NULL) {
@@ -99,8 +101,7 @@ apta_status_t APTA_CALL apta_context_create(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* The first implementation stage exposes no analysis capability yet. */
-    if (config->requested_capabilities != 0u) {
+    if ((config->requested_capabilities & ~available_capabilities) != 0u) {
         return APTA_ERROR_UNSUPPORTED;
     }
 
@@ -113,7 +114,7 @@ apta_status_t APTA_CALL apta_context_create(
     context->allocator = config->allocator;
     context->logger = config->logger;
     context->clock = config->clock;
-    context->capabilities = 0u;
+    context->capabilities = available_capabilities;
     context->memory_limit_bytes = config->memory_limit_bytes;
     context->flags = config->flags;
 
