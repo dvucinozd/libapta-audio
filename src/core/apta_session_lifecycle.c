@@ -140,6 +140,11 @@ apta_status_t APTA_CALL apta_session_create(
         return APTA_ERROR_UNSUPPORTED;
     }
 
+    if (config->input_mode == APTA_INPUT_MODE_PULL &&
+        (config->requested_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
+        return APTA_ERROR_UNSUPPORTED;
+    }
+
     if (!apta_session_config_is_valid(context, config)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
