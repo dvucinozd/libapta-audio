@@ -59,9 +59,19 @@ jobs:
       - name: Run sanitized runtime tests
         run: ctest --test-dir build-sanitized --output-on-failure
 
+      - name: Generate canonical fuzz seeds
+        run: |
+          mkdir -p build-sanitized/fuzz-corpus
+          cd build-sanitized/fuzz-corpus
+          ../tests/apta_wovr_seed_generator
+          test -s valid-final.apta
+          test -s valid-sparse-partial.apta
+
       - name: Run bounded fuzz smoke
         run: >-
           ./build-sanitized/tests/apta_wovr_reader_fuzz
+          build-sanitized/fuzz-corpus
+          -dict=tests/fuzz/wovr_reader.dict
           -runs=2000
           -max_len=4096
           -timeout=5
