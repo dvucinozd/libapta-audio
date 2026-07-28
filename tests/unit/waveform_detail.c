@@ -62,7 +62,7 @@ int main(void)
           APTA_STATUS_OK);
     CHECK(pcm_request.range.first_frame == 0u);
     CHECK(pcm_request.range.end_frame == 1024u);
-    CHECK(pcm_request.feature_mask == APTA_FEATURE_WAVEFORM_DETAIL);
+    CHECK(pcm_request.feature_mask == APTA_FEATURE_WAVEFORM_OVERVIEW);
 
     apta_pcm_block_init(&block);
     block.data = pcm;
