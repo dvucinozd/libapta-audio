@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #define APTA_SERIALIZE_CANONICAL (1u << 0)
+#define APTA_PARSE_STRICT        (1u << 0)
 
 typedef struct {
     uint32_t struct_size;
@@ -25,8 +26,25 @@ typedef struct {
     uint64_t reserved64[3];
 } apta_serialize_options_t;
 
+typedef struct {
+    uint32_t struct_size;
+    uint32_t api_version;
+
+    uint32_t flags;
+    uint32_t maximum_section_count;
+    uint32_t maximum_overview_spans;
+    uint32_t maximum_waveform_columns;
+
+    uint64_t maximum_file_bytes;
+    uint64_t maximum_allocation_bytes;
+    uint64_t reserved64[4];
+} apta_parse_options_t;
+
 APTA_API void APTA_CALL
 apta_serialize_options_init(apta_serialize_options_t *options);
+
+APTA_API void APTA_CALL
+apta_parse_options_init(apta_parse_options_t *options);
 
 APTA_API apta_status_t APTA_CALL
 apta_result_query_serialized_size(
@@ -41,6 +59,14 @@ apta_result_serialize(
     void *buffer,
     size_t buffer_size,
     size_t *bytes_written_out);
+
+APTA_API apta_status_t APTA_CALL
+apta_result_parse(
+    apta_context_t *context,
+    const apta_parse_options_t *options,
+    const void *buffer,
+    size_t buffer_size,
+    const apta_result_t **result_out);
 
 #ifdef __cplusplus
 } /* extern "C" */
