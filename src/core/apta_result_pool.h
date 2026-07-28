@@ -25,6 +25,13 @@ apta_status_t apta_internal_result_pool_create_empty_result(
     uint64_t lineage_id_low,
     apta_result_t **result_out);
 
+apta_status_t apta_internal_result_pool_create_session_result(
+    apta_internal_result_pool_control_t *pool,
+    const apta_session_t *session,
+    apta_generation_t generation,
+    apta_feature_mask_t changed_features,
+    apta_result_t **result_out);
+
 void apta_internal_result_pool_release_result_slot(
     apta_internal_result_pool_control_t *pool,
     uint32_t slot_index);

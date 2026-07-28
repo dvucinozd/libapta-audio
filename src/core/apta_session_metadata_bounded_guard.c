@@ -12,10 +12,6 @@ apta_status_t APTA_CALL apta_session_set_metadata(
     if (session == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
-    if ((session->config.flags &
-         APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
-        return APTA_ERROR_UNSUPPORTED;
-    }
 
     return apta_session_set_metadata_workspace_base(
         session,

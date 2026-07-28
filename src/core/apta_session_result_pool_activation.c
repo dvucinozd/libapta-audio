@@ -26,14 +26,6 @@ APTA_API apta_status_t APTA_CALL apta_session_process_base(
     const apta_work_budget_t *budget,
     apta_progress_t *progress_out);
 
-static int apta_session_uses_bounded_results(
-    const apta_session_t *session)
-{
-    return session != NULL &&
-           (session->config.flags &
-            APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u;
-}
-
 apta_status_t APTA_CALL apta_session_create(
     apta_context_t *context,
     const apta_session_config_t *config,
@@ -125,9 +117,6 @@ apta_status_t APTA_CALL apta_session_set_source(
     if (session == NULL || source == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
-    if (apta_session_uses_bounded_results(session)) {
-        return APTA_ERROR_UNSUPPORTED;
-    }
     return apta_session_set_source_base(session, source);
 }
 
@@ -144,9 +133,6 @@ apta_status_t APTA_CALL apta_session_push_pcm(
     if (session == NULL || block == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
-    if (apta_session_uses_bounded_results(session)) {
-        return APTA_ERROR_UNSUPPORTED;
-    }
     return apta_session_push_pcm_base(
         session,
         block,
@@ -160,9 +146,6 @@ apta_status_t APTA_CALL apta_session_signal_end_of_input(
     if (session == NULL ||
         final_end_frame == APTA_TOTAL_FRAMES_UNKNOWN) {
         return APTA_ERROR_INVALID_ARGUMENT;
-    }
-    if (apta_session_uses_bounded_results(session)) {
-        return APTA_ERROR_UNSUPPORTED;
     }
     return apta_session_signal_end_of_input_base(
         session,
@@ -191,9 +174,6 @@ apta_status_t APTA_CALL apta_session_process(
             progress_out->struct_size,
             progress_out->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
-    }
-    if (apta_session_uses_bounded_results(session)) {
-        return APTA_ERROR_UNSUPPORTED;
     }
     return apta_session_process_base(
         session,
