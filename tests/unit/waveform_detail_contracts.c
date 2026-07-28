@@ -80,9 +80,7 @@ int main(void)
     CHECK(pcm_request.range.first_frame == region_first);
     CHECK(pcm_request.range.end_frame == region_end);
     CHECK(pcm_request.request_token == request_id);
-    CHECK(pcm_request.feature_mask ==
-          (APTA_FEATURE_WAVEFORM_OVERVIEW |
-           APTA_FEATURE_WAVEFORM_DETAIL));
+    CHECK(pcm_request.feature_mask == APTA_FEATURE_WAVEFORM_DETAIL);
 
     apta_work_budget_init(&budget);
     budget.maximum_steps = 1u;
