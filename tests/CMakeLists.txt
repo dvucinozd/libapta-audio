@@ -86,6 +86,10 @@ add_executable(apta_static_workspace unit/static_workspace.c)
 target_link_libraries(apta_static_workspace PRIVATE apta::core)
 set_target_properties(apta_static_workspace PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 
+add_executable(apta_static_workspace_metadata unit/static_workspace_metadata.c)
+target_link_libraries(apta_static_workspace_metadata PRIVATE apta::core)
+set_target_properties(apta_static_workspace_metadata PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+
 add_executable(apta_publication_retry unit/publication_retry.c)
 target_link_libraries(apta_publication_retry PRIVATE apta::core)
 set_target_properties(apta_publication_retry PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
@@ -172,6 +176,7 @@ add_test(NAME apta.waveform.detail_contracts COMMAND apta_waveform_detail_contra
 add_test(NAME apta.waveform.detail_replay COMMAND apta_waveform_detail_replay)
 add_test(NAME apta.memory.requirements COMMAND apta_memory_requirements)
 add_test(NAME apta.memory.static_workspace COMMAND apta_static_workspace)
+add_test(NAME apta.memory.static_workspace_metadata COMMAND apta_static_workspace_metadata)
 add_test(NAME apta.result.publication_retry COMMAND apta_publication_retry)
 add_test(NAME apta.serialization.wovr_writer COMMAND apta_wovr_writer)
 add_test(NAME apta.serialization.wovr_writer_partial COMMAND apta_wovr_writer_partial)
