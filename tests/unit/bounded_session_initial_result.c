@@ -153,33 +153,32 @@ int main(void)
     CHECK(verify_initial_result(result));
 
     apta_metadata_init(&metadata);
-    metadata.producer_name.data = "blocked";
+    metadata.producer_name.data = "bounded";
     metadata.producer_name.size = 7u;
     metadata.flags = APTA_METADATA_FLAG_PRODUCER_NAME_PRESENT;
-    CHECK(apta_session_set_metadata(session, &metadata) ==
-          APTA_ERROR_UNSUPPORTED);
+    CHECK(apta_session_set_metadata(session, &metadata) == APTA_STATUS_OK);
 
     apta_pcm_source_init(&source);
     CHECK(apta_session_set_source(session, &source) ==
-          APTA_ERROR_UNSUPPORTED);
+          APTA_ERROR_INVALID_STATE);
 
     apta_pcm_block_init(&block);
     block.data = pcm;
     block.frame_count = 16u;
     accepted = UINT32_MAX;
     CHECK(apta_session_push_pcm(session, &block, &accepted) ==
-          APTA_ERROR_UNSUPPORTED);
+          APTA_ERROR_RESULT_SLOTS_EXHAUSTED);
     CHECK(accepted == 0u);
 
     CHECK(apta_session_signal_end_of_input(session, 4096u) ==
-          APTA_ERROR_UNSUPPORTED);
+          APTA_ERROR_RESULT_SLOTS_EXHAUSTED);
 
     apta_work_budget_init(&budget);
     budget.maximum_input_frames = 16u;
     budget.maximum_steps = 1u;
     apta_progress_init(&progress);
     CHECK(apta_session_process(session, &budget, &progress) ==
-          APTA_ERROR_UNSUPPORTED);
+          APTA_STATUS_WOULD_BLOCK);
     CHECK(apta_session_get_state(session) == APTA_SESSION_CREATED);
     CHECK(state.allocate_calls == 2u);
     CHECK(state.outstanding == 2u);
