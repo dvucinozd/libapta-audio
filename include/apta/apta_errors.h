@@ -24,5 +24,6 @@ typedef int32_t apta_status_t;
 #define APTA_ERROR_CONFLICT              ((apta_status_t)-10)
 #define APTA_ERROR_LIMIT_EXCEEDED        ((apta_status_t)-11)
 #define APTA_ERROR_INVALID_STATE         ((apta_status_t)-12)
+#define APTA_ERROR_BUFFER_TOO_SMALL      ((apta_status_t)-13)
 
 #endif /* APTA_ERRORS_H */
