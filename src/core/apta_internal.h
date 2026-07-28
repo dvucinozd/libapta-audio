@@ -10,6 +10,13 @@
 
 #define APTA_INTERNAL_MAX_REGION_REQUESTS 16u
 #define APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN 1024u
+#define APTA_INTERNAL_DETAIL_LEVEL_ID 1u
+#define APTA_INTERNAL_DETAIL_FRAMES_PER_COLUMN 256u
+#define APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE 64u
+#define APTA_INTERNAL_DETAIL_TILE_FRAMES \
+    (APTA_INTERNAL_DETAIL_FRAMES_PER_COLUMN * \
+     APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE)
+#define APTA_INTERNAL_MAX_DETAIL_TILES 4u
 #define APTA_INTERNAL_PROCESS_CHUNK_FRAMES 256u
 #define APTA_INTERNAL_MAX_PUSH_FRAMES 4096u
 
@@ -50,6 +57,16 @@ typedef struct {
     uint16_t reserved16;
 } apta_internal_waveform_accumulator_t;
 
+typedef struct {
+    uint32_t tile_index;
+    uint32_t complete_count;
+    uint64_t access_serial;
+    uint8_t occupied;
+    uint8_t reserved8[7];
+    apta_internal_waveform_accumulator_t
+        accumulators[APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE];
+} apta_internal_detail_tile_t;
+
 struct apta_context {
     apta_allocator_t allocator;
     apta_logger_t logger;
@@ -78,6 +95,10 @@ struct apta_result {
     apta_waveform_overview_view_t overview;
     apta_waveform_span_t *overview_spans;
     apta_waveform_column_t *overview_columns;
+
+    uint32_t detail_tile_count;
+    apta_waveform_tile_view_t *detail_tiles;
+    apta_waveform_column_t *detail_columns;
 };
 
 struct apta_session {
@@ -121,6 +142,10 @@ struct apta_session {
     uint32_t overview_accumulator_capacity;
     uint32_t overview_complete_count;
     uint32_t overview_frames_per_column;
+
+    apta_internal_detail_tile_t detail_tiles[APTA_INTERNAL_MAX_DETAIL_TILES];
+    uint64_t detail_access_serial;
+    uint64_t detail_mutation_serial;
 };
 
 int apta_internal_validate_struct(
@@ -175,6 +200,31 @@ apta_status_t apta_internal_waveform_next_pcm_request(
     apta_pcm_request_t *request_out);
 
 apta_status_t apta_internal_waveform_build_snapshot(
+    apta_session_t *session,
+    apta_result_t *result);
+
+apta_status_t apta_internal_waveform_build_overview_snapshot(
+    apta_session_t *session,
+    apta_result_t *result);
+
+apta_status_t apta_internal_detail_process_sample(
+    apta_session_t *session,
+    apta_source_frame_t source_frame,
+    float sample);
+
+void apta_internal_detail_refresh_completed(apta_session_t *session);
+
+int apta_internal_detail_range_complete(
+    const apta_session_t *session,
+    apta_source_frame_t first_frame,
+    apta_source_frame_t end_frame);
+
+int apta_internal_detail_range_has_output(
+    const apta_session_t *session,
+    apta_source_frame_t first_frame,
+    apta_source_frame_t end_frame);
+
+apta_status_t apta_internal_detail_build_snapshot(
     apta_session_t *session,
     apta_result_t *result);
 
