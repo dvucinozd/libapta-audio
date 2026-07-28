@@ -96,6 +96,52 @@ static int result_has_overview(
            (column->flags & APTA_WAVEFORM_COLUMN_CLIPPED) != 0u;
 }
 
+static int result_has_detail(
+    const apta_result_t *result,
+    apta_feature_state_t expected_state)
+{
+    apta_waveform_tile_view_t tile;
+    apta_frame_range_t range;
+    apta_feature_state_t state = APTA_FEATURE_ABSENT;
+    apta_confidence_value_t confidence = 0u;
+    uint32_t column;
+
+    apta_waveform_tile_view_init(&tile);
+    if (apta_result_get_waveform_tile(result, 1u, 0u, &tile) !=
+            APTA_STATUS_OK ||
+        tile.level_id != 1u ||
+        tile.tile_index != 0u ||
+        tile.source_range.first_frame != 0u ||
+        tile.source_range.end_frame != 1024u ||
+        tile.first_column_index != 0u ||
+        tile.column_count != 4u ||
+        tile.state != expected_state ||
+        tile.columns == NULL) {
+        return 0;
+    }
+
+    for (column = 0u; column < tile.column_count; ++column) {
+        if (tile.columns[column].minimum != INT16_MIN ||
+            tile.columns[column].maximum != INT16_MAX ||
+            (tile.columns[column].flags & APTA_WAVEFORM_COLUMN_VALID) == 0u ||
+            (tile.columns[column].flags & APTA_WAVEFORM_COLUMN_CLIPPED) == 0u) {
+            return 0;
+        }
+    }
+
+    apta_frame_range_init(&range);
+    range.first_frame = 0u;
+    range.end_frame = 1024u;
+    return apta_result_get_feature_state(
+               result,
+               APTA_FEATURE_WAVEFORM_DETAIL,
+               &range,
+               &state,
+               &confidence) == APTA_STATUS_OK &&
+           state == expected_state &&
+           confidence == APTA_CONFIDENCE_UNKNOWN;
+}
+
 int main(void)
 {
     allocator_state_t allocator_state = {0u, 0u};
@@ -130,7 +176,9 @@ int main(void)
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
     session_config.total_frames = 1024u;
-    session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    session_config.requested_features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL;
     session_config.flags = APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS;
 
     apta_memory_requirements_init(&requirements);
@@ -143,7 +191,8 @@ int main(void)
     context_config.allocator.allocate = test_allocate;
     context_config.allocator.deallocate = test_deallocate;
     context_config.requested_capabilities =
-        APTA_FEATURE_WAVEFORM_OVERVIEW;
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL;
     context_config.memory_limit_bytes = requirements.minimum_bytes;
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
 
@@ -209,6 +258,7 @@ int main(void)
     CHECK(apta_result_get_generation(partial_result) == 4u);
     CHECK(result_has_metadata(partial_result, "bounded-wovr"));
     CHECK(result_has_overview(partial_result, APTA_FEATURE_PARTIAL));
+    CHECK(result_has_detail(partial_result, APTA_FEATURE_STABLE));
 
     CHECK(apta_session_signal_end_of_input(session, 1024u) == APTA_STATUS_OK);
     CHECK(apta_session_get_state(session) == APTA_SESSION_DRAINING);
@@ -232,16 +282,19 @@ int main(void)
     CHECK(apta_result_get_generation(final_result) == 6u);
     CHECK(result_has_metadata(final_result, "bounded-wovr"));
     CHECK(result_has_overview(final_result, APTA_FEATURE_FINAL));
+    CHECK(result_has_detail(final_result, APTA_FEATURE_FINAL));
     apta_result_info_init(&info);
     CHECK(apta_result_get_info(final_result, &info) == APTA_STATUS_OK);
     CHECK(info.session_state == APTA_SESSION_COMPLETED);
     CHECK((info.available_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u);
+    CHECK((info.available_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u);
 
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     session = NULL;
     memset(workspace.bytes, 0xA5, sizeof(workspace.bytes));
     CHECK(result_has_metadata(final_result, "bounded-wovr"));
     CHECK(result_has_overview(final_result, APTA_FEATURE_FINAL));
+    CHECK(result_has_detail(final_result, APTA_FEATURE_FINAL));
     CHECK(apta_context_destroy(context) == APTA_ERROR_BUSY);
 
     apta_result_release(final_result);
