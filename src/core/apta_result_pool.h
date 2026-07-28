@@ -15,6 +15,20 @@ void apta_internal_result_pool_retain(
 void apta_internal_result_pool_release(
     apta_internal_result_pool_control_t *pool);
 
+apta_status_t apta_internal_result_pool_create_empty_result(
+    apta_internal_result_pool_control_t *pool,
+    const apta_session_config_t *config,
+    apta_generation_t generation,
+    apta_session_state_t session_state,
+    apta_feature_mask_t changed_features,
+    uint64_t lineage_id_high,
+    uint64_t lineage_id_low,
+    apta_result_t **result_out);
+
+void apta_internal_result_pool_release_result_slot(
+    apta_internal_result_pool_control_t *pool,
+    uint32_t slot_index);
+
 size_t apta_internal_result_pool_get_allocation_size(
     const apta_internal_result_pool_control_t *pool);
 
