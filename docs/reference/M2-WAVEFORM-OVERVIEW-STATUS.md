@@ -29,7 +29,12 @@ The current M2 implementation provides:
 - partial, stable and final overview lifecycle states;
 - range-scoped feature-state queries;
 - final partial-column handling after end-of-input;
-- cleanup of queued PCM, accumulators and snapshot payloads.
+- cleanup of queued PCM, accumulators and snapshot payloads;
+- measurable minimum and recommended memory requirements;
+- context memory-limit enforcement;
+- concurrent immutable result readers during publication;
+- cross-thread cooperative cancellation;
+- explicit session/context destruction concurrency rules.
 
 ## Advertised behaviour
 
@@ -43,21 +48,34 @@ A session must explicitly request that feature before PCM is retained and analys
 
 The current waveform analyser supports push input only. A pull-mode session requesting waveform overview returns `APTA_ERROR_UNSUPPORTED`; this avoids advertising a source path that is not yet implemented.
 
+Static workspace mode also returns `APTA_ERROR_UNSUPPORTED` until a real workspace allocator exists; the implementation no longer accepts and silently ignores that configuration.
+
 ## Runtime tests
 
-The test suite currently includes:
+The test suite currently includes twelve runtime tests:
 
 - core lifecycle and result ownership;
 - allocation-failure cleanup;
 - cancellation lifecycle;
+- cross-thread cancellation visibility;
 - public structure initializers;
 - incompatible-version rejection;
 - sparse overview coverage and golden peak/RMS columns;
 - waveform block-boundary determinism;
 - focus-region preemption over earlier background PCM;
-- unknown-duration PCM demand and EOF boundary contracts.
+- unknown-duration PCM demand and EOF boundary contracts;
+- reported memory requirements and enforced memory limits;
+- concurrent immutable-result readers during repeated waveform publication.
 
-The sparse overview test has been observed passing in GitHub Actions. The complete latest nine-test package still requires an Actions result for the newest commit before M2 is marked complete.
+The sparse overview test has been observed passing in GitHub Actions. The complete latest twelve-test package still requires an Actions result for the newest commit before M2 is marked complete.
+
+## Threading contract
+
+The public prototype threading rules are documented in [`../api/APTA-THREADING-0.1.md`](../api/APTA-THREADING-0.1.md).
+
+Result acquire/access/release operations may run concurrently with publication. Mutating session calls remain host-serialized except for the explicitly thread-safe cancellation request and query functions.
+
+Session destruction must not race with any operation receiving the same session pointer. Acquired immutable results may outlive their session, but the context remains busy until those results are released.
 
 ## Deliberate limitations
 
@@ -86,22 +104,21 @@ The Adaptive Waveform Profile is not claimed because detail tiles, starvation pr
 
 M2 can be marked complete when:
 
-- the latest GitHub Actions run builds all source modules;
-- all nine runtime tests pass;
+- the latest GitHub Actions run builds all source and test modules;
+- all twelve runtime tests pass;
 - compiler warnings remain clean under the configured warning level;
-- a memory-limit regression test is added;
-- a concurrent result acquire/release stress test is added or explicitly deferred with a documented threading limitation;
-- destruction concurrency rules are documented;
-- this status document is updated with the verified commit SHA.
+- this status document records the verified commit SHA.
+
+Race-detector, sanitizer, 32-bit ABI and malformed-container jobs remain required before stable API or profile-conformance status, but they do not block the bounded M2 processing milestone.
 
 ## Next implementation work
 
-The next bounded sequence is:
+After the latest M2 Actions run is verified, the next bounded sequence is:
 
-1. memory-limit and snapshot-allocation regression tests;
-2. result-acquire/release concurrency stress test;
-3. public threading and destruction contract;
-4. version-1 `WOVR` writer;
-5. hardened `WOVR` parser and malformed-input corpus;
-6. Waveform Profile conformance report;
-7. detail-tile geometry and adaptive retention.
+1. version-1 `WOVR` writer and CRC32C support;
+2. hardened `WOVR` reader with configured limits;
+3. malformed-container regression corpus;
+4. writer/reader round-trip golden fixtures;
+5. Waveform Profile conformance report;
+6. detail-tile geometry and adaptive retention;
+7. equal-priority deadline ordering and starvation-prevention aging.
