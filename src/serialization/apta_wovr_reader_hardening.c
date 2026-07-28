@@ -177,6 +177,11 @@ apta_status_t APTA_CALL apta_result_parse(
     const apta_result_t *parsed = NULL;
     apta_status_t status;
 
+    if (result_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    *result_out = NULL;
+
     status = apta_result_parse_base(
         context,
         options,
@@ -192,9 +197,6 @@ apta_status_t APTA_CALL apta_result_parse(
         (const uint8_t *)buffer);
     if (status < 0) {
         apta_result_release(parsed);
-        if (result_out != NULL) {
-            *result_out = NULL;
-        }
         return status;
     }
 
