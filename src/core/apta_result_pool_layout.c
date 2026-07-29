@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_result_pool_layout.h"
+#include "../beatgrid/apta_s6_internal.h"
 
 #include <stdalign.h>
 #include <string.h>
@@ -80,8 +81,12 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     uint32_t detail_tiles;
     uint32_t detail_columns;
     uint32_t tempo_candidates;
-    uint32_t grid_coverage;
-    uint32_t grid_segments;
+    uint32_t local_grid_coverage;
+    uint32_t local_grid_segments;
+    uint32_t global_grid_state;
+    uint32_t global_grid_coverage;
+    uint32_t global_grid_segments;
+    uint32_t global_grid_beats;
     size_t slot_offset;
     size_t pool_offset;
     size_t slots_bytes;
@@ -122,12 +127,24 @@ apta_status_t apta_internal_result_pool_calculate_layout(
         (config->requested_features & APTA_FEATURE_BPM) != 0u
             ? APTA_INTERNAL_MAX_TEMPO_CANDIDATES
             : 0u;
-    grid_coverage =
+    local_grid_coverage =
         (config->requested_features &
          APTA_FEATURE_LOCAL_BEATGRID) != 0u
             ? 1u
             : 0u;
-    grid_segments = grid_coverage;
+    local_grid_segments = local_grid_coverage;
+    global_grid_state =
+        (config->requested_features &
+         APTA_FEATURE_GLOBAL_BEATGRID) != 0u
+            ? 1u
+            : 0u;
+    global_grid_coverage = global_grid_state;
+    global_grid_segments = global_grid_state != 0u
+                               ? APTA_INTERNAL_GLOBAL_MAX_SEGMENTS
+                               : 0u;
+    global_grid_beats = global_grid_state != 0u
+                            ? APTA_INTERNAL_GLOBAL_MAX_BEATS
+                            : 0u;
 
     slot_offset = 0u;
     if (!apta_pool_append_region(
@@ -169,15 +186,39 @@ apta_status_t apta_internal_result_pool_calculate_layout(
         !apta_pool_append_region(
             &slot_offset,
             alignof(apta_frame_range_t),
-            grid_coverage,
+            local_grid_coverage,
             sizeof(apta_frame_range_t),
             &layout_out->local_grid_coverage_offset) ||
         !apta_pool_append_region(
             &slot_offset,
             alignof(apta_grid_segment_t),
-            grid_segments,
+            local_grid_segments,
             sizeof(apta_grid_segment_t),
             &layout_out->local_grid_segments_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_internal_s6_result_state_t),
+            global_grid_state,
+            sizeof(apta_internal_s6_result_state_t),
+            &layout_out->global_grid_state_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_frame_range_t),
+            global_grid_coverage,
+            sizeof(apta_frame_range_t),
+            &layout_out->global_grid_coverage_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_grid_segment_t),
+            global_grid_segments,
+            sizeof(apta_grid_segment_t),
+            &layout_out->global_grid_segments_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
+            alignof(apta_beat_t),
+            global_grid_beats,
+            sizeof(apta_beat_t),
+            &layout_out->global_grid_beats_offset) ||
         !apta_pool_append_region(
             &slot_offset,
             alignof(uint8_t),
@@ -234,8 +275,11 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     layout_out->detail_tile_capacity = detail_tiles;
     layout_out->detail_column_capacity = detail_columns;
     layout_out->tempo_candidate_capacity = tempo_candidates;
-    layout_out->local_grid_coverage_capacity = grid_coverage;
-    layout_out->local_grid_segment_capacity = grid_segments;
+    layout_out->local_grid_coverage_capacity = local_grid_coverage;
+    layout_out->local_grid_segment_capacity = local_grid_segments;
+    layout_out->global_grid_coverage_capacity = global_grid_coverage;
+    layout_out->global_grid_segment_capacity = global_grid_segments;
+    layout_out->global_grid_beat_capacity = global_grid_beats;
     layout_out->metadata_capacity = APTA_METADATA_MAX_TOTAL_BYTES;
     layout_out->slot_count = APTA_INTERNAL_RESULT_SLOT_COUNT;
     return APTA_STATUS_OK;
