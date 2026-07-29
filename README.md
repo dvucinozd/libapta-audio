@@ -37,7 +37,7 @@ the POSIX reference tools.
 | Memory control | Custom allocator, memory budget, static session workspace and two-slot bounded result pools | Resource-class certification is not yet claimed |
 | Desktop input | Reference WAV decoder for PCM16, packed PCM24, PCM32 and float32; mono/stereo | Other codecs require an application or third-party decoder backend |
 | Embedded integration | ESP-IDF component, cooperative example and three bounded memory profiles | Cross-build verified; physical hardware timing and memory high-water marks remain validation gates |
-| Portability | ISO C11 core with C++11 header/ABI compile checks | A second independent platform is Stage S8; the current MSVC preflight is not green |
+| Portability | ISO C11 core with C++11 header/ABI compile checks and a green MSVC 2022 core build/test preflight | A second independent platform integration is still Stage S8 |
 
 ## Functional implementation stages
 
@@ -168,6 +168,21 @@ cmake -S . -B build-core \
 cmake --build build-core --parallel
 ctest --test-dir build-core --output-on-failure
 ```
+
+On Windows with Visual Studio 2022, build and test the portable core with:
+
+```powershell
+cmake -S . -B build-windows `
+  -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF `
+  -DAPTA_BUILD_TOOLS=OFF
+cmake --build build-windows --config Release --parallel
+ctest --test-dir build-windows -C Release --output-on-failure
+```
+
+The build checks that the selected MSVC toolchain supports C11 atomics and
+enables the required compiler option for the core and white-box tests. This is
+a core portability preflight; it does not provide a Windows file, decoder or
+runtime adapter.
 
 ### CMake options
 
@@ -338,8 +353,8 @@ The reference workflows generate click-track WAV and `.apta` parser seeds at run
   self-test evidence exist. It is not formal certification.
 - CI cross-builds the ESP-IDF examples but does not flash or execute them on
   physical hardware.
-- The Windows/MSVC job is currently a portability preflight with a known C11
-  atomics compilation failure, not a supported Windows integration.
+- The Windows/MSVC job is a passing portable-core build/test preflight, not a
+  supported Windows adapter or complete Stage S8 platform integration.
 - Long-running fuzzing, cross-endian interoperability, a second independent
   implementation and real-device performance measurements remain release
   gates.
