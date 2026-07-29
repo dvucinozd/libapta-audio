@@ -32,7 +32,7 @@ apta_status_t apta_internal_result_pool_create(
         apta_internal_context_allocate(
             context,
             layout.total_bytes,
-            alignof(max_align_t),
+            APTA_INTERNAL_MAX_ALIGNMENT,
             APTA_MEMORY_PERSISTENT);
     if (pool == NULL) {
         return APTA_ERROR_OUT_OF_MEMORY;

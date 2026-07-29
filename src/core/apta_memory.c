@@ -104,7 +104,7 @@ void *apta_internal_context_allocate(
         raw_memory = context->allocator.allocate(
             context->allocator.user_data,
             total_size,
-            alignof(max_align_t),
+            APTA_INTERNAL_MAX_ALIGNMENT,
             flags);
     } else {
         (void)flags;

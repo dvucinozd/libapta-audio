@@ -92,7 +92,7 @@ static apta_status_t apta_workspace_validate_config(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     if (((uintptr_t)config->static_workspace &
-         (uintptr_t)(alignof(max_align_t) - 1u)) != 0u) {
+         (uintptr_t)(APTA_INTERNAL_MAX_ALIGNMENT - 1u)) != 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     if (config->static_workspace_size <

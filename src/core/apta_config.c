@@ -265,7 +265,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
 
         requirements_out->minimum_bytes = pool_layout.total_bytes;
         requirements_out->recommended_bytes = pool_layout.total_bytes;
-        requirements_out->required_alignment = alignof(max_align_t);
+        requirements_out->required_alignment = APTA_INTERNAL_MAX_ALIGNMENT;
         requirements_out->flags =
             APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL;
         memset(
@@ -281,7 +281,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
             ? apta_memory_waveform_recommendation(
                   config->requested_features)
             : requirements_out->minimum_bytes;
-    requirements_out->required_alignment = alignof(max_align_t);
+    requirements_out->required_alignment = APTA_INTERNAL_MAX_ALIGNMENT;
     requirements_out->flags = 0u;
     memset(requirements_out->reserved32, 0, sizeof(requirements_out->reserved32));
 

@@ -227,14 +227,14 @@ apta_status_t apta_internal_result_pool_calculate_layout(
             &layout_out->metadata_offset) ||
         !apta_pool_align_size(
             slot_offset,
-            alignof(max_align_t),
+            APTA_INTERNAL_MAX_ALIGNMENT,
             &layout_out->slot_bytes)) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 
     if (!apta_pool_align_size(
             sizeof(apta_internal_result_pool_control_t),
-            alignof(max_align_t),
+            APTA_INTERNAL_MAX_ALIGNMENT,
             &pool_offset) ||
         !apta_pool_multiply_size(
             APTA_INTERNAL_RESULT_SLOT_COUNT,

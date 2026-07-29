@@ -7,6 +7,8 @@
 
 #include <apta/apta.h>
 
+#include "test_alignment.h"
+
 #define SAMPLE_RATE 48000u
 #define BLOCK_FRAMES 4096u
 #define MAX_WORKSPACE_BYTES 1572864u
@@ -21,7 +23,7 @@
     } while (0)
 
 typedef union {
-    max_align_t alignment;
+    apta_test_max_align_t alignment;
     uint8_t bytes[MAX_WORKSPACE_BYTES];
 } aligned_workspace_t;
 

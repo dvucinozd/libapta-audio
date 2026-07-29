@@ -6,6 +6,8 @@
 
 #include <apta/apta.h>
 
+#include "test_alignment.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -16,7 +18,7 @@
     } while (0)
 
 typedef union {
-    max_align_t alignment;
+    apta_test_max_align_t alignment;
     uint8_t bytes[64];
 } aligned_small_workspace_t;
 
