@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: Apache-2.0
+#ifndef APTA_S6_INTERNAL_H
+#define APTA_S6_INTERNAL_H
+
+#include "../core/apta_internal.h"
+
+struct apta_internal_s6_session_state {
+    apta_internal_onset_bin_t *global_bins;
+    uint32_t global_bin_capacity;
+
+    apta_grid_segment_t segments[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
+    uint32_t segment_count;
+
+    apta_beat_t *beats;
+    uint32_t beat_count;
+    uint32_t beat_capacity;
+
+    apta_frame_range_t requested_range;
+    apta_frame_range_t evidence_range;
+    apta_frame_range_t applicability_range;
+    apta_frame_range_t coverage_range;
+
+    apta_grid_revision_view_t revision;
+
+    apta_grid_representation_t representation;
+    apta_feature_state_t state;
+    apta_confidence_value_t confidence;
+    uint8_t reserved8[3];
+    uint32_t flags;
+
+    uint32_t has_global_grid;
+    uint32_t has_dynamic_tempo;
+    uint32_t revision_pending;
+    uint32_t revision_id;
+    uint32_t previous_revision_id;
+    uint64_t signature;
+    uint64_t mutation_serial;
+    uint64_t published_serial;
+};
+
+struct apta_internal_s6_result_state {
+    apta_grid_view_t global_grid;
+    apta_frame_range_t *coverage_ranges;
+    apta_grid_segment_t *segments;
+    apta_beat_t *beats;
+    apta_grid_revision_view_t revision;
+};
+
+#endif /* APTA_S6_INTERNAL_H */
