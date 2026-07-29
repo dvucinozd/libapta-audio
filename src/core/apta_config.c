@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
 #include "apta_result_pool_layout.h"
+#include "../beatgrid/apta_s6_internal.h"
 
 #include <stdalign.h>
 #include <string.h>
@@ -123,6 +124,8 @@ static size_t apta_memory_waveform_recommendation(
     size_t detail_snapshot = 0u;
     size_t s4_session = 0u;
     size_t s4_snapshots = 0u;
+    size_t s6_session = 0u;
+    size_t s6_snapshots = 0u;
 
     if ((requested_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
         detail_snapshot =
@@ -142,6 +145,21 @@ static size_t apta_memory_waveform_recommendation(
                   sizeof(apta_frame_range_t) +
                   sizeof(apta_grid_segment_t));
     }
+    if ((requested_features & APTA_INTERNAL_S6_FEATURES) != 0u) {
+        s6_session =
+            sizeof(apta_internal_s6_session_state_t) +
+            (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY *
+                sizeof(apta_internal_onset_bin_t) +
+            (size_t)APTA_INTERNAL_GLOBAL_MAX_BEATS *
+                sizeof(apta_beat_t);
+        s6_snapshots =
+            2u * (sizeof(apta_internal_s6_result_state_t) +
+                  sizeof(apta_frame_range_t) +
+                  (size_t)APTA_INTERNAL_GLOBAL_MAX_SEGMENTS *
+                      sizeof(apta_grid_segment_t) +
+                  (size_t)APTA_INTERNAL_GLOBAL_MAX_BEATS *
+                      sizeof(apta_beat_t));
+    }
 
     return sizeof(apta_session_t) +
            result_generations +
@@ -152,7 +170,9 @@ static size_t apta_memory_waveform_recommendation(
            overview_snapshot_spans +
            detail_snapshot +
            s4_session +
-           s4_snapshots;
+           s4_snapshots +
+           s6_session +
+           s6_snapshots;
 }
 
 apta_status_t APTA_CALL apta_query_memory_requirements(
@@ -164,8 +184,14 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
         APTA_FEATURE_WAVEFORM_DETAIL |
         APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID |
+        APTA_FEATURE_GLOBAL_BEATGRID |
+        APTA_FEATURE_DYNAMIC_TEMPO |
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_GRID_LOCKING;
+    const apta_feature_mask_t waveform_dependency =
+        APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_INTERNAL_S4_FEATURES |
+        APTA_INTERNAL_S6_FEATURES;
     apta_internal_result_pool_layout_t pool_layout;
     apta_status_t status;
 
@@ -196,18 +222,30 @@ apta_status_t APTA_CALL apta_query_memory_requirements(
     if ((config->requested_features & ~supported_features) != 0u) {
         return APTA_ERROR_UNSUPPORTED;
     }
-    if ((config->requested_features &
-         (APTA_FEATURE_WAVEFORM_DETAIL | APTA_INTERNAL_S4_FEATURES)) != 0u &&
+    if ((config->requested_features & waveform_dependency) != 0u &&
         (config->requested_features &
          APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
-    if ((config->requested_features & APTA_FEATURE_LOCAL_BEATGRID) != 0u &&
+    if ((config->requested_features &
+         APTA_FEATURE_LOCAL_BEATGRID) != 0u &&
         (config->requested_features & APTA_FEATURE_BPM) == 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
+    if ((config->requested_features &
+         APTA_FEATURE_GLOBAL_BEATGRID) != 0u &&
+        (config->requested_features & APTA_FEATURE_BPM) == 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if ((config->requested_features &
+         APTA_FEATURE_DYNAMIC_TEMPO) != 0u &&
+        (config->requested_features &
+         APTA_FEATURE_GLOBAL_BEATGRID) == 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
     if ((config->requested_features & APTA_FEATURE_GRID_LOCKING) != 0u &&
-        (config->requested_features & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        (config->requested_features &
+         APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
