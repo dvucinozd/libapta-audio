@@ -134,7 +134,8 @@ apta_status_t apta_tool_write_file_atomic(
     int descriptor;
     FILE *file;
     size_t written;
-    int saved_errno;
+    int failed = 0;
+    int saved_errno = 0;
 
     if (path == NULL || path[0] == '\0' || (size != 0u && data == NULL)) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -166,9 +167,23 @@ apta_status_t apta_tool_write_file_atomic(
     }
 
     written = size == 0u ? 0u : fwrite(data, 1u, size, file);
-    if (written != size || fflush(file) != 0 || fsync(descriptor) != 0 ||
-        fclose(file) != 0) {
-        saved_errno = errno;
+    if (written != size) {
+        failed = 1;
+        saved_errno = errno != 0 ? errno : EIO;
+    }
+    if (!failed && fflush(file) != 0) {
+        failed = 1;
+        saved_errno = errno != 0 ? errno : EIO;
+    }
+    if (!failed && fsync(descriptor) != 0) {
+        failed = 1;
+        saved_errno = errno != 0 ? errno : EIO;
+    }
+    if (fclose(file) != 0 && !failed) {
+        failed = 1;
+        saved_errno = errno != 0 ? errno : EIO;
+    }
+    if (failed) {
         (void)unlink(temporary_path);
         free(temporary_path);
         errno = saved_errno;
@@ -208,25 +223,25 @@ apta_status_t apta_tool_parse_feature_list(
     cursor = text;
     while (*cursor != '\0') {
         const char *end = strchr(cursor, ',');
-        size_t size = end != NULL ? (size_t)(end - cursor) : strlen(cursor);
-        if (size == 0u) {
+        size_t token_size = end != NULL ? (size_t)(end - cursor) : strlen(cursor);
+        if (token_size == 0u) {
             return APTA_ERROR_INVALID_ARGUMENT;
         }
-        if (apta_tool_token_equals(cursor, size, "waveform")) {
+        if (apta_tool_token_equals(cursor, token_size, "waveform")) {
             features |= APTA_FEATURE_WAVEFORM_OVERVIEW;
-        } else if (apta_tool_token_equals(cursor, size, "detail")) {
+        } else if (apta_tool_token_equals(cursor, token_size, "detail")) {
             features |= APTA_FEATURE_WAVEFORM_OVERVIEW |
                         APTA_FEATURE_WAVEFORM_DETAIL;
-        } else if (apta_tool_token_equals(cursor, size, "bpm")) {
+        } else if (apta_tool_token_equals(cursor, token_size, "bpm")) {
             features |= APTA_FEATURE_WAVEFORM_OVERVIEW |
                         APTA_FEATURE_BPM |
                         APTA_FEATURE_CONFIDENCE;
-        } else if (apta_tool_token_equals(cursor, size, "beatgrid")) {
+        } else if (apta_tool_token_equals(cursor, token_size, "beatgrid")) {
             features |= APTA_FEATURE_WAVEFORM_OVERVIEW |
                         APTA_FEATURE_BPM |
                         APTA_FEATURE_LOCAL_BEATGRID |
                         APTA_FEATURE_CONFIDENCE;
-        } else if (apta_tool_token_equals(cursor, size, "all")) {
+        } else if (apta_tool_token_equals(cursor, token_size, "all")) {
             features |= APTA_FEATURE_WAVEFORM_OVERVIEW |
                         APTA_FEATURE_WAVEFORM_DETAIL |
                         APTA_FEATURE_BPM |
