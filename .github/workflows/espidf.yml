@@ -6,6 +6,7 @@ on:
       - "ports/espidf/**"
       - "examples/espidf/**"
       - "tests/unit/espidf_port.c"
+      - "tests/unit/espidf_memory_profiles.c"
       - "tests/stubs/espidf/**"
       - ".github/workflows/espidf.yml"
   push:
@@ -15,6 +16,7 @@ on:
       - "ports/espidf/**"
       - "examples/espidf/**"
       - "tests/unit/espidf_port.c"
+      - "tests/unit/espidf_memory_profiles.c"
       - "tests/stubs/espidf/**"
       - ".github/workflows/espidf.yml"
 
@@ -34,13 +36,28 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Run bounded embedded memory profiles
+        run: |
+          cmake -S . -B build-profiles \
+            -DAPTA_BUILD_TESTS=OFF \
+            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
+            -DAPTA_BUILD_TOOLS=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-profiles --parallel 2
+          cc -std=c11 -Wall -Wextra -Wpedantic \
+            -Iinclude \
+            tests/unit/espidf_memory_profiles.c \
+            build-profiles/libapta.a -lm \
+            -o build-profiles/apta-espidf-memory-profiles
+          ./build-profiles/apta-espidf-memory-profiles
+
       - name: Build scalar port for ESP32
         run: >-
           docker run --rm
           -v "${GITHUB_WORKSPACE}:/project"
           -w /project/examples/espidf/cooperative_scheduler
           espressif/idf:v6.0.2
-          idf.py -B build-esp32 set-target esp32 build
+          idf.py -B build-esp32 set-target esp32 build size-components
 
       - name: Build ESP-DSP port for ESP32-S3
         run: >-
@@ -50,7 +67,7 @@ jobs:
           espressif/idf:v6.0.2
           idf.py -B build-esp32s3
           -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.dsp.defaults"
-          set-target esp32s3 build
+          set-target esp32s3 build size-components
 
       - name: Verify component artifacts
         run: |
