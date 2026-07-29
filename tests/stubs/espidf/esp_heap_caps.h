@@ -11,7 +11,7 @@
 #define MALLOC_CAP_DMA      (1u << 3)
 
 void *heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps);
-void heap_caps_aligned_free(void *memory);
+void heap_caps_free(void *memory);
 size_t heap_caps_get_free_size(uint32_t caps);
 
 #endif
