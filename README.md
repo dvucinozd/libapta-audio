@@ -2,9 +2,9 @@
 
 `libapta-audio` is the home of the Adaptive Progressive Track Analysis (APTA) standard and its portable ISO C11 reference implementation.
 
-APTA provides progressive, bounded and portable audio analysis for waveform, tempo and local beatgrid data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, the versioned `.apta` container and POSIX reference desktop tools.
+APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container and POSIX reference desktop tools.
 
-> Project status: functional implementation candidate through roadmap Stage S5. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.
+> Project status: functional implementation candidate through roadmap Stage S6. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.
 
 ## Implemented stages
 
@@ -14,10 +14,17 @@ APTA provides progressive, bounded and portable audio analysis for waveform, tem
 - S3 — `.apta` container
 - S4 — Tempo and local grid
 - S5 — Reference desktop tools
+- S6 — Global grid and dynamic tempo
 
 Current roadmap status:
 
 [`docs/status/APTA-ROADMAP-STATUS.md`](docs/status/APTA-ROADMAP-STATUS.md)
+
+Stage S6 status and evidence:
+
+- [`docs/status/S6-GLOBAL-GRID-DYNAMIC-TEMPO-STATUS.md`](docs/status/S6-GLOBAL-GRID-DYNAMIC-TEMPO-STATUS.md)
+- [`docs/reference/APTA-S6-CONTAINER-0.1.md`](docs/reference/APTA-S6-CONTAINER-0.1.md)
+- [`docs/conformance/APTA-S6-READINESS-0.1.md`](docs/conformance/APTA-S6-READINESS-0.1.md)
 
 ## Repository layout
 
@@ -127,13 +134,13 @@ apta-validate
 
 ## Testing
 
-The current suite contains unit, generated-audio integration, malformed-input, allocation-failure, concurrency, sanitizer, truncation and fuzz-smoke coverage.
+The current suite contains unit, generated-audio integration, malformed-input, allocation-failure, concurrency, sanitizer, exhaustive truncation and fuzz-smoke coverage. Stage S6 adds deterministic global-grid, dynamic-tempo, explicit-beat, revision and `GGRD`/`REVN` interchange vectors.
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-The Stage S5 workflow generates its click-track WAV at runtime. No third-party audio recording is required or committed.
+The reference workflows generate click-track WAV and `.apta` parser seeds at runtime. No third-party audio recording is required or committed.
 
 ## License and copyright
 
