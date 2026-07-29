@@ -77,6 +77,77 @@ if(TARGET apta_decoder_wav)
     apta_add_desktop_test(apta_desktop_wav_pull apta.desktop.wav_pull unit/desktop_wav_pull_integration.c)
 endif()
 
+if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)
+    set(APTA_CLI_WAV "${CMAKE_CURRENT_BINARY_DIR}/apta-cli-click.wav")
+    set(APTA_CLI_CONTAINER "${CMAKE_CURRENT_BINARY_DIR}/apta-cli-result.apta")
+    set(APTA_CLI_CORRUPT "${CMAKE_CURRENT_BINARY_DIR}/apta-cli-corrupt.apta")
+
+    add_executable(apta_desktop_cli_fixture unit/desktop_cli_fixture.c)
+    target_compile_definitions(apta_desktop_cli_fixture PRIVATE _POSIX_C_SOURCE=200809L)
+    set_target_properties(
+        apta_desktop_cli_fixture
+        PROPERTIES
+            C_STANDARD 11
+            C_STANDARD_REQUIRED YES)
+
+    add_test(
+        NAME apta.tools.fixture_wav
+        COMMAND apta_desktop_cli_fixture wav ${APTA_CLI_WAV})
+    set_tests_properties(
+        apta.tools.fixture_wav
+        PROPERTIES
+            FIXTURES_SETUP apta_cli_wav)
+
+    add_test(
+        NAME apta.tools.analyze
+        COMMAND apta_analyze ${APTA_CLI_WAV}
+                --output ${APTA_CLI_CONTAINER}
+                --profile performance)
+    set_tests_properties(
+        apta.tools.analyze
+        PROPERTIES
+            FIXTURES_REQUIRED apta_cli_wav
+            FIXTURES_SETUP apta_cli_container
+            PASS_REGULAR_EXPRESSION "analyzed")
+
+    add_test(
+        NAME apta.tools.validate_strict
+        COMMAND apta_validate ${APTA_CLI_CONTAINER} --strict)
+    set_tests_properties(
+        apta.tools.validate_strict
+        PROPERTIES
+            FIXTURES_REQUIRED apta_cli_container
+            PASS_REGULAR_EXPRESSION "valid:")
+
+    add_test(
+        NAME apta.tools.inspect_json
+        COMMAND apta_inspect ${APTA_CLI_CONTAINER} --json --section TEMP)
+    set_tests_properties(
+        apta.tools.inspect_json
+        PROPERTIES
+            FIXTURES_REQUIRED apta_cli_container
+            PASS_REGULAR_EXPRESSION "tempo_millibpm")
+
+    add_test(
+        NAME apta.tools.fixture_corrupt
+        COMMAND apta_desktop_cli_fixture truncate
+                ${APTA_CLI_CONTAINER} ${APTA_CLI_CORRUPT})
+    set_tests_properties(
+        apta.tools.fixture_corrupt
+        PROPERTIES
+            FIXTURES_REQUIRED apta_cli_container
+            FIXTURES_SETUP apta_cli_corrupt)
+
+    add_test(
+        NAME apta.tools.reject_corrupt
+        COMMAND apta_validate ${APTA_CLI_CORRUPT} --strict --quiet)
+    set_tests_properties(
+        apta.tools.reject_corrupt
+        PROPERTIES
+            FIXTURES_REQUIRED apta_cli_corrupt
+            WILL_FAIL TRUE)
+endif()
+
 apta_add_c_test(apta_memory_requirements apta.memory.requirements unit/memory_requirements.c)
 apta_add_c_test(apta_static_workspace apta.memory.static_workspace unit/static_workspace.c)
 apta_add_c_test(apta_static_workspace_metadata apta.memory.static_workspace_metadata unit/static_workspace_metadata.c)
