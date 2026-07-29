@@ -64,11 +64,13 @@ jobs:
           mkdir -p build-sanitized/fuzz-corpus
           cd build-sanitized/fuzz-corpus
           ../tests/apta_wovr_seed_generator
+          ../tests/apta_s6_seed_generator
           test -s valid-final.apta
           test -s valid-sparse-partial.apta
           test -s valid-wdtl.apta
           test -s valid-meta.apta
           test -s valid-s4.apta
+          test -s valid-s6.apta
 
       - name: Run bounded fuzz smoke
         run: >-
