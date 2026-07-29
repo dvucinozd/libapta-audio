@@ -10,6 +10,13 @@
 **Interchange format:** `.apta`  
 **Primary domain:** Progressive audio-track analysis for DJ players, embedded devices, desktop applications and servers  
 
+> This document preserves the original target architecture. Its repository
+> tree, licensing model, platform list and roadmap are proposals rather than a
+> current implementation inventory. See
+> [`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md) for
+> current status and [`../../specification/APTA-SPEC.md`](../../specification/APTA-SPEC.md)
+> for normative precedence.
+
 ---
 
 ## 1. Purpose
@@ -72,7 +79,7 @@ The standard defines:
 
 ### 2.2. Included in the reference library
 
-The reference `libapta` implementation provides:
+The target reference `libapta` implementation is intended to provide:
 
 - incremental waveform analysis;
 - three-band energy analysis;
@@ -174,6 +181,9 @@ The public specification should use the full name **Adaptive Progressive Track A
 ---
 
 ## 5. Repository structure
+
+The following tree is the proposed mature repository layout, not a statement
+that every listed file, backend or package target currently exists.
 
 ```text
 libapta-audio/

@@ -6,7 +6,7 @@ APTA provides progressive, bounded and portable audio analysis for waveform, tem
 
 > Project status: functional implementation candidate through roadmap Stage S7. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.
 
-## Implemented stages
+## Functional implementation stages
 
 - S0 — Foundation
 - S1 — Portable core API
@@ -40,12 +40,27 @@ Stage S6 status and evidence:
 - [`docs/`](docs/) — architecture, API, format, porting, review and roadmap documentation.
 - [`include/apta/`](include/apta/) — public C API headers.
 - [`src/`](src/) — portable core plus optional desktop adapter implementation.
-- [`backends/`](backends/) — replaceable DSP backends.
+- [`backends/`](backends/) — reserved scaffolding for future replaceable DSP
+  backend packages; the current reference algorithms are built from `src/`.
 - [`ports/`](ports/) — platform integration layers, including ESP-IDF.
 - [`tools/`](tools/) — `apta-analyze`, `apta-inspect` and `apta-validate`.
 - [`tests/`](tests/) — unit, integration, conformance, fuzz and generated-fixture tests.
 - [`examples/`](examples/) — usage and platform examples.
-- [`packaging/`](packaging/) — build-system and package-manager integration.
+- [`packaging/`](packaging/) — reserved packaging scaffolding; install and
+  package-manager rules are not implemented yet.
+
+## Documentation
+
+- [`specification/README.md`](specification/README.md) — normative Working
+  Draft 0.1 document set.
+- [`docs/README.md`](docs/README.md) — API contracts, implementation evidence,
+  architecture, platform guidance and the current roadmap status.
+- [`docs/status/APTA-ROADMAP-STATUS.md`](docs/status/APTA-ROADMAP-STATUS.md) —
+  current implementation and validation boundary.
+
+Documents that name a source commit or CI run are evidence snapshots for that
+milestone. They are intentionally not rewritten to imply that the historical
+run validated later features.
 
 ## Current architecture draft
 
@@ -72,6 +87,8 @@ ctest --test-dir build --output-on-failure
 - `APTA_BUILD_FUZZING` — build libFuzzer targets; default `OFF`.
 - `APTA_BUILD_DESKTOP_ADAPTERS` — build `apta::port_posix` and `apta::decoder_wav`; default `ON`.
 - `APTA_BUILD_TOOLS` — build the three reference CLI tools; default `ON`.
+- `APTA_WARNINGS_AS_ERRORS` — treat `apta::core` compiler warnings as errors;
+  default `OFF`.
 
 The tool build requires the desktop adapters.
 
@@ -153,6 +170,11 @@ Detailed desktop-tool contract:
 
 [`docs/reference/APTA-DESKTOP-TOOLS-0.1.md`](docs/reference/APTA-DESKTOP-TOOLS-0.1.md)
 
+The current S5 command-line feature list and inspector cover waveform, detail,
+tempo and local-grid data. Stage S6 global-grid and revision data are available
+through the library API and container reader/writer, but `apta-analyze` and
+`apta-inspect --section` do not yet expose `GGRD` or `REVN`.
+
 ## CMake targets
 
 Current native reference targets include:
@@ -176,7 +198,12 @@ The ESP-IDF integration is an IDF component under `ports/espidf`, not a native C
 
 ## Testing
 
-The native suite registers 69 tests and contains unit, generated-audio integration, malformed-input, allocation-failure, concurrency, sanitizer, exhaustive truncation and fuzz-smoke coverage.
+The default POSIX build registers 69 CTest tests: 59 portable core tests, four
+POSIX adapter/decoder tests and six generated CLI fixture tests. A core-only
+build with desktop adapters and tools disabled registers 59 tests. The suite
+contains unit, generated-audio integration, malformed-input,
+allocation-failure, concurrency, exhaustive truncation and parser-hardening
+coverage; sanitizer and fuzz-smoke execution are separate CI steps.
 
 ```bash
 ctest --test-dir build --output-on-failure
@@ -193,6 +220,9 @@ The reference workflows generate click-track WAV and `.apta` parser seeds at run
 
 ## License and copyright
 
-See [`LICENSE`](LICENSE) and the SPDX identifier in each source file.
+The repository currently has a licensing inconsistency that must be resolved
+before a release: [`LICENSE`](LICENSE) contains MIT terms, while source files
+carry `SPDX-License-Identifier: Apache-2.0`. Neither this README nor the
+architecture draft resolves that conflict.
 
 Copyright (c) Daniel Vučinović.

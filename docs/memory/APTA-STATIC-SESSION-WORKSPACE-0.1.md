@@ -3,6 +3,11 @@
 **Status:** Phase-four implementation candidate  
 **Scope:** caller-owned session, mutable overview state and session metadata
 
+> Historical phase snapshot: the immutable-publication gap described here was
+> closed by the two-slot result-pool implementation. See
+> [`APTA-BOUNDED-RESULT-SLOTS-0.1.md`](APTA-BOUNDED-RESULT-SLOTS-0.1.md) and
+> [`APTA-BOUNDED-RESULT-POOL-STORAGE-0.1.md`](APTA-BOUNDED-RESULT-POOL-STORAGE-0.1.md).
+
 ## Purpose
 
 The workspace path activates the existing `static_workspace` and `static_workspace_size` fields in `apta_session_config_t` without changing the public structure layout.
@@ -90,6 +95,9 @@ The workspace tests verify:
 
 The controlled PCM workload never completes an overview column. This prevents immutable result publication from obscuring the allocator-call evidence. Across all push/process operations, the context allocator remains at the three expected calls: context creation, initial result publication and the `CREATED` to `ACTIVE` result transition.
 
-## Next bounded phase
+## Subsequent bounded phase
 
-The remaining zero-heap gap is immutable result publication. Closing it requires an explicit bounded result-slot model that preserves the existing rule that acquired results may outlive the session. A result-slot design and backpressure policy must be specified before snapshot allocations can safely move into caller-owned storage.
+The gap at this snapshot was immutable result publication. It was subsequently
+closed with a context-owned, preallocated two-slot result pool that preserves
+result lifetime beyond session/workspace destruction and reports deterministic
+slot-exhaustion backpressure.

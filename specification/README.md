@@ -1,25 +1,30 @@
 # APTA specification
 
-This directory is reserved for normative Adaptive Progressive Track Analysis documents.
+This directory contains the normative Adaptive Progressive Track Analysis
+Working Draft 0.1 document set. Start with [`APTA-SPEC.md`](APTA-SPEC.md).
 
 Normative documents must clearly use RFC 2119-style requirement terms such as MUST, MUST NOT, SHOULD, SHOULD NOT and MAY.
 
-Planned documents:
+Current documents:
 
-- `APTA-SPEC.md`
-- `normative-language.md`
-- `terminology.md`
-- `processing-model.md`
-- `pcm-input.md`
-- `time-model.md`
-- `progressive-scheduling.md`
-- `waveform.md`
-- `tempo.md`
-- `beatgrid.md`
-- `lifecycle.md`
-- `confidence.md`
-- `result-model.md`
-- `file-format.md`
-- `profiles.md`
-- `extensions.md`
-- `conformance.md`
+- [`APTA-SPEC.md`](APTA-SPEC.md) — master scope, precedence and document set.
+- [`normative-language.md`](normative-language.md)
+- [`terminology.md`](terminology.md)
+- [`time-model.md`](time-model.md)
+- [`pcm-input.md`](pcm-input.md)
+- [`progressive-scheduling.md`](progressive-scheduling.md)
+- [`waveform.md`](waveform.md)
+- [`tempo.md`](tempo.md)
+- [`beatgrid.md`](beatgrid.md)
+- [`lifecycle.md`](lifecycle.md)
+- [`confidence.md`](confidence.md)
+- [`result-model.md`](result-model.md)
+- [`file-format.md`](file-format.md)
+- [`wovr-state-flags.md`](wovr-state-flags.md)
+- [`profiles.md`](profiles.md)
+- [`extensions.md`](extensions.md)
+- [`conformance.md`](conformance.md)
+
+The original architecture proposed a separate `processing-model.md`; Core 0.1
+currently defines that material across PCM input, scheduling, lifecycle and
+result-model documents instead.

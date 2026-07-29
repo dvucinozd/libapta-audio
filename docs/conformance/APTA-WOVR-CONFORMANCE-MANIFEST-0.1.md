@@ -5,6 +5,12 @@
 **Primary verification:** GitHub Actions PR CI run `#153`  
 **Serialization verification:** PR CI runs `#143`, `#145`, `#151` and `#153`
 
+> Evidence snapshot: this manifest records merge `2bdbf32f` and its 34-test
+> package. The independent fixture manifest, 32-bit execution and ESP-IDF
+> cross-build evidence listed as open below were added later; current status is
+> maintained in
+> [`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md).
+
 ## Scope
 
 This manifest records self-tested behaviour of the version-1 `.apta` waveform container implementation:
