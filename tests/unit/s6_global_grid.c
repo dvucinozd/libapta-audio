@@ -8,6 +8,8 @@
 #define BLOCK_FRAMES 4096u
 #define TOTAL_FRAMES 1048576u
 #define SPLIT_FRAME (TOTAL_FRAMES / 2u)
+#define TEMPO_12_BIN 117188u
+#define TEMPO_9_BIN 156250u
 
 #define CHECK(condition)                                                     \
     do {                                                                     \
@@ -109,7 +111,12 @@ static int run_constant(apta_context_t *context)
             count = BLOCK_FRAMES;
         }
         CHECK(fill_and_push(
-                  session, first, count, 120000u, 120000u, &budget) == 0);
+                  session,
+                  first,
+                  count,
+                  TEMPO_12_BIN,
+                  TEMPO_12_BIN,
+                  &budget) == 0);
     }
     CHECK(finish_session(session, &budget) == 0);
 
@@ -126,8 +133,8 @@ static int run_constant(apta_context_t *context)
     CHECK(grid.segment_count == 1u);
     CHECK(grid.beat_count == 0u);
     CHECK(grid.segments != NULL);
-    CHECK(grid.segments[0].nominal_tempo_millibpm >= 105000u);
-    CHECK(grid.segments[0].nominal_tempo_millibpm <= 135000u);
+    CHECK(grid.segments[0].nominal_tempo_millibpm >= 116000u);
+    CHECK(grid.segments[0].nominal_tempo_millibpm <= 119000u);
     CHECK(grid.segments[0].revision != 0u);
 
     apta_grid_revision_view_init(&revision);
@@ -181,7 +188,12 @@ static int run_dynamic(apta_context_t *context)
             count = BLOCK_FRAMES;
         }
         CHECK(fill_and_push(
-                  session, first, count, 120000u, 150000u, &budget) == 0);
+                  session,
+                  first,
+                  count,
+                  TEMPO_12_BIN,
+                  TEMPO_9_BIN,
+                  &budget) == 0);
         if (first + count == SPLIT_FRAME) {
             mid_result = apta_session_acquire_result(session);
             CHECK(mid_result != NULL);
@@ -219,12 +231,12 @@ static int run_dynamic(apta_context_t *context)
     CHECK(final_grid.beat_count <= APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS);
     CHECK(final_grid.beats != NULL);
     CHECK((final_grid.flags & APTA_GRID_FLAG_DYNAMIC_TEMPO) != 0u);
-    CHECK(final_grid.segments[0].nominal_tempo_millibpm >= 105000u);
-    CHECK(final_grid.segments[0].nominal_tempo_millibpm <= 135000u);
+    CHECK(final_grid.segments[0].nominal_tempo_millibpm >= 116000u);
+    CHECK(final_grid.segments[0].nominal_tempo_millibpm <= 119000u);
     CHECK(final_grid.segments[final_grid.segment_count - 1u]
-              .nominal_tempo_millibpm >= 135000u);
+              .nominal_tempo_millibpm >= 154000u);
     CHECK(final_grid.segments[final_grid.segment_count - 1u]
-              .nominal_tempo_millibpm <= 170000u);
+              .nominal_tempo_millibpm <= 158000u);
     {
         uint32_t index;
         for (index = 1u; index < final_grid.beat_count; ++index) {
