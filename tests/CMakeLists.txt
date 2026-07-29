@@ -28,6 +28,18 @@ function(apta_add_cpp_test target test_name source)
     add_test(NAME ${test_name} COMMAND ${target})
 endfunction()
 
+function(apta_add_desktop_test target test_name source)
+    add_executable(${target} ${source})
+    target_link_libraries(
+        ${target}
+        PRIVATE
+            apta::core
+            apta::decoder_wav
+            apta::port_posix)
+    set_target_properties(${target} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+    add_test(NAME ${test_name} COMMAND ${target})
+endfunction()
+
 apta_add_c_test(apta_core_smoke apta.core.smoke unit/core_smoke.c)
 apta_add_c_test(apta_allocation_failure apta.core.allocation_failure unit/allocation_failure.c)
 apta_add_c_test(apta_cancellation apta.core.cancellation unit/cancellation.c)
@@ -56,6 +68,13 @@ apta_add_c_test(apta_s4_tempo_vectors apta.s4.tempo_vectors unit/s4_tempo_vector
 apta_add_c_test(apta_s4_focus apta.s4.focus unit/s4_focus.c)
 apta_add_c_test(apta_s4_serialization apta.serialization.s4 unit/s4_serialization.c)
 apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_failure unit/s4_allocation_failure.c)
+
+if(TARGET apta_decoder_wav)
+    apta_add_desktop_test(apta_desktop_posix_file apta.desktop.posix_file unit/desktop_posix_file.c)
+    apta_add_desktop_test(apta_desktop_wav_decoder apta.desktop.wav_decoder unit/desktop_wav_decoder.c)
+    apta_add_desktop_test(apta_desktop_wav_malformed apta.desktop.wav_malformed unit/desktop_wav_malformed.c)
+    apta_add_desktop_test(apta_desktop_wav_pull apta.desktop.wav_pull unit/desktop_wav_pull_integration.c)
+endif()
 
 apta_add_c_test(apta_memory_requirements apta.memory.requirements unit/memory_requirements.c)
 apta_add_c_test(apta_static_workspace apta.memory.static_workspace unit/static_workspace.c)
