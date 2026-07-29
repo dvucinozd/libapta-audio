@@ -1,0 +1,58 @@
+name: ESP-IDF
+
+on:
+  pull_request:
+    paths:
+      - "ports/espidf/**"
+      - "examples/espidf/**"
+      - "tests/unit/espidf_port.c"
+      - "tests/stubs/espidf/**"
+      - ".github/workflows/espidf.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "ports/espidf/**"
+      - "examples/espidf/**"
+      - "tests/unit/espidf_port.c"
+      - "tests/stubs/espidf/**"
+      - ".github/workflows/espidf.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: espidf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ESP-IDF 6.0.2 component builds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build scalar port for ESP32
+        run: >-
+          docker run --rm
+          -v "${GITHUB_WORKSPACE}:/project"
+          -w /project/examples/espidf/cooperative_scheduler
+          espressif/idf:v6.0.2
+          idf.py -B build-esp32 set-target esp32 build
+
+      - name: Build ESP-DSP port for ESP32-S3
+        run: >-
+          docker run --rm
+          -v "${GITHUB_WORKSPACE}:/project"
+          -w /project/examples/espidf/cooperative_scheduler
+          espressif/idf:v6.0.2
+          idf.py -B build-esp32s3
+          -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.dsp.defaults"
+          set-target esp32s3 build
+
+      - name: Verify component artifacts
+        run: |
+          test -s examples/espidf/cooperative_scheduler/build-esp32/apta_cooperative_scheduler.bin
+          test -s examples/espidf/cooperative_scheduler/build-esp32s3/apta_cooperative_scheduler.bin
