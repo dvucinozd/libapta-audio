@@ -63,8 +63,8 @@ static int apta_wav_is_extensible_guid(
     uint16_t *format_out)
 {
     static const uint8_t suffix[14] = {
-        0x00u, 0x00u, 0x10u, 0x00u, 0x80u, 0x00u, 0x00u,
-        0xAAu, 0x00u, 0x38u, 0x9Bu, 0x71u, 0x00u, 0x00u
+        0x00u, 0x00u, 0x00u, 0x00u, 0x10u, 0x00u, 0x80u,
+        0x00u, 0x00u, 0xAAu, 0x00u, 0x38u, 0x9Bu, 0x71u
     };
 
     if (memcmp(guid + 2u, suffix, sizeof(suffix)) != 0) {
@@ -239,6 +239,7 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
     apta_posix_file_t *file = NULL;
     uint8_t riff[12];
     uint64_t file_size;
+    uint64_t riff_end;
     uint64_t cursor;
     uint64_t data_offset = 0u;
     uint64_t data_size = 0u;
@@ -278,13 +279,14 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
         apta_posix_file_close(file);
         return status < 0 ? status : APTA_ERROR_UNSUPPORTED;
     }
-    if ((uint64_t)apta_wav_get_u32(riff + 4u) + 8u > file_size) {
+    riff_end = (uint64_t)apta_wav_get_u32(riff + 4u) + 8u;
+    if (riff_end < sizeof(riff) || riff_end > file_size) {
         apta_posix_file_close(file);
         return APTA_ERROR_CORRUPT_DATA;
     }
 
     cursor = 12u;
-    while (cursor + 8u <= file_size) {
+    while (cursor + 8u <= riff_end) {
         uint8_t chunk_header[8];
         uint32_t chunk_size;
         uint64_t payload_offset;
@@ -297,12 +299,12 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
         }
         chunk_size = apta_wav_get_u32(chunk_header + 4u);
         payload_offset = cursor + 8u;
-        if ((uint64_t)chunk_size > file_size - payload_offset) {
+        if ((uint64_t)chunk_size > riff_end - payload_offset) {
             apta_posix_file_close(file);
             return APTA_ERROR_CORRUPT_DATA;
         }
         next_offset = payload_offset + chunk_size + (chunk_size & 1u);
-        if (next_offset < payload_offset || next_offset > file_size + 1u) {
+        if (next_offset < payload_offset || next_offset > riff_end) {
             apta_posix_file_close(file);
             return APTA_ERROR_CORRUPT_DATA;
         }
@@ -331,10 +333,16 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
 
             if (parsed_format == APTA_WAV_FORMAT_EXTENSIBLE) {
                 uint16_t subformat;
+                uint16_t valid_bits;
                 if (chunk_size < 40u || apta_wav_get_u16(fmt + 16u) < 22u ||
                     !apta_wav_is_extensible_guid(fmt + 24u, &subformat)) {
                     apta_posix_file_close(file);
                     return APTA_ERROR_UNSUPPORTED;
+                }
+                valid_bits = apta_wav_get_u16(fmt + 18u);
+                if (valid_bits == 0u || valid_bits > bits_per_sample) {
+                    apta_posix_file_close(file);
+                    return APTA_ERROR_CORRUPT_DATA;
                 }
                 parsed_format = subformat;
             }
@@ -358,7 +366,7 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
         bits_per_sample == 0u || (bits_per_sample & 7u) != 0u ||
         block_align != channel_count * (bits_per_sample / 8u) ||
         block_align == 0u || data_size % block_align != 0u ||
-        byte_rate != sample_rate * (uint32_t)block_align) {
+        (uint64_t)byte_rate != (uint64_t)sample_rate * block_align) {
         apta_posix_file_close(file);
         return APTA_ERROR_CORRUPT_DATA;
     }
