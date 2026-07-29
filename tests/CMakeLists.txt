@@ -199,6 +199,14 @@ if(APTA_BUILD_FUZZING)
             C_STANDARD 11
             C_STANDARD_REQUIRED YES)
 
+    add_executable(apta_s6_seed_generator fuzz/s6_seed_generator.c)
+    target_link_libraries(apta_s6_seed_generator PRIVATE apta::core)
+    set_target_properties(
+        apta_s6_seed_generator
+        PROPERTIES
+            C_STANDARD 11
+            C_STANDARD_REQUIRED YES)
+
     add_executable(apta_wovr_reader_fuzz fuzz/wovr_reader_fuzz.c)
     target_link_libraries(apta_wovr_reader_fuzz PRIVATE apta::core)
     target_compile_options(apta_wovr_reader_fuzz PRIVATE -fsanitize=fuzzer)
