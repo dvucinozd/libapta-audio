@@ -19,6 +19,10 @@ typedef struct {
     size_t tempo_candidates_offset;
     size_t local_grid_coverage_offset;
     size_t local_grid_segments_offset;
+    size_t global_grid_state_offset;
+    size_t global_grid_coverage_offset;
+    size_t global_grid_segments_offset;
+    size_t global_grid_beats_offset;
     size_t metadata_offset;
 
     uint32_t overview_span_capacity;
@@ -28,6 +32,9 @@ typedef struct {
     uint32_t tempo_candidate_capacity;
     uint32_t local_grid_coverage_capacity;
     uint32_t local_grid_segment_capacity;
+    uint32_t global_grid_coverage_capacity;
+    uint32_t global_grid_segment_capacity;
+    uint32_t global_grid_beat_capacity;
     uint32_t metadata_capacity;
     uint32_t slot_count;
 } apta_internal_result_pool_layout_t;

@@ -4,6 +4,7 @@
 
 #include <apta/apta_config.h>
 #include <apta/apta_result.h>
+#include <apta/apta_s6.h>
 #include <apta/apta_source.h>
 
 #ifdef __cplusplus
@@ -39,6 +40,9 @@ apta_tempo_view_init(apta_tempo_view_t *view);
 
 APTA_API void APTA_CALL
 apta_grid_view_init(apta_grid_view_t *view);
+
+APTA_API void APTA_CALL
+apta_grid_revision_view_init(apta_grid_revision_view_t *view);
 
 #ifdef __cplusplus
 } /* extern "C" */

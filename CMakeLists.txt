@@ -46,11 +46,6 @@ if(APTA_ENABLE_SANITIZERS)
 endif()
 
 set_source_files_properties(
-    src/core/apta_config.c
-    PROPERTIES
-        COMPILE_DEFINITIONS "apta_query_memory_requirements=apta_query_memory_requirements_base")
-
-set_source_files_properties(
     src/serialization/apta_wovr_reader.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_result_parse=apta_result_parse_base")
@@ -126,6 +121,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_activation_base;apta_session_process=apta_session_process_activation_base")
 
 set_source_files_properties(
+    src/core/apta_session_pull_activation.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_s6_guard_base")
+
+set_source_files_properties(
     src/core/apta_session_source.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_set_source=apta_session_set_source_base;apta_session_push_pcm=apta_session_push_pcm_base;apta_session_signal_end_of_input=apta_session_signal_end_of_input_base")
@@ -146,9 +146,19 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_result_get_feature_state=apta_result_get_feature_state_s4_base")
 
 set_source_files_properties(
+    src/tempo/apta_s4_accessors.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_result_get_feature_state=apta_result_get_feature_state_s6_base;apta_result_get_beatgrid=apta_result_get_beatgrid_s6_base")
+
+set_source_files_properties(
     src/core/apta_result_pool_snapshot.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_internal_result_pool_create_session_result=apta_internal_result_pool_create_session_result_base")
+
+set_source_files_properties(
+    src/tempo/apta_s4_pool_snapshot.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_result_pool_create_session_result=apta_internal_result_pool_create_session_result_s6_base")
 
 set_source_files_properties(
     src/waveform/apta_waveform_input.c
@@ -166,9 +176,19 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_s4_base")
 
 set_source_files_properties(
+    src/tempo/apta_s4_process.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_s6_base")
+
+set_source_files_properties(
     src/waveform/apta_waveform_snapshot.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_session=apta_internal_waveform_cleanup_session_base;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")
+
+set_source_files_properties(
+    src/tempo/apta_s4_cleanup.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_internal_waveform_cleanup_session=apta_internal_waveform_cleanup_session_s6_base")
 
 set_source_files_properties(
     src/waveform/apta_waveform_detail_replay.c
@@ -178,6 +198,12 @@ set_source_files_properties(
 add_library(
     apta_core
     STATIC
+        src/beatgrid/apta_s6.c
+        src/beatgrid/apta_s6_accessors.c
+        src/beatgrid/apta_s6_cleanup.c
+        src/beatgrid/apta_s6_pool_snapshot.c
+        src/beatgrid/apta_s6_process.c
+        src/beatgrid/apta_s6_session_guard.c
         src/core/apta_config.c
         src/core/apta_context.c
         src/core/apta_initializers.c

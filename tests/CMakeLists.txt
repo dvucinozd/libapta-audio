@@ -70,6 +70,10 @@ apta_add_c_test(apta_s4_focus apta.s4.focus unit/s4_focus.c)
 apta_add_c_test(apta_s4_serialization apta.serialization.s4 unit/s4_serialization.c)
 apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_failure unit/s4_allocation_failure.c)
 
+apta_add_c_test(apta_s6_global_grid apta.s6.global_grid unit/s6_global_grid.c)
+apta_add_c_test(apta_s6_revision apta.s6.revision unit/s6_revision.c)
+apta_add_c_test(apta_s6_bounded apta.s6.bounded unit/s6_bounded.c)
+
 if(TARGET apta_decoder_wav)
     apta_add_desktop_test(apta_desktop_posix_file apta.desktop.posix_file unit/desktop_posix_file.c)
     apta_add_desktop_test(apta_desktop_wav_decoder apta.desktop.wav_decoder unit/desktop_wav_decoder.c)

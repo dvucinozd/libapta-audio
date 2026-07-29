@@ -79,6 +79,8 @@ apta_status_t APTA_CALL apta_context_create(
         APTA_FEATURE_WAVEFORM_DETAIL |
         APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID |
+        APTA_FEATURE_GLOBAL_BEATGRID |
+        APTA_FEATURE_DYNAMIC_TEMPO |
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_GRID_LOCKING;
     apta_context_t *context;
