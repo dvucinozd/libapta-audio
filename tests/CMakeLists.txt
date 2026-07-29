@@ -59,7 +59,7 @@ apta_add_c_test(apta_scheduler_aging apta.scheduler.aging unit/scheduler_aging.c
 apta_add_c_test(apta_waveform_contracts apta.waveform.contracts unit/waveform_contracts.c)
 apta_add_c_test(apta_waveform_detail apta.waveform.detail unit/waveform_detail.c)
 apta_add_c_test(apta_waveform_detail_contracts apta.waveform.detail_contracts unit/waveform_detail_contracts.c)
-apta_add_c_test(apta_waveform_detail_replay apta.source.waveform_detail_replay unit/waveform_detail_replay.c)
+apta_add_c_test(apta_waveform_detail_replay apta.waveform.detail_replay unit/waveform_detail_replay.c)
 
 apta_add_c_test(apta_s4_tempo_grid apta.s4.tempo_grid unit/s4_tempo_grid.c)
 apta_add_c_test(apta_s4_silence apta.s4.silence unit/s4_silence.c)
@@ -189,7 +189,7 @@ if(APTA_BUILD_FUZZING)
         message(FATAL_ERROR "APTA_BUILD_FUZZING requires Clang and libFuzzer")
     endif()
 
-    add_executable(apta_wovr_seed_generator tests/fuzz/wovr_seed_generator.c)
+    add_executable(apta_wovr_seed_generator fuzz/wovr_seed_generator.c)
     target_link_libraries(apta_wovr_seed_generator PRIVATE apta::core)
     set_target_properties(
         apta_wovr_seed_generator
@@ -197,7 +197,7 @@ if(APTA_BUILD_FUZZING)
             C_STANDARD 11
             C_STANDARD_REQUIRED YES)
 
-    add_executable(apta_wovr_reader_fuzz tests/fuzz/wovr_reader_fuzz.c)
+    add_executable(apta_wovr_reader_fuzz fuzz/wovr_reader_fuzz.c)
     target_link_libraries(apta_wovr_reader_fuzz PRIVATE apta::core)
     target_compile_options(apta_wovr_reader_fuzz PRIVATE -fsanitize=fuzzer)
     target_link_options(apta_wovr_reader_fuzz PRIVATE -fsanitize=fuzzer)
