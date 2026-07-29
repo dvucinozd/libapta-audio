@@ -7,6 +7,8 @@
 
 #include <apta/apta.h>
 
+#include "test_alignment.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -23,7 +25,7 @@ typedef struct {
 } allocator_state_t;
 
 typedef union {
-    max_align_t alignment;
+    apta_test_max_align_t alignment;
     uint8_t bytes[65536];
 } aligned_workspace_t;
 

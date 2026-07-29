@@ -3,10 +3,10 @@
 - **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)
 - **Current completed stage:** S7 — ESP-IDF port
 - **Next stage:** S8 — Second independent platform
-- **Latest implementation baseline:** `cf622e84854aae53cedeca0ba06725479d84b8eb`
-- **Latest all-green native CI:** run `#294` at `1bfcea06fdca41e2abac9573d481aed44e7bc39e`
-- **Current-head CI boundary:** run `#295`; POSIX, 32-bit and parser-hardening jobs passed, Windows/MSVC compilation failed
-- **Current-head platform/fixture checks:** ESP-IDF run `#17` and reference-fixture run `#3` passed
+- **Latest implementation baseline:** `17a55f3d4d7da3d12e530111e28e1c954d41d393`
+- **Latest all-green native CI:** GitHub Actions run `30463175285` at `17a55f3d4d7da3d12e530111e28e1c954d41d393`
+- **Current-head CI boundary:** POSIX, 32-bit, parser-hardening and Windows/MSVC core jobs pass
+- **Current-head platform/fixture checks:** ESP-IDF run `30463174165` and reference-fixture run `30463174172` passed
 
 ## Status summary
 
@@ -20,7 +20,7 @@
 | S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX adapter, WAV decoder boundary, analyzer, inspector, validator and generated-fixture integration |
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
 | S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP allocator/clock/logger, optional ESP-DSP helper, IDF component, cooperative example, bounded profiles and 5.5.4/6.0.2 firmware builds |
-| S8 — Second independent platform | Not started | A Windows core CI preflight exists, but it is not a completed platform integration and the current MSVC job is failing |
+| S8 — Second independent platform | Not started | A passing Windows/MSVC core CI preflight exists, but it is not a completed platform integration |
 | S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
 
 ## S0 — Foundation
@@ -168,13 +168,12 @@ The default POSIX suite registers 69 tests. A core-only configuration without
 the POSIX desktop adapters and tools registers 59 tests. The ESP-IDF matrix
 links and verifies complete firmware artifacts and runs component-size reports.
 
-For implementation baseline `cf622e8`, CI run `#295` passed the 69-test POSIX
-job, the 59-test 32-bit core job and the sanitized 69-test parser job with fuzz
-smoke. Its new Windows/MSVC job failed during compilation because the runner's
-C11 atomic support was not enabled, so the current head does not have an
-all-green native CI claim. ESP-IDF run `#17` and reference-fixture run `#3`
-passed for the same commit. The latest all-green native workflow remains run
-`#294` on the preceding documentation-only S7 baseline `1bfcea0`.
+For implementation baseline `17a55f3`, native CI run `30463175285` passed the
+69-test POSIX job, the 59-test 32-bit core job, the sanitized 69-test parser job
+with fuzz smoke and the Windows/MSVC 59-test core job. Reference-fixture run
+`30463174172` passed for the same commit. ESP-IDF run `30463174165` also
+passed, covering the bounded memory profiles and the supported cross-build
+matrix.
 
 Status: complete self-tested and cross-build-verified implementation candidate. Physical-board execution, stack high-water marks, on-target latency, fragmentation and hardware decoder/USB integration remain stronger validation gates rather than absent Stage S7 implementation items.
 
@@ -195,9 +194,9 @@ Implement and validate at least one independent platform integration, such as:
 The selected platform must consume the public APTA API and `.apta` data model without depending on ESP-IDF adapter internals. Its evidence should include platform build/runtime tests and interchange with the existing reference implementation.
 
 The existing Windows core CI job is only a portability preflight. It does not
-provide a Windows adapter, runtime integration or S8 completion evidence, and
-its current MSVC C11-atomics failure must be resolved before it can serve as a
-green build gate.
+provide a Windows adapter, runtime integration or S8 completion evidence. It is
+now a green build/test gate for the portable core, including the MSVC-specific
+C11 atomics enablement and maximum-alignment compatibility path.
 
 ## Claims
 

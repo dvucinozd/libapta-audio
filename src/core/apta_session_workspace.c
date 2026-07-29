@@ -16,7 +16,7 @@ union apta_internal_workspace_block {
         uint32_t free;
         uint32_t reserved32;
     } state;
-    max_align_t force_alignment;
+    apta_internal_max_align_t force_alignment;
 };
 
 static size_t apta_workspace_align_up(size_t value, size_t alignment)
@@ -34,7 +34,7 @@ static size_t apta_workspace_payload_prefix_size(void)
     payload_offset = apta_workspace_align_up(
         sizeof(apta_internal_workspace_block_t) +
             sizeof(apta_allocation_header_t),
-        alignof(max_align_t));
+        APTA_INTERNAL_MAX_ALIGNMENT);
     if (payload_offset == SIZE_MAX) {
         return SIZE_MAX;
     }
@@ -61,7 +61,7 @@ static apta_internal_workspace_block_t *apta_workspace_first_block(
     base = (uintptr_t)session->config.static_workspace;
     offset = apta_workspace_align_up(
         sizeof(*session),
-        alignof(max_align_t));
+        APTA_INTERNAL_MAX_ALIGNMENT);
     if (offset == SIZE_MAX) {
         return NULL;
     }
@@ -75,16 +75,16 @@ size_t apta_internal_session_workspace_minimum_size(void)
 
     offset = apta_workspace_align_up(
         sizeof(apta_session_t),
-        alignof(max_align_t));
+        APTA_INTERNAL_MAX_ALIGNMENT);
     prefix_size = apta_workspace_payload_prefix_size();
     if (offset == SIZE_MAX || prefix_size == SIZE_MAX ||
         offset > SIZE_MAX - sizeof(apta_internal_workspace_block_t) -
-                     prefix_size - alignof(max_align_t)) {
+                     prefix_size - APTA_INTERNAL_MAX_ALIGNMENT) {
         return SIZE_MAX;
     }
 
     return offset + sizeof(apta_internal_workspace_block_t) +
-           prefix_size + alignof(max_align_t);
+           prefix_size + APTA_INTERNAL_MAX_ALIGNMENT;
 }
 
 int apta_internal_session_uses_workspace(
@@ -113,13 +113,13 @@ apta_status_t apta_internal_session_workspace_initialize(
     }
 
     if (((uintptr_t)session->config.static_workspace &
-         (uintptr_t)(alignof(max_align_t) - 1u)) != 0u) {
+         (uintptr_t)(APTA_INTERNAL_MAX_ALIGNMENT - 1u)) != 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
     offset = apta_workspace_align_up(
         sizeof(*session),
-        alignof(max_align_t));
+        APTA_INTERNAL_MAX_ALIGNMENT);
     block = apta_workspace_first_block(session);
     if (block == NULL) {
         return APTA_ERROR_LIMIT_EXCEEDED;
@@ -163,11 +163,13 @@ void *apta_internal_session_allocate(
         alignment = alignof(void *);
     }
     if (!apta_internal_is_power_of_two(alignment) ||
-        alignment > alignof(max_align_t)) {
+        alignment > APTA_INTERNAL_MAX_ALIGNMENT) {
         return NULL;
     }
 
-    padded_size = apta_workspace_align_up(size, alignof(max_align_t));
+    padded_size = apta_workspace_align_up(
+        size,
+        APTA_INTERNAL_MAX_ALIGNMENT);
     prefix_size = apta_workspace_payload_prefix_size();
     if (padded_size == SIZE_MAX || prefix_size == SIZE_MAX ||
         prefix_size > SIZE_MAX - padded_size) {
@@ -187,7 +189,7 @@ void *apta_internal_session_allocate(
 
         remaining = block->state.capacity - required;
         if (remaining >= sizeof(*block) +
-                             prefix_size + alignof(max_align_t)) {
+                             prefix_size + APTA_INTERNAL_MAX_ALIGNMENT) {
             apta_internal_workspace_block_t *next;
             uint8_t *next_address;
 

@@ -7,6 +7,8 @@
 
 #include <apta/apta.h>
 
+#include "test_alignment.h"
+
 #define SAMPLE_RATE 48000u
 #define BEAT_FRAMES 23040u
 #define TOTAL_FRAMES 288000u
@@ -27,7 +29,7 @@ typedef struct {
 } allocator_state_t;
 
 typedef union {
-    max_align_t alignment;
+    apta_test_max_align_t alignment;
     uint8_t bytes[262144];
 } aligned_workspace_t;
 

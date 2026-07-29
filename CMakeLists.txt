@@ -46,6 +46,77 @@ if(APTA_ENABLE_SANITIZERS)
     endif()
 endif()
 
+add_library(apta_c11_atomics INTERFACE)
+
+if(MSVC)
+    include(CheckCSourceCompiles)
+
+    set(APTA_SAVED_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
+    set(
+        CMAKE_REQUIRED_FLAGS
+        "${CMAKE_REQUIRED_FLAGS} /std:c11 /experimental:c11atomics")
+
+    check_c_source_compiles(
+        [=[
+            #include <stddef.h>
+            #include <stdint.h>
+            #include <stdatomic.h>
+
+            int main(void)
+            {
+                atomic_uint state;
+                atomic_size_t allocated_bytes;
+                atomic_uint_fast64_t counter;
+                atomic_flag lock = ATOMIC_FLAG_INIT;
+                unsigned int expected = 0u;
+
+                atomic_init(&state, 0u);
+                atomic_init(&allocated_bytes, (size_t)0u);
+                atomic_init(&counter, UINT64_C(0));
+                atomic_flag_clear_explicit(&lock, memory_order_release);
+
+                (void)atomic_compare_exchange_strong_explicit(
+                    &state,
+                    &expected,
+                    1u,
+                    memory_order_acq_rel,
+                    memory_order_acquire);
+                (void)atomic_fetch_add_explicit(
+                    &allocated_bytes,
+                    (size_t)1u,
+                    memory_order_relaxed);
+                (void)atomic_fetch_add_explicit(
+                    &counter,
+                    UINT64_C(1),
+                    memory_order_relaxed);
+                (void)atomic_flag_test_and_set_explicit(
+                    &lock,
+                    memory_order_acquire);
+
+                return (int)atomic_load_explicit(
+                    &state,
+                    memory_order_relaxed);
+            }
+        ]=]
+        APTA_MSVC_C11_ATOMICS_AVAILABLE)
+
+    set(CMAKE_REQUIRED_FLAGS "${APTA_SAVED_CMAKE_REQUIRED_FLAGS}")
+    unset(APTA_SAVED_CMAKE_REQUIRED_FLAGS)
+
+    if(NOT APTA_MSVC_C11_ATOMICS_AVAILABLE)
+        message(
+            FATAL_ERROR
+            "MSVC C11 atomics are unavailable. "
+            "Use Visual Studio 2022 17.5 or newer with "
+            "/experimental:c11atomics support.")
+    endif()
+
+    target_compile_options(
+        apta_c11_atomics
+        INTERFACE
+            "$<$<COMPILE_LANGUAGE:C>:/experimental:c11atomics>")
+endif()
+
 set_source_files_properties(
     src/serialization/apta_wovr_reader.c
     PROPERTIES
@@ -308,6 +379,9 @@ target_link_libraries(
     apta_core
     PUBLIC
         apta::headers
+    PRIVATE
+        apta_c11_atomics
+    PUBLIC
         apta_sanitizers)
 
 if(UNIX)

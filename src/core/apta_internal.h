@@ -4,6 +4,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdalign.h>
 #include <stdatomic.h>
 
 #include <apta/apta.h>
@@ -22,6 +23,19 @@
 #define APTA_INTERNAL_SCHEDULER_AGE_STEP 8u
 #define APTA_INTERNAL_SCHEDULER_MAX_SKIPS 32u
 #define APTA_INTERNAL_RESULT_FLAG_POOLED (1u << 0)
+
+#if defined(_MSC_VER)
+typedef union {
+    long double long_double_value;
+    long long long_long_value;
+    void *pointer_value;
+} apta_internal_max_align_t;
+#else
+typedef max_align_t apta_internal_max_align_t;
+#endif
+
+#define APTA_INTERNAL_MAX_ALIGNMENT \
+    alignof(apta_internal_max_align_t)
 
 #define APTA_INTERNAL_ONSET_FRAMES_PER_BIN 256u
 #define APTA_INTERNAL_ONSET_BIN_CAPACITY 4096u
