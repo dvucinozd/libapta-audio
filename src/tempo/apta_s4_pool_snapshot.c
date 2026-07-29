@@ -29,7 +29,8 @@ static apta_status_t apta_s4_pool_build(
         return APTA_ERROR_INTERNAL;
     }
 
-    if (session->has_tempo) {
+    if (session->has_tempo &&
+        (session->config.requested_features & APTA_FEATURE_BPM) != 0u) {
         size_t bytes;
 
         if (session->tempo_candidate_count >
@@ -61,7 +62,9 @@ static apta_status_t apta_s4_pool_build(
         }
     }
 
-    if (session->has_local_grid) {
+    if (session->has_local_grid &&
+        (session->config.requested_features &
+         APTA_FEATURE_LOCAL_BEATGRID) != 0u) {
         if (layout->local_grid_coverage_capacity < 1u ||
             layout->local_grid_segment_capacity < 1u) {
             return APTA_ERROR_LIMIT_EXCEEDED;
