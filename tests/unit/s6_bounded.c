@@ -142,15 +142,7 @@ int main(void)
               APTA_STATUS_OK);
         CHECK(accepted == count);
         status = apta_session_process(session, &budget, NULL);
-        if (status != APTA_STATUS_OK && status != APTA_STATUS_MORE_WORK) {
-            fprintf(stderr,
-                    "bounded process status=%d first=%u generation=%llu\n",
-                    (int)status,
-                    first,
-                    (unsigned long long)apta_result_get_generation(
-                        apta_session_acquire_result(session)));
-            return 1;
-        }
+        CHECK(status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
         CHECK(allocator_state.allocate_calls == allocator_calls_after_create);
         first += count;
     }
