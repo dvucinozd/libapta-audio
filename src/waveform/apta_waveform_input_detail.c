@@ -14,6 +14,9 @@ apta_status_t apta_internal_waveform_accept_pcm(
     const int s4_enabled =
         (session->config.requested_features &
          APTA_INTERNAL_S4_FEATURES) != 0u;
+    const int s6_enabled =
+        (session->config.requested_features &
+         APTA_INTERNAL_S6_FEATURES) != 0u;
     apta_status_t status;
     apta_internal_pcm_node_t *node;
     uint32_t frame;
@@ -38,6 +41,13 @@ apta_status_t apta_internal_waveform_accept_pcm(
             return status;
         }
     }
+    if (s6_enabled) {
+        status = apta_internal_s6_prepare(session);
+        if (status < 0) {
+            *accepted_frames_out = 0u;
+            return status;
+        }
+    }
 
     status = apta_internal_waveform_accept_pcm_base(
         session,
@@ -57,7 +67,7 @@ apta_status_t apta_internal_waveform_accept_pcm(
     }
 
     if (status < 0 || *accepted_frames_out == 0u ||
-        (!detail_enabled && !s4_enabled)) {
+        (!detail_enabled && !s4_enabled && !s6_enabled)) {
         return status;
     }
 
@@ -88,6 +98,15 @@ apta_status_t apta_internal_waveform_accept_pcm(
                 node->first_frame + frame,
                 node->samples[frame]);
             if (s4_status != APTA_STATUS_OK) {
+                break;
+            }
+        }
+        if (s6_enabled) {
+            const apta_status_t s6_status = apta_internal_s6_process_sample(
+                session,
+                node->first_frame + frame,
+                node->samples[frame]);
+            if (s6_status != APTA_STATUS_OK) {
                 break;
             }
         }
