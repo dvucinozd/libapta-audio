@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <apta/apta_espidf.h>
 
+#include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -111,7 +112,7 @@ static void APTA_CALL apta_espidf_log_write(
         case APTA_LOG_ERROR:
             esp_level = ESP_LOG_ERROR;
             break;
-        case APTA_LOG_WARNING:
+        case APTA_LOG_WARN:
             esp_level = ESP_LOG_WARN;
             break;
         case APTA_LOG_INFO:
