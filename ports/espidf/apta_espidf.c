@@ -93,7 +93,7 @@ static void *APTA_CALL apta_espidf_allocate(
 static void APTA_CALL apta_espidf_deallocate(void *user_data, void *memory)
 {
     (void)user_data;
-    heap_caps_aligned_free(memory);
+    heap_caps_free(memory);
 }
 
 static void APTA_CALL apta_espidf_log_write(
