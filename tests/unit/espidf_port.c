@@ -167,7 +167,7 @@ int main(void)
     CHECK(apta_context_create(&config, &context) == APTA_STATUS_OK);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     context = NULL;
-    CHECK(allocation_calls == free_calls + 1u); /* one deliberate strict failure */
+    CHECK(allocation_calls == free_calls + 2u); /* fallback and strict failures */
 
     port.reserved32[0] = 1u;
     apta_context_config_init(&config);
