@@ -1,10 +1,10 @@
 # APTA development roadmap status
 
 **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)  
-**Current completed stage:** S4 — Tempo and local grid  
-**Next stage:** S5 — Reference desktop tools  
-**Latest implementation merge:** `8fe19cfda514151880d658520912722db7edb99a`  
-**Latest full verification:** GitHub Actions PR CI run `#224`, 53 runtime tests
+**Current completed stage:** S5 — Reference desktop tools  
+**Next stage:** S6 — Global grid and dynamic tempo  
+**Latest implementation merge:** `b971be282dea0b7fb168e938d39356152537f4b1`  
+**Latest full verification:** GitHub Actions PR CI run `#246`, 63 runtime tests
 
 ## Status summary
 
@@ -15,7 +15,7 @@
 | S2 — Waveform Profile | Functionally complete implementation candidate | Overview, detail tiles, progressive coverage, WOVR/WDTL serialization and vectors |
 | S3 — `.apta` container | Functionally complete implementation candidate | Header, directory, META, WOVR, WDTL, TEMP, LGRD, CRC, hardened parser/writer and fuzzing |
 | S4 — Tempo and local grid | Functionally complete implementation candidate | BPM, candidates, confidence, local grid, locking and progressive lifecycle |
-| S5 — Reference desktop tools | Not started | POSIX source adapter, decoder integration and CLI tools remain |
+| S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX adapter, WAV decoder boundary, analyzer, inspector, validator and generated-fixture integration |
 | S6 — Global grid and dynamic tempo | Not started | Global refinement, multi-segment/dynamic tempo and explicit beats remain |
 | S7 — ESP-IDF port | Not started as an independent port | Core bounded-memory work is ready for integration, but adapter/backend/example evidence remains |
 | S8 — Second independent platform | Not started | Independent platform integration remains |
@@ -96,16 +96,35 @@ Status: complete self-tested implementation candidate. See [`S4-TEMPO-LOCAL-GRID
 
 ## S5 — Reference desktop tools
 
+Implemented:
+
+- checked 64-bit POSIX read-only file adapter;
+- replaceable decoder callback boundary outside the core;
+- reference WAV decoder for PCM16, packed PCM24, PCM32 and float32;
+- standard and `WAVE_FORMAT_EXTENSIBLE` input;
+- pull-mode decoder bridge;
+- `apta-analyze` with canonical atomic output;
+- `apta-inspect` with human and JSON output;
+- `apta-validate` with normal, strict and quiet modes;
+- runtime-generated deterministic audio fixture;
+- end-to-end valid and truncated-container CLI tests.
+
+Status: complete self-tested implementation candidate. See [`S5-REFERENCE-DESKTOP-TOOLS-STATUS.md`](S5-REFERENCE-DESKTOP-TOOLS-STATUS.md) and [`../reference/APTA-DESKTOP-TOOLS-0.1.md`](../reference/APTA-DESKTOP-TOOLS-0.1.md).
+
+The portable core still does not own codecs, filesystems, threads or application scheduling.
+
+## S6 — Global grid and dynamic tempo
+
 Next implementation scope:
 
-1. POSIX file/source adapter;
-2. decoder integration behind a non-core adapter boundary;
-3. `apta-analyze`;
-4. `apta-inspect`;
-5. `apta-validate`;
-6. integration tests using legally redistributable audio fixtures.
+1. global grid refinement across the analysed source;
+2. multiple tempo/grid segments;
+3. dynamic-tempo representation;
+4. explicit beat representation where required;
+5. revision and replacement behavior for progressively refined grids;
+6. new conformance vectors for tempo ramps, abrupt changes and ambiguous transitions.
 
-S5 must preserve the architecture rule that the portable core does not own codecs, filesystems, threads or application scheduling.
+S6 must preserve S4 local evidence/applicability semantics and must not mutate already acquired result generations.
 
 ## Claims
 
