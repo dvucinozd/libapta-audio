@@ -315,9 +315,6 @@ static apta_status_t apta_wdtl_measure(
             (layout->strict && apta_wdtl_get_u32(payload + 4u) != 0u)) {
             return APTA_ERROR_CORRUPT_DATA;
         }
-        if ((uint64_t)tile_count > UINT64_MAX / APTA_WDTL_TILE_SIZE) {
-            return APTA_ERROR_LIMIT_EXCEEDED;
-        }
         tile_directory_size = (uint64_t)tile_count * APTA_WDTL_TILE_SIZE;
         if (tile_directory_offset < APTA_WDTL_HEADER_SIZE ||
             !apta_wdtl_range_fits(
@@ -387,22 +384,6 @@ static apta_status_t apta_wdtl_validate_intervals(
         }
     }
     return APTA_STATUS_OK;
-}
-
-static uint64_t apta_wdtl_existing_result_bytes(const apta_result_t *result)
-{
-    uint64_t columns = 0u;
-    uint64_t bytes;
-    uint32_t span_index;
-
-    for (span_index = 0u; span_index < result->overview.span_count; ++span_index) {
-        columns += result->overview.spans[span_index].column_count;
-    }
-    bytes = sizeof(*result) +
-            (uint64_t)result->overview.span_count *
-                sizeof(apta_waveform_span_t) +
-            columns * sizeof(apta_waveform_column_t);
-    return bytes;
 }
 
 static apta_status_t apta_wdtl_copy(
@@ -579,15 +560,20 @@ apta_status_t APTA_CALL apta_result_parse(
         return APTA_STATUS_OK;
     }
 
-    allocation_bytes = apta_wdtl_existing_result_bytes(parsed) +
-                       (uint64_t)layout.tile_count *
-                           sizeof(apta_waveform_tile_view_t) +
-                       (uint64_t)layout.column_count *
-                           sizeof(apta_waveform_column_t) +
-                       (uint64_t)layout.tile_count *
-                           sizeof(apta_wdtl_interval_t);
-    if (allocation_bytes > layout.maximum_allocation_bytes ||
-        (size_t)layout.tile_count > SIZE_MAX / sizeof(*intervals)) {
+    allocation_bytes =
+        (uint64_t)layout.tile_count *
+            (sizeof(apta_waveform_tile_view_t) +
+             sizeof(apta_wdtl_interval_t)) +
+        (uint64_t)layout.column_count *
+            sizeof(apta_waveform_column_t);
+    if (!apta_internal_result_allocation_fits(
+            parsed,
+            allocation_bytes,
+            layout.maximum_allocation_bytes) ||
+        !apta_internal_size_array_fits(
+            0u,
+            layout.tile_count,
+            sizeof(*intervals))) {
         apta_result_release(parsed_const);
         return APTA_ERROR_LIMIT_EXCEEDED;
     }

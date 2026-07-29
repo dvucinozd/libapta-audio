@@ -11,6 +11,7 @@ option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSani
 option(APTA_BUILD_FUZZING "Build libFuzzer targets" OFF)
 option(APTA_BUILD_DESKTOP_ADAPTERS "Build POSIX and reference decoder adapters" ON)
 option(APTA_BUILD_TOOLS "Build reference desktop command-line tools" ON)
+option(APTA_WARNINGS_AS_ERRORS "Treat apta_core compiler warnings as errors" OFF)
 
 add_library(apta_headers INTERFACE)
 add_library(apta::headers ALIAS apta_headers)
@@ -219,6 +220,7 @@ add_library(
         src/core/apta_initializers.c
         src/core/apta_memory.c
         src/core/apta_metadata.c
+        src/core/apta_result_allocation.c
         src/core/apta_result_accessors.c
         src/core/apta_result_detail_accessors.c
         src/core/apta_result_lifetime.c
@@ -268,6 +270,30 @@ add_library(
         src/waveform/apta_waveform_snapshot.c
         src/waveform/apta_waveform_snapshot_combined.c)
 
+file(
+    GLOB_RECURSE
+    APTA_DISCOVERED_CORE_SOURCES
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    CONFIGURE_DEPENDS
+    src/core/*.c
+    src/serialization/*.c
+    src/tempo/*.c
+    src/beatgrid/*.c
+    src/waveform/*.c)
+get_target_property(APTA_CONFIGURED_CORE_SOURCES apta_core SOURCES)
+foreach(APTA_DISCOVERED_SOURCE IN LISTS APTA_DISCOVERED_CORE_SOURCES)
+    list(
+        FIND
+        APTA_CONFIGURED_CORE_SOURCES
+        "${APTA_DISCOVERED_SOURCE}"
+        APTA_DISCOVERED_SOURCE_INDEX)
+    if(APTA_DISCOVERED_SOURCE_INDEX EQUAL -1)
+        message(
+            FATAL_ERROR
+            "Production source is not part of apta_core: ${APTA_DISCOVERED_SOURCE}")
+    endif()
+endforeach()
+
 add_library(apta::core ALIAS apta_core)
 
 set_target_properties(
@@ -297,8 +323,14 @@ target_compile_definitions(apta_core PRIVATE APTA_BUILDING_LIBRARY=1)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(apta_core PRIVATE -Wall -Wextra -Wpedantic)
+    if(APTA_WARNINGS_AS_ERRORS)
+        target_compile_options(apta_core PRIVATE -Werror)
+    endif()
 elseif(MSVC)
     target_compile_options(apta_core PRIVATE /W4)
+    if(APTA_WARNINGS_AS_ERRORS)
+        target_compile_options(apta_core PRIVATE /WX)
+    endif()
 endif()
 
 if(APTA_BUILD_DESKTOP_ADAPTERS)

@@ -6,11 +6,17 @@ on:
       - main
     paths:
       - ".github/workflows/reference-fixture.yml"
+      - "CMakeLists.txt"
+      - "include/**"
+      - "src/**"
       - "tests/fixtures/**"
       - "tests/unit/external_fixture.c"
   pull_request:
     paths:
       - ".github/workflows/reference-fixture.yml"
+      - "CMakeLists.txt"
+      - "include/**"
+      - "src/**"
       - "tests/fixtures/**"
       - "tests/unit/external_fixture.c"
 

@@ -14,6 +14,7 @@ set(APTA_CORE_SRCS
     "${APTA_ROOT}/src/core/apta_initializers.c"
     "${APTA_ROOT}/src/core/apta_memory.c"
     "${APTA_ROOT}/src/core/apta_metadata.c"
+    "${APTA_ROOT}/src/core/apta_result_allocation.c"
     "${APTA_ROOT}/src/core/apta_result_accessors.c"
     "${APTA_ROOT}/src/core/apta_result_detail_accessors.c"
     "${APTA_ROOT}/src/core/apta_result_lifetime.c"

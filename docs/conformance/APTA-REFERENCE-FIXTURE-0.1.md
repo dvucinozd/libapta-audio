@@ -4,7 +4,7 @@
 **Fixture:** `reference-wovr-meta.apta`  
 **Repository encoding:** lowercase hexadecimal text  
 **Decoded size:** 303 bytes  
-**SHA-256:** `3129b6c40b348e1674859d73b0299c25f611c0f4762aa9c99819d9f629439a19`
+**SHA-256:** `394403f6e0617cde449f88c35b87d7d3a136ca304ae4874cba65310724a1d7d2`
 
 ## Independence
 

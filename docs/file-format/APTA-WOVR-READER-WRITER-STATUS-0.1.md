@@ -69,7 +69,8 @@ The public parser is layered as:
 - maximum section count;
 - maximum overview span count;
 - maximum logical or packed waveform column count;
-- maximum aggregate result allocation.
+- maximum aggregate logical allocation across every parsed result layer,
+  including WOVR, WDTL, META, TEMP, LGRD, GGRD and REVN-owned state.
 
 A zero limit field selects the library default rather than disabling the limit.
 

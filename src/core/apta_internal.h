@@ -52,6 +52,15 @@ typedef struct {
     size_t requested_size;
 } apta_allocation_header_t;
 
+static inline int apta_internal_size_array_fits(
+    size_t base_size,
+    size_t element_count,
+    size_t element_size)
+{
+    return element_size == 0u ||
+           element_count <= (SIZE_MAX - base_size) / element_size;
+}
+
 typedef struct {
     uint32_t request_id;
     apta_region_request_t request;
@@ -263,6 +272,15 @@ void *apta_internal_context_allocate(
 void apta_internal_context_deallocate(
     apta_context_t *context,
     void *memory);
+
+int apta_internal_result_allocation_bytes(
+    const apta_result_t *result,
+    uint64_t *allocation_bytes_out);
+
+int apta_internal_result_allocation_fits(
+    const apta_result_t *result,
+    uint64_t additional_bytes,
+    uint64_t maximum_allocation_bytes);
 
 void apta_internal_log(
     apta_context_t *context,

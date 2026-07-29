@@ -219,7 +219,10 @@ static apta_status_t apta_s6_parse_grid(
     allocation_bytes = sizeof(apta_internal_s6_result_state_t) +
                        sizeof(apta_frame_range_t) +
                        (uint64_t)segment_bytes + (uint64_t)beat_bytes;
-    if (allocation_bytes > limit) {
+    if (!apta_internal_result_allocation_fits(
+            result,
+            allocation_bytes,
+            limit)) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 

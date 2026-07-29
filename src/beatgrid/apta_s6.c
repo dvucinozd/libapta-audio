@@ -39,21 +39,6 @@ static apta_source_frame_t apta_s6_min_frame(
     return left < right ? left : right;
 }
 
-static apta_internal_onset_bin_t *apta_s6_bin(
-    apta_internal_s6_session_state_t *state,
-    uint64_t bin_index)
-{
-    apta_internal_onset_bin_t *bin;
-
-    if (state == NULL || state->global_bins == NULL ||
-        state->global_bin_capacity == 0u) {
-        return NULL;
-    }
-    bin = &state->global_bins[
-        (uint32_t)(bin_index % state->global_bin_capacity)];
-    return bin->occupied && bin->bin_index == bin_index ? bin : NULL;
-}
-
 static const apta_internal_onset_bin_t *apta_s6_const_bin(
     const apta_internal_s6_session_state_t *state,
     uint64_t bin_index)

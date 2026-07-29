@@ -121,8 +121,14 @@ apta_status_t apta_internal_waveform_build_snapshot(
         have_previous = 1;
     }
 
-    if ((size_t)complete_count > SIZE_MAX / sizeof(*result->overview_columns) ||
-        (size_t)span_count > SIZE_MAX / sizeof(*result->overview_spans)) {
+    if (!apta_internal_size_array_fits(
+            0u,
+            complete_count,
+            sizeof(*result->overview_columns)) ||
+        !apta_internal_size_array_fits(
+            0u,
+            span_count,
+            sizeof(*result->overview_spans))) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 

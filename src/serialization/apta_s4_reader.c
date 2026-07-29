@@ -173,7 +173,7 @@ static apta_status_t apta_s4_parse_temp(
         return APTA_ERROR_CORRUPT_DATA;
     }
     bytes = (size_t)count * sizeof(apta_tempo_candidate_t);
-    if ((uint64_t)bytes > limit) {
+    if (!apta_internal_result_allocation_fits(result, bytes, limit)) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 
@@ -270,11 +270,11 @@ static apta_status_t apta_s4_parse_grid(
         !apta_s4_state_valid(payload[136]) ||
         payload[137] > APTA_CONFIDENCE_MAX ||
         payload[138] != 0u || payload[139] != 0u ||
-        apta_s4_get_u32(payload + 140u) != 0u ||
-        needed > limit) {
-        return needed > limit
-                   ? APTA_ERROR_LIMIT_EXCEEDED
-                   : APTA_ERROR_CORRUPT_DATA;
+        apta_s4_get_u32(payload + 140u) != 0u) {
+        return APTA_ERROR_CORRUPT_DATA;
+    }
+    if (!apta_internal_result_allocation_fits(result, needed, limit)) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
     }
     if (apta_s4_get_u32(payload + 120u) !=
         result->tempo.selected.tempo_millibpm) {

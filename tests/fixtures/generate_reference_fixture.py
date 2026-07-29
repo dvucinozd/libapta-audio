@@ -11,8 +11,10 @@ from pathlib import Path
 
 
 POLYNOMIAL = 0x82F63B78
+CONTAINER_HEADER_SIZE = 96
+DIRECTORY_ENTRY_SIZE = 40
 EXPECTED_SIZE = 303
-EXPECTED_SHA256 = "3129b6c40b348e1674859d73b0299c25f611c0f4762aa9c99819d9f629439a19"
+EXPECTED_SHA256 = "394403f6e0617cde449f88c35b87d7d3a136ca304ae4874cba65310724a1d7d2"
 
 
 def crc32c(data: bytes) -> int:
@@ -71,6 +73,73 @@ def build_meta() -> bytes:
     )
 
 
+def get_u16(buffer: bytes, offset: int) -> int:
+    return int.from_bytes(buffer[offset : offset + 2], "little", signed=False)
+
+
+def get_u32(buffer: bytes, offset: int) -> int:
+    return int.from_bytes(buffer[offset : offset + 4], "little", signed=False)
+
+
+def get_u64(buffer: bytes, offset: int) -> int:
+    return int.from_bytes(buffer[offset : offset + 8], "little", signed=False)
+
+
+def validate_fixture(fixture: bytes) -> None:
+    if len(fixture) != EXPECTED_SIZE:
+        raise RuntimeError(
+            f"fixture size mismatch: expected={EXPECTED_SIZE} actual={len(fixture)}"
+        )
+    if fixture[:4] != b"APTA":
+        raise RuntimeError("fixture magic mismatch")
+
+    header_size = get_u16(fixture, 4)
+    section_count = get_u32(fixture, 20)
+    directory_offset = get_u64(fixture, 24)
+    declared_size = get_u64(fixture, 32)
+    if header_size != CONTAINER_HEADER_SIZE:
+        raise RuntimeError(f"unexpected container header size: {header_size}")
+    if directory_offset != header_size:
+        raise RuntimeError("directory does not immediately follow the header")
+    if declared_size != len(fixture):
+        raise RuntimeError(
+            f"declared size mismatch: declared={declared_size} actual={len(fixture)}"
+        )
+    if get_u32(fixture, 92) != crc32c(fixture[:92]):
+        raise RuntimeError("container header CRC32C mismatch")
+
+    directory_end = directory_offset + section_count * DIRECTORY_ENTRY_SIZE
+    if directory_end > len(fixture):
+        raise RuntimeError("section directory extends beyond the fixture")
+    previous_end = directory_end
+    for index in range(section_count):
+        entry_offset = directory_offset + index * DIRECTORY_ENTRY_SIZE
+        entry = fixture[entry_offset : entry_offset + DIRECTORY_ENTRY_SIZE]
+        section_offset = get_u64(entry, 8)
+        stored_size = get_u64(entry, 16)
+        logical_size = get_u64(entry, 24)
+        section_end = section_offset + stored_size
+        if (
+            section_offset < directory_end
+            or section_offset < previous_end
+            or section_end > len(fixture)
+        ):
+            raise RuntimeError(f"invalid section range at directory index {index}")
+        if stored_size != logical_size:
+            raise RuntimeError(
+                f"compressed sections are not expected at directory index {index}"
+            )
+        payload = fixture[section_offset:section_end]
+        if get_u32(entry, 32) != crc32c(payload):
+            raise RuntimeError(f"section CRC32C mismatch at directory index {index}")
+        previous_end = section_end
+
+    if previous_end != len(fixture):
+        raise RuntimeError(
+            f"fixture has {len(fixture) - previous_end} trailing undeclared bytes"
+        )
+
+
 def build_fixture() -> bytes:
     wovr = build_wovr()
     meta = build_meta()
@@ -81,7 +150,7 @@ def build_fixture() -> bytes:
     put_u16(output, 6, 1)
     put_u16(output, 8, 0)
     put_u16(output, 10, 1)
-    put_u32(output, 12, 0x00010000)
+    put_u32(output, 12, 0x00001000)  # APTA_API_VERSION_ENCODE(0, 1, 0)
     put_u32(output, 16, 0)
     put_u32(output, 20, 2)
     put_u64(output, 24, 96)
@@ -114,8 +183,9 @@ def build_fixture() -> bytes:
     put_u32(output, 92, crc32c(bytes(output[:92])))
 
     fixture = bytes(output)
+    validate_fixture(fixture)
     digest = hashlib.sha256(fixture).hexdigest()
-    if len(fixture) != EXPECTED_SIZE or digest != EXPECTED_SHA256:
+    if digest != EXPECTED_SHA256:
         raise RuntimeError(
             f"fixture invariant failed: size={len(fixture)} sha256={digest}"
         )

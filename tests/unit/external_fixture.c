@@ -156,6 +156,19 @@ int main(void)
               sizeof(serialized),
               &written) == APTA_STATUS_OK);
     CHECK(written == FIXTURE_SIZE);
+    if (memcmp(serialized, fixture, FIXTURE_SIZE) != 0) {
+        size_t index;
+        for (index = 0u; index < FIXTURE_SIZE; ++index) {
+            if (serialized[index] != fixture[index]) {
+                fprintf(
+                    stderr,
+                    "fixture mismatch at byte %zu: expected=%02x actual=%02x\n",
+                    index,
+                    fixture[index],
+                    serialized[index]);
+            }
+        }
+    }
     CHECK(memcmp(serialized, fixture, FIXTURE_SIZE) == 0);
 
     apta_result_release(result);

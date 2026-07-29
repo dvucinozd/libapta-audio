@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_WIN32)
+#include <malloc.h>
+#endif
+
 #include <apta/apta.h>
 #include <apta/apta_espidf.h>
 
@@ -30,6 +34,24 @@ static uint32_t log_calls;
 static esp_log_level_t last_log_level;
 static char last_log_tag[32];
 
+static void *host_aligned_allocate(size_t alignment, size_t size)
+{
+#if defined(_WIN32)
+    return _aligned_malloc(size, alignment);
+#else
+    return aligned_alloc(alignment, size);
+#endif
+}
+
+static void host_aligned_free(void *memory)
+{
+#if defined(_WIN32)
+    _aligned_free(memory);
+#else
+    free(memory);
+#endif
+}
+
 void *heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps)
 {
     size_t rounded;
@@ -41,7 +63,7 @@ void *heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps)
         return NULL;
     }
     rounded = (size + alignment - 1u) & ~(alignment - 1u);
-    memory = aligned_alloc(alignment, rounded);
+    memory = host_aligned_allocate(alignment, rounded);
     return memory;
 }
 
@@ -49,7 +71,7 @@ void heap_caps_free(void *memory)
 {
     if (memory != NULL) {
         free_calls += 1u;
-        free(memory);
+        host_aligned_free(memory);
     }
 }
 

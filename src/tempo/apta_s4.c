@@ -37,21 +37,6 @@ static void apta_s4_init_range(
     range->end_frame = end;
 }
 
-static apta_internal_onset_bin_t *apta_s4_bin(
-    apta_session_t *session,
-    uint64_t bin_index)
-{
-    apta_internal_onset_bin_t *bin;
-
-    if (session->onset_bins == NULL || session->onset_bin_capacity == 0u) {
-        return NULL;
-    }
-
-    bin = &session->onset_bins[
-        (uint32_t)(bin_index % session->onset_bin_capacity)];
-    return bin->occupied && bin->bin_index == bin_index ? bin : NULL;
-}
-
 static const apta_internal_onset_bin_t *apta_s4_const_bin(
     const apta_session_t *session,
     uint64_t bin_index)

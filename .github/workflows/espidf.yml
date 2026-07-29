@@ -3,6 +3,9 @@ name: ESP-IDF
 on:
   pull_request:
     paths:
+      - "CMakeLists.txt"
+      - "include/**"
+      - "src/**"
       - "ports/espidf/**"
       - "examples/espidf/**"
       - "tests/unit/espidf_port.c"
@@ -13,6 +16,9 @@ on:
     branches:
       - main
     paths:
+      - "CMakeLists.txt"
+      - "include/**"
+      - "src/**"
       - "ports/espidf/**"
       - "examples/espidf/**"
       - "tests/unit/espidf_port.c"

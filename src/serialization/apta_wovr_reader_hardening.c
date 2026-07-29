@@ -102,7 +102,10 @@ static apta_status_t apta_harden_validated_wovr(
     span_directory_offset = apta_harden_get_u64(payload + 24u);
     state = apta_harden_get_u32(payload + 40u) & APTA_WOVR_STATE_MASK;
 
-    if ((size_t)span_count > SIZE_MAX / sizeof(*intervals)) {
+    if (!apta_internal_size_array_fits(
+            0u,
+            span_count,
+            sizeof(*intervals))) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 

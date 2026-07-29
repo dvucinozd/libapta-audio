@@ -36,6 +36,10 @@ typedef struct {
     uint32_t maximum_waveform_columns;
 
     uint64_t maximum_file_bytes;
+    /*
+     * Maximum aggregate logical bytes allocated while constructing the
+     * parsed result. Zero selects the library default.
+     */
     uint64_t maximum_allocation_bytes;
     uint64_t reserved64[4];
 } apta_parse_options_t;

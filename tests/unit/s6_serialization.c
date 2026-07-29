@@ -6,6 +6,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_internal.h"
+
 #define SAMPLE_RATE 48000u
 #define TOTAL_FRAMES 524288u
 #define SPLIT_FRAME (TOTAL_FRAMES / 2u)
@@ -250,6 +252,7 @@ int main(void)
     uint8_t *roundtrip = NULL;
     uint64_t size64 = 0u;
     uint64_t roundtrip_size = 0u;
+    uint64_t exact_allocation_size = 0u;
     size_t written = 0u;
     size_t roundtrip_written = 0u;
     size_t prefix;
@@ -297,6 +300,10 @@ int main(void)
               &parsed) == APTA_STATUS_OK);
     CHECK(parsed != NULL);
     CHECK(verify_result(parsed) == 0);
+    CHECK(apta_internal_result_allocation_bytes(
+              parsed,
+              &exact_allocation_size));
+    CHECK(exact_allocation_size > 1u);
     CHECK(apta_result_query_serialized_size(parsed, NULL, &roundtrip_size) ==
           APTA_STATUS_OK);
     CHECK(roundtrip_size == size64);
@@ -312,6 +319,30 @@ int main(void)
     CHECK(memcmp(bytes, roundtrip, written) == 0);
     apta_result_release(parsed);
     parsed = NULL;
+
+    {
+        apta_parse_options_t limited;
+        apta_parse_options_init(&limited);
+        limited.maximum_allocation_bytes = exact_allocation_size - 1u;
+        CHECK(apta_result_parse(
+                  parse_context,
+                  &limited,
+                  bytes,
+                  written,
+                  &parsed) == APTA_ERROR_LIMIT_EXCEEDED);
+        CHECK(parsed == NULL);
+
+        limited.maximum_allocation_bytes = exact_allocation_size;
+        CHECK(apta_result_parse(
+                  parse_context,
+                  &limited,
+                  bytes,
+                  written,
+                  &parsed) == APTA_STATUS_OK);
+        CHECK(parsed != NULL);
+        apta_result_release(parsed);
+        parsed = NULL;
+    }
 
     for (prefix = 0u; prefix < written; ++prefix) {
         const apta_result_t *truncated = NULL;

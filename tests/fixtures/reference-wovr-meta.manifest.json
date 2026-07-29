@@ -5,7 +5,7 @@
   "fixture_hex_path": "tests/fixtures/reference-wovr-meta.apta.hex",
   "generator_path": "tests/fixtures/generate_reference_fixture.py",
   "size_bytes": 303,
-  "sha256": "3129b6c40b348e1674859d73b0299c25f611c0f4762aa9c99819d9f629439a19",
+  "sha256": "394403f6e0617cde449f88c35b87d7d3a136ca304ae4874cba65310724a1d7d2",
   "container_version": 1,
   "specification_version": "0.1",
   "producer_api_version": "0.1.0",

@@ -144,7 +144,10 @@ static apta_status_t apta_process_workspace_reserve_accumulators(
         }
         capacity *= 2u;
     }
-    if ((size_t)capacity > SIZE_MAX / sizeof(*replacement)) {
+    if (!apta_internal_size_array_fits(
+            0u,
+            capacity,
+            sizeof(*replacement))) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
     bytes = (size_t)capacity * sizeof(*replacement);

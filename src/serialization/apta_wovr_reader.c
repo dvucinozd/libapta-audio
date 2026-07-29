@@ -256,10 +256,6 @@ static apta_status_t apta_validate_container(
         (directory_offset & 7u) != 0u) {
         return APTA_ERROR_CORRUPT_DATA;
     }
-    if ((uint64_t)section_count > UINT64_MAX / APTA_DIRECTORY_ENTRY_SIZE) {
-        return APTA_ERROR_LIMIT_EXCEEDED;
-    }
-
     directory_size = (uint64_t)section_count * APTA_DIRECTORY_ENTRY_SIZE;
     if (!apta_range_fits(directory_offset, directory_size, buffer_size)) {
         return APTA_ERROR_CORRUPT_DATA;
@@ -427,9 +423,6 @@ static apta_status_t apta_validate_wovr_geometry(
         return APTA_ERROR_CORRUPT_DATA;
     }
 
-    if ((uint64_t)span_count > UINT64_MAX / APTA_WOVR_SPAN_SIZE) {
-        return APTA_ERROR_LIMIT_EXCEEDED;
-    }
     span_bytes = (uint64_t)span_count * APTA_WOVR_SPAN_SIZE;
     if (span_directory_offset < APTA_WOVR_HEADER_SIZE ||
         column_data_offset < APTA_WOVR_HEADER_SIZE ||

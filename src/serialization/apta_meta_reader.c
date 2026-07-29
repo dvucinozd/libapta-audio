@@ -429,26 +429,6 @@ static apta_status_t apta_meta_find_section(
     return APTA_STATUS_OK;
 }
 
-static uint64_t apta_meta_existing_result_bytes(const apta_result_t *result)
-{
-    uint64_t total = sizeof(*result);
-    uint32_t index;
-
-    total += (uint64_t)result->overview.span_count *
-             sizeof(apta_waveform_span_t);
-    for (index = 0u; index < result->overview.span_count; ++index) {
-        total += (uint64_t)result->overview.spans[index].column_count *
-                 sizeof(apta_waveform_column_t);
-    }
-    total += (uint64_t)result->detail_tile_count *
-             sizeof(apta_waveform_tile_view_t);
-    for (index = 0u; index < result->detail_tile_count; ++index) {
-        total += (uint64_t)result->detail_tiles[index].column_count *
-                 sizeof(apta_waveform_column_t);
-    }
-    return total;
-}
-
 apta_status_t APTA_CALL apta_result_parse(
     apta_context_t *context,
     const apta_parse_options_t *options,
@@ -465,7 +445,6 @@ apta_status_t APTA_CALL apta_result_parse(
         options != NULL && options->maximum_allocation_bytes != 0u
             ? options->maximum_allocation_bytes
             : APTA_PARSE_DEFAULT_MAX_ALLOCATION_BYTES;
-    uint64_t existing_bytes;
     uint64_t metadata_bytes;
     apta_status_t status;
 
@@ -512,9 +491,10 @@ apta_status_t APTA_CALL apta_result_parse(
                      metadata.backend_version.size +
                      metadata.application_source_id.size +
                      metadata.comments.size;
-    existing_bytes = apta_meta_existing_result_bytes(parsed_const);
-    if (existing_bytes > maximum_allocation_bytes ||
-        metadata_bytes > maximum_allocation_bytes - existing_bytes) {
+    if (!apta_internal_result_allocation_fits(
+            parsed_const,
+            metadata_bytes,
+            maximum_allocation_bytes)) {
         apta_result_release(parsed_const);
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
