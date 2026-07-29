@@ -37,6 +37,7 @@ target_link_libraries(
     apta_decoder_wav
     PUBLIC
         apta::headers
+        apta::core
         apta::port_posix
     PRIVATE
         apta_sanitizers)
