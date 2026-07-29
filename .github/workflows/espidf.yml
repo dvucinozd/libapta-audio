@@ -1,0 +1,94 @@
+name: ESP-IDF
+
+on:
+  pull_request:
+    paths:
+      - "ports/espidf/**"
+      - "examples/espidf/**"
+      - "tests/unit/espidf_port.c"
+      - "tests/unit/espidf_memory_profiles.c"
+      - "tests/stubs/espidf/**"
+      - ".github/workflows/espidf.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "ports/espidf/**"
+      - "examples/espidf/**"
+      - "tests/unit/espidf_port.c"
+      - "tests/unit/espidf_memory_profiles.c"
+      - "tests/stubs/espidf/**"
+      - ".github/workflows/espidf.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: espidf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  profiles:
+    name: Bounded embedded memory profiles
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build and run profiles
+        run: |
+          cmake -S . -B build-profiles \
+            -DAPTA_BUILD_TESTS=OFF \
+            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
+            -DAPTA_BUILD_TOOLS=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-profiles --parallel 2
+          cc -std=c11 -Wall -Wextra -Wpedantic \
+            -Iinclude \
+            tests/unit/espidf_memory_profiles.c \
+            build-profiles/libapta.a -lm \
+            -o build-profiles/apta-espidf-memory-profiles
+          ./build-profiles/apta-espidf-memory-profiles
+
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ESP-IDF 5.5.4 / ESP32 / scalar
+            image: espressif/idf:v5.5.4
+            target: esp32
+            build_dir: build-idf55-esp32
+            defaults: sdkconfig.defaults
+          - name: ESP-IDF 6.0.2 / ESP32 / scalar
+            image: espressif/idf:v6.0.2
+            target: esp32
+            build_dir: build-idf60-esp32
+            defaults: sdkconfig.defaults
+          - name: ESP-IDF 6.0.2 / ESP32-S3 / ESP-DSP
+            image: espressif/idf:v6.0.2
+            target: esp32s3
+            build_dir: build-idf60-esp32s3
+            defaults: sdkconfig.defaults;sdkconfig.dsp.defaults
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build component and example
+        run: >-
+          docker run --rm
+          -v "${GITHUB_WORKSPACE}:/project"
+          -w /project/examples/espidf/cooperative_scheduler
+          ${{ matrix.image }}
+          idf.py -B ${{ matrix.build_dir }}
+          -DSDKCONFIG_DEFAULTS="${{ matrix.defaults }}"
+          set-target ${{ matrix.target }} build size-components
+
+      - name: Verify firmware artifact
+        run: >-
+          test -s
+          examples/espidf/cooperative_scheduler/${{ matrix.build_dir }}/apta_cooperative_scheduler.bin

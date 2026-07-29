@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+
+menu "libapta-audio"
+
+config APTA_ESP_DSP_BACKEND
+    bool "Use ESP-DSP for port math helpers"
+    default n
+    help
+        Use the optimized dsps_dotprod_f32 implementation from the official
+        Espressif ESP-DSP component for apta_espidf_dot_product_f32().
+        The portable libapta core remains algorithmically identical and does
+        not require ESP-DSP.
+
+endmenu

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+
+version: "0.1.0"
+description: "ESP-IDF port for libapta-audio"
+url: "https://github.com/dvucinozd/libapta-audio"
+dependencies:
+  idf: ">=5.5"
+  espressif/esp-dsp:
+    version: "^1.8.2"
+    require: private

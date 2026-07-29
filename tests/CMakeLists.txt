@@ -76,6 +76,20 @@ apta_add_c_test(apta_s6_bounded apta.s6.bounded unit/s6_bounded.c)
 apta_add_c_test(apta_s6_serialization apta.serialization.s6 unit/s6_serialization.c)
 apta_add_c_test(apta_s6_allocation_failure apta.serialization.s6_allocation_failure unit/s6_allocation_failure.c)
 
+add_executable(
+    apta_espidf_port
+    unit/espidf_port.c
+    ${CMAKE_SOURCE_DIR}/ports/espidf/apta_espidf.c)
+target_link_libraries(apta_espidf_port PRIVATE apta::core)
+target_include_directories(
+    apta_espidf_port
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/ports/espidf/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/stubs/espidf)
+target_compile_definitions(apta_espidf_port PRIVATE CONFIG_APTA_ESP_DSP_BACKEND=0)
+set_target_properties(apta_espidf_port PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+add_test(NAME apta.port.espidf COMMAND apta_espidf_port)
+
 if(TARGET apta_decoder_wav)
     apta_add_desktop_test(apta_desktop_posix_file apta.desktop.posix_file unit/desktop_posix_file.c)
     apta_add_desktop_test(apta_desktop_wav_decoder apta.desktop.wav_decoder unit/desktop_wav_decoder.c)
