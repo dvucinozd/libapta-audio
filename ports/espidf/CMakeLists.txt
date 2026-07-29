@@ -171,6 +171,6 @@ if(NOT CMAKE_BUILD_EARLY_EXPANSION)
 
     set_target_properties(${COMPONENT_LIB} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
     target_compile_definitions(${COMPONENT_LIB} PRIVATE APTA_BUILDING_LIBRARY=1)
-    target_compile_options(${COMPONENT_LIB} PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(${COMPONENT_LIB} PRIVATE -Wall -Wextra)
     target_link_libraries(${COMPONENT_LIB} PRIVATE m)
 endif()
