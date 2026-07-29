@@ -45,7 +45,7 @@ void *heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps)
     return memory;
 }
 
-void heap_caps_aligned_free(void *memory)
+void heap_caps_free(void *memory)
 {
     if (memory != NULL) {
         free_calls += 1u;
