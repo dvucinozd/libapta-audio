@@ -210,9 +210,6 @@ apta_status_t APTA_CALL apta_espidf_dot_product_f32(
     size_t count,
     float *result_out)
 {
-    size_t index;
-    float result = 0.0f;
-
     if (left == NULL || right == NULL || result_out == NULL ||
         count == 0u || count > (size_t)INT_MAX) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -222,6 +219,8 @@ apta_status_t APTA_CALL apta_espidf_dot_product_f32(
         return APTA_ERROR_INTERNAL;
     }
 #else
+    size_t index;
+    float result = 0.0f;
     for (index = 0u; index < count; ++index) {
         result += left[index] * right[index];
     }
