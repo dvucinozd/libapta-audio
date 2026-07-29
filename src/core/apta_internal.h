@@ -33,6 +33,19 @@
     (APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID | \
      APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING)
 
+#define APTA_INTERNAL_S6_FEATURES \
+    (APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO)
+
+#define APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN 2048u
+#define APTA_INTERNAL_GLOBAL_BIN_CAPACITY 16384u
+#define APTA_INTERNAL_GLOBAL_WINDOW_BINS 128u
+#define APTA_INTERNAL_GLOBAL_MIN_BINS 64u
+#define APTA_INTERNAL_GLOBAL_STABLE_BINS 256u
+#define APTA_INTERNAL_GLOBAL_MAX_SEGMENTS \
+    APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS
+#define APTA_INTERNAL_GLOBAL_MAX_BEATS \
+    APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS
+
 typedef struct {
     void *raw_memory;
     size_t allocated_size;
@@ -108,6 +121,10 @@ typedef struct {
 
 typedef struct apta_internal_result_pool_control
     apta_internal_result_pool_control_t;
+typedef struct apta_internal_s6_session_state
+    apta_internal_s6_session_state_t;
+typedef struct apta_internal_s6_result_state
+    apta_internal_s6_result_state_t;
 
 struct apta_context {
     apta_allocator_t allocator;
@@ -153,6 +170,8 @@ struct apta_result {
     apta_grid_view_t local_grid;
     apta_frame_range_t *local_grid_coverage;
     apta_grid_segment_t *local_grid_segments;
+
+    apta_internal_s6_result_state_t *s6;
 };
 
 struct apta_session {
@@ -223,6 +242,8 @@ struct apta_session {
     uint32_t local_grid_segment_id;
     uint64_t s4_mutation_serial;
     uint64_t s4_published_serial;
+
+    apta_internal_s6_session_state_t *s6;
 };
 
 int apta_internal_validate_struct(
@@ -365,6 +386,21 @@ apta_status_t apta_internal_s4_build_snapshot(
     apta_result_t *result);
 void apta_internal_s4_cleanup_session(apta_session_t *session);
 void apta_internal_s4_cleanup_result(apta_result_t *result);
+
+apta_status_t apta_internal_s6_prepare(apta_session_t *session);
+apta_status_t apta_internal_s6_process_sample(
+    apta_session_t *session,
+    apta_source_frame_t source_frame,
+    float sample);
+apta_status_t apta_internal_s6_refresh(apta_session_t *session);
+apta_feature_mask_t apta_internal_s6_pending_features(
+    const apta_session_t *session);
+void apta_internal_s6_mark_published(apta_session_t *session);
+apta_status_t apta_internal_s6_build_snapshot(
+    apta_session_t *session,
+    apta_result_t *result);
+void apta_internal_s6_cleanup_session(apta_session_t *session);
+void apta_internal_s6_cleanup_result(apta_result_t *result);
 
 void apta_internal_waveform_cleanup_session(apta_session_t *session);
 void apta_internal_waveform_cleanup_result(apta_result_t *result);
