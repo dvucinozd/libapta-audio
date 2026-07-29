@@ -121,6 +121,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "apta_session_create=apta_session_create_activation_base;apta_session_process=apta_session_process_activation_base")
 
 set_source_files_properties(
+    src/core/apta_session_pull_activation.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "apta_session_create=apta_session_create_s6_guard_base")
+
+set_source_files_properties(
     src/core/apta_session_source.c
     PROPERTIES
         COMPILE_DEFINITIONS "apta_session_set_source=apta_session_set_source_base;apta_session_push_pcm=apta_session_push_pcm_base;apta_session_signal_end_of_input=apta_session_signal_end_of_input_base")
@@ -198,6 +203,7 @@ add_library(
         src/beatgrid/apta_s6_cleanup.c
         src/beatgrid/apta_s6_pool_snapshot.c
         src/beatgrid/apta_s6_process.c
+        src/beatgrid/apta_s6_session_guard.c
         src/core/apta_config.c
         src/core/apta_context.c
         src/core/apta_initializers.c
