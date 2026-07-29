@@ -175,7 +175,7 @@ static size_t apta_memory_waveform_recommendation(
            s6_snapshots;
 }
 
-apta_status_t APTA_CALL apta_query_memory_requirements(
+apta_status_t APTA_CALL apta_query_memory_requirements_base(
     const apta_session_config_t *config,
     apta_memory_requirements_t *requirements_out)
 {
