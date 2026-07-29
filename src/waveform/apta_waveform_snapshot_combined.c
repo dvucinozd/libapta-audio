@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../beatgrid/apta_s6_internal.h"
 
 static void apta_finalize_s4_result(
     const apta_session_t *session,
@@ -21,6 +22,23 @@ static void apta_finalize_s4_result(
     }
 }
 
+static void apta_finalize_s6_result(
+    const apta_session_t *session,
+    apta_result_t *result)
+{
+    uint32_t index;
+
+    if (atomic_load_explicit(&session->state, memory_order_acquire) !=
+            APTA_SESSION_COMPLETED ||
+        result->s6 == NULL) {
+        return;
+    }
+    result->s6->global_grid.state = APTA_FEATURE_FINAL;
+    for (index = 0u; index < result->s6->global_grid.segment_count; ++index) {
+        result->s6->segments[index].state = APTA_FEATURE_FINAL;
+    }
+}
+
 apta_status_t apta_internal_waveform_build_snapshot(
     apta_session_t *session,
     apta_result_t *result)
@@ -38,10 +56,17 @@ apta_status_t apta_internal_waveform_build_snapshot(
     }
 
     status = apta_internal_s4_build_snapshot(session, result);
-    if (status >= 0) {
-        apta_finalize_s4_result(session, result);
+    if (status < 0) {
+        return status;
     }
-    return status;
+    apta_finalize_s4_result(session, result);
+
+    status = apta_internal_s6_build_snapshot(session, result);
+    if (status < 0) {
+        return status;
+    }
+    apta_finalize_s6_result(session, result);
+    return APTA_STATUS_OK;
 }
 
 void apta_internal_waveform_cleanup_result(apta_result_t *result)
@@ -57,4 +82,5 @@ void apta_internal_waveform_cleanup_result(apta_result_t *result)
     result->detail_columns = NULL;
     result->detail_tile_count = 0u;
     apta_internal_s4_cleanup_result(result);
+    apta_internal_s6_cleanup_result(result);
 }
