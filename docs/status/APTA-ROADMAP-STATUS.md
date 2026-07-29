@@ -1,10 +1,10 @@
 # APTA development roadmap status
 
 **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)  
-**Current completed stage:** S6 — Global grid and dynamic tempo  
-**Next stage:** S7 — ESP-IDF port  
-**Latest implementation merge:** `9d80f680469a7bec4e914c061e306f880bfc3f36`  
-**Latest full verification:** GitHub Actions PR CI run `#275`, 68 runtime tests
+**Current completed stage:** S7 — ESP-IDF port  
+**Next stage:** S8 — Second independent platform  
+**Latest implementation merge:** `5f949197c2600a9c83a9187ec3625c841ab7f076`  
+**Latest full verification:** native CI run `#291` with 69 runtime tests and ESP-IDF workflow run `#13`
 
 ## Status summary
 
@@ -17,7 +17,7 @@
 | S4 — Tempo and local grid | Functionally complete implementation candidate | BPM, candidates, confidence, local grid, locking and progressive lifecycle |
 | S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX adapter, WAV decoder boundary, analyzer, inspector, validator and generated-fixture integration |
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
-| S7 — ESP-IDF port | Not started as an independent port | Portable bounded-memory core is ready; ESP-IDF adapter/backend/example and target evidence remain |
+| S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP allocator/clock/logger, optional ESP-DSP helper, IDF component, cooperative example, bounded profiles and 5.5.4/6.0.2 firmware builds |
 | S8 — Second independent platform | Not started | Independent platform integration remains |
 | S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
 
@@ -135,24 +135,52 @@ Status: complete self-tested implementation candidate. See [`S6-GLOBAL-GRID-DYNA
 
 ## S7 — ESP-IDF port
 
+Implemented:
+
+- capability-aware aligned allocator using ESP-IDF heap capabilities;
+- configurable memory-class-to-capability mapping;
+- strict and fallback allocation policies;
+- monotonic nanosecond clock derived from `esp_timer_get_time()`;
+- optional `esp_log` logger binding;
+- optional ESP-DSP dot-product helper with scalar fallback;
+- full ESP-IDF component build of the existing portable core;
+- cooperative application-managed scheduler example;
+- bounded waveform, local-performance and global-dynamic memory profiles;
+- host-stub adapter regression;
+- ESP-IDF 5.5.4 / ESP32 scalar cross-build;
+- ESP-IDF 6.0.2 / ESP32 scalar cross-build;
+- ESP-IDF 6.0.2 / ESP32-S3 ESP-DSP cross-build.
+
+The native suite registers 69 runtime tests. The ESP-IDF matrix links and verifies complete firmware artifacts and runs component-size reports.
+
+Status: complete self-tested and cross-build-verified implementation candidate. Physical-board execution, stack high-water marks, on-target latency, fragmentation and hardware decoder/USB integration remain stronger validation gates rather than absent Stage S7 implementation items.
+
+See [`S7-ESP-IDF-PORT-STATUS.md`](S7-ESP-IDF-PORT-STATUS.md), [`../reference/APTA-ESP-IDF-MEMORY-PROFILES-0.1.md`](../reference/APTA-ESP-IDF-MEMORY-PROFILES-0.1.md), [`../conformance/APTA-S7-READINESS-0.1.md`](../conformance/APTA-S7-READINESS-0.1.md) and [`../../ports/espidf/README.md`](../../ports/espidf/README.md).
+
+## S8 — Second independent platform
+
 Next implementation scope:
 
-1. ESP-IDF allocator and monotonic-clock integration;
-2. optional ESP-DSP or target-optimized backend boundary;
-3. cooperative scheduler and application integration example;
-4. component packaging and build evidence;
-5. measured embedded workspace, stack and latency profiles;
-6. target runtime and container interoperability tests.
+Implement and validate at least one independent platform integration, such as:
+
+1. Zephyr;
+2. Windows;
+3. STM32 bare metal;
+4. Linux DJ player;
+5. mobile application.
+
+The selected platform must consume the public APTA API and `.apta` data model without depending on ESP-IDF adapter internals. Its evidence should include platform build/runtime tests and interchange with the existing reference implementation.
 
 ## Claims
 
-“Stage complete” in this document means that the functional items listed for the stage in the architecture roadmap exist in the reference implementation and have self-tested evidence.
+“Stage complete” in this document means that the functional items listed for the stage in the architecture roadmap exist in the reference implementation and have self-tested evidence appropriate to their layer.
 
 It does not mean:
 
 - stable APTA 1.0 specification;
 - stable public API or ABI;
 - certified profile conformance;
+- physical-device certification for every supported build target;
 - independent implementation interoperability;
 - measured resource-class certification;
 - completion of later stages.
