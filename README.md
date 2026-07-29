@@ -2,9 +2,9 @@
 
 `libapta-audio` is the home of the Adaptive Progressive Track Analysis (APTA) standard and its portable ISO C11 reference implementation.
 
-APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container and POSIX reference desktop tools.
+APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container, POSIX reference desktop tools and an ESP-IDF platform component.
 
-> Project status: functional implementation candidate through roadmap Stage S6. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.
+> Project status: functional implementation candidate through roadmap Stage S7. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.
 
 ## Implemented stages
 
@@ -15,10 +15,18 @@ APTA provides progressive, bounded and portable audio analysis for waveform, tem
 - S4 — Tempo and local grid
 - S5 — Reference desktop tools
 - S6 — Global grid and dynamic tempo
+- S7 — ESP-IDF port
 
 Current roadmap status:
 
 [`docs/status/APTA-ROADMAP-STATUS.md`](docs/status/APTA-ROADMAP-STATUS.md)
+
+Stage S7 status and evidence:
+
+- [`docs/status/S7-ESP-IDF-PORT-STATUS.md`](docs/status/S7-ESP-IDF-PORT-STATUS.md)
+- [`ports/espidf/README.md`](ports/espidf/README.md)
+- [`docs/reference/APTA-ESP-IDF-MEMORY-PROFILES-0.1.md`](docs/reference/APTA-ESP-IDF-MEMORY-PROFILES-0.1.md)
+- [`docs/conformance/APTA-S7-READINESS-0.1.md`](docs/conformance/APTA-S7-READINESS-0.1.md)
 
 Stage S6 status and evidence:
 
@@ -33,7 +41,7 @@ Stage S6 status and evidence:
 - [`include/apta/`](include/apta/) — public C API headers.
 - [`src/`](src/) — portable core plus optional desktop adapter implementation.
 - [`backends/`](backends/) — replaceable DSP backends.
-- [`ports/`](ports/) — platform integration layers.
+- [`ports/`](ports/) — platform integration layers, including ESP-IDF.
 - [`tools/`](tools/) — `apta-analyze`, `apta-inspect` and `apta-validate`.
 - [`tests/`](tests/) — unit, integration, conformance, fuzz and generated-fixture tests.
 - [`examples/`](examples/) — usage and platform examples.
@@ -79,6 +87,38 @@ cmake --build build-sanitized --parallel
 ctest --test-dir build-sanitized --output-on-failure
 ```
 
+## ESP-IDF quick start
+
+The reference ESP-IDF component supports the verified build range from ESP-IDF 5.5.4 through 6.0.2.
+
+A complete cooperative example is located at:
+
+```text
+examples/espidf/cooperative_scheduler
+```
+
+Build the scalar ESP32 configuration:
+
+```bash
+cd examples/espidf/cooperative_scheduler
+idf.py set-target esp32
+idf.py build
+```
+
+Build the ESP32-S3 configuration with the optional ESP-DSP helper:
+
+```bash
+idf.py -B build-esp32s3 \
+  -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.dsp.defaults" \
+  set-target esp32s3 build
+```
+
+Detailed component integration:
+
+[`ports/espidf/README.md`](ports/espidf/README.md)
+
+The CI matrix cross-compiles linked firmware for ESP-IDF 5.5.4/ESP32, ESP-IDF 6.0.2/ESP32 and ESP-IDF 6.0.2/ESP32-S3 with ESP-DSP. It does not flash or execute firmware on physical hardware.
+
 ## Desktop quick start
 
 The built-in reference decoder accepts RIFF/WAVE PCM16, packed PCM24, PCM32 and IEEE float32, mono or stereo. Other codecs require another decoder backend or application-side decode-to-PCM integration.
@@ -115,7 +155,7 @@ Detailed desktop-tool contract:
 
 ## CMake targets
 
-Current reference targets include:
+Current native reference targets include:
 
 ```text
 apta::headers
@@ -132,13 +172,22 @@ apta-inspect
 apta-validate
 ```
 
+The ESP-IDF integration is an IDF component under `ports/espidf`, not a native CMake alias target.
+
 ## Testing
 
-The current suite contains unit, generated-audio integration, malformed-input, allocation-failure, concurrency, sanitizer, exhaustive truncation and fuzz-smoke coverage. Stage S6 adds deterministic global-grid, dynamic-tempo, explicit-beat, revision and `GGRD`/`REVN` interchange vectors.
+The native suite registers 69 tests and contains unit, generated-audio integration, malformed-input, allocation-failure, concurrency, sanitizer, exhaustive truncation and fuzz-smoke coverage.
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
+
+Stage S7 additionally provides:
+
+- the `apta.port.espidf` host-stub adapter regression;
+- three bounded embedded memory profiles;
+- ESP-IDF 5.5.4 and 6.0.2 firmware cross-builds;
+- scalar ESP32 and ESP-DSP ESP32-S3 link coverage.
 
 The reference workflows generate click-track WAV and `.apta` parser seeds at runtime. No third-party audio recording is required or committed.
 
