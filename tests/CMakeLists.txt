@@ -36,6 +36,7 @@ function(apta_add_desktop_test target test_name source)
             apta::core
             apta::decoder_wav
             apta::port_posix)
+    target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
     set_target_properties(${target} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
     add_test(NAME ${test_name} COMMAND ${target})
 endfunction()
