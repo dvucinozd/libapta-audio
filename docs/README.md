@@ -9,6 +9,11 @@ For the current project state, start with
 that identify a source commit or CI run are milestone evidence snapshots; their
 test counts and forward-looking sections describe that recorded baseline.
 
+Repository-wide contribution, governance and vulnerability-reporting policies
+are maintained in [`../CONTRIBUTING.md`](../CONTRIBUTING.md),
+[`../GOVERNANCE.md`](../GOVERNANCE.md) and
+[`../SECURITY.md`](../SECURITY.md).
+
 ## Sections
 
 - [`architecture/`](architecture/) — original system boundaries and target

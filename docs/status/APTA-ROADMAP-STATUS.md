@@ -12,7 +12,7 @@
 
 | Stage | Status | Evidence |
 |---|---|---|
-| S0 — Foundation | Technical foundation present; release-policy gaps open | Repository, specification structure, charter, terminology and non-goals exist; license metadata and missing policy files require resolution |
+| S0 — Foundation | Functionally complete foundation | Repository, specification structure, charter, terminology, Apache-2.0 licensing and contribution/governance/security policies exist |
 | S1 — Portable core API | Functionally complete implementation candidate | Opaque handles, allocator abstraction, PCM push/pull, bounded processing, cancellation, immutable snapshots |
 | S2 — Waveform Profile | Functionally complete implementation candidate | Overview, detail tiles, progressive coverage, WOVR/WDTL serialization and vectors |
 | S3 — `.apta` container | Functionally complete implementation candidate | Header, directory, META, WOVR, WDTL, TEMP, LGRD, GGRD, REVN, CRC, hardened parser/writer and fuzzing |
@@ -31,16 +31,20 @@ Implemented:
 - specification/documentation structure;
 - terminology and explicit non-goals.
 
-Open release-policy gaps:
+Release-policy foundation:
 
-- root [`../../LICENSE`](../../LICENSE) contains MIT terms while tracked
-  source/build/test files carry `SPDX-License-Identifier: Apache-2.0`;
-- `CONTRIBUTING.md`, `GOVERNANCE.md` and `SECURITY.md` do not exist;
-- no verified private vulnerability-reporting path is documented.
+- the root [`../../LICENSE`](../../LICENSE) contains the complete Apache
+  License 2.0 and matches tracked source/build/test SPDX identifiers;
+- [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md),
+  [`../../GOVERNANCE.md`](../../GOVERNANCE.md) and
+  [`../../SECURITY.md`](../../SECURITY.md) define contribution, decision and
+  coordinated-disclosure processes;
+- `SECURITY.md` provides a private email contact. GitHub's structured
+  private-report form is documented as an additional channel only when it is
+  available and enabled.
 
 The architecture draft remains a working draft rather than a stable standard.
-Its proposed Apache-2.0/CC BY 4.0 licensing table is not a resolution of the
-current repository conflict.
+Its licensing section now records the repository's Apache-2.0 model.
 
 ## S1 — Portable core API
 
@@ -203,7 +207,6 @@ It does not mean:
 
 - stable APTA 1.0 specification;
 - stable public API or ABI;
-- reconciled release licensing or completed contribution/security governance;
 - certified profile conformance;
 - physical-device certification for every supported build target;
 - independent implementation interoperability;

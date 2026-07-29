@@ -28,3 +28,8 @@ Current documents:
 The original architecture proposed a separate `processing-model.md`; Core 0.1
 currently defines that material across PCM input, scheduling, lifecycle and
 result-model documents instead.
+
+The specification is distributed under the repository's
+[Apache License 2.0](../LICENSE). Proposed normative changes follow
+[`../CONTRIBUTING.md`](../CONTRIBUTING.md) and the decision process in
+[`../GOVERNANCE.md`](../GOVERNANCE.md).
