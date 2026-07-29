@@ -7,6 +7,11 @@
 **Runtime tests:** 43  
 **Resource-class claim:** none
 
+> Evidence snapshot: statuses and the 43-test count below apply to source commit
+> `b1c9100b`. PCM pull, Stage S4–S7 features and later platform/build evidence
+> are tracked in
+> [`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md).
+
 ## Claim position
 
 The current implementation satisfies the functional requirements currently listed for:
@@ -45,7 +50,7 @@ A formal profile claim is intentionally withheld because the complete conformanc
 
 | Optional capability | Status |
 |---|---|
-| PCM pull input | Not implemented |
+| PCM pull input | Not implemented at this snapshot; implemented later |
 | Detail tiles | Implemented, bounded four-tile cache |
 | Three-band waveform | Not implemented |
 | `REFERENCE-WAVEFORM-0.1` qualifier | Not formally claimed; core peak/RMS behaviour is deterministic |

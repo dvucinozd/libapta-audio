@@ -5,9 +5,16 @@
 **Supported waveform section:** `WOVR` version 1  
 **Conformance claim:** Not yet claimed
 
+> Evidence scope: this file started as the original WOVR-only implementation
+> snapshot. Its 19-test count records that baseline, not the current full
+> suite. Later WDTL, META, S4 and S6 layers are documented in
+> [`../conformance/APTA-WOVR-CONFORMANCE-MANIFEST-0.1.md`](../conformance/APTA-WOVR-CONFORMANCE-MANIFEST-0.1.md),
+> [`../reference/APTA-S6-CONTAINER-0.1.md`](../reference/APTA-S6-CONTAINER-0.1.md)
+> and [`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md).
+
 ## Implemented writer behaviour
 
-The current canonical writer provides:
+The canonical WOVR layer provides:
 
 - a 96-byte container header;
 - one 40-byte section-directory entry;
@@ -76,7 +83,10 @@ A zero limit field selects the library default rather than disabling the limit.
 
 ## Runtime and hardening tests
 
-The test suite now registers 19 runtime tests. Serialization and parser coverage includes:
+The original WOVR verification baseline registered 19 runtime tests. The
+current suite totals are recorded in
+[`../../README.md`](../../README.md#testing). Serialization and parser coverage
+includes:
 
 - canonical final `WOVR` golden-layout validation;
 - sparse partial/unknown-duration writer validation;
@@ -102,8 +112,11 @@ The build provides opt-in hardening controls:
 
 - `APTA_ENABLE_SANITIZERS=ON` enables AddressSanitizer and UndefinedBehaviorSanitizer with GCC or Clang;
 - `APTA_BUILD_FUZZING=ON` builds the Clang/libFuzzer `apta_wovr_reader_fuzz` target;
-- `apta_wovr_seed_generator` creates canonical final and sparse-partial corpus entries through the public analysis and writer APIs;
-- `wovr_reader.dict` supplies format-aware magic, FourCC, version, lifecycle and geometry tokens;
+- `apta_wovr_seed_generator` creates canonical final, sparse-partial, WDTL,
+  META and S4 entries through the public analysis and writer APIs;
+- `apta_s6_seed_generator` creates the canonical S6 entry;
+- `wovr_reader.dict` supplies format-aware magic, all recognized FourCC,
+  version, lifecycle, revision, tempo, waveform and CBOR tokens;
 - the fuzz harness limits input to 1 MiB, aggregate result allocation to 1 MiB and context-owned memory to 2 MiB;
 - the CI parser-hardening job runs the complete test suite under ASan/UBSan and then executes a seeded bounded 2000-run fuzz smoke pass.
 
@@ -111,27 +124,29 @@ The fuzz smoke run is a regression guard, not a substitute for long-running cont
 
 ## Deliberate limitations
 
-The implementation does not yet provide:
+The current implementation still does not provide:
 
 - streaming or incremental parsing;
 - memory-mapped zero-copy result views;
-- `META` parsing or writing;
-- `WDTL` parsing or writing;
 - compressed or encrypted sections;
 - preservation of unknown optional sections during rewrite;
 - non-zero source fingerprint kinds;
 - multiple overview levels;
-- tempo or beatgrid sections;
 - a persistent corpus of independently discovered crash regressions;
 - continuous or scheduled long-running fuzz infrastructure;
 - a formal Waveform Profile conformance report.
 
 ## Completion gates
 
-This package can be treated as a verified implementation candidate when:
+The original WOVR package was treated as a verified implementation candidate
+after these gates passed:
 
 - the newest GitHub Actions core-build job compiles cleanly and all 19 runtime tests pass;
 - the parser-hardening job passes ASan and UBSan without findings;
 - the seeded bounded libFuzzer smoke run completes without a crash, timeout or leak;
 - compiler warnings remain clean;
 - the status document records the verified commit SHA.
+
+They are historical package gates, not a claim that the current repository head
+has an all-green workflow. Current validation status is tracked in
+[`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md).

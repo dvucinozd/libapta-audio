@@ -1,16 +1,18 @@
 # APTA development roadmap status
 
-**Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)  
-**Current completed stage:** S7 — ESP-IDF port  
-**Next stage:** S8 — Second independent platform  
-**Latest implementation merge:** `5f949197c2600a9c83a9187ec3625c841ab7f076`  
-**Latest full verification:** native CI run `#291` with 69 runtime tests and ESP-IDF workflow run `#13`
+- **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)
+- **Current completed stage:** S7 — ESP-IDF port
+- **Next stage:** S8 — Second independent platform
+- **Latest implementation baseline:** `cf622e84854aae53cedeca0ba06725479d84b8eb`
+- **Latest all-green native CI:** run `#294` at `1bfcea06fdca41e2abac9573d481aed44e7bc39e`
+- **Current-head CI boundary:** run `#295`; POSIX, 32-bit and parser-hardening jobs passed, Windows/MSVC compilation failed
+- **Current-head platform/fixture checks:** ESP-IDF run `#17` and reference-fixture run `#3` passed
 
 ## Status summary
 
 | Stage | Status | Evidence |
 |---|---|---|
-| S0 — Foundation | Functionally complete | Repository, licensing, charter, terminology, non-goals, contribution and security policy |
+| S0 — Foundation | Functionally complete foundation | Repository, specification structure, charter, terminology, Apache-2.0 licensing and contribution/governance/security policies exist |
 | S1 — Portable core API | Functionally complete implementation candidate | Opaque handles, allocator abstraction, PCM push/pull, bounded processing, cancellation, immutable snapshots |
 | S2 — Waveform Profile | Functionally complete implementation candidate | Overview, detail tiles, progressive coverage, WOVR/WDTL serialization and vectors |
 | S3 — `.apta` container | Functionally complete implementation candidate | Header, directory, META, WOVR, WDTL, TEMP, LGRD, GGRD, REVN, CRC, hardened parser/writer and fuzzing |
@@ -18,7 +20,7 @@
 | S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX adapter, WAV decoder boundary, analyzer, inspector, validator and generated-fixture integration |
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
 | S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP allocator/clock/logger, optional ESP-DSP helper, IDF component, cooperative example, bounded profiles and 5.5.4/6.0.2 firmware builds |
-| S8 — Second independent platform | Not started | Independent platform integration remains |
+| S8 — Second independent platform | Not started | A Windows core CI preflight exists, but it is not a completed platform integration and the current MSVC job is failing |
 | S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
 
 ## S0 — Foundation
@@ -26,12 +28,23 @@
 Implemented:
 
 - repository and project identity;
-- Apache-2.0 reference implementation licensing;
 - specification/documentation structure;
-- terminology and explicit non-goals;
-- contribution, governance and security material.
+- terminology and explicit non-goals.
+
+Release-policy foundation:
+
+- the root [`../../LICENSE`](../../LICENSE) contains the complete Apache
+  License 2.0 and matches tracked source/build/test SPDX identifiers;
+- [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md),
+  [`../../GOVERNANCE.md`](../../GOVERNANCE.md) and
+  [`../../SECURITY.md`](../../SECURITY.md) define contribution, decision and
+  coordinated-disclosure processes;
+- `SECURITY.md` provides a private email contact. GitHub's structured
+  private-report form is documented as an additional channel only when it is
+  available and enabled.
 
 The architecture draft remains a working draft rather than a stable standard.
+Its licensing section now records the repository's Apache-2.0 model.
 
 ## S1 — Portable core API
 
@@ -151,7 +164,17 @@ Implemented:
 - ESP-IDF 6.0.2 / ESP32 scalar cross-build;
 - ESP-IDF 6.0.2 / ESP32-S3 ESP-DSP cross-build.
 
-The native suite registers 69 runtime tests. The ESP-IDF matrix links and verifies complete firmware artifacts and runs component-size reports.
+The default POSIX suite registers 69 tests. A core-only configuration without
+the POSIX desktop adapters and tools registers 59 tests. The ESP-IDF matrix
+links and verifies complete firmware artifacts and runs component-size reports.
+
+For implementation baseline `cf622e8`, CI run `#295` passed the 69-test POSIX
+job, the 59-test 32-bit core job and the sanitized 69-test parser job with fuzz
+smoke. Its new Windows/MSVC job failed during compilation because the runner's
+C11 atomic support was not enabled, so the current head does not have an
+all-green native CI claim. ESP-IDF run `#17` and reference-fixture run `#3`
+passed for the same commit. The latest all-green native workflow remains run
+`#294` on the preceding documentation-only S7 baseline `1bfcea0`.
 
 Status: complete self-tested and cross-build-verified implementation candidate. Physical-board execution, stack high-water marks, on-target latency, fragmentation and hardware decoder/USB integration remain stronger validation gates rather than absent Stage S7 implementation items.
 
@@ -170,6 +193,11 @@ Implement and validate at least one independent platform integration, such as:
 5. mobile application.
 
 The selected platform must consume the public APTA API and `.apta` data model without depending on ESP-IDF adapter internals. Its evidence should include platform build/runtime tests and interchange with the existing reference implementation.
+
+The existing Windows core CI job is only a portability preflight. It does not
+provide a Windows adapter, runtime integration or S8 completion evidence, and
+its current MSVC C11-atomics failure must be resolved before it can serve as a
+green build gate.
 
 ## Claims
 

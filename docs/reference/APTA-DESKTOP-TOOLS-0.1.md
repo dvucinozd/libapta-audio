@@ -285,4 +285,6 @@ Stage S5 does not claim:
 - stable command-line output compatibility;
 - stable APTA API or ABI;
 - package-manager installation;
-- Stage S6 global grid or dynamic-tempo functionality.
+- Stage S6 global-grid/revision analysis or `GGRD`/`REVN` inspection through
+  the S5 command-line interfaces. Those features exist in the library API and
+  container layer but are not selectable/displayed by the current tools.

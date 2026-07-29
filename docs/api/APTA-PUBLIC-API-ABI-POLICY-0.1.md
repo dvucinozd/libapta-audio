@@ -1,7 +1,8 @@
 # APTA public API and ABI policy 0.1
 
 **Status:** Design policy draft  
-**Applies to:** future public headers under `include/apta/`
+**Applies to:** current draft and future stabilized public headers under
+`include/apta/`
 
 ## 1. Compatibility domains
 
@@ -143,7 +144,9 @@ Unless a callback contract explicitly says otherwise:
 - callback pointers and `user_data` remain valid until the owning context or session is destroyed;
 - callbacks MUST NOT destroy the object currently invoking them;
 - callback re-entry into the same session is prohibited;
-- callback re-entry into unrelated sessions is implementation-defined until the threading specification is complete;
+- callback re-entry into unrelated sessions is outside the current guarantee
+  unless [`APTA-THREADING-0.1.md`](APTA-THREADING-0.1.md) explicitly permits
+  it;
 - the library MUST NOT retain a borrowed callback buffer beyond the corresponding release operation.
 
 ## 11. Threading baseline
@@ -156,11 +159,13 @@ The baseline core guarantees:
 - immutable result acquisition and reading are thread-safe;
 - configuration mutation is not thread-safe unless explicitly stated.
 
-A dedicated threading specification will define memory ordering and destruction rules before ABI stabilisation.
+The current prototype threading and destruction contract is documented in
+[`APTA-THREADING-0.1.md`](APTA-THREADING-0.1.md). Its guarantees and memory
+ordering still require stabilization before a stable ABI claim.
 
 ## 12. Version macros
 
-Public headers will expose independently named versions:
+Public headers expose independently named versions:
 
 ```c
 #define APTA_SPEC_VERSION_MAJOR 0

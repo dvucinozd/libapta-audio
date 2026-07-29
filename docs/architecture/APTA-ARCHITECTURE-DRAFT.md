@@ -10,6 +10,14 @@
 **Interchange format:** `.apta`  
 **Primary domain:** Progressive audio-track analysis for DJ players, embedded devices, desktop applications and servers  
 
+> This document preserves the original target architecture. Its repository
+> tree, platform list and roadmap are proposals rather than a current
+> implementation inventory. Section 30 records the license now adopted by the
+> repository. See
+> [`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md) for
+> current status and [`../../specification/APTA-SPEC.md`](../../specification/APTA-SPEC.md)
+> for normative precedence.
+
 ---
 
 ## 1. Purpose
@@ -72,7 +80,7 @@ The standard defines:
 
 ### 2.2. Included in the reference library
 
-The reference `libapta` implementation provides:
+The target reference `libapta` implementation is intended to provide:
 
 - incremental waveform analysis;
 - three-band energy analysis;
@@ -174,6 +182,9 @@ The public specification should use the full name **Adaptive Progressive Track A
 ---
 
 ## 5. Repository structure
+
+The following tree is the proposed mature repository layout, not a statement
+that every listed file, backend or package target currently exists.
 
 ```text
 libapta-audio/
@@ -1461,23 +1472,24 @@ target_link_libraries(
 
 ## 30. Licensing
 
-Recommended initial licensing model:
+Current repository licensing model:
 
-| Asset | Proposed license |
+| Asset | License |
 |---|---|
-| Specification | CC BY 4.0 |
+| Specification and documentation | Apache-2.0 |
 | Reference implementation | Apache-2.0 |
 | Test code | Apache-2.0 |
 | Example code | Apache-2.0 |
-| Audio fixtures | Per-fixture documented license |
+| Generated fixtures | Apache-2.0 unless the fixture records another compatible redistribution license |
 
-Each source file should use SPDX identifiers.
+The root [`LICENSE`](../../LICENSE) applies to the repository. Source, build and
+test files use SPDX identifiers where the file format supports comments.
 
 ```c
 // SPDX-License-Identifier: Apache-2.0
 ```
 
-A legal review should be completed before the first stable release.
+A legal review should still be completed before the first stable release.
 
 ---
 

@@ -1,7 +1,12 @@
 # APTA implementation roadmap 0.1
 
-**Status:** Working roadmap  
+**Status:** Historical planning baseline
 **Primary objective:** Deliver an embedded-validated adaptive waveform MVP before stabilising the complete public ABI or `.apta` format.
+
+This document preserves the original M0–M8 implementation sequence. The
+project later adopted architecture stages S0–S9; current completion and
+validation status is maintained in
+[`../status/APTA-ROADMAP-STATUS.md`](../status/APTA-ROADMAP-STATUS.md).
 
 ## D0 — Specification foundation
 
