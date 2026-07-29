@@ -98,3 +98,13 @@ void APTA_CALL apta_grid_view_init(apta_grid_view_t *view)
         view->confidence = APTA_CONFIDENCE_UNKNOWN;
     }
 }
+
+void APTA_CALL apta_grid_revision_view_init(apta_grid_revision_view_t *view)
+{
+    if (view != NULL) {
+        APTA_INIT_STRUCT(view);
+        apta_frame_range_init(&view->affected_range);
+        view->confidence = APTA_CONFIDENCE_UNKNOWN;
+        view->state = APTA_GRID_REVISION_NONE;
+    }
+}
