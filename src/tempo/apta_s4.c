@@ -97,7 +97,10 @@ static double apta_s4_energy(
                : 0.0;
 }
 
-static double apta_s4_flux(
+/* A1: the single definition of the flux computation. Called once per bin by
+ * the fill loop in apta_internal_s4_refresh(); the lag and phase loops read
+ * session->onset_flux instead of calling this. */
+static double apta_s4_flux_uncached(
     const apta_session_t *session,
     uint64_t bin_index,
     uint64_t evidence_first)
@@ -292,6 +295,18 @@ apta_status_t apta_internal_s4_prepare(apta_session_t *session)
     }
     memset(session->onset_bins, 0, bytes);
     session->onset_bin_capacity = APTA_INTERNAL_ONSET_BIN_CAPACITY;
+
+    bytes = (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float);
+    session->onset_flux = (float *)apta_internal_session_allocate(
+        session,
+        bytes,
+        alignof(float),
+        APTA_MEMORY_PERSISTENT);
+    if (session->onset_flux == NULL) {
+        return APTA_ERROR_OUT_OF_MEMORY;
+    }
+    memset(session->onset_flux, 0, bytes);
+    session->onset_flux_capacity = APTA_INTERNAL_ONSET_BIN_CAPACITY;
     return APTA_STATUS_OK;
 }
 
@@ -336,6 +351,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     uint64_t evidence_end;
     uint64_t run_count;
     uint64_t index;
+    uint32_t flux_capacity;
     uint32_t minimum_lag;
     uint32_t maximum_lag;
     uint32_t lag;
@@ -356,7 +372,8 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     apta_frame_range_t old_evidence;
     uint32_t flags = 0u;
 
-    if (!apta_s4_enabled(session) || session->onset_bins == NULL) {
+    if (!apta_s4_enabled(session) || session->onset_bins == NULL ||
+        session->onset_flux == NULL) {
         return APTA_STATUS_OK;
     }
 
@@ -396,6 +413,28 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    /* A1: flux[index] depends only on index and evidence_first, both invariant
+     * across the lag loop. Compute it once here; the loops below are pure
+     * array reads. Storing flux as float rounds each term once, but the
+     * accumulators stay double so that the only arithmetic difference from the
+     * previous implementation is that single rounding. A3 converts the
+     * accumulators.
+     *
+     * The array is indexed linearly by (index - evidence_first), not by the
+     * onset_bins ring mapping. apta_s4_find_evidence() returns a contiguous
+     * run bounded by onset_bin_capacity, so the offsets fit the allocation,
+     * and dropping the ring keeps an integer division out of the inner loop —
+     * with a runtime capacity, index % capacity compiles to a hardware divide
+     * and costs more than the correlation arithmetic it feeds. */
+    flux_capacity = session->onset_flux_capacity;
+    if (run_count > (uint64_t)flux_capacity) {
+        return APTA_STATUS_OK;
+    }
+    for (index = evidence_first; index < evidence_end; ++index) {
+        session->onset_flux[(uint32_t)(index - evidence_first)] =
+            (float)apta_s4_flux_uncached(session, index, evidence_first);
+    }
+
     for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
         double numerator = 0.0;
         double left_square = 0.0;
@@ -403,9 +442,12 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         double score;
         uint32_t position;
 
+        const float *flux = session->onset_flux;
+
         for (index = evidence_first + lag; index < evidence_end; ++index) {
-            double left = apta_s4_flux(session, index, evidence_first);
-            double right = apta_s4_flux(session, index - lag, evidence_first);
+            const uint32_t offset = (uint32_t)(index - evidence_first);
+            const double left = (double)flux[offset];
+            const double right = (double)flux[offset - lag];
             numerator += left * right;
             left_square += left * left;
             right_square += right * right;
@@ -520,7 +562,8 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         for (index = evidence_first + lag;
              index < evidence_end;
              index += best_lags[0]) {
-            score += apta_s4_flux(session, index, evidence_first);
+            score += (double)session->onset_flux[
+                (uint32_t)(index - evidence_first)];
         }
         if (score > phase_score) {
             phase_score = score;
@@ -770,6 +813,9 @@ void apta_internal_s4_cleanup_session(apta_session_t *session)
     apta_internal_context_deallocate(session->context, session->onset_bins);
     session->onset_bins = NULL;
     session->onset_bin_capacity = 0u;
+    apta_internal_context_deallocate(session->context, session->onset_flux);
+    session->onset_flux = NULL;
+    session->onset_flux_capacity = 0u;
 }
 
 void apta_internal_s4_cleanup_result(apta_result_t *result)

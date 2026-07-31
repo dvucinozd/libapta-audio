@@ -96,7 +96,10 @@ static double apta_s6_energy(
                : 0.0;
 }
 
-static double apta_s6_flux(
+/* A1: the single definition of the flux computation. Called once per bin by
+ * the fill loop in apta_internal_s6_refresh(); the per-window lag and phase
+ * loops read state->global_flux instead of calling this. */
+static double apta_s6_flux_uncached(
     const apta_internal_s6_session_state_t *state,
     uint64_t bin_index,
     uint64_t evidence_first)
@@ -246,11 +249,20 @@ static int apta_s6_estimate_window(
     double best_score = 0.0;
     double best_phase_score = -1.0;
     uint64_t index;
+    const float *flux;
+    uint64_t flux_base;
 
     if (window == NULL || end <= first ||
         end - first < APTA_INTERNAL_GLOBAL_MIN_BINS) {
         return 0;
     }
+    if (session->s6->global_flux == NULL) {
+        return 0;
+    }
+    /* A1: flux is indexed linearly from the refresh's evidence start, shared
+     * by every window of that refresh. See apta_internal_s6_refresh(). */
+    flux = session->s6->global_flux;
+    flux_base = session->s6->flux_base_bin;
 
     minimum_lag = (uint32_t)(
         ((uint64_t)session->config.source_sample_rate * 60u +
@@ -276,8 +288,9 @@ static int apta_s6_estimate_window(
         double score;
 
         for (index = first + lag; index < end; ++index) {
-            const double left = apta_s6_flux(session->s6, index, first);
-            const double right = apta_s6_flux(session->s6, index - lag, first);
+            const uint32_t offset = (uint32_t)(index - flux_base);
+            const double left = (double)flux[offset];
+            const double right = (double)flux[offset - lag];
             numerator += left * right;
             left_square += left * left;
             right_square += right * right;
@@ -298,7 +311,7 @@ static int apta_s6_estimate_window(
     for (lag = 0u; lag < best_lag; ++lag) {
         double score = 0.0;
         for (index = first + lag; index < end; index += best_lag) {
-            score += apta_s6_flux(session->s6, index, first);
+            score += (double)flux[(uint32_t)(index - flux_base)];
         }
         if (score > best_phase_score) {
             best_phase_score = score;
@@ -473,6 +486,7 @@ apta_status_t apta_internal_s6_prepare(apta_session_t *session)
     apta_internal_s6_session_state_t *state;
     size_t bins_bytes;
     size_t beats_bytes;
+    size_t flux_bytes;
 
     if (!apta_s6_enabled(session) || session->s6 != NULL) {
         return APTA_STATUS_OK;
@@ -495,21 +509,31 @@ apta_status_t apta_internal_s6_prepare(apta_session_t *session)
             bins_bytes,
             alignof(apta_internal_onset_bin_t),
             APTA_MEMORY_PERSISTENT);
+    flux_bytes = (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY * sizeof(float);
+    state->global_flux = (float *)apta_internal_session_allocate(
+        session,
+        flux_bytes,
+        alignof(float),
+        APTA_MEMORY_PERSISTENT);
     beats_bytes = (size_t)APTA_INTERNAL_GLOBAL_MAX_BEATS * sizeof(apta_beat_t);
     state->beats = (apta_beat_t *)apta_internal_session_allocate(
         session,
         beats_bytes,
         alignof(apta_beat_t),
         APTA_MEMORY_PERSISTENT);
-    if (state->global_bins == NULL || state->beats == NULL) {
+    if (state->global_bins == NULL || state->beats == NULL ||
+        state->global_flux == NULL) {
         apta_internal_session_deallocate(session, state->beats);
+        apta_internal_session_deallocate(session, state->global_flux);
         apta_internal_session_deallocate(session, state->global_bins);
         apta_internal_session_deallocate(session, state);
         return APTA_ERROR_OUT_OF_MEMORY;
     }
     memset(state->global_bins, 0, bins_bytes);
+    memset(state->global_flux, 0, flux_bytes);
     memset(state->beats, 0, beats_bytes);
     state->global_bin_capacity = APTA_INTERNAL_GLOBAL_BIN_CAPACITY;
+    state->global_flux_capacity = APTA_INTERNAL_GLOBAL_BIN_CAPACITY;
     state->beat_capacity = APTA_INTERNAL_GLOBAL_MAX_BEATS;
     apta_grid_revision_view_init(&state->revision);
     session->s6 = state;
@@ -586,11 +610,31 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
     state->beat_count = 0u;
     state->flags = 0u;
 
+    /* A1: fill the flux array once for the whole evidence range rather than
+     * once per window. Flux depends on the window start only at the window's
+     * first bin, where the predecessor is treated as absent, so each window
+     * needs a single boundary patch below instead of its own fill. */
+    if (state->global_flux == NULL ||
+        evidence_end - evidence_first > (uint64_t)state->global_flux_capacity) {
+        return APTA_STATUS_OK;
+    }
+    for (cursor = evidence_first; cursor < evidence_end; ++cursor) {
+        state->global_flux[(uint32_t)(cursor - evidence_first)] =
+            (float)apta_s6_flux_uncached(state, cursor, evidence_first);
+    }
+    state->flux_base_bin = evidence_first;
+
     for (cursor = evidence_first; cursor < evidence_end;) {
         uint64_t window_end = cursor + APTA_INTERNAL_GLOBAL_WINDOW_BINS;
         if (window_end > evidence_end) {
             window_end = evidence_end;
         }
+        /* Boundary patch: for this window the bin at `cursor` has no
+         * predecessor. Windows are disjoint and contiguous, so this slot is
+         * read only by the window that starts on it and never needs
+         * restoring. */
+        state->global_flux[(uint32_t)(cursor - state->flux_base_bin)] =
+            (float)apta_s6_flux_uncached(state, cursor, cursor);
         if (window_count < sizeof(windows) / sizeof(windows[0]) &&
             apta_s6_estimate_window(
                 session,
@@ -937,6 +981,7 @@ void apta_internal_s6_cleanup_session(apta_session_t *session)
         return;
     }
     apta_internal_session_deallocate(session, session->s6->beats);
+    apta_internal_session_deallocate(session, session->s6->global_flux);
     apta_internal_session_deallocate(session, session->s6->global_bins);
     apta_internal_session_deallocate(session, session->s6);
     session->s6 = NULL;

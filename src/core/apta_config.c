@@ -138,7 +138,9 @@ static size_t apta_memory_waveform_recommendation(
     if ((requested_features & APTA_INTERNAL_S4_FEATURES) != 0u) {
         s4_session =
             (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY *
-            sizeof(apta_internal_onset_bin_t);
+                sizeof(apta_internal_onset_bin_t) +
+            /* A1: precomputed flux array, one float per onset bin. */
+            (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float);
         s4_snapshots =
             2u * ((size_t)APTA_INTERNAL_MAX_TEMPO_CANDIDATES *
                       sizeof(apta_tempo_candidate_t) +
@@ -150,6 +152,8 @@ static size_t apta_memory_waveform_recommendation(
             sizeof(apta_internal_s6_session_state_t) +
             (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY *
                 sizeof(apta_internal_onset_bin_t) +
+            /* A1: precomputed flux array, one float per global bin. */
+            (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY * sizeof(float) +
             (size_t)APTA_INTERNAL_GLOBAL_MAX_BEATS *
                 sizeof(apta_beat_t);
         s6_snapshots =

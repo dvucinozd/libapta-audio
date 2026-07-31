@@ -256,3 +256,48 @@ Its scope is:
 - `apta-analyze`;
 - `apta-inspect`;
 - `apta-validate`.
+
+## 14. Performance: precomputed onset flux
+
+`apta_internal_s4_refresh()` previously recomputed the onset flux inside the
+autocorrelation lag loop. `flux[index]` depends only on the bin index and the
+evidence start, both invariant across that loop, so every value was recomputed
+once per lag — two bin lookups and two divisions each.
+
+The flux is now computed once per refresh into `apta_session_t.onset_flux`, a
+`float` array of `APTA_INTERNAL_ONSET_BIN_CAPACITY` entries allocated through
+`apta_internal_session_allocate()` alongside `onset_bins`, so it comes from the
+static workspace when one is configured. The lag loop and the phase search both
+read that array. `apta_s4_flux_uncached()` remains the single definition of the
+flux computation and is called only by the fill loop.
+
+The array is indexed linearly as `flux[bin_index - evidence_first]` rather than
+through the `onset_bins` ring mapping. `apta_s4_find_evidence()` returns a
+contiguous run bounded by the bin capacity, so linear offsets always fit. This
+matters for cost: with a runtime capacity, `bin_index % capacity` compiles to a
+hardware integer division, and two of those per inner iteration cost more than
+the correlation arithmetic they feed. Measured on an x86-64 host, the ring form
+gave 2.1x and the linear form 13.7x over the same baseline.
+
+Cost of `apta_session_process()` for a 5-minute 44.1 kHz track in 1024-frame
+blocks, 12,921 calls, microseconds per call:
+
+| Requested features | Before | After |
+|---|---:|---:|
+| `WAVEFORM_OVERVIEW` | 155.6 | 146.5 |
+| `+ CONFIDENCE` | 13,393.9 | 979.2 |
+| `+ BPM` | 13,416.9 | 977.9 |
+| `+ LOCAL_BEATGRID` | 13,179.6 | 1,016.9 |
+| `+ GLOBAL_BEATGRID` | 14,331.1 | 1,205.8 |
+| `+ DYNAMIC_TEMPO` | 14,204.0 | 1,158.9 |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 14,217.0 | 1,162.6 |
+
+The remaining per-call cost is the lag loop itself, which still performs on the
+order of 885,000 iterations per refresh. Reducing it further is a matter of
+running the refresh less often rather than making one refresh cheaper.
+
+The static workspace grew by 16 KiB for S4. The three published ESP-IDF memory
+profiles still fit and still report two allocator calls each.
+
+Selected tempo values are unchanged: `apta.s4.tempo_vectors` passes without
+modification, so no vector's winning lag moved.

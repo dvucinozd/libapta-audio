@@ -228,3 +228,36 @@ Its scope includes:
 - cooperative scheduler example;
 - embedded memory profiles;
 - target build and runtime evidence.
+
+## 14. Performance: precomputed onset flux
+
+`apta_internal_s6_refresh()` previously recomputed the onset flux inside the
+autocorrelation lag loop of `apta_s6_estimate_window()`. Because S6 analyses the
+evidence range as a sequence of windows, that recomputation ran once per lag
+*per window*.
+
+The flux is now computed once per refresh into
+`apta_internal_s6_session_state_t.global_flux`, a `float` array of
+`APTA_INTERNAL_GLOBAL_BIN_CAPACITY` entries allocated through
+`apta_internal_session_allocate()` alongside `global_bins`. It is indexed
+linearly as `flux[bin_index - flux_base_bin]`, where `flux_base_bin` records the
+evidence start of the refresh that filled it.
+
+One fill serves every window. Flux depends on the window start only at the
+window's first bin, where the predecessor is treated as absent, so each window
+needs a single boundary value patched before it is analysed rather than a fill
+of its own. Windows are disjoint and contiguous, so a patched entry is read only
+by the window that starts on it.
+
+`apta_s6_flux_uncached()` remains the single definition of the flux computation
+and is called only by the fill loop and the per-window boundary patch.
+
+Measured on an x86-64 host for a 5-minute 44.1 kHz track in 1024-frame blocks,
+the `+ GLOBAL_BEATGRID` row of `apta_session_process()` fell from 14,331.1 to
+1,205.8 microseconds per call, and `+ DYNAMIC_TEMPO` from 14,204.0 to 1,158.9.
+
+The static workspace grew by 64 KiB for S6. The three published ESP-IDF memory
+profiles still fit and still report two allocator calls each.
+
+`apta.s6.global_grid`, `apta.s6.revision` and `apta.s6.bounded` pass without
+modification.

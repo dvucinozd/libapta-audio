@@ -7,6 +7,17 @@
 struct apta_internal_s6_session_state {
     apta_internal_onset_bin_t *global_bins;
     uint32_t global_bin_capacity;
+    /* A1: precomputed onset flux, indexed linearly as
+     * flux[bin_index - flux_base_bin]. Filled once per refresh over the whole
+     * evidence range and shared by every analysis window: flux depends on the
+     * window start only at the window's first bin, where the predecessor is
+     * treated as absent, so apta_internal_s6_refresh() patches that single
+     * boundary per window instead of refilling the array. */
+    float *global_flux;
+    uint32_t global_flux_capacity;
+    /* Bin index that global_flux[0] corresponds to: the evidence start of the
+     * refresh that filled the array. */
+    uint64_t flux_base_bin;
 
     apta_grid_segment_t segments[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
     uint32_t segment_count;

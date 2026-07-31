@@ -250,6 +250,13 @@ struct apta_session {
 
     apta_internal_onset_bin_t *onset_bins;
     uint32_t onset_bin_capacity;
+    /* A1: precomputed onset flux for the evidence range of the last refresh,
+     * indexed linearly as flux[bin_index - evidence_first]. Unlike onset_bins
+     * this is not a ring: apta_s4_find_evidence() returns a contiguous run of
+     * at most onset_bin_capacity bins, so linear offsets always fit, and
+     * avoiding the modulo keeps a hardware divide out of the lag loop. */
+    float *onset_flux;
+    uint32_t onset_flux_capacity;
     uint32_t tempo_candidate_count;
     apta_tempo_value_t tempo_value;
     apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
