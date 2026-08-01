@@ -871,3 +871,82 @@ knob barely engages. Swing is untested, not shown harmless.
 There is still no production processing -- no compression, no limiting, no
 reverb, no bass-heavy masters -- and no real recordings. These rates remain a
 floor.
+
+## 24. Confidence cannot be fixed by reweighting
+
+Section 23 showed that confidence collapses under realistic timing while
+accuracy barely moves, and pointed at two directions: recalibrate confidence,
+or make the novelty tolerant of sub-bin jitter. The first was investigated and
+abandoned on measurement.
+
+The formula is:
+
+```text
+confidence = 35 + score * 50 + separation * 15 + (stable ? 5 : 0)
+confidence *= (1 - family_ambiguity)
+```
+
+The argument for recalibrating was that `score`, the absolute normalized
+autocorrelation, measures how metronomic a recording is rather than how likely
+the answer is correct, while `separation` and `family_ambiguity` are
+scale-invariant and should survive a uniformly weaker correlation. Shifting
+weight from the first to the second looked principled.
+
+It does not work, because `separation` carries no signal. Measured over 60
+tracks with jitter, taking the candidate scores from the public result:
+
+| Population | n | separation min / median / max | mean confidence |
+|---|---:|---|---:|
+| Correct | 21 | 0.00 / 0.08 / 0.19 | 54.2 |
+| Incorrect | 39 | 0.00 / 0.04 / 0.23 | 48.4 |
+
+The two distributions overlap almost entirely, and no threshold on separation
+splits them: at 0.1 it admits 10 correct and 11 incorrect, at 0.2 it admits
+none correct and two incorrect. The term's whole range is 0.23 wide, because
+with three candidates and 500-millibpm duplicate suppression the runner-up is
+always close in score. There is no room in it to carry information.
+
+### 24.1 What that implies
+
+The aggregate is not much better than the part. Mean confidence is 54.2 for
+correct answers and 48.4 for incorrect, with heavily overlapping ranges. Six
+points of separation between the populations is not something a host can gate
+on.
+
+That reframes the problem. It is not that the three terms are weighted wrongly;
+it is that none of them knows whether the answer is right. No reweighting of
+`score`, `separation` and `family_ambiguity` will produce a usable gate,
+because the information is not in them.
+
+A usable confidence needs evidence the estimator does not currently gather.
+Two candidates, neither attempted here:
+
+- Measure how well the derived grid actually fits the onsets it claims to
+  explain -- residual between predicted beat positions and observed onset
+  peaks. That is a direct measure of "is this grid right", which none of the
+  present terms is.
+- Compare independent estimates. S6 already analyses the track in windows and
+  S4 estimates locally; agreement between them is evidence, disagreement is
+  doubt, and neither engine currently looks at the other.
+
+### 24.2 Corpus changes behind these numbers
+
+Two patterns were added, `sixteenth_hats` and `ghost_funk`, carrying
+sixteenth-note hats and ghost snares on odd sixteenths. They exist because the
+original four placed almost nothing on odd sixteenths, which made the swing
+knob a no-op and left it untested.
+
+With them the corpus is 60 tracks and swing is genuinely exercised: it changes
+exact matches from 23 to 24 and leaves the confidence distribution untouched.
+Swing is now tested and harmless, which section 23.3 could not claim.
+
+The new patterns are hard. They contribute close to zero exact matches and
+fifteen octave errors, almost all doubling: dense uniform subdivision gives the
+autocorrelation a strong peak at the eighth-note level, and B1's prior barely
+discriminates there -- at 90 BPM the prior weights the true tempo 0.84 and the
+doubled answer 0.80, so the raw correlation decides. Narrowing the prior would
+help this material and hurt drum and bass at 174. That tension is recorded
+rather than tuned away.
+
+Corpus totals in sections 18 to 23 were measured on the original four patterns
+and are not comparable with the six-pattern figures here.

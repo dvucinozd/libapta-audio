@@ -198,6 +198,31 @@ static const pattern_t g_patterns[] = {
         {0,-1,-1,-1, -1,-1,-1,-1, 2,-1,-1,-1, -1,-1,-1,-1},
         "snare on 3, sparse -- the classic half/double trap"
     },
+    /*
+     * The four patterns above place almost nothing on odd sixteenths, which
+     * made the swing knob a no-op: it delays odd steps, and there was nothing
+     * there to delay. These two carry sixteenth-note hats and ghost snares, so
+     * swing actually engages. They also broaden the corpus toward material
+     * where the subdivision is audible rather than implied.
+     */
+    {
+        "sixteenth_hats",
+        {1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0},
+        {0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0},
+        {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1},
+        {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0},
+        {0,-1,-1,-1, -1,-1,2,-1, 0,-1,-1,-1, 3,-1,-1,-1},
+        "driving sixteenth hats over a syncopated kick"
+    },
+    {
+        "ghost_funk",
+        {1,0,0,1, 0,0,1,0, 0,0,1,0, 0,1,0,0},
+        {0,0,1,0, 1,0,0,1, 0,1,0,0, 1,0,1,0},
+        {1,0,1,1, 1,0,1,1, 1,0,1,1, 1,0,1,1},
+        {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0},
+        {0,-1,-1,2, -1,-1,-1,-1, 3,-1,-1,-1, -1,-1,2,-1},
+        "ghost snares on the e and the a, the classic shuffle carrier"
+    },
     {
         "offbeat_bass",
         {1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0},
@@ -446,6 +471,10 @@ typedef struct {
     uint32_t reported_millibpm;
     uint32_t confidence;
     apta_feature_state_t state;
+    /* Candidate evidence, so the confidence formula's inputs can be inspected
+     * from outside: 1 - score[1]/score[0] is exactly its `separation` term. */
+    uint32_t candidate_count;
+    float separation;
     int ok;
 } analysis_t;
 
@@ -532,6 +561,13 @@ static analysis_t analyze(const float *audio, size_t frames)
         out.reported_millibpm = tempo.selected.tempo_millibpm;
         out.confidence = tempo.selected.confidence;
         out.state = tempo.selected.state;
+        out.candidate_count = tempo.candidate_count;
+        out.separation =
+            (tempo.candidate_count > 1u &&
+             tempo.candidates[0].score != 0u)
+                ? 1.0f - (float)tempo.candidates[1].score /
+                             (float)tempo.candidates[0].score
+                : 1.0f;
         out.ok = 1;
     }
     apta_result_release(result);
@@ -619,6 +655,13 @@ static analysis_t analyze_file(const char *path)
             out.reported_millibpm = tempo.selected.tempo_millibpm;
             out.confidence = tempo.selected.confidence;
             out.state = tempo.selected.state;
+            out.candidate_count = tempo.candidate_count;
+            out.separation =
+                (tempo.candidate_count > 1u &&
+                 tempo.candidates[0].score != 0u)
+                    ? 1.0f - (float)tempo.candidates[1].score /
+                                 (float)tempo.candidates[0].score
+                    : 1.0f;
             out.ok = 1;
         }
         apta_result_release(result);
@@ -737,10 +780,11 @@ static void record(const char *label,
     }
 
     if (verbose || rel != REL_EXACT) {
-        printf("%-34s %8.3f  %10.3f  %-13s %5u %d\n",
+        printf("%-34s %8.3f  %10.3f  %-13s %5u %d  n=%u sep=%.2f\n",
                label, (double)truth_millibpm / 1000.0,
                (double)a.reported_millibpm / 1000.0,
-               relation_name(rel), a.confidence, (int)a.state);
+               relation_name(rel), a.confidence, (int)a.state,
+               a.candidate_count, (double)a.separation);
     }
 }
 
