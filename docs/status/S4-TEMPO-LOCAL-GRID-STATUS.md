@@ -1055,3 +1055,97 @@ Two follow-ups this suggests, neither attempted:
 next thing worth improving. The confidence term now reports that limitation
 rather than hiding it: with grid fit the 26 misses average 44.7 and none exceeds
 66, so a host gating at 70 gets 29 answers and all 29 are right.
+
+## 26. Sub-bin period refinement
+
+Section 25.4 read the misses as an accuracy problem. Measuring what the tempo
+error costs shows the sharper problem is the answers counted as *correct*.
+
+### 26.1 What a correct answer was worth
+
+The published local grid is one anchor plus a constant period, so any tempo
+error accumulates without bound. A grid running at E BPM against music at T BPM
+slips `|E - T|` beats every minute.
+
+Of the 29 tracks that were both within 1% of the Rekordbox grid and above
+confidence 70 -- the answers a host acts on -- 20 slipped half a beat inside
+three minutes, shorter than the tracks themselves. Median time to half a beat
+was 2.5 minutes.
+
+That is not a search failure. The lag scan is an integer argmax over 256-frame
+bins, and near 128 BPM consecutive bins are 1.6 BPM apart: 126.05, 127.60,
+129.20, with nothing between them. A track at exactly 128.00 can only be
+gridded at 127.60, which slips half a beat in 1.3 minutes and a whole bar in 5.
+S6 is worse, and section 27 covers it separately.
+
+### 26.2 Interpolating the peak, measured and rejected
+
+The obvious fix is a parabola through the winning lag and its two neighbours,
+putting the vertex between bins. It was implemented and measured first, and it
+made things worse: median tempo error over the same 29 tracks went from 0.154%
+to 0.184%, 16 tracks worse against 9 better.
+
+The reason is that the correlation peak is as narrow as the onsets that produce
+it, a few bins at most. Three samples straddling a peak that sharp describe
+local asymmetry rather than a parabola, and the vertex they imply is noise. The
+method assumes a smooth peak the signal does not have.
+
+### 26.3 Measuring across beats instead
+
+Resolution does not have to come from the shape of one peak. Correlating at a
+lag of N beats puts the peak near `N * lag`, and dividing the integer argmax
+found there by N divides the error by N as well. The same integer search buys N
+times the precision.
+
+`APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS` is 16, four bars in common time, reduced
+automatically when the evidence is too short to shift that far and keep half of
+itself. The search window is +/- N/2 bins around `N * lag`, which is exactly the
+half-bin either side of the integer lag, so it cannot walk onto a neighbouring
+beat and change the answer's octave.
+
+Measured over the same 68 tracks:
+
+| | before | after |
+|---|---:|---:|
+| median tempo error | 0.154% | **0.013%** |
+| median minutes to half a beat | 2.5 | 31.3 |
+| slipping half a beat inside 3 min | 20 of 29 | 5 of 29 |
+| exact (within 1%) | 42 of 68 | 43 of 68 |
+
+22 tracks improved, 5 worsened, 2 unchanged. Tracks that read 127.60 now read
+128.00, and 124.53 now reads 125.00 -- matching the Rekordbox grid to two
+decimals.
+
+The five that worsened are all still within 1%; the largest moves from 126.05 to
+126.34 against a truth of 126.00. Those are candidates for genuine tempo
+variation that a 16-beat measurement resolves differently from a whole-track
+average, and they are not separated here.
+
+Exact matches barely move because the 1% tolerance was already wide enough to
+absorb a whole bin. That is the point: the tolerance was hiding the error this
+section is about.
+
+### 26.4 Cost
+
+Up to 17 correlations per candidate against several hundred in the scan.
+Measured with the section 22 harness, three runs each:
+
+| Row | HEAD | With refinement |
+|---|---:|---:|
+| `+ BPM` | 476.8 - 500.5 | 493.7 - 496.6 |
+| `+ LOCAL_BEATGRID` | 477.5 - 480.7 | 494.9 - 498.2 |
+
+About 3.5% on the local-grid row, which is the tightest of the two and the one
+where the change is visible above the 2 to 4 percent host noise. End to end over
+68 real tracks the corpus tool went from 78.1 to 84.1 seconds.
+
+Both rows were already above the 500-microsecond figure discussed in section
+22.1, and this does not change that argument.
+
+### 26.5 Regression checks
+
+The synthetic corpus is unchanged at 23 of 60 exact. The humanized corpus
+improves from 18 to 20. `apta.s4.tempo_subbin` is a new test: a click train
+beating every 20,608 frames, exactly 80.5 bins, so the true period sits halfway
+between lag 80 and lag 81. It fails on HEAD reporting 127,604 millibpm, and
+passes with the refinement. 77/77 tests pass, including under ASan and UBSan.

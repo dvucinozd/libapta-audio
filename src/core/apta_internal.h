@@ -368,6 +368,22 @@ typedef struct {
 #define APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE 0.85f
 #endif
 
+/*
+ * How many beats the sub-bin period refinement measures across.
+ *
+ * The integer lag search resolves the period to one onset bin, 5.8 ms, which is
+ * 1.6 BPM near 128 and enough for the published grid to slip half a beat inside
+ * two minutes. Correlating across N beats and dividing divides the error too.
+ *
+ * Sixteen is four bars in common time. Raising it buys hundredths of a BPM and
+ * assumes the tempo is held over more of the track; lowering it gives the drift
+ * back. The refinement falls back to whatever fits when the evidence is shorter
+ * than this many beats, so early estimates are coarser rather than absent.
+ */
+#ifndef APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS
+#define APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS 16u
+#endif
+
 typedef struct {
     uint64_t bin_index;
     uint32_t sum_absolute;
@@ -528,6 +544,13 @@ struct apta_session {
      * them. Cached with the estimate for the same reason as the ambiguity:
      * a gated pass has not refilled the flux array it is computed from. */
     float s4_cached_grid_fit;
+    /* Sub-bin position of each candidate's correlation peak, in bins, within
+     * [-0.5, 0.5] of the integer lag beside it. The lag search is an integer
+     * argmax, so without this the reachable tempi are fixed by the bin size:
+     * 1.6 BPM apart near 128, which is enough for the published grid to slip
+     * half a beat inside two minutes. Cached with the estimate for the same
+     * reason as the ambiguity and the grid fit. */
+    float s4_cached_lag_offsets[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
     uint32_t tempo_candidate_count;
     apta_tempo_value_t tempo_value;
     apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
