@@ -597,3 +597,94 @@ This is the measurement B1 to B3 are to be judged against. It is recorded here
 before any algorithmic change so the comparison is honest, and it is deliberately
 not tuned: no threshold in the corpus was chosen to make the current
 implementation look better or worse.
+
+## 19. Tempo selection: preferred-tempo prior
+
+Selection was the raw autocorrelation argmax. A log-normal prior centred at
+125 BPM, width 0.55 in natural-log units, now weights each lag's score before
+selection. Both, plus the ambiguity knee below, are `#ifndef`-guarded.
+
+Every lag in range is scanned and weighted, so taking the maximum already
+prefers the best member of an octave family. The explicit family scan --
+correlations at 1/2, 2, 1/3, 3, 2/3, 3/2, 1/4 and 4 times the winning lag,
+eight against roughly 224 -- exists to measure how close the runner-up sibling
+came, which is what confidence needs.
+
+### 19.1 Result on the accuracy corpus
+
+Measured against the section 18 baseline, same 40 synthetic tracks:
+
+| Measure | Baseline | With prior |
+|---|---:|---:|
+| Exact | 8 (20.0%) | **23 (57.5%)** |
+| Octave-family errors | 25 (62.5%) | 17 (42.5%) |
+| Other errors | 7 | **0** |
+| Confidence, correct | 81.1 mean | 71.0 mean |
+| Confidence, incorrect | 70.3 mean | 57.8 mean |
+
+The corpus tool now prints a threshold sweep rather than assuming a gate. At
+75, twelve correct answers survive and zero incorrect ones do; every lower gate
+admits octave errors. **The actionable threshold is therefore 75**, and B1's
+requirement of no high-confidence octave errors holds against it. At the
+baseline no threshold separated the two populations at all.
+
+### 19.2 Confidence calibration, and a wrong first attempt
+
+Scaling confidence linearly by `1 - sibling/winner` produced zero
+high-confidence errors and was still wrong: a clean four-to-the-floor track
+always has a substantial half-tempo sibling, so confidence collapsed on
+ordinary material, nothing in the corpus exceeded 63, and threshold gating
+became useless. The scaling now has a knee at 0.85. A sibling below that
+fraction of the winner does not reduce confidence at all; above it confidence
+falls to zero. Ambiguous has to mean "nearly as good", not "present".
+
+### 19.3 What the prior does not fix
+
+174 BPM is still halved in two of the four patterns. The prior is not the
+cause: 174 is marginally closer to the centre than 87, so the prior mildly
+opposes the halving and the raw correlation overrides it. Those answers score
+70 and 72, below the actionable threshold, so a host gating at 75 rejects them
+rather than acting on them.
+
+The dominant residual is `two-thirds`, 15 of 40 -- a relation the public enum
+defines but the implementation never produces. That is B2.
+
+## 20. Multi-band onset front end: measured, rejected
+
+B3 proposes replacing the broadband onset envelope with a multi-band one, on
+the stated theory that a broadband envelope "cannot distinguish a kick from a
+snare from a harmonic onset" and that this is "the root cause of the octave
+errors in B1".
+
+It was implemented and measured rather than assumed. Per-band accumulators in
+the shared onset bin struct, per-band half-wave rectified flux, weighted into
+the single novelty value the autocorrelation consumes, reusing C1's filterbank
+with its own state instance.
+
+| Variant | Exact | Octave errors | Lowest usable threshold |
+|---|---:|---:|---|
+| Broadband baseline | 8 (20.0%) | 25 (62.5%) | none |
+| Multi-band, per-band normalized | 2 (5.0%) | 35 (87.5%) | none |
+| Multi-band, unnormalized | 8 (20.0%) | 27 (67.5%) | none |
+| Prior only (B1) | **23 (57.5%)** | **17 (42.5%)** | **75** |
+| Prior + multi-band | 22 (55.0%) | 18 (45.0%) | 80 |
+
+The change was not adopted. On this corpus it does not improve accuracy alone,
+and on top of the prior it is marginally worse while costing 164 KiB of
+workspace, from the onset bin struct growing, and three times the per-sample
+onset work.
+
+Per-band normalization is actively harmful here, and mechanically so:
+equalising band means amplifies the snare band, whose natural period in these
+patterns is two beats, so the dominant error shifts to half-tempo -- 21 of 40.
+
+The wider result is that the work order's premise appears inverted. Octave
+errors are a selection problem, not a novelty-function problem: autocorrelation
+of a periodic signal peaks at multiples and divisors however clean the novelty
+curve is, and what chooses among those peaks is the prior. The prior alone
+moved exact matches from 20% to 57.5%; the multi-band front end alone moved
+them not at all.
+
+This is recorded rather than implemented so the finding is not lost. Revisiting
+it would be reasonable if the corpus were replaced with real audio, where
+timbral separation may matter more than it does on programmed patterns.
