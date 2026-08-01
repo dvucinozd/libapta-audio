@@ -4,7 +4,7 @@
 **Architecture source:** `docs/architecture/APTA-ARCHITECTURE-DRAFT.md`, Stage S4  
 **Verified implementation merge:** `8fe19cfda514151880d658520912722db7edb99a`  
 **Primary verification:** GitHub Actions PR CI run `#224`  
-**Registered runtime tests:** 53  
+**Registered runtime tests:** 53 at the verified merge above; 75 on the current branch (see sections 14 to 21)  
 **Formal Core Profile claim:** not issued
 
 ## 1. Stage scope

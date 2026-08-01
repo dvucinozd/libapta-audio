@@ -687,7 +687,14 @@ estimate_ready:
      * the honest response is lower confidence rather than high confidence with
      * a flag nobody reads. That failure -- confidence 82 on a third-relation
      * error -- is what this task exists to stop. */
-    {
+    if (!estimate) {
+        /* A2/B1: a gated pass must not run the family scan. It reads
+         * onset_flux, which was filled relative to the evidence start of the
+         * last refresh that actually estimated; the current evidence start may
+         * differ, and the newest bins are not in the array at all. Reuse the
+         * ambiguity computed alongside the cached estimate instead. */
+        family_ambiguity = session->s4_cached_ambiguity;
+    } else {
         const float winner = best_scores[0];
         uint32_t entry;
 
@@ -738,6 +745,7 @@ estimate_ready:
         } else {
             family_ambiguity = 0.0f;
         }
+        session->s4_cached_ambiguity = family_ambiguity;
     }
 
     confidence = 35u + (uint32_t)(best_scores[0] * 50.0);

@@ -6,7 +6,7 @@
 **Original M2 verification merge:** `b1c9100b2acee13188c650e71e6364bacbae7e7c`  
 **Latest integrated verification merge:** `8fe19cfda514151880d658520912722db7edb99a`  
 **Latest verification evidence:** GitHub Actions PR CI run `#224` completed successfully  
-**Registered runtime tests:** 53
+**Registered runtime tests:** 53 at the verified merge above; 75 on the current branch
 
 ## Advertised capabilities
 

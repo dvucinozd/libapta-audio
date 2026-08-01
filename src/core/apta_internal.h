@@ -518,6 +518,12 @@ struct apta_session {
     float s4_cached_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
     uint32_t s4_cached_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
     uint32_t s4_cached_phase;
+    /* B1: the octave-family ambiguity that produced the cached estimate. It is
+     * cached rather than recomputed because the family scan reads onset_flux,
+     * which a gated pass has not refilled: the array is indexed from the
+     * evidence start of the refresh that filled it, and that start moves once
+     * the track is longer than the onset ring. */
+    float s4_cached_ambiguity;
     uint32_t tempo_candidate_count;
     apta_tempo_value_t tempo_value;
     apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
