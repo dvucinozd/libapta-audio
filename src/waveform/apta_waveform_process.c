@@ -242,6 +242,43 @@ static apta_status_t apta_find_or_insert_accumulator(
     return APTA_STATUS_OK;
 }
 
+/* D1: install a completed overview accumulator for one column, reconstructed
+ * from a parsed result. Exposed because the accumulator store and its sorted
+ * insertion are private to this file. */
+apta_status_t apta_internal_waveform_seed_column(
+    apta_session_t *session,
+    uint32_t column_index,
+    float minimum,
+    float maximum,
+    uint64_t sum_squares,
+    uint32_t sample_count,
+    int clipped)
+{
+    apta_internal_waveform_accumulator_t *accumulator;
+    apta_status_t status;
+
+    status = apta_find_or_insert_accumulator(
+        session,
+        column_index,
+        &accumulator);
+    if (status < 0) {
+        return status;
+    }
+    accumulator->minimum = minimum;
+    accumulator->maximum = maximum;
+    accumulator->sum_squares = sum_squares;
+    accumulator->sample_count = sample_count;
+    accumulator->clipped = clipped != 0 ? 1u : 0u;
+    /* overview_complete_count is maintained separately from the per-accumulator
+     * flag and is what the snapshot sizes its column array from. Setting the
+     * flag without it makes the snapshot write past its allocation. */
+    if (!accumulator->complete) {
+        accumulator->complete = 1u;
+        session->overview_complete_count += 1u;
+    }
+    return APTA_STATUS_OK;
+}
+
 static uint32_t apta_expected_column_frames(
     const apta_session_t *session,
     uint32_t column_index)
