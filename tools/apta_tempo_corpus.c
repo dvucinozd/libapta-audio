@@ -217,43 +217,120 @@ static const uint32_t g_tempos[] = {
 
 #define TEMPO_COUNT (sizeof(g_tempos) / sizeof(g_tempos[0]))
 
+/*
+ * Realism knobs.
+ *
+ * Programmed patterns with exact timing are an optimistic floor: every onset
+ * lands on a grid line, every hit is the same loudness, and the tempo never
+ * moves. Real material does none of that, and an autocorrelation estimator is
+ * exactly the kind of thing those imperfections can degrade.
+ *
+ * These are off by default so the original baseline stays reproducible, and on
+ * with --humanize. Values are chosen to be modest rather than adversarial: a
+ * competent player or a lightly quantized production, not a sloppy one.
+ */
+static int g_jitter;
+static int g_dynamics;
+static int g_drift;
+static int g_swing;
+
+/* Standard deviation of per-hit timing error, seconds. Around 6 ms is typical
+ * of a tight human performer; fully quantized electronic music has none. */
+#define HUMAN_JITTER_SECONDS 0.006
+
+/* Per-hit gain varies by up to this fraction, on top of a downbeat accent. */
+#define HUMAN_VELOCITY_RANGE 0.25
+
+/* Peak tempo deviation. One full sine cycle across the track, so the mean
+ * tempo stays at nominal and the ground truth remains honest. */
+#define HUMAN_DRIFT_DEPTH 0.005
+
+/* Fraction of a 16th that odd steps are pushed late. 0.15 is a light shuffle;
+ * it moves subdivisions without changing the beat period. */
+#define HUMAN_SWING 0.15
+
+/* Approximately gaussian, from the same deterministic source. */
+static double human_jitter(void)
+{
+    if (!g_jitter) {
+        return 0.0;
+    }
+    return (double)(rng_bipolar() + rng_bipolar() + rng_bipolar()) / 3.0 *
+           HUMAN_JITTER_SECONDS * 3.0;
+}
+
+static float human_gain(float base, uint32_t step)
+{
+    float accent;
+
+    if (!g_dynamics) {
+        return base;
+    }
+    /* Downbeat loudest, backbeats next, offbeats quietest. */
+    accent = (step % 16u) == 0u ? 1.12f
+           : (step % 4u) == 0u  ? 1.04f
+                                : 0.92f;
+    return base * accent * (1.0f + rng_bipolar() * HUMAN_VELOCITY_RANGE);
+}
+
 static void render(const pattern_t *pattern,
                    uint32_t bpm,
                    float *out,
                    size_t total)
 {
-    const double step_seconds = 60.0 / (double)bpm / 4.0;  /* 16th note */
-    const size_t step_frames = (size_t)(step_seconds * SAMPLE_RATE);
+    const double nominal_step = 60.0 / (double)bpm / 4.0;  /* 16th note */
+    const double track_seconds = (double)total / SAMPLE_RATE;
     size_t step_index = 0u;
-    size_t at = 0u;
+    double cursor = 0.0;  /* seconds, start of the current 16th */
 
     rng_seed(0x2468aceu ^ bpm);
     memset(out, 0, total * sizeof(*out));
 
-    while (at < total) {
+    while (cursor < track_seconds) {
         const uint32_t s = (uint32_t)(step_index % 16u);
+        /* One sine cycle across the track keeps the mean at nominal. */
+        const double drift =
+            g_drift
+                ? 1.0 + HUMAN_DRIFT_DEPTH *
+                            sin(6.283185307 * cursor / track_seconds)
+                : 1.0;
+        const double step_seconds = nominal_step / drift;
+        const double swing =
+            (g_swing && (step_index % 2u) == 1u)
+                ? step_seconds * HUMAN_SWING
+                : 0.0;
+        const double placed = cursor + swing;
+        size_t at;
 
+        /* Each voice is humanized independently: a drummer's kick and hat do
+         * not share a timing error. */
         if (pattern->kick[s]) {
-            add_kick(out, total, at, 0.85f);
+            at = (size_t)fmax(0.0, (placed + human_jitter()) * SAMPLE_RATE);
+            add_kick(out, total, at, human_gain(0.85f, step_index));
         }
         if (pattern->snare[s]) {
-            add_snare(out, total, at, 0.55f);
+            at = (size_t)fmax(0.0, (placed + human_jitter()) * SAMPLE_RATE);
+            add_snare(out, total, at, human_gain(0.55f, step_index));
         }
         if (pattern->hat[s]) {
-            add_hat(out, total, at, 0.30f, 0);
+            at = (size_t)fmax(0.0, (placed + human_jitter()) * SAMPLE_RATE);
+            add_hat(out, total, at, human_gain(0.30f, step_index), 0);
         }
         if (pattern->open_hat[s]) {
-            add_hat(out, total, at, 0.26f, 1);
+            at = (size_t)fmax(0.0, (placed + human_jitter()) * SAMPLE_RATE);
+            add_hat(out, total, at, human_gain(0.26f, step_index), 1);
         }
         if (pattern->bass[s] >= 0) {
             const double root = 55.0;  /* A1 */
             const double f = root *
                 pow(2.0, (double)semitone_offsets[pattern->bass[s]] / 12.0);
-            add_bass(out, total, at, 0.45f, f, step_seconds * 3.5);
+            at = (size_t)fmax(0.0, (placed + human_jitter()) * SAMPLE_RATE);
+            add_bass(out, total, at, human_gain(0.45f, step_index),
+                     f, step_seconds * 3.5);
         }
 
         step_index += 1u;
-        at += step_frames;
+        cursor += step_seconds;
     }
 
     /* Normalize to just under full scale. Summed layers overshoot 1.0, and
@@ -750,11 +827,23 @@ int main(int argc, char **argv)
             wav_dir = argv[++arg];
         } else if (strcmp(argv[arg], "--tracks") == 0 && arg + 1 < argc) {
             tracks_path = argv[++arg];
+        } else if (strcmp(argv[arg], "--humanize") == 0) {
+            g_jitter = g_dynamics = g_drift = g_swing = 1;
+        } else if (strcmp(argv[arg], "--jitter") == 0) {
+            g_jitter = 1;
+        } else if (strcmp(argv[arg], "--dynamics") == 0) {
+            g_dynamics = 1;
+        } else if (strcmp(argv[arg], "--drift") == 0) {
+            g_drift = 1;
+        } else if (strcmp(argv[arg], "--swing") == 0) {
+            g_swing = 1;
         } else if (strcmp(argv[arg], "--verbose") == 0) {
             verbose = 1;
         } else {
             fprintf(stderr,
                     "usage: %s [--seconds N] [--write-wav DIR] [--verbose]\n"
+                    "       realism: --humanize | any of --jitter"
+                    " --dynamics --drift --swing\n"
                     "       %s --tracks LIST [--verbose]\n",
                     argv[0], argv[0]);
             return 2;
@@ -766,9 +855,16 @@ int main(int argc, char **argv)
     printf("APTA tempo accuracy, %s corpus\n",
            tracks_path != NULL ? "REAL" : "SYNTHETIC");
     if (tracks_path == NULL) {
-        printf("%u patterns x %u tempi, %u s each at %u Hz mono\n\n",
+        printf("%u patterns x %u tempi, %u s each at %u Hz mono\n",
                (unsigned)PATTERN_COUNT, (unsigned)TEMPO_COUNT, seconds,
                SAMPLE_RATE);
+        printf("timing:%s%s%s%s\n\n",
+               g_jitter ? " jitter(6ms)" : "",
+               g_dynamics ? " dynamics" : "",
+               g_drift ? " drift(0.5%)" : "",
+               (g_jitter || g_dynamics || g_drift || g_swing)
+                   ? (g_swing ? " swing(15%)" : "")
+                   : " exact, every onset on the grid");
     } else {
         printf("track list: %s\n\n", tracks_path);
     }
@@ -906,9 +1002,12 @@ int main(int argc, char **argv)
                "list declares, so a wrong annotation reads as an estimator\n"
                "error. Check outliers against the file before believing them.\n");
     } else {
-        printf("\nNOTE: synthetic material with exact timing and no production\n"
-               "processing. These rates are a floor, not a prediction of\n"
-               "real-world accuracy.\n");
+        printf("\nNOTE: synthetic material%s. Still no production\n"
+               "processing, so these rates remain a floor rather than a\n"
+               "prediction of real-world accuracy.\n",
+               (g_jitter || g_dynamics || g_drift || g_swing)
+                   ? ", with the realism knobs listed above"
+                   : " with exact timing and no dynamics");
     }
 
     return 0;

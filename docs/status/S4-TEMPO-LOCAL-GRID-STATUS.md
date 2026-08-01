@@ -791,3 +791,83 @@ per 20 ms tick on an ESP32-P4. That budget has never been measured on the
 actual target, and the host figure is a proxy that A3 deliberately made
 pessimistic. Closing this properly means measuring on hardware, not tuning
 against x86.
+
+## 23. The actionable threshold does not survive realistic timing
+
+Section 19 derived an actionable confidence threshold of 75 from the synthetic
+corpus and reported that B1's requirement -- no high-confidence octave errors
+-- holds against it. That conclusion depended on the corpus having perfectly
+quantized timing, which was not stated at the time and is not true of real
+material.
+
+The corpus tool now models three imperfections, individually selectable so
+their effects can be separated: per-hit timing jitter, velocity variation with
+a downbeat accent, and a slow sinusoidal tempo drift whose mean stays at
+nominal. Defaults are modest rather than adversarial -- 6 ms of jitter is a
+tight human performer, or any recording that was not grid-quantized.
+
+Forty tracks, 30 s each:
+
+| Variant | Exact | Octave | Other | Max confidence, correct | Lowest usable gate |
+|---|---:|---:|---:|---:|---:|
+| Exact timing | 23 | 17 | 0 | 90 | 75 |
+| Jitter only | 21 | 15 | 4 | **64** | 60 |
+| Dynamics only | 21 | 19 | 0 | 89 | 75 |
+| Drift only | 25 | 15 | 0 | 82 | 70 |
+| Swing only | 23 | 17 | 0 | 90 | 75 |
+| All together | 18 | 15 | 7 | **63** | 60 |
+
+"Lowest usable gate" is the smallest threshold at which no incorrect answer
+survives while at least one correct one does.
+
+### 23.1 What this changes
+
+Accuracy barely moves. Exact matches go from 23 to 21 under jitter, which is
+within a couple of tracks of noise at this sample size.
+
+Confidence collapses. The highest confidence attached to a *correct* answer
+falls from 90 to 64, so a host gating at 75 admits nothing at all -- not one
+track of forty. The threshold recorded in section 19 is an artefact of the
+corpus, not a property of the estimator.
+
+Timing jitter is the sole cause. Dynamics and swing leave the confidence
+distribution untouched; drift lowers it modestly. Jitter alone also produces
+every one of the errors that are not simple ratios, which the exact-timing
+corpus never showed.
+
+The mechanism is plausibly direct rather than subtle. An onset bin is 256
+frames, 5.8 ms at 44.1 kHz, and the jitter standard deviation is 6 ms -- about
+one bin. Onsets smear across adjacent bins, the novelty peaks flatten, and the
+normalized autocorrelation score drops. Confidence is `35 + score * 50`, so a
+lower correlation lowers confidence directly. This is a hypothesis consistent
+with the measurement, not something the measurement proves.
+
+### 23.2 Where that leaves the shippability question
+
+Section 17.4 item 6 of the work order asks whether tempo and beatgrid are
+shippable, and says a negative answer is a valid outcome. The honest answer is
+now: not on this evidence. A host cannot gate Sync or Quantize on confidence
+and obtain useful coverage on material that was not grid-quantized, because
+confidence never reaches a level at which the errors have been excluded.
+
+Two directions follow, and they are different problems:
+
+- Recalibrate confidence against realistic material rather than against
+  correlation strength alone. The estimator is not much less accurate under
+  jitter; it only reports itself as less certain.
+- Make the novelty function tolerant of sub-bin timing error, for example by
+  distributing an onset across adjacent bins rather than assigning it to one.
+  That attacks the cause rather than the symptom.
+
+Neither is attempted here. This section records the measurement that motivates
+them.
+
+### 23.3 What this measurement does not cover
+
+The swing knob shows no effect, but that is a defect in the experiment rather
+than a result: the four patterns place almost nothing on odd sixteenths, so the
+knob barely engages. Swing is untested, not shown harmless.
+
+There is still no production processing -- no compression, no limiting, no
+reverb, no bass-heavy masters -- and no real recordings. These rates remain a
+floor.
