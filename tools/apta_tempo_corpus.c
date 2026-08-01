@@ -34,10 +34,16 @@
 #define DEFAULT_SECONDS 30u
 #define BLOCK_FRAMES 1024u
 
-/* Confidence at or above this is "the host would act on it": Sync and Quantize
+/*
+ * Confidence at or above this is "the host would act on it": Sync and Quantize
  * are gated on confidence, and a confidently wrong grid is worse than an
- * absent one. Stated explicitly because B1's acceptance asks for a threshold. */
-#define ACTIONABLE_CONFIDENCE 70u
+ * absent one. B1's acceptance asks for the threshold to be stated explicitly.
+ *
+ * 75 is not assumed, it is read off the sweep printed below: it is the lowest
+ * gate at which no incorrect answer survives while a useful number of correct
+ * ones do. Anything lower admits octave errors.
+ */
+#define ACTIONABLE_CONFIDENCE 75u
 
 /* ------------------------------------------------------------------ */
 /* deterministic noise                                                  */
@@ -477,6 +483,14 @@ static void write_wav(const char *path, const float *audio, size_t frames)
 
 /* ------------------------------------------------------------------ */
 
+typedef struct {
+    uint32_t confidence;
+    int exact;
+} corpus_result_t;
+
+static corpus_result_t g_results[256];
+static unsigned result_count;
+
 int main(int argc, char **argv)
 {
     uint32_t seconds = DEFAULT_SECONDS;
@@ -551,6 +565,11 @@ int main(int argc, char **argv)
             rel = a.ok ? classify(a.reported_millibpm, bpm) : REL_ABSENT;
             counts[rel] += 1u;
             total += 1u;
+            if (result_count < sizeof(g_results) / sizeof(g_results[0])) {
+                g_results[result_count].confidence = a.confidence;
+                g_results[result_count].exact = (rel == REL_EXACT);
+                result_count += 1u;
+            }
 
             if (rel == REL_EXACT) {
                 correct_conf_sum += a.confidence;
@@ -622,6 +641,37 @@ int main(int argc, char **argv)
                wrong_conf_min, wrong_conf_max);
     } else {
         printf("  incorrect n=0\n");
+    }
+
+    /* B1 asks for a threshold to be defined explicitly and reported against.
+     * The useful question is not one number but whether any threshold
+     * separates correct from incorrect at all, so sweep it. */
+    printf("\nthreshold sweep (how many of each survive a >= gate):\n");
+    printf("  %-10s %-18s %-18s %s\n",
+           "threshold", "correct admitted", "wrong admitted", "usable");
+    {
+        static const uint32_t gates[] = {50u, 55u, 60u, 65u, 70u, 75u, 80u};
+        unsigned g;
+
+        for (g = 0u; g < sizeof(gates) / sizeof(gates[0]); ++g) {
+            uint32_t ok = 0u;
+            uint32_t bad = 0u;
+            unsigned k;
+
+            for (k = 0u; k < result_count; ++k) {
+                if (g_results[k].confidence >= gates[g] &&
+                    g_results[k].confidence != APTA_CONFIDENCE_UNKNOWN) {
+                    if (g_results[k].exact) {
+                        ok += 1u;
+                    } else {
+                        bad += 1u;
+                    }
+                }
+            }
+            printf("  %-10u %-18u %-18u %s\n",
+                   gates[g], ok, bad,
+                   (bad == 0u && ok > 0u) ? "YES" : "no");
+        }
     }
 
     printf("\nactionable threshold = %u\n", ACTIONABLE_CONFIDENCE);

@@ -117,6 +117,55 @@ static float apta_s4_flux_uncached(
     return current > previous ? current - previous : 0.0f;
 }
 
+/* B1: log-normal weight for a tempo, peaking at the configured centre. */
+static float apta_s4_tempo_prior(uint32_t tempo_millibpm)
+{
+    float ratio;
+    float logarithm;
+
+    if (tempo_millibpm == 0u) {
+        return 0.0f;
+    }
+    ratio = (float)tempo_millibpm /
+            (float)APTA_INTERNAL_TEMPO_PRIOR_CENTRE_MILLIBPM;
+    logarithm = logf(ratio) / APTA_INTERNAL_TEMPO_PRIOR_WIDTH;
+    return expf(-0.5f * logarithm * logarithm);
+}
+
+/* B1: normalized autocorrelation of the precomputed flux at one lag. Extracted
+ * so the octave-family scan below can evaluate related lags without repeating
+ * the loop body. */
+static float apta_s4_correlation_at_lag(
+    const apta_session_t *session,
+    uint64_t evidence_first,
+    uint64_t evidence_end,
+    uint32_t lag)
+{
+    const float *flux = session->onset_flux;
+    float numerator = 0.0f;
+    float left_square = 0.0f;
+    float right_square = 0.0f;
+    float score;
+    uint64_t index;
+
+    if (lag == 0u || (uint64_t)lag >= evidence_end - evidence_first) {
+        return 0.0f;
+    }
+    for (index = evidence_first + lag; index < evidence_end; ++index) {
+        const uint32_t offset = (uint32_t)(index - evidence_first);
+        const float left = flux[offset];
+        const float right = flux[offset - lag];
+        numerator += left * right;
+        left_square += left * left;
+        right_square += right * right;
+    }
+    if (left_square <= 1e-12f || right_square <= 1e-12f) {
+        return 0.0f;
+    }
+    score = numerator / sqrtf(left_square * right_square);
+    return score > 0.0f ? score : 0.0f;
+}
+
 static int apta_s4_find_evidence(
     const apta_session_t *session,
     uint64_t *first_out,
@@ -364,6 +413,8 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     uint64_t run_count;
     uint64_t index;
     uint32_t flux_capacity;
+    float family_best;
+    float family_ambiguity;
     int estimate = 0;
     uint32_t minimum_lag;
     uint32_t maximum_lag;
@@ -484,29 +535,20 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     }
 
     for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
-        float numerator = 0.0f;
-        float left_square = 0.0f;
-        float right_square = 0.0f;
         float score;
         uint32_t position;
 
-        const float *flux = session->onset_flux;
-
-        for (index = evidence_first + lag; index < evidence_end; ++index) {
-            const uint32_t offset = (uint32_t)(index - evidence_first);
-            const float left = flux[offset];
-            const float right = flux[offset - lag];
-            numerator += left * right;
-            left_square += left * left;
-            right_square += right * right;
-        }
-        /* A3: float guard. These hold sums of squares of normalized flux
-         * values, so anything at or below 1e-12f is silence rather than
-         * signal. The previous 1e-18 was sized for double. */
-        if (left_square <= 1e-12f || right_square <= 1e-12f) {
-            continue;
-        }
-        score = numerator / sqrtf(left_square * right_square);
+        /* B1: weight by the preferred-tempo prior before the argmax. Every lag
+         * in range is scanned and weighted, so selecting the maximum of the
+         * weighted scores already prefers the best member of an octave family;
+         * what the explicit family scan below adds is a measure of how close
+         * the runner-up sibling came, which is what confidence has to
+         * reflect. */
+        score = apta_s4_correlation_at_lag(
+            session,
+            evidence_first,
+            evidence_end,
+            lag) * apta_s4_tempo_prior(apta_s4_tempo_from_lag(session, lag));
         if (score <= 0.0f) {
             continue;
         }
@@ -602,6 +644,64 @@ estimate_ready:
         }
     }
 
+    /* B1: how close did the best octave sibling of the winner come? A
+     * candidate whose family sibling scores nearly as well is ambiguous, and
+     * the honest response is lower confidence rather than high confidence with
+     * a flag nobody reads. That failure -- confidence 82 on a third-relation
+     * error -- is what this task exists to stop. */
+    {
+        static const float family_ratios[] = {
+            0.5f, 2.0f, 1.0f / 3.0f, 3.0f, 2.0f / 3.0f, 1.5f, 0.25f, 4.0f
+        };
+        const float winner = best_scores[0];
+        uint32_t entry;
+
+        family_best = 0.0f;
+        for (entry = 0u;
+             entry < sizeof(family_ratios) / sizeof(family_ratios[0]);
+             ++entry) {
+            const float scaled =
+                (float)best_lags[0] * family_ratios[entry] + 0.5f;
+            uint32_t sibling_lag;
+            float sibling;
+
+            if (scaled < 1.0f) {
+                continue;
+            }
+            sibling_lag = (uint32_t)scaled;
+            if (sibling_lag < minimum_lag || sibling_lag > maximum_lag ||
+                sibling_lag == best_lags[0]) {
+                continue;
+            }
+            sibling = apta_s4_correlation_at_lag(
+                          session,
+                          evidence_first,
+                          evidence_end,
+                          sibling_lag) *
+                      apta_s4_tempo_prior(
+                          apta_s4_tempo_from_lag(session, sibling_lag));
+            if (sibling > family_best) {
+                family_best = sibling;
+            }
+        }
+        if (winner > 0.0f && family_best > 0.0f) {
+            const float ratio = family_best / winner;
+
+            if (ratio <= APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE) {
+                family_ambiguity = 0.0f;
+            } else {
+                family_ambiguity =
+                    (ratio - APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE) /
+                    (1.0f - APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE);
+                if (family_ambiguity > 1.0f) {
+                    family_ambiguity = 1.0f;
+                }
+            }
+        } else {
+            family_ambiguity = 0.0f;
+        }
+    }
+
     confidence = 35u + (uint32_t)(best_scores[0] * 50.0);
     if (candidate_count > 1u && best_scores[0] > 0.0f) {
         float separation = 1.0f - best_scores[1] / best_scores[0];
@@ -614,6 +714,13 @@ estimate_ready:
     }
     if (confidence > APTA_CONFIDENCE_MAX) {
         confidence = APTA_CONFIDENCE_MAX;
+    }
+    /* Scale the whole figure by how unambiguous the octave choice was. A
+     * sibling scoring as well as the winner drives confidence to zero. */
+    confidence = (uint32_t)((float)confidence * (1.0f - family_ambiguity));
+    if (family_ambiguity > 0.5f) {
+        flags |= APTA_TEMPO_FLAG_HALF_TIME_AMBIGUITY |
+                 APTA_TEMPO_FLAG_DOUBLE_TIME_AMBIGUITY;
     }
 
     if (estimate) {

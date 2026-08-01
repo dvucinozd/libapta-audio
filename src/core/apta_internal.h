@@ -332,6 +332,42 @@ typedef struct {
 #endif
 #define APTA_INTERNAL_BAND_COUNT 3u
 
+/*
+ * B1: preferred-tempo prior.
+ *
+ * Autocorrelation of a periodic novelty function peaks at integer multiples
+ * and divisors of the true period, frequently more strongly than at the period
+ * itself. Raw argmax has nothing to resolve that with. A log-normal prior
+ * centred on the range most DJ material occupies weights the score before
+ * selection.
+ *
+ * Centre and width are overridable so a consumer with different repertoire can
+ * retune without forking. Width is in natural-log units: 0.55 puts a half- or
+ * double-tempo candidate at about 0.45 of the weight of one at the centre, and
+ * a third or triple at about 0.14.
+ */
+#ifndef APTA_INTERNAL_TEMPO_PRIOR_CENTRE_MILLIBPM
+#define APTA_INTERNAL_TEMPO_PRIOR_CENTRE_MILLIBPM 125000u
+#endif
+#ifndef APTA_INTERNAL_TEMPO_PRIOR_WIDTH
+#define APTA_INTERNAL_TEMPO_PRIOR_WIDTH 0.55f
+#endif
+
+/*
+ * B1: how close an octave sibling has to come before it counts as ambiguity.
+ *
+ * A sibling scoring below this fraction of the winner does not reduce
+ * confidence at all; between here and parity, confidence falls to zero. The
+ * knee matters: a clean four-to-the-floor track always has a half-tempo
+ * sibling with a substantial score, so a scaling that starts penalising as
+ * soon as any sibling exists collapses confidence on ordinary material and
+ * makes threshold gating useless. Ambiguous has to mean "nearly as good", not
+ * "present".
+ */
+#ifndef APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE
+#define APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE 0.85f
+#endif
+
 typedef struct {
     uint64_t bin_index;
     uint32_t sum_absolute;
