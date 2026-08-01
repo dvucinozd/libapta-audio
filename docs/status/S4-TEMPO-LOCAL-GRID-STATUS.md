@@ -736,3 +736,58 @@ the public API needs a signal whose autocorrelation carries two strong peaks at
 that exact ratio -- eight purpose-built signals. Those were not written. The
 relations that occur in practice, `two-thirds`, `third` and `half`, are
 exercised by the accuracy corpus, which reports the relation for every track.
+
+## 22. Final cost measurement
+
+Measured on the merged branch, x86-64 host, 5-minute 44.1 kHz track in
+1024-frame blocks, 12,921 calls. Three runs of the same binary, so the spread
+is host noise rather than a build difference:
+
+| Requested features | Baseline | Final (3 runs) |
+|---|---:|---|
+| `WAVEFORM_OVERVIEW` | 155.6 | 157.3 |
+| `+ CONFIDENCE` | 13,393.9 | 159.7 |
+| `+ BPM` | 13,416.9 | 467.9 – 486.8 |
+| `+ LOCAL_BEATGRID` | 13,179.6 | 473.6 – 481.8 |
+| `+ GLOBAL_BEATGRID` | 14,331.1 | 536.3 – 548.3 |
+| `+ DYNAMIC_TEMPO` | 14,204.0 | 538.0 – 555.0 |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 14,217.0 | 577.5 – 592.2 |
+
+Run-to-run spread is 2 to 4 percent. An earlier note in section 16.1 described
+S6 variance as around 15 percent; that was wrong. The two figures it compared,
+500.9 and 583.9, came from different builds rather than repeated runs of one
+binary, and repeated runs are much tighter than that.
+
+`overview + CONFIDENCE` is within noise of `overview`, which was the check A4
+existed to satisfy: that row is 84x cheaper than at baseline.
+
+### 22.1 The under-500-microsecond target is not met, and should not be chased
+
+Three rows exceed 500 microseconds per call. The work order's section 17.4 lists
+that as a success condition, and it is the one condition of seven that this work
+does not satisfy.
+
+Where it went, measured against the A4 snapshot:
+
+| Row | After A4 | Final | Delta |
+|---|---:|---:|---:|
+| `+ BPM` | 457.6 | ~479 | +4.7% |
+| `+ GLOBAL_BEATGRID` | 499.5 | ~543 | +8.7% |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 533.8 | ~587 | +10% |
+
+The S6 rows were already at or above 500 after A3. The further 5 to 10 percent
+is B1's octave-family scan, eight extra correlations against roughly 224 per
+estimate, plus B2's ratio-table relation classifier.
+
+Removing the family scan entirely would recover about 3.4 percent, against a
+gap of roughly 8 percent, so it does not reach the target on its own. The only
+change that would is undoing A3 -- and A3 exists precisely because the target is
+RV32IMAFC, where every `double` operation is a software-emulated call. Trading
+target cost for host cost to satisfy a host-measured threshold would be
+optimising the wrong machine.
+
+The threshold's purpose was to prove headroom against a budget of about 2 ms
+per 20 ms tick on an ESP32-P4. That budget has never been measured on the
+actual target, and the host figure is a proxy that A3 deliberately made
+pessimistic. Closing this properly means measuring on hardware, not tuning
+against x86.
