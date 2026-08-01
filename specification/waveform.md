@@ -132,6 +132,39 @@ APTA Core 0.1 defines the meaning as relative non-negative energy estimates for 
 
 A future reference-filterbank profile may define exact crossover frequencies, filtering, windowing and quantization without changing the baseline column layout.
 
+#### 5.3.1. This implementation's filterbank
+
+Declared here to satisfy the provenance requirement above.
+
+`libapta` splits the mono signal with two one-pole low-pass sections whose
+corners are derived from the session sample rate, not fixed in samples:
+
+```text
+low   = lp(200 Hz)
+mid   = lp(2 kHz) - lp(200 Hz)
+high  = sample    - lp(2 kHz)
+```
+
+Each band's mean absolute magnitude is accumulated over the column and
+normalized to `0..255` at column close. The slopes are 6 dB per octave, which
+is deliberate: this is a visualization descriptor, and the cost budget is two
+multiply-adds per sample on a target with no hardware double.
+
+Bands are produced for overview columns when `APTA_FEATURE_WAVEFORM_3BAND` is
+requested, and only then; every column of such a session carries all three
+values and `APTA_WAVEFORM_COLUMN_HAS_3BAND`.
+
+Detail tiles do not carry band values in this implementation, and leave both
+the bytes and the flag zero, which the container permits. The reason is
+structural rather than incidental: detail tiles are a bounded cache that can be
+replayed for an arbitrary frame range, and a recursive filter cannot be resumed
+at an arbitrary offset without either carrying per-tile history or warming up
+from earlier audio. Neither is free, and the overview is where a zoomed-out
+three-band waveform is actually drawn.
+
+The crossovers are overridable at build time through
+`APTA_INTERNAL_BAND_LOW_HZ` and `APTA_INTERNAL_BAND_HIGH_HZ`.
+
 ## 6. Column flags
 
 ```c

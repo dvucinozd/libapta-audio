@@ -172,6 +172,16 @@ static apta_status_t apta_process_workspace_reserve_accumulators(
         session->context,
         session->overview_accumulators);
     session->overview_accumulators = replacement;
+
+    /* C1: keep the parallel band array in step. */
+    {
+        const apta_status_t band_status =
+            apta_internal_waveform_grow_band_sums(session, capacity);
+        if (band_status < 0) {
+            return band_status;
+        }
+    }
+
     session->overview_accumulator_capacity = capacity;
     return APTA_STATUS_OK;
 }

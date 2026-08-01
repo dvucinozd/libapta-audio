@@ -187,6 +187,17 @@ size_t apta_internal_session_workspace_requirement(
             sizeof(apta_internal_waveform_accumulator_t),
             16u));
 
+    /* C1: the band sums grow alongside the accumulators, and only exist when
+     * bands were requested. */
+    if ((features & APTA_FEATURE_WAVEFORM_3BAND) != 0u) {
+        total = apta_workspace_add(
+            total,
+            apta_workspace_growable_cost(
+                overview_columns,
+                APTA_INTERNAL_BAND_COUNT * sizeof(uint32_t),
+                16u));
+    }
+
     /* Accepted-range table. One range per contiguous accepted run; a host that
      * pushes in order needs one, but fragmentation costs more. Charge the
      * scheduler's request capacity as a working bound. */

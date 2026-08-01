@@ -149,6 +149,7 @@ apta_status_t apta_internal_workspace_session_prepare(
     session->next_request_id = 1u;
     session->overview_frames_per_column =
         APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+    apta_internal_waveform_init_bands(session);
     session->lineage_id_low = atomic_fetch_add_explicit(
         &context->lineage_counter,
         1u,

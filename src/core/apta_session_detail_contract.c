@@ -26,6 +26,7 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
 {
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_FEATURE_WAVEFORM_3BAND |
         APTA_FEATURE_CONFIDENCE |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;

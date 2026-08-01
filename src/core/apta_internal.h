@@ -322,6 +322,16 @@ typedef struct {
 #define APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE 32768.0f
 #define APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE 8388608.0f
 
+/* C1: three-band split corners, in hertz. Derived into one-pole coefficients
+ * from the session's sample rate, never hard-coded in samples. */
+#ifndef APTA_INTERNAL_BAND_LOW_HZ
+#define APTA_INTERNAL_BAND_LOW_HZ 200.0f
+#endif
+#ifndef APTA_INTERNAL_BAND_HIGH_HZ
+#define APTA_INTERNAL_BAND_HIGH_HZ 2000.0f
+#endif
+#define APTA_INTERNAL_BAND_COUNT 3u
+
 typedef struct {
     uint64_t bin_index;
     uint32_t sum_absolute;
@@ -430,6 +440,24 @@ struct apta_session {
     uint32_t overview_accumulator_capacity;
     uint32_t overview_complete_count;
     uint32_t overview_frames_per_column;
+
+    /* C1: three-band split for the overview.
+     *
+     * The per-column sums live in a parallel array rather than inside
+     * apta_internal_waveform_accumulator_t so that a session which did not ask
+     * for bands pays nothing: the accumulator array is the dominant workspace
+     * term, and three more uint32 per entry would grow it by half.
+     * APTA_INTERNAL_BAND_COUNT entries per column, low then mid then high.
+     *
+     * The filter is two one-pole low-passes: low is the 200 Hz output, mid is
+     * the difference between the 2 kHz and 200 Hz outputs, high is what is
+     * left. Two multiply-adds per sample, no double. State is carried in the
+     * session, which is itself the workspace base when one is configured. */
+    uint32_t *overview_band_sums;
+    float band_low_state;
+    float band_mid_state;
+    float band_low_coefficient;
+    float band_mid_coefficient;
 
     apta_internal_detail_tile_t detail_tiles[APTA_INTERNAL_MAX_DETAIL_TILES];
     uint64_t detail_access_serial;
@@ -609,6 +637,12 @@ apta_status_t apta_internal_detail_build_snapshot(
     apta_result_t *result);
 
 apta_status_t apta_internal_s4_prepare(apta_session_t *session);
+void apta_internal_waveform_init_bands(apta_session_t *session);
+
+apta_status_t apta_internal_waveform_grow_band_sums(
+    apta_session_t *session,
+    uint32_t capacity);
+
 apta_status_t apta_internal_s4_process_sample(
     apta_session_t *session,
     apta_source_frame_t source_frame,

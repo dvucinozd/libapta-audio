@@ -1,10 +1,36 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../core/apta_session_workspace.h"
 
 #include <math.h>
 #include <stdalign.h>
 #include <stdint.h>
 #include <string.h>
+
+/* C1: one-pole coefficients for the band split, derived from the session's
+ * sample rate so the corners stay at 200 Hz and 2 kHz whatever the rate is.
+ * a = 1 - exp(-2*pi*fc/fs), clamped to a stable range. */
+void apta_internal_waveform_init_bands(apta_session_t *session)
+{
+    const float rate = (float)session->config.source_sample_rate;
+    float low;
+    float mid;
+
+    session->band_low_state = 0.0f;
+    session->band_mid_state = 0.0f;
+
+    if (rate <= 0.0f) {
+        session->band_low_coefficient = 0.0f;
+        session->band_mid_coefficient = 0.0f;
+        return;
+    }
+
+    low = 1.0f - expf(-6.2831853f * APTA_INTERNAL_BAND_LOW_HZ / rate);
+    mid = 1.0f - expf(-6.2831853f * APTA_INTERNAL_BAND_HIGH_HZ / rate);
+    /* A corner at or above Nyquist degenerates; pass the sample through. */
+    session->band_low_coefficient = fminf(fmaxf(low, 0.0f), 1.0f);
+    session->band_mid_coefficient = fminf(fmaxf(mid, 0.0f), 1.0f);
+}
 
 static uint32_t apta_min_u32(uint32_t left, uint32_t right)
 {
@@ -27,6 +53,54 @@ static int apta_ranges_overlap(
     return first_a < end_b && first_b < end_a;
 }
 
+/* C1: grow the parallel band-sum array to match the accumulator capacity.
+ * Shared, because the accumulators are grown from two places: this file's
+ * insert path and the detail layer's pre-reservation in
+ * apta_waveform_process_detail.c. A no-op when bands were not requested. */
+apta_status_t apta_internal_waveform_grow_band_sums(
+    apta_session_t *session,
+    uint32_t capacity)
+{
+    uint32_t *bands;
+    size_t band_bytes;
+
+    if ((session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_3BAND) == 0u) {
+        return APTA_STATUS_OK;
+    }
+    if (!apta_internal_size_array_fits(
+            0u,
+            (size_t)capacity * APTA_INTERNAL_BAND_COUNT,
+            sizeof(uint32_t))) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+    band_bytes =
+        (size_t)capacity * APTA_INTERNAL_BAND_COUNT * sizeof(uint32_t);
+
+    bands = (uint32_t *)apta_internal_session_allocate(
+        session,
+        band_bytes,
+        alignof(uint32_t),
+        APTA_MEMORY_PERSISTENT);
+    if (bands == NULL) {
+        return APTA_ERROR_OUT_OF_MEMORY;
+    }
+    memset(bands, 0, band_bytes);
+    if (session->overview_accumulator_count != 0u &&
+        session->overview_band_sums != NULL) {
+        memcpy(
+            bands,
+            session->overview_band_sums,
+            (size_t)session->overview_accumulator_count *
+                APTA_INTERNAL_BAND_COUNT * sizeof(uint32_t));
+    }
+    apta_internal_context_deallocate(
+        session->context,
+        session->overview_band_sums);
+    session->overview_band_sums = bands;
+    return APTA_STATUS_OK;
+}
+
 static apta_status_t apta_ensure_accumulator_capacity(
     apta_session_t *session,
     uint32_t needed)
@@ -34,6 +108,7 @@ static apta_status_t apta_ensure_accumulator_capacity(
     apta_internal_waveform_accumulator_t *replacement;
     uint32_t capacity;
     size_t bytes;
+    apta_status_t status;
 
     if (session->overview_accumulator_capacity >= needed) {
         return APTA_STATUS_OK;
@@ -78,6 +153,12 @@ static apta_status_t apta_ensure_accumulator_capacity(
         session->context,
         session->overview_accumulators);
     session->overview_accumulators = replacement;
+
+    status = apta_internal_waveform_grow_band_sums(session, capacity);
+    if (status < 0) {
+        return status;
+    }
+
     session->overview_accumulator_capacity = capacity;
     return APTA_STATUS_OK;
 }
@@ -125,6 +206,27 @@ static apta_status_t apta_find_or_insert_accumulator(
          --index) {
         session->overview_accumulators[index] =
             session->overview_accumulators[index - 1u];
+    }
+
+    /* C1: the band sums are a parallel array indexed by position, so they must
+     * follow the same insertion shift. Getting this wrong attaches a column's
+     * bands to its neighbour, which no existing test would have caught. */
+    if (session->overview_band_sums != NULL) {
+        uint32_t *bands = session->overview_band_sums;
+        uint32_t band;
+
+        for (index = session->overview_accumulator_count;
+             index > position;
+             --index) {
+            for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+                bands[(size_t)index * APTA_INTERNAL_BAND_COUNT + band] =
+                    bands[(size_t)(index - 1u) *
+                              APTA_INTERNAL_BAND_COUNT + band];
+            }
+        }
+        for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+            bands[(size_t)position * APTA_INTERNAL_BAND_COUNT + band] = 0u;
+        }
     }
 
     memset(
@@ -237,6 +339,40 @@ static apta_status_t apta_process_samples(
                             APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
         accumulator->sum_squares += (uint64_t)scaled * scaled;
         accumulator->sample_count += 1u;
+
+        /* C1: two one-pole low-passes split the sample three ways. The state
+         * advances on every sample regardless of which column it lands in, so
+         * the filter sees a continuous stream. */
+        if (session->overview_band_sums != NULL) {
+            const size_t base =
+                (size_t)(accumulator - session->overview_accumulators) *
+                APTA_INTERNAL_BAND_COUNT;
+            float low;
+            float mid;
+            float high;
+
+            session->band_low_state +=
+                session->band_low_coefficient *
+                (sample - session->band_low_state);
+            session->band_mid_state +=
+                session->band_mid_coefficient *
+                (sample - session->band_mid_state);
+
+            low = session->band_low_state;
+            mid = session->band_mid_state - session->band_low_state;
+            high = sample - session->band_mid_state;
+
+            session->overview_band_sums[base + 0u] += (uint32_t)(
+                fminf(fabsf(low), 1.0f) *
+                APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
+            session->overview_band_sums[base + 1u] += (uint32_t)(
+                fminf(fabsf(mid), 1.0f) *
+                APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
+            session->overview_band_sums[base + 2u] += (uint32_t)(
+                fminf(fabsf(high), 1.0f) *
+                APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
+        }
+
         if (sample <= -1.0f || sample >= 1.0f) {
             accumulator->clipped = 1u;
         }

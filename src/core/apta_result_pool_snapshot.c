@@ -51,6 +51,20 @@ static int16_t apta_pool_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
+/* C1: see apta_quantize_band() in apta_waveform_snapshot.c. */
+static uint8_t apta_pool_quantize_band(uint32_t sum, uint32_t sample_count)
+{
+    uint32_t mean;
+
+    if (sample_count == 0u) {
+        return 0u;
+    }
+    mean = (uint32_t)((uint64_t)sum * 255u /
+                      ((uint64_t)sample_count *
+                       (uint64_t)APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE));
+    return mean > 255u ? (uint8_t)255u : (uint8_t)mean;
+}
+
 /* A4: see apta_overview_confidence() in apta_waveform_snapshot.c. Duplicated
  * here to match the existing split between the two snapshot paths. */
 static apta_confidence_value_t apta_pool_overview_confidence(
@@ -371,6 +385,20 @@ static apta_status_t apta_pool_build_overview(
         column->flags = APTA_WAVEFORM_COLUMN_VALID;
         if (accumulator->clipped) {
             column->flags |= APTA_WAVEFORM_COLUMN_CLIPPED;
+        }
+        /* C1: see apta_waveform_snapshot.c. */
+        if (session->overview_band_sums != NULL) {
+            const size_t base = (size_t)index * APTA_INTERNAL_BAND_COUNT;
+            column->low = apta_pool_quantize_band(
+                session->overview_band_sums[base + 0u],
+                accumulator->sample_count);
+            column->mid = apta_pool_quantize_band(
+                session->overview_band_sums[base + 1u],
+                accumulator->sample_count);
+            column->high = apta_pool_quantize_band(
+                session->overview_band_sums[base + 2u],
+                accumulator->sample_count);
+            column->flags |= APTA_WAVEFORM_COLUMN_HAS_3BAND;
         }
 
         output_index += 1u;

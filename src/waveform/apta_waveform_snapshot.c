@@ -92,6 +92,22 @@ static apta_confidence_value_t apta_overview_confidence(
         expected);
 }
 
+/* C1: mean band magnitude over the column, normalized to a byte. The sums are
+ * scaled by APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE, so dividing by the count and
+ * the scale gives a value in [0, 1]. */
+static uint8_t apta_quantize_band(uint32_t sum, uint32_t sample_count)
+{
+    uint32_t mean;
+
+    if (sample_count == 0u) {
+        return 0u;
+    }
+    mean = (uint32_t)((uint64_t)sum * 255u /
+                      ((uint64_t)sample_count *
+                       (uint64_t)APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE));
+    return mean > 255u ? (uint8_t)255u : (uint8_t)mean;
+}
+
 static uint16_t apta_quantize_rms(uint64_t sum_squares, uint32_t sample_count)
 {
     double rms;
@@ -258,6 +274,22 @@ apta_status_t apta_internal_waveform_build_snapshot(
         if (accumulator->clipped) {
             column->flags |= APTA_WAVEFORM_COLUMN_CLIPPED;
         }
+        /* C1: bands are written only when they were computed. The writers
+         * reject nonzero low/mid/high without this flag, so a column either
+         * carries all three and the flag, or neither. */
+        if (session->overview_band_sums != NULL) {
+            const size_t base = (size_t)index * APTA_INTERNAL_BAND_COUNT;
+            column->low = apta_quantize_band(
+                session->overview_band_sums[base + 0u],
+                accumulator->sample_count);
+            column->mid = apta_quantize_band(
+                session->overview_band_sums[base + 1u],
+                accumulator->sample_count);
+            column->high = apta_quantize_band(
+                session->overview_band_sums[base + 2u],
+                accumulator->sample_count);
+            column->flags |= APTA_WAVEFORM_COLUMN_HAS_3BAND;
+        }
 
         output_index += 1u;
         previous_column = accumulator->column_index;
@@ -331,11 +363,15 @@ void apta_internal_waveform_cleanup_session(apta_session_t *session)
     apta_internal_context_deallocate(
         session->context,
         session->overview_accumulators);
+    apta_internal_context_deallocate(
+        session->context,
+        session->overview_band_sums);
 
     session->pcm_head = NULL;
     session->pcm_tail = NULL;
     session->accepted_ranges = NULL;
     session->overview_accumulators = NULL;
+    session->overview_band_sums = NULL;
 }
 
 void apta_internal_waveform_cleanup_result(apta_result_t *result)

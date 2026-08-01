@@ -187,6 +187,8 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
     const apta_feature_mask_t supported_features =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
         APTA_FEATURE_WAVEFORM_DETAIL |
+        /* C1: three-band overview waveform. */
+        APTA_FEATURE_WAVEFORM_3BAND |
         APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID |
         APTA_FEATURE_GLOBAL_BEATGRID |
@@ -195,6 +197,8 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_GRID_LOCKING;
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
+        /* C1: bands qualify the overview, so they require it, like DETAIL. */
+        APTA_FEATURE_WAVEFORM_3BAND |
         /* A4: CONFIDENCE is no longer an S4 feature, but it still needs
          * something to qualify, and every feature it can qualify depends on
          * the overview. Naming it explicitly keeps CONFIDENCE-alone rejected
