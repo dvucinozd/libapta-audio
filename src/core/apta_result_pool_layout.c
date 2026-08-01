@@ -91,6 +91,7 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     size_t pool_offset;
     size_t slots_bytes;
     uint32_t slot_index;
+    uint32_t frames_per_column;
 
     if (config == NULL || layout_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -105,10 +106,13 @@ apta_status_t apta_internal_result_pool_calculate_layout(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
-    overview_columns64 = config->total_frames /
-                         APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
-    if ((config->total_frames %
-         APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN) != 0u) {
+    /* C2: the pool must be sized for the resolution the session will use, not
+     * the compile-time default. */
+    frames_per_column = config->overview_frames_per_column != 0u
+                            ? config->overview_frames_per_column
+                            : APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+    overview_columns64 = config->total_frames / frames_per_column;
+    if ((config->total_frames % frames_per_column) != 0u) {
         overview_columns64 += 1u;
     }
     if (overview_columns64 > UINT32_MAX) {

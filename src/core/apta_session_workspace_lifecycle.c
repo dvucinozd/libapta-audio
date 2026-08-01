@@ -46,6 +46,10 @@ static int apta_workspace_config_is_valid(
         return 0;
     }
 
+    if (!apta_internal_overview_resolution_is_valid(config)) {
+        return 0;
+    }
+
     if (config->channel_layout == APTA_CHANNEL_LAYOUT_MONO &&
         config->channel_count != 1u) {
         return 0;
@@ -147,8 +151,11 @@ apta_status_t apta_internal_workspace_session_prepare(
     session->config = *config;
     session->final_end_frame = APTA_TOTAL_FRAMES_UNKNOWN;
     session->next_request_id = 1u;
+    /* C2: the host may choose the overview resolution; zero means default. */
     session->overview_frames_per_column =
-        APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+        config->overview_frames_per_column != 0u
+            ? config->overview_frames_per_column
+            : APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
     apta_internal_waveform_init_bands(session);
     session->lineage_id_low = atomic_fetch_add_explicit(
         &context->lineage_counter,

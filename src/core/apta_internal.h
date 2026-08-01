@@ -673,6 +673,9 @@ apta_status_t apta_internal_detail_build_snapshot(
     apta_result_t *result);
 
 apta_status_t apta_internal_s4_prepare(apta_session_t *session);
+int apta_internal_overview_resolution_is_valid(
+    const apta_session_config_t *config);
+
 void apta_internal_waveform_init_bands(apta_session_t *session);
 
 apta_status_t apta_internal_waveform_grow_band_sums(

@@ -71,6 +71,7 @@ apta_add_c_test(apta_s4_refresh_gate apta.s4.refresh_gate unit/s4_refresh_gate.c
 apta_add_c_test(apta_confidence_without_tempo apta.waveform.confidence_without_tempo unit/confidence_without_tempo.c)
 apta_add_c_test(apta_workspace_requirements apta.memory.workspace_requirements unit/workspace_requirements.c)
 apta_add_c_test(apta_waveform_3band apta.waveform.three_band unit/waveform_3band.c)
+apta_add_c_test(apta_waveform_resolution apta.waveform.resolution unit/waveform_resolution.c)
 apta_add_c_test(apta_s4_relations apta.s4.relations unit/s4_relations.c)
 apta_add_c_test(apta_s4_serialization apta.serialization.s4 unit/s4_serialization.c)
 apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_failure unit/s4_allocation_failure.c)

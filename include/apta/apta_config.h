@@ -96,7 +96,30 @@ typedef struct {
     size_t static_workspace_size;
 
     uint32_t flags;
-    uint32_t reserved32[5];
+
+    /*
+     * Frames summarised into one overview waveform column, for level 0.
+     *
+     * Zero selects the library default, so a config produced by
+     * apta_session_config_init() behaves exactly as before. A non-zero value
+     * must be a power of two between 64 and 65536; anything else is rejected
+     * at apta_session_create() with APTA_ERROR_INVALID_ARGUMENT.
+     *
+     * Lower values raise the horizontal resolution a zoom UI can draw and
+     * raise the static workspace proportionally, because the accumulator array
+     * holds one entry per column across the whole track. Ask
+     * apta_query_workspace_requirements() rather than scaling a published
+     * figure by hand.
+     *
+     * The value reached is reported back in
+     * apta_waveform_level_info_t.frames_per_column.
+     *
+     * Taken from the reserved space, so the struct size and therefore the ABI
+     * are unchanged.
+     */
+    uint32_t overview_frames_per_column;
+
+    uint32_t reserved32[4];
     uint64_t reserved64[4];
 } apta_session_config_t;
 

@@ -159,7 +159,11 @@ size_t apta_internal_session_workspace_requirement(
     const apta_session_config_t *config)
 {
     const apta_feature_mask_t features = config->requested_features;
-    uint32_t frames_per_column = APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+    /* C2: follow the session's chosen resolution. */
+    const uint32_t frames_per_column =
+        config->overview_frames_per_column != 0u
+            ? config->overview_frames_per_column
+            : APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
     uint64_t overview_columns;
     size_t total;
 

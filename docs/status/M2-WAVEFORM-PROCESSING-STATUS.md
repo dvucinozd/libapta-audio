@@ -268,3 +268,56 @@ undefined, whereas `fminf` returns the non-NaN operand.
 
 Verified with AddressSanitizer and UndefinedBehaviorSanitizer over the full
 suite, with no `float-cast-overflow` or other diagnostics.
+
+## Configurable overview resolution
+
+`apta_result_get_waveform_overview()` has always taken a `level_id` and
+`apta_waveform_level_info_t` has always carried `frames_per_column`, but there
+was exactly one resolution: 1024 frames per column, about 43 columns per second
+at 44.1 kHz. A consumer whose zoom window spans one to thirty seconds across
+800 pixels needs 27 to 800 columns per second.
+
+`apta_session_config_t.overview_frames_per_column` now selects it. Zero keeps
+the library default, so a config from `apta_session_config_init()` behaves
+exactly as before. A non-zero value must be a power of two between 64 and
+65536; anything else is rejected at `apta_session_create()` with
+`APTA_ERROR_INVALID_ARGUMENT` rather than clamped, because the column index is
+a division by this value and the result-pool layout is sized from it.
+
+The field comes from the struct's reserved space, so `sizeof` and the ABI are
+unchanged and no API version bump is needed.
+
+This is the work order's option B rather than a level pyramid. C3 had already
+made the constant overridable at build time, which left the remaining work as
+moving it from compile time to the session config; a pyramid would have cost
+memory linearly per level for resolutions most hosts do not need at the same
+time.
+
+Everything derived from the resolution follows it: the session's column
+geometry, the bounded result-pool layout, and
+`apta_query_workspace_requirements()`. The queried figure rises as the
+resolution gets finer, which is the honest answer -- the accumulator array
+holds one entry per column across the whole track and is the dominant workspace
+term.
+
+The value reached is reported back in
+`apta_waveform_level_info_t.frames_per_column`, so a host that passes zero can
+still discover what it got.
+
+### Validation lives in three places
+
+A new session-config field has to be validated in
+`apta_session_config_is_valid()` for heap sessions,
+`apta_workspace_config_is_valid()` for static-workspace sessions, and
+`apta_query_memory_requirements_base()` for the query. Adding it to only one
+leaves the others accepting values the rest of the library cannot honour. The
+check is a shared `apta_internal_overview_resolution_is_valid()` called from
+all three rather than a fourth copy.
+
+### Not changed
+
+The detail tile mechanism keeps its own fixed geometry, per the work order.
+Whether the WOVR container header carries `frames_per_column` was not
+investigated; a serialize and parse round trip at a non-default resolution is
+not covered by `apta.waveform.resolution`, which checks the live result only.
+That is the remaining gap for this task.

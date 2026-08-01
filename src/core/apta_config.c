@@ -180,6 +180,26 @@ static size_t apta_memory_waveform_recommendation(
            s6_snapshots;
 }
 
+/* C2: zero means the library default. Otherwise a power of two in range; the
+ * column index is a division by this value and the result-pool layout is sized
+ * from it, so a rogue value is a configuration error rather than something to
+ * clamp silently.
+ *
+ * Shared, because session creation validates through
+ * apta_session_config_is_valid() and apta_workspace_config_is_valid() while
+ * the memory query validates here, and those are three separate paths a new
+ * config field has to be added to. */
+int apta_internal_overview_resolution_is_valid(
+    const apta_session_config_t *config)
+{
+    if (config->overview_frames_per_column == 0u) {
+        return 1;
+    }
+    return config->overview_frames_per_column >= 64u &&
+           config->overview_frames_per_column <= 65536u &&
+           apta_internal_is_power_of_two(config->overview_frames_per_column);
+}
+
 apta_status_t APTA_CALL apta_query_memory_requirements_base(
     const apta_session_config_t *config,
     apta_memory_requirements_t *requirements_out)
@@ -231,6 +251,9 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
 
     if ((config->flags &
          ~APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_overview_resolution_is_valid(config)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     if ((config->requested_features & ~supported_features) != 0u) {
