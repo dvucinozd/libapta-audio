@@ -51,6 +51,7 @@ int main(void)
     apta_memory_requirements_t zeroed;
     apta_context_t *context = NULL;
     apta_session_t *session = NULL;
+    void *allocation;
     void *workspace;
     size_t workspace_size;
 
@@ -100,10 +101,16 @@ int main(void)
     /* The bug this task fixes: a 12 KiB workspace was accepted for a
      * five-minute full-feature session and failed much later inside
      * process(). It must be rejected at creation. */
+    /* Aligned by hand rather than with aligned_alloc: that is C11 but MSVC
+     * does not provide it, and this test has to build everywhere the library
+     * does. */
     configure(&config, FULL_FEATURES, FIVE_MINUTES);
-    workspace_size = (required.minimum_bytes + 63u) & ~(size_t)63u;
-    workspace = aligned_alloc(64u, workspace_size);
-    CHECK(workspace != NULL);
+    workspace_size = required.minimum_bytes;
+    allocation = malloc(workspace_size + required.required_alignment);
+    CHECK(allocation != NULL);
+    workspace = (void *)(((uintptr_t)allocation +
+                          (uintptr_t)required.required_alignment - 1u) &
+                         ~((uintptr_t)required.required_alignment - 1u));
     memset(workspace, 0, workspace_size);
 
     config.static_workspace = workspace;
@@ -125,7 +132,7 @@ int main(void)
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     session = NULL;
 
-    free(workspace);
+    free(allocation);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     return 0;
 }
