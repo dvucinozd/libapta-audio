@@ -24,6 +24,15 @@ extern "C" {
 #define APTA_TEMPO_FLAG_USER_CONFIRMED        (1u << 4)
 #define APTA_TEMPO_FLAG_USER_EDITED           (1u << 5)
 #define APTA_TEMPO_FLAG_DEGRADED              (1u << 6)
+/*
+ * B2: set when any candidate stands in a metrical relation to the selected
+ * tempo and scores comparably. The two flags above name only half and double;
+ * with eight relations defined, one flag per ratio does not scale, and the
+ * relations that actually dominate in practice -- thirds and two-thirds --
+ * had no flag at all. Those two remain set for their own relations so
+ * existing hosts keep working.
+ */
+#define APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY      (1u << 7)
 
 #define APTA_GRID_FLAG_PROVISIONAL_PHASE     (1u << 0)
 #define APTA_GRID_FLAG_DYNAMIC_TEMPO         (1u << 1)

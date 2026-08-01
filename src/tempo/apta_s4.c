@@ -242,31 +242,61 @@ static uint32_t apta_s4_tempo_from_lag(
                : 0u;
 }
 
+/*
+ * B2: the metrical relations the estimator can report, as exact ratios.
+ *
+ * One table serves two callers: apta_s4_relation() classifies a candidate
+ * against the selected tempo, and B1's octave-family scan walks the same
+ * ratios looking for a competing peak. They were separate before, which meant
+ * the set of relations the estimator could detect and the set it searched
+ * could drift apart.
+ *
+ * Ordered by increasing distance from unity so the nearest match wins when
+ * tolerances would otherwise overlap.
+ */
+typedef struct {
+    uint32_t numerator;
+    uint32_t denominator;
+    apta_tempo_relation_t relation;
+} apta_s4_ratio_t;
+
+static const apta_s4_ratio_t apta_s4_ratios[] = {
+    {3u, 2u, APTA_TEMPO_RELATION_THREE_HALF},
+    {2u, 3u, APTA_TEMPO_RELATION_TWO_THIRDS},
+    {2u, 1u, APTA_TEMPO_RELATION_DOUBLE},
+    {1u, 2u, APTA_TEMPO_RELATION_HALF},
+    {3u, 1u, APTA_TEMPO_RELATION_TRIPLE},
+    {1u, 3u, APTA_TEMPO_RELATION_THIRD},
+    {4u, 1u, APTA_TEMPO_RELATION_QUADRUPLE},
+    {1u, 4u, APTA_TEMPO_RELATION_QUARTER}
+};
+
+#define APTA_S4_RATIO_COUNT \
+    (sizeof(apta_s4_ratios) / sizeof(apta_s4_ratios[0]))
+
 static apta_tempo_relation_t apta_s4_relation(
     uint32_t selected,
     uint32_t candidate)
 {
-    uint64_t difference;
-    uint64_t tolerance;
+    uint32_t entry;
 
     if (selected == 0u || candidate == 0u || selected == candidate) {
         return APTA_TEMPO_RELATION_INDEPENDENT;
     }
 
-    tolerance = selected / 50u + 1u;
-    difference = candidate > selected / 2u
-                     ? candidate - selected / 2u
-                     : selected / 2u - candidate;
-    if (difference <= tolerance) {
-        return APTA_TEMPO_RELATION_HALF;
-    }
+    for (entry = 0u; entry < APTA_S4_RATIO_COUNT; ++entry) {
+        const uint64_t expected =
+            (uint64_t)selected * apta_s4_ratios[entry].numerator /
+            apta_s4_ratios[entry].denominator;
+        const uint64_t difference = candidate > expected
+                                        ? (uint64_t)candidate - expected
+                                        : expected - (uint64_t)candidate;
+        /* Two percent, the tolerance the half-time case already used. */
+        const uint64_t tolerance = expected / 50u + 1u;
 
-    tolerance = selected / 25u + 1u;
-    difference = candidate > selected * 2u
-                     ? candidate - selected * 2u
-                     : selected * 2u - candidate;
-    if (difference <= tolerance) {
-        return APTA_TEMPO_RELATION_DOUBLE;
+        if (difference <= tolerance) {
+            return apta_s4_ratios[entry].relation;
+        }
     }
 
     return APTA_TEMPO_RELATION_INDEPENDENT;
@@ -633,12 +663,20 @@ estimate_ready:
         if (lag != 0u &&
             session->tempo_candidates[lag].score >=
                 (uint16_t)((uint32_t)session->tempo_candidates[0].score * 7u / 10u)) {
-            if (session->tempo_candidates[lag].relation_to_selected ==
-                APTA_TEMPO_RELATION_HALF) {
+            const apta_tempo_relation_t relation =
+                session->tempo_candidates[lag].relation_to_selected;
+
+            /* B2: flag every metrical relation, not just half and double. The
+             * two dominant errors measured on the accuracy corpus are
+             * two-thirds and third, neither of which had a flag before, so a
+             * host reading the flags saw nothing wrong. */
+            if (relation != APTA_TEMPO_RELATION_INDEPENDENT) {
+                flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+            }
+            if (relation == APTA_TEMPO_RELATION_HALF) {
                 flags |= APTA_TEMPO_FLAG_HALF_TIME_AMBIGUITY;
             }
-            if (session->tempo_candidates[lag].relation_to_selected ==
-                APTA_TEMPO_RELATION_DOUBLE) {
+            if (relation == APTA_TEMPO_RELATION_DOUBLE) {
                 flags |= APTA_TEMPO_FLAG_DOUBLE_TIME_AMBIGUITY;
             }
         }
@@ -650,18 +688,18 @@ estimate_ready:
      * a flag nobody reads. That failure -- confidence 82 on a third-relation
      * error -- is what this task exists to stop. */
     {
-        static const float family_ratios[] = {
-            0.5f, 2.0f, 1.0f / 3.0f, 3.0f, 2.0f / 3.0f, 1.5f, 0.25f, 4.0f
-        };
         const float winner = best_scores[0];
         uint32_t entry;
 
         family_best = 0.0f;
-        for (entry = 0u;
-             entry < sizeof(family_ratios) / sizeof(family_ratios[0]);
-             ++entry) {
+        for (entry = 0u; entry < APTA_S4_RATIO_COUNT; ++entry) {
+            /* B2: the same ratio table the relation classifier uses. A lag
+             * scaled by r corresponds to a tempo scaled by 1/r, so the
+             * numerator and denominator swap here. */
             const float scaled =
-                (float)best_lags[0] * family_ratios[entry] + 0.5f;
+                (float)best_lags[0] *
+                    (float)apta_s4_ratios[entry].denominator /
+                    (float)apta_s4_ratios[entry].numerator + 0.5f;
             uint32_t sibling_lag;
             float sibling;
 
@@ -718,9 +756,10 @@ estimate_ready:
     /* Scale the whole figure by how unambiguous the octave choice was. A
      * sibling scoring as well as the winner drives confidence to zero. */
     confidence = (uint32_t)((float)confidence * (1.0f - family_ambiguity));
-    if (family_ambiguity > 0.5f) {
-        flags |= APTA_TEMPO_FLAG_HALF_TIME_AMBIGUITY |
-                 APTA_TEMPO_FLAG_DOUBLE_TIME_AMBIGUITY;
+    /* B2: a strong family sibling is ambiguity even when it did not survive
+     * into the candidate list, which holds only three entries. */
+    if (family_ambiguity > 0.0f) {
+        flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
     }
 
     if (estimate) {

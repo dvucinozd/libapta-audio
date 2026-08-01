@@ -688,3 +688,51 @@ them not at all.
 This is recorded rather than implemented so the finding is not lost. Revisiting
 it would be reasonable if the corpus were replaced with real audio, where
 timbral separation may matter more than it does on programmed patterns.
+
+## 21. Tempo relations completed and reported
+
+`relation_to_selected` detected two cases, half and double. Three consequences
+followed from that, all of which the accuracy corpus made concrete:
+
+`APTA_TEMPO_RELATION_THREE_HALF` and `APTA_TEMPO_RELATION_TWO_THIRDS` were
+defined in the public headers and never produced. There was no value at all for
+the third or triple relation, so the failure the work order itself measured --
+a 128 BPM signal reported as 42.7 -- was not merely unresolved, it was not
+expressible.
+
+Four values are added: `THIRD` 5, `TRIPLE` 6, `QUARTER` 7, `QUADRUPLE` 8. The
+relation is a single byte in the `TEMP` section, so the set is append-only and
+the existing values 0 to 4 are unchanged. The reader's validation bound moved
+with it; a reader predating these values rejects a section carrying them, which
+is the conservative behaviour.
+
+The classifier now walks one table of exact ratios with a two percent
+tolerance, ordered by distance from unity so the nearest match wins. That same
+table drives B1's octave-family scan, which previously carried its own hard
+coded list. The set of relations the estimator can detect and the set it
+searches can no longer drift apart.
+
+Ambiguity flagging was one flag per ratio, which does not scale to eight
+relations and left the two dominant errors -- `two-thirds` at 15 of 40 and
+`third` -- with no flag at all. `APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY`, bit 7, is
+set for any detected relation and for a strong family sibling that did not
+survive into the three-entry candidate list. `HALF_TIME_AMBIGUITY` and
+`DOUBLE_TIME_AMBIGUITY` still fire for their own relations, so existing hosts
+are unaffected.
+
+Accuracy is unchanged, which is correct: this task changes what is reported,
+not what is selected. 23 of 40 exact, threshold 75, no high-confidence octave
+errors.
+
+### 21.1 Coverage gap
+
+`apta.s4.relations` pins every relation's numeric value and the flag's bit
+position, so a future renumbering fails a test rather than silently
+reinterpreting existing files. That is the risk worth guarding.
+
+What is not covered is a test driving the estimator to emit each of the eight
+relations. `apta_s4_relation()` is static, and reaching each relation through
+the public API needs a signal whose autocorrelation carries two strong peaks at
+that exact ratio -- eight purpose-built signals. Those were not written. The
+relations that occur in practice, `two-thirds`, `third` and `half`, are
+exercised by the accuracy corpus, which reports the relation for every track.
