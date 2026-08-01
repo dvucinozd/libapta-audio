@@ -56,6 +56,10 @@ elseif(MSVC)
     target_compile_options(apta_tool_common PRIVATE /W4)
 endif()
 
+# Measurement instrument rather than a deliverable, but it needs the WAV
+# decoder for --tracks, so it is built like the tools rather than by hand.
+apta_add_tool(apta_tempo_corpus apta-tempo-corpus apta_tempo_corpus.c)
+
 apta_add_tool(apta_analyze apta-analyze apta_analyze.c)
 apta_add_tool(apta_inspect apta-inspect apta_inspect.c)
 apta_add_tool(apta_validate apta-validate apta_validate.c)

@@ -20,7 +20,20 @@
  *      -o build/apta-tempo-corpus
  *
  * Usage:
- *   ./build/apta-tempo-corpus [--seconds N] [--write-wav DIR] [--verbose]
+ *   apta-tempo-corpus [--seconds N] [--write-wav DIR] [--verbose]
+ *   apta-tempo-corpus --tracks LIST [--verbose]
+ *
+ * --tracks reads a plain-text list of real recordings with known ground-truth
+ * tempo, one per line:
+ *
+ *     # comments and blank lines are ignored
+ *     /music/track-a.wav   128
+ *     /music/track-b.wav   174.5
+ *
+ * Paths are used as given; nothing is copied into the repository, so no
+ * copyrighted audio is committed. Results from a real corpus are labelled as
+ * such, because the two kinds are not comparable: synthetic material has exact
+ * timing and no production processing, and its rates are a floor.
  */
 #include <math.h>
 #include <stdint.h>
@@ -29,6 +42,7 @@
 #include <string.h>
 
 #include <apta/apta.h>
+#include <apta/desktop/apta_decoder.h>
 
 #define SAMPLE_RATE 44100u
 #define DEFAULT_SECONDS 30u
@@ -299,15 +313,34 @@ static const char *relation_name(relation_t r)
     }
 }
 
+/*
+ * Two tolerances, because they answer different questions.
+ *
+ * EXACT decides whether a host could beat-match on this answer. Four percent
+ * is far too loose for that: 130.8 BPM against a true 135 drifts a whole beat
+ * in about thirty seconds. One percent is roughly the point where a
+ * constant-tempo grid stays usable across a mix.
+ *
+ * The octave-family ratios only need to identify which relation was hit, and
+ * there the wide tolerance is right -- a half-tempo answer is a half-tempo
+ * answer whether it is out by one percent or three.
+ */
+#define EXACT_TOLERANCE  0.01
+#define FAMILY_TOLERANCE 0.04
+
 static int near_ratio(double value, double target)
 {
-    return fabs(value - target) <= target * 0.04;
+    const double tolerance =
+        target == 1.0 ? EXACT_TOLERANCE : FAMILY_TOLERANCE;
+    return fabs(value - target) <= target * tolerance;
 }
 
-static relation_t classify(uint32_t reported_millibpm, uint32_t truth_bpm)
+static relation_t classify(uint32_t reported_millibpm, uint32_t truth_millibpm)
 {
     const double ratio =
-        (double)reported_millibpm / 1000.0 / (double)truth_bpm;
+        truth_millibpm != 0u
+            ? (double)reported_millibpm / (double)truth_millibpm
+            : 0.0;
 
     if (reported_millibpm == 0u) return REL_ABSENT;
     if (near_ratio(ratio, 1.0))       return REL_EXACT;
@@ -433,6 +466,97 @@ cleanup:
 }
 
 /* ------------------------------------------------------------------ */
+/* real recordings                                                      */
+
+/* Analyse a decoded file in pull mode. Mirrors analyze() above, but the source
+ * geometry comes from the file rather than from the synthesizer. */
+static analysis_t analyze_file(const char *path)
+{
+    const apta_feature_mask_t features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
+        APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE;
+    apta_decoder_t decoder;
+    apta_decoder_info_t decoder_info;
+    apta_pcm_source_t source;
+    apta_context_config_t cc;
+    apta_session_config_t sc;
+    apta_context_t *ctx = NULL;
+    apta_session_t *s = NULL;
+    apta_work_budget_t budget;
+    apta_tempo_view_t tempo;
+    const apta_result_t *result = NULL;
+    analysis_t out;
+    apta_status_t st;
+    unsigned long guard = 0ul;
+
+    memset(&out, 0, sizeof(out));
+    apta_decoder_init(&decoder);
+    apta_decoder_info_init(&decoder_info);
+    if (apta_wav_decoder_open_path(path, &decoder, &decoder_info) < 0) {
+        return out;
+    }
+    apta_pcm_source_init(&source);
+    if (apta_decoder_make_pcm_source(&decoder, &source) < 0) {
+        goto close_decoder;
+    }
+
+    apta_context_config_init(&cc);
+    cc.requested_capabilities = features;
+    if (apta_context_create(&cc, &ctx) < 0) {
+        goto close_decoder;
+    }
+
+    apta_session_config_init(&sc);
+    sc.input_mode = APTA_INPUT_MODE_PULL;
+    sc.source_sample_rate = decoder_info.sample_rate;
+    sc.channel_count = decoder_info.channel_count;
+    sc.sample_format = decoder_info.sample_format;
+    sc.channel_layout = decoder_info.channel_layout;
+    sc.total_frames = decoder_info.total_frames;
+    sc.requested_features = features;
+    if (apta_session_create(ctx, &sc, &s) < 0) {
+        goto destroy_context;
+    }
+    if (apta_session_set_source(s, &source) < 0) {
+        goto destroy_session;
+    }
+
+    apta_work_budget_init(&budget);
+    budget.maximum_input_frames = BLOCK_FRAMES;
+    budget.maximum_steps = 32u;
+    for (;;) {
+        st = apta_session_process(s, &budget, NULL);
+        guard += 1ul;
+        if (st == APTA_STATUS_END_OF_INPUT) {
+            break;
+        }
+        if (st < 0 || guard > 5000000ul) {
+            goto destroy_session;
+        }
+    }
+
+    result = apta_session_acquire_result(s);
+    if (result != NULL) {
+        apta_tempo_view_init(&tempo);
+        if (apta_result_get_tempo(result, NULL, &tempo) == APTA_STATUS_OK) {
+            out.reported_millibpm = tempo.selected.tempo_millibpm;
+            out.confidence = tempo.selected.confidence;
+            out.state = tempo.selected.state;
+            out.ok = 1;
+        }
+        apta_result_release(result);
+    }
+
+destroy_session:
+    (void)apta_session_destroy(s);
+destroy_context:
+    (void)apta_context_destroy(ctx);
+close_decoder:
+    apta_decoder_close(&decoder);
+    return out;
+}
+
+/* ------------------------------------------------------------------ */
 /* optional WAV output so the corpus can be inspected                   */
 
 static void write_le32(FILE *f, uint32_t v)
@@ -491,23 +615,132 @@ typedef struct {
 static corpus_result_t g_results[256];
 static unsigned result_count;
 
+/* Shared bookkeeping, so the synthetic and real paths report identically. */
+static uint32_t g_total;
+static uint32_t g_counts[REL_COUNT];
+static uint32_t g_correct_sum, g_correct_n, g_correct_min = 255u, g_correct_max;
+static uint32_t g_wrong_sum, g_wrong_n, g_wrong_min = 255u, g_wrong_max;
+static uint32_t g_high_confidence_errors;
+static uint32_t g_high_confidence_octave_errors;
+
+/* `truth_millibpm` allows fractional ground truth such as 174.5 BPM. */
+static void record(const char *label,
+                   uint32_t truth_millibpm,
+                   analysis_t a,
+                   int verbose)
+{
+    const relation_t rel =
+        a.ok ? classify(a.reported_millibpm, truth_millibpm) : REL_ABSENT;
+
+    g_counts[rel] += 1u;
+    g_total += 1u;
+    if (result_count < sizeof(g_results) / sizeof(g_results[0])) {
+        g_results[result_count].confidence = a.confidence;
+        g_results[result_count].exact = (rel == REL_EXACT);
+        result_count += 1u;
+    }
+
+    if (rel == REL_EXACT) {
+        g_correct_sum += a.confidence;
+        g_correct_n += 1u;
+        if (a.confidence < g_correct_min) g_correct_min = a.confidence;
+        if (a.confidence > g_correct_max) g_correct_max = a.confidence;
+    } else {
+        g_wrong_sum += a.confidence;
+        g_wrong_n += 1u;
+        if (a.confidence < g_wrong_min) g_wrong_min = a.confidence;
+        if (a.confidence > g_wrong_max) g_wrong_max = a.confidence;
+        if (a.confidence >= ACTIONABLE_CONFIDENCE &&
+            a.confidence != APTA_CONFIDENCE_UNKNOWN) {
+            g_high_confidence_errors += 1u;
+            if (is_octave_error(rel)) {
+                g_high_confidence_octave_errors += 1u;
+            }
+        }
+    }
+
+    if (verbose || rel != REL_EXACT) {
+        printf("%-34s %8.3f  %10.3f  %-13s %5u %d\n",
+               label, (double)truth_millibpm / 1000.0,
+               (double)a.reported_millibpm / 1000.0,
+               relation_name(rel), a.confidence, (int)a.state);
+    }
+}
+
+/* Run every entry of a "path<space>bpm" list. Returns non-zero on a file the
+ * list names but the decoder cannot open, because a silently skipped track
+ * would quietly bias the rates. */
+static int run_track_list(const char *list_path, int verbose)
+{
+    char line[1024];
+    FILE *list;
+    int failures = 0;
+
+    list = fopen(list_path, "r");
+    if (list == NULL) {
+        fprintf(stderr, "cannot open track list %s\n", list_path);
+        return 1;
+    }
+    while (fgets(line, sizeof(line), list) != NULL) {
+        char *cursor = line;
+        char *path;
+        char *tempo_text;
+        double truth;
+        analysis_t a;
+
+        while (*cursor == ' ' || *cursor == '\t') {
+            cursor += 1;
+        }
+        if (*cursor == '#' || *cursor == '\n' || *cursor == '\r' ||
+            *cursor == '\0') {
+            continue;
+        }
+        /* Split on the last run of whitespace, so paths may contain spaces. */
+        cursor[strcspn(cursor, "\r\n")] = '\0';
+        tempo_text = strrchr(cursor, ' ');
+        if (tempo_text == NULL) {
+            tempo_text = strrchr(cursor, '\t');
+        }
+        if (tempo_text == NULL) {
+            fprintf(stderr, "malformed line (no tempo): %s\n", cursor);
+            failures += 1;
+            continue;
+        }
+        *tempo_text = '\0';
+        tempo_text += 1;
+        path = cursor;
+        while (*path == ' ' || *path == '\t') {
+            path += 1;
+        }
+        truth = strtod(tempo_text, NULL);
+        if (truth <= 0.0) {
+            fprintf(stderr, "malformed line (bad tempo): %s\n", tempo_text);
+            failures += 1;
+            continue;
+        }
+
+        a = analyze_file(path);
+        if (!a.ok) {
+            fprintf(stderr, "could not analyse %s\n", path);
+            failures += 1;
+            continue;
+        }
+        record(path, (uint32_t)(truth * 1000.0 + 0.5), a, verbose);
+    }
+    fclose(list);
+    return failures;
+}
+
 int main(int argc, char **argv)
 {
     uint32_t seconds = DEFAULT_SECONDS;
     const char *wav_dir = NULL;
+    const char *tracks_path = NULL;
     int verbose = 0;
     size_t frames;
     float *audio;
     size_t pattern_index;
     size_t tempo_index;
-    uint32_t total = 0u;
-    uint32_t counts[REL_COUNT];
-    uint32_t correct_conf_sum = 0u, correct_conf_n = 0u;
-    uint32_t correct_conf_min = 255u, correct_conf_max = 0u;
-    uint32_t wrong_conf_sum = 0u, wrong_conf_n = 0u;
-    uint32_t wrong_conf_min = 255u, wrong_conf_max = 0u;
-    uint32_t high_confidence_octave_errors = 0u;
-    uint32_t high_confidence_any_errors = 0u;
     int arg;
 
     for (arg = 1; arg < argc; ++arg) {
@@ -515,130 +748,119 @@ int main(int argc, char **argv)
             seconds = (uint32_t)strtoul(argv[++arg], NULL, 10);
         } else if (strcmp(argv[arg], "--write-wav") == 0 && arg + 1 < argc) {
             wav_dir = argv[++arg];
+        } else if (strcmp(argv[arg], "--tracks") == 0 && arg + 1 < argc) {
+            tracks_path = argv[++arg];
         } else if (strcmp(argv[arg], "--verbose") == 0) {
             verbose = 1;
         } else {
             fprintf(stderr,
-                    "usage: %s [--seconds N] [--write-wav DIR] [--verbose]\n",
-                    argv[0]);
+                    "usage: %s [--seconds N] [--write-wav DIR] [--verbose]\n"
+                    "       %s --tracks LIST [--verbose]\n",
+                    argv[0], argv[0]);
             return 2;
         }
     }
 
     setvbuf(stdout, NULL, _IONBF, 0);
-    memset(counts, 0, sizeof(counts));
 
-    frames = (size_t)SAMPLE_RATE * seconds;
-    audio = (float *)malloc(frames * sizeof(*audio));
-    if (audio == NULL) {
-        puts("allocation failed");
-        return 1;
+    printf("APTA tempo accuracy, %s corpus\n",
+           tracks_path != NULL ? "REAL" : "SYNTHETIC");
+    if (tracks_path == NULL) {
+        printf("%u patterns x %u tempi, %u s each at %u Hz mono\n\n",
+               (unsigned)PATTERN_COUNT, (unsigned)TEMPO_COUNT, seconds,
+               SAMPLE_RATE);
+    } else {
+        printf("track list: %s\n\n", tracks_path);
     }
-
-    printf("APTA tempo accuracy, SYNTHETIC corpus\n");
-    printf("%u patterns x %u tempi, %u s each at %u Hz mono\n\n",
-           (unsigned)PATTERN_COUNT, (unsigned)TEMPO_COUNT, seconds,
-           SAMPLE_RATE);
-    printf("%-16s %6s  %10s  %-13s %5s %s\n",
-           "pattern", "truth", "reported", "relation", "conf", "state");
+    printf("%-34s %8s  %10s  %-13s %5s %s\n",
+           tracks_path != NULL ? "track" : "pattern",
+           "truth", "reported", "relation", "conf", "state");
     printf("---------------------------------------------------------------"
-           "-------\n");
+           "----------------\n");
 
-    for (pattern_index = 0u; pattern_index < PATTERN_COUNT; ++pattern_index) {
-        const pattern_t *pattern = &g_patterns[pattern_index];
+    if (tracks_path != NULL) {
+        const int failures = run_track_list(tracks_path, verbose);
 
-        for (tempo_index = 0u; tempo_index < TEMPO_COUNT; ++tempo_index) {
-            const uint32_t bpm = g_tempos[tempo_index];
-            analysis_t a;
-            relation_t rel;
+        if (g_total == 0u) {
+            puts("\nno tracks analysed");
+            return 1;
+        }
+        if (failures != 0) {
+            printf("\n%d track(s) could not be analysed and are excluded;\n"
+                   "the rates below describe only what was analysed.\n",
+                   failures);
+        }
+    } else {
+        frames = (size_t)SAMPLE_RATE * seconds;
+        audio = (float *)malloc(frames * sizeof(*audio));
+        if (audio == NULL) {
+            puts("allocation failed");
+            return 1;
+        }
 
-            render(pattern, bpm, audio, frames);
+        for (pattern_index = 0u;
+             pattern_index < PATTERN_COUNT;
+             ++pattern_index) {
+            const pattern_t *pattern = &g_patterns[pattern_index];
 
-            if (wav_dir != NULL) {
-                char path[512];
-                (void)snprintf(path, sizeof(path), "%s/%s_%03u.wav",
-                               wav_dir, pattern->name, bpm);
-                write_wav(path, audio, frames);
-            }
+            for (tempo_index = 0u; tempo_index < TEMPO_COUNT; ++tempo_index) {
+                const uint32_t bpm = g_tempos[tempo_index];
 
-            a = analyze(audio, frames);
-            rel = a.ok ? classify(a.reported_millibpm, bpm) : REL_ABSENT;
-            counts[rel] += 1u;
-            total += 1u;
-            if (result_count < sizeof(g_results) / sizeof(g_results[0])) {
-                g_results[result_count].confidence = a.confidence;
-                g_results[result_count].exact = (rel == REL_EXACT);
-                result_count += 1u;
-            }
-
-            if (rel == REL_EXACT) {
-                correct_conf_sum += a.confidence;
-                correct_conf_n += 1u;
-                if (a.confidence < correct_conf_min) correct_conf_min = a.confidence;
-                if (a.confidence > correct_conf_max) correct_conf_max = a.confidence;
-            } else {
-                wrong_conf_sum += a.confidence;
-                wrong_conf_n += 1u;
-                if (a.confidence < wrong_conf_min) wrong_conf_min = a.confidence;
-                if (a.confidence > wrong_conf_max) wrong_conf_max = a.confidence;
-                if (a.confidence >= ACTIONABLE_CONFIDENCE &&
-                    a.confidence != APTA_CONFIDENCE_UNKNOWN) {
-                    high_confidence_any_errors += 1u;
-                    if (is_octave_error(rel)) {
-                        high_confidence_octave_errors += 1u;
-                    }
+                render(pattern, bpm, audio, frames);
+                if (wav_dir != NULL) {
+                    char path[512];
+                    (void)snprintf(path, sizeof(path), "%s/%s_%03u.wav",
+                                   wav_dir, pattern->name, bpm);
+                    write_wav(path, audio, frames);
                 }
-            }
-
-            if (verbose || rel != REL_EXACT) {
-                printf("%-16s %6u  %10.3f  %-13s %5u %d\n",
-                       pattern->name, bpm,
-                       (double)a.reported_millibpm / 1000.0,
-                       relation_name(rel), a.confidence, (int)a.state);
+                record(pattern->name, bpm * 1000u,
+                       analyze(audio, frames), verbose);
             }
         }
+        free(audio);
     }
 
-    printf("\n=== summary (SYNTHETIC corpus) ===\n");
-    printf("tracks                     %u\n", total);
+    printf("\n=== summary (%s corpus) ===\n",
+           tracks_path != NULL ? "REAL" : "SYNTHETIC");
+    printf("tracks                     %u\n", g_total);
     printf("exact                      %u (%.1f%%)\n",
-           counts[REL_EXACT], 100.0 * counts[REL_EXACT] / (double)total);
+           g_counts[REL_EXACT], 100.0 * g_counts[REL_EXACT] / (double)g_total);
     {
         uint32_t octave = 0u;
         int i;
         for (i = 0; i < REL_COUNT; ++i) {
-            if (is_octave_error((relation_t)i)) octave += counts[i];
+            if (is_octave_error((relation_t)i)) octave += g_counts[i];
         }
         printf("octave-family errors       %u (%.1f%%)\n",
-               octave, 100.0 * octave / (double)total);
+               octave, 100.0 * octave / (double)g_total);
     }
-    printf("other errors               %u\n", counts[REL_OTHER]);
-    printf("no tempo reported          %u\n", counts[REL_ABSENT]);
+    printf("other errors               %u\n", g_counts[REL_OTHER]);
+    printf("no tempo reported          %u\n", g_counts[REL_ABSENT]);
 
     printf("\nbreakdown:\n");
     {
         int i;
         for (i = 0; i < REL_COUNT; ++i) {
-            if (counts[i] != 0u) {
-                printf("  %-14s %u\n", relation_name((relation_t)i), counts[i]);
+            if (g_counts[i] != 0u) {
+                printf("  %-14s %u\n", relation_name((relation_t)i), g_counts[i]);
             }
         }
     }
 
     printf("\nconfidence distribution:\n");
-    if (correct_conf_n != 0u) {
+    if (g_correct_n != 0u) {
         printf("  correct   n=%-3u mean=%5.1f min=%3u max=%3u\n",
-               correct_conf_n,
-               (double)correct_conf_sum / correct_conf_n,
-               correct_conf_min, correct_conf_max);
+               g_correct_n,
+               (double)g_correct_sum / g_correct_n,
+               g_correct_min, g_correct_max);
     } else {
         printf("  correct   n=0\n");
     }
-    if (wrong_conf_n != 0u) {
+    if (g_wrong_n != 0u) {
         printf("  incorrect n=%-3u mean=%5.1f min=%3u max=%3u\n",
-               wrong_conf_n,
-               (double)wrong_conf_sum / wrong_conf_n,
-               wrong_conf_min, wrong_conf_max);
+               g_wrong_n,
+               (double)g_wrong_sum / g_wrong_n,
+               g_wrong_min, g_wrong_max);
     } else {
         printf("  incorrect n=0\n");
     }
@@ -675,14 +897,19 @@ int main(int argc, char **argv)
     }
 
     printf("\nactionable threshold = %u\n", ACTIONABLE_CONFIDENCE);
-    printf("high-confidence errors        %u\n", high_confidence_any_errors);
+    printf("high-confidence errors        %u\n", g_high_confidence_errors);
     printf("high-confidence octave errors %u   <-- B1 requires this to be 0\n",
-           high_confidence_octave_errors);
+           g_high_confidence_octave_errors);
 
-    printf("\nNOTE: synthetic material with exact timing and no production\n"
-           "processing. These rates are a floor, not a prediction of\n"
-           "real-world accuracy.\n");
+    if (tracks_path != NULL) {
+        printf("\nNOTE: real recordings. Ground truth is whatever the track\n"
+               "list declares, so a wrong annotation reads as an estimator\n"
+               "error. Check outliers against the file before believing them.\n");
+    } else {
+        printf("\nNOTE: synthetic material with exact timing and no production\n"
+               "processing. These rates are a floor, not a prediction of\n"
+               "real-world accuracy.\n");
+    }
 
-    free(audio);
     return 0;
 }
