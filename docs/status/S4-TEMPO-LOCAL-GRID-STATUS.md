@@ -950,3 +950,108 @@ rather than tuned away.
 
 Corpus totals in sections 18 to 23 were measured on the original four patterns
 and are not comparable with the six-pattern figures here.
+
+## 25. Grid fit decided on real recordings
+
+Section 24 named two candidates for a confidence that knows whether the answer
+is right. The first, grid fit, was implemented and measured on the synthetic
+corpus, where the result was mixed: the term carried real signal, unlike
+`separation`, but on humanized material no threshold was clean, and the change
+was left on a branch rather than merged.
+
+That verdict was wrong, and the corpus is why.
+
+### 25.1 The corpus and the material disagreed
+
+The humanized corpus applies 6 ms of per-onset jitter, which models a human
+drummer. Most material a beatgridding library is pointed at is sequenced: house,
+techno, trance, anything produced in a DAW. For that material the *exact*
+corpus was the closer model all along, and the humanized one was measuring a
+population the library rarely sees.
+
+This was not visible from inside the corpus. It took real recordings.
+
+### 25.2 Ground truth from a DJ library
+
+68 tracks were read off a Rekordbox USB export. Rekordbox stores its analysis
+per track in `PIONEER/USBANLZ/**/ANLZ0000.DAT`; the `PQTZ` section is the beat
+grid and carries tempo in hundredths of a BPM, and `PPTH` carries the track
+path. The modal grid tempo is the value the software displays and the value the
+user mixes to, so it is ground truth in the only sense that matters here.
+
+Each track was decoded to a 90-second window starting at 0:30, 44.1 kHz stereo,
+into a temporary directory. No audio enters the repository (section 10.4).
+
+Both builds were run over the same decoded files: `main` with the correlation
+score, the branch with grid fit. The library differs; the corpus tool does not.
+
+### 25.3 Result
+
+Selection is identical, as it must be -- confidence scores an answer, it does
+not choose one. Both builds report 42 of 68 exact (61.8%), one octave-family
+error, 25 other errors.
+
+The confidence distributions are not identical:
+
+| Build | correct mean | incorrect mean | gap | incorrect max | correct min |
+|---|---:|---:|---:|---:|---:|
+| `main` correlation score | 70.6 | 61.5 | 9.1 | 79 | 37 |
+| branch grid fit | 75.1 | 44.7 | 30.4 | 66 | 48 |
+
+The last two columns decide it. On `main` the worst wrong answer scores 79 and
+the weakest right answer scores 37, so the populations interleave across the
+whole usable range and no threshold separates them. With grid fit the worst
+wrong answer scores 66 and the weakest right answer 48; the overlap is 18 points
+wide instead of 42, and above 66 the wrong population is empty.
+
+Precision and recall of the admitted set, correct meaning within 1% of the
+Rekordbox grid:
+
+| Gate | `main` precision | recall | grid fit precision | recall |
+|---:|---:|---:|---:|---:|
+| 60 | 69.1% | 90.5% | 97.4% | 88.1% |
+| 65 | 73.3% | 78.6% | 97.2% | 83.3% |
+| 70 | 85.2% | 54.8% | 100% | 69.0% |
+| 75 | 82.4% | 33.3% | 100% | 45.2% |
+| 80 | 100% | 16.7% | 100% | 33.3% |
+
+Grid fit is better on both axes at every gate, which is the rare shape of
+result that needs no trade-off argument. At the documented actionable threshold
+of 75 it admits 19 tracks with no errors, where the correlation score admits 14
+with three errors. `main` reaches perfect precision only at 80, and only by
+admitting 7 of 42.
+
+B1's requirement -- zero high-confidence octave errors -- holds for grid fit at
+every gate from 50 to 95. For the correlation score it fails at 70 and 75.
+
+Merged on this evidence.
+
+### 25.4 What the misses actually are
+
+The 26 wrong answers are worth separating from the confidence question, because
+they are not the failure mode sections 18 to 24 assumed.
+
+Only three sit at a metrical ratio. The other 23 land between 0.95 and 1.09 of
+the true tempo -- 124 read as 121.60, 125 as 127.60, 128 as 130.84. These are
+near misses, not octave confusion, and they are clustered on a small set of
+reported values because the lag search is integer bins and a bin is 5.8 ms. At
+128 BPM one bin is 1.5 BPM, so adjacent bins are 130.84, 128.00 and 125.97 with
+nothing in between.
+
+Integer-bin quantization alone would cap the error at half a bin, about 0.6%.
+The observed errors are 2% to 8%, one to six bins wide, so the search is picking
+the wrong bin rather than merely rounding. Quantization is a floor under the
+accuracy, not the explanation for it.
+
+Two follow-ups this suggests, neither attempted:
+
+- Interpolate the correlation peak instead of taking the best integer bin.
+  That removes the floor and costs a few operations per candidate.
+- Look at why the peak lands one to six bins off on this material. The near
+  misses cluster around 124-128 BPM, which is where this library sits, so the
+  sample is not neutral and the question needs a broader set of tracks.
+
+61.8% exact is the honest number for S4 on real sequenced music, and it is the
+next thing worth improving. The confidence term now reports that limitation
+rather than hiding it: with grid fit the 26 misses average 44.7 and none exceeds
+66, so a host gating at 70 gets 29 answers and all 29 are right.
