@@ -18,7 +18,7 @@ static void print_usage(FILE *stream)
         "\n"
         "Options:\n"
         "  --profile waveform|performance\n"
-        "  --features waveform,detail,bpm,beatgrid,all\n"
+        "  --features waveform,detail,bpm,beatgrid,global,dynamic,all\n"
         "  --help\n"
         "  --version\n",
         stream);

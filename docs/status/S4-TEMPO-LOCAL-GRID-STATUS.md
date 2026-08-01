@@ -763,6 +763,14 @@ existed to satisfy: that row is 84x cheaper than at baseline.
 
 ### 22.1 The under-500-microsecond target is not met, and should not be chased
 
+> **Superseded.** All seven rows now measure under 500 microseconds. Section
+> 16.6 of the S6 status document has the current figures and the cause: sharing
+> the correlation loop between the two estimators replaced a 64-bit bin index
+> with a 32-bit slice offset in the innermost loop, and the `+ BPM` row fell
+> from about 500 to about 395. The reasoning below is kept because its argument
+> -- that the host figure is a proxy and the target has never been measured --
+> still holds, and is the reason the target was not chased at the time.
+
 Three rows exceed 500 microseconds per call. The work order's section 17.4 lists
 that as a success condition, and it is the one condition of seven that this work
 does not satisfy.

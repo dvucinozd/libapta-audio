@@ -259,6 +259,11 @@ static int g_dynamics;
 static int g_drift;
 static int g_swing;
 
+/* --global: request S6 as well and judge its nominal tempo instead of S4's.
+ * The two engines estimate independently, so this measures S6 rather than the
+ * pipeline around it. */
+static int g_global;
+
 /* Standard deviation of per-hit timing error, seconds. Around 6 ms is typical
  * of a tight human performer; fully quantized electronic music has none. */
 #define HUMAN_JITTER_SECONDS 0.006
@@ -478,11 +483,45 @@ typedef struct {
     int ok;
 } analysis_t;
 
-static analysis_t analyze(const float *audio, size_t frames)
+/* The feature set under test. S6 is only requested when it is being judged,
+ * so the default run measures the same thing it always did. */
+static apta_feature_mask_t corpus_features(void)
 {
-    const apta_feature_mask_t features =
+    apta_feature_mask_t features =
         APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE;
+
+    if (g_global) {
+        features |= APTA_FEATURE_GLOBAL_BEATGRID;
+    }
+    return features;
+}
+
+/* Replace the S4 reading with S6's nominal tempo, so every downstream figure --
+ * accuracy, octave relation, threshold sweep -- describes S6. */
+static void corpus_take_global(analysis_t *out, const apta_result_t *result)
+{
+    apta_grid_view_t grid;
+
+    if (!g_global) {
+        return;
+    }
+    apta_grid_view_init(&grid);
+    if (apta_result_get_beatgrid(
+            result, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &grid) !=
+            APTA_STATUS_OK ||
+        grid.segment_count == 0u) {
+        out->ok = 0;
+        return;
+    }
+    out->reported_millibpm = grid.segments[0].nominal_tempo_millibpm;
+    out->confidence = grid.confidence;
+    out->state = grid.state;
+}
+
+static analysis_t analyze(const float *audio, size_t frames)
+{
+    const apta_feature_mask_t features = corpus_features();
     apta_context_config_t cc;
     apta_session_config_t sc;
     apta_context_t *ctx = NULL;
@@ -569,6 +608,7 @@ static analysis_t analyze(const float *audio, size_t frames)
                              (float)tempo.candidates[0].score
                 : 1.0f;
         out.ok = 1;
+        corpus_take_global(&out, result);
     }
     apta_result_release(result);
 
@@ -585,9 +625,7 @@ cleanup:
  * geometry comes from the file rather than from the synthesizer. */
 static analysis_t analyze_file(const char *path)
 {
-    const apta_feature_mask_t features =
-        APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
-        APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE;
+    const apta_feature_mask_t features = corpus_features();
     apta_decoder_t decoder;
     apta_decoder_info_t decoder_info;
     apta_pcm_source_t source;
@@ -663,6 +701,7 @@ static analysis_t analyze_file(const char *path)
                                  (float)tempo.candidates[0].score
                     : 1.0f;
             out.ok = 1;
+            corpus_take_global(&out, result);
         }
         apta_result_release(result);
     }
@@ -881,6 +920,8 @@ int main(int argc, char **argv)
             g_drift = 1;
         } else if (strcmp(argv[arg], "--swing") == 0) {
             g_swing = 1;
+        } else if (strcmp(argv[arg], "--global") == 0) {
+            g_global = 1;
         } else if (strcmp(argv[arg], "--verbose") == 0) {
             verbose = 1;
         } else {
@@ -888,6 +929,7 @@ int main(int argc, char **argv)
                     "usage: %s [--seconds N] [--write-wav DIR] [--verbose]\n"
                     "       realism: --humanize | any of --jitter"
                     " --dynamics --drift --swing\n"
+                    "       engine:  --global (judge S6 instead of S4)\n"
                     "       %s --tracks LIST [--verbose]\n",
                     argv[0], argv[0]);
             return 2;

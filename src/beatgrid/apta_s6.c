@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_s6_internal.h"
+#include "../core/apta_period_refine.h"
 #include "../core/apta_session_workspace.h"
+#include "../core/apta_tempo_prior.h"
 
 #include <math.h>
 #include <stdalign.h>
@@ -250,6 +252,11 @@ static int apta_s6_estimate_window(
     uint32_t lag;
     uint32_t phase = 0u;
     float best_score = 0.0f;
+    /* The acceptance gate below measures the evidence, so it has to see the
+     * correlation itself rather than the prior-weighted score the argmax ranks
+     * on. Weighting the gated value would reject correct answers at the edges
+     * of the prior for having an unfashionable tempo. */
+    float best_correlation = 0.0f;
     float best_phase_score = -1.0f;
     uint64_t index;
     const float *flux;
@@ -288,6 +295,7 @@ static int apta_s6_estimate_window(
         float numerator = 0.0f;
         float left_square = 0.0f;
         float right_square = 0.0f;
+        float correlation;
         float score;
 
         for (index = first + lag; index < end; ++index) {
@@ -302,13 +310,22 @@ static int apta_s6_estimate_window(
         if (left_square <= 1e-12f || right_square <= 1e-12f) {
             continue;
         }
-        score = numerator / sqrtf(left_square * right_square);
+        /* B1's prior, which S4 has had since the octave work and S6 never got.
+         * Autocorrelation peaks at every multiple of the true period, so a bare
+         * argmax picks whichever family member happens to score highest. On 68
+         * real tracks that was the wrong one 38 times: 25 landed on half the
+         * tempo and 11 on a third. */
+        correlation = numerator / sqrtf(left_square * right_square);
+        score = correlation *
+                apta_internal_tempo_prior(
+                    apta_s6_tempo_from_lag(session, lag));
         if (score > best_score) {
             best_score = score;
+            best_correlation = correlation;
             best_lag = lag;
         }
     }
-    if (best_lag == 0u || best_score < 0.04f) {
+    if (best_lag == 0u || best_correlation < 0.04f) {
         return 0;
     }
 
@@ -326,7 +343,18 @@ static int apta_s6_estimate_window(
     memset(window, 0, sizeof(*window));
     window->first_bin = first;
     window->end_bin = end;
-    window->tempo_millibpm = apta_s6_tempo_from_lag(session, best_lag);
+    /* A global bin is 46 ms, so integer lags near 128 BPM are 13 BPM apart and
+     * the whole 110-150 range holds three of them. Refining matters more here
+     * than in S4, and helps less: the window bounds how far across the track
+     * the measurement can reach. */
+    window->tempo_millibpm = apta_internal_tempo_with_offset(
+        apta_s6_tempo_from_lag(session, best_lag),
+        best_lag,
+        apta_internal_refine_lag(
+            &flux[(uint32_t)(first - flux_base)],
+            (uint32_t)(end - first),
+            best_lag,
+            APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS));
     if (window->tempo_millibpm < APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
         window->tempo_millibpm > APTA_REFERENCE_TEMPO_MAX_MILLIBPM) {
         return 0;

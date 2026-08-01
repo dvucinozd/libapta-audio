@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../core/apta_period_refine.h"
 #include "../core/apta_session_workspace.h"
+#include "../core/apta_tempo_prior.h"
 
 #include <math.h>
 #include <stdalign.h>
@@ -194,51 +196,28 @@ static float apta_s4_grid_fit(
 }
 
 /* B1: log-normal weight for a tempo, peaking at the configured centre. */
-static float apta_s4_tempo_prior(uint32_t tempo_millibpm)
-{
-    float ratio;
-    float logarithm;
-
-    if (tempo_millibpm == 0u) {
-        return 0.0f;
-    }
-    ratio = (float)tempo_millibpm /
-            (float)APTA_INTERNAL_TEMPO_PRIOR_CENTRE_MILLIBPM;
-    logarithm = logf(ratio) / APTA_INTERNAL_TEMPO_PRIOR_WIDTH;
-    return expf(-0.5f * logarithm * logarithm);
-}
+#define apta_s4_tempo_prior apta_internal_tempo_prior
 
 /* B1: normalized autocorrelation of the precomputed flux at one lag. Extracted
  * so the octave-family scan below can evaluate related lags without repeating
- * the loop body. */
+ * the loop body. The arithmetic is shared with S6 -- see apta_period_refine.h;
+ * this wrapper only maps the evidence run onto the slice the shared function
+ * takes. */
 static float apta_s4_correlation_at_lag(
     const apta_session_t *session,
     uint64_t evidence_first,
     uint64_t evidence_end,
     uint32_t lag)
 {
-    const float *flux = session->onset_flux;
-    float numerator = 0.0f;
-    float left_square = 0.0f;
-    float right_square = 0.0f;
     float score;
-    uint64_t index;
 
     if (lag == 0u || (uint64_t)lag >= evidence_end - evidence_first) {
         return 0.0f;
     }
-    for (index = evidence_first + lag; index < evidence_end; ++index) {
-        const uint32_t offset = (uint32_t)(index - evidence_first);
-        const float left = flux[offset];
-        const float right = flux[offset - lag];
-        numerator += left * right;
-        left_square += left * left;
-        right_square += right * right;
-    }
-    if (left_square <= 1e-12f || right_square <= 1e-12f) {
-        return 0.0f;
-    }
-    score = numerator / sqrtf(left_square * right_square);
+    score = apta_internal_correlation_at_lag(
+        session->onset_flux,
+        (uint32_t)(evidence_end - evidence_first),
+        lag);
     return score > 0.0f ? score : 0.0f;
 }
 
@@ -318,115 +297,28 @@ static uint32_t apta_s4_tempo_from_lag(
                : 0u;
 }
 
-/*
- * Where the beat period actually lies, to better than one bin.
- *
- * The lag scan is an integer argmax, so the tempi it can report are fixed by
- * the bin size alone: 5.8 ms per bin puts them 1.6 BPM apart near 128, and a
- * track at 128.00 can only be gridded at 127.60. The published grid is one
- * anchor plus a constant period, so that error accumulates -- half a beat in
- * 1.3 minutes, a whole bar in 5.
- *
- * Resolution comes from measuring across many beats rather than from the shape
- * of one peak. Correlating at a lag of `multiple` beats puts the peak near
- * `multiple * lag`, and dividing the integer argmax found there by `multiple`
- * gives the period to a fraction of a bin. The same integer search buys
- * `multiple` times the precision because the error is divided too.
- *
- * Fitting a parabola through the winning lag and its two neighbours was tried
- * first and measured worse: median tempo error over 29 real tracks went from
- * 0.154% to 0.184%, with 16 tracks worse and 9 better. The correlation peak is
- * as narrow as the onsets that produce it, a few bins at most, so three samples
- * straddling it describe local asymmetry rather than a parabola, and the vertex
- * they imply is noise.
- *
- * `multiple` is capped at four bars. Beyond that the estimate assumes a tempo
- * held constant over more of the track than is safe, and the gain is already
- * down to hundredths of a BPM.
- */
+/* Sub-bin period refinement. The mechanism, and the parabola that was tried
+ * and rejected before it, are described in apta_period_refine.h. */
 static float apta_s4_lag_offset(
     const apta_session_t *session,
     uint64_t evidence_first,
     uint64_t evidence_end,
     uint32_t lag)
 {
-    const uint64_t span = evidence_end - evidence_first;
-    uint32_t multiple = APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS;
-    uint32_t best_extended;
-    uint32_t window;
-    uint32_t step;
-    float best_score = 0.0f;
-    float offset;
-
-    if (lag == 0u || span == 0u) {
-        return 0.0f;
-    }
-
-    /* Half the evidence must survive the shift, or the correlation is measured
-     * over too little of the track to mean anything. */
-    while (multiple > 1u && (uint64_t)multiple * lag > span / 2u) {
-        multiple -= 1u;
-    }
-    if (multiple < 2u) {
-        return 0.0f;
-    }
-
-    /* Only lags that round back to this beat are candidates, so the search
-     * cannot walk onto a neighbouring beat and change the answer's octave. */
-    window = multiple / 2u;
-    best_extended = multiple * lag;
-    for (step = 0u; step <= 2u * window; ++step) {
-        const uint32_t extended = multiple * lag - window + step;
-        float score;
-
-        if (extended == 0u || (uint64_t)extended >= span) {
-            continue;
-        }
-        score = apta_s4_correlation_at_lag(
-            session, evidence_first, evidence_end, extended);
-        if (score > best_score) {
-            best_score = score;
-            best_extended = extended;
-        }
-    }
-    if (best_score <= 0.0f) {
-        return 0.0f;
-    }
-
-    offset = (float)best_extended / (float)multiple - (float)lag;
-    if (offset > 0.5f) {
-        offset = 0.5f;
-    } else if (offset < -0.5f) {
-        offset = -0.5f;
-    }
-    return offset;
+    return apta_internal_refine_lag(
+        session->onset_flux,
+        (uint32_t)(evidence_end - evidence_first),
+        lag,
+        APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS);
 }
 
-/*
- * Tempo at a fractional lag, as `tempo(lag) * lag / (lag + offset)`.
- *
- * Scaling the exact integer-lag tempo keeps the wide arithmetic in
- * apta_s4_tempo_from_lag() and leaves float carrying only a ratio within 1% of
- * one, where its precision costs a hundredth of a millibpm. Computing the
- * whole expression in float instead would put a 2.6e9 numerator through a
- * 24-bit mantissa for no gain. The target has no hardware double (A3).
- */
 static uint32_t apta_s4_tempo_from_refined_lag(
     const apta_session_t *session,
     uint32_t lag,
     float offset)
 {
-    const uint32_t tempo = apta_s4_tempo_from_lag(session, lag);
-    float refined;
-
-    if (tempo == 0u || offset == 0.0f) {
-        return tempo;
-    }
-    refined = (float)tempo * (float)lag / ((float)lag + offset);
-    if (refined <= 0.0f) {
-        return tempo;
-    }
-    return (uint32_t)(refined + 0.5f);
+    return apta_internal_tempo_with_offset(
+        apta_s4_tempo_from_lag(session, lag), lag, offset);
 }
 
 /*
