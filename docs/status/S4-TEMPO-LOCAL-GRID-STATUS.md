@@ -736,3 +736,217 @@ the public API needs a signal whose autocorrelation carries two strong peaks at
 that exact ratio -- eight purpose-built signals. Those were not written. The
 relations that occur in practice, `two-thirds`, `third` and `half`, are
 exercised by the accuracy corpus, which reports the relation for every track.
+
+## 22. Final cost measurement
+
+Measured on the merged branch, x86-64 host, 5-minute 44.1 kHz track in
+1024-frame blocks, 12,921 calls. Three runs of the same binary, so the spread
+is host noise rather than a build difference:
+
+| Requested features | Baseline | Final (3 runs) |
+|---|---:|---|
+| `WAVEFORM_OVERVIEW` | 155.6 | 157.3 |
+| `+ CONFIDENCE` | 13,393.9 | 159.7 |
+| `+ BPM` | 13,416.9 | 467.9 – 486.8 |
+| `+ LOCAL_BEATGRID` | 13,179.6 | 473.6 – 481.8 |
+| `+ GLOBAL_BEATGRID` | 14,331.1 | 536.3 – 548.3 |
+| `+ DYNAMIC_TEMPO` | 14,204.0 | 538.0 – 555.0 |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 14,217.0 | 577.5 – 592.2 |
+
+Run-to-run spread is 2 to 4 percent. An earlier note in section 16.1 described
+S6 variance as around 15 percent; that was wrong. The two figures it compared,
+500.9 and 583.9, came from different builds rather than repeated runs of one
+binary, and repeated runs are much tighter than that.
+
+`overview + CONFIDENCE` is within noise of `overview`, which was the check A4
+existed to satisfy: that row is 84x cheaper than at baseline.
+
+### 22.1 The under-500-microsecond target is not met, and should not be chased
+
+Three rows exceed 500 microseconds per call. The work order's section 17.4 lists
+that as a success condition, and it is the one condition of seven that this work
+does not satisfy.
+
+Where it went, measured against the A4 snapshot:
+
+| Row | After A4 | Final | Delta |
+|---|---:|---:|---:|
+| `+ BPM` | 457.6 | ~479 | +4.7% |
+| `+ GLOBAL_BEATGRID` | 499.5 | ~543 | +8.7% |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 533.8 | ~587 | +10% |
+
+The S6 rows were already at or above 500 after A3. The further 5 to 10 percent
+is B1's octave-family scan, eight extra correlations against roughly 224 per
+estimate, plus B2's ratio-table relation classifier.
+
+Removing the family scan entirely would recover about 3.4 percent, against a
+gap of roughly 8 percent, so it does not reach the target on its own. The only
+change that would is undoing A3 -- and A3 exists precisely because the target is
+RV32IMAFC, where every `double` operation is a software-emulated call. Trading
+target cost for host cost to satisfy a host-measured threshold would be
+optimising the wrong machine.
+
+The threshold's purpose was to prove headroom against a budget of about 2 ms
+per 20 ms tick on an ESP32-P4. That budget has never been measured on the
+actual target, and the host figure is a proxy that A3 deliberately made
+pessimistic. Closing this properly means measuring on hardware, not tuning
+against x86.
+
+## 23. The actionable threshold does not survive realistic timing
+
+Section 19 derived an actionable confidence threshold of 75 from the synthetic
+corpus and reported that B1's requirement -- no high-confidence octave errors
+-- holds against it. That conclusion depended on the corpus having perfectly
+quantized timing, which was not stated at the time and is not true of real
+material.
+
+The corpus tool now models three imperfections, individually selectable so
+their effects can be separated: per-hit timing jitter, velocity variation with
+a downbeat accent, and a slow sinusoidal tempo drift whose mean stays at
+nominal. Defaults are modest rather than adversarial -- 6 ms of jitter is a
+tight human performer, or any recording that was not grid-quantized.
+
+Forty tracks, 30 s each:
+
+| Variant | Exact | Octave | Other | Max confidence, correct | Lowest usable gate |
+|---|---:|---:|---:|---:|---:|
+| Exact timing | 23 | 17 | 0 | 90 | 75 |
+| Jitter only | 21 | 15 | 4 | **64** | 60 |
+| Dynamics only | 21 | 19 | 0 | 89 | 75 |
+| Drift only | 25 | 15 | 0 | 82 | 70 |
+| Swing only | 23 | 17 | 0 | 90 | 75 |
+| All together | 18 | 15 | 7 | **63** | 60 |
+
+"Lowest usable gate" is the smallest threshold at which no incorrect answer
+survives while at least one correct one does.
+
+### 23.1 What this changes
+
+Accuracy barely moves. Exact matches go from 23 to 21 under jitter, which is
+within a couple of tracks of noise at this sample size.
+
+Confidence collapses. The highest confidence attached to a *correct* answer
+falls from 90 to 64, so a host gating at 75 admits nothing at all -- not one
+track of forty. The threshold recorded in section 19 is an artefact of the
+corpus, not a property of the estimator.
+
+Timing jitter is the sole cause. Dynamics and swing leave the confidence
+distribution untouched; drift lowers it modestly. Jitter alone also produces
+every one of the errors that are not simple ratios, which the exact-timing
+corpus never showed.
+
+The mechanism is plausibly direct rather than subtle. An onset bin is 256
+frames, 5.8 ms at 44.1 kHz, and the jitter standard deviation is 6 ms -- about
+one bin. Onsets smear across adjacent bins, the novelty peaks flatten, and the
+normalized autocorrelation score drops. Confidence is `35 + score * 50`, so a
+lower correlation lowers confidence directly. This is a hypothesis consistent
+with the measurement, not something the measurement proves.
+
+### 23.2 Where that leaves the shippability question
+
+Section 17.4 item 6 of the work order asks whether tempo and beatgrid are
+shippable, and says a negative answer is a valid outcome. The honest answer is
+now: not on this evidence. A host cannot gate Sync or Quantize on confidence
+and obtain useful coverage on material that was not grid-quantized, because
+confidence never reaches a level at which the errors have been excluded.
+
+Two directions follow, and they are different problems:
+
+- Recalibrate confidence against realistic material rather than against
+  correlation strength alone. The estimator is not much less accurate under
+  jitter; it only reports itself as less certain.
+- Make the novelty function tolerant of sub-bin timing error, for example by
+  distributing an onset across adjacent bins rather than assigning it to one.
+  That attacks the cause rather than the symptom.
+
+Neither is attempted here. This section records the measurement that motivates
+them.
+
+### 23.3 What this measurement does not cover
+
+The swing knob shows no effect, but that is a defect in the experiment rather
+than a result: the four patterns place almost nothing on odd sixteenths, so the
+knob barely engages. Swing is untested, not shown harmless.
+
+There is still no production processing -- no compression, no limiting, no
+reverb, no bass-heavy masters -- and no real recordings. These rates remain a
+floor.
+
+## 24. Confidence cannot be fixed by reweighting
+
+Section 23 showed that confidence collapses under realistic timing while
+accuracy barely moves, and pointed at two directions: recalibrate confidence,
+or make the novelty tolerant of sub-bin jitter. The first was investigated and
+abandoned on measurement.
+
+The formula is:
+
+```text
+confidence = 35 + score * 50 + separation * 15 + (stable ? 5 : 0)
+confidence *= (1 - family_ambiguity)
+```
+
+The argument for recalibrating was that `score`, the absolute normalized
+autocorrelation, measures how metronomic a recording is rather than how likely
+the answer is correct, while `separation` and `family_ambiguity` are
+scale-invariant and should survive a uniformly weaker correlation. Shifting
+weight from the first to the second looked principled.
+
+It does not work, because `separation` carries no signal. Measured over 60
+tracks with jitter, taking the candidate scores from the public result:
+
+| Population | n | separation min / median / max | mean confidence |
+|---|---:|---|---:|
+| Correct | 21 | 0.00 / 0.08 / 0.19 | 54.2 |
+| Incorrect | 39 | 0.00 / 0.04 / 0.23 | 48.4 |
+
+The two distributions overlap almost entirely, and no threshold on separation
+splits them: at 0.1 it admits 10 correct and 11 incorrect, at 0.2 it admits
+none correct and two incorrect. The term's whole range is 0.23 wide, because
+with three candidates and 500-millibpm duplicate suppression the runner-up is
+always close in score. There is no room in it to carry information.
+
+### 24.1 What that implies
+
+The aggregate is not much better than the part. Mean confidence is 54.2 for
+correct answers and 48.4 for incorrect, with heavily overlapping ranges. Six
+points of separation between the populations is not something a host can gate
+on.
+
+That reframes the problem. It is not that the three terms are weighted wrongly;
+it is that none of them knows whether the answer is right. No reweighting of
+`score`, `separation` and `family_ambiguity` will produce a usable gate,
+because the information is not in them.
+
+A usable confidence needs evidence the estimator does not currently gather.
+Two candidates, neither attempted here:
+
+- Measure how well the derived grid actually fits the onsets it claims to
+  explain -- residual between predicted beat positions and observed onset
+  peaks. That is a direct measure of "is this grid right", which none of the
+  present terms is.
+- Compare independent estimates. S6 already analyses the track in windows and
+  S4 estimates locally; agreement between them is evidence, disagreement is
+  doubt, and neither engine currently looks at the other.
+
+### 24.2 Corpus changes behind these numbers
+
+Two patterns were added, `sixteenth_hats` and `ghost_funk`, carrying
+sixteenth-note hats and ghost snares on odd sixteenths. They exist because the
+original four placed almost nothing on odd sixteenths, which made the swing
+knob a no-op and left it untested.
+
+With them the corpus is 60 tracks and swing is genuinely exercised: it changes
+exact matches from 23 to 24 and leaves the confidence distribution untouched.
+Swing is now tested and harmless, which section 23.3 could not claim.
+
+The new patterns are hard. They contribute close to zero exact matches and
+fifteen octave errors, almost all doubling: dense uniform subdivision gives the
+autocorrelation a strong peak at the eighth-note level, and B1's prior barely
+discriminates there -- at 90 BPM the prior weights the true tempo 0.84 and the
+doubled answer 0.80, so the raw correlation decides. Narrowing the prior would
+help this material and hurt drum and bass at 174. That tension is recorded
+rather than tuned away.
+
+Corpus totals in sections 18 to 23 were measured on the original four patterns
+and are not comparable with the six-pattern figures here.
