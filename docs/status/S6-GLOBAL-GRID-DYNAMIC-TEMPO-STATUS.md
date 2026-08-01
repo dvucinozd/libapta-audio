@@ -261,3 +261,28 @@ profiles still fit and still report two allocator calls each.
 
 `apta.s6.global_grid`, `apta.s6.revision` and `apta.s6.bounded` pass without
 modification.
+
+## 15. Performance: refresh gated on evidence growth
+
+`apta_internal_s6_refresh()` ran the per-window autocorrelation on every
+`apta_session_process()` call. It now re-runs only when the evidence range has
+grown by `APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS` (default 32) since the last
+one. Global bins hold 2048 frames, so 32 bins is about 1.5 s at 44.1 kHz and a
+1024-frame process call advances the range by at most half a bin. The constant
+is `#ifndef`-guarded.
+
+As in S4, `end_of_input_signalled` and a session state of
+`APTA_SESSION_COMPLETED` bypass the gate so the grid can reach its final state,
+and an evidence range that moved backwards resets the tracker.
+
+Unlike S4 the whole refresh is gated rather than only its inner loops. The S6
+requested and applicability ranges are derived from the evidence range, not from
+the session focus, so skipping the refresh cannot strand focus-driven
+republication the way it does in S4.
+
+The `+ GLOBAL_BEATGRID` row of `apta_session_process()` fell from 1,205.8 to
+421.9 microseconds per call, and `+ DYNAMIC_TEMPO` from 1,158.9 to 418.6.
+Measured against the pre-A1 baseline the two rows are 34.0x and 33.9x cheaper.
+
+`apta.s6.global_grid`, `apta.s6.revision` and `apta.s6.bounded` pass without
+modification.

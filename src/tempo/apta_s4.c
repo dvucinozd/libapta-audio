@@ -352,6 +352,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     uint64_t run_count;
     uint64_t index;
     uint32_t flux_capacity;
+    int estimate = 0;
     uint32_t minimum_lag;
     uint32_t maximum_lag;
     uint32_t lag;
@@ -396,6 +397,32 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    /* A2: decide whether to re-run the autocorrelation. Only the two expensive
+     * loops are gated; everything derived from the current ranges is
+     * recomputed on every call from the cached estimate, so focus movement
+     * keeps updating the applicability range and republishing.
+     *
+     * Draining and completed sessions always estimate: APTA_FEATURE_FINAL is
+     * reachable only from a pass that sees the full evidence range with the
+     * session already COMPLETED, so gating the last one would strand the state
+     * at STABLE. A grid lock needs no exemption because the locked branch
+     * above returns before this point. */
+    if (evidence_end < session->s4_refreshed_evidence_end) {
+        /* Focus or a region request moved the range backwards. Reset the
+         * tracker and re-estimate. */
+        session->s4_refreshed_evidence_end = 0u;
+        estimate = 1;
+    } else if (session->end_of_input_signalled ||
+               atomic_load_explicit(&session->state, memory_order_acquire) ==
+                   APTA_SESSION_COMPLETED ||
+               evidence_end >= session->s4_refreshed_evidence_end +
+                                   APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS) {
+        estimate = 1;
+    } else if (session->s4_refreshed_evidence_end == 0u) {
+        /* No cached estimate to fall back on yet. */
+        return APTA_STATUS_OK;
+    }
+
     minimum_lag = (uint32_t)(
         ((uint64_t)session->config.source_sample_rate * 60u +
          (uint64_t)300u * APTA_INTERNAL_ONSET_FRAMES_PER_BIN - 1u) /
@@ -430,6 +457,15 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     if (run_count > (uint64_t)flux_capacity) {
         return APTA_STATUS_OK;
     }
+    if (!estimate) {
+        /* A2: reuse the last estimate; skip the fill and both loops. */
+        for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
+            best_scores[lag] = session->s4_cached_scores[lag];
+            best_lags[lag] = session->s4_cached_lags[lag];
+        }
+        goto estimate_ready;
+    }
+
     for (index = evidence_first; index < evidence_end; ++index) {
         session->onset_flux[(uint32_t)(index - evidence_first)] =
             (float)apta_s4_flux_uncached(session, index, evidence_first);
@@ -478,6 +514,14 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         }
     }
 
+    /* A2: cache the estimate so a gated pass can reuse it. */
+    for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
+        session->s4_cached_scores[lag] = best_scores[lag];
+        session->s4_cached_lags[lag] = best_lags[lag];
+    }
+    session->s4_refreshed_evidence_end = evidence_end;
+
+estimate_ready:
     if (best_lags[0] == 0u || best_scores[0] < 0.05) {
         return APTA_STATUS_OK;
     }
@@ -557,18 +601,23 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         confidence = APTA_CONFIDENCE_MAX;
     }
 
-    for (lag = 0u; lag < best_lags[0]; ++lag) {
-        double score = 0.0;
-        for (index = evidence_first + lag;
-             index < evidence_end;
-             index += best_lags[0]) {
-            score += (double)session->onset_flux[
-                (uint32_t)(index - evidence_first)];
+    if (estimate) {
+        for (lag = 0u; lag < best_lags[0]; ++lag) {
+            double score = 0.0;
+            for (index = evidence_first + lag;
+                 index < evidence_end;
+                 index += best_lags[0]) {
+                score += (double)session->onset_flux[
+                    (uint32_t)(index - evidence_first)];
+            }
+            if (score > phase_score) {
+                phase_score = score;
+                phase = lag;
+            }
         }
-        if (score > phase_score) {
-            phase_score = score;
-            phase = lag;
-        }
+        session->s4_cached_phase = phase;
+    } else {
+        phase = session->s4_cached_phase;
     }
 
     evidence_first_frame = evidence_first * APTA_INTERNAL_ONSET_FRAMES_PER_BIN;

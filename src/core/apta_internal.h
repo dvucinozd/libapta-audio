@@ -43,6 +43,15 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_STABLE_TEMPO_BINS 1024u
 #define APTA_INTERNAL_MAX_TEMPO_CANDIDATES 3u
 
+/* A2: how many new onset bins must accumulate before the tempo estimate is
+ * recomputed. One process call of 1024 frames advances the evidence range by
+ * at most four 256-frame bins, so without a gate the full autocorrelation runs
+ * on every call. 32 bins is 8192 frames, about 186 ms at 44.1 kHz; the
+ * estimate is not meaningfully improved by re-running it every 23 ms. */
+#ifndef APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS
+#define APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS 32u
+#endif
+
 #define APTA_INTERNAL_S4_FEATURES \
     (APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID | \
      APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING)
@@ -55,6 +64,13 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_GLOBAL_WINDOW_BINS 128u
 #define APTA_INTERNAL_GLOBAL_MIN_BINS 64u
 #define APTA_INTERNAL_GLOBAL_STABLE_BINS 256u
+
+/* A2: the S6 equivalent. Global bins hold 2048 frames, so a 1024-frame process
+ * call advances the range by at most half a bin and 32 bins is about 1.5 s at
+ * 44.1 kHz. The global grid does not need updating more often than that. */
+#ifndef APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS
+#define APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS 32u
+#endif
 #define APTA_INTERNAL_GLOBAL_MAX_SEGMENTS \
     APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS
 #define APTA_INTERNAL_GLOBAL_MAX_BEATS \
@@ -257,6 +273,15 @@ struct apta_session {
      * avoiding the modulo keeps a hardware divide out of the lag loop. */
     float *onset_flux;
     uint32_t onset_flux_capacity;
+    /* A2: evidence_end of the last refresh that actually ran the
+     * autocorrelation, and the estimate it produced. A gated refresh reloads
+     * the estimate and recomputes everything derived from the current ranges,
+     * so focus movement keeps republishing while the expensive loops are
+     * skipped. Zero before the first estimate. */
+    uint64_t s4_refreshed_evidence_end;
+    double s4_cached_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    uint32_t s4_cached_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    uint32_t s4_cached_phase;
     uint32_t tempo_candidate_count;
     apta_tempo_value_t tempo_value;
     apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];

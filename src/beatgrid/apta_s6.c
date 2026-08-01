@@ -602,6 +602,20 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    /* A2: as in S4, skip the per-window autocorrelation when too little new
+     * evidence has arrived. Draining and completed sessions always refresh so
+     * the grid can reach its final state. */
+    if (evidence_end < state->refreshed_evidence_end) {
+        state->refreshed_evidence_end = 0u;
+    } else if (!session->end_of_input_signalled &&
+               atomic_load_explicit(&session->state, memory_order_acquire) !=
+                   APTA_SESSION_COMPLETED &&
+               evidence_end < state->refreshed_evidence_end +
+                                  APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS) {
+        return APTA_STATUS_OK;
+    }
+    state->refreshed_evidence_end = evidence_end;
+
     old_signature = state->signature;
     old_state = state->state;
     old_revision_state = state->revision.state;

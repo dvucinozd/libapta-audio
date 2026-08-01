@@ -301,3 +301,63 @@ profiles still fit and still report two allocator calls each.
 
 Selected tempo values are unchanged: `apta.s4.tempo_vectors` passes without
 modification, so no vector's winning lag moved.
+
+## 15. Performance: refresh gated on evidence growth
+
+`apta_internal_s4_refresh()` ran the full autocorrelation on every
+`apta_session_process()` call. None of its early exits was a "nothing changed"
+check, so a 5-minute track at 1024 frames per call produced 12,921 estimates
+where a few hundred carry the same information: one call advances the evidence
+range by at most four 256-frame bins.
+
+The estimate now re-runs only when the evidence range has grown by
+`APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS` (default 32, about 186 ms at 44.1 kHz)
+since the last one. The constant is `#ifndef`-guarded and can be overridden by
+the host build.
+
+Only the two expensive loops are gated. The lag loop and the phase search are
+skipped and their result reloaded from `s4_cached_scores`, `s4_cached_lags` and
+`s4_cached_phase`; candidate construction, confidence, the requested and
+applicability ranges, the state decision and the mutation serial are recomputed
+on every call as before. This distinction is load-bearing: the applicability
+range is derived from the current focus inside the refresh, so gating the whole
+function stops focus movement from republishing. `apta.s4.focus` fails if the
+gate is placed before the range computation rather than around the loops.
+
+Three cases bypass the gate:
+
+- `end_of_input_signalled`, and a session state of `APTA_SESSION_COMPLETED`.
+  `APTA_FEATURE_FINAL` is reachable only from a pass that sees the full evidence
+  range with the session already completed, so gating the last estimate would
+  strand the state at `APTA_FEATURE_STABLE`.
+- An evidence range that moved backwards, which resets the tracker.
+
+A grid lock needs no exemption: the `local_grid_locked` branch returns before
+the gate is reached.
+
+`apta.s4.refresh_gate` covers this. It pushes PCM in 512-frame increments so
+most calls take the gated path, and asserts that the final state is
+`APTA_FEATURE_FINAL` and that published generations still appear. At the default
+gate the draining bypasses are not strictly required for this input; rebuilding
+with `-DAPTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS=1000000u` makes them load-bearing,
+and in that configuration the `APTA_FEATURE_FINAL` assertion passes with the
+bypasses and fails without them.
+
+Cost of `apta_session_process()`, microseconds per call, continuing the table in
+section 14:
+
+| Requested features | Before A1 | After A1 | After A2 |
+|---|---:|---:|---:|
+| `WAVEFORM_OVERVIEW` | 155.6 | 146.5 | 155.4 |
+| `+ CONFIDENCE` | 13,393.9 | 979.2 | 376.3 |
+| `+ BPM` | 13,416.9 | 977.9 | 368.5 |
+| `+ LOCAL_BEATGRID` | 13,179.6 | 1,016.9 | 371.2 |
+| `+ GLOBAL_BEATGRID` | 14,331.1 | 1,205.8 | 421.9 |
+| `+ DYNAMIC_TEMPO` | 14,204.0 | 1,158.9 | 418.6 |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 14,217.0 | 1,162.6 | 465.6 |
+
+The dominant remaining ungated cost is `apta_s4_find_evidence()`, which runs on
+every call ahead of the gate -- it has to, because the gate needs the evidence
+range to decide -- and scans the whole bin capacity in two passes. Reducing it
+would require tracking the completed-bin high-water mark incrementally as bins
+fill, rather than rediscovering it by scan.

@@ -18,6 +18,9 @@ struct apta_internal_s6_session_state {
     /* Bin index that global_flux[0] corresponds to: the evidence start of the
      * refresh that filled the array. */
     uint64_t flux_base_bin;
+    /* A2: evidence_end of the last refresh that actually ran the per-window
+     * autocorrelation. Zero before the first one. */
+    uint64_t refreshed_evidence_end;
 
     apta_grid_segment_t segments[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
     uint32_t segment_count;
