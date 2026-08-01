@@ -99,6 +99,20 @@ static apta_status_t apta_workspace_validate_config(
         apta_internal_session_workspace_minimum_size()) {
         return APTA_ERROR_OUT_OF_MEMORY;
     }
+    /* A5: the check above is a floor that ignores total_frames and
+     * requested_features, so it accepted a 12 KiB buffer for a full-feature
+     * multi-minute track and failed much later inside process(). Reject that
+     * here instead, where it is a diagnosable configuration error. */
+    {
+        const size_t required =
+            apta_internal_session_workspace_requirement(config);
+        if (required == SIZE_MAX) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+        if (config->static_workspace_size < required) {
+            return APTA_ERROR_OUT_OF_MEMORY;
+        }
+    }
 
     return APTA_STATUS_OK;
 }

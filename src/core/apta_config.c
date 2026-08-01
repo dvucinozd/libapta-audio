@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
 #include "apta_result_pool_layout.h"
+#include "apta_session_workspace.h"
 #include "../beatgrid/apta_s6_internal.h"
 
 #include <stdalign.h>
@@ -293,6 +294,55 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
     requirements_out->required_alignment = APTA_INTERNAL_MAX_ALIGNMENT;
     requirements_out->flags = 0u;
     memset(requirements_out->reserved32, 0, sizeof(requirements_out->reserved32));
+
+    return APTA_STATUS_OK;
+}
+
+/* A5: this is a new symbol rather than a flag on apta_query_memory_requirements
+ * deliberately. That entry point is wrapped by the compile-time renaming scheme
+ * in both CMakeLists.txt and ports/espidf/CMakeLists.txt; a fresh symbol with a
+ * single definition needs no entry in either. */
+apta_status_t APTA_CALL apta_query_workspace_requirements(
+    const apta_session_config_t *config,
+    apta_memory_requirements_t *requirements_out)
+{
+    size_t required;
+
+    if (config == NULL || requirements_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_validate_struct(
+            config,
+            sizeof(*config),
+            config->struct_size,
+            config->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+    if (!apta_internal_validate_struct(
+            requirements_out,
+            sizeof(*requirements_out),
+            requirements_out->struct_size,
+            requirements_out->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+
+    required = apta_internal_session_workspace_requirement(config);
+    if (required == SIZE_MAX) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+
+    requirements_out->minimum_bytes = required;
+    /* Headroom for allocator slack: the block splitter refuses to split a
+     * remainder smaller than a header plus prefix plus alignment, so a request
+     * can strand that much. */
+    requirements_out->recommended_bytes =
+        required + required / 16u + APTA_INTERNAL_MAX_ALIGNMENT;
+    requirements_out->required_alignment = APTA_INTERNAL_MAX_ALIGNMENT;
+    requirements_out->flags = 0u;
+    memset(
+        requirements_out->reserved32,
+        0,
+        sizeof(requirements_out->reserved32));
 
     return APTA_STATUS_OK;
 }

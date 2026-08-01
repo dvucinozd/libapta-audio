@@ -69,6 +69,7 @@ apta_add_c_test(apta_s4_tempo_vectors apta.s4.tempo_vectors unit/s4_tempo_vector
 apta_add_c_test(apta_s4_focus apta.s4.focus unit/s4_focus.c)
 apta_add_c_test(apta_s4_refresh_gate apta.s4.refresh_gate unit/s4_refresh_gate.c)
 apta_add_c_test(apta_confidence_without_tempo apta.waveform.confidence_without_tempo unit/confidence_without_tempo.c)
+apta_add_c_test(apta_workspace_requirements apta.memory.workspace_requirements unit/workspace_requirements.c)
 apta_add_c_test(apta_s4_serialization apta.serialization.s4 unit/s4_serialization.c)
 apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_failure unit/s4_allocation_failure.c)
 

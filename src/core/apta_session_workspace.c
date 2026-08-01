@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_session_workspace.h"
 
+#include "../beatgrid/apta_s6_internal.h"
+
 #include <stdalign.h>
 #include <stdint.h>
 #include <string.h>
@@ -85,6 +87,178 @@ size_t apta_internal_session_workspace_minimum_size(void)
 
     return offset + sizeof(apta_internal_workspace_block_t) +
            prefix_size + APTA_INTERNAL_MAX_ALIGNMENT;
+}
+
+/* A5: cost of one workspace allocation of `size` bytes, including the block
+ * header and payload prefix the allocator places in front of every payload and
+ * the padding it applies to the payload itself. Derived from
+ * apta_internal_session_allocate() rather than tabulated by hand. */
+static size_t apta_workspace_allocation_cost(size_t size)
+{
+    size_t padded;
+    size_t prefix;
+
+    if (size == 0u) {
+        size = 1u;
+    }
+    padded = apta_workspace_align_up(size, APTA_INTERNAL_MAX_ALIGNMENT);
+    prefix = apta_workspace_payload_prefix_size();
+    if (padded == SIZE_MAX || prefix == SIZE_MAX) {
+        return SIZE_MAX;
+    }
+    return sizeof(apta_internal_workspace_block_t) + prefix + padded;
+}
+
+static size_t apta_workspace_add(size_t total, size_t addend)
+{
+    if (total == SIZE_MAX || addend == SIZE_MAX ||
+        total > SIZE_MAX - addend) {
+        return SIZE_MAX;
+    }
+    return total + addend;
+}
+
+/* Both growable arrays double and copy: the replacement is allocated before the
+ * previous array is released. The freed fragments cannot serve the next
+ * request, because each request is strictly larger than everything released so
+ * far -- a doubling sequence 16, 32, ... C frees a total of C - 16, always less
+ * than the C the final growth asks for. So the whole sequence has to be
+ * charged, not just the last step. Measured: charging only the last two steps
+ * under-reports a 5-minute full-feature configuration by about 230 KiB against
+ * a bisected true requirement. */
+static size_t apta_workspace_growable_cost(
+    uint64_t needed_entries,
+    size_t entry_size,
+    uint32_t initial_capacity)
+{
+    uint64_t capacity = initial_capacity;
+    size_t cost = 0u;
+
+    if (needed_entries == 0u) {
+        return 0u;
+    }
+    for (;;) {
+        if (capacity > (uint64_t)(SIZE_MAX / entry_size)) {
+            return SIZE_MAX;
+        }
+        cost = apta_workspace_add(
+            cost,
+            apta_workspace_allocation_cost((size_t)capacity * entry_size));
+        if (cost == SIZE_MAX || capacity >= needed_entries) {
+            break;
+        }
+        if (capacity > (uint64_t)UINT32_MAX / 2u) {
+            return SIZE_MAX;
+        }
+        capacity *= 2u;
+    }
+    return cost;
+}
+
+size_t apta_internal_session_workspace_requirement(
+    const apta_session_config_t *config)
+{
+    const apta_feature_mask_t features = config->requested_features;
+    uint32_t frames_per_column = APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+    uint64_t overview_columns;
+    size_t total;
+
+    total = apta_workspace_align_up(
+        sizeof(apta_session_t),
+        APTA_INTERNAL_MAX_ALIGNMENT);
+    if (total == SIZE_MAX) {
+        return SIZE_MAX;
+    }
+
+    /* Overview accumulators: one per column across the track. This is the only
+     * contributor that scales with duration, and for a multi-minute track it is
+     * the largest single item. */
+    if (config->total_frames != 0u) {
+        overview_columns =
+            (config->total_frames + (uint64_t)frames_per_column - 1u) /
+            (uint64_t)frames_per_column;
+    } else {
+        overview_columns = 0u;
+    }
+    total = apta_workspace_add(
+        total,
+        apta_workspace_growable_cost(
+            overview_columns,
+            sizeof(apta_internal_waveform_accumulator_t),
+            16u));
+
+    /* Accepted-range table. One range per contiguous accepted run; a host that
+     * pushes in order needs one, but fragmentation costs more. Charge the
+     * scheduler's request capacity as a working bound. */
+    total = apta_workspace_add(
+        total,
+        apta_workspace_growable_cost(
+            APTA_INTERNAL_MAX_REGION_REQUESTS,
+            sizeof(apta_internal_range_t),
+            8u));
+
+    /* PCM queue high-water mark. Nodes are released as they are consumed, but
+     * a host may push a full block before the next process() call. */
+    total = apta_workspace_add(
+        total,
+        apta_workspace_allocation_cost(
+            sizeof(apta_internal_pcm_node_t) +
+            (size_t)APTA_INTERNAL_MAX_PUSH_FRAMES * sizeof(float)));
+
+    if ((features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_MAX_DETAIL_TILES *
+                APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE *
+                sizeof(apta_internal_waveform_accumulator_t)));
+    }
+
+    if ((features & APTA_INTERNAL_S4_FEATURES) != 0u) {
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY *
+                sizeof(apta_internal_onset_bin_t)));
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float)));
+    }
+
+    if ((features & APTA_INTERNAL_S6_FEATURES) != 0u) {
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                sizeof(apta_internal_s6_session_state_t)));
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY *
+                sizeof(apta_internal_onset_bin_t)));
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY * sizeof(float)));
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_GLOBAL_MAX_BEATS *
+                sizeof(apta_beat_t)));
+    }
+
+    /* Session metadata storage, which a host may set at any time. */
+    total = apta_workspace_add(
+        total,
+        apta_workspace_allocation_cost(APTA_METADATA_MAX_TOTAL_BYTES));
+
+    /* One spare block header plus alignment, matching the tail slack the
+     * constant minimum already reserved. */
+    total = apta_workspace_add(
+        total,
+        sizeof(apta_internal_workspace_block_t) + APTA_INTERNAL_MAX_ALIGNMENT);
+
+    return total;
 }
 
 int apta_internal_session_uses_workspace(

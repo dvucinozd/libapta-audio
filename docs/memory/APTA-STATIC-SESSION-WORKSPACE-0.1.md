@@ -101,3 +101,52 @@ The gap at this snapshot was immutable result publication. It was subsequently
 closed with a context-owned, preallocated two-slot result pool that preserves
 result lifetime beyond session/workspace destruction and reports deterministic
 slot-exhaustion backpressure.
+
+## Querying the required size
+
+`apta_query_workspace_requirements()` reports how large
+`apta_session_config_t.static_workspace` must be for a given configuration:
+
+```c
+apta_session_config_t config;
+apta_memory_requirements_t required;
+
+apta_session_config_init(&config);
+config.source_sample_rate = 44100u;
+config.channel_count = 2u;
+config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
+config.channel_layout = APTA_CHANNEL_LAYOUT_STEREO;
+config.total_frames = total_frames;          /* required: the figure scales */
+config.requested_features = features;
+
+apta_memory_requirements_init(&required);    /* output structs too */
+status = apta_query_workspace_requirements(&config, &required);
+```
+
+`minimum_bytes` is what `apta_session_create()` enforces; a buffer at least that
+large, aligned to `required_alignment`, completes the analysis.
+`recommended_bytes` adds headroom. `static_workspace` and
+`static_workspace_size` are ignored by the query, so it can be called before a
+buffer exists.
+
+`config.total_frames` must be set. The overview accumulator array holds one
+entry per column across the track and is the largest contributor for anything
+longer than a few seconds, so a query with `total_frames == 0` reports only the
+fixed part and will understate a real session.
+
+### What changed
+
+`apta_session_create()` previously validated the workspace against
+`apta_internal_session_workspace_minimum_size()`, which is
+`align(sizeof(apta_session_t))` plus one block header and payload prefix and is
+independent of both `total_frames` and `requested_features`. A 12 KiB buffer was
+accepted for a multi-minute full-feature session and the insufficiency surfaced
+much later as an `APTA_ERROR_OUT_OF_MEMORY` from `apta_session_process()`.
+
+Creation now also enforces the computed figure, so an undersized buffer is a
+diagnosable configuration error at the point where the host can still act on it.
+The old constant remains as a cheap first check.
+
+Hosts that previously supplied a workspace smaller than their configuration
+needs, and happened not to hit the failure, will now be rejected at creation.
+That is the intended behaviour: those sessions could not have completed.
