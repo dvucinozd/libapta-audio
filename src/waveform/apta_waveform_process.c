@@ -197,7 +197,7 @@ static apta_status_t apta_process_samples(
         uint32_t column_index;
         float sample;
         float magnitude;
-        uint64_t scaled;
+        uint32_t scaled;
         apta_internal_waveform_accumulator_t *accumulator;
         apta_status_t status;
 
@@ -228,9 +228,14 @@ static apta_status_t apta_process_samples(
         /* A3: integer accumulation with a branchless clamp. See
          * apta_internal_waveform_accumulator_t. */
         magnitude = fminf(fabsf(sample), 1.0f);
-        scaled = (uint64_t)(magnitude *
+        /* scaled is at most 2^23, so it fits uint32_t and the product is a
+         * widening 32x32->64 multiply, which 32-bit targets do natively.
+         * Declaring it uint64_t instead makes this a full 64x64 multiply and
+         * pulls in a libgcc helper call per sample -- measured as a new
+         * libgcc.a dependency in the ESP-IDF component size report. */
+        scaled = (uint32_t)(magnitude *
                             APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
-        accumulator->sum_squares += scaled * scaled;
+        accumulator->sum_squares += (uint64_t)scaled * scaled;
         accumulator->sample_count += 1u;
         if (sample <= -1.0f || sample >= 1.0f) {
             accumulator->clipped = 1u;

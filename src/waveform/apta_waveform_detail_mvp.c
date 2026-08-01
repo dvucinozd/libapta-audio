@@ -289,7 +289,7 @@ apta_status_t apta_internal_detail_process_sample(
     uint32_t tile_index;
     uint32_t column_index;
     float magnitude;
-    uint64_t scaled;
+    uint32_t scaled;
     apta_internal_detail_tile_t *tile;
     apta_internal_waveform_accumulator_t *accumulator;
 
@@ -324,8 +324,9 @@ apta_status_t apta_internal_detail_process_sample(
     }
     /* A3: integer accumulation with a branchless clamp. */
     magnitude = fminf(fabsf(sample), 1.0f);
-    scaled = (uint64_t)(magnitude * APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
-    accumulator->sum_squares += scaled * scaled;
+    /* Widening 32x32->64 multiply; see apta_waveform_process.c. */
+    scaled = (uint32_t)(magnitude * APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
+    accumulator->sum_squares += (uint64_t)scaled * scaled;
     accumulator->sample_count += 1u;
     if (sample <= -1.0f || sample >= 1.0f) {
         accumulator->clipped = 1u;
