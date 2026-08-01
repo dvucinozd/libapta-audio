@@ -416,12 +416,46 @@ percent: an earlier run of the same binary reported 500.9 for
 every row under 500 microseconds, which A2 met, is no longer cleanly met -- the
 S6 rows straddle the line within measurement noise.
 
-The static library grew from 131,695 to 134,005 bytes of text on x86-64. That is
-also the wrong measurement for this change: the acceptance criterion concerns the
-ESP-IDF component-size report, where removing `double` should drop the
-soft-float support routines rather than add code. No RISC-V toolchain was
-available here, so that criterion is unverified locally and left to
-`.github/workflows/espidf.yml`.
+### 16.2 Component size on the real target
+
+The acceptance criterion is that the ESP-IDF component-size report does not
+grow. It does. Measured by CI against the same report on `main`, for the whole
+branch A1 through C3:
+
+| Target | `main` | branch | delta |
+|---|---:|---:|---:|
+| ESP-IDF 5.5.4 / ESP32 / scalar | 36,786 | 37,091 | +305 |
+| ESP-IDF 6.0.2 / ESP32 / scalar | 36,311 | 36,670 | +359 |
+| ESP-IDF 6.0.2 / ESP32-S3 / ESP-DSP | 36,358 | 36,700 | +342 |
+
+About one percent. Two things are worth separating.
+
+The branch is not A3 alone. A5 adds a public entry point and the workspace
+requirement computation, which plausibly accounts for most of the increase.
+Attributing the delta per task would need a CI run per commit, which was not
+done, so no such attribution is claimed here.
+
+More interesting is that the report gained a `libgcc.a` row, 187 bytes, where
+`main` has none: the branch introduced 64-bit integer helpers on a 32-bit
+target. One cause was A3's own: declaring the scaled magnitude `uint64_t` made
+the squaring a full 64x64 multiply, a `__muldi3` call once per source sample --
+exactly the class of cost this task exists to remove, swapped from soft-float
+to soft-int. That is fixed; the operand is now `uint32_t` and the product a
+widening 32x32 multiply, worth about 30 bytes and removing a per-sample helper
+call.
+
+`libgcc.a` remains at 187 bytes after that fix, so other 64-bit helpers are
+still linked. The likely sources are the `uint64_t` to `double` conversion in
+the rms quantizers, which runs once per column, and the `uint64_t` division by
+a runtime divisor in A5's workspace query, which runs once per session. Both
+are cold relative to the per-sample path, so the remaining cost is size rather
+than throughput. This is inference from what the branch adds, not a symbol
+listing: no cross toolchain was available to confirm it.
+
+On x86-64 the static library text grew from 131,695 to 134,005 bytes, but that
+is not the measurement the criterion is about, and the per-sample `__muldi3`
+regression above was invisible there -- both operand widths compile to one
+instruction on a 64-bit host. It was only found by running CI.
 
 ## 17. Activation: CONFIDENCE decoupled from the tempo engine
 
