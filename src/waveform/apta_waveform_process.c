@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
 
+#include <math.h>
 #include <stdalign.h>
 #include <stdint.h>
 #include <string.h>
@@ -195,6 +196,8 @@ static apta_status_t apta_process_samples(
         uint64_t column64;
         uint32_t column_index;
         float sample;
+        float magnitude;
+        uint64_t scaled;
         apta_internal_waveform_accumulator_t *accumulator;
         apta_status_t status;
 
@@ -222,7 +225,12 @@ static apta_status_t apta_process_samples(
         if (sample > accumulator->maximum) {
             accumulator->maximum = sample;
         }
-        accumulator->sum_squares += (double)sample * (double)sample;
+        /* A3: integer accumulation with a branchless clamp. See
+         * apta_internal_waveform_accumulator_t. */
+        magnitude = fminf(fabsf(sample), 1.0f);
+        scaled = (uint64_t)(magnitude *
+                            APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
+        accumulator->sum_squares += scaled * scaled;
         accumulator->sample_count += 1u;
         if (sample <= -1.0f || sample >= 1.0f) {
             accumulator->clipped = 1u;

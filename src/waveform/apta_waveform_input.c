@@ -12,12 +12,17 @@ static uint32_t apta_min_u32(uint32_t left, uint32_t right)
     return left < right ? left : right;
 }
 
+/* A3: these run once per source sample per channel, ahead of every other
+ * per-sample path, so they must not use double on a target without hardware
+ * double. For 16- and 24-bit input both the value and the divisor are exactly
+ * representable in float, so a single float division is correctly rounded and
+ * produces bit-identical results to the previous double form. */
 static float apta_normalize_s16(int16_t value)
 {
     if (value < 0) {
-        return (float)((double)value / 32768.0);
+        return (float)value / 32768.0f;
     }
-    return value == 0 ? 0.0f : (float)((double)value / 32767.0);
+    return value == 0 ? 0.0f : (float)value / 32767.0f;
 }
 
 static float apta_normalize_s24(const uint8_t *bytes)
@@ -32,16 +37,22 @@ static float apta_normalize_s24(const uint8_t *bytes)
     }
 
     if (value < 0) {
-        return (float)((double)value / 8388608.0);
+        return (float)value / 8388608.0f;
     }
-    return value == 0 ? 0.0f : (float)((double)value / 8388607.0);
+    return value == 0 ? 0.0f : (float)value / 8388607.0f;
 }
 
 static float apta_normalize_s32(int32_t value)
 {
     if (value < 0) {
-        return (float)((double)value / 2147483648.0);
+        /* Divisor is 2^31: scaling by a power of two is exact, so converting
+         * first and scaling second gives the same result as the double form. */
+        return (float)value / 2147483648.0f;
     }
+    /* Retained in double deliberately: a 32-bit magnitude exceeds float's
+     * 24-bit mantissa, so (float)value would discard bits before the division.
+     * This is the one per-sample double left, and it is reachable only for
+     * APTA_SAMPLE_S32 input. */
     return value == 0 ? 0.0f : (float)((double)value / 2147483647.0);
 }
 

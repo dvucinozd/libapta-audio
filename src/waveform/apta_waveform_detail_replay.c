@@ -191,12 +191,14 @@ apta_status_t apta_internal_detail_next_pcm_request(
     return APTA_STATUS_OK;
 }
 
+/* A3: per-sample conversion. See apta_normalize_s16() in
+ * apta_waveform_input.c for why float is bit-identical here. */
 static float apta_detail_normalize_s16(int16_t value)
 {
     if (value < 0) {
-        return (float)((double)value / 32768.0);
+        return (float)value / 32768.0f;
     }
-    return value == 0 ? 0.0f : (float)((double)value / 32767.0);
+    return value == 0 ? 0.0f : (float)value / 32767.0f;
 }
 
 static float apta_detail_normalize_s24(const uint8_t *bytes)
@@ -209,16 +211,17 @@ static float apta_detail_normalize_s24(const uint8_t *bytes)
         value |= (int32_t)0xFF000000;
     }
     if (value < 0) {
-        return (float)((double)value / 8388608.0);
+        return (float)value / 8388608.0f;
     }
-    return value == 0 ? 0.0f : (float)((double)value / 8388607.0);
+    return value == 0 ? 0.0f : (float)value / 8388607.0f;
 }
 
 static float apta_detail_normalize_s32(int32_t value)
 {
     if (value < 0) {
-        return (float)((double)value / 2147483648.0);
+        return (float)value / 2147483648.0f;
     }
+    /* Retained in double: see apta_normalize_s32() in apta_waveform_input.c. */
     return value == 0 ? 0.0f : (float)((double)value / 2147483647.0);
 }
 

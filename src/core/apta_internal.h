@@ -132,7 +132,17 @@ typedef struct apta_internal_pcm_node {
 typedef struct {
     uint32_t column_index;
     uint32_t sample_count;
-    double sum_squares;
+    /* A3: sum of squared sample magnitudes scaled by
+     * APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE. Bounded by 1024 * (2^23)^2 = 2^56
+     * for an overview column, a 256x margin inside uint64_t.
+     * apta_*_quantize_rms() divides out both the count and the scale.
+     *
+     * The scale is 2^23 rather than the 2^15 used for onset magnitudes because
+     * this feeds published column values. A sample decoded from 16-bit PCM is
+     * exactly k/32768, so k * 2^8 is representable without loss and the
+     * conversion introduces no quantization error at all for such sources.
+     * A 15-bit scale here moved some published rms values by one count. */
+    uint64_t sum_squares;
     float minimum;
     float maximum;
     uint8_t clipped;
@@ -150,9 +160,17 @@ typedef struct {
         accumulators[APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE];
 } apta_internal_detail_tile_t;
 
+/* A3: sum of 15-bit sample magnitudes, not a floating-point sum. The target is
+ * RV32IMAFC with no hardware double, and this accumulates once per source
+ * sample. S6 bins hold the most samples, 2048, so the sum is bounded by
+ * 2048 * 32768 = 67,108,864 -- a 64x margin inside uint32_t. Readers divide by
+ * sample_count and by 32768 to recover the normalized energy. */
+#define APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE 32768.0f
+#define APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE 8388608.0f
+
 typedef struct {
     uint64_t bin_index;
-    double sum_absolute;
+    uint32_t sum_absolute;
     uint32_t sample_count;
     uint8_t occupied;
     uint8_t reserved8[3];
@@ -279,7 +297,7 @@ struct apta_session {
      * so focus movement keeps republishing while the expensive loops are
      * skipped. Zero before the first estimate. */
     uint64_t s4_refreshed_evidence_end;
-    double s4_cached_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    float s4_cached_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
     uint32_t s4_cached_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
     uint32_t s4_cached_phase;
     uint32_t tempo_candidate_count;

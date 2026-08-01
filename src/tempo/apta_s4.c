@@ -85,7 +85,10 @@ static int apta_s4_bin_complete(
     return bin != NULL && expected != 0u && bin->sample_count == expected;
 }
 
-static double apta_s4_energy(
+/* A3: recover the normalized mean magnitude from the integer accumulator. One
+ * division per bin, called O(bins) per refresh rather than O(bins x lags)
+ * since A1 precomputes the flux. */
+static float apta_s4_energy(
     const apta_session_t *session,
     uint64_t bin_index)
 {
@@ -93,23 +96,25 @@ static double apta_s4_energy(
         apta_s4_const_bin(session, bin_index);
 
     return bin != NULL && bin->sample_count != 0u
-               ? bin->sum_absolute / (double)bin->sample_count
-               : 0.0;
+               ? (float)bin->sum_absolute /
+                     ((float)bin->sample_count *
+                      APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE)
+               : 0.0f;
 }
 
 /* A1: the single definition of the flux computation. Called once per bin by
  * the fill loop in apta_internal_s4_refresh(); the lag and phase loops read
  * session->onset_flux instead of calling this. */
-static double apta_s4_flux_uncached(
+static float apta_s4_flux_uncached(
     const apta_session_t *session,
     uint64_t bin_index,
     uint64_t evidence_first)
 {
-    double current = apta_s4_energy(session, bin_index);
-    double previous = bin_index > evidence_first
-                          ? apta_s4_energy(session, bin_index - 1u)
-                          : 0.0;
-    return current > previous ? current - previous : 0.0;
+    float current = apta_s4_energy(session, bin_index);
+    float previous = bin_index > evidence_first
+                         ? apta_s4_energy(session, bin_index - 1u)
+                         : 0.0f;
+    return current > previous ? current - previous : 0.0f;
 }
 
 static int apta_s4_find_evidence(
@@ -318,6 +323,7 @@ apta_status_t apta_internal_s4_process_sample(
     uint64_t bin_index;
     uint32_t slot;
     apta_internal_onset_bin_t *bin;
+    float magnitude;
 
     if (!apta_s4_enabled(session)) {
         return APTA_STATUS_OK;
@@ -338,14 +344,20 @@ apta_status_t apta_internal_s4_process_sample(
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 
-    bin->sum_absolute += fabs((double)sample);
+    /* A3: apta_read_channel_sample() already returns a finite value in
+     * [-1, 1], but the conversion below must not depend on a caller invariant
+     * for its defined behaviour. fminf is branchless, so the guard costs one
+     * instruction rather than a per-sample branch. */
+    magnitude = fminf(fabsf(sample), 1.0f);
+    bin->sum_absolute +=
+        (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
     bin->sample_count += 1u;
     return APTA_STATUS_OK;
 }
 
 apta_status_t apta_internal_s4_refresh(apta_session_t *session)
 {
-    double best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0, 0.0, 0.0};
+    float best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
     uint32_t best_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0u, 0u, 0u};
     uint64_t evidence_first;
     uint64_t evidence_end;
@@ -359,7 +371,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     uint32_t candidate_count = 0u;
     uint32_t selected_tempo;
     uint32_t phase = 0u;
-    double phase_score = -1.0;
+    float phase_score = -1.0f;
     uint32_t confidence;
     apta_feature_state_t state;
     apta_source_frame_t evidence_first_frame;
@@ -472,27 +484,30 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     }
 
     for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
-        double numerator = 0.0;
-        double left_square = 0.0;
-        double right_square = 0.0;
-        double score;
+        float numerator = 0.0f;
+        float left_square = 0.0f;
+        float right_square = 0.0f;
+        float score;
         uint32_t position;
 
         const float *flux = session->onset_flux;
 
         for (index = evidence_first + lag; index < evidence_end; ++index) {
             const uint32_t offset = (uint32_t)(index - evidence_first);
-            const double left = (double)flux[offset];
-            const double right = (double)flux[offset - lag];
+            const float left = flux[offset];
+            const float right = flux[offset - lag];
             numerator += left * right;
             left_square += left * left;
             right_square += right * right;
         }
-        if (left_square <= 1e-18 || right_square <= 1e-18) {
+        /* A3: float guard. These hold sums of squares of normalized flux
+         * values, so anything at or below 1e-12f is silence rather than
+         * signal. The previous 1e-18 was sized for double. */
+        if (left_square <= 1e-12f || right_square <= 1e-12f) {
             continue;
         }
-        score = numerator / sqrt(left_square * right_square);
-        if (score <= 0.0) {
+        score = numerator / sqrtf(left_square * right_square);
+        if (score <= 0.0f) {
             continue;
         }
 
@@ -522,7 +537,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     session->s4_refreshed_evidence_end = evidence_end;
 
 estimate_ready:
-    if (best_lags[0] == 0u || best_scores[0] < 0.05) {
+    if (best_lags[0] == 0u || best_scores[0] < 0.05f) {
         return APTA_STATUS_OK;
     }
 
@@ -552,7 +567,7 @@ estimate_ready:
             continue;
         }
 
-        score = (uint32_t)(best_scores[lag] / best_scores[0] * 65535.0 + 0.5);
+        score = (uint32_t)(best_scores[lag] / best_scores[0] * 65535.0f + 0.5f);
         if (score > 65535u) {
             score = 65535u;
         }
@@ -588,10 +603,10 @@ estimate_ready:
     }
 
     confidence = 35u + (uint32_t)(best_scores[0] * 50.0);
-    if (candidate_count > 1u && best_scores[0] > 0.0) {
-        double separation = 1.0 - best_scores[1] / best_scores[0];
-        if (separation > 0.0) {
-            confidence += (uint32_t)(separation * 15.0);
+    if (candidate_count > 1u && best_scores[0] > 0.0f) {
+        float separation = 1.0f - best_scores[1] / best_scores[0];
+        if (separation > 0.0f) {
+            confidence += (uint32_t)(separation * 15.0f);
         }
     }
     if (run_count >= APTA_INTERNAL_STABLE_TEMPO_BINS) {
@@ -603,11 +618,11 @@ estimate_ready:
 
     if (estimate) {
         for (lag = 0u; lag < best_lags[0]; ++lag) {
-            double score = 0.0;
+            float score = 0.0f;
             for (index = evidence_first + lag;
                  index < evidence_end;
                  index += best_lags[0]) {
-                score += (double)session->onset_flux[
+                score += session->onset_flux[
                     (uint32_t)(index - evidence_first)];
             }
             if (score > phase_score) {

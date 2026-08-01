@@ -361,3 +361,64 @@ every call ahead of the gate -- it has to, because the gate needs the evidence
 range to decide -- and scans the whole bin capacity in two passes. Reducing it
 would require tracking the completed-bin high-water mark incrementally as bins
 fill, rather than rediscovering it by scan.
+
+## 16. Types: double removed from per-sample and inner-loop paths
+
+The target for the first hardware integration is RV32IMAFC: single-precision FPU,
+no `D` extension, so every `double` operation is a software-emulated library
+call. The tempo path used `double` per source sample and throughout the
+autocorrelation.
+
+Changed:
+
+- `apta_internal_onset_bin_t.sum_absolute` is now `uint32_t`, a sum of sample
+  magnitudes scaled by `APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE` (2^15). S6 bins
+  hold the most samples, 2048, bounding the sum at 2^26 -- a 64x margin inside
+  `uint32_t`. The struct is shared by S4 and S6, so this is one change covering
+  both engines.
+- `apta_s4_energy()` and `apta_s4_flux_uncached()` return `float` and divide out
+  the count and the scale at read time. Since A1 precomputes the flux array,
+  this division runs once per bin per refresh rather than once per bin per lag.
+- The autocorrelation accumulators, `best_scores[]`, the phase score, the
+  candidate score ratio and the confidence separation are `float`; `sqrt`
+  became `sqrtf`.
+- The degenerate-energy guard moved from `1e-18` to `1e-12f`. The accumulators
+  hold sums of squares of normalized flux, so `1e-12f` is still far below any
+  real signal while remaining meaningful in single precision.
+
+Selected tempo values are unchanged: `apta.s4.tempo_vectors` passes without
+modification, so quantizing the per-sample magnitude to 15 bits did not move any
+winning lag.
+
+### 16.1 Cost on the host
+
+The work order motivates this task by target cost, and the host measurement runs
+the other way. Microseconds per call, continuing the table in section 15:
+
+| Requested features | After A2 | After A3 |
+|---|---:|---:|
+| `WAVEFORM_OVERVIEW` | 155.4 | 152.5 |
+| `+ CONFIDENCE` | 376.3 | 446.7 |
+| `+ BPM` | 368.5 | 448.6 |
+| `+ LOCAL_BEATGRID` | 371.2 | 447.5 |
+| `+ GLOBAL_BEATGRID` | 421.9 | 583.9 |
+| `+ DYNAMIC_TEMPO` | 418.6 | 520.4 |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 465.6 | 538.7 |
+
+This is expected. On x86-64 both `float` and `double` are native, so replacing
+one with the other buys nothing and the added integer scaling and conversions
+cost about 20 percent. The benefit is confined to targets where `double` is
+emulated, which this host cannot represent.
+
+Two caveats on these figures. Run-to-run variance on the S6 rows is around 15
+percent: an earlier run of the same binary reported 500.9 for
+`+ GLOBAL_BEATGRID` against 583.9 here. And the work order's overall target of
+every row under 500 microseconds, which A2 met, is no longer cleanly met -- the
+S6 rows straddle the line within measurement noise.
+
+The static library grew from 131,695 to 134,005 bytes of text on x86-64. That is
+also the wrong measurement for this change: the acceptance criterion concerns the
+ESP-IDF component-size report, where removing `double` should drop the
+soft-float support routines rather than add code. No RISC-V toolchain was
+available here, so that criterion is unverified locally and left to
+`.github/workflows/espidf.yml`.

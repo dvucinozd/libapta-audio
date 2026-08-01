@@ -51,8 +51,11 @@ static int16_t apta_pool_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
+/* A3: see apta_quantize_rms() in apta_waveform_snapshot.c. Only the parameter
+ * type changed; apta_pool_round_ties_even() and the double arithmetic feeding
+ * canonical serialization are deliberately untouched. */
 static uint16_t apta_pool_quantize_rms(
-    double sum_squares,
+    uint64_t sum_squares,
     uint32_t sample_count)
 {
     double rms;
@@ -62,7 +65,8 @@ static uint16_t apta_pool_quantize_rms(
         return 0u;
     }
 
-    rms = sqrt(sum_squares / (double)sample_count);
+    rms = sqrt((double)sum_squares / (double)sample_count) /
+          (double)APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE;
     if (rms < 0.0) {
         rms = 0.0;
     }

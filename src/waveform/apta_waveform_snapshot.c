@@ -52,7 +52,11 @@ static int16_t apta_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
-static uint16_t apta_quantize_rms(double sum_squares, uint32_t sample_count)
+/* A3: sum_squares is an integer accumulator scaled by
+ * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE squared. The arithmetic here stays
+ * double: it runs once per column rather than per sample, and the
+ * round-half-to-even step feeds canonical serialization. */
+static uint16_t apta_quantize_rms(uint64_t sum_squares, uint32_t sample_count)
 {
     double rms;
     double rounded;
@@ -61,7 +65,8 @@ static uint16_t apta_quantize_rms(double sum_squares, uint32_t sample_count)
         return 0u;
     }
 
-    rms = sqrt(sum_squares / (double)sample_count);
+    rms = sqrt((double)sum_squares / (double)sample_count) /
+          (double)APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE;
     if (rms < 0.0) {
         rms = 0.0;
     }

@@ -13,7 +13,7 @@ typedef struct {
     uint32_t tempo_millibpm;
     uint32_t phase_bins;
     apta_confidence_value_t confidence;
-    double score;
+    float score;
 } apta_s6_window_t;
 
 static int apta_s6_enabled(const apta_session_t *session)
@@ -86,29 +86,32 @@ static int apta_s6_bin_complete(
     return bin != NULL && expected != 0u && bin->sample_count == expected;
 }
 
-static double apta_s6_energy(
+/* A3: see apta_s4_energy(). */
+static float apta_s6_energy(
     const apta_internal_s6_session_state_t *state,
     uint64_t bin_index)
 {
     const apta_internal_onset_bin_t *bin = apta_s6_const_bin(state, bin_index);
     return bin != NULL && bin->sample_count != 0u
-               ? bin->sum_absolute / (double)bin->sample_count
-               : 0.0;
+               ? (float)bin->sum_absolute /
+                     ((float)bin->sample_count *
+                      APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE)
+               : 0.0f;
 }
 
 /* A1: the single definition of the flux computation. Called once per bin by
  * the fill loop in apta_internal_s6_refresh(); the per-window lag and phase
  * loops read state->global_flux instead of calling this. */
-static double apta_s6_flux_uncached(
+static float apta_s6_flux_uncached(
     const apta_internal_s6_session_state_t *state,
     uint64_t bin_index,
     uint64_t evidence_first)
 {
-    const double current = apta_s6_energy(state, bin_index);
-    const double previous = bin_index > evidence_first
-                                ? apta_s6_energy(state, bin_index - 1u)
-                                : 0.0;
-    return current > previous ? current - previous : 0.0;
+    const float current = apta_s6_energy(state, bin_index);
+    const float previous = bin_index > evidence_first
+                               ? apta_s6_energy(state, bin_index - 1u)
+                               : 0.0f;
+    return current > previous ? current - previous : 0.0f;
 }
 
 static int apta_s6_find_evidence(
@@ -246,8 +249,8 @@ static int apta_s6_estimate_window(
     uint32_t best_lag = 0u;
     uint32_t lag;
     uint32_t phase = 0u;
-    double best_score = 0.0;
-    double best_phase_score = -1.0;
+    float best_score = 0.0f;
+    float best_phase_score = -1.0f;
     uint64_t index;
     const float *flux;
     uint64_t flux_base;
@@ -282,36 +285,37 @@ static int apta_s6_estimate_window(
     }
 
     for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
-        double numerator = 0.0;
-        double left_square = 0.0;
-        double right_square = 0.0;
-        double score;
+        float numerator = 0.0f;
+        float left_square = 0.0f;
+        float right_square = 0.0f;
+        float score;
 
         for (index = first + lag; index < end; ++index) {
             const uint32_t offset = (uint32_t)(index - flux_base);
-            const double left = (double)flux[offset];
-            const double right = (double)flux[offset - lag];
+            const float left = flux[offset];
+            const float right = flux[offset - lag];
             numerator += left * right;
             left_square += left * left;
             right_square += right * right;
         }
-        if (left_square <= 1e-18 || right_square <= 1e-18) {
+        /* A3: float guard, sized for normalized flux. See apta_s4.c. */
+        if (left_square <= 1e-12f || right_square <= 1e-12f) {
             continue;
         }
-        score = numerator / sqrt(left_square * right_square);
+        score = numerator / sqrtf(left_square * right_square);
         if (score > best_score) {
             best_score = score;
             best_lag = lag;
         }
     }
-    if (best_lag == 0u || best_score < 0.04) {
+    if (best_lag == 0u || best_score < 0.04f) {
         return 0;
     }
 
     for (lag = 0u; lag < best_lag; ++lag) {
-        double score = 0.0;
+        float score = 0.0f;
         for (index = first + lag; index < end; index += best_lag) {
-            score += (double)flux[(uint32_t)(index - flux_base)];
+            score += flux[(uint32_t)(index - flux_base)];
         }
         if (score > best_phase_score) {
             best_phase_score = score;
@@ -548,6 +552,7 @@ apta_status_t apta_internal_s6_process_sample(
     apta_internal_s6_session_state_t *state;
     apta_internal_onset_bin_t *bin;
     uint64_t bin_index;
+    float magnitude;
 
     if (!apta_s6_enabled(session)) {
         return APTA_STATUS_OK;
@@ -566,7 +571,10 @@ apta_status_t apta_internal_s6_process_sample(
     if (bin->sample_count == UINT32_MAX) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
-    bin->sum_absolute += fabs((double)sample);
+    /* A3: branchless clamp, as in S4. */
+    magnitude = fminf(fabsf(sample), 1.0f);
+    bin->sum_absolute +=
+        (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
     bin->sample_count += 1u;
     return APTA_STATUS_OK;
 }
@@ -667,7 +675,7 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
         windows[0].tempo_millibpm = session->tempo_value.tempo_millibpm;
         windows[0].phase_bins = 0u;
         windows[0].confidence = session->tempo_value.confidence;
-        windows[0].score = 0.05;
+        windows[0].score = 0.05f;
         window_count = 1u;
         degraded = 1;
     }

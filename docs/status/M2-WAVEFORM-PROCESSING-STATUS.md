@@ -220,3 +220,51 @@ The next architecture and evidence sequence is:
 7. Stage S6 global-grid and dynamic-tempo refinement.
 
 The completed result-slot contract is documented in [`../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md`](../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md).
+
+## Types: double removed from the per-sample waveform path
+
+The first hardware target is RV32IMAFC, which has no hardware double. Two
+per-sample paths in the waveform code used it.
+
+`apta_internal_waveform_accumulator_t.sum_squares` is now `uint64_t`, a sum of
+squared sample magnitudes scaled by `APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE`
+(2^23). An overview column holds 1024 samples, bounding the sum at 2^56, a 256x
+margin. `apta_quantize_rms()`, `apta_detail_quantize_rms()` and
+`apta_pool_quantize_rms()` divide out the count and the scale; their arithmetic
+stays `double` because it runs once per column rather than once per sample, and
+the round-half-to-even step feeds canonical serialization.
+
+The scale is 2^23 rather than the 2^15 used for onset magnitudes, and that
+choice matters. A sample decoded from 16-bit PCM is exactly k/32768, so k * 2^8
+is representable in `uint64_t` without loss and the conversion introduces no
+error at all for such sources. Measured against the previous implementation,
+published `minimum`, `maximum`, `rms` and `flags` are bit-identical. A 2^15
+scale, which is what a naive reading of the requirement suggests, moved some
+published `rms` values by one count out of 65535 -- small, but a silent change
+to published data, and no test in the repository detects it because there are no
+stored golden column values. `apta.waveform.determinism` compares two chunkings
+of the same input against each other, not against a reference.
+
+The per-sample format conversions `apta_normalize_s16()`, `_s24()` and their
+counterparts in `apta_waveform_detail_replay.c` computed
+`(float)((double)value / 32768.0)`. These run once per source sample per
+channel, ahead of every other per-sample path. They are now single `float`
+divisions. This is bit-identical rather than merely close: for 16- and 24-bit
+input both the value and the divisor are exactly representable in `float`, so
+IEEE 754 gives the correctly rounded result either way.
+
+`apta_normalize_s32()` keeps a `double` division on its positive branch. A
+32-bit magnitude exceeds float's 24-bit mantissa, so converting first would
+discard bits. Its negative branch divides by 2^31, where scaling is exact, and
+is now `float`. This is the only per-sample `double` remaining, reachable only
+for `APTA_SAMPLE_S32` input, and it is commented as such.
+
+Conversions clamp with `fminf(fabsf(sample), 1.0f)`. `apta_read_channel_sample()
+` already guarantees a finite value in [-1, 1], but the float-to-integer
+conversion must not depend on a caller invariant for its defined behaviour. The
+branchless form is also safer than an `if`: for a NaN input the comparison form
+would leave NaN in place and the subsequent integer conversion would be
+undefined, whereas `fminf` returns the non-NaN operand.
+
+Verified with AddressSanitizer and UndefinedBehaviorSanitizer over the full
+suite, with no `float-cast-overflow` or other diagnostics.
