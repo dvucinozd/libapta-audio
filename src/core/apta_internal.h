@@ -524,6 +524,10 @@ struct apta_session {
      * evidence start of the refresh that filled it, and that start moves once
      * the track is longer than the onset ring. */
     float s4_cached_ambiguity;
+    /* Contrast between novelty on the predicted beats and novelty between
+     * them. Cached with the estimate for the same reason as the ambiguity:
+     * a gated pass has not refilled the flux array it is computed from. */
+    float s4_cached_grid_fit;
     uint32_t tempo_candidate_count;
     apta_tempo_value_t tempo_value;
     apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];

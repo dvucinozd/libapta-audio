@@ -1012,7 +1012,9 @@ int main(int argc, char **argv)
     printf("  %-10s %-18s %-18s %s\n",
            "threshold", "correct admitted", "wrong admitted", "usable");
     {
-        static const uint32_t gates[] = {50u, 55u, 60u, 65u, 70u, 75u, 80u};
+        static const uint32_t gates[] = {
+            50u, 55u, 60u, 65u, 70u, 75u, 80u, 85u, 90u, 95u
+        };
         unsigned g;
 
         for (g = 0u; g < sizeof(gates) / sizeof(gates[0]); ++g) {
