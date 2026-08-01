@@ -497,3 +497,69 @@ confidence that reaches both `apta_waveform_overview_view_t` and
 `apta_result_get_feature_state()`, still advertises the capability, and reports
 no tempo. Restoring `CONFIDENCE` to `APTA_INTERNAL_S4_FEATURES` makes it fail on
 the tempo assertion.
+
+## 18. Tempo accuracy: baseline measurement
+
+B1 to B3 cannot be evaluated on impulse trains, so `tools/apta_tempo_corpus.c`
+synthesizes a repeatable corpus and measures the estimator against it. Four
+multi-layer drum patterns -- kick, snare, hat and a bassline -- at ten tempi
+from 90 to 174 BPM, 30 s each, 40 tracks. The noise source is a seeded
+xorshift, so the audio and the results are reproducible from the binary alone.
+`--write-wav DIR` dumps the corpus for inspection.
+
+```bash
+cc -O2 -std=c11 -Iinclude tools/apta_tempo_corpus.c build/libapta.a -lm \
+   -o build/apta-tempo-corpus
+./build/apta-tempo-corpus --seconds 30
+```
+
+The corpus is synthetic: exact timing, no expressive dynamics, no production
+processing. It is a floor, not a prediction of real-world accuracy. Every rate
+below must be read with that attached.
+
+### 18.1 Result at the current implementation
+
+| Measure | Value |
+|---|---:|
+| Tracks | 40 |
+| Exact | 8 (20.0%) |
+| Octave-family errors | 25 (62.5%) |
+| Other errors | 7 |
+| No tempo reported | 0 |
+
+Error breakdown: two-thirds 11, third 8, half 4, quarter 2, other 7.
+
+| Confidence | n | mean | min | max |
+|---|---:|---:|---:|---:|
+| Correct | 8 | 81.1 | 77 | 84 |
+| Incorrect | 32 | 70.3 | 58 | 88 |
+
+With an actionable threshold of 70 -- the point at which a host would let Sync
+or Quantize use the grid -- there are **14 high-confidence octave errors**. B1
+requires that number to be zero.
+
+### 18.2 What the numbers say
+
+The estimator is not shippable for tempo or beatgrid in its current form, and
+the confidence value is the reason rather than the accuracy rate.
+
+Confidence does not separate right from wrong. The two distributions overlap
+almost completely, and the single most confident answer in the corpus, 88, is
+**wrong** -- higher than the best correct answer, 84. A host gating Sync on
+confidence would be misled preferentially toward the errors.
+
+The most common failure, two-thirds at 11 of 40, is a relation the public enum
+defines but the implementation never produces, and the second most common,
+third at 8 of 40, has no relation constant at all. So the dominant failure mode
+is not merely unresolved, it is not reportable. That is B2.
+
+The work order's own observation reproduces exactly: `offbeat_bass` at 128 BPM
+is reported as 42.710 BPM, the same 42,710 millibpm the work order cites for
+its impulse train, at confidence 80.
+
+### 18.3 Status
+
+This is the measurement B1 to B3 are to be judged against. It is recorded here
+before any algorithmic change so the comparison is honest, and it is deliberately
+not tuned: no threshold in the corpus was chosen to make the current
+implementation look better or worse.
