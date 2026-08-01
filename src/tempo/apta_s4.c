@@ -319,6 +319,117 @@ static uint32_t apta_s4_tempo_from_lag(
 }
 
 /*
+ * Where the beat period actually lies, to better than one bin.
+ *
+ * The lag scan is an integer argmax, so the tempi it can report are fixed by
+ * the bin size alone: 5.8 ms per bin puts them 1.6 BPM apart near 128, and a
+ * track at 128.00 can only be gridded at 127.60. The published grid is one
+ * anchor plus a constant period, so that error accumulates -- half a beat in
+ * 1.3 minutes, a whole bar in 5.
+ *
+ * Resolution comes from measuring across many beats rather than from the shape
+ * of one peak. Correlating at a lag of `multiple` beats puts the peak near
+ * `multiple * lag`, and dividing the integer argmax found there by `multiple`
+ * gives the period to a fraction of a bin. The same integer search buys
+ * `multiple` times the precision because the error is divided too.
+ *
+ * Fitting a parabola through the winning lag and its two neighbours was tried
+ * first and measured worse: median tempo error over 29 real tracks went from
+ * 0.154% to 0.184%, with 16 tracks worse and 9 better. The correlation peak is
+ * as narrow as the onsets that produce it, a few bins at most, so three samples
+ * straddling it describe local asymmetry rather than a parabola, and the vertex
+ * they imply is noise.
+ *
+ * `multiple` is capped at four bars. Beyond that the estimate assumes a tempo
+ * held constant over more of the track than is safe, and the gain is already
+ * down to hundredths of a BPM.
+ */
+static float apta_s4_lag_offset(
+    const apta_session_t *session,
+    uint64_t evidence_first,
+    uint64_t evidence_end,
+    uint32_t lag)
+{
+    const uint64_t span = evidence_end - evidence_first;
+    uint32_t multiple = APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS;
+    uint32_t best_extended;
+    uint32_t window;
+    uint32_t step;
+    float best_score = 0.0f;
+    float offset;
+
+    if (lag == 0u || span == 0u) {
+        return 0.0f;
+    }
+
+    /* Half the evidence must survive the shift, or the correlation is measured
+     * over too little of the track to mean anything. */
+    while (multiple > 1u && (uint64_t)multiple * lag > span / 2u) {
+        multiple -= 1u;
+    }
+    if (multiple < 2u) {
+        return 0.0f;
+    }
+
+    /* Only lags that round back to this beat are candidates, so the search
+     * cannot walk onto a neighbouring beat and change the answer's octave. */
+    window = multiple / 2u;
+    best_extended = multiple * lag;
+    for (step = 0u; step <= 2u * window; ++step) {
+        const uint32_t extended = multiple * lag - window + step;
+        float score;
+
+        if (extended == 0u || (uint64_t)extended >= span) {
+            continue;
+        }
+        score = apta_s4_correlation_at_lag(
+            session, evidence_first, evidence_end, extended);
+        if (score > best_score) {
+            best_score = score;
+            best_extended = extended;
+        }
+    }
+    if (best_score <= 0.0f) {
+        return 0.0f;
+    }
+
+    offset = (float)best_extended / (float)multiple - (float)lag;
+    if (offset > 0.5f) {
+        offset = 0.5f;
+    } else if (offset < -0.5f) {
+        offset = -0.5f;
+    }
+    return offset;
+}
+
+/*
+ * Tempo at a fractional lag, as `tempo(lag) * lag / (lag + offset)`.
+ *
+ * Scaling the exact integer-lag tempo keeps the wide arithmetic in
+ * apta_s4_tempo_from_lag() and leaves float carrying only a ratio within 1% of
+ * one, where its precision costs a hundredth of a millibpm. Computing the
+ * whole expression in float instead would put a 2.6e9 numerator through a
+ * 24-bit mantissa for no gain. The target has no hardware double (A3).
+ */
+static uint32_t apta_s4_tempo_from_refined_lag(
+    const apta_session_t *session,
+    uint32_t lag,
+    float offset)
+{
+    const uint32_t tempo = apta_s4_tempo_from_lag(session, lag);
+    float refined;
+
+    if (tempo == 0u || offset == 0.0f) {
+        return tempo;
+    }
+    refined = (float)tempo * (float)lag / ((float)lag + offset);
+    if (refined <= 0.0f) {
+        return tempo;
+    }
+    return (uint32_t)(refined + 0.5f);
+}
+
+/*
  * B2: the metrical relations the estimator can report, as exact ratios.
  *
  * One table serves two callers: apta_s4_relation() classifies a candidate
@@ -514,6 +625,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
 {
     float best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
     uint32_t best_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0u, 0u, 0u};
+    float lag_offsets[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
     uint64_t evidence_first;
     uint64_t evidence_end;
     uint64_t run_count;
@@ -632,6 +744,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
             best_scores[lag] = session->s4_cached_scores[lag];
             best_lags[lag] = session->s4_cached_lags[lag];
+            lag_offsets[lag] = session->s4_cached_lag_offsets[lag];
         }
         goto estimate_ready;
     }
@@ -678,10 +791,23 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         }
     }
 
+    /* Refine each candidate, not just the winner: all three are published, and
+     * the duplicate suppression below compares their tempi. Three correlations
+     * per candidate against several hundred in the scan above. */
+    for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
+        lag_offsets[lag] = best_lags[lag] != 0u
+                               ? apta_s4_lag_offset(session,
+                                                    evidence_first,
+                                                    evidence_end,
+                                                    best_lags[lag])
+                               : 0.0f;
+    }
+
     /* A2: cache the estimate so a gated pass can reuse it. */
     for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
         session->s4_cached_scores[lag] = best_scores[lag];
         session->s4_cached_lags[lag] = best_lags[lag];
+        session->s4_cached_lag_offsets[lag] = lag_offsets[lag];
     }
     session->s4_refreshed_evidence_end = evidence_end;
 
@@ -699,7 +825,8 @@ estimate_ready:
         if (best_lags[lag] == 0u) {
             continue;
         }
-        tempo = apta_s4_tempo_from_lag(session, best_lags[lag]);
+        tempo = apta_s4_tempo_from_refined_lag(
+            session, best_lags[lag], lag_offsets[lag]);
         if (tempo < APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
             tempo > APTA_REFERENCE_TEMPO_MAX_MILLIBPM) {
             continue;
