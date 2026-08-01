@@ -194,6 +194,11 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_GRID_LOCKING;
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
+        /* A4: CONFIDENCE is no longer an S4 feature, but it still needs
+         * something to qualify, and every feature it can qualify depends on
+         * the overview. Naming it explicitly keeps CONFIDENCE-alone rejected
+         * while allowing WAVEFORM_OVERVIEW | CONFIDENCE. */
+        APTA_FEATURE_CONFIDENCE |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
     apta_internal_result_pool_layout_t pool_layout;

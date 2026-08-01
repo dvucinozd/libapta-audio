@@ -26,6 +26,7 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
 {
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_FEATURE_CONFIDENCE |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
 
@@ -45,9 +46,12 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
         (feature_mask & APTA_FEATURE_GLOBAL_BEATGRID) == 0u) {
         return 0;
     }
+    /* A4: the overview now carries its own confidence, so it is one of the
+     * features CONFIDENCE can qualify. */
     if ((feature_mask & APTA_FEATURE_CONFIDENCE) != 0u &&
         (feature_mask &
-         (APTA_FEATURE_BPM |
+         (APTA_FEATURE_WAVEFORM_OVERVIEW |
+          APTA_FEATURE_BPM |
           APTA_FEATURE_LOCAL_BEATGRID |
           APTA_FEATURE_GLOBAL_BEATGRID)) == 0u) {
         return 0;

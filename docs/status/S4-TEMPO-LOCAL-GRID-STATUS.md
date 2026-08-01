@@ -422,3 +422,78 @@ ESP-IDF component-size report, where removing `double` should drop the
 soft-float support routines rather than add code. No RISC-V toolchain was
 available here, so that criterion is unverified locally and left to
 `.github/workflows/espidf.yml`.
+
+## 17. Activation: CONFIDENCE decoupled from the tempo engine
+
+`APTA_INTERNAL_S4_FEATURES` included `APTA_FEATURE_CONFIDENCE`, and
+`apta_s4_enabled()` tests against that mask. A host requesting
+`WAVEFORM_OVERVIEW | CONFIDENCE` -- a reasonable request meaning "tell me how
+much of the waveform you actually measured" -- therefore activated the full
+autocorrelation tempo estimator. Nothing in the public headers signalled this:
+`apta_types.h` documents `APTA_FEATURE_CONFIDENCE` as an independent bit, and
+the result model already carries `apta_waveform_overview_view_t.confidence` and
+`apta_tempo_value_t.confidence` as separate fields. Only the activation mask
+conflated them.
+
+`APTA_FEATURE_CONFIDENCE` is no longer in `APTA_INTERNAL_S4_FEATURES`. It is
+treated as a modifier that qualifies whichever features a host actually
+requested.
+
+Consequences worked through:
+
+- **Dependency validation.** `CONFIDENCE` was reachable by the
+  `waveform_dependency` group only through `APTA_INTERNAL_S4_FEATURES`, so
+  removing it there would have made `CONFIDENCE` alone a valid session. It is
+  now named explicitly in that group in `apta_config.c` and
+  `apta_session_detail_contract.c`: `CONFIDENCE` alone is still rejected,
+  `WAVEFORM_OVERVIEW | CONFIDENCE` is accepted. `apta_session_mask_is_coherent()`
+  additionally accepts `WAVEFORM_OVERVIEW` as something `CONFIDENCE` can
+  qualify, alongside the tempo and grid features it already accepted.
+
+- **Overview confidence.** This did not previously exist. Both snapshot paths
+  hard-coded `result->overview.confidence = APTA_CONFIDENCE_UNKNOWN`, so the
+  field was never meaningful, with or without S4. It now reports coverage
+  completeness: complete columns over expected columns, scaled to
+  `APTA_CONFIDENCE_MAX`, or `APTA_CONFIDENCE_UNKNOWN` while the track length is
+  unknown or when the host did not request confidence. Note that there are two
+  snapshot paths, `apta_waveform_snapshot.c` and `apta_result_pool_snapshot.c`,
+  each carrying its own copy of the overview logic; bounded sessions go through
+  the second.
+
+- **Accessors.** `apta_result_get_feature_state()` for `APTA_FEATURE_CONFIDENCE`
+  is answered from the tempo estimate only when `APTA_FEATURE_BPM` is available;
+  otherwise it falls through the chain so the waveform layer answers. Without
+  this the S4 accessor would have reported a zeroed tempo state for sessions
+  that never ran S4.
+
+- **Capabilities.** `apta_context_get_capabilities()` still advertises
+  `APTA_FEATURE_CONFIDENCE`; that path was not touched.
+
+### 17.1 Effect
+
+| Requested features | Before A1 | After A3 | After A4 |
+|---|---:|---:|---:|
+| `WAVEFORM_OVERVIEW` | 155.6 | 152.5 | 157.9 |
+| `+ CONFIDENCE` | 13,393.9 | 446.7 | 156.7 |
+
+`overview+confidence` is now within noise of `overview`, which is the check this
+task exists to satisfy. Measured against the original baseline that row is 85x
+cheaper.
+
+The other rows are unaffected, as expected: a host that asks for `BPM` still
+gets the estimator.
+
+### 17.2 Behaviour change for existing hosts
+
+This is observable. Any host that relied on `APTA_FEATURE_CONFIDENCE` to switch
+on tempo analysis will no longer get a tempo. Such a host was depending on
+undocumented activation coupling, and the fix is to request `APTA_FEATURE_BPM`,
+but the change is not source-compatible in behaviour and is recorded here for
+that reason.
+
+`apta.waveform.confidence_without_tempo` covers the new contract: a session
+requesting `WAVEFORM_OVERVIEW | CONFIDENCE` reports a meaningful overview
+confidence that reaches both `apta_waveform_overview_view_t` and
+`apta_result_get_feature_state()`, still advertises the capability, and reports
+no tempo. Restoring `CONFIDENCE` to `APTA_INTERNAL_S4_FEATURES` makes it fail on
+the tempo assertion.

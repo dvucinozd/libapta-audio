@@ -51,6 +51,40 @@ static int16_t apta_pool_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
+/* A4: see apta_overview_confidence() in apta_waveform_snapshot.c. Duplicated
+ * here to match the existing split between the two snapshot paths. */
+static apta_confidence_value_t apta_pool_overview_confidence(
+    const apta_session_t *session,
+    uint32_t complete_columns)
+{
+    uint64_t total_frames;
+    uint64_t expected;
+
+    if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+
+    total_frames = session->end_of_input_signalled
+                       ? session->final_end_frame
+                       : session->config.total_frames;
+    if (total_frames == 0u || session->overview_frames_per_column == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+
+    expected = (total_frames +
+                (uint64_t)session->overview_frames_per_column - 1u) /
+               (uint64_t)session->overview_frames_per_column;
+    if (expected == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+    if ((uint64_t)complete_columns >= expected) {
+        return (apta_confidence_value_t)APTA_CONFIDENCE_MAX;
+    }
+    return (apta_confidence_value_t)(
+        ((uint64_t)complete_columns * (uint64_t)APTA_CONFIDENCE_MAX) /
+        expected);
+}
+
 /* A3: see apta_quantize_rms() in apta_waveform_snapshot.c. Only the parameter
  * type changed; apta_pool_round_ties_even() and the double arithmetic feeding
  * canonical serialization are deliberately untouched. */
@@ -368,7 +402,8 @@ static apta_status_t apta_pool_build_overview(
     result->overview.level.frames_per_column =
         session->overview_frames_per_column;
     result->overview.level.origin_frame = 0u;
-    result->overview.confidence = APTA_CONFIDENCE_UNKNOWN;
+    result->overview.confidence =
+        apta_pool_overview_confidence(session, output_index);
     result->overview.span_count = span_count;
     result->overview.spans = result->overview_spans;
 
@@ -386,6 +421,10 @@ static apta_status_t apta_pool_build_overview(
             : (full_coverage ? APTA_FEATURE_STABLE
                              : APTA_FEATURE_PARTIAL);
     result->info.available_features |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    /* A4: the overview reports confidence on its own, without S4. */
+    if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) != 0u) {
+        result->info.available_features |= APTA_FEATURE_CONFIDENCE;
+    }
     return APTA_STATUS_OK;
 }
 

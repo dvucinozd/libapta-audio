@@ -52,9 +52,13 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS 32u
 #endif
 
+/* A4: APTA_FEATURE_CONFIDENCE is deliberately absent. It is a modifier that
+ * qualifies whatever features a host actually requested, not a request for
+ * tempo analysis; including it here made WAVEFORM_OVERVIEW | CONFIDENCE
+ * activate the whole autocorrelation estimator. */
 #define APTA_INTERNAL_S4_FEATURES \
     (APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID | \
-     APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING)
+     APTA_FEATURE_GRID_LOCKING)
 
 #define APTA_INTERNAL_S6_FEATURES \
     (APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO)
