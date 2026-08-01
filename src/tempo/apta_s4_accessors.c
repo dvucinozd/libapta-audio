@@ -90,20 +90,29 @@ apta_status_t APTA_CALL apta_result_get_feature_state(
     apta_confidence_value_t *confidence_out)
 {
     apta_status_t status;
+    int answered_here;
 
-    if (feature != APTA_FEATURE_BPM &&
-        feature != APTA_FEATURE_LOCAL_BEATGRID &&
-        feature != APTA_FEATURE_CONFIDENCE &&
-        feature != APTA_FEATURE_GRID_LOCKING) {
+    if (result == NULL || state_out == NULL || confidence_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* A4: CONFIDENCE is no longer owned by S4. Answer it from the tempo
+     * estimate only when there is one; otherwise fall through so the waveform
+     * layer can report its own coverage confidence. */
+    answered_here =
+        feature == APTA_FEATURE_BPM ||
+        feature == APTA_FEATURE_LOCAL_BEATGRID ||
+        feature == APTA_FEATURE_GRID_LOCKING ||
+        (feature == APTA_FEATURE_CONFIDENCE &&
+         (result->info.available_features & APTA_FEATURE_BPM) != 0u);
+
+    if (!answered_here) {
         return apta_result_get_feature_state_s4_base(
             result,
             feature,
             range,
             state_out,
             confidence_out);
-    }
-    if (result == NULL || state_out == NULL || confidence_out == NULL) {
-        return APTA_ERROR_INVALID_ARGUMENT;
     }
     status = apta_s4_validate_range(range);
     if (status < 0) {

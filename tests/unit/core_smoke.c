@@ -49,6 +49,9 @@ int main(void)
     CHECK(apta_context_get_capabilities(context) ==
           (APTA_FEATURE_WAVEFORM_OVERVIEW |
            APTA_FEATURE_WAVEFORM_DETAIL |
+           /* C1: three-band overview waveform is now implemented, so the
+            * advertised capability set genuinely grew. */
+           APTA_FEATURE_WAVEFORM_3BAND |
            APTA_FEATURE_BPM |
            APTA_FEATURE_LOCAL_BEATGRID |
            APTA_FEATURE_GLOBAL_BEATGRID |

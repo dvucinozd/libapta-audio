@@ -85,7 +85,10 @@ static int apta_s4_bin_complete(
     return bin != NULL && expected != 0u && bin->sample_count == expected;
 }
 
-static double apta_s4_energy(
+/* A3: recover the normalized mean magnitude from the integer accumulator. One
+ * division per bin, called O(bins) per refresh rather than O(bins x lags)
+ * since A1 precomputes the flux. */
+static float apta_s4_energy(
     const apta_session_t *session,
     uint64_t bin_index)
 {
@@ -93,20 +96,74 @@ static double apta_s4_energy(
         apta_s4_const_bin(session, bin_index);
 
     return bin != NULL && bin->sample_count != 0u
-               ? bin->sum_absolute / (double)bin->sample_count
-               : 0.0;
+               ? (float)bin->sum_absolute /
+                     ((float)bin->sample_count *
+                      APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE)
+               : 0.0f;
 }
 
-static double apta_s4_flux(
+/* A1: the single definition of the flux computation. Called once per bin by
+ * the fill loop in apta_internal_s4_refresh(); the lag and phase loops read
+ * session->onset_flux instead of calling this. */
+static float apta_s4_flux_uncached(
     const apta_session_t *session,
     uint64_t bin_index,
     uint64_t evidence_first)
 {
-    double current = apta_s4_energy(session, bin_index);
-    double previous = bin_index > evidence_first
-                          ? apta_s4_energy(session, bin_index - 1u)
-                          : 0.0;
-    return current > previous ? current - previous : 0.0;
+    float current = apta_s4_energy(session, bin_index);
+    float previous = bin_index > evidence_first
+                         ? apta_s4_energy(session, bin_index - 1u)
+                         : 0.0f;
+    return current > previous ? current - previous : 0.0f;
+}
+
+/* B1: log-normal weight for a tempo, peaking at the configured centre. */
+static float apta_s4_tempo_prior(uint32_t tempo_millibpm)
+{
+    float ratio;
+    float logarithm;
+
+    if (tempo_millibpm == 0u) {
+        return 0.0f;
+    }
+    ratio = (float)tempo_millibpm /
+            (float)APTA_INTERNAL_TEMPO_PRIOR_CENTRE_MILLIBPM;
+    logarithm = logf(ratio) / APTA_INTERNAL_TEMPO_PRIOR_WIDTH;
+    return expf(-0.5f * logarithm * logarithm);
+}
+
+/* B1: normalized autocorrelation of the precomputed flux at one lag. Extracted
+ * so the octave-family scan below can evaluate related lags without repeating
+ * the loop body. */
+static float apta_s4_correlation_at_lag(
+    const apta_session_t *session,
+    uint64_t evidence_first,
+    uint64_t evidence_end,
+    uint32_t lag)
+{
+    const float *flux = session->onset_flux;
+    float numerator = 0.0f;
+    float left_square = 0.0f;
+    float right_square = 0.0f;
+    float score;
+    uint64_t index;
+
+    if (lag == 0u || (uint64_t)lag >= evidence_end - evidence_first) {
+        return 0.0f;
+    }
+    for (index = evidence_first + lag; index < evidence_end; ++index) {
+        const uint32_t offset = (uint32_t)(index - evidence_first);
+        const float left = flux[offset];
+        const float right = flux[offset - lag];
+        numerator += left * right;
+        left_square += left * left;
+        right_square += right * right;
+    }
+    if (left_square <= 1e-12f || right_square <= 1e-12f) {
+        return 0.0f;
+    }
+    score = numerator / sqrtf(left_square * right_square);
+    return score > 0.0f ? score : 0.0f;
 }
 
 static int apta_s4_find_evidence(
@@ -185,31 +242,61 @@ static uint32_t apta_s4_tempo_from_lag(
                : 0u;
 }
 
+/*
+ * B2: the metrical relations the estimator can report, as exact ratios.
+ *
+ * One table serves two callers: apta_s4_relation() classifies a candidate
+ * against the selected tempo, and B1's octave-family scan walks the same
+ * ratios looking for a competing peak. They were separate before, which meant
+ * the set of relations the estimator could detect and the set it searched
+ * could drift apart.
+ *
+ * Ordered by increasing distance from unity so the nearest match wins when
+ * tolerances would otherwise overlap.
+ */
+typedef struct {
+    uint32_t numerator;
+    uint32_t denominator;
+    apta_tempo_relation_t relation;
+} apta_s4_ratio_t;
+
+static const apta_s4_ratio_t apta_s4_ratios[] = {
+    {3u, 2u, APTA_TEMPO_RELATION_THREE_HALF},
+    {2u, 3u, APTA_TEMPO_RELATION_TWO_THIRDS},
+    {2u, 1u, APTA_TEMPO_RELATION_DOUBLE},
+    {1u, 2u, APTA_TEMPO_RELATION_HALF},
+    {3u, 1u, APTA_TEMPO_RELATION_TRIPLE},
+    {1u, 3u, APTA_TEMPO_RELATION_THIRD},
+    {4u, 1u, APTA_TEMPO_RELATION_QUADRUPLE},
+    {1u, 4u, APTA_TEMPO_RELATION_QUARTER}
+};
+
+#define APTA_S4_RATIO_COUNT \
+    (sizeof(apta_s4_ratios) / sizeof(apta_s4_ratios[0]))
+
 static apta_tempo_relation_t apta_s4_relation(
     uint32_t selected,
     uint32_t candidate)
 {
-    uint64_t difference;
-    uint64_t tolerance;
+    uint32_t entry;
 
     if (selected == 0u || candidate == 0u || selected == candidate) {
         return APTA_TEMPO_RELATION_INDEPENDENT;
     }
 
-    tolerance = selected / 50u + 1u;
-    difference = candidate > selected / 2u
-                     ? candidate - selected / 2u
-                     : selected / 2u - candidate;
-    if (difference <= tolerance) {
-        return APTA_TEMPO_RELATION_HALF;
-    }
+    for (entry = 0u; entry < APTA_S4_RATIO_COUNT; ++entry) {
+        const uint64_t expected =
+            (uint64_t)selected * apta_s4_ratios[entry].numerator /
+            apta_s4_ratios[entry].denominator;
+        const uint64_t difference = candidate > expected
+                                        ? (uint64_t)candidate - expected
+                                        : expected - (uint64_t)candidate;
+        /* Two percent, the tolerance the half-time case already used. */
+        const uint64_t tolerance = expected / 50u + 1u;
 
-    tolerance = selected / 25u + 1u;
-    difference = candidate > selected * 2u
-                     ? candidate - selected * 2u
-                     : selected * 2u - candidate;
-    if (difference <= tolerance) {
-        return APTA_TEMPO_RELATION_DOUBLE;
+        if (difference <= tolerance) {
+            return apta_s4_ratios[entry].relation;
+        }
     }
 
     return APTA_TEMPO_RELATION_INDEPENDENT;
@@ -292,6 +379,18 @@ apta_status_t apta_internal_s4_prepare(apta_session_t *session)
     }
     memset(session->onset_bins, 0, bytes);
     session->onset_bin_capacity = APTA_INTERNAL_ONSET_BIN_CAPACITY;
+
+    bytes = (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float);
+    session->onset_flux = (float *)apta_internal_session_allocate(
+        session,
+        bytes,
+        alignof(float),
+        APTA_MEMORY_PERSISTENT);
+    if (session->onset_flux == NULL) {
+        return APTA_ERROR_OUT_OF_MEMORY;
+    }
+    memset(session->onset_flux, 0, bytes);
+    session->onset_flux_capacity = APTA_INTERNAL_ONSET_BIN_CAPACITY;
     return APTA_STATUS_OK;
 }
 
@@ -303,6 +402,7 @@ apta_status_t apta_internal_s4_process_sample(
     uint64_t bin_index;
     uint32_t slot;
     apta_internal_onset_bin_t *bin;
+    float magnitude;
 
     if (!apta_s4_enabled(session)) {
         return APTA_STATUS_OK;
@@ -323,26 +423,36 @@ apta_status_t apta_internal_s4_process_sample(
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 
-    bin->sum_absolute += fabs((double)sample);
+    /* A3: apta_read_channel_sample() already returns a finite value in
+     * [-1, 1], but the conversion below must not depend on a caller invariant
+     * for its defined behaviour. fminf is branchless, so the guard costs one
+     * instruction rather than a per-sample branch. */
+    magnitude = fminf(fabsf(sample), 1.0f);
+    bin->sum_absolute +=
+        (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
     bin->sample_count += 1u;
     return APTA_STATUS_OK;
 }
 
 apta_status_t apta_internal_s4_refresh(apta_session_t *session)
 {
-    double best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0, 0.0, 0.0};
+    float best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
     uint32_t best_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0u, 0u, 0u};
     uint64_t evidence_first;
     uint64_t evidence_end;
     uint64_t run_count;
     uint64_t index;
+    uint32_t flux_capacity;
+    float family_best;
+    float family_ambiguity;
+    int estimate = 0;
     uint32_t minimum_lag;
     uint32_t maximum_lag;
     uint32_t lag;
     uint32_t candidate_count = 0u;
     uint32_t selected_tempo;
     uint32_t phase = 0u;
-    double phase_score = -1.0;
+    float phase_score = -1.0f;
     uint32_t confidence;
     apta_feature_state_t state;
     apta_source_frame_t evidence_first_frame;
@@ -356,7 +466,8 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     apta_frame_range_t old_evidence;
     uint32_t flags = 0u;
 
-    if (!apta_s4_enabled(session) || session->onset_bins == NULL) {
+    if (!apta_s4_enabled(session) || session->onset_bins == NULL ||
+        session->onset_flux == NULL) {
         return APTA_STATUS_OK;
     }
 
@@ -379,6 +490,32 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    /* A2: decide whether to re-run the autocorrelation. Only the two expensive
+     * loops are gated; everything derived from the current ranges is
+     * recomputed on every call from the cached estimate, so focus movement
+     * keeps updating the applicability range and republishing.
+     *
+     * Draining and completed sessions always estimate: APTA_FEATURE_FINAL is
+     * reachable only from a pass that sees the full evidence range with the
+     * session already COMPLETED, so gating the last one would strand the state
+     * at STABLE. A grid lock needs no exemption because the locked branch
+     * above returns before this point. */
+    if (evidence_end < session->s4_refreshed_evidence_end) {
+        /* Focus or a region request moved the range backwards. Reset the
+         * tracker and re-estimate. */
+        session->s4_refreshed_evidence_end = 0u;
+        estimate = 1;
+    } else if (session->end_of_input_signalled ||
+               atomic_load_explicit(&session->state, memory_order_acquire) ==
+                   APTA_SESSION_COMPLETED ||
+               evidence_end >= session->s4_refreshed_evidence_end +
+                                   APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS) {
+        estimate = 1;
+    } else if (session->s4_refreshed_evidence_end == 0u) {
+        /* No cached estimate to fall back on yet. */
+        return APTA_STATUS_OK;
+    }
+
     minimum_lag = (uint32_t)(
         ((uint64_t)session->config.source_sample_rate * 60u +
          (uint64_t)300u * APTA_INTERNAL_ONSET_FRAMES_PER_BIN - 1u) /
@@ -396,25 +533,53 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    /* A1: flux[index] depends only on index and evidence_first, both invariant
+     * across the lag loop. Compute it once here; the loops below are pure
+     * array reads. Storing flux as float rounds each term once, but the
+     * accumulators stay double so that the only arithmetic difference from the
+     * previous implementation is that single rounding. A3 converts the
+     * accumulators.
+     *
+     * The array is indexed linearly by (index - evidence_first), not by the
+     * onset_bins ring mapping. apta_s4_find_evidence() returns a contiguous
+     * run bounded by onset_bin_capacity, so the offsets fit the allocation,
+     * and dropping the ring keeps an integer division out of the inner loop —
+     * with a runtime capacity, index % capacity compiles to a hardware divide
+     * and costs more than the correlation arithmetic it feeds. */
+    flux_capacity = session->onset_flux_capacity;
+    if (run_count > (uint64_t)flux_capacity) {
+        return APTA_STATUS_OK;
+    }
+    if (!estimate) {
+        /* A2: reuse the last estimate; skip the fill and both loops. */
+        for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
+            best_scores[lag] = session->s4_cached_scores[lag];
+            best_lags[lag] = session->s4_cached_lags[lag];
+        }
+        goto estimate_ready;
+    }
+
+    for (index = evidence_first; index < evidence_end; ++index) {
+        session->onset_flux[(uint32_t)(index - evidence_first)] =
+            (float)apta_s4_flux_uncached(session, index, evidence_first);
+    }
+
     for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
-        double numerator = 0.0;
-        double left_square = 0.0;
-        double right_square = 0.0;
-        double score;
+        float score;
         uint32_t position;
 
-        for (index = evidence_first + lag; index < evidence_end; ++index) {
-            double left = apta_s4_flux(session, index, evidence_first);
-            double right = apta_s4_flux(session, index - lag, evidence_first);
-            numerator += left * right;
-            left_square += left * left;
-            right_square += right * right;
-        }
-        if (left_square <= 1e-18 || right_square <= 1e-18) {
-            continue;
-        }
-        score = numerator / sqrt(left_square * right_square);
-        if (score <= 0.0) {
+        /* B1: weight by the preferred-tempo prior before the argmax. Every lag
+         * in range is scanned and weighted, so selecting the maximum of the
+         * weighted scores already prefers the best member of an octave family;
+         * what the explicit family scan below adds is a measure of how close
+         * the runner-up sibling came, which is what confidence has to
+         * reflect. */
+        score = apta_s4_correlation_at_lag(
+            session,
+            evidence_first,
+            evidence_end,
+            lag) * apta_s4_tempo_prior(apta_s4_tempo_from_lag(session, lag));
+        if (score <= 0.0f) {
             continue;
         }
 
@@ -436,7 +601,15 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         }
     }
 
-    if (best_lags[0] == 0u || best_scores[0] < 0.05) {
+    /* A2: cache the estimate so a gated pass can reuse it. */
+    for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
+        session->s4_cached_scores[lag] = best_scores[lag];
+        session->s4_cached_lags[lag] = best_lags[lag];
+    }
+    session->s4_refreshed_evidence_end = evidence_end;
+
+estimate_ready:
+    if (best_lags[0] == 0u || best_scores[0] < 0.05f) {
         return APTA_STATUS_OK;
     }
 
@@ -466,7 +639,7 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
             continue;
         }
 
-        score = (uint32_t)(best_scores[lag] / best_scores[0] * 65535.0 + 0.5);
+        score = (uint32_t)(best_scores[lag] / best_scores[0] * 65535.0f + 0.5f);
         if (score > 65535u) {
             score = 65535u;
         }
@@ -490,22 +663,96 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         if (lag != 0u &&
             session->tempo_candidates[lag].score >=
                 (uint16_t)((uint32_t)session->tempo_candidates[0].score * 7u / 10u)) {
-            if (session->tempo_candidates[lag].relation_to_selected ==
-                APTA_TEMPO_RELATION_HALF) {
+            const apta_tempo_relation_t relation =
+                session->tempo_candidates[lag].relation_to_selected;
+
+            /* B2: flag every metrical relation, not just half and double. The
+             * two dominant errors measured on the accuracy corpus are
+             * two-thirds and third, neither of which had a flag before, so a
+             * host reading the flags saw nothing wrong. */
+            if (relation != APTA_TEMPO_RELATION_INDEPENDENT) {
+                flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+            }
+            if (relation == APTA_TEMPO_RELATION_HALF) {
                 flags |= APTA_TEMPO_FLAG_HALF_TIME_AMBIGUITY;
             }
-            if (session->tempo_candidates[lag].relation_to_selected ==
-                APTA_TEMPO_RELATION_DOUBLE) {
+            if (relation == APTA_TEMPO_RELATION_DOUBLE) {
                 flags |= APTA_TEMPO_FLAG_DOUBLE_TIME_AMBIGUITY;
             }
         }
     }
 
+    /* B1: how close did the best octave sibling of the winner come? A
+     * candidate whose family sibling scores nearly as well is ambiguous, and
+     * the honest response is lower confidence rather than high confidence with
+     * a flag nobody reads. That failure -- confidence 82 on a third-relation
+     * error -- is what this task exists to stop. */
+    if (!estimate) {
+        /* A2/B1: a gated pass must not run the family scan. It reads
+         * onset_flux, which was filled relative to the evidence start of the
+         * last refresh that actually estimated; the current evidence start may
+         * differ, and the newest bins are not in the array at all. Reuse the
+         * ambiguity computed alongside the cached estimate instead. */
+        family_ambiguity = session->s4_cached_ambiguity;
+    } else {
+        const float winner = best_scores[0];
+        uint32_t entry;
+
+        family_best = 0.0f;
+        for (entry = 0u; entry < APTA_S4_RATIO_COUNT; ++entry) {
+            /* B2: the same ratio table the relation classifier uses. A lag
+             * scaled by r corresponds to a tempo scaled by 1/r, so the
+             * numerator and denominator swap here. */
+            const float scaled =
+                (float)best_lags[0] *
+                    (float)apta_s4_ratios[entry].denominator /
+                    (float)apta_s4_ratios[entry].numerator + 0.5f;
+            uint32_t sibling_lag;
+            float sibling;
+
+            if (scaled < 1.0f) {
+                continue;
+            }
+            sibling_lag = (uint32_t)scaled;
+            if (sibling_lag < minimum_lag || sibling_lag > maximum_lag ||
+                sibling_lag == best_lags[0]) {
+                continue;
+            }
+            sibling = apta_s4_correlation_at_lag(
+                          session,
+                          evidence_first,
+                          evidence_end,
+                          sibling_lag) *
+                      apta_s4_tempo_prior(
+                          apta_s4_tempo_from_lag(session, sibling_lag));
+            if (sibling > family_best) {
+                family_best = sibling;
+            }
+        }
+        if (winner > 0.0f && family_best > 0.0f) {
+            const float ratio = family_best / winner;
+
+            if (ratio <= APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE) {
+                family_ambiguity = 0.0f;
+            } else {
+                family_ambiguity =
+                    (ratio - APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE) /
+                    (1.0f - APTA_INTERNAL_TEMPO_AMBIGUITY_KNEE);
+                if (family_ambiguity > 1.0f) {
+                    family_ambiguity = 1.0f;
+                }
+            }
+        } else {
+            family_ambiguity = 0.0f;
+        }
+        session->s4_cached_ambiguity = family_ambiguity;
+    }
+
     confidence = 35u + (uint32_t)(best_scores[0] * 50.0);
-    if (candidate_count > 1u && best_scores[0] > 0.0) {
-        double separation = 1.0 - best_scores[1] / best_scores[0];
-        if (separation > 0.0) {
-            confidence += (uint32_t)(separation * 15.0);
+    if (candidate_count > 1u && best_scores[0] > 0.0f) {
+        float separation = 1.0f - best_scores[1] / best_scores[0];
+        if (separation > 0.0f) {
+            confidence += (uint32_t)(separation * 15.0f);
         }
     }
     if (run_count >= APTA_INTERNAL_STABLE_TEMPO_BINS) {
@@ -514,18 +761,32 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     if (confidence > APTA_CONFIDENCE_MAX) {
         confidence = APTA_CONFIDENCE_MAX;
     }
+    /* Scale the whole figure by how unambiguous the octave choice was. A
+     * sibling scoring as well as the winner drives confidence to zero. */
+    confidence = (uint32_t)((float)confidence * (1.0f - family_ambiguity));
+    /* B2: a strong family sibling is ambiguity even when it did not survive
+     * into the candidate list, which holds only three entries. */
+    if (family_ambiguity > 0.0f) {
+        flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+    }
 
-    for (lag = 0u; lag < best_lags[0]; ++lag) {
-        double score = 0.0;
-        for (index = evidence_first + lag;
-             index < evidence_end;
-             index += best_lags[0]) {
-            score += apta_s4_flux(session, index, evidence_first);
+    if (estimate) {
+        for (lag = 0u; lag < best_lags[0]; ++lag) {
+            float score = 0.0f;
+            for (index = evidence_first + lag;
+                 index < evidence_end;
+                 index += best_lags[0]) {
+                score += session->onset_flux[
+                    (uint32_t)(index - evidence_first)];
+            }
+            if (score > phase_score) {
+                phase_score = score;
+                phase = lag;
+            }
         }
-        if (score > phase_score) {
-            phase_score = score;
-            phase = lag;
-        }
+        session->s4_cached_phase = phase;
+    } else {
+        phase = session->s4_cached_phase;
     }
 
     evidence_first_frame = evidence_first * APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
@@ -770,6 +1031,9 @@ void apta_internal_s4_cleanup_session(apta_session_t *session)
     apta_internal_context_deallocate(session->context, session->onset_bins);
     session->onset_bins = NULL;
     session->onset_bin_capacity = 0u;
+    apta_internal_context_deallocate(session->context, session->onset_flux);
+    session->onset_flux = NULL;
+    session->onset_flux_capacity = 0u;
 }
 
 void apta_internal_s4_cleanup_result(apta_result_t *result)

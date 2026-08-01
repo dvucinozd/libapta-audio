@@ -22,11 +22,19 @@ The profile test verifies final feature publication, result lifetime and complet
 
 ## 2. Verified profiles
 
-| Profile | Features | Source | Caller workspace | Queried result-pool allocation | Workspace + pool | Alignment | Allocator calls |
-|---|---|---:|---:|---:|---:|---:|---:|
-| `WAVEFORM_8S` | overview waveform | 8.0 s / 384,000 frames | 131,072 B | 55,664 B | 186,736 B | 16 B | 2 |
-| `PERFORMANCE_LOCAL_6S` | overview, BPM, local grid, confidence | 6.0 s / 288,000 frames | 262,144 B | 46,736 B | 308,880 B | 16 B | 2 |
-| `GLOBAL_DYNAMIC_10_9S` | overview, BPM, global grid, dynamic tempo, confidence | 10.92 s / 524,288 frames | 1,572,864 B | 399,408 B | 1,972,272 B | 16 B | 2 |
+| Profile | Features | Source | Queried workspace | Profile workspace | Queried result-pool allocation | Workspace + pool | Alignment | Allocator calls |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| `WAVEFORM_8S` | overview waveform | 8.0 s / 384,000 frames | 68,832 B | 131,072 B | 55,664 B | 186,736 B | 16 B | 2 |
+| `PERFORMANCE_LOCAL_6S` | overview, BPM, local grid, confidence | 6.0 s / 288,000 frames | 183,648 B | 262,144 B | 46,736 B | 308,880 B | 16 B | 2 |
+| `GLOBAL_DYNAMIC_10_9S` | overview, BPM, global grid, dynamic tempo, confidence | 10.92 s / 524,288 frames | 807,664 B | 1,572,864 B | 399,408 B | 1,972,272 B | 16 B | 2 |
+
+The `Queried workspace` column is `minimum_bytes` from
+`apta_query_workspace_requirements()` for each profile's configuration. It
+replaces the hand-picked constant as the figure a host should plan against;
+the `Profile workspace` column is retained because it is what the profile test
+actually supplies, and it shows the headroom each published profile carries.
+Every profile allocates more than the query asks for, so none of them was
+passing by luck.
 
 The two allocator calls are:
 
@@ -37,9 +45,25 @@ PCM queue nodes, accepted ranges, waveform accumulators, tempo/grid mutable stat
 
 ## 3. What the numbers include
 
-The caller-workspace column is the exact byte budget supplied to `apta_session_config_t.static_workspace` by the profile test.
+The queried-workspace column is the `minimum_bytes` value returned by `apta_query_workspace_requirements()`. A buffer at least that large, and aligned to `required_alignment`, completes the analysis the configuration describes; `apta_session_create()` rejects anything smaller with `APTA_ERROR_OUT_OF_MEMORY`. Hosts should call the query rather than copying a constant from this table, because the figure scales with `total_frames`.
+
+The profile-workspace column is the exact byte budget supplied to `apta_session_config_t.static_workspace` by the profile test.
 
 The result-pool column is the `minimum_bytes` value returned by `apta_query_memory_requirements()` for the bounded-result-slot configuration and used as the context allocation limit in the test.
+
+### 3.1 How the workspace figure scales
+
+The workspace is not dominated by fixed capacities. The overview accumulator array holds one entry per column across the whole track and grows by doubling, and for anything longer than a few seconds it is the largest single contributor. Queried `minimum_bytes` for full features at 44.1 kHz:
+
+| Duration | Queried workspace |
+|---|---:|
+| 30 s | 914,352 B |
+| 5 min | 1,832,048 B |
+| 12 min | 2,880,688 B |
+
+The growth is sublinear only because the doubling sequence steps in powers of two; within a step the figure is flat, and across steps it roughly tracks duration.
+
+The figure also accounts for the doubling transient. A growable array is replaced before the old one is released, and the freed fragments can never serve the next request, which is strictly larger than everything released so far. The whole doubling sequence is therefore charged, not just the final capacity. Verified by bisection: for a 5-minute full-feature configuration the reported 1,832,048 B completes and the true boundary lies within about 800 bytes of it.
 
 The `Workspace + pool` column is useful for integration planning, but it is not total application RAM.
 

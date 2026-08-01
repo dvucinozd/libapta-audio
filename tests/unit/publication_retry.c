@@ -6,6 +6,10 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -79,7 +83,7 @@ int main(void)
     apta_work_budget_t budget;
     apta_waveform_overview_view_t overview;
     const apta_result_t *result = NULL;
-    int16_t pcm[4096] = {0};
+    int16_t pcm[4u * COL] = {0};
     uint32_t accepted = 0u;
 
     apta_context_config_init(&context_config);
@@ -94,17 +98,17 @@ int main(void)
     session_config.channel_count = 1u;
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    session_config.total_frames = 4096u;
+    session_config.total_frames = (4u * COL);
     session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
     CHECK(apta_session_create(context, &session_config, &session) == APTA_STATUS_OK);
 
     apta_pcm_block_init(&block);
     block.data = pcm;
     block.first_frame = 0u;
-    block.frame_count = 4096u;
+    block.frame_count = (4u * COL);
     CHECK(apta_session_push_pcm(session, &block, &accepted) == APTA_STATUS_OK);
-    CHECK(accepted == 4096u);
-    CHECK(apta_session_signal_end_of_input(session, 4096u) == APTA_STATUS_OK);
+    CHECK(accepted == (4u * COL));
+    CHECK(apta_session_signal_end_of_input(session, (4u * COL)) == APTA_STATUS_OK);
 
     /*
      * The portable processor consumes at most 256 frames per step. Process
@@ -121,7 +125,7 @@ int main(void)
     allocator_state.armed_allocation_count = 0u;
 
     /* Four 256-frame steps consume and complete the final overview column. */
-    budget.maximum_input_frames = 1024u;
+    budget.maximum_input_frames = COL;
     budget.maximum_steps = 4u;
     CHECK(apta_session_process(session, &budget, NULL) == APTA_ERROR_OUT_OF_MEMORY);
     CHECK(allocator_state.failed_once == 1u);

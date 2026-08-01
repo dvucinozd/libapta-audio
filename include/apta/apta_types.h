@@ -112,11 +112,22 @@ typedef int64_t apta_beat_ordinal_t;
 #define APTA_GRID_REPRESENTATION_EXPLICIT  2u
 #define APTA_GRID_REPRESENTATION_HYBRID    3u
 
+/*
+ * Relation of a candidate tempo to the selected one.
+ *
+ * These values are serialized as a single byte in the TEMP section, so they
+ * are append-only: existing values must never be renumbered. B2 added 5 to 8;
+ * a reader that predates them rejects the section rather than misreading it.
+ */
 #define APTA_TEMPO_RELATION_INDEPENDENT 0u
 #define APTA_TEMPO_RELATION_HALF        1u
 #define APTA_TEMPO_RELATION_DOUBLE      2u
 #define APTA_TEMPO_RELATION_THREE_HALF  3u
 #define APTA_TEMPO_RELATION_TWO_THIRDS  4u
+#define APTA_TEMPO_RELATION_THIRD       5u
+#define APTA_TEMPO_RELATION_TRIPLE      6u
+#define APTA_TEMPO_RELATION_QUARTER     7u
+#define APTA_TEMPO_RELATION_QUADRUPLE   8u
 
 #define APTA_MEMORY_DEFAULT     0u
 #define APTA_MEMORY_FAST        (1u << 0)

@@ -9,12 +9,16 @@
 
 #include "test_alignment.h"
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define SAMPLE_RATE 48000u
 #define TEMPO_MILLIBPM 117188u
 #define BEAT_FRAMES 24576u
 #define TOTAL_FRAMES 524288u
 #define BLOCK_FRAMES 4096u
-#define WORKSPACE_BYTES 1572864u
+#define WORKSPACE_BYTES (1572864u * APTA_TEST_WORKSPACE_SCALE)
 
 #define CHECK(condition)                                                     \
     do {                                                                     \

@@ -51,8 +51,59 @@ static int16_t apta_pool_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
+/* C1: see apta_quantize_band() in apta_waveform_snapshot.c. */
+static uint8_t apta_pool_quantize_band(uint32_t sum, uint32_t sample_count)
+{
+    uint32_t mean;
+
+    if (sample_count == 0u) {
+        return 0u;
+    }
+    mean = (uint32_t)((uint64_t)sum * 255u /
+                      ((uint64_t)sample_count *
+                       (uint64_t)APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE));
+    return mean > 255u ? (uint8_t)255u : (uint8_t)mean;
+}
+
+/* A4: see apta_overview_confidence() in apta_waveform_snapshot.c. Duplicated
+ * here to match the existing split between the two snapshot paths. */
+static apta_confidence_value_t apta_pool_overview_confidence(
+    const apta_session_t *session,
+    uint32_t complete_columns)
+{
+    uint64_t total_frames;
+    uint64_t expected;
+
+    if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+
+    total_frames = session->end_of_input_signalled
+                       ? session->final_end_frame
+                       : session->config.total_frames;
+    if (total_frames == 0u || session->overview_frames_per_column == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+
+    expected = (total_frames +
+                (uint64_t)session->overview_frames_per_column - 1u) /
+               (uint64_t)session->overview_frames_per_column;
+    if (expected == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+    if ((uint64_t)complete_columns >= expected) {
+        return (apta_confidence_value_t)APTA_CONFIDENCE_MAX;
+    }
+    return (apta_confidence_value_t)(
+        ((uint64_t)complete_columns * (uint64_t)APTA_CONFIDENCE_MAX) /
+        expected);
+}
+
+/* A3: see apta_quantize_rms() in apta_waveform_snapshot.c. Only the parameter
+ * type changed; apta_pool_round_ties_even() and the double arithmetic feeding
+ * canonical serialization are deliberately untouched. */
 static uint16_t apta_pool_quantize_rms(
-    double sum_squares,
+    uint64_t sum_squares,
     uint32_t sample_count)
 {
     double rms;
@@ -62,7 +113,8 @@ static uint16_t apta_pool_quantize_rms(
         return 0u;
     }
 
-    rms = sqrt(sum_squares / (double)sample_count);
+    rms = sqrt((double)sum_squares / (double)sample_count) /
+          (double)APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE;
     if (rms < 0.0) {
         rms = 0.0;
     }
@@ -334,6 +386,20 @@ static apta_status_t apta_pool_build_overview(
         if (accumulator->clipped) {
             column->flags |= APTA_WAVEFORM_COLUMN_CLIPPED;
         }
+        /* C1: see apta_waveform_snapshot.c. */
+        if (session->overview_band_sums != NULL) {
+            const size_t base = (size_t)index * APTA_INTERNAL_BAND_COUNT;
+            column->low = apta_pool_quantize_band(
+                session->overview_band_sums[base + 0u],
+                accumulator->sample_count);
+            column->mid = apta_pool_quantize_band(
+                session->overview_band_sums[base + 1u],
+                accumulator->sample_count);
+            column->high = apta_pool_quantize_band(
+                session->overview_band_sums[base + 2u],
+                accumulator->sample_count);
+            column->flags |= APTA_WAVEFORM_COLUMN_HAS_3BAND;
+        }
 
         output_index += 1u;
         previous_column = accumulator->column_index;
@@ -364,7 +430,8 @@ static apta_status_t apta_pool_build_overview(
     result->overview.level.frames_per_column =
         session->overview_frames_per_column;
     result->overview.level.origin_frame = 0u;
-    result->overview.confidence = APTA_CONFIDENCE_UNKNOWN;
+    result->overview.confidence =
+        apta_pool_overview_confidence(session, output_index);
     result->overview.span_count = span_count;
     result->overview.spans = result->overview_spans;
 
@@ -382,6 +449,10 @@ static apta_status_t apta_pool_build_overview(
             : (full_coverage ? APTA_FEATURE_STABLE
                              : APTA_FEATURE_PARTIAL);
     result->info.available_features |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    /* A4: the overview reports confidence on its own, without S4. */
+    if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) != 0u) {
+        result->info.available_features |= APTA_FEATURE_CONFIDENCE;
+    }
     return APTA_STATUS_OK;
 }
 

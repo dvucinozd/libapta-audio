@@ -168,6 +168,29 @@ apta_session_signal_end_of_input(
     apta_session_t *session,
     apta_source_frame_t final_end_frame);
 
+/*
+ * Seed a session's overview coverage from a previously parsed result, so a
+ * partially analysed track can be continued instead of rescanned.
+ *
+ * Callable only in APTA_SESSION_CREATED, like apta_session_set_source(), and
+ * subject to the same host-serialization rule as every other mutating call.
+ *
+ * The result must carry APTA_FEATURE_WAVEFORM_OVERVIEW and its column geometry
+ * must match the session, or APTA_ERROR_CONFLICT is returned. Note that a
+ * parsed result does not record the source sample rate, channel count or track
+ * length, so the library cannot check those: seeding from a result produced
+ * with different source geometry is the caller's responsibility to avoid. See
+ * docs/api/APTA-SESSION-SEEDING-0.1.md.
+ *
+ * Only waveform coverage is seeded. Tempo and beatgrid engines rebuild their
+ * own evidence from the PCM that follows, because the onset timeline they need
+ * is not in the container.
+ */
+APTA_API apta_status_t APTA_CALL
+apta_session_seed_from_result(
+    apta_session_t *session,
+    const apta_result_t *result);
+
 APTA_API apta_status_t APTA_CALL
 apta_session_set_focus(
     apta_session_t *session,

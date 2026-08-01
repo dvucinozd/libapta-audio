@@ -5,7 +5,7 @@
   "fixture_hex_path": "tests/fixtures/reference-wovr-meta.apta.hex",
   "generator_path": "tests/fixtures/generate_reference_fixture.py",
   "size_bytes": 303,
-  "sha256": "394403f6e0617cde449f88c35b87d7d3a136ca304ae4874cba65310724a1d7d2",
+  "sha256": "1d9824015912611f1f9a6d36a0d55d77b4ae7112cbaff56b14aae5ed0224bd3e",
   "container_version": 1,
   "specification_version": "0.1",
   "producer_api_version": "0.1.0",
@@ -32,7 +32,12 @@
       "required": false,
       "offset": 272,
       "stored_size": 31,
-      "keys": [1, 5, 6, 7]
+      "keys": [
+        1,
+        5,
+        6,
+        7
+      ]
     }
   ],
   "independence_statement": "The fixture is produced without linking or importing libapta and encodes every multibyte field explicitly."

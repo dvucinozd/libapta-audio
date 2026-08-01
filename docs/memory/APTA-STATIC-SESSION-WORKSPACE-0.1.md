@@ -101,3 +101,103 @@ The gap at this snapshot was immutable result publication. It was subsequently
 closed with a context-owned, preallocated two-slot result pool that preserves
 result lifetime beyond session/workspace destruction and reports deterministic
 slot-exhaustion backpressure.
+
+## Querying the required size
+
+`apta_query_workspace_requirements()` reports how large
+`apta_session_config_t.static_workspace` must be for a given configuration:
+
+```c
+apta_session_config_t config;
+apta_memory_requirements_t required;
+
+apta_session_config_init(&config);
+config.source_sample_rate = 44100u;
+config.channel_count = 2u;
+config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
+config.channel_layout = APTA_CHANNEL_LAYOUT_STEREO;
+config.total_frames = total_frames;          /* required: the figure scales */
+config.requested_features = features;
+
+apta_memory_requirements_init(&required);    /* output structs too */
+status = apta_query_workspace_requirements(&config, &required);
+```
+
+`minimum_bytes` is what `apta_session_create()` enforces; a buffer at least that
+large, aligned to `required_alignment`, completes the analysis.
+`recommended_bytes` adds headroom. `static_workspace` and
+`static_workspace_size` are ignored by the query, so it can be called before a
+buffer exists.
+
+`config.total_frames` must be set. The overview accumulator array holds one
+entry per column across the track and is the largest contributor for anything
+longer than a few seconds, so a query with `total_frames == 0` reports only the
+fixed part and will understate a real session.
+
+### What changed
+
+`apta_session_create()` previously validated the workspace against
+`apta_internal_session_workspace_minimum_size()`, which is
+`align(sizeof(apta_session_t))` plus one block header and payload prefix and is
+independent of both `total_frames` and `requested_features`. A 12 KiB buffer was
+accepted for a multi-minute full-feature session and the insufficiency surfaced
+much later as an `APTA_ERROR_OUT_OF_MEMORY` from `apta_session_process()`.
+
+Creation now also enforces the computed figure, so an undersized buffer is a
+diagnosable configuration error at the point where the host can still act on it.
+The old constant remains as a cheap first check.
+
+Hosts that previously supplied a workspace smaller than their configuration
+needs, and happened not to hit the failure, will now be rejected at creation.
+That is the intended behaviour: those sessions could not have completed.
+
+## Overridable capacities
+
+The geometry and capacity constants in `src/core/apta_internal.h` are
+`#ifndef`-guarded, so a host can override them from its build system without
+patching the header:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u
+```
+
+The ESP-IDF component exposes the four most useful ones through `Kconfig`; see
+`ports/espidf/README.md`.
+
+Derived constants stay derived and are not overridable:
+`APTA_INTERNAL_DETAIL_TILE_FRAMES`, `APTA_INTERNAL_GLOBAL_MAX_WINDOWS`,
+`APTA_INTERNAL_GLOBAL_MAX_SEGMENTS` and `APTA_INTERNAL_GLOBAL_MAX_BEATS`.
+
+Every invariant the code depends on is a `_Static_assert` in the same header,
+so an incoherent combination fails to compile instead of corrupting a ring
+buffer or overflowing a stack array.
+
+Any override changes what `apta_query_workspace_requirements()` reports,
+because that function is computed from the same constants. Call it rather than
+scaling a published figure.
+
+### Ring capacities and division cost
+
+The onset and global bin stores are rings addressed with
+`bin_index % capacity`, not a mask, so a capacity that is not a power of two is
+correct. It costs an integer division per lookup; a power of two lets the
+compiler strength-reduce it. This is worth respecting: the same division in an
+inner loop was measured to dominate the tempo autocorrelation.
+
+### Verifying a non-default build
+
+```bash
+cmake -S . -B build-ov256 -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u \
+      -DCMAKE_CXX_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u
+cmake --build build-ov256 --parallel
+ctest --test-dir build-ov256 -LE default_geometry --output-on-failure
+```
+
+`-LE default_geometry` excludes tests pinned to the documented default
+geometry: those asserting exact serialized container sizes, exact fixture byte
+counts, or allocator call counts. They are interchange and layout conformance
+evidence, and deriving their expectations from the configured geometry would
+make them assert that the writer wrote what the writer computed. Everything
+outside that label is expected to pass at any supported override.

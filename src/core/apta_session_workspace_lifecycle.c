@@ -46,6 +46,10 @@ static int apta_workspace_config_is_valid(
         return 0;
     }
 
+    if (!apta_internal_overview_resolution_is_valid(config)) {
+        return 0;
+    }
+
     if (config->channel_layout == APTA_CHANNEL_LAYOUT_MONO &&
         config->channel_count != 1u) {
         return 0;
@@ -99,6 +103,20 @@ static apta_status_t apta_workspace_validate_config(
         apta_internal_session_workspace_minimum_size()) {
         return APTA_ERROR_OUT_OF_MEMORY;
     }
+    /* A5: the check above is a floor that ignores total_frames and
+     * requested_features, so it accepted a 12 KiB buffer for a full-feature
+     * multi-minute track and failed much later inside process(). Reject that
+     * here instead, where it is a diagnosable configuration error. */
+    {
+        const size_t required =
+            apta_internal_session_workspace_requirement(config);
+        if (required == SIZE_MAX) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+        if (config->static_workspace_size < required) {
+            return APTA_ERROR_OUT_OF_MEMORY;
+        }
+    }
 
     return APTA_STATUS_OK;
 }
@@ -133,8 +151,12 @@ apta_status_t apta_internal_workspace_session_prepare(
     session->config = *config;
     session->final_end_frame = APTA_TOTAL_FRAMES_UNKNOWN;
     session->next_request_id = 1u;
+    /* C2: the host may choose the overview resolution; zero means default. */
     session->overview_frames_per_column =
-        APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+        config->overview_frames_per_column != 0u
+            ? config->overview_frames_per_column
+            : APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN;
+    apta_internal_waveform_init_bands(session);
     session->lineage_id_low = atomic_fetch_add_explicit(
         &context->lineage_counter,
         1u,

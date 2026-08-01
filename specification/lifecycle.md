@@ -166,3 +166,27 @@ The implementation SHOULD choose the narrowest correct scope. For example, unsup
 A new result generation MUST identify every feature or range whose state changed materially.
 
 The aggregate snapshot MAY expose a convenience summary state, but applications MUST be able to inspect per-feature state and coverage.
+
+## Seeding a session from a parsed result
+
+A session in the created state MAY be seeded from a previously parsed result
+through `apta_session_seed_from_result()`, so that a partially analysed source
+can be continued rather than rescanned. Partial results are already
+serializable and are flagged with `APTA_CONTAINER_FLAG_PARTIAL_RESULT`; this is
+the reverse direction.
+
+Seeding is only valid in `APTA_SESSION_CREATED`, alongside
+`apta_session_set_source()`, and is subject to the same host-serialization
+rule as every other mutating call.
+
+Seeding populates waveform coverage only. Tempo and beatgrid state is not
+seeded, because a result records a published estimate but not the onset
+evidence it was derived from. An implementation MUST NOT present a seeded
+tempo as though it had been re-derived from the current source.
+
+An implementation MUST reject a result whose overview column geometry differs
+from the session's, and MUST reject one whose coverage extends past the
+session's declared source length. Note that container version 1 does not record
+the source sample rate, channel count or track length, so an implementation
+cannot verify that a result came from the same source; that guarantee is the
+caller's. See `docs/api/APTA-SESSION-SEEDING-0.1.md`.

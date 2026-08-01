@@ -11,4 +11,45 @@ config APTA_ESP_DSP_BACKEND
         The portable libapta core remains algorithmically identical and does
         not require ESP-DSP.
 
+config APTA_OVERVIEW_FRAMES_PER_COLUMN
+    int "Overview waveform frames per column"
+    default 1024
+    range 64 65536
+    help
+        Frames summarised into one overview waveform column. 1024 gives about
+        43 columns per second at 44.1 kHz. Lowering it raises the horizontal
+        resolution a zoom UI can draw, and raises the static workspace
+        proportionally, because the accumulator array holds one entry per
+        column across the whole track. Query the resulting requirement with
+        apta_query_workspace_requirements() rather than guessing.
+
+config APTA_MAX_DETAIL_TILES
+    int "Detail waveform tile cache size"
+    default 4
+    range 1 64
+    help
+        Number of cached detail tiles. At the default detail geometry each
+        tile covers 0.37 s at 44.1 kHz, so the default of 4 gives about 1.5 s
+        of total detail coverage.
+
+config APTA_ONSET_BIN_CAPACITY
+    int "Onset bin ring capacity for local tempo"
+    default 4096
+    range 512 65536
+    help
+        Onset bins retained for the local tempo estimator. 4096 bins of 256
+        frames is a 23.8 s analysis window at 44.1 kHz. Must be at least the
+        minimum tempo window; a static assertion enforces this.
+
+config APTA_GLOBAL_BIN_CAPACITY
+    int "Global bin ring capacity for the global grid"
+    default 16384
+    range 1024 262144
+    help
+        Onset bins retained for the global beatgrid. 16384 bins of 2048 frames
+        is a 12.7 minute ceiling at 44.1 kHz; tracks longer than that are
+        analysed over a moving window. Raising it also raises the stack used
+        by the refresh, which declares a per-window array sized from this
+        value -- see the stack note in this port's README.
+
 endmenu

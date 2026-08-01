@@ -52,7 +52,63 @@ static int16_t apta_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
-static uint16_t apta_quantize_rms(double sum_squares, uint32_t sample_count)
+/* A3: sum_squares is an integer accumulator scaled by
+ * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE squared. The arithmetic here stays
+ * double: it runs once per column rather than per sample, and the
+ * round-half-to-even step feeds canonical serialization. */
+/* A4: the overview's own confidence, independent of the tempo engine. It
+ * reports coverage completeness: how much of the expected column range has
+ * actually been measured. APTA_CONFIDENCE_UNKNOWN when the track length is not
+ * yet known, or when the host did not ask for confidence. */
+static apta_confidence_value_t apta_overview_confidence(
+    const apta_session_t *session,
+    uint32_t complete_columns)
+{
+    uint64_t total_frames;
+    uint64_t expected;
+
+    if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+
+    total_frames = session->end_of_input_signalled
+                       ? session->final_end_frame
+                       : session->config.total_frames;
+    if (total_frames == 0u || session->overview_frames_per_column == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+
+    expected = (total_frames +
+                (uint64_t)session->overview_frames_per_column - 1u) /
+               (uint64_t)session->overview_frames_per_column;
+    if (expected == 0u) {
+        return APTA_CONFIDENCE_UNKNOWN;
+    }
+    if ((uint64_t)complete_columns >= expected) {
+        return (apta_confidence_value_t)APTA_CONFIDENCE_MAX;
+    }
+    return (apta_confidence_value_t)(
+        ((uint64_t)complete_columns * (uint64_t)APTA_CONFIDENCE_MAX) /
+        expected);
+}
+
+/* C1: mean band magnitude over the column, normalized to a byte. The sums are
+ * scaled by APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE, so dividing by the count and
+ * the scale gives a value in [0, 1]. */
+static uint8_t apta_quantize_band(uint32_t sum, uint32_t sample_count)
+{
+    uint32_t mean;
+
+    if (sample_count == 0u) {
+        return 0u;
+    }
+    mean = (uint32_t)((uint64_t)sum * 255u /
+                      ((uint64_t)sample_count *
+                       (uint64_t)APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE));
+    return mean > 255u ? (uint8_t)255u : (uint8_t)mean;
+}
+
+static uint16_t apta_quantize_rms(uint64_t sum_squares, uint32_t sample_count)
 {
     double rms;
     double rounded;
@@ -61,7 +117,8 @@ static uint16_t apta_quantize_rms(double sum_squares, uint32_t sample_count)
         return 0u;
     }
 
-    rms = sqrt(sum_squares / (double)sample_count);
+    rms = sqrt((double)sum_squares / (double)sample_count) /
+          (double)APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE;
     if (rms < 0.0) {
         rms = 0.0;
     }
@@ -217,6 +274,22 @@ apta_status_t apta_internal_waveform_build_snapshot(
         if (accumulator->clipped) {
             column->flags |= APTA_WAVEFORM_COLUMN_CLIPPED;
         }
+        /* C1: bands are written only when they were computed. The writers
+         * reject nonzero low/mid/high without this flag, so a column either
+         * carries all three and the flag, or neither. */
+        if (session->overview_band_sums != NULL) {
+            const size_t base = (size_t)index * APTA_INTERNAL_BAND_COUNT;
+            column->low = apta_quantize_band(
+                session->overview_band_sums[base + 0u],
+                accumulator->sample_count);
+            column->mid = apta_quantize_band(
+                session->overview_band_sums[base + 1u],
+                accumulator->sample_count);
+            column->high = apta_quantize_band(
+                session->overview_band_sums[base + 2u],
+                accumulator->sample_count);
+            column->flags |= APTA_WAVEFORM_COLUMN_HAS_3BAND;
+        }
 
         output_index += 1u;
         previous_column = accumulator->column_index;
@@ -245,7 +318,8 @@ apta_status_t apta_internal_waveform_build_snapshot(
     result->overview.level.frames_per_column =
         session->overview_frames_per_column;
     result->overview.level.origin_frame = 0u;
-    result->overview.confidence = APTA_CONFIDENCE_UNKNOWN;
+    result->overview.confidence =
+        apta_overview_confidence(session, output_index);
     result->overview.span_count = span_count;
     result->overview.spans = result->overview_spans;
 
@@ -263,6 +337,10 @@ apta_status_t apta_internal_waveform_build_snapshot(
             : (full_coverage ? APTA_FEATURE_STABLE : APTA_FEATURE_PARTIAL);
 
     result->info.available_features |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    /* A4: the overview reports confidence on its own, without S4. */
+    if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) != 0u) {
+        result->info.available_features |= APTA_FEATURE_CONFIDENCE;
+    }
     return APTA_STATUS_OK;
 }
 
@@ -285,11 +363,15 @@ void apta_internal_waveform_cleanup_session(apta_session_t *session)
     apta_internal_context_deallocate(
         session->context,
         session->overview_accumulators);
+    apta_internal_context_deallocate(
+        session->context,
+        session->overview_band_sums);
 
     session->pcm_head = NULL;
     session->pcm_tail = NULL;
     session->accepted_ranges = NULL;
     session->overview_accumulators = NULL;
+    session->overview_band_sums = NULL;
 }
 
 void apta_internal_waveform_cleanup_result(apta_result_t *result)

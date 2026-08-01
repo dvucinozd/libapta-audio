@@ -67,13 +67,24 @@ Status: complete functional implementation candidate. Stable API/ABI is not yet 
 Implemented:
 
 - progressive overview waveform;
+- three-band overview columns behind `APTA_FEATURE_WAVEFORM_3BAND`, with the
+  filterbank declared in `specification/waveform.md` section 5.3.1 as that
+  section requires of producers;
+- overview coverage confidence, independent of the tempo engine;
 - bounded detail tiles;
 - sparse coverage and gaps;
 - focus/request scheduling;
 - WOVR and WDTL interchange;
 - golden, malformed, allocation and concurrency tests.
 
-Status: complete functional implementation candidate. Formal profile conformance remains withheld.
+Deferred:
+
+- three-band values for detail tiles. Detail tiles are replayable for arbitrary
+  frame ranges and a recursive filter cannot be resumed at an arbitrary offset
+  without per-tile history or a warm-up. They leave the band bytes and the flag
+  zero, which the container permits.
+
+Status: complete functional implementation candidate. Formal profile conformance remains withheld. Three-band values remain outside bit-exact reference conformance until a reference-filterbank profile is standardised, as `specification/waveform.md` states.
 
 ## S3 — `.apta` container
 

@@ -8,6 +8,10 @@
 
 #include "test_alignment.h"
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -19,7 +23,7 @@
 
 typedef union {
     apta_test_max_align_t alignment;
-    uint8_t bytes[64];
+    uint8_t bytes[64 * APTA_TEST_WORKSPACE_SCALE];
 } aligned_small_workspace_t;
 
 static void configure_waveform_session(apta_session_config_t *config)

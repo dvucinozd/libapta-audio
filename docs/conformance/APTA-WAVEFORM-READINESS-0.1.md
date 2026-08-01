@@ -52,7 +52,7 @@ A formal profile claim is intentionally withheld because the complete conformanc
 |---|---|
 | PCM pull input | Not implemented at this snapshot; implemented later |
 | Detail tiles | Implemented, bounded four-tile cache |
-| Three-band waveform | Not implemented |
+| Three-band waveform | Implemented for overview columns; see specification/waveform.md section 5.3.1. Detail tiles leave bands zero and unflagged. |
 | `REFERENCE-WAVEFORM-0.1` qualifier | Not formally claimed; core peak/RMS behaviour is deterministic |
 | Partial `.apta` results | Implemented for `WOVR`; detail serialization preserves partial state |
 | Deterministic `META` | Implemented with owned bounded public API and canonical CBOR |

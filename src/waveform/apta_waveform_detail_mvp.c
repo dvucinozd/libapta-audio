@@ -288,6 +288,8 @@ apta_status_t apta_internal_detail_process_sample(
     uint64_t tile64;
     uint32_t tile_index;
     uint32_t column_index;
+    float magnitude;
+    uint32_t scaled;
     apta_internal_detail_tile_t *tile;
     apta_internal_waveform_accumulator_t *accumulator;
 
@@ -320,7 +322,11 @@ apta_status_t apta_internal_detail_process_sample(
     if (sample > accumulator->maximum) {
         accumulator->maximum = sample;
     }
-    accumulator->sum_squares += (double)sample * (double)sample;
+    /* A3: integer accumulation with a branchless clamp. */
+    magnitude = fminf(fabsf(sample), 1.0f);
+    /* Widening 32x32->64 multiply; see apta_waveform_process.c. */
+    scaled = (uint32_t)(magnitude * APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
+    accumulator->sum_squares += (uint64_t)scaled * scaled;
     accumulator->sample_count += 1u;
     if (sample <= -1.0f || sample >= 1.0f) {
         accumulator->clipped = 1u;
@@ -501,8 +507,9 @@ static int16_t apta_detail_quantize_peak(float value)
     return (int16_t)rounded;
 }
 
+/* A3: see apta_quantize_rms() in apta_waveform_snapshot.c. */
 static uint16_t apta_detail_quantize_rms(
-    double sum_squares,
+    uint64_t sum_squares,
     uint32_t sample_count)
 {
     double rms;
@@ -512,7 +519,8 @@ static uint16_t apta_detail_quantize_rms(
         return 0u;
     }
 
-    rms = sqrt(sum_squares / (double)sample_count);
+    rms = sqrt((double)sum_squares / (double)sample_count) /
+          (double)APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE;
     if (rms > 1.0) {
         rms = 1.0;
     }

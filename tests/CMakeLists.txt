@@ -67,6 +67,13 @@ apta_add_c_test(apta_s4_bounded apta.s4.bounded unit/s4_bounded.c)
 apta_add_c_test(apta_s4_pull apta.s4.pull unit/s4_pull.c)
 apta_add_c_test(apta_s4_tempo_vectors apta.s4.tempo_vectors unit/s4_tempo_vectors.c)
 apta_add_c_test(apta_s4_focus apta.s4.focus unit/s4_focus.c)
+apta_add_c_test(apta_s4_refresh_gate apta.s4.refresh_gate unit/s4_refresh_gate.c)
+apta_add_c_test(apta_confidence_without_tempo apta.waveform.confidence_without_tempo unit/confidence_without_tempo.c)
+apta_add_c_test(apta_workspace_requirements apta.memory.workspace_requirements unit/workspace_requirements.c)
+apta_add_c_test(apta_waveform_3band apta.waveform.three_band unit/waveform_3band.c)
+apta_add_c_test(apta_waveform_resolution apta.waveform.resolution unit/waveform_resolution.c)
+apta_add_c_test(apta_session_seeding apta.session.seeding unit/session_seeding.c)
+apta_add_c_test(apta_s4_relations apta.s4.relations unit/s4_relations.c)
 apta_add_c_test(apta_s4_serialization apta.serialization.s4 unit/s4_serialization.c)
 apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_failure unit/s4_allocation_failure.c)
 
@@ -235,3 +242,36 @@ if(APTA_BUILD_FUZZING)
             C_STANDARD 11
             C_STANDARD_REQUIRED YES)
 endif()
+
+# C3: tests pinned to the default overview geometry.
+#
+# These assert exact serialized container sizes, exact fixture byte counts, or
+# allocator call counts at the documented default geometry. They are
+# interchange and layout conformance evidence, and rewriting them to derive
+# their expectations from the configured geometry would make them assert that
+# the writer wrote what the writer computed -- circular, and much weaker than
+# what they check today.
+#
+# A build with a non-default capacity override therefore excludes them:
+#
+#   cmake -S . -B build-ov256 -DCMAKE_BUILD_TYPE=Release \
+#         -DCMAKE_C_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u \
+#         -DCMAKE_CXX_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u
+#   cmake --build build-ov256 --parallel
+#   ctest --test-dir build-ov256 -LE default_geometry --output-on-failure
+#
+# Everything outside this label must pass at any supported override.
+set_tests_properties(
+    apta.serialization.wovr_writer
+    apta.serialization.wovr_writer_partial
+    apta.serialization.wovr_roundtrip
+    apta.serialization.wovr_reader_malformed
+    apta.serialization.wdtl_roundtrip
+    apta.serialization.wdtl_reader_malformed
+    apta.serialization.wdtl_reader_allocation_failure
+    apta.serialization.s4_allocation_failure
+    apta.memory.static_workspace
+    apta.memory.result_pool_storage
+    apta.result.bounded_waveform_publication
+    apta.result.publication_retry
+    PROPERTIES LABELS default_geometry)

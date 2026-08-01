@@ -12,12 +12,17 @@ static uint32_t apta_min_u32(uint32_t left, uint32_t right)
     return left < right ? left : right;
 }
 
+/* A3: these run once per source sample per channel, ahead of every other
+ * per-sample path, so they must not use double on a target without hardware
+ * double. For 16- and 24-bit input both the value and the divisor are exactly
+ * representable in float, so a single float division is correctly rounded and
+ * produces bit-identical results to the previous double form. */
 static float apta_normalize_s16(int16_t value)
 {
     if (value < 0) {
-        return (float)((double)value / 32768.0);
+        return (float)value / 32768.0f;
     }
-    return value == 0 ? 0.0f : (float)((double)value / 32767.0);
+    return value == 0 ? 0.0f : (float)value / 32767.0f;
 }
 
 static float apta_normalize_s24(const uint8_t *bytes)
@@ -32,16 +37,22 @@ static float apta_normalize_s24(const uint8_t *bytes)
     }
 
     if (value < 0) {
-        return (float)((double)value / 8388608.0);
+        return (float)value / 8388608.0f;
     }
-    return value == 0 ? 0.0f : (float)((double)value / 8388607.0);
+    return value == 0 ? 0.0f : (float)value / 8388607.0f;
 }
 
 static float apta_normalize_s32(int32_t value)
 {
     if (value < 0) {
-        return (float)((double)value / 2147483648.0);
+        /* Divisor is 2^31: scaling by a power of two is exact, so converting
+         * first and scaling second gives the same result as the double form. */
+        return (float)value / 2147483648.0f;
     }
+    /* Retained in double deliberately: a 32-bit magnitude exceeds float's
+     * 24-bit mantissa, so (float)value would discard bits before the division.
+     * This is the one per-sample double left, and it is reachable only for
+     * APTA_SAMPLE_S32 input. */
     return value == 0 ? 0.0f : (float)((double)value / 2147483647.0);
 }
 
@@ -273,6 +284,151 @@ static void apta_insert_accepted_range(
     }
 
     apta_refresh_accepted_ends(session);
+}
+
+/*
+ * D1: seed a fresh session's overview coverage from a parsed result.
+ *
+ * The accepted-range table is already the right representation for "these
+ * ranges are done", so seeding is a matter of populating it and the overview
+ * accumulators from the parsed columns rather than from accepted PCM.
+ *
+ * Columns are quantized in the container, so the reconstruction is exact only
+ * to that quantization: minimum and maximum invert the int16 peak scaling and
+ * rms inverts the uint16 scaling. A seeded column therefore reproduces the
+ * parsed column, not the original float accumulator state.
+ *
+ * S4 and S6 are deliberately not seeded. The parsed result carries a published
+ * tempo and grid but not the onset timeline they were derived from, so there
+ * is nothing to resume from; the engines rebuild their own evidence from the
+ * PCM that follows. Seeding waveform coverage while letting the onset engines
+ * restart is the honest split.
+ */
+apta_status_t APTA_CALL apta_session_seed_from_result(
+    apta_session_t *session,
+    const apta_result_t *result)
+{
+    apta_result_info_t info;
+    apta_waveform_overview_view_t overview;
+    apta_status_t status;
+    uint32_t span;
+
+    if (session == NULL || result == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (atomic_flag_test_and_set_explicit(
+            &session->process_lock,
+            memory_order_acquire)) {
+        return APTA_ERROR_BUSY;
+    }
+    if (atomic_load_explicit(&session->state, memory_order_acquire) !=
+        APTA_SESSION_CREATED) {
+        status = APTA_ERROR_INVALID_STATE;
+        goto done;
+    }
+
+    apta_result_info_init(&info);
+    status = apta_result_get_info(result, &info);
+    if (status < 0) {
+        goto done;
+    }
+    if ((info.available_features & APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+
+    apta_waveform_overview_view_init(&overview);
+    status = apta_result_get_waveform_overview(result, 0u, &overview);
+    if (status < 0) {
+        goto done;
+    }
+
+    /*
+     * Compatibility. The work order asks for source_sample_rate, channel_count
+     * and total_frames to be checked against the session config as well, but a
+     * parsed result carries none of the three: apta_result_info_t has no such
+     * fields and no container section records them. Only the column geometry
+     * and the coverage extent can be validated here. The caller has to
+     * guarantee the rest -- documented in docs/api/APTA-SESSION-SEEDING-0.1.md.
+     */
+    if (overview.level.frames_per_column !=
+        session->overview_frames_per_column) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+    for (span = 0u; span < overview.span_count; ++span) {
+        if (session->config.total_frames != APTA_TOTAL_FRAMES_UNKNOWN &&
+            overview.spans[span].source_range.end_frame >
+                session->config.total_frames) {
+            status = APTA_ERROR_CONFLICT;
+            goto done;
+        }
+    }
+
+    for (span = 0u; span < overview.span_count; ++span) {
+        const apta_waveform_span_t *view = &overview.spans[span];
+        uint32_t column;
+
+        for (column = 0u; column < view->column_count; ++column) {
+            const apta_waveform_column_t *source = &view->columns[column];
+            const uint32_t column_index = view->first_column_index + column;
+            const apta_source_frame_t column_first =
+                (apta_source_frame_t)column_index *
+                session->overview_frames_per_column;
+            apta_source_frame_t column_end;
+            uint32_t sample_count;
+            float rms;
+            uint64_t scaled;
+
+            if ((source->flags & APTA_WAVEFORM_COLUMN_VALID) == 0u) {
+                continue;
+            }
+
+            column_end = column_first +
+                         (apta_source_frame_t)session->overview_frames_per_column;
+            if (session->config.total_frames != APTA_TOTAL_FRAMES_UNKNOWN &&
+                column_end > session->config.total_frames) {
+                column_end = session->config.total_frames;
+            }
+            if (column_end <= column_first) {
+                continue;
+            }
+            sample_count = (uint32_t)(column_end - column_first);
+
+            /* Invert the container quantization. */
+            rms = (float)source->rms / 65535.0f;
+            scaled = (uint64_t)(rms * APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE);
+
+            status = apta_internal_waveform_seed_column(
+                session,
+                column_index,
+                (float)source->minimum / 32767.0f,
+                (float)source->maximum / 32767.0f,
+                scaled * scaled * (uint64_t)sample_count,
+                sample_count,
+                (source->flags & APTA_WAVEFORM_COLUMN_CLIPPED) != 0u);
+            if (status < 0) {
+                goto done;
+            }
+        }
+
+        status = apta_ensure_range_capacity(
+            session,
+            session->accepted_range_count + 1u);
+        if (status < 0) {
+            goto done;
+        }
+        apta_insert_accepted_range(
+            session,
+            view->source_range.first_frame,
+            view->source_range.end_frame);
+    }
+
+    status = APTA_STATUS_OK;
+
+done:
+    atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
+    return status;
 }
 
 apta_status_t apta_internal_waveform_accept_pcm(

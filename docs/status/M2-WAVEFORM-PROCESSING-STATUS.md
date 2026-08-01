@@ -6,7 +6,7 @@
 **Original M2 verification merge:** `b1c9100b2acee13188c650e71e6364bacbae7e7c`  
 **Latest integrated verification merge:** `8fe19cfda514151880d658520912722db7edb99a`  
 **Latest verification evidence:** GitHub Actions PR CI run `#224` completed successfully  
-**Registered runtime tests:** 53
+**Registered runtime tests:** 53 at the verified merge above; 75 on the current branch
 
 ## Advertised capabilities
 
@@ -220,3 +220,104 @@ The next architecture and evidence sequence is:
 7. Stage S6 global-grid and dynamic-tempo refinement.
 
 The completed result-slot contract is documented in [`../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md`](../memory/APTA-BOUNDED-RESULT-SLOTS-0.1.md).
+
+## Types: double removed from the per-sample waveform path
+
+The first hardware target is RV32IMAFC, which has no hardware double. Two
+per-sample paths in the waveform code used it.
+
+`apta_internal_waveform_accumulator_t.sum_squares` is now `uint64_t`, a sum of
+squared sample magnitudes scaled by `APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE`
+(2^23). An overview column holds 1024 samples, bounding the sum at 2^56, a 256x
+margin. `apta_quantize_rms()`, `apta_detail_quantize_rms()` and
+`apta_pool_quantize_rms()` divide out the count and the scale; their arithmetic
+stays `double` because it runs once per column rather than once per sample, and
+the round-half-to-even step feeds canonical serialization.
+
+The scale is 2^23 rather than the 2^15 used for onset magnitudes, and that
+choice matters. A sample decoded from 16-bit PCM is exactly k/32768, so k * 2^8
+is representable in `uint64_t` without loss and the conversion introduces no
+error at all for such sources. Measured against the previous implementation,
+published `minimum`, `maximum`, `rms` and `flags` are bit-identical. A 2^15
+scale, which is what a naive reading of the requirement suggests, moved some
+published `rms` values by one count out of 65535 -- small, but a silent change
+to published data, and no test in the repository detects it because there are no
+stored golden column values. `apta.waveform.determinism` compares two chunkings
+of the same input against each other, not against a reference.
+
+The per-sample format conversions `apta_normalize_s16()`, `_s24()` and their
+counterparts in `apta_waveform_detail_replay.c` computed
+`(float)((double)value / 32768.0)`. These run once per source sample per
+channel, ahead of every other per-sample path. They are now single `float`
+divisions. This is bit-identical rather than merely close: for 16- and 24-bit
+input both the value and the divisor are exactly representable in `float`, so
+IEEE 754 gives the correctly rounded result either way.
+
+`apta_normalize_s32()` keeps a `double` division on its positive branch. A
+32-bit magnitude exceeds float's 24-bit mantissa, so converting first would
+discard bits. Its negative branch divides by 2^31, where scaling is exact, and
+is now `float`. This is the only per-sample `double` remaining, reachable only
+for `APTA_SAMPLE_S32` input, and it is commented as such.
+
+Conversions clamp with `fminf(fabsf(sample), 1.0f)`. `apta_read_channel_sample()
+` already guarantees a finite value in [-1, 1], but the float-to-integer
+conversion must not depend on a caller invariant for its defined behaviour. The
+branchless form is also safer than an `if`: for a NaN input the comparison form
+would leave NaN in place and the subsequent integer conversion would be
+undefined, whereas `fminf` returns the non-NaN operand.
+
+Verified with AddressSanitizer and UndefinedBehaviorSanitizer over the full
+suite, with no `float-cast-overflow` or other diagnostics.
+
+## Configurable overview resolution
+
+`apta_result_get_waveform_overview()` has always taken a `level_id` and
+`apta_waveform_level_info_t` has always carried `frames_per_column`, but there
+was exactly one resolution: 1024 frames per column, about 43 columns per second
+at 44.1 kHz. A consumer whose zoom window spans one to thirty seconds across
+800 pixels needs 27 to 800 columns per second.
+
+`apta_session_config_t.overview_frames_per_column` now selects it. Zero keeps
+the library default, so a config from `apta_session_config_init()` behaves
+exactly as before. A non-zero value must be a power of two between 64 and
+65536; anything else is rejected at `apta_session_create()` with
+`APTA_ERROR_INVALID_ARGUMENT` rather than clamped, because the column index is
+a division by this value and the result-pool layout is sized from it.
+
+The field comes from the struct's reserved space, so `sizeof` and the ABI are
+unchanged and no API version bump is needed.
+
+This is the work order's option B rather than a level pyramid. C3 had already
+made the constant overridable at build time, which left the remaining work as
+moving it from compile time to the session config; a pyramid would have cost
+memory linearly per level for resolutions most hosts do not need at the same
+time.
+
+Everything derived from the resolution follows it: the session's column
+geometry, the bounded result-pool layout, and
+`apta_query_workspace_requirements()`. The queried figure rises as the
+resolution gets finer, which is the honest answer -- the accumulator array
+holds one entry per column across the whole track and is the dominant workspace
+term.
+
+The value reached is reported back in
+`apta_waveform_level_info_t.frames_per_column`, so a host that passes zero can
+still discover what it got.
+
+### Validation lives in three places
+
+A new session-config field has to be validated in
+`apta_session_config_is_valid()` for heap sessions,
+`apta_workspace_config_is_valid()` for static-workspace sessions, and
+`apta_query_memory_requirements_base()` for the query. Adding it to only one
+leaves the others accepting values the rest of the library cannot honour. The
+check is a shared `apta_internal_overview_resolution_is_valid()` called from
+all three rather than a fourth copy.
+
+### Not changed
+
+The detail tile mechanism keeps its own fixed geometry, per the work order.
+Whether the WOVR container header carries `frames_per_column` was not
+investigated; a serialize and parse round trip at a non-default resolution is
+not covered by `apta.waveform.resolution`, which checks the live result only.
+That is the remaining gap for this task.

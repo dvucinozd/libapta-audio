@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
 #include "apta_result_pool_layout.h"
+#include "apta_session_workspace.h"
 #include "../beatgrid/apta_s6_internal.h"
 
 #include <stdalign.h>
@@ -138,7 +139,9 @@ static size_t apta_memory_waveform_recommendation(
     if ((requested_features & APTA_INTERNAL_S4_FEATURES) != 0u) {
         s4_session =
             (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY *
-            sizeof(apta_internal_onset_bin_t);
+                sizeof(apta_internal_onset_bin_t) +
+            /* A1: precomputed flux array, one float per onset bin. */
+            (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float);
         s4_snapshots =
             2u * ((size_t)APTA_INTERNAL_MAX_TEMPO_CANDIDATES *
                       sizeof(apta_tempo_candidate_t) +
@@ -150,6 +153,8 @@ static size_t apta_memory_waveform_recommendation(
             sizeof(apta_internal_s6_session_state_t) +
             (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY *
                 sizeof(apta_internal_onset_bin_t) +
+            /* A1: precomputed flux array, one float per global bin. */
+            (size_t)APTA_INTERNAL_GLOBAL_BIN_CAPACITY * sizeof(float) +
             (size_t)APTA_INTERNAL_GLOBAL_MAX_BEATS *
                 sizeof(apta_beat_t);
         s6_snapshots =
@@ -175,6 +180,26 @@ static size_t apta_memory_waveform_recommendation(
            s6_snapshots;
 }
 
+/* C2: zero means the library default. Otherwise a power of two in range; the
+ * column index is a division by this value and the result-pool layout is sized
+ * from it, so a rogue value is a configuration error rather than something to
+ * clamp silently.
+ *
+ * Shared, because session creation validates through
+ * apta_session_config_is_valid() and apta_workspace_config_is_valid() while
+ * the memory query validates here, and those are three separate paths a new
+ * config field has to be added to. */
+int apta_internal_overview_resolution_is_valid(
+    const apta_session_config_t *config)
+{
+    if (config->overview_frames_per_column == 0u) {
+        return 1;
+    }
+    return config->overview_frames_per_column >= 64u &&
+           config->overview_frames_per_column <= 65536u &&
+           apta_internal_is_power_of_two(config->overview_frames_per_column);
+}
+
 apta_status_t APTA_CALL apta_query_memory_requirements_base(
     const apta_session_config_t *config,
     apta_memory_requirements_t *requirements_out)
@@ -182,6 +207,8 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
     const apta_feature_mask_t supported_features =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
         APTA_FEATURE_WAVEFORM_DETAIL |
+        /* C1: three-band overview waveform. */
+        APTA_FEATURE_WAVEFORM_3BAND |
         APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID |
         APTA_FEATURE_GLOBAL_BEATGRID |
@@ -190,6 +217,13 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_GRID_LOCKING;
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
+        /* C1: bands qualify the overview, so they require it, like DETAIL. */
+        APTA_FEATURE_WAVEFORM_3BAND |
+        /* A4: CONFIDENCE is no longer an S4 feature, but it still needs
+         * something to qualify, and every feature it can qualify depends on
+         * the overview. Naming it explicitly keeps CONFIDENCE-alone rejected
+         * while allowing WAVEFORM_OVERVIEW | CONFIDENCE. */
+        APTA_FEATURE_CONFIDENCE |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
     apta_internal_result_pool_layout_t pool_layout;
@@ -217,6 +251,9 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
 
     if ((config->flags &
          ~APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_overview_resolution_is_valid(config)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     if ((config->requested_features & ~supported_features) != 0u) {
@@ -284,6 +321,55 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
     requirements_out->required_alignment = APTA_INTERNAL_MAX_ALIGNMENT;
     requirements_out->flags = 0u;
     memset(requirements_out->reserved32, 0, sizeof(requirements_out->reserved32));
+
+    return APTA_STATUS_OK;
+}
+
+/* A5: this is a new symbol rather than a flag on apta_query_memory_requirements
+ * deliberately. That entry point is wrapped by the compile-time renaming scheme
+ * in both CMakeLists.txt and ports/espidf/CMakeLists.txt; a fresh symbol with a
+ * single definition needs no entry in either. */
+apta_status_t APTA_CALL apta_query_workspace_requirements(
+    const apta_session_config_t *config,
+    apta_memory_requirements_t *requirements_out)
+{
+    size_t required;
+
+    if (config == NULL || requirements_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_validate_struct(
+            config,
+            sizeof(*config),
+            config->struct_size,
+            config->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+    if (!apta_internal_validate_struct(
+            requirements_out,
+            sizeof(*requirements_out),
+            requirements_out->struct_size,
+            requirements_out->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+
+    required = apta_internal_session_workspace_requirement(config);
+    if (required == SIZE_MAX) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+
+    requirements_out->minimum_bytes = required;
+    /* Headroom for allocator slack: the block splitter refuses to split a
+     * remainder smaller than a header plus prefix plus alignment, so a request
+     * can strand that much. */
+    requirements_out->recommended_bytes =
+        required + required / 16u + APTA_INTERNAL_MAX_ALIGNMENT;
+    requirements_out->required_alignment = APTA_INTERNAL_MAX_ALIGNMENT;
+    requirements_out->flags = 0u;
+    memset(
+        requirements_out->reserved32,
+        0,
+        sizeof(requirements_out->reserved32));
 
     return APTA_STATUS_OK;
 }

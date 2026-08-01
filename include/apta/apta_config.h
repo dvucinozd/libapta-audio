@@ -96,7 +96,30 @@ typedef struct {
     size_t static_workspace_size;
 
     uint32_t flags;
-    uint32_t reserved32[5];
+
+    /*
+     * Frames summarised into one overview waveform column, for level 0.
+     *
+     * Zero selects the library default, so a config produced by
+     * apta_session_config_init() behaves exactly as before. A non-zero value
+     * must be a power of two between 64 and 65536; anything else is rejected
+     * at apta_session_create() with APTA_ERROR_INVALID_ARGUMENT.
+     *
+     * Lower values raise the horizontal resolution a zoom UI can draw and
+     * raise the static workspace proportionally, because the accumulator array
+     * holds one entry per column across the whole track. Ask
+     * apta_query_workspace_requirements() rather than scaling a published
+     * figure by hand.
+     *
+     * The value reached is reported back in
+     * apta_waveform_level_info_t.frames_per_column.
+     *
+     * Taken from the reserved space, so the struct size and therefore the ABI
+     * are unchanged.
+     */
+    uint32_t overview_frames_per_column;
+
+    uint32_t reserved32[4];
     uint64_t reserved64[4];
 } apta_session_config_t;
 
@@ -129,6 +152,29 @@ apta_session_config_init(apta_session_config_t *config);
 
 APTA_API apta_status_t APTA_CALL
 apta_query_memory_requirements(
+    const apta_session_config_t *config,
+    apta_memory_requirements_t *requirements_out);
+
+/*
+ * Size of the static workspace this configuration requires, for hosts that
+ * supply apta_session_config_t.static_workspace instead of an allocator.
+ *
+ * minimum_bytes is what apta_session_create() enforces; a buffer at least that
+ * large completes the analysis the configuration describes.
+ * recommended_bytes adds headroom for allocator slack. required_alignment is
+ * the alignment the buffer must satisfy.
+ *
+ * config->total_frames must be set: the overview accumulators scale with track
+ * duration and dominate the figure for anything longer than a few seconds. The
+ * fields consulted are total_frames and requested_features; static_workspace
+ * and static_workspace_size are ignored, so this can be called before a buffer
+ * exists.
+ *
+ * requirements_out must be initialized with apta_memory_requirements_init()
+ * first, as for apta_query_memory_requirements().
+ */
+APTA_API apta_status_t APTA_CALL
+apta_query_workspace_requirements(
     const apta_session_config_t *config,
     apta_memory_requirements_t *requirements_out);
 

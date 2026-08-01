@@ -14,7 +14,11 @@ POLYNOMIAL = 0x82F63B78
 CONTAINER_HEADER_SIZE = 96
 DIRECTORY_ENTRY_SIZE = 40
 EXPECTED_SIZE = 303
-EXPECTED_SHA256 = "394403f6e0617cde449f88c35b87d7d3a136ca304ae4874cba65310724a1d7d2"
+# Changed when APTA_API_VERSION_MINOR went 1 -> 2: the fixture records the
+# producer API version at byte 12, and tests/unit/external_fixture.c
+# re-serializes the parsed fixture and requires byte equality. The size is
+# unchanged; only that field and the header CRC moved.
+EXPECTED_SHA256 = "1d9824015912611f1f9a6d36a0d55d77b4ae7112cbaff56b14aae5ed0224bd3e"
 
 
 def crc32c(data: bytes) -> int:
@@ -150,7 +154,11 @@ def build_fixture() -> bytes:
     put_u16(output, 6, 1)
     put_u16(output, 8, 0)
     put_u16(output, 10, 1)
-    put_u32(output, 12, 0x00001000)  # APTA_API_VERSION_ENCODE(0, 1, 0)
+    # APTA_API_VERSION_ENCODE(0, 2, 0). The fixture records the producer API
+    # version, and tests/unit/external_fixture.c re-serializes the parsed
+    # fixture and requires byte equality, so this has to move with
+    # APTA_API_VERSION_MINOR in include/apta/apta_version.h.
+    put_u32(output, 12, 0x00002000)
     put_u32(output, 16, 0)
     put_u32(output, 20, 2)
     put_u64(output, 24, 96)

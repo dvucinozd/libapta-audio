@@ -7,6 +7,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \

@@ -5,6 +5,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -77,7 +79,7 @@ static void refresh_section_crc(uint8_t *data)
             (size_t)section_size));
 }
 
-static int create_valid_file(apta_context_t *context, uint8_t output[236])
+static int create_valid_file(apta_context_t *context, uint8_t output[236 * APTA_TEST_WORKSPACE_SCALE])
 {
     apta_session_config_t session_config;
     apta_session_t *session = NULL;
@@ -183,7 +185,7 @@ int main(void)
     apta_context_config_t context_config;
     apta_context_t *context = NULL;
     apta_parse_options_t options;
-    uint8_t valid[236];
+    uint8_t valid[236 * APTA_TEST_WORKSPACE_SCALE];
     uint8_t mutated[236];
 
     apta_context_config_init(&context_config);

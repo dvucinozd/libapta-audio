@@ -51,7 +51,10 @@ static int apta_s4_state_valid(uint32_t state)
 
 static int apta_s4_relation_valid(uint32_t relation)
 {
-    return relation <= APTA_TEMPO_RELATION_TWO_THIRDS;
+    /* B2: the relation set is append-only, so this bound moves with it. A
+     * reader built before those values rejects a section carrying them, which
+     * is the intended conservative behaviour. */
+    return relation <= APTA_TEMPO_RELATION_QUADRUPLE;
 }
 
 static int apta_s4_range_valid(uint64_t first, uint64_t end)

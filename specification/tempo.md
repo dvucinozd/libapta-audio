@@ -94,6 +94,10 @@ typedef uint32_t apta_tempo_relation_t;
 #define APTA_TEMPO_RELATION_DOUBLE      2u
 #define APTA_TEMPO_RELATION_THREE_HALF  3u
 #define APTA_TEMPO_RELATION_TWO_THIRDS  4u
+#define APTA_TEMPO_RELATION_THIRD       5u
+#define APTA_TEMPO_RELATION_TRIPLE      6u
+#define APTA_TEMPO_RELATION_QUARTER     7u
+#define APTA_TEMPO_RELATION_QUADRUPLE   8u
 
 typedef struct {
     apta_tempo_millibpm_t tempo_millibpm;
@@ -110,6 +114,10 @@ typedef struct {
 Candidates in one set MUST be ordered from most preferred to least preferred. Equal score ordering MUST be deterministic for a reference backend.
 
 `relation_to_selected` describes a known metric relationship to the selected candidate. It does not prove that either interpretation is musically correct.
+
+Relation values are serialized as a single byte in the `TEMP` section and are therefore append-only. Values 0 to 4 are original; 5 to 8 were added later. A producer MUST NOT renumber an existing value, and a reader that does not recognise a value MUST reject the section rather than reinterpret it.
+
+The reference backend classifies a candidate against the selected tempo using a two percent tolerance on each exact ratio, taking the nearest match when tolerances would overlap. It detects all eight relations. Which relations a given producer emits is a backend property, not a container requirement.
 
 ## 6. Candidate-set identity
 

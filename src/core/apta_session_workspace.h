@@ -6,6 +6,11 @@
 
 size_t apta_internal_session_workspace_minimum_size(void);
 
+/* A5: bytes of static workspace this configuration actually needs, derived
+ * from the allocator's own block geometry. SIZE_MAX on overflow. */
+size_t apta_internal_session_workspace_requirement(
+    const apta_session_config_t *config);
+
 int apta_internal_session_uses_workspace(
     const apta_session_t *session);
 

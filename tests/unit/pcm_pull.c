@@ -6,6 +6,10 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                  \
@@ -138,7 +142,11 @@ static int verify_final_overview(
         overview.state != APTA_FEATURE_FINAL ||
         overview.span_count != 1u ||
         overview.spans == NULL ||
-        overview.spans[0].column_count != expected_columns ||
+        overview.level.frames_per_column == 0u ||
+        overview.spans[0].column_count !=
+            (uint32_t)((total_frames +
+                        overview.level.frames_per_column - 1u) /
+                       overview.level.frames_per_column) ||
         overview.spans[0].source_range.first_frame != 0u ||
         overview.spans[0].source_range.end_frame != total_frames) {
         return 0;
@@ -293,7 +301,7 @@ static int test_unknown_length_end_callback(void)
 
 static int test_source_contract_failures(void)
 {
-    int16_t samples[1024] = {0};
+    int16_t samples[COL] = {0};
     pull_source_state_t source_state;
     apta_context_config_t context_config;
     apta_session_config_t session_config;
@@ -312,19 +320,19 @@ static int test_source_contract_failures(void)
     session_config.channel_count = 1u;
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    session_config.total_frames = 1024u;
+    session_config.total_frames = COL;
     session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
     CHECK(apta_session_create(context, &session_config, &session) ==
           APTA_STATUS_OK);
 
     memset(&source_state, 0, sizeof(source_state));
     source_state.samples = samples;
-    source_state.total_frames = 2048u;
+    source_state.total_frames = (2u * COL);
     source_state.known_total = 1u;
     init_source(&source, &source_state);
     CHECK(apta_session_set_source(session, &source) == APTA_ERROR_CONFLICT);
 
-    source_state.total_frames = 1024u;
+    source_state.total_frames = COL;
     source_state.bad_offset = 1u;
     CHECK(apta_session_set_source(session, &source) == APTA_STATUS_OK);
 

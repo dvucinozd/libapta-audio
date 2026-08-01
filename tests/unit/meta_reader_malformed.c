@@ -5,6 +5,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                  \
@@ -93,7 +95,7 @@ static void refresh_meta_crc(uint8_t *file)
 
 static int build_file(
     apta_context_t *context,
-    uint8_t output[1024],
+    uint8_t output[1024 * APTA_TEST_WORKSPACE_SCALE],
     size_t *size_out,
     int empty)
 {
@@ -209,7 +211,7 @@ int main(void)
 {
     apta_context_config_t context_config;
     apta_context_t *context = NULL;
-    uint8_t valid[1024];
+    uint8_t valid[1024 * APTA_TEST_WORKSPACE_SCALE];
     uint8_t empty[1024];
     uint8_t mutated[1024];
     size_t valid_size = 0u;
