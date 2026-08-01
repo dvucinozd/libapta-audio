@@ -5,6 +5,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -14,7 +16,7 @@
         }                                                                    \
     } while (0)
 
-#define VALID_SIZE 376u
+#define VALID_SIZE (376u * APTA_TEST_WORKSPACE_SCALE)
 #define WDTL_DIRECTORY_OFFSET 136u
 #define WDTL_PAYLOAD_OFFSET 272u
 #define WDTL_PAYLOAD_SIZE 104u

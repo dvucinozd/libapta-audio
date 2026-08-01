@@ -6,6 +6,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                  \
@@ -54,7 +56,7 @@ static void APTA_CALL test_deallocate(void *user_data, void *memory)
     }
 }
 
-static int build_valid_file(uint8_t output[1024], size_t *size_out)
+static int build_valid_file(uint8_t output[1024 * APTA_TEST_WORKSPACE_SCALE], size_t *size_out)
 {
     apta_context_config_t context_config;
     apta_session_config_t session_config;
@@ -255,7 +257,7 @@ cleanup:
 
 int main(void)
 {
-    uint8_t file[1024];
+    uint8_t file[1024 * APTA_TEST_WORKSPACE_SCALE];
     size_t file_size = 0u;
     uint32_t fail_at;
 

@@ -5,6 +5,10 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -63,19 +67,19 @@ static int analyze(
     session_config.channel_count = 1u;
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    session_config.total_frames = 2048u;
+    session_config.total_frames = (2u * COL);
     session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
     if (apta_session_create(context, &session_config, &session) != APTA_STATUS_OK) {
         goto cleanup;
     }
 
-    for (first_frame = 0u; first_frame < 2048u; first_frame += block_frames) {
+    for (first_frame = 0u; first_frame < (2u * COL); first_frame += block_frames) {
         uint32_t accepted = 0u;
         uint32_t frames = block_frames;
         apta_status_t status;
 
-        if (frames > 2048u - first_frame) {
-            frames = 2048u - first_frame;
+        if (frames > (2u * COL) - first_frame) {
+            frames = (2u * COL) - first_frame;
         }
 
         apta_pcm_block_init(&block);
@@ -89,7 +93,7 @@ static int analyze(
         }
     }
 
-    if (apta_session_signal_end_of_input(session, 2048u) != APTA_STATUS_OK ||
+    if (apta_session_signal_end_of_input(session, (2u * COL)) != APTA_STATUS_OK ||
         drain_session(session) != 0) {
         goto cleanup;
     }
@@ -125,19 +129,19 @@ cleanup:
 
 int main(void)
 {
-    int16_t pcm[2048];
+    int16_t pcm[2u * COL];
     apta_waveform_column_t single_block[2];
     apta_waveform_column_t split_blocks[2];
     uint32_t index;
 
-    for (index = 0u; index < 1024u; ++index) {
+    for (index = 0u; index < COL; ++index) {
         pcm[index] = (index & 1u) == 0u ? INT16_MIN : INT16_MAX;
     }
-    for (; index < 2048u; ++index) {
+    for (; index < (2u * COL); ++index) {
         pcm[index] = (int16_t)(index - 1536u);
     }
 
-    CHECK(analyze(pcm, 2048u, single_block) == 0);
+    CHECK(analyze(pcm, (2u * COL), single_block) == 0);
     CHECK(analyze(pcm, 257u, split_blocks) == 0);
     CHECK(memcmp(single_block, split_blocks, sizeof(single_block)) == 0);
     return 0;

@@ -7,6 +7,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define TOTAL_FRAMES 144000u
 #define BLOCK_FRAMES 4096u
 #define BEAT_FRAMES 23040u
@@ -57,7 +59,7 @@ static void APTA_CALL test_deallocate(void *user_data, void *memory)
     }
 }
 
-static int build_valid_file(uint8_t output[4096], size_t *size_out)
+static int build_valid_file(uint8_t output[4096 * APTA_TEST_WORKSPACE_SCALE], size_t *size_out)
 {
     const apta_feature_mask_t features =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
@@ -209,7 +211,7 @@ cleanup:
 
 int main(void)
 {
-    uint8_t file[4096];
+    uint8_t file[4096 * APTA_TEST_WORKSPACE_SCALE];
     size_t file_size = 0u;
     uint32_t fail_at;
 

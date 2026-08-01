@@ -582,9 +582,10 @@ apta_status_t apta_internal_s6_process_sample(
 apta_status_t apta_internal_s6_refresh(apta_session_t *session)
 {
     apta_internal_s6_session_state_t *state;
-    apta_s6_window_t windows[
-        APTA_INTERNAL_GLOBAL_BIN_CAPACITY /
-        APTA_INTERNAL_GLOBAL_WINDOW_BINS + 1u];
+    /* C3: stack array, bounded and asserted by APTA_INTERNAL_GLOBAL_MAX_WINDOWS
+     * in apta_internal.h. This runs inside process(), so its size is part of
+     * the host's task stack budget. */
+    apta_s6_window_t windows[APTA_INTERNAL_GLOBAL_MAX_WINDOWS];
     uint32_t window_count = 0u;
     uint32_t segment_window_counts[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS] = {0u};
     uint64_t evidence_first;

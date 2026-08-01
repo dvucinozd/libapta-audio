@@ -9,6 +9,8 @@
 
 #include "apta_result_pool.h"
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -131,7 +133,8 @@ int main(void)
     CHECK(layout->total_bytes == requirements.minimum_bytes);
     CHECK(layout->slot_count == 2u);
     CHECK(layout->slot_bytes > sizeof(apta_result_t));
-    CHECK(layout->overview_column_capacity == 4u);
+    CHECK(layout->overview_column_capacity ==
+          (4096u + APTA_TEST_COLUMN_FRAMES - 1u) / APTA_TEST_COLUMN_FRAMES);
     CHECK(layout->overview_span_capacity == 4u);
     CHECK(layout->detail_tile_capacity == 4u);
     CHECK(layout->detail_column_capacity == 256u);

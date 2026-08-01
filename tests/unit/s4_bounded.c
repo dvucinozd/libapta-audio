@@ -9,6 +9,10 @@
 
 #include "test_alignment.h"
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define SAMPLE_RATE 48000u
 #define BEAT_FRAMES 23040u
 #define TOTAL_FRAMES 288000u
@@ -30,7 +34,7 @@ typedef struct {
 
 typedef union {
     apta_test_max_align_t alignment;
-    uint8_t bytes[262144];
+    uint8_t bytes[262144 * APTA_TEST_WORKSPACE_SCALE];
 } aligned_workspace_t;
 
 static void *APTA_CALL test_allocate(

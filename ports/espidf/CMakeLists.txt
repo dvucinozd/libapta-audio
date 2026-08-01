@@ -172,6 +172,34 @@ if(NOT CMAKE_BUILD_EARLY_EXPANSION)
 
     set_target_properties(${COMPONENT_LIB} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
     target_compile_definitions(${COMPONENT_LIB} PRIVATE APTA_BUILDING_LIBRARY=1)
+
+    # C3: wire the Kconfig capacity options to the library's #ifndef-guarded
+    # constants. Each is only defined when the host set it, so an unconfigured
+    # build keeps the library defaults.
+    if(CONFIG_APTA_OVERVIEW_FRAMES_PER_COLUMN)
+        target_compile_definitions(
+            ${COMPONENT_LIB}
+            PRIVATE
+                APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=${CONFIG_APTA_OVERVIEW_FRAMES_PER_COLUMN}u)
+    endif()
+    if(CONFIG_APTA_MAX_DETAIL_TILES)
+        target_compile_definitions(
+            ${COMPONENT_LIB}
+            PRIVATE
+                APTA_INTERNAL_MAX_DETAIL_TILES=${CONFIG_APTA_MAX_DETAIL_TILES}u)
+    endif()
+    if(CONFIG_APTA_ONSET_BIN_CAPACITY)
+        target_compile_definitions(
+            ${COMPONENT_LIB}
+            PRIVATE
+                APTA_INTERNAL_ONSET_BIN_CAPACITY=${CONFIG_APTA_ONSET_BIN_CAPACITY}u)
+    endif()
+    if(CONFIG_APTA_GLOBAL_BIN_CAPACITY)
+        target_compile_definitions(
+            ${COMPONENT_LIB}
+            PRIVATE
+                APTA_INTERNAL_GLOBAL_BIN_CAPACITY=${CONFIG_APTA_GLOBAL_BIN_CAPACITY}u)
+    endif()
     target_compile_options(${COMPONENT_LIB} PRIVATE -Wall -Wextra -Wno-error=type-limits)
     target_link_libraries(${COMPONENT_LIB} PRIVATE m)
 endif()

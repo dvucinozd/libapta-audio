@@ -136,3 +136,45 @@ See [`../../examples/espidf/cooperative_scheduler`](../../examples/espidf/cooper
 ## Evidence boundary
 
 CI cross-compiles and links complete firmware images for the listed ESP-IDF/target combinations and runs host-side allocator, lifetime, bounded-profile, sanitizer and fuzz tests. CI does not flash or execute the example on a physical ESP board. On-target heap, stack and latency measurements must therefore be recorded separately before making a device resource-class or real-time claim.
+
+## Tunable capacities
+
+The library's geometry and capacity constants are `#ifndef`-guarded, and the
+four a host is most likely to need are exposed through this component's
+`Kconfig`:
+
+| Option | Default | Effect |
+|---|---:|---|
+| `CONFIG_APTA_OVERVIEW_FRAMES_PER_COLUMN` | 1024 | Overview horizontal resolution. 1024 is about 43 columns per second at 44.1 kHz. |
+| `CONFIG_APTA_MAX_DETAIL_TILES` | 4 | Detail tile cache. About 1.5 s of total coverage at the default detail geometry. |
+| `CONFIG_APTA_ONSET_BIN_CAPACITY` | 4096 | Local tempo analysis window, 23.8 s at 44.1 kHz. |
+| `CONFIG_APTA_GLOBAL_BIN_CAPACITY` | 16384 | Global grid window, 12.7 minutes at 44.1 kHz. |
+
+`CMakeLists.txt` passes each one through only when it is set, so an
+unconfigured build keeps the library defaults.
+
+Anything overridden changes the static workspace a session needs. Do not scale
+a published profile constant by hand -- call
+`apta_query_workspace_requirements()` with the configuration and use what it
+reports. `apta_session_create()` enforces the same figure.
+
+### Stack cost of the global grid
+
+`apta_internal_s6_refresh()` declares a per-window array on the stack, sized
+`APTA_INTERNAL_GLOBAL_MAX_WINDOWS`, which is
+`GLOBAL_BIN_CAPACITY / GLOBAL_WINDOW_BINS + 1`. At the defaults that is 129
+entries of `apta_s6_window_t`, roughly 4 KiB, and it lives for the duration of
+a `apta_session_process()` call. Raising `CONFIG_APTA_GLOBAL_BIN_CAPACITY`
+raises this proportionally, so a task calling `apta_session_process()` needs
+its stack sized accordingly. A static assertion caps the array at 1025 entries
+to stop an override from silently overflowing a typical task stack; raising
+that cap is a deliberate edit to `src/core/apta_internal.h`.
+
+### Coherence is checked at compile time
+
+Overrides that contradict each other fail the build rather than misbehaving at
+runtime. For example an onset ring smaller than the minimum tempo window:
+
+```text
+error: static assertion failed: "onset bin capacity must hold the minimum tempo window"
+```

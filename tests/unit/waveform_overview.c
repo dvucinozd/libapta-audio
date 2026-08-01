@@ -5,6 +5,10 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -57,13 +61,13 @@ int main(void)
     apta_feature_state_t feature_state;
     apta_confidence_value_t confidence;
     const apta_result_t *result = NULL;
-    int16_t first_column[1024];
-    int16_t second_column[1024];
+    int16_t first_column[COL];
+    int16_t second_column[COL];
     uint32_t accepted;
     uint32_t index;
 
     memset(first_column, 0, sizeof(first_column));
-    for (index = 0u; index < 1024u; ++index) {
+    for (index = 0u; index < COL; ++index) {
         second_column[index] = INT16_MAX;
     }
 
@@ -78,18 +82,18 @@ int main(void)
     session_config.channel_count = 1u;
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    session_config.total_frames = 2048u;
+    session_config.total_frames = (2u * COL);
     session_config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
 
     CHECK(apta_session_create(context, &session_config, &session) == APTA_STATUS_OK);
 
     apta_pcm_block_init(&block);
     block.data = second_column;
-    block.first_frame = 1024u;
-    block.frame_count = 1024u;
+    block.first_frame = COL;
+    block.frame_count = COL;
     accepted = 0u;
     CHECK(apta_session_push_pcm(session, &block, &accepted) == APTA_STATUS_OK);
-    CHECK(accepted == 1024u);
+    CHECK(accepted == COL);
 
     accepted = 77u;
     CHECK(apta_session_push_pcm(session, &block, &accepted) == APTA_ERROR_CONFLICT);
@@ -98,7 +102,7 @@ int main(void)
     apta_pcm_request_init(&pcm_request);
     CHECK(apta_session_next_pcm_request(session, &pcm_request) == APTA_STATUS_OK);
     CHECK(pcm_request.range.first_frame == 0u);
-    CHECK(pcm_request.range.end_frame == 1024u);
+    CHECK(pcm_request.range.end_frame == COL);
     CHECK(pcm_request.feature_mask == APTA_FEATURE_WAVEFORM_OVERVIEW);
 
     CHECK(process_all(session) == 0);
@@ -111,10 +115,10 @@ int main(void)
     apta_waveform_overview_view_init(&overview);
     CHECK(apta_result_get_waveform_overview(result, 0u, &overview) ==
           APTA_STATUS_OK);
-    CHECK(overview.level.frames_per_column == 1024u);
+    CHECK(overview.level.frames_per_column == COL);
     CHECK(overview.span_count == 1u);
-    CHECK(overview.spans[0].source_range.first_frame == 1024u);
-    CHECK(overview.spans[0].source_range.end_frame == 2048u);
+    CHECK(overview.spans[0].source_range.first_frame == COL);
+    CHECK(overview.spans[0].source_range.end_frame == (2u * COL));
     CHECK(overview.spans[0].first_column_index == 1u);
     CHECK(overview.spans[0].column_count == 1u);
     CHECK(overview.spans[0].columns[0].minimum == INT16_MAX);
@@ -129,13 +133,13 @@ int main(void)
     apta_pcm_block_init(&block);
     block.data = first_column;
     block.first_frame = 0u;
-    block.frame_count = 1024u;
+    block.frame_count = COL;
     accepted = 0u;
     CHECK(apta_session_push_pcm(session, &block, &accepted) == APTA_STATUS_OK);
-    CHECK(accepted == 1024u);
+    CHECK(accepted == COL);
     CHECK(process_all(session) == 0);
 
-    CHECK(apta_session_signal_end_of_input(session, 2048u) == APTA_STATUS_OK);
+    CHECK(apta_session_signal_end_of_input(session, (2u * COL)) == APTA_STATUS_OK);
     CHECK(process_all(session) == 0);
     CHECK(apta_session_get_state(session) == APTA_SESSION_COMPLETED);
 
@@ -147,7 +151,7 @@ int main(void)
     CHECK(overview.state == APTA_FEATURE_FINAL);
     CHECK(overview.span_count == 1u);
     CHECK(overview.spans[0].source_range.first_frame == 0u);
-    CHECK(overview.spans[0].source_range.end_frame == 2048u);
+    CHECK(overview.spans[0].source_range.end_frame == (2u * COL));
     CHECK(overview.spans[0].first_column_index == 0u);
     CHECK(overview.spans[0].column_count == 2u);
 
@@ -162,7 +166,7 @@ int main(void)
 
     apta_frame_range_init(&full_range);
     full_range.first_frame = 0u;
-    full_range.end_frame = 2048u;
+    full_range.end_frame = (2u * COL);
     CHECK(apta_result_get_feature_state(
               result,
               APTA_FEATURE_WAVEFORM_OVERVIEW,

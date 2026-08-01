@@ -9,6 +9,10 @@
 
 #include "test_alignment.h"
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -25,7 +29,7 @@ typedef struct {
 
 typedef union {
     apta_test_max_align_t alignment;
-    uint8_t bytes[65536];
+    uint8_t bytes[65536 * APTA_TEST_WORKSPACE_SCALE];
 } aligned_workspace_t;
 
 static void *APTA_CALL test_allocate(
@@ -114,7 +118,7 @@ static int result_has_detail(
         tile.level_id != 1u ||
         tile.tile_index != 0u ||
         tile.source_range.first_frame != 0u ||
-        tile.source_range.end_frame != 1024u ||
+        tile.source_range.end_frame != COL ||
         tile.first_column_index != 0u ||
         tile.column_count != 4u ||
         tile.state != expected_state ||
@@ -133,7 +137,7 @@ static int result_has_detail(
 
     apta_frame_range_init(&range);
     range.first_frame = 0u;
-    range.end_frame = 1024u;
+    range.end_frame = COL;
     return apta_result_get_feature_state(
                result,
                APTA_FEATURE_WAVEFORM_DETAIL,
@@ -165,7 +169,7 @@ int main(void)
     apta_work_budget_t budget;
     apta_progress_t progress;
     apta_result_info_t info;
-    int16_t pcm[1024];
+    int16_t pcm[COL];
     uint8_t *serialized = NULL;
     uint64_t serialized_size = 0u;
     size_t written = 0u;
@@ -174,7 +178,7 @@ int main(void)
     apta_status_t status;
 
     memset(&workspace, 0, sizeof(workspace));
-    for (index = 0u; index < 1024u; ++index) {
+    for (index = 0u; index < COL; ++index) {
         pcm[index] = (index & 1u) != 0u ? INT16_MAX : INT16_MIN;
     }
 
@@ -183,7 +187,7 @@ int main(void)
     session_config.channel_count = 1u;
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    session_config.total_frames = 1024u;
+    session_config.total_frames = COL;
     session_config.requested_features =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
         APTA_FEATURE_WAVEFORM_DETAIL;
@@ -230,7 +234,7 @@ int main(void)
     apta_pcm_block_init(&block);
     block.data = pcm;
     block.first_frame = 0u;
-    block.frame_count = 1024u;
+    block.frame_count = COL;
     accepted = UINT32_MAX;
     CHECK(apta_session_push_pcm(session, &block, &accepted) ==
           APTA_ERROR_RESULT_SLOTS_EXHAUSTED);
@@ -240,12 +244,12 @@ int main(void)
     apta_result_release(initial);
     initial = NULL;
     CHECK(apta_session_push_pcm(session, &block, &accepted) == APTA_STATUS_OK);
-    CHECK(accepted == 1024u);
+    CHECK(accepted == COL);
     CHECK(apta_session_get_state(session) == APTA_SESSION_ACTIVE);
     CHECK(allocator_state.allocate_calls == 2u);
 
     apta_work_budget_init(&budget);
-    budget.maximum_input_frames = 1024u;
+    budget.maximum_input_frames = COL;
     budget.maximum_steps = 4u;
     apta_progress_init(&progress);
     CHECK(apta_session_process(session, &budget, &progress) ==
@@ -268,7 +272,7 @@ int main(void)
     CHECK(result_has_overview(partial_result, APTA_FEATURE_PARTIAL));
     CHECK(result_has_detail(partial_result, APTA_FEATURE_PARTIAL));
 
-    CHECK(apta_session_signal_end_of_input(session, 1024u) == APTA_STATUS_OK);
+    CHECK(apta_session_signal_end_of_input(session, COL) == APTA_STATUS_OK);
     CHECK(apta_session_get_state(session) == APTA_SESSION_DRAINING);
     CHECK(allocator_state.allocate_calls == 2u);
 

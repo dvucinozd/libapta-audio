@@ -9,19 +9,54 @@
 
 #include <apta/apta.h>
 
+/*
+ * C3: geometry and capacity constants.
+ *
+ * Every value a host might reasonably need to change is #ifndef-guarded so it
+ * can be overridden from the build system, for example
+ * -DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256. Derived constants stay
+ * derived and are deliberately not overridable. Section "Invariants" below
+ * asserts everything the code relies on; the ring buffers and stack arrays
+ * break silently otherwise.
+ */
+#ifndef APTA_INTERNAL_MAX_REGION_REQUESTS
 #define APTA_INTERNAL_MAX_REGION_REQUESTS 16u
+#endif
+#ifndef APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN
 #define APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN 1024u
+#endif
+
+/* Not overridable: this is the published level identifier for detail tiles. */
 #define APTA_INTERNAL_DETAIL_LEVEL_ID 1u
+
+#ifndef APTA_INTERNAL_DETAIL_FRAMES_PER_COLUMN
 #define APTA_INTERNAL_DETAIL_FRAMES_PER_COLUMN 256u
+#endif
+#ifndef APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE
 #define APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE 64u
+#endif
+
+/* Derived: must continue to follow from its inputs. */
 #define APTA_INTERNAL_DETAIL_TILE_FRAMES \
     (APTA_INTERNAL_DETAIL_FRAMES_PER_COLUMN * \
      APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE)
+
+#ifndef APTA_INTERNAL_MAX_DETAIL_TILES
 #define APTA_INTERNAL_MAX_DETAIL_TILES 4u
+#endif
+#ifndef APTA_INTERNAL_PROCESS_CHUNK_FRAMES
 #define APTA_INTERNAL_PROCESS_CHUNK_FRAMES 256u
+#endif
+#ifndef APTA_INTERNAL_MAX_PUSH_FRAMES
 #define APTA_INTERNAL_MAX_PUSH_FRAMES 4096u
+#endif
+#ifndef APTA_INTERNAL_SCHEDULER_AGE_STEP
 #define APTA_INTERNAL_SCHEDULER_AGE_STEP 8u
+#endif
+#ifndef APTA_INTERNAL_SCHEDULER_MAX_SKIPS
 #define APTA_INTERNAL_SCHEDULER_MAX_SKIPS 32u
+#endif
+
 #define APTA_INTERNAL_RESULT_FLAG_POOLED (1u << 0)
 
 #if defined(_MSC_VER)
@@ -37,11 +72,24 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_MAX_ALIGNMENT \
     alignof(apta_internal_max_align_t)
 
+#ifndef APTA_INTERNAL_ONSET_FRAMES_PER_BIN
 #define APTA_INTERNAL_ONSET_FRAMES_PER_BIN 256u
+#endif
+/* The onset bin store is a ring addressed with `bin_index % capacity`, not a
+ * mask, so a non-power-of-two capacity is correct. It costs an integer
+ * division per lookup; a power of two lets the compiler strength-reduce it. */
+#ifndef APTA_INTERNAL_ONSET_BIN_CAPACITY
 #define APTA_INTERNAL_ONSET_BIN_CAPACITY 4096u
+#endif
+#ifndef APTA_INTERNAL_MIN_TEMPO_BINS
 #define APTA_INTERNAL_MIN_TEMPO_BINS 512u
+#endif
+#ifndef APTA_INTERNAL_STABLE_TEMPO_BINS
 #define APTA_INTERNAL_STABLE_TEMPO_BINS 1024u
+#endif
+#ifndef APTA_INTERNAL_MAX_TEMPO_CANDIDATES
 #define APTA_INTERNAL_MAX_TEMPO_CANDIDATES 3u
+#endif
 
 /* A2: how many new onset bins must accumulate before the tempo estimate is
  * recomputed. One process call of 1024 frames advances the evidence range by
@@ -63,11 +111,30 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_S6_FEATURES \
     (APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO)
 
+#ifndef APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN
 #define APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN 2048u
+#endif
+/* Same ring addressing as the onset bins; see the note there. Raising this
+ * also raises the stack used by apta_internal_s6_refresh(), which declares a
+ * windows array sized from it -- see APTA_INTERNAL_GLOBAL_MAX_WINDOWS. */
+#ifndef APTA_INTERNAL_GLOBAL_BIN_CAPACITY
 #define APTA_INTERNAL_GLOBAL_BIN_CAPACITY 16384u
+#endif
+#ifndef APTA_INTERNAL_GLOBAL_WINDOW_BINS
 #define APTA_INTERNAL_GLOBAL_WINDOW_BINS 128u
+#endif
+#ifndef APTA_INTERNAL_GLOBAL_MIN_BINS
 #define APTA_INTERNAL_GLOBAL_MIN_BINS 64u
+#endif
+#ifndef APTA_INTERNAL_GLOBAL_STABLE_BINS
 #define APTA_INTERNAL_GLOBAL_STABLE_BINS 256u
+#endif
+
+/* Derived: the stack array in apta_internal_s6_refresh(). Named so the bound
+ * can be asserted and documented rather than repeated at the declaration. */
+#define APTA_INTERNAL_GLOBAL_MAX_WINDOWS \
+    (APTA_INTERNAL_GLOBAL_BIN_CAPACITY / \
+     APTA_INTERNAL_GLOBAL_WINDOW_BINS + 1u)
 
 /* A2: the S6 equivalent. Global bins hold 2048 frames, so a 1024-frame process
  * call advances the range by at most half a bin and 32 bins is about 1.5 s at
@@ -79,6 +146,89 @@ typedef max_align_t apta_internal_max_align_t;
     APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS
 #define APTA_INTERNAL_GLOBAL_MAX_BEATS \
     APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS
+
+/*
+ * C3: invariants. These hold at the default settings and must keep holding for
+ * any override. Each one guards something that fails silently rather than
+ * loudly if it is violated.
+ */
+
+/* Nothing may be zero: these divide, size arrays, or bound loops. */
+_Static_assert(APTA_INTERNAL_MAX_REGION_REQUESTS >= 1u,
+               "at least one region-request slot is required");
+_Static_assert(APTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN >= 1u,
+               "overview frames per column must be non-zero");
+_Static_assert(APTA_INTERNAL_DETAIL_FRAMES_PER_COLUMN >= 1u,
+               "detail frames per column must be non-zero");
+_Static_assert(APTA_INTERNAL_DETAIL_COLUMNS_PER_TILE >= 1u,
+               "detail columns per tile must be non-zero");
+_Static_assert(APTA_INTERNAL_MAX_DETAIL_TILES >= 1u,
+               "at least one detail tile is required");
+_Static_assert(APTA_INTERNAL_PROCESS_CHUNK_FRAMES >= 1u,
+               "process chunk must be non-zero");
+_Static_assert(APTA_INTERNAL_ONSET_FRAMES_PER_BIN >= 1u,
+               "onset frames per bin must be non-zero");
+_Static_assert(APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN >= 1u,
+               "global frames per bin must be non-zero");
+_Static_assert(APTA_INTERNAL_GLOBAL_WINDOW_BINS >= 1u,
+               "global window must be non-zero");
+
+/* A push must be drainable in whole chunks, and a chunk must fit a push. */
+_Static_assert(APTA_INTERNAL_PROCESS_CHUNK_FRAMES <=
+                   APTA_INTERNAL_MAX_PUSH_FRAMES,
+               "process chunk cannot exceed the maximum push");
+
+/* The onset ring must be able to hold the evidence run the estimator waits
+ * for, and the run it calls stable. apta_s4_find_evidence() bounds the range
+ * it returns by the capacity, so a capacity below the minimum means the
+ * estimator can never start. */
+_Static_assert(APTA_INTERNAL_MIN_TEMPO_BINS <=
+                   APTA_INTERNAL_ONSET_BIN_CAPACITY,
+               "onset bin capacity must hold the minimum tempo window");
+_Static_assert(APTA_INTERNAL_STABLE_TEMPO_BINS <=
+                   APTA_INTERNAL_ONSET_BIN_CAPACITY,
+               "onset bin capacity must hold the stable tempo window");
+_Static_assert(APTA_INTERNAL_MIN_TEMPO_BINS <=
+                   APTA_INTERNAL_STABLE_TEMPO_BINS,
+               "the stable window cannot be shorter than the minimum window");
+
+/* Same for the global ring, which additionally slices into windows. */
+_Static_assert(APTA_INTERNAL_GLOBAL_MIN_BINS <=
+                   APTA_INTERNAL_GLOBAL_BIN_CAPACITY,
+               "global bin capacity must hold the minimum window");
+_Static_assert(APTA_INTERNAL_GLOBAL_STABLE_BINS <=
+                   APTA_INTERNAL_GLOBAL_BIN_CAPACITY,
+               "global bin capacity must hold a stable window");
+_Static_assert(APTA_INTERNAL_GLOBAL_WINDOW_BINS <=
+                   APTA_INTERNAL_GLOBAL_BIN_CAPACITY,
+               "an analysis window must fit the global ring");
+
+/* apta_internal_s6_refresh() declares a windows array of this length on the
+ * stack, inside process(). Raising GLOBAL_BIN_CAPACITY raises task stack use;
+ * the bound is documented in ports/espidf/README.md. */
+_Static_assert(APTA_INTERNAL_GLOBAL_MAX_WINDOWS <= 1025u,
+               "global window array would use an unreasonable amount of stack; "
+               "raise this bound deliberately and update the ESP-IDF port "
+               "stack guidance if you mean it");
+
+/* Candidate capacity is published in the public headers and serialized. */
+_Static_assert(APTA_INTERNAL_MAX_TEMPO_CANDIDATES >= 1u,
+               "at least one tempo candidate is required");
+_Static_assert(APTA_INTERNAL_MAX_TEMPO_CANDIDATES <=
+                   APTA_REFERENCE_TEMPO_MAX_CANDIDATES,
+               "candidate capacity exceeds the documented public maximum");
+_Static_assert(APTA_INTERNAL_GLOBAL_MAX_SEGMENTS <=
+                   APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS,
+               "segment capacity exceeds the documented public maximum");
+_Static_assert(APTA_INTERNAL_GLOBAL_MAX_BEATS <=
+                   APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS,
+               "beat capacity exceeds the documented public maximum");
+
+/* A2's refresh gates must be able to fire. */
+_Static_assert(APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS >= 1u,
+               "the S4 refresh gate must allow progress");
+_Static_assert(APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS >= 1u,
+               "the S6 refresh gate must allow progress");
 
 typedef struct {
     void *raw_memory;

@@ -150,3 +150,54 @@ The old constant remains as a cheap first check.
 Hosts that previously supplied a workspace smaller than their configuration
 needs, and happened not to hit the failure, will now be rejected at creation.
 That is the intended behaviour: those sessions could not have completed.
+
+## Overridable capacities
+
+The geometry and capacity constants in `src/core/apta_internal.h` are
+`#ifndef`-guarded, so a host can override them from its build system without
+patching the header:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u
+```
+
+The ESP-IDF component exposes the four most useful ones through `Kconfig`; see
+`ports/espidf/README.md`.
+
+Derived constants stay derived and are not overridable:
+`APTA_INTERNAL_DETAIL_TILE_FRAMES`, `APTA_INTERNAL_GLOBAL_MAX_WINDOWS`,
+`APTA_INTERNAL_GLOBAL_MAX_SEGMENTS` and `APTA_INTERNAL_GLOBAL_MAX_BEATS`.
+
+Every invariant the code depends on is a `_Static_assert` in the same header,
+so an incoherent combination fails to compile instead of corrupting a ring
+buffer or overflowing a stack array.
+
+Any override changes what `apta_query_workspace_requirements()` reports,
+because that function is computed from the same constants. Call it rather than
+scaling a published figure.
+
+### Ring capacities and division cost
+
+The onset and global bin stores are rings addressed with
+`bin_index % capacity`, not a mask, so a capacity that is not a power of two is
+correct. It costs an integer division per lookup; a power of two lets the
+compiler strength-reduce it. This is worth respecting: the same division in an
+inner loop was measured to dominate the tempo autocorrelation.
+
+### Verifying a non-default build
+
+```bash
+cmake -S . -B build-ov256 -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u \
+      -DCMAKE_CXX_FLAGS=-DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256u
+cmake --build build-ov256 --parallel
+ctest --test-dir build-ov256 -LE default_geometry --output-on-failure
+```
+
+`-LE default_geometry` excludes tests pinned to the documented default
+geometry: those asserting exact serialized container sizes, exact fixture byte
+counts, or allocator call counts. They are interchange and layout conformance
+evidence, and deriving their expectations from the configured geometry would
+make them assert that the writer wrote what the writer computed. Everything
+outside that label is expected to pass at any supported override.

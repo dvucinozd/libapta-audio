@@ -8,6 +8,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_test_geometry.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -69,10 +71,15 @@ int main(void)
     CHECK(apta_query_workspace_requirements(&config, &required) ==
           APTA_STATUS_OK);
 
-    /* The figure must be credible: a five-minute full-feature session needs
-     * far more than the old constant floor, and not an absurd amount. */
-    CHECK(required.minimum_bytes > 1024u * 1024u);
-    CHECK(required.minimum_bytes < 4u * 1024u * 1024u);
+    /* The figure must be credible: far more than the old constant floor, which
+     * accepted 12 KiB for this configuration, and not an absurd amount. The
+     * bounds are deliberately wide so they hold at any supported geometry --
+     * what they catch is a query that reports a constant or a nonsense value,
+     * not a specific number. The exact figure is checked below by creating a
+     * session at exactly it. */
+    CHECK(required.minimum_bytes > (size_t)256u * 1024u);
+    CHECK(required.minimum_bytes <
+          (size_t)16u * 1024u * 1024u * APTA_TEST_WORKSPACE_SCALE);
     CHECK(required.recommended_bytes >= required.minimum_bytes);
     CHECK(required.required_alignment >= sizeof(void *));
 
@@ -94,9 +101,10 @@ int main(void)
      * five-minute full-feature session and failed much later inside
      * process(). It must be rejected at creation. */
     configure(&config, FULL_FEATURES, FIVE_MINUTES);
-    workspace = aligned_alloc(64u, 2u * 1024u * 1024u);
+    workspace_size = (required.minimum_bytes + 63u) & ~(size_t)63u;
+    workspace = aligned_alloc(64u, workspace_size);
     CHECK(workspace != NULL);
-    memset(workspace, 0, 2u * 1024u * 1024u);
+    memset(workspace, 0, workspace_size);
 
     config.static_workspace = workspace;
     config.static_workspace_size = 12u * 1024u;
@@ -111,9 +119,7 @@ int main(void)
     CHECK(session == NULL);
 
     /* Exactly the reported requirement is accepted. */
-    workspace_size = required.minimum_bytes;
-    CHECK(workspace_size <= 2u * 1024u * 1024u);
-    config.static_workspace_size = workspace_size;
+    config.static_workspace_size = required.minimum_bytes;
     CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
     CHECK(session != NULL);
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);

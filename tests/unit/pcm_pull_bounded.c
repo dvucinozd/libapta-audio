@@ -9,6 +9,10 @@
 
 #include "test_alignment.h"
 
+#include "apta_test_geometry.h"
+
+#define COL APTA_TEST_COLUMN_FRAMES
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                  \
@@ -25,7 +29,7 @@ typedef struct {
 
 typedef union {
     apta_test_max_align_t alignment;
-    uint8_t bytes[65536];
+    uint8_t bytes[65536 * APTA_TEST_WORKSPACE_SCALE];
 } aligned_workspace_t;
 
 typedef struct {
@@ -107,7 +111,7 @@ static void APTA_CALL source_release(
 
 int main(void)
 {
-    enum { FRAME_COUNT = 2048 };
+    enum { FRAME_COUNT = 2u * COL };
     int16_t samples[FRAME_COUNT];
     aligned_workspace_t workspace;
     allocator_state_t allocator_state = {0u, 0u};
