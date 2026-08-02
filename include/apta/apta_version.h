@@ -23,7 +23,7 @@
  * as it is rather than quietly relaxed.
  */
 #define APTA_API_VERSION_MAJOR 0u
-#define APTA_API_VERSION_MINOR 2u
+#define APTA_API_VERSION_MINOR 3u
 #define APTA_API_VERSION_PATCH 0u
 
 #define APTA_API_VERSION_ENCODE(major, minor, patch) \

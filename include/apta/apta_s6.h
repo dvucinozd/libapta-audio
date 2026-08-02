@@ -12,7 +12,22 @@ extern "C" {
 #endif
 
 #define APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS 8u
-#define APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS    4096u
+
+/*
+ * Beats the reference implementation will materialise for a global grid.
+ *
+ * Reduced from 4096 in API 0.3.0. At 128 BPM this is 24 minutes of beats,
+ * against an analysis ring that covers 12.7, so the array is still the larger
+ * of the two. The 1024 entries removed are 40,960 bytes, and on an ESP32-P4
+ * that is what brings the S6 workspace inside internal SRAM instead of PSRAM --
+ * measured at roughly three and a half times the cost per call. See section 30
+ * of docs/status/S4-TEMPO-LOCAL-GRID-STATUS.md.
+ *
+ * A host that sizes its own storage from this constant needs no change. A host
+ * that hard-coded 4096 and expects that many beats from a long track will see
+ * fewer.
+ */
+#define APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS    3072u
 
 #define APTA_GRID_REVISION_NONE    0u
 #define APTA_GRID_REVISION_PENDING 1u
