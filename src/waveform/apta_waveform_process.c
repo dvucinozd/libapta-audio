@@ -7,29 +7,63 @@
 #include <stdint.h>
 #include <string.h>
 
-/* C1: one-pole coefficients for the band split, derived from the session's
+/* C1/B3: one-pole coefficients for the shared band split, derived from the
  * sample rate so the corners stay at 200 Hz and 2 kHz whatever the rate is.
  * a = 1 - exp(-2*pi*fc/fs), clamped to a stable range. */
-void apta_internal_waveform_init_bands(apta_session_t *session)
+void apta_internal_band_filter_init(
+    apta_internal_band_filter_t *filter,
+    uint32_t sample_rate)
 {
-    const float rate = (float)session->config.source_sample_rate;
+    const float rate = (float)sample_rate;
     float low;
     float mid;
 
-    session->band_low_state = 0.0f;
-    session->band_mid_state = 0.0f;
+    memset(filter, 0, sizeof(*filter));
 
     if (rate <= 0.0f) {
-        session->band_low_coefficient = 0.0f;
-        session->band_mid_coefficient = 0.0f;
         return;
     }
 
     low = 1.0f - expf(-6.2831853f * APTA_INTERNAL_BAND_LOW_HZ / rate);
     mid = 1.0f - expf(-6.2831853f * APTA_INTERNAL_BAND_HIGH_HZ / rate);
     /* A corner at or above Nyquist degenerates; pass the sample through. */
-    session->band_low_coefficient = fminf(fmaxf(low, 0.0f), 1.0f);
-    session->band_mid_coefficient = fminf(fmaxf(mid, 0.0f), 1.0f);
+    filter->low_coefficient = fminf(fmaxf(low, 0.0f), 1.0f);
+    filter->mid_coefficient = fminf(fmaxf(mid, 0.0f), 1.0f);
+}
+
+void apta_internal_band_filter_reset(apta_internal_band_filter_t *filter)
+{
+    filter->low_state = 0.0f;
+    filter->mid_state = 0.0f;
+}
+
+void apta_internal_band_filter_split(
+    apta_internal_band_filter_t *filter,
+    float sample,
+    float out_bands[APTA_INTERNAL_BAND_COUNT])
+{
+    filter->low_state +=
+        filter->low_coefficient * (sample - filter->low_state);
+    filter->mid_state +=
+        filter->mid_coefficient * (sample - filter->mid_state);
+
+    out_bands[0] = filter->low_state;
+    out_bands[1] = filter->mid_state - filter->low_state;
+    out_bands[2] = sample - filter->mid_state;
+}
+
+void apta_internal_waveform_init_bands(apta_session_t *session)
+{
+    apta_internal_band_filter_init(
+        &session->overview_band_filter,
+        session->config.source_sample_rate);
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    apta_internal_band_filter_init(
+        &session->onset_band_filter,
+        session->config.source_sample_rate);
+    session->onset_band_next_frame = 0u;
+    session->onset_band_filter_valid = 0u;
+#endif
 }
 
 static uint32_t apta_min_u32(uint32_t left, uint32_t right)
@@ -384,29 +418,21 @@ static apta_status_t apta_process_samples(
             const size_t base =
                 (size_t)(accumulator - session->overview_accumulators) *
                 APTA_INTERNAL_BAND_COUNT;
-            float low;
-            float mid;
-            float high;
+            float bands[APTA_INTERNAL_BAND_COUNT];
 
-            session->band_low_state +=
-                session->band_low_coefficient *
-                (sample - session->band_low_state);
-            session->band_mid_state +=
-                session->band_mid_coefficient *
-                (sample - session->band_mid_state);
-
-            low = session->band_low_state;
-            mid = session->band_mid_state - session->band_low_state;
-            high = sample - session->band_mid_state;
+            apta_internal_band_filter_split(
+                &session->overview_band_filter,
+                sample,
+                bands);
 
             session->overview_band_sums[base + 0u] += (uint32_t)(
-                fminf(fabsf(low), 1.0f) *
+                fminf(fabsf(bands[0]), 1.0f) *
                 APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
             session->overview_band_sums[base + 1u] += (uint32_t)(
-                fminf(fabsf(mid), 1.0f) *
+                fminf(fabsf(bands[1]), 1.0f) *
                 APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
             session->overview_band_sums[base + 2u] += (uint32_t)(
-                fminf(fabsf(high), 1.0f) *
+                fminf(fabsf(bands[2]), 1.0f) *
                 APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
         }
 

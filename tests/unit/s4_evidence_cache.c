@@ -54,8 +54,14 @@ static int fill_bin(
     for (sample = 0u; sample < sample_count; ++sample) {
         apta_source_frame_t frame =
             bin_index * APTA_INTERNAL_ONSET_FRAMES_PER_BIN + sample;
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+        const float bands[APTA_INTERNAL_BAND_COUNT] = {0.5f, 0.25f, 0.125f};
+        apta_status_t status =
+            apta_internal_s4_process_sample(session, frame, bands);
+#else
         apta_status_t status =
             apta_internal_s4_process_sample(session, frame, 0.5f);
+#endif
         if (status != APTA_STATUS_OK) {
             fprintf(stderr,
                     "process_sample failed: bin=%llu sample=%u status=%d\n",

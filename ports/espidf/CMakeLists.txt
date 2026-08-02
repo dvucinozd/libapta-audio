@@ -173,6 +173,12 @@ if(NOT CMAKE_BUILD_EARLY_EXPANSION)
     set_target_properties(${COMPONENT_LIB} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
     target_compile_definitions(${COMPONENT_LIB} PRIVATE APTA_BUILDING_LIBRARY=1)
 
+    if(CONFIG_APTA_EXPERIMENTAL_MULTIBAND_ONSET)
+        target_compile_definitions(
+            ${COMPONENT_LIB}
+            PRIVATE APTA_INTERNAL_MULTIBAND_ONSET=1)
+    endif()
+
     # C3: wire the Kconfig capacity options to the library's #ifndef-guarded
     # constants. Each is only defined when the host set it, so an unconfigured
     # build keeps the library defaults.

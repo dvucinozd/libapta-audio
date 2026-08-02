@@ -336,6 +336,41 @@ typedef struct {
 #endif
 #define APTA_INTERNAL_BAND_COUNT 3u
 
+/* B3: relative contributions to the experimental novelty sum. They remain
+ * overridable for controlled development-corpus experiments. The first
+ * candidate is deliberately unnormalised: the earlier normalized prototype
+ * regressed severely on the available synthetic corpus. */
+#ifndef APTA_INTERNAL_ONSET_WEIGHT_LOW
+#define APTA_INTERNAL_ONSET_WEIGHT_LOW 1.0f
+#endif
+#ifndef APTA_INTERNAL_ONSET_WEIGHT_MID
+#define APTA_INTERNAL_ONSET_WEIGHT_MID 1.0f
+#endif
+#ifndef APTA_INTERNAL_ONSET_WEIGHT_HIGH
+#define APTA_INTERNAL_ONSET_WEIGHT_HIGH 1.0f
+#endif
+#ifndef APTA_INTERNAL_ONSET_MULTIBAND_MIX
+#define APTA_INTERNAL_ONSET_MULTIBAND_MIX 0.25f
+#endif
+
+/* C1/B3: one shared portable filterbank implementation. Overview and onset
+ * each own state because they advance at different points in the pipeline. */
+typedef struct {
+    float low_state;
+    float mid_state;
+    float low_coefficient;
+    float mid_coefficient;
+} apta_internal_band_filter_t;
+
+void apta_internal_band_filter_init(
+    apta_internal_band_filter_t *filter,
+    uint32_t sample_rate);
+void apta_internal_band_filter_reset(apta_internal_band_filter_t *filter);
+void apta_internal_band_filter_split(
+    apta_internal_band_filter_t *filter,
+    float sample,
+    float out_bands[APTA_INTERNAL_BAND_COUNT]);
+
 /*
  * B1: preferred-tempo prior.
  *
@@ -441,11 +476,46 @@ typedef struct {
  */
 typedef struct {
     uint32_t bin_index;
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    /* B3: S4's quantized band sums and broadband anchor share storage with
+     * S6's unchanged 32-bit broadband accumulator. A local and global bin
+     * never inhabit the same ring, so the union preserves both algorithms
+     * while keeping the dominant allocation at 16 bytes per entry. */
+    union {
+        struct {
+            uint16_t band_sums[APTA_INTERNAL_BAND_COUNT];
+            uint16_t broadband_sum;
+        } multiband;
+        uint32_t sum_absolute;
+    } sums;
+    uint16_t sample_count;
+    uint8_t occupied;
+    uint8_t reserved8;
+#else
     uint32_t sum_absolute;
     uint32_t sample_count;
     uint8_t occupied;
     uint8_t reserved8[3];
+#endif
 } apta_internal_onset_bin_t;
+
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+#define APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE 255u
+_Static_assert(APTA_INTERNAL_ONSET_FRAMES_PER_BIN *
+                       APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE <=
+                   UINT16_MAX,
+               "S4 band sum must fit in uint16_t");
+_Static_assert(APTA_INTERNAL_ONSET_FRAMES_PER_BIN <= UINT16_MAX,
+               "S4 sample count must fit in uint16_t");
+_Static_assert(APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN <= UINT16_MAX,
+               "S6 sample count must fit in uint16_t");
+#endif
+
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+#define APTA_INTERNAL_ONSET_SUM_ABSOLUTE(bin) ((bin)->sums.sum_absolute)
+#else
+#define APTA_INTERNAL_ONSET_SUM_ABSOLUTE(bin) ((bin)->sum_absolute)
+#endif
 
 _Static_assert(sizeof(apta_internal_onset_bin_t) <= 16u,
                "the onset bin is the unit of the library's largest allocation; "
@@ -571,10 +641,13 @@ struct apta_session {
      * left. Two multiply-adds per sample, no double. State is carried in the
      * session, which is itself the workspace base when one is configured. */
     uint32_t *overview_band_sums;
-    float band_low_state;
-    float band_mid_state;
-    float band_low_coefficient;
-    float band_mid_coefficient;
+    apta_internal_band_filter_t overview_band_filter;
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    apta_internal_band_filter_t onset_band_filter;
+    apta_source_frame_t onset_band_next_frame;
+    uint8_t onset_band_filter_valid;
+    uint8_t onset_band_reserved8[7];
+#endif
 
     apta_internal_detail_tile_t detail_tiles[APTA_INTERNAL_MAX_DETAIL_TILES];
     uint64_t detail_access_serial;
@@ -810,7 +883,11 @@ apta_status_t apta_internal_waveform_grow_band_sums(
 apta_status_t apta_internal_s4_process_sample(
     apta_session_t *session,
     apta_source_frame_t source_frame,
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    const float bands[APTA_INTERNAL_BAND_COUNT]);
+#else
     float sample);
+#endif
 apta_status_t apta_internal_s4_refresh(apta_session_t *session);
 apta_feature_mask_t apta_internal_s4_pending_features(
     const apta_session_t *session);
