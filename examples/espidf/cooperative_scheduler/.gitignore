@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# ESP-IDF writes these into the project directory. sdkconfig in particular is
+# generated from the defaults files and is shared across build directories, so
+# it changes whenever a different target or defaults set is configured.
+build/
+build-*/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+managed_components/

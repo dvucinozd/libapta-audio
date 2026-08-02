@@ -53,6 +53,148 @@ static void generate_click_block(uint32_t first_frame, uint32_t frame_count)
     }
 }
 
+/*
+ * Per-feature cost on the actual target.
+ *
+ * Section 22 of the S4 status document tabulates this on an x86 host and says
+ * in 22.1 that the host figure is a proxy for a budget that has never been
+ * measured on hardware. These rows are the same feature sets, so the two tables
+ * can be read against each other and the proxy ratio stops being a guess.
+ */
+typedef struct {
+    const char *name;
+    apta_feature_mask_t features;
+} sweep_row_t;
+
+static apta_status_t sweep_one(
+    apta_context_t *context,
+    const sweep_row_t *row)
+{
+    apta_session_config_t config;
+    apta_session_t *session = NULL;
+    process_stats_t stats = {0u, 0u, 0u};
+    uint32_t first_frame = 0u;
+    size_t free_before;
+    size_t free_after;
+    apta_work_budget_t budget;
+    apta_status_t status;
+
+    apta_memory_requirements_t requirement;
+
+    free_before = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+
+    apta_session_config_init(&config);
+    config.input_mode = APTA_INPUT_MODE_PUSH;
+    config.source_sample_rate = APTA_EXAMPLE_SAMPLE_RATE;
+    config.channel_count = 1u;
+    config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
+    config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
+    config.total_frames = APTA_EXAMPLE_TOTAL_FRAMES;
+    config.requested_features = row->features;
+
+    /* Ask before allocating. A feature set that does not fit should report a
+     * number the reader can act on, not just a failed push. */
+    apta_memory_requirements_init(&requirement);
+    if (apta_query_workspace_requirements(&config, &requirement) < 0) {
+        requirement.minimum_bytes = 0u;
+    }
+
+    status = apta_session_create(context, &config, &session);
+    if (status < 0) {
+        ESP_LOGW(TAG, "%-28s unavailable (status %" PRId32 ")",
+                 row->name, status);
+        return APTA_STATUS_OK;
+    }
+
+    apta_work_budget_init(&budget);
+    budget.maximum_input_frames = APTA_EXAMPLE_BLOCK_FRAMES;
+    budget.maximum_steps = 8u;
+
+    while (first_frame < APTA_EXAMPLE_TOTAL_FRAMES) {
+        apta_pcm_block_t block;
+        uint32_t accepted = 0u;
+        uint32_t count = APTA_EXAMPLE_TOTAL_FRAMES - first_frame;
+
+        if (count > APTA_EXAMPLE_BLOCK_FRAMES) {
+            count = APTA_EXAMPLE_BLOCK_FRAMES;
+        }
+        generate_click_block(first_frame, count);
+        apta_pcm_block_init(&block);
+        block.data = pcm_block;
+        block.first_frame = first_frame;
+        block.frame_count = count;
+        status = apta_session_push_pcm(session, &block, &accepted);
+        if (status < 0) {
+            ESP_LOGW(TAG, "%s: push failed at frame %" PRIu32
+                     " with status %" PRId32,
+                     row->name, first_frame, status);
+            break;
+        }
+        status = process_once(session, &budget, &stats);
+        if (status < 0) {
+            ESP_LOGW(TAG, "%s: process failed at frame %" PRIu32
+                     " with status %" PRId32,
+                     row->name, first_frame, status);
+            break;
+        }
+        first_frame += count;
+        /* The sweep runs seven sessions back to back and the task never
+         * blocks, so taskYIELD() alone starves the idle task and the watchdog
+         * fires. One tick every block is enough and costs nothing that the
+         * per-call timing measures. */
+        vTaskDelay(1);
+    }
+    (void)apta_session_signal_end_of_input(session, APTA_EXAMPLE_TOTAL_FRAMES);
+    do {
+        status = process_once(session, &budget, &stats);
+        vTaskDelay(1);
+    } while (status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
+
+    (void)apta_session_destroy(session);
+    free_after = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+
+    ESP_LOGI(TAG,
+             "%-24s workspace=%7" PRIu64 " calls=%4" PRIu64
+             " average_us=%6" PRIu64 " max_us=%6" PRIu64 " heap_delta=%d",
+             row->name,
+             (uint64_t)requirement.minimum_bytes,
+             stats.call_count,
+             stats.call_count != 0u ? stats.total_us / stats.call_count : 0u,
+             stats.maximum_us,
+             (int)free_after - (int)free_before);
+    return APTA_STATUS_OK;
+}
+
+static void run_feature_sweep(apta_context_t *context)
+{
+    const apta_feature_mask_t ov = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    const apta_feature_mask_t ovc = ov | APTA_FEATURE_CONFIDENCE;
+    const apta_feature_mask_t bpm = ovc | APTA_FEATURE_BPM;
+    const apta_feature_mask_t loc = bpm | APTA_FEATURE_LOCAL_BEATGRID;
+    const apta_feature_mask_t glo = loc | APTA_FEATURE_GLOBAL_BEATGRID;
+    const apta_feature_mask_t dyn = glo | APTA_FEATURE_DYNAMIC_TEMPO;
+    const apta_feature_mask_t all = dyn | APTA_FEATURE_WAVEFORM_DETAIL |
+                                    APTA_FEATURE_GRID_LOCKING;
+    const sweep_row_t rows[] = {
+        {"overview", ov},
+        {"overview+confidence", ovc},
+        {"+BPM", bpm},
+        {"+local grid", loc},
+        {"+global grid", glo},
+        {"+dynamic tempo", dyn},
+        {"+detail+locking (full)", all}
+    };
+    size_t index;
+
+    ESP_LOGI(TAG, "--- per-feature cost, %u s @ %u Hz, %u-frame blocks ---",
+             (unsigned)(APTA_EXAMPLE_TOTAL_FRAMES / APTA_EXAMPLE_SAMPLE_RATE),
+             (unsigned)APTA_EXAMPLE_SAMPLE_RATE,
+             (unsigned)APTA_EXAMPLE_BLOCK_FRAMES);
+    for (index = 0u; index < sizeof(rows) / sizeof(rows[0]); ++index) {
+        (void)sweep_one(context, &rows[index]);
+    }
+}
+
 void app_main(void)
 {
     const apta_feature_mask_t features =
@@ -81,7 +223,20 @@ void app_main(void)
     port.log_tag = TAG;
 
     apta_context_config_init(&context_config);
-    context_config.requested_capabilities = features;
+    /* Every feature, not just the demonstration's, so the sweep below can ask
+     * for the global grid and dynamic tempo. A session cannot request more
+     * than its context was created with, and asking for less here made three
+     * of the seven rows report "unavailable" rather than a cost. */
+    context_config.requested_capabilities =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_FEATURE_WAVEFORM_3BAND |
+        APTA_FEATURE_BPM |
+        APTA_FEATURE_LOCAL_BEATGRID |
+        APTA_FEATURE_GLOBAL_BEATGRID |
+        APTA_FEATURE_DYNAMIC_TEMPO |
+        APTA_FEATURE_CONFIDENCE |
+        APTA_FEATURE_GRID_LOCKING;
     if (apta_espidf_bind_context_config(&port, &context_config) < 0 ||
         apta_context_create(&context_config, &context) < 0) {
         ESP_LOGE(TAG, "context creation failed");
@@ -175,6 +330,15 @@ void app_main(void)
     ESP_LOGI(TAG,
              "port_dsp_backend=%" PRIu32,
              apta_espidf_dsp_backend());
+
+    /* The demonstration above is one feature set. The sweep reports all of
+     * them, so the numbers can be read against the host table in section 22 of
+     * the S4 status document. */
+    apta_result_release(result);
+    result = NULL;
+    (void)apta_session_destroy(session);
+    session = NULL;
+    run_feature_sweep(context);
 
 cleanup:
     if (result != NULL) {

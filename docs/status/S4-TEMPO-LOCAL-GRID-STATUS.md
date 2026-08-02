@@ -1323,7 +1323,7 @@ sits on a plateau, not a peak.
 A second annotated library would still be the thing that confirms it, and none
 was available.
 
-### 28.5 What this does not reach
+### 28.5 What this does not reach (see also section 29)
 
 The 14 tracks where the right answer was never proposed are untouched, and ten
 of the eighteen S6 gets right are among them. Reaching those means changing the
@@ -1335,3 +1335,84 @@ currently perfect. They are right and not trusted. Raising confidence on an
 endorsement is arguable -- independent agreement is evidence -- but section 16.8
 measured cross-engine agreement as a gate and found it worse than the shipped
 confidence, so it is not done here on a sample of eight.
+
+## 29. Measured on an ESP32-P4
+
+Section 22.1 argued that the host figure is a proxy, that the real budget is
+about 2 ms per 20 ms tick on an ESP32-P4, and that the budget "has never been
+measured on the actual target". It has now.
+
+Board: ESP32-P4 v1.3 at 360 MHz, 32 MB PSRAM at 20 MHz, ESP-IDF 5.5, scalar
+helper, size-optimised build. Eight seconds of 48 kHz mono click track in
+1024-frame blocks, 376 process calls, the same feature sets section 22
+tabulates. The cooperative-scheduler example carries the sweep, so the run is
+reproducible from the repository.
+
+| Feature set | Workspace | Host | Target avg | Target max | Ratio |
+|---|---:|---:|---:|---:|---:|
+| `WAVEFORM_OVERVIEW` | 68,592 | ~155 | 1,943 | 3,059 | 12.5x |
+| `+ CONFIDENCE` | 68,592 | ~155 | 1,939 | 3,055 | 12.5x |
+| `+ BPM` | 183,376 | ~395 | 4,266 | 17,525 | 10.8x |
+| `+ LOCAL_BEATGRID` | 183,376 | ~400 | 4,258 | 17,512 | 10.6x |
+| `+ GLOBAL_BEATGRID` | 807,296 | ~452 | 16,827 | 30,349 | **37x** |
+| `+ DYNAMIC_TEMPO` | 807,296 | ~443 | 16,836 | 30,358 | **38x** |
+| `+ DETAIL + GRID_LOCKING` | 815,536 | ~484 | 18,600 | 32,828 | **38x** |
+
+Microseconds per `apta_session_process()` call. Heap delta is zero on every row.
+
+### 29.1 The proxy ratio is not one number
+
+The rows whose working set stays in internal SRAM cost 10 to 13 times the host.
+The rows that request the global grid cost 37 to 38.
+
+That is not S6 being slow. Its workspace is 807 KB, the board has about 570 KB
+of internal RAM, so the working set lands in PSRAM at 20 MHz. The extra factor
+of three and a half is the memory it sits in, not the arithmetic it does.
+
+Section 22.1 concluded that trading target cost for host cost would be
+optimising the wrong machine, and that measuring on hardware was the way to
+close it. That was right, and the thing hardware showed is not what the host
+table suggested: on the host the S6 rows are 13 percent more expensive than the
+local-grid rows, and on target they are four times more.
+
+### 29.2 Against real time, and against the 2 ms budget
+
+A 1024-frame block at 48 kHz is 21.33 ms of audio.
+
+| Feature set | Average | Worst call |
+|---|---:|---:|
+| `+ LOCAL_BEATGRID` | 5.0x real time | 1.2x real time |
+| `+ GLOBAL_BEATGRID` | 1.27x real time | 0.70x |
+| `+ DETAIL + GRID_LOCKING` | 1.15x real time | **0.65x** |
+
+Local analysis keeps up comfortably. With the global grid the average still
+keeps up, but a single worst-case call takes 30 to 33 ms against 21.33 ms of
+audio, so a full-feature session cannot be relied on to stay ahead in real time
+on this board.
+
+Against the 2 ms slice section 22.1 named: the cheapest possible configuration,
+overview alone, averages 1.94 ms. Every configuration that reports a tempo is
+over it. The budget as stated is not met by anything useful, and the honest
+reading is that the figure was a guess made without hardware rather than a
+requirement the library missed.
+
+The worst-case spike on the S4 rows -- 17.5 ms against a 4.3 ms average -- is
+the full correlation scan on a refresh that is not gated. A2's gate skips it
+when evidence has not grown; these are the passes where it has.
+
+### 29.3 A P4 without PSRAM cannot run the global grid
+
+With internal RAM only, 606,484 bytes were free and the global grid asked for
+807,296. `apta_session_push_pcm()` returned `APTA_ERROR_OUT_OF_MEMORY` before
+accepting a single block. The S6 bin ring is roughly 624 KB of that on its own:
+16,384 bins is about twelve minutes of coverage at 2048 frames per bin.
+
+`sdkconfig.p4.defaults` records the PSRAM configuration that works on this
+board, and the example now prints the queried workspace requirement beside each
+row so a shortfall reports a number rather than a failed push.
+
+Two toolchain notes worth keeping. ESP-IDF 6.0.2 builds P4 firmware requiring
+chip revision v3.1 or newer, so a v1.x board needs 5.5, which supports v0.0
+through v1.0. And the sweep needs `vTaskDelay()` rather than `taskYIELD()`
+between blocks: seven sessions back to back never let the idle task run, and the
+task watchdog fires.

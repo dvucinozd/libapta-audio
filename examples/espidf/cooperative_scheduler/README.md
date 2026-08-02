@@ -81,3 +81,36 @@ The repository CI cross-compiles this project for:
 - ESP-IDF 6.0.2 / ESP32-S3 / ESP-DSP helper.
 
 CI verifies the linked firmware artifacts but does not execute them on physical hardware. Run the project on the intended board before adopting process-time, stack or heap limits for production.
+
+## ESP32-P4
+
+ESP-IDF 6.0.2 builds P4 firmware that requires chip revision v3.1 or newer. A
+v1.x board needs 5.5, which supports v0.0 through v1.0; flashing a 6.0.2 build
+to one fails with `requires chip revision in range [v3.1 - v3.99]`.
+
+The global beatgrid needs 807,296 bytes of workspace and does not fit in a P4's
+internal RAM. Without PSRAM the session reports `APTA_ERROR_OUT_OF_MEMORY`
+before accepting a block. With it:
+
+```bash
+idf.py -B build-esp32p4 \
+  -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.p4.defaults" \
+  set-target esp32p4 build
+```
+
+## Per-feature sweep
+
+After the demonstration the example runs the same seven feature sets the host
+cost probe measures, printing the queried workspace requirement beside each:
+
+```text
+--- per-feature cost, 8 s @ 48000 Hz, 1024-frame blocks ---
+overview                 workspace=  68592 calls= 376 average_us=  1943 ...
++BPM                     workspace= 183376 calls= 376 average_us=  4266 ...
++global grid             workspace= 807296 calls= 376 average_us= 16827 ...
+```
+
+Section 29 of `docs/status/S4-TEMPO-LOCAL-GRID-STATUS.md` reads those numbers
+against the host table. The short version: rows whose working set stays in
+internal SRAM cost 10 to 13 times the host, and rows that spill to PSRAM cost
+37 to 38.
