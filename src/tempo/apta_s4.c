@@ -578,6 +578,62 @@ static uint32_t apta_s4_beat_count(
     return count > UINT32_MAX ? UINT32_MAX : (uint32_t)count;
 }
 
+static void apta_s4_update_cached_ranges(apta_session_t *session)
+{
+    apta_source_frame_t requested_first;
+    apta_source_frame_t requested_end;
+    apta_source_frame_t applicability_first;
+    apta_source_frame_t applicability_end;
+    const apta_source_frame_t evidence_first =
+        session->tempo_value.evidence_range.first_frame;
+    const apta_source_frame_t evidence_end =
+        session->tempo_value.evidence_range.end_frame;
+
+    if (!session->has_tempo || !session->has_local_grid) {
+        return;
+    }
+    requested_first = evidence_first;
+    requested_end = evidence_end;
+    if (session->has_focus &&
+        (session->focus.feature_mask & APTA_INTERNAL_S4_FEATURES) != 0u) {
+        requested_first = session->focus.playhead_frame >
+                                  session->focus.lookbehind_frames
+                              ? session->focus.playhead_frame -
+                                    session->focus.lookbehind_frames
+                              : 0u;
+        requested_end = session->focus.playhead_frame;
+        if (UINT64_MAX - requested_end < session->focus.lookahead_frames) {
+            requested_end = UINT64_MAX;
+        } else {
+            requested_end += session->focus.lookahead_frames;
+        }
+    }
+    applicability_first = apta_s4_max_frame(requested_first, evidence_first);
+    applicability_end = apta_s4_min_frame(requested_end, evidence_end);
+    if (applicability_end <= applicability_first) {
+        applicability_first = evidence_first;
+        applicability_end = evidence_end;
+    }
+
+    apta_s4_init_range(&session->tempo_value.applicability_range,
+                       applicability_first,
+                       applicability_end);
+    apta_s4_init_range(&session->local_grid_segment.applicability_range,
+                       applicability_first,
+                       applicability_end);
+    session->local_grid_segment.beat_count =
+        apta_s4_beat_count(&session->local_grid_segment);
+    apta_s4_init_range(&session->local_grid_requested_range,
+                       requested_first,
+                       requested_end);
+    session->local_grid_evidence_range = session->tempo_value.evidence_range;
+    apta_s4_init_range(&session->local_grid_applicability_range,
+                       applicability_first,
+                       applicability_end);
+    session->local_grid_coverage_range =
+        session->local_grid_applicability_range;
+}
+
 apta_status_t apta_internal_s4_prepare(apta_session_t *session)
 {
     size_t bytes;
@@ -697,7 +753,10 @@ apta_status_t apta_internal_s4_process_sample(
     return APTA_STATUS_OK;
 }
 
-apta_status_t apta_internal_s4_refresh(apta_session_t *session)
+apta_status_t apta_internal_s4_refresh(
+    apta_session_t *session,
+    uint32_t step_limit,
+    uint32_t *completed_steps_out)
 {
     APTA_S4_PROFILE_DECLARE;
     float best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
@@ -731,6 +790,12 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     apta_feature_state_t old_state;
     apta_frame_range_t old_evidence;
     uint32_t flags = 0u;
+    uint32_t completed_steps = 0u;
+
+    if (completed_steps_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    *completed_steps_out = 0u;
 
     if (!apta_s4_enabled(session) || session->onset_bins == NULL ||
         session->onset_flux == NULL) {
@@ -742,14 +807,32 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
 #endif
 
     if (session->local_grid_locked) {
-        if (atomic_load_explicit(&session->state, memory_order_acquire) ==
-                APTA_SESSION_COMPLETED &&
+        session->s4_refresh_active = 0u;
+        session->s4_refresh_pending = 0u;
+        if ((atomic_load_explicit(&session->state, memory_order_acquire) ==
+                 APTA_SESSION_DRAINING ||
+             atomic_load_explicit(&session->state, memory_order_acquire) ==
+                 APTA_SESSION_COMPLETED) &&
             session->tempo_value.state != APTA_FEATURE_FINAL) {
             session->tempo_value.state = APTA_FEATURE_FINAL;
             session->local_grid_segment.state = APTA_FEATURE_FINAL;
             session->s4_mutation_serial += 1u;
         }
         return APTA_STATUS_OK;
+    }
+
+    /* Focus/range changes may recontextualize the last committed estimate,
+     * but never expose an active generation's partial argmax. Do this before
+     * either starting or resuming the expensive generation. */
+    apta_s4_update_cached_ranges(session);
+    if (session->s4_refresh_active) {
+        evidence_first = session->s4_refresh_evidence_first;
+        evidence_end = session->s4_refresh_evidence_end;
+        run_count = evidence_end - evidence_first;
+        minimum_lag = session->s4_refresh_minimum_lag;
+        maximum_lag = session->s4_refresh_maximum_lag;
+        estimate = 1;
+        goto resume_lag_sweep;
     }
 
     APTA_S4_PROFILE_BEGIN(session);
@@ -768,19 +851,17 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
      * recomputed on every call from the cached estimate, so focus movement
      * keeps updating the applicability range and republishing.
      *
-     * Draining and completed sessions always estimate: APTA_FEATURE_FINAL is
-     * reachable only from a pass that sees the full evidence range with the
-     * session already COMPLETED, so gating the last one would strand the state
-     * at STABLE. A grid lock needs no exemption because the locked branch
-     * above returns before this point. */
+     * A draining session estimates once against the complete evidence range
+     * so APTA_FEATURE_FINAL is reachable. Once that generation is final it is
+     * reused; otherwise a downstream S6 refresh with a one-step budget could
+     * be starved by redundant final S4 scans. */
     if (evidence_end < session->s4_refreshed_evidence_end) {
         /* Focus or a region request moved the range backwards. Reset the
          * tracker and re-estimate. */
         session->s4_refreshed_evidence_end = 0u;
         estimate = 1;
-    } else if (session->end_of_input_signalled ||
-               atomic_load_explicit(&session->state, memory_order_acquire) ==
-                   APTA_SESSION_COMPLETED ||
+    } else if ((session->end_of_input_signalled &&
+                session->tempo_value.state != APTA_FEATURE_FINAL) ||
                evidence_end >= session->s4_refreshed_evidence_end +
                                    APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS) {
         estimate = 1;
@@ -835,6 +916,10 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         goto estimate_ready;
     }
 
+    if (step_limit == 0u) {
+        session->s4_refresh_pending = 1u;
+        return APTA_STATUS_MORE_WORK;
+    }
 #ifdef APTA_INTERNAL_PROFILE_S4
     session->s4_profile.refresh_scans += 1u;
     session->s4_profile.evidence_bins_scanned += run_count;
@@ -845,45 +930,92 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
             (float)apta_s4_flux_uncached(session, index, evidence_first);
     }
     APTA_S4_PROFILE_ADD(session, flux_ns);
+    session->s4_refresh_evidence_first = evidence_first;
+    session->s4_refresh_evidence_end = evidence_end;
+    session->s4_refresh_minimum_lag = minimum_lag;
+    session->s4_refresh_maximum_lag = maximum_lag;
+    session->s4_refresh_next_lag = minimum_lag;
+    memset(session->s4_refresh_best_scores,
+           0,
+           sizeof(session->s4_refresh_best_scores));
+    memset(session->s4_refresh_best_lags,
+           0,
+           sizeof(session->s4_refresh_best_lags));
+    session->s4_refresh_active = 1u;
+    session->s4_refresh_pending = 0u;
+    completed_steps += 1u;
 
-    for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
-        float score;
-        uint32_t position;
+resume_lag_sweep:
+    while (session->s4_refresh_next_lag <= maximum_lag &&
+           completed_steps < step_limit) {
+        uint32_t last_lag = session->s4_refresh_next_lag +
+                            APTA_INTERNAL_S4_LAGS_PER_STEP - 1u;
 
-        /* B1: weight by the preferred-tempo prior before the argmax. Every lag
-         * in range is scanned and weighted, so selecting the maximum of the
-         * weighted scores already prefers the best member of an octave family;
-         * what the explicit family scan below adds is a measure of how close
-         * the runner-up sibling came, which is what confidence has to
-         * reflect. */
-        score = apta_s4_correlation_at_lag(
-            session,
-            evidence_first,
-            evidence_end,
-            lag) * apta_s4_tempo_prior(apta_s4_tempo_from_lag(session, lag));
-        if (score <= 0.0f) {
-            continue;
+        if (last_lag < session->s4_refresh_next_lag ||
+            last_lag > maximum_lag) {
+            last_lag = maximum_lag;
         }
+        APTA_S4_PROFILE_BEGIN(session);
+        for (lag = session->s4_refresh_next_lag; lag <= last_lag; ++lag) {
+            float score;
+            uint32_t position;
 
-        for (position = 0u;
-             position < APTA_INTERNAL_MAX_TEMPO_CANDIDATES;
-             ++position) {
-            if (score > best_scores[position]) {
-                uint32_t move;
-                for (move = APTA_INTERNAL_MAX_TEMPO_CANDIDATES - 1u;
-                     move > position;
-                     --move) {
-                    best_scores[move] = best_scores[move - 1u];
-                    best_lags[move] = best_lags[move - 1u];
+            /* B1: preserve the original ordered argmax exactly; only the
+             * scheduler boundary moved between groups of lags. */
+            score = apta_s4_correlation_at_lag(
+                        session,
+                        evidence_first,
+                        evidence_end,
+                        lag) *
+                    apta_s4_tempo_prior(
+                        apta_s4_tempo_from_lag(session, lag));
+            if (score <= 0.0f) {
+                continue;
+            }
+            for (position = 0u;
+                 position < APTA_INTERNAL_MAX_TEMPO_CANDIDATES;
+                 ++position) {
+                if (score > session->s4_refresh_best_scores[position]) {
+                    uint32_t move;
+                    for (move = APTA_INTERNAL_MAX_TEMPO_CANDIDATES - 1u;
+                         move > position;
+                         --move) {
+                        session->s4_refresh_best_scores[move] =
+                            session->s4_refresh_best_scores[move - 1u];
+                        session->s4_refresh_best_lags[move] =
+                            session->s4_refresh_best_lags[move - 1u];
+                    }
+                    session->s4_refresh_best_scores[position] = score;
+                    session->s4_refresh_best_lags[position] = lag;
+                    break;
                 }
-                best_scores[position] = score;
-                best_lags[position] = lag;
-                break;
             }
         }
+        session->s4_refresh_next_lag = last_lag + 1u;
+        completed_steps += 1u;
+        APTA_S4_PROFILE_ADD(session, lag_sweep_ns);
+        if (session->process_deadline_ns != 0u &&
+            session->context->clock.monotonic_time_ns != NULL &&
+            session->context->clock.monotonic_time_ns(
+                session->context->clock.user_data) >=
+                session->process_deadline_ns) {
+            break;
+        }
+    }
+    if (session->s4_refresh_next_lag <= maximum_lag ||
+        completed_steps >= step_limit) {
+        *completed_steps_out = completed_steps;
+        return APTA_STATUS_MORE_WORK;
     }
 
-    APTA_S4_PROFILE_ADD(session, lag_sweep_ns);
+    /* Refinement, ambiguity, phase and publication form one final scheduler
+     * step. They consume only a small fixed number of correlations and the
+     * cached/public state remains untouched until this point. */
+    completed_steps += 1u;
+    for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
+        best_scores[lag] = session->s4_refresh_best_scores[lag];
+        best_lags[lag] = session->s4_refresh_best_lags[lag];
+    }
 
     /* Refine each candidate, not just the winner: all three are published, and
      * the duplicate suppression below compares their tempi. Three correlations
@@ -906,6 +1038,24 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         session->s4_cached_lag_offsets[lag] = lag_offsets[lag];
     }
     session->s4_refreshed_evidence_end = evidence_end;
+    session->s4_refresh_active = 0u;
+    session->s4_refresh_pending = 0u;
+    {
+        uint64_t current_first;
+        uint64_t current_end;
+
+        if (apta_s4_find_evidence(session, &current_first, &current_end) &&
+            (current_first < evidence_first ||
+             current_end < evidence_end ||
+             (session->end_of_input_signalled &&
+              (current_first != evidence_first ||
+               current_end != evidence_end)) ||
+             current_end >= evidence_end +
+                                APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS)) {
+            session->s4_refresh_pending = 1u;
+        }
+    }
+    *completed_steps_out = completed_steps;
 
 estimate_ready:
     if (best_lags[0] == 0u || best_scores[0] < 0.05f) {
@@ -1234,8 +1384,10 @@ estimate_ready:
     if (state == APTA_FEATURE_STABLE && session->end_of_input_signalled &&
         evidence_first_frame == 0u &&
         evidence_end_frame == session->final_end_frame &&
-        atomic_load_explicit(&session->state, memory_order_acquire) ==
-            APTA_SESSION_COMPLETED) {
+        (atomic_load_explicit(&session->state, memory_order_acquire) ==
+             APTA_SESSION_DRAINING ||
+         atomic_load_explicit(&session->state, memory_order_acquire) ==
+             APTA_SESSION_COMPLETED)) {
         state = APTA_FEATURE_FINAL;
     }
 
@@ -1317,7 +1469,27 @@ estimate_ready:
         session->s4_mutation_serial += 1u;
     }
     APTA_S4_PROFILE_ADD(session, publication_ns);
+    if (session->s4_refresh_pending) {
+        if (completed_steps < step_limit) {
+            uint32_t follow_steps = 0u;
+            const apta_status_t follow_status = apta_internal_s4_refresh(
+                session,
+                step_limit - completed_steps,
+                &follow_steps);
+
+            completed_steps += follow_steps;
+            *completed_steps_out = completed_steps;
+            return follow_status;
+        }
+        return APTA_STATUS_MORE_WORK;
+    }
     return APTA_STATUS_OK;
+}
+
+int apta_internal_s4_refresh_pending(const apta_session_t *session)
+{
+    return session != NULL &&
+           (session->s4_refresh_active || session->s4_refresh_pending);
 }
 
 apta_feature_mask_t apta_internal_s4_pending_features(

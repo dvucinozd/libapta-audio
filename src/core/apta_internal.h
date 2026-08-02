@@ -20,7 +20,7 @@
  * can be overridden from the build system, for example
  * -DAPTA_INTERNAL_OVERVIEW_FRAMES_PER_COLUMN=256. Derived constants stay
  * derived and are deliberately not overridable. Section "Invariants" below
- * asserts everything the code relies on; the ring buffers and stack arrays
+ * asserts everything the code relies on; the bounded buffers
  * break silently otherwise.
  */
 #ifndef APTA_INTERNAL_MAX_REGION_REQUESTS
@@ -104,6 +104,13 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_S4_REFRESH_MIN_NEW_BINS 32u
 #endif
 
+/* Phase 7: one scheduler step advances this many correlation lags.  The
+ * default keeps a single step comfortably below an audio block on the P4,
+ * while maximum_steps == 0 still permits an intentionally unbounded call. */
+#ifndef APTA_INTERNAL_S4_LAGS_PER_STEP
+#define APTA_INTERNAL_S4_LAGS_PER_STEP 4u
+#endif
+
 /* A4: APTA_FEATURE_CONFIDENCE is deliberately absent. It is a modifier that
  * qualifies whatever features a host actually requested, not a request for
  * tempo analysis; including it here made WAVEFORM_OVERVIEW | CONFIDENCE
@@ -118,9 +125,7 @@ typedef max_align_t apta_internal_max_align_t;
 #ifndef APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN
 #define APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN 2048u
 #endif
-/* Same ring addressing as the onset bins; see the note there. Raising this
- * also raises the stack used by apta_internal_s6_refresh(), which declares a
- * windows array sized from it -- see APTA_INTERNAL_GLOBAL_MAX_WINDOWS. */
+/* Same ring addressing as the onset bins; see the note there. */
 #ifndef APTA_INTERNAL_GLOBAL_BIN_CAPACITY
 #define APTA_INTERNAL_GLOBAL_BIN_CAPACITY 16384u
 #endif
@@ -133,12 +138,6 @@ typedef max_align_t apta_internal_max_align_t;
 #ifndef APTA_INTERNAL_GLOBAL_STABLE_BINS
 #define APTA_INTERNAL_GLOBAL_STABLE_BINS 256u
 #endif
-
-/* Derived: the stack array in apta_internal_s6_refresh(). Named so the bound
- * can be asserted and documented rather than repeated at the declaration. */
-#define APTA_INTERNAL_GLOBAL_MAX_WINDOWS \
-    (APTA_INTERNAL_GLOBAL_BIN_CAPACITY / \
-     APTA_INTERNAL_GLOBAL_WINDOW_BINS + 1u)
 
 /* A2: the S6 equivalent. Global bins hold 2048 frames, so a 1024-frame process
  * call advances the range by at most half a bin and 32 bins is about 1.5 s at
@@ -174,6 +173,8 @@ _Static_assert(APTA_INTERNAL_ONSET_FRAMES_PER_BIN >= 1u,
                "onset frames per bin must be non-zero");
 _Static_assert(APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN >= 1u,
                "global frames per bin must be non-zero");
+_Static_assert(APTA_INTERNAL_S4_LAGS_PER_STEP >= 1u,
+               "S4 lags per scheduler step must be non-zero");
 _Static_assert(APTA_INTERNAL_GLOBAL_WINDOW_BINS >= 1u,
                "global window must be non-zero");
 
@@ -206,14 +207,6 @@ _Static_assert(APTA_INTERNAL_GLOBAL_STABLE_BINS <=
 _Static_assert(APTA_INTERNAL_GLOBAL_WINDOW_BINS <=
                    APTA_INTERNAL_GLOBAL_BIN_CAPACITY,
                "an analysis window must fit the global ring");
-
-/* apta_internal_s6_refresh() declares a windows array of this length on the
- * stack, inside process(). Raising GLOBAL_BIN_CAPACITY raises task stack use;
- * the bound is documented in ports/espidf/README.md. */
-_Static_assert(APTA_INTERNAL_GLOBAL_MAX_WINDOWS <= 1025u,
-               "global window array would use an unreasonable amount of stack; "
-               "raise this bound deliberately and update the ESP-IDF port "
-               "stack guidance if you mean it");
 
 /* Candidate capacity is published in the public headers and serialized. */
 _Static_assert(APTA_INTERNAL_MAX_TEMPO_CANDIDATES >= 1u,
@@ -591,6 +584,12 @@ struct apta_session {
     atomic_flag process_lock;
     atomic_flag result_lock;
 
+    /* Absolute deadline for the current process call. Zero means that the
+     * caller supplied no usable soft-time budget. Internal analysis stages
+     * share it so chained waveform/S4/S6 work cannot each consume a fresh
+     * copy of the same budget. */
+    uint64_t process_deadline_ns;
+
     apta_result_t *current_result;
     apta_internal_result_pool_control_t *result_pool;
     apta_generation_t generation;
@@ -698,6 +697,20 @@ struct apta_session {
      * half a beat inside two minutes. Cached with the estimate for the same
      * reason as the ambiguity and the grid fit. */
     float s4_cached_lag_offsets[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    /* Phase 7 cooperative refresh. The flux array is the immutable evidence
+     * snapshot for this generation; these fields retain the ordered argmax
+     * state while small lag batches are processed across process() calls.
+     * Published/cached state is not changed until the generation commits. */
+    uint64_t s4_refresh_evidence_first;
+    uint64_t s4_refresh_evidence_end;
+    float s4_refresh_best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    uint32_t s4_refresh_best_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    uint32_t s4_refresh_minimum_lag;
+    uint32_t s4_refresh_maximum_lag;
+    uint32_t s4_refresh_next_lag;
+    uint8_t s4_refresh_active;
+    uint8_t s4_refresh_pending;
+    uint8_t s4_refresh_reserved8[2];
     /* The global estimator's most recent nominal tempo, or zero before it has
      * one. S6 runs after S4 within a process call -- the layering is waveform,
      * then S4, then S6 -- so S4 reads the previous generation's value. Analysis
@@ -888,7 +901,11 @@ apta_status_t apta_internal_s4_process_sample(
 #else
     float sample);
 #endif
-apta_status_t apta_internal_s4_refresh(apta_session_t *session);
+apta_status_t apta_internal_s4_refresh(
+    apta_session_t *session,
+    uint32_t step_limit,
+    uint32_t *completed_steps_out);
+int apta_internal_s4_refresh_pending(const apta_session_t *session);
 apta_feature_mask_t apta_internal_s4_pending_features(
     const apta_session_t *session);
 void apta_internal_s4_mark_published(apta_session_t *session);
@@ -903,7 +920,12 @@ apta_status_t apta_internal_s6_process_sample(
     apta_session_t *session,
     apta_source_frame_t source_frame,
     float sample);
-apta_status_t apta_internal_s6_refresh(apta_session_t *session);
+apta_status_t apta_internal_s6_refresh(
+    apta_session_t *session,
+    uint32_t step_limit,
+    uint32_t *completed_steps_out);
+int apta_internal_s6_refresh_pending(const apta_session_t *session);
+int apta_internal_analysis_pending(const apta_session_t *session);
 apta_feature_mask_t apta_internal_s6_pending_features(
     const apta_session_t *session);
 void apta_internal_s6_mark_published(apta_session_t *session);

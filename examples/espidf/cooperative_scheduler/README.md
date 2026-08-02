@@ -11,7 +11,8 @@ The example:
 - calls `taskYIELD()` between cooperative processing steps;
 - drains the session to `APTA_STATUS_END_OF_INPUT`;
 - reads the final tempo and local beatgrid;
-- reports process-call count, average/max process time and free heap before/after cleanup.
+- reports process-call count, average/p99-upper-bound/max process time, heap
+  cleanup, largest free block and task stack high-water evidence.
 
 ## Build with ESP-IDF 5.5.4 or later
 
@@ -52,12 +53,17 @@ A successful board run logs:
 
 ```text
 tempo=<millibpm> confidence=<0..100> grid_segments=<count>
-process_calls=<count> average_us=<microseconds> max_us=<microseconds>
+process_calls=<count> average_us=<microseconds> p99_us<=<microseconds> max_us=<microseconds>
 port_dsp_backend=<0 scalar | 1 ESP-DSP>
 free_heap_before=<bytes> free_heap_after=<bytes> delta=<bytes>
+minimum_free_heap=<bytes> largest_free_block=<bytes> stack_high_water_words=<words>
 ```
 
-Exact timing and heap values depend on the target, clock, compiler optimization, ESP-IDF version and system configuration. They are measurements, not stable API output.
+The p99 value is the upper edge of a 100-us histogram bucket. The FreeRTOS
+high-water value is the minimum number of unused `StackType_t` words observed,
+not a byte count. Exact timing, heap and stack values depend on the target,
+clock, compiler optimization, ESP-IDF version and system configuration. They
+are measurements, not stable API output.
 
 ## Integration model
 
@@ -89,10 +95,11 @@ v1.x board needs 5.5; the measured revision 1.3 board reports an accepted image
 range of v0.1 through v1.99. Flashing a 6.0.2 image to it would fail the image
 revision check.
 
-At API 0.3.0 the measured global-beatgrid configuration queries 602,528 bytes
-of workspace. It completes on the measured P4 both with internal memory only
-and with PSRAM enabled. The PSRAM-enabled placement was faster for this working
-set; neither result is a universal resource-class claim.
+At API 0.3.0 with the Phase 7 cooperative refresh state, the measured
+global-beatgrid configuration queries 603,504 bytes of workspace. It completes
+on the measured P4 both with internal memory only and with PSRAM enabled. The
+PSRAM-enabled placement was faster for this working set; neither result is a
+universal resource-class claim.
 
 Build with the measured PSRAM configuration:
 
@@ -109,13 +116,15 @@ cost probe measures, printing the queried workspace requirement beside each:
 
 ```text
 --- per-feature cost, 8 s @ 48000 Hz, 1024-frame blocks ---
-overview                 workspace=  68624 calls= 376 average_us=  1941 ...
-+BPM                     workspace= 150640 calls= 376 average_us=  3555 ...
-+global grid             workspace= 602528 calls= 376 average_us=  4232 ...
+overview                 workspace=  68688 calls= 376 average_us=  1916 p99_us<= 3100 ...
++BPM                     workspace= 150704 calls= 385 average_us=  2288 p99_us<= 6300 ...
++global grid             workspace= 603504 calls= 392 average_us=  2670 p99_us<= 6000 ...
 ```
 
 Sections 29 and 30 of `docs/status/S4-TEMPO-LOCAL-GRID-STATUS.md` read those
 numbers against the host table and retain the earlier 807,296-byte result for
 comparison. Section 31 records the later incremental-evidence cache measurement.
-The full feature set's current worst measured process call is 19,360
-microseconds, below one 1024-frame block period at 48 kHz.
+`docs/status/PHASE7-P4-BOUNDED-REFRESH-STATUS.md` records the cooperative
+refresh measurement. The full feature set's current p99 upper bound is 8,200
+microseconds and its worst measured process call is 12,355 microseconds,
+leaving 42.1% of one 1024-frame block period at 48 kHz.

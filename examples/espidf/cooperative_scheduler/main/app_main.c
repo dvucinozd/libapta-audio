@@ -16,6 +16,8 @@
 #define APTA_EXAMPLE_TOTAL_FRAMES (APTA_EXAMPLE_SAMPLE_RATE * 8u)
 #define APTA_EXAMPLE_BLOCK_FRAMES 1024u
 #define APTA_EXAMPLE_BEAT_FRAMES 23040u
+#define APTA_EXAMPLE_TIMING_BUCKET_US 100u
+#define APTA_EXAMPLE_TIMING_BUCKETS 256u
 
 static const char *TAG = "apta-example";
 static int16_t pcm_block[APTA_EXAMPLE_BLOCK_FRAMES];
@@ -24,7 +26,26 @@ typedef struct {
     uint64_t call_count;
     uint64_t total_us;
     uint64_t maximum_us;
+    uint32_t timing_histogram[APTA_EXAMPLE_TIMING_BUCKETS];
 } process_stats_t;
+
+static process_stats_t main_stats;
+static process_stats_t sweep_stats;
+
+static uint32_t process_p99_upper_us(const process_stats_t *stats)
+{
+    const uint64_t target = (stats->call_count * 99u + 99u) / 100u;
+    uint64_t cumulative = 0u;
+    uint32_t index;
+
+    for (index = 0u; index < APTA_EXAMPLE_TIMING_BUCKETS; ++index) {
+        cumulative += stats->timing_histogram[index];
+        if (cumulative >= target) {
+            return (index + 1u) * APTA_EXAMPLE_TIMING_BUCKET_US;
+        }
+    }
+    return APTA_EXAMPLE_TIMING_BUCKETS * APTA_EXAMPLE_TIMING_BUCKET_US;
+}
 
 static apta_status_t process_once(
     apta_session_t *session,
@@ -40,6 +61,13 @@ static apta_status_t process_once(
     stats->total_us += elapsed;
     if (elapsed > stats->maximum_us) {
         stats->maximum_us = elapsed;
+    }
+    {
+        uint64_t bucket = elapsed / APTA_EXAMPLE_TIMING_BUCKET_US;
+        if (bucket >= APTA_EXAMPLE_TIMING_BUCKETS) {
+            bucket = APTA_EXAMPLE_TIMING_BUCKETS - 1u;
+        }
+        stats->timing_histogram[bucket] += 1u;
     }
     return status;
 }
@@ -72,7 +100,7 @@ static apta_status_t sweep_one(
 {
     apta_session_config_t config;
     apta_session_t *session = NULL;
-    process_stats_t stats = {0u, 0u, 0u};
+    process_stats_t *stats = &sweep_stats;
     uint32_t first_frame = 0u;
     size_t free_before;
     size_t free_after;
@@ -81,6 +109,7 @@ static apta_status_t sweep_one(
 
     apta_memory_requirements_t requirement;
 
+    memset(stats, 0, sizeof(*stats));
     free_before = heap_caps_get_free_size(MALLOC_CAP_8BIT);
 
     apta_session_config_init(&config);
@@ -130,7 +159,7 @@ static apta_status_t sweep_one(
                      row->name, first_frame, status);
             break;
         }
-        status = process_once(session, &budget, &stats);
+        status = process_once(session, &budget, stats);
         if (status < 0) {
             ESP_LOGW(TAG, "%s: process failed at frame %" PRIu32
                      " with status %" PRId32,
@@ -146,7 +175,7 @@ static apta_status_t sweep_one(
     }
     (void)apta_session_signal_end_of_input(session, APTA_EXAMPLE_TOTAL_FRAMES);
     do {
-        status = process_once(session, &budget, &stats);
+        status = process_once(session, &budget, stats);
         vTaskDelay(1);
     } while (status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
 
@@ -155,12 +184,16 @@ static apta_status_t sweep_one(
 
     ESP_LOGI(TAG,
              "%-24s workspace=%7" PRIu64 " calls=%4" PRIu64
-             " average_us=%6" PRIu64 " max_us=%6" PRIu64 " heap_delta=%d",
+             " average_us=%6" PRIu64 " p99_us<=%5" PRIu32
+             " max_us=%6" PRIu64 " heap_delta=%d",
              row->name,
              (uint64_t)requirement.minimum_bytes,
-             stats.call_count,
-             stats.call_count != 0u ? stats.total_us / stats.call_count : 0u,
-             stats.maximum_us,
+             stats->call_count,
+             stats->call_count != 0u
+                 ? stats->total_us / stats->call_count
+                 : 0u,
+             process_p99_upper_us(stats),
+             stats->maximum_us,
              (int)free_after - (int)free_before);
     return APTA_STATUS_OK;
 }
@@ -211,12 +244,13 @@ void app_main(void)
     const apta_result_t *result = NULL;
     apta_tempo_view_t tempo;
     apta_grid_view_t grid;
-    process_stats_t stats = {0u, 0u, 0u};
+    process_stats_t *stats = &main_stats;
     uint32_t first_frame = 0u;
     size_t free_before;
     size_t free_after;
     apta_status_t status = APTA_STATUS_OK;
 
+    memset(stats, 0, sizeof(*stats));
     free_before = heap_caps_get_free_size(MALLOC_CAP_8BIT);
 
     apta_espidf_port_init(&port);
@@ -280,7 +314,7 @@ void app_main(void)
             goto cleanup;
         }
 
-        status = process_once(session, &budget, &stats);
+        status = process_once(session, &budget, stats);
         if (status < 0) {
             ESP_LOGE(TAG, "process failed: status=%" PRId32, status);
             goto cleanup;
@@ -295,7 +329,7 @@ void app_main(void)
         goto cleanup;
     }
     do {
-        status = process_once(session, &budget, &stats);
+        status = process_once(session, &budget, stats);
         taskYIELD();
     } while (status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
     if (status != APTA_STATUS_END_OF_INPUT) {
@@ -323,10 +357,14 @@ void app_main(void)
              (unsigned)tempo.selected.confidence,
              grid.segment_count);
     ESP_LOGI(TAG,
-             "process_calls=%" PRIu64 " average_us=%" PRIu64 " max_us=%" PRIu64,
-             stats.call_count,
-             stats.call_count != 0u ? stats.total_us / stats.call_count : 0u,
-             stats.maximum_us);
+             "process_calls=%" PRIu64 " average_us=%" PRIu64
+             " p99_us<=%" PRIu32 " max_us=%" PRIu64,
+             stats->call_count,
+             stats->call_count != 0u
+                 ? stats->total_us / stats->call_count
+                 : 0u,
+             process_p99_upper_us(stats),
+             stats->maximum_us);
     ESP_LOGI(TAG,
              "port_dsp_backend=%" PRIu32,
              apta_espidf_dsp_backend());
@@ -357,5 +395,11 @@ cleanup:
              (unsigned)free_before,
              (unsigned)free_after,
              (int)free_after - (int)free_before);
+    ESP_LOGI(TAG,
+             "minimum_free_heap=%u largest_free_block=%u "
+             "stack_high_water_words=%u",
+             (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
+             (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT),
+             (unsigned)uxTaskGetStackHighWaterMark(NULL));
     vTaskDelete(NULL);
 }

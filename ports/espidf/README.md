@@ -158,17 +158,19 @@ a published profile constant by hand -- call
 `apta_query_workspace_requirements()` with the configuration and use what it
 reports. `apta_session_create()` enforces the same figure.
 
-### Stack cost of the global grid
+### Global-grid refresh storage
 
-`apta_internal_s6_refresh()` declares a per-window array on the stack, sized
-`APTA_INTERNAL_GLOBAL_MAX_WINDOWS`, which is
-`GLOBAL_BIN_CAPACITY / GLOBAL_WINDOW_BINS + 1`. At the defaults that is 129
-entries of `apta_s6_window_t`, roughly 4 KiB, and it lives for the duration of
-a `apta_session_process()` call. Raising `CONFIG_APTA_GLOBAL_BIN_CAPACITY`
-raises this proportionally, so a task calling `apta_session_process()` needs
-its stack sized accordingly. A static assertion caps the array at 1025 entries
-to stop an override from silently overflowing a typical task stack; raising
-that cap is a deliberate edit to `src/core/apta_internal.h`.
+Phase 7 removed the capacity-sized per-window array from the process stack.
+S6 now analyzes one compile-time-bounded 128-bin window per scheduler step and
+keeps at most the public maximum number of pending segments in the queried
+session workspace. Raising `CONFIG_APTA_GLOBAL_BIN_CAPACITY` therefore grows
+the global ring and flux workspace as before, but no longer grows a temporary
+`apta_session_process()` stack array.
+
+The cooperative example reports the FreeRTOS stack high-water value after its
+complete feature sweep. Hosts must still measure their own caller stack because
+compiler options, enabled features, callbacks and surrounding application
+frames remain target-specific.
 
 ### Coherence is checked at compile time
 

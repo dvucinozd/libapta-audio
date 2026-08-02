@@ -57,6 +57,32 @@ Detail-only and overview-plus-detail region requests use the same ordering key. 
 
 Feature-specific replay acceptance continues to validate against the base detail selector and does not advance aging a second time.
 
+## Analysis refresh steps
+
+`maximum_steps` covers the entire `apta_session_process()` call. A waveform
+input chunk, an S4 refresh slice and an S6 refresh slice all consume the same
+counter; downstream wrappers continue from the count used by the base layer.
+
+The maximum implementation granularity of one analysis step is:
+
+- S4: one complete flux fill, four ordered autocorrelation lags, or the bounded
+  final refinement/phase/commit operation;
+- S6: one complete flux fill, one 128-bin global analysis window, or the
+  bounded final fallback/commit operation.
+
+`soft_time_budget_us` is converted to one absolute monotonic deadline at the
+public process boundary. Each layer checks that same deadline between its
+steps. As specified, it remains a best-effort target: a step already in
+progress is not preempted.
+
+Pending S4 and S6 generations remain private until their final commit step.
+End-of-input therefore remains in the draining state until both engines have
+finished, while cancellation can stop between any two steps without exposing a
+partial result.
+
 ## Boundedness
 
-The implementation adds fixed fields to each of the sixteen embedded request slots and performs no heap allocation for scheduling. Temporary sorting uses bounded stack arrays and the already bounded PCM linked list.
+The implementation adds fixed fields to each of the sixteen embedded request
+slots and fixed private refresh state to the session workspace. It performs no
+heap allocation for scheduling or analysis refresh. Temporary sorting uses
+bounded stack arrays and the already bounded PCM linked list.

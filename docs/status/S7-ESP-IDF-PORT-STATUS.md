@@ -5,8 +5,9 @@
 **Implementation merge:** `5f949197c2600a9c83a9187ec3625c841ab7f076`  
 **Native verification:** GitHub Actions CI run `#291`  
 **ESP-IDF verification:** GitHub Actions ESP-IDF workflow run `#13`  
-**Registered native runtime tests:** 69  
-**Physical-board runtime claim:** not issued
+**Registered native runtime tests:** 83 default; 71 core-only
+**Physical-board runtime evidence:** one ESP32-P4 v1.3 configuration measured;
+resource certification not issued
 
 ## 1. Stage scope
 
@@ -20,7 +21,9 @@ The architecture roadmap defines Stage S7 as:
 
 All five functional items are present in the repository and have build, host-runtime or bounded-profile evidence. The complete example firmware is cross-compiled and linked for multiple ESP-IDF/target configurations.
 
-Stage completion here does not claim that CI executed the firmware on a physical board.
+Stage completion here does not claim that CI executes firmware on a physical
+board. A separate manual P4 run is recorded in
+[`PHASE7-P4-BOUNDED-REFRESH-STATUS.md`](PHASE7-P4-BOUNDED-REFRESH-STATUS.md).
 
 ## 2. Component structure
 
@@ -190,13 +193,17 @@ Verified:
 - ESP-DSP helper compilation and linking;
 - bounded workload completion without post-create allocator calls.
 
+Verified manually for one ESP32-P4 v1.3 / ESP-IDF 5.5 configuration:
+
+- complete physical-board feature sweep;
+- average, histogram-bounded p99 and maximum process-call timing;
+- heap cleanup, minimum-free and largest-block observations;
+- task stack high-water observation.
+
 Not yet verified:
 
-- execution on a physical ESP board;
-- actual task stack high-water marks;
-- on-target process-call latency distribution;
-- on-target heap fragmentation and largest-block behavior;
-- watchdog/playback coexistence;
+- repeatability across intended production boards and configurations;
+- a 30-minute playback/watchdog coexistence soak;
 - physical USB/filesystem/decoder integration;
 - on-device `.apta` interchange with an independent producer/consumer.
 

@@ -5,7 +5,7 @@
 - **Next stage:** S8 — Second independent platform
 - **Current source baseline:** `9709c674e9bda200c55091c52b0e92bcbc1b5924`
 - **Current public API:** 0.3.0 draft
-- **Current CTest inventory:** 82 default POSIX tests; 70 core-only tests
+- **Current CTest inventory:** 83 default POSIX tests; 71 core-only tests
 - **Latest all-green native CI:** GitHub Actions run `30744535644` at the current source baseline
 - **Current-head platform/fixture checks:** ESP-IDF run `30744535677` and reference-fixture run `30744535645` passed
 
@@ -137,6 +137,11 @@ opt-in because the 48-track partition had already been observed in phase 5 and
 the high-confidence metrical-error gate is unchanged. Applying B3 to S6 was
 measured and rejected; S6 retains its production broadband envelope. See
 [`PHASE6-MULTIBAND-ONSET-STATUS.md`](PHASE6-MULTIBAND-ONSET-STATUS.md).
+Phase 7 made the S4 and S6 refresh scans cooperative under the existing step
+and soft-time budgets. On the ESP32-P4 full profile it reduced the measured
+maximum process call from 19.323 ms to 12.355 ms, with p99 <= 8.2 ms and 42.1%
+worst-call margin inside a 1024-frame audio block. See
+[`PHASE7-P4-BOUNDED-REFRESH-STATUS.md`](PHASE7-P4-BOUNDED-REFRESH-STATUS.md).
 
 ## S5 — Reference desktop tools
 
@@ -199,8 +204,8 @@ Implemented:
 - manual ESP32-P4 timing and memory measurements for the seven feature sets in
   the cooperative example.
 
-The current source tree registers 81 tests in the default POSIX configuration
-and 69 in a core-only configuration without the POSIX desktop adapters and
+The current source tree registers 83 tests in the default POSIX configuration
+and 71 in a core-only configuration without the POSIX desktop adapters and
 tools. The ESP-IDF matrix links and verifies complete firmware artifacts and
 runs component-size reports.
 
@@ -212,9 +217,10 @@ passed, covering the bounded memory profiles and the supported cross-build
 matrix.
 
 Status: complete self-tested and cross-build-verified implementation candidate.
-Manual ESP32-P4 measurements now cover process-call timing and memory for one
-board/configuration. CI still does not execute firmware on hardware, and stack
-high-water marks, fragmentation, hardware decoder/USB integration and
+Manual ESP32-P4 measurements now cover average, histogram-bounded p99 and
+maximum process-call timing, heap cleanup/largest block and stack high-water
+evidence for one board/configuration. CI still does not execute firmware on
+hardware; a long playback/watchdog soak, hardware decoder/USB integration and
 repeatable measurements on intended production targets remain stronger
 validation gates rather than absent Stage S7 implementation items.
 

@@ -168,6 +168,13 @@ int main(void)
     apta_grid_revision_view_init(&revision);
     CHECK(apta_result_get_grid_revision(result, &revision) == APTA_STATUS_OK);
     CHECK(revision.state == APTA_GRID_REVISION_APPLIED);
+    apta_grid_view_init(&local_grid);
+    CHECK(apta_result_get_beatgrid(
+              result,
+              APTA_FEATURE_LOCAL_BEATGRID,
+              NULL,
+              &local_grid) == APTA_STATUS_OK);
+    CHECK(local_grid.state == APTA_FEATURE_FINAL);
     apta_result_release(result);
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);

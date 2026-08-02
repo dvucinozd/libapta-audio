@@ -32,11 +32,11 @@ This document records evidence for architecture Stage S7 — ESP-IDF port. It di
 | Native regressions | Verified | 69 CTest tests |
 | Sanitizer coverage | Verified | ASan and UBSan jobs pass |
 | Parser fuzz smoke retained | Verified | Existing canonical corpus and bounded libFuzzer run pass |
-| Physical ESP32 execution | Open | CI does not flash a board |
+| Physical ESP32-P4 execution | Verified manually for one configuration | P4 v1.3, 360 MHz, ESP-IDF 5.5 feature sweep |
 | Physical ESP32-S3 execution | Open | CI does not flash a board |
-| On-target stack measurement | Open | Requires board runtime |
-| On-target latency measurement | Open | Requires board runtime |
-| On-target heap fragmentation | Open | Requires board runtime |
+| On-target stack measurement | Verified manually for one P4 configuration | 5,776-word high-water value after the complete sweep |
+| On-target latency measurement | Verified manually for one P4 configuration | Full profile average 3.657 ms, p99 <= 8.2 ms, max 12.355 ms |
+| On-target heap fragmentation | Partially verified manually | Zero cleanup delta and 33,030,144-byte largest free block after the P4 sweep |
 | USB/filesystem/decoder integration | Open | Application-specific hardware integration remains |
 | Independent on-device `.apta` interoperability | Open | Requires another producer/consumer or target execution |
 | Certified resource class | Open | No target-specific stack/latency/heap certification |
@@ -88,7 +88,11 @@ Architecture Stage S7 is complete because every functional roadmap item has an i
 - cooperative example;
 - embedded memory profiles.
 
-The remaining open gates concern stronger claims—physical execution, measured real-time/resource behavior and independent interoperability—not missing Stage S7 source or build functionality.
+The remaining open gates concern repeated production-target measurements,
+playback/watchdog and hardware-I/O coexistence, and independent
+interoperability—not missing Stage S7 source or build functionality. The
+single-board Phase 7 evidence is recorded in
+[`../status/PHASE7-P4-BOUNDED-REFRESH-STATUS.md`](../status/PHASE7-P4-BOUNDED-REFRESH-STATUS.md).
 
 ## Claims not authorized by this record
 

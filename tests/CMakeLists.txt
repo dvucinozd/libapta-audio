@@ -98,6 +98,16 @@ apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_fail
 apta_add_c_test(apta_s6_global_grid apta.s6.global_grid unit/s6_global_grid.c)
 apta_add_c_test(apta_s6_revision apta.s6.revision unit/s6_revision.c)
 apta_add_c_test(apta_s6_bounded apta.s6.bounded unit/s6_bounded.c)
+apta_add_c_test(
+    apta_cooperative_refresh
+    apta.scheduler.cooperative_refresh
+    unit/cooperative_refresh.c)
+target_link_libraries(apta_cooperative_refresh PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_cooperative_refresh
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/core
+        ${CMAKE_SOURCE_DIR}/src/beatgrid)
 apta_add_c_test(apta_s6_serialization apta.serialization.s6 unit/s6_serialization.c)
 target_link_libraries(apta_s6_serialization PRIVATE apta_c11_atomics)
 target_include_directories(apta_s6_serialization PRIVATE ${CMAKE_SOURCE_DIR}/src/core)

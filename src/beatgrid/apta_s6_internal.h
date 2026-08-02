@@ -22,6 +22,23 @@ struct apta_internal_s6_session_state {
      * autocorrelation. Zero before the first one. */
     uint64_t refreshed_evidence_end;
 
+    /* Phase 7 cooperative refresh. Pending segments and window-argmax state
+     * are private until the entire evidence generation commits, so a result
+     * snapshot can never observe a partially refreshed global grid. */
+    apta_grid_segment_t refresh_segments[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
+    uint32_t refresh_segment_window_counts[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
+    uint64_t refresh_evidence_first;
+    uint64_t refresh_evidence_end;
+    uint64_t refresh_next_window;
+    uint32_t refresh_segment_count;
+    uint32_t refresh_window_count;
+    uint32_t refresh_total_confidence;
+    uint32_t refresh_valid_confidence_count;
+    uint8_t refresh_stage;
+    uint8_t refresh_degraded;
+    uint8_t refresh_pending;
+    uint8_t refresh_reserved8;
+
     apta_grid_segment_t segments[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
     uint32_t segment_count;
 
