@@ -9,14 +9,16 @@ target_link_libraries(
     apta_tool_common
     PUBLIC
         apta::core
-        apta::port_posix
+        apta::port_native
     PRIVATE
         apta_sanitizers)
 
-target_compile_definitions(
-    apta_tool_common
-    PRIVATE
-        _POSIX_C_SOURCE=200809L)
+if(UNIX)
+    target_compile_definitions(
+        apta_tool_common
+        PRIVATE
+            _POSIX_C_SOURCE=200809L)
+endif()
 
 set_target_properties(
     apta_tool_common
@@ -32,10 +34,12 @@ function(apta_add_tool target output_name source)
         PRIVATE
             apta_tool_common
             apta::core
-            apta::port_posix
+            apta::port_native
             apta::decoder_wav
             apta_sanitizers)
-    target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
+    if(UNIX)
+        target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
+    endif()
     set_target_properties(
         ${target}
         PROPERTIES
@@ -45,15 +49,29 @@ function(apta_add_tool target output_name source)
             C_EXTENSIONS NO)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+        if(APTA_WARNINGS_AS_ERRORS)
+            target_compile_options(${target} PRIVATE -Werror)
+        endif()
     elseif(MSVC)
+        # The tools intentionally use portable C stdio APIs such as fopen.
+        target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
         target_compile_options(${target} PRIVATE /W4)
+        if(APTA_WARNINGS_AS_ERRORS)
+            target_compile_options(${target} PRIVATE /WX)
+        endif()
     endif()
 endfunction()
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(apta_tool_common PRIVATE -Wall -Wextra -Wpedantic)
+    if(APTA_WARNINGS_AS_ERRORS)
+        target_compile_options(apta_tool_common PRIVATE -Werror)
+    endif()
 elseif(MSVC)
     target_compile_options(apta_tool_common PRIVATE /W4)
+    if(APTA_WARNINGS_AS_ERRORS)
+        target_compile_options(apta_tool_common PRIVATE /WX)
+    endif()
 endif()
 
 # Measurement instrument rather than a deliverable, but it needs the WAV

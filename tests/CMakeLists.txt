@@ -35,8 +35,10 @@ function(apta_add_desktop_test target test_name source)
         PRIVATE
             apta::core
             apta::decoder_wav
-            apta::port_posix)
-    target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
+            apta::port_native)
+    if(UNIX)
+        target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
+    endif()
     set_target_properties(${target} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
     add_test(NAME ${test_name} COMMAND ${target})
 endfunction()
@@ -127,6 +129,23 @@ target_compile_definitions(apta_espidf_port PRIVATE CONFIG_APTA_ESP_DSP_BACKEND=
 set_target_properties(apta_espidf_port PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 add_test(NAME apta.port.espidf COMMAND apta_espidf_port)
 
+# The producer for this committed fixture is the standalone Python script in
+# tests/fixtures, so consuming it here verifies the container contract without
+# sharing writer code. In Stage S8 this same test executes on Windows as the
+# cross-platform interchange gate.
+add_executable(apta_external_fixture unit/external_fixture.c)
+target_link_libraries(apta_external_fixture PRIVATE apta::core)
+target_compile_definitions(
+    apta_external_fixture
+    PRIVATE
+        APTA_EXTERNAL_FIXTURE_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/reference-wovr-meta.apta.hex")
+set_target_properties(
+    apta_external_fixture
+    PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED YES)
+add_test(NAME apta.interchange.external_fixture COMMAND apta_external_fixture)
+
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
     add_test(
@@ -137,7 +156,10 @@ if(Python3_Interpreter_FOUND)
 endif()
 
 if(TARGET apta_decoder_wav)
-    apta_add_desktop_test(apta_desktop_posix_file apta.desktop.posix_file unit/desktop_posix_file.c)
+    apta_add_desktop_test(apta_desktop_native_file apta.desktop.native_file unit/desktop_native_file.c)
+    if(TARGET apta_port_posix)
+        apta_add_desktop_test(apta_desktop_posix_file apta.desktop.posix_file unit/desktop_posix_file.c)
+    endif()
     apta_add_desktop_test(apta_desktop_wav_decoder apta.desktop.wav_decoder unit/desktop_wav_decoder.c)
     apta_add_desktop_test(apta_desktop_wav_malformed apta.desktop.wav_malformed unit/desktop_wav_malformed.c)
     apta_add_desktop_test(apta_desktop_wav_pull apta.desktop.wav_pull unit/desktop_wav_pull_integration.c)
@@ -169,7 +191,9 @@ if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)
     set(APTA_CLI_CORRUPT "${CMAKE_CURRENT_BINARY_DIR}/apta-cli-corrupt.apta")
 
     add_executable(apta_desktop_cli_fixture unit/desktop_cli_fixture.c)
-    target_compile_definitions(apta_desktop_cli_fixture PRIVATE _POSIX_C_SOURCE=200809L)
+    if(UNIX)
+        target_compile_definitions(apta_desktop_cli_fixture PRIVATE _POSIX_C_SOURCE=200809L)
+    endif()
     set_target_properties(
         apta_desktop_cli_fixture
         PROPERTIES

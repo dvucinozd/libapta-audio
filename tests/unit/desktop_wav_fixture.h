@@ -6,7 +6,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_WIN32)
+#if !defined(WIN32_LEAN_AND_MEAN)
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
+
+#define APTA_TEST_TEMP_PATH_CAPACITY 512u
 
 typedef double (*apta_test_sample_fn)(
     uint64_t frame,
@@ -43,15 +53,64 @@ static int apta_test_put_u32(FILE *file, uint32_t value)
     return fwrite(bytes, 1u, sizeof(bytes), file) == sizeof(bytes);
 }
 
-static int apta_test_make_temp_path(char path[64])
+static int apta_test_make_temp_path(char *path, size_t capacity)
 {
+#if defined(_WIN32)
+    char directory[MAX_PATH + 1u];
+    DWORD directory_size;
+
+    if (path == NULL || capacity < MAX_PATH + 1u) {
+        return 0;
+    }
+    directory_size = GetTempPathA((DWORD)sizeof(directory), directory);
+    if (directory_size == 0u || directory_size >= sizeof(directory)) {
+        return 0;
+    }
+    return GetTempFileNameA(directory, "apt", 0u, path) != 0u;
+#else
     int descriptor;
-    (void)snprintf(path, 64u, "/tmp/libapta-s5-XXXXXX");
+    if (path == NULL || capacity < 32u) {
+        return 0;
+    }
+    (void)snprintf(path, capacity, "/tmp/libapta-s5-XXXXXX");
     descriptor = mkstemp(path);
     if (descriptor < 0) {
         return 0;
     }
     return close(descriptor) == 0;
+#endif
+}
+
+static int apta_test_remove_path(const char *path)
+{
+#if defined(_WIN32)
+    wchar_t wide[MAX_PATH + 1u];
+    int count = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, wide, (int)(MAX_PATH + 1u));
+    return count > 0 && DeleteFileW(wide) != 0;
+#else
+    return remove(path) == 0;
+#endif
+}
+
+static int apta_test_make_unicode_temp_path(char *path, size_t capacity)
+{
+    static const char suffix[] = "-\xC5\xBE.apta";
+    size_t path_size;
+
+    if (!apta_test_make_temp_path(path, capacity)) {
+        return 0;
+    }
+    if (!apta_test_remove_path(path)) {
+        return 0;
+    }
+    path_size = strlen(path);
+    if (capacity < sizeof(suffix) ||
+        path_size > capacity - sizeof(suffix)) {
+        return 0;
+    }
+    memcpy(path + path_size, suffix, sizeof(suffix));
+    return 1;
 }
 
 static double apta_test_default_sample(

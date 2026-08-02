@@ -2,16 +2,13 @@
 #ifndef APTA_DESKTOP_POSIX_FILE_H
 #define APTA_DESKTOP_POSIX_FILE_H
 
-#include <stddef.h>
-#include <stdint.h>
-
-#include <apta/apta_errors.h>
-#include <apta/apta_types.h>
+#include <apta/desktop/apta_file.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Compatibility API for applications written against the Stage S5 adapter. */
 typedef struct apta_posix_file apta_posix_file_t;
 
 APTA_API apta_status_t APTA_CALL

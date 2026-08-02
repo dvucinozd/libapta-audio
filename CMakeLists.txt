@@ -9,9 +9,9 @@ project(
 option(APTA_BUILD_TESTS "Build libapta tests" ON)
 option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(APTA_BUILD_FUZZING "Build libFuzzer targets" OFF)
-option(APTA_BUILD_DESKTOP_ADAPTERS "Build POSIX and reference decoder adapters" ON)
+option(APTA_BUILD_DESKTOP_ADAPTERS "Build native desktop and reference decoder adapters" ON)
 option(APTA_BUILD_TOOLS "Build reference desktop command-line tools" ON)
-option(APTA_WARNINGS_AS_ERRORS "Treat apta_core compiler warnings as errors" OFF)
+option(APTA_WARNINGS_AS_ERRORS "Treat project compiler warnings as errors" OFF)
 option(
     APTA_ENABLE_INTERNAL_PROFILING
     "Build opt-in internal timing probes (never enable for a shipped library)"
@@ -427,8 +427,8 @@ elseif(MSVC)
 endif()
 
 if(APTA_BUILD_DESKTOP_ADAPTERS)
-    if(NOT UNIX)
-        message(FATAL_ERROR "APTA_BUILD_DESKTOP_ADAPTERS currently requires a POSIX platform")
+    if(NOT UNIX AND NOT WIN32)
+        message(FATAL_ERROR "APTA_BUILD_DESKTOP_ADAPTERS requires POSIX or Windows")
     endif()
     add_subdirectory(src/desktop)
 endif()

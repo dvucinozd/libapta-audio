@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_tool_common.h"
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-#include <apta/desktop/apta_posix_file.h>
+#include <apta/desktop/apta_file.h>
 
 const char *apta_tool_status_name(apta_status_t status)
 {
@@ -66,7 +64,7 @@ apta_status_t apta_tool_read_file(
     uint64_t maximum_bytes,
     apta_tool_buffer_t *buffer_out)
 {
-    apta_posix_file_t *file = NULL;
+    apta_file_t *file = NULL;
     uint64_t size64;
     size_t size;
     size_t read_bytes = 0u;
@@ -82,28 +80,28 @@ apta_status_t apta_tool_read_file(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
-    status = apta_posix_file_open_read(path, &file);
+    status = apta_file_open_read(path, &file);
     if (status < 0) {
         return status;
     }
-    status = apta_posix_file_get_size(file, &size64);
+    status = apta_file_get_size(file, &size64);
     if (status < 0) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return status;
     }
     if (size64 == 0u || size64 > maximum_bytes || size64 > SIZE_MAX) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return size64 == 0u ? APTA_ERROR_CORRUPT_DATA
                             : APTA_ERROR_LIMIT_EXCEEDED;
     }
     size = (size_t)size64;
     data = (uint8_t *)malloc(size);
     if (data == NULL) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return APTA_ERROR_OUT_OF_MEMORY;
     }
-    status = apta_posix_file_read_at(file, 0u, data, size, &read_bytes);
-    apta_posix_file_close(file);
+    status = apta_file_read_at(file, 0u, data, size, &read_bytes);
+    apta_file_close(file);
     if (status < 0 || read_bytes != size) {
         free(data);
         return status < 0 ? status : APTA_ERROR_SOURCE;
@@ -128,76 +126,7 @@ apta_status_t apta_tool_write_file_atomic(
     const void *data,
     size_t size)
 {
-    static const char suffix[] = ".tmp.XXXXXX";
-    size_t path_size;
-    char *temporary_path;
-    int descriptor;
-    FILE *file;
-    size_t written;
-    int failed = 0;
-    int saved_errno = 0;
-
-    if (path == NULL || path[0] == '\0' || (size != 0u && data == NULL)) {
-        return APTA_ERROR_INVALID_ARGUMENT;
-    }
-    path_size = strlen(path);
-    if (path_size > SIZE_MAX - sizeof(suffix)) {
-        return APTA_ERROR_LIMIT_EXCEEDED;
-    }
-    temporary_path = (char *)malloc(path_size + sizeof(suffix));
-    if (temporary_path == NULL) {
-        return APTA_ERROR_OUT_OF_MEMORY;
-    }
-    memcpy(temporary_path, path, path_size);
-    memcpy(temporary_path + path_size, suffix, sizeof(suffix));
-
-    descriptor = mkstemp(temporary_path);
-    if (descriptor < 0) {
-        free(temporary_path);
-        return APTA_ERROR_SOURCE;
-    }
-    file = fdopen(descriptor, "wb");
-    if (file == NULL) {
-        saved_errno = errno;
-        (void)close(descriptor);
-        (void)unlink(temporary_path);
-        free(temporary_path);
-        errno = saved_errno;
-        return APTA_ERROR_SOURCE;
-    }
-
-    written = size == 0u ? 0u : fwrite(data, 1u, size, file);
-    if (written != size) {
-        failed = 1;
-        saved_errno = errno != 0 ? errno : EIO;
-    }
-    if (!failed && fflush(file) != 0) {
-        failed = 1;
-        saved_errno = errno != 0 ? errno : EIO;
-    }
-    if (!failed && fsync(descriptor) != 0) {
-        failed = 1;
-        saved_errno = errno != 0 ? errno : EIO;
-    }
-    if (fclose(file) != 0 && !failed) {
-        failed = 1;
-        saved_errno = errno != 0 ? errno : EIO;
-    }
-    if (failed) {
-        (void)unlink(temporary_path);
-        free(temporary_path);
-        errno = saved_errno;
-        return APTA_ERROR_SOURCE;
-    }
-    if (rename(temporary_path, path) != 0) {
-        saved_errno = errno;
-        (void)unlink(temporary_path);
-        free(temporary_path);
-        errno = saved_errno;
-        return APTA_ERROR_SOURCE;
-    }
-    free(temporary_path);
-    return APTA_STATUS_OK;
+    return apta_file_write_atomic(path, data, size);
 }
 
 static int apta_tool_token_equals(

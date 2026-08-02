@@ -1,7 +1,7 @@
 # APTA reference desktop tools 0.1
 
 **Status:** Reference implementation contract  
-**Platform:** POSIX  
+**Platform:** POSIX and Windows
 **Built-in decoder:** RIFF/WAVE PCM and IEEE float  
 **API version:** 0.3.0 draft
 
@@ -11,7 +11,8 @@ Stage S5 provides a desktop integration layer around the portable APTA core. It 
 
 The delivered components are:
 
-- `apta::port_posix` — checked read-only POSIX file access;
+- `apta::port_native` — checked native file access and atomic replacement;
+- `apta::port_posix` — Stage S5 compatibility alias on POSIX;
 - `apta::decoder_wav` — reference WAV decoder and pull-source bridge;
 - `apta-analyze` — WAV analysis and `.apta` generation;
 - `apta-inspect` — human-readable or JSON result inspection;
@@ -19,7 +20,7 @@ The delivered components are:
 
 ## 2. Building
 
-The default POSIX build enables desktop adapters and tools:
+The default POSIX and Windows builds enable desktop adapters and tools:
 
 ```bash
 cmake -S . -B build \
@@ -31,7 +32,7 @@ cmake --build build --parallel
 Relevant CMake options:
 
 ```text
-APTA_BUILD_DESKTOP_ADAPTERS  Build apta::port_posix and apta::decoder_wav
+APTA_BUILD_DESKTOP_ADAPTERS  Build apta::port_native and apta::decoder_wav
 APTA_BUILD_TOOLS             Build apta-analyze, apta-inspect and apta-validate
 ```
 
@@ -45,7 +46,24 @@ build/tools/apta-inspect
 build/tools/apta-validate
 ```
 
-## 3. POSIX file adapter
+## 3. Native file adapter
+
+`apta::port_native` exposes the platform-neutral UTF-8 path API:
+
+```c
+apta_file_open_read();
+apta_file_get_size();
+apta_file_read_at();
+apta_file_close();
+apta_file_write_atomic();
+```
+
+On POSIX it uses checked 64-bit stdio and `fsync()` before rename. On Windows
+it converts UTF-8 to UTF-16, uses `CreateFileW` and 64-bit Win32 offsets, calls
+`FlushFileBuffers()`, and replaces the destination with a sibling temporary
+file through `MoveFileExW`.
+
+The Stage S5 POSIX compatibility symbols remain available:
 
 `apta::port_posix` exposes:
 
@@ -56,7 +74,7 @@ apta_posix_file_read_at();
 apta_posix_file_close();
 ```
 
-The adapter provides:
+The native adapters provide:
 
 - 64-bit file-size and offset handling;
 - checked random-access reads;
@@ -64,6 +82,7 @@ The adapter provides:
 - no global mutable state;
 - no implicit ownership transfer;
 - source errors mapped to APTA status values.
+- flushed atomic result-file replacement.
 
 It is not linked into `apta::core`.
 

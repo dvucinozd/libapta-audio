@@ -351,7 +351,7 @@ static int g_request_global;
 #define HUMAN_JITTER_SECONDS 0.006
 
 /* Per-hit gain varies by up to this fraction, on top of a downbeat accent. */
-#define HUMAN_VELOCITY_RANGE 0.25
+#define HUMAN_VELOCITY_RANGE 0.25f
 
 /* Peak tempo deviation. One full sine cycle across the track, so the mean
  * tempo stays at nominal and the ground truth remains honest. */
@@ -371,7 +371,7 @@ static double human_jitter(void)
            HUMAN_JITTER_SECONDS * 3.0;
 }
 
-static float human_gain(float base, uint32_t step)
+static float human_gain(float base, size_t step)
 {
     float accent;
 

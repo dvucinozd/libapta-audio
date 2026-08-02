@@ -16,7 +16,7 @@ typedef struct {
     const char *name;
     const char *description;
     uint32_t sample_rate;
-    uint32_t channel_count;
+    uint16_t channel_count;
     apta_channel_layout_t channel_layout;
     uint64_t total_frames;
     apta_feature_mask_t features;
@@ -103,7 +103,7 @@ static int print_text_rows(const probe_row_t *rows, size_t count)
                "result_pool=%zu alignment=%zu\n",
                rows[index].name,
                rows[index].sample_rate,
-               rows[index].channel_count,
+               (unsigned)rows[index].channel_count,
                (unsigned long long)rows[index].total_frames,
                result.workspace,
                result.recommended_workspace,

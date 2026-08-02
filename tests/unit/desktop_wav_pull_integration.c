@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <apta/apta.h>
 #include <apta/desktop/apta_decoder.h>
@@ -39,7 +38,7 @@ int main(void)
         APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID |
         APTA_FEATURE_CONFIDENCE;
-    char path[64];
+    char path[APTA_TEST_TEMP_PATH_CAPACITY];
     apta_decoder_t decoder;
     apta_decoder_info_t decoder_info;
     apta_pcm_source_t source;
@@ -58,7 +57,7 @@ int main(void)
     size_t written = 0u;
     uint8_t *serialized = NULL;
 
-    CHECK(apta_test_make_temp_path(path));
+    CHECK(apta_test_make_temp_path(path, sizeof(path)));
     CHECK(apta_test_write_wav(
         path,
         1u,
@@ -159,6 +158,6 @@ int main(void)
     apta_decoder_close(&decoder);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     context = NULL;
-    CHECK(unlink(path) == 0);
+    CHECK(apta_test_remove_path(path));
     return 0;
 }

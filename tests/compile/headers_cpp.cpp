@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <apta/apta.h>
+#include <apta/desktop/apta_decoder.h>
+#include <apta/desktop/apta_file.h>
+#include <apta/desktop/apta_posix_file.h>
 
 int main()
 {

@@ -1,13 +1,14 @@
 # APTA development roadmap status
 
 - **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)
-- **Current completed stage:** S7 — ESP-IDF port
-- **Next stage:** S8 — Second independent platform
-- **Current source baseline:** `9709c674e9bda200c55091c52b0e92bcbc1b5924`
+- **Current completed stage:** S8 — Windows platform integration
+- **Current implementation stage:** S9 — APTA 1.0; not started
+- **Next completed-stage gate:** stable specification/API/format and multi-platform conformance
+- **Current source baseline:** `d21572a`
 - **Current public API:** 0.3.0 draft
-- **Current CTest inventory:** 83 default POSIX tests; 71 core-only tests
-- **Latest all-green native CI:** GitHub Actions run `30744535644` at the current source baseline
-- **Current-head platform/fixture checks:** ESP-IDF run `30744535677` and reference-fixture run `30744535645` passed
+- **Current CTest inventory:** 85 default POSIX tests; 84 Windows tests; 72 core-only tests
+- **Latest all-green native CI:** GitHub Actions run `30765409478` at the current source baseline
+- **Current-head platform/fixture checks:** ESP-IDF run `30765409488` and reference-fixture run `30765409477` passed
 
 ## Status summary
 
@@ -21,7 +22,7 @@
 | S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX/WAV input, analyzer, inspector, validator, global/dynamic selection, diagnostics and generated fixtures |
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
 | S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP adapter, optional ESP-DSP helper, cooperative example, bounded profiles, 5.5.4/6.0.2 firmware builds and manual P4 measurements |
-| S8 — Second independent platform | Not started | A passing Windows/MSVC core CI preflight exists, but it is not a completed platform integration |
+| S8 — Second independent platform | Complete self-tested and CI-verified implementation candidate | Native Windows adapter, WAV pull runtime, CLI tools, independent fixture, bidirectional Linux/Windows `.apta` interchange and 84-test MSVC CI |
 | S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
 
 ## S0 — Foundation
@@ -228,22 +229,26 @@ See [`S7-ESP-IDF-PORT-STATUS.md`](S7-ESP-IDF-PORT-STATUS.md), [`../reference/APT
 
 ## S8 — Second independent platform
 
-Next implementation scope:
+Windows is the selected second platform. Stage S8 implements:
 
-Implement and validate at least one independent platform integration, such as:
+- a native Win32 file adapter with a platform-neutral UTF-8 path API;
+- checked 64-bit reads and flushed atomic result-file replacement;
+- the WAV pull decoder and reference CLI tools over that adapter;
+- native adapter, malformed-input, pull-analysis and generated CLI tests;
+- regular consumption of the independently produced Python container fixture;
+- an updated Windows CI job that builds adapters and tools and executes their
+  runtime tests with warnings as errors.
 
-1. Zephyr;
-2. Windows;
-3. STM32 bare metal;
-4. Linux DJ player;
-5. mobile application.
+Local Windows x64 MinGW builds and native runtime tests pass. Linux-produced
+containers validate and inspect on Windows, Windows-produced containers
+validate on Linux, and the independent Python fixture validates on Windows.
+GitHub Actions run `30765409478` builds the adapters, decoder and tools with
+MSVC warnings as errors and passes all 84 registered Windows tests. The
+supported ESP-IDF matrix and independent-fixture workflow also pass at the same
+source baseline. S8 is therefore the current completed stage.
 
-The selected platform must consume the public APTA API and `.apta` data model without depending on ESP-IDF adapter internals. Its evidence should include platform build/runtime tests and interchange with the existing reference implementation.
-
-The existing Windows core CI job is only a portability preflight. It does not
-provide a Windows adapter, runtime integration or S8 completion evidence. It is
-now a green build/test gate for the portable core, including the MSVC-specific
-C11 atomics enablement and maximum-alignment compatibility path.
+See [`S8-WINDOWS-PORT-STATUS.md`](S8-WINDOWS-PORT-STATUS.md) and
+[`../../ports/windows/README.md`](../../ports/windows/README.md).
 
 ## Claims
 

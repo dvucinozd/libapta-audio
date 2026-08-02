@@ -4,9 +4,9 @@
 
 `libapta-audio` is the home of the Adaptive Progressive Track Analysis (APTA) standard and its portable ISO C11 reference implementation.
 
-APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container, POSIX reference desktop tools and an ESP-IDF platform component.
+APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container, native POSIX and Windows reference desktop tools and an ESP-IDF platform component.
 
-> Project status: functional implementation candidate through roadmap Stage S7. The specification remains Working Draft 0.1; the current public API is 0.3.0, and no stable API or ABI is claimed before APTA 1.0.
+> Project status: functional implementation candidate through roadmap Stage S8. The specification remains Working Draft 0.1; the current public API is 0.3.0, and no stable API or ABI is claimed before APTA 1.0.
 
 ## Why APTA
 
@@ -37,7 +37,7 @@ the POSIX reference tools.
 | Memory control | Custom allocator, memory budget, static session workspace and two-slot bounded result pools | Resource-class certification is not yet claimed |
 | Desktop input | Reference WAV decoder for PCM16, packed PCM24, PCM32 and float32; mono/stereo | Other codecs require an application or third-party decoder backend |
 | Embedded integration | ESP-IDF component, cooperative example, three bounded memory profiles and ESP32-P4 measurements | CI remains cross-build-only; repeatable target-specific stack, heap and latency evidence is still required for a resource-class claim |
-| Portability | ISO C11 core with C++11 header/ABI compile checks and a green MSVC 2022 core build/test preflight | A second independent platform integration is still Stage S8 |
+| Portability | ISO C11 core, ESP-IDF component, and native POSIX/Windows file, decoder and CLI integrations with UTF-8 paths | No formal Windows certification, ARM64 Windows or network-share atomic-replacement claim is made |
 
 ## Functional implementation stages
 
@@ -49,6 +49,7 @@ the POSIX reference tools.
 - S5 — Reference desktop tools
 - S6 — Global grid and dynamic tempo
 - S7 — ESP-IDF port
+- S8 — Second independent platform (Windows)
 
 Current roadmap status:
 
@@ -75,7 +76,7 @@ Stage S6 status and evidence:
 - [`src/`](src/) — portable core plus optional desktop adapter implementation.
 - [`backends/`](backends/) — reserved scaffolding for future replaceable DSP
   backend packages; the current reference algorithms are built from `src/`.
-- [`ports/`](ports/) — platform integration layers, including ESP-IDF.
+- [`ports/`](ports/) — platform integration layers, including ESP-IDF and Windows.
 - [`tools/`](tools/) — `apta-analyze`, `apta-inspect`, `apta-validate`, the
   tempo harness and the read-only Rekordbox corpus importer.
 - [`tests/`](tests/) — unit, integration, conformance, fuzz and generated-fixture tests.
@@ -170,29 +171,32 @@ cmake --build build-core --parallel
 ctest --test-dir build-core --output-on-failure
 ```
 
-On Windows with Visual Studio 2022, build and test the portable core with:
+On Windows with Visual Studio 2022, the default build includes the Win32 file
+adapter, WAV decoder and reference CLI tools:
 
 ```powershell
 cmake -S . -B build-windows `
-  -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF `
-  -DAPTA_BUILD_TOOLS=OFF
+  -DAPTA_BUILD_DESKTOP_ADAPTERS=ON `
+  -DAPTA_BUILD_TOOLS=ON
 cmake --build build-windows --config Release --parallel
 ctest --test-dir build-windows -C Release --output-on-failure
 ```
 
 The build checks that the selected MSVC toolchain supports C11 atomics and
-enables the required compiler option for the core and white-box tests. This is
-a core portability preflight; it does not provide a Windows file, decoder or
-runtime adapter.
+enables the required compiler option for the core and white-box tests. Windows
+paths accepted by the desktop adapter are UTF-8 and are converted to UTF-16
+before Win32 file operations.
 
 ### CMake options
 
 - `APTA_BUILD_TESTS` — build runtime tests; default `ON`.
 - `APTA_ENABLE_SANITIZERS` — enable AddressSanitizer and UndefinedBehaviorSanitizer with GCC or Clang; default `OFF`.
 - `APTA_BUILD_FUZZING` — build libFuzzer targets; default `OFF`.
-- `APTA_BUILD_DESKTOP_ADAPTERS` — build `apta::port_posix` and `apta::decoder_wav`; default `ON`.
+- `APTA_BUILD_DESKTOP_ADAPTERS` — build `apta::port_native` and
+  `apta::decoder_wav`; the native port is POSIX or Windows; default `ON`.
 - `APTA_BUILD_TOOLS` — build the three reference CLI tools; default `ON`.
-- `APTA_WARNINGS_AS_ERRORS` — treat `apta::core` compiler warnings as errors;
+- `APTA_WARNINGS_AS_ERRORS` — treat core, native adapter, decoder and tool
+  compiler warnings as errors;
   default `OFF`.
 
 The tool build requires the desktop adapters.
@@ -327,9 +331,11 @@ The ESP-IDF integration is an IDF component under `ports/espidf`, not a native C
 
 ## Testing
 
-The current default POSIX build registers 81 CTest tests: 69 portable core
-tests, four POSIX adapter/decoder tests and eight generated CLI/tool tests. A
-core-only build with desktop adapters and tools disabled registers 69 tests.
+The current default POSIX build registers 85 CTest tests. The Windows build
+registers 84 tests (the POSIX compatibility-adapter test is omitted), including
+native file, WAV pull-analysis, independently produced fixture and generated
+CLI interchange coverage. A core-only build with desktop adapters and tools
+disabled registers 72 tests.
 The suite contains unit, generated-audio integration, malformed-input,
 allocation-failure, concurrency, exhaustive truncation and parser-hardening
 coverage; sanitizer and fuzz-smoke execution are separate CI steps.
@@ -355,8 +361,9 @@ The reference workflows generate click-track WAV and `.apta` parser seeds at run
   self-test evidence exist. It is not formal certification.
 - CI cross-builds the ESP-IDF examples but does not flash or execute them on
   physical hardware.
-- The Windows/MSVC job is a passing portable-core build/test preflight, not a
-  supported Windows adapter or complete Stage S8 platform integration.
+- The Windows adapter, tools and runtime pass the Stage S8 MSVC CI gate; formal
+  Windows certification, ARM64 Windows and application decoder integrations
+  remain outside that stage.
 - Long-running fuzzing, cross-endian interoperability, a second independent
   implementation and repeatable performance measurements across intended
   devices remain release gates.

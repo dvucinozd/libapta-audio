@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <apta/desktop/apta_decoder.h>
 
@@ -52,12 +51,12 @@ static apta_status_t open_status(const char *path)
 
 int main(void)
 {
-    char path[64];
+    char path[APTA_TEST_TEMP_PATH_CAPACITY];
     FILE *file;
     uint8_t patch4[4];
     uint8_t patch2[2];
 
-    CHECK(apta_test_make_temp_path(path));
+    CHECK(apta_test_make_temp_path(path, sizeof(path)));
     file = fopen(path, "wb");
     CHECK(file != NULL);
     CHECK(fwrite("not-a-wave", 1u, 10u, file) == 10u);
@@ -105,6 +104,6 @@ int main(void)
     CHECK(patch_bytes(path, 28L, patch4, sizeof(patch4)));
     CHECK(open_status(path) == APTA_ERROR_UNSUPPORTED);
 
-    CHECK(unlink(path) == 0);
+    CHECK(apta_test_remove_path(path));
     return 0;
 }
