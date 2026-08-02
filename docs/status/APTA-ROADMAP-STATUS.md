@@ -3,23 +3,24 @@
 - **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)
 - **Current completed stage:** S7 — ESP-IDF port
 - **Next stage:** S8 — Second independent platform
-- **Latest implementation baseline:** `17a55f3d4d7da3d12e530111e28e1c954d41d393`
-- **Latest all-green native CI:** GitHub Actions run `30463175285` at `17a55f3d4d7da3d12e530111e28e1c954d41d393`
-- **Current-head CI boundary:** POSIX, 32-bit, parser-hardening and Windows/MSVC core jobs pass
-- **Current-head platform/fixture checks:** ESP-IDF run `30463174165` and reference-fixture run `30463174172` passed
+- **Current source baseline:** `9709c674e9bda200c55091c52b0e92bcbc1b5924`
+- **Current public API:** 0.3.0 draft
+- **Current CTest inventory:** 80 default POSIX tests; 68 core-only tests
+- **Latest all-green native CI:** GitHub Actions run `30744535644` at the current source baseline
+- **Current-head platform/fixture checks:** ESP-IDF run `30744535677` and reference-fixture run `30744535645` passed
 
 ## Status summary
 
 | Stage | Status | Evidence |
 |---|---|---|
 | S0 — Foundation | Functionally complete foundation | Repository, specification structure, charter, terminology, Apache-2.0 licensing and contribution/governance/security policies exist |
-| S1 — Portable core API | Functionally complete implementation candidate | Opaque handles, allocator abstraction, PCM push/pull, bounded processing, cancellation, immutable snapshots |
-| S2 — Waveform Profile | Functionally complete implementation candidate | Overview, detail tiles, progressive coverage, WOVR/WDTL serialization and vectors |
+| S1 — Portable core API | Functionally complete implementation candidate | Opaque handles, allocator abstraction, PCM push/pull, bounded processing, cancellation, immutable snapshots, workspace query and checkpoint seeding |
+| S2 — Waveform Profile | Functionally complete implementation candidate | Overview, detail tiles, three-band overview, progressive coverage, WOVR/WDTL serialization and vectors |
 | S3 — `.apta` container | Functionally complete implementation candidate | Header, directory, META, WOVR, WDTL, TEMP, LGRD, GGRD, REVN, CRC, hardened parser/writer and fuzzing |
 | S4 — Tempo and local grid | Functionally complete implementation candidate | BPM, candidates, confidence, local grid, locking and progressive lifecycle |
-| S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX adapter, WAV decoder boundary, analyzer, inspector, validator and generated-fixture integration |
+| S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX/WAV input, analyzer, inspector, validator, global/dynamic selection, diagnostics and generated fixtures |
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
-| S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP allocator/clock/logger, optional ESP-DSP helper, IDF component, cooperative example, bounded profiles and 5.5.4/6.0.2 firmware builds |
+| S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP adapter, optional ESP-DSP helper, cooperative example, bounded profiles, 5.5.4/6.0.2 firmware builds and manual P4 measurements |
 | S8 — Second independent platform | Not started | A passing Windows/MSVC core CI preflight exists, but it is not a completed platform integration |
 | S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
 
@@ -58,7 +59,9 @@ Implemented:
 - cancellation;
 - immutable result generations;
 - result lifetime beyond session destruction;
-- static workspace and optional bounded result slots.
+- static workspace and optional bounded result slots;
+- queried static-workspace requirements;
+- seeding a fresh session's waveform coverage from a compatible parsed result.
 
 Status: complete functional implementation candidate. Stable API/ABI is not yet claimed.
 
@@ -131,6 +134,9 @@ Implemented:
 - `apta-analyze` with canonical atomic output;
 - `apta-inspect` with human and JSON output;
 - `apta-validate` with normal, strict and quiet modes;
+- capability-derived `--features all` selection;
+- global/dynamic feature selection and `GGRD`/`REVN` inspection;
+- surfaced result diagnostics;
 - runtime-generated deterministic audio fixture;
 - end-to-end valid and truncated-container CLI tests.
 
@@ -173,20 +179,28 @@ Implemented:
 - host-stub adapter regression;
 - ESP-IDF 5.5.4 / ESP32 scalar cross-build;
 - ESP-IDF 6.0.2 / ESP32 scalar cross-build;
-- ESP-IDF 6.0.2 / ESP32-S3 ESP-DSP cross-build.
+- ESP-IDF 6.0.2 / ESP32-S3 ESP-DSP cross-build;
+- manual ESP32-P4 timing and memory measurements for the seven feature sets in
+  the cooperative example.
 
-The default POSIX suite registers 69 tests. A core-only configuration without
-the POSIX desktop adapters and tools registers 59 tests. The ESP-IDF matrix
-links and verifies complete firmware artifacts and runs component-size reports.
+The current source tree registers 80 tests in the default POSIX configuration
+and 68 in a core-only configuration without the POSIX desktop adapters and
+tools. The ESP-IDF matrix links and verifies complete firmware artifacts and
+runs component-size reports.
 
-For implementation baseline `17a55f3`, native CI run `30463175285` passed the
-69-test POSIX job, the 59-test 32-bit core job, the sanitized 69-test parser job
-with fuzz smoke and the Windows/MSVC 59-test core job. Reference-fixture run
-`30463174172` passed for the same commit. ESP-IDF run `30463174165` also
+For current source baseline `9709c67`, native CI run `30744535644` passed the
+80-test POSIX job, the 68-test 32-bit core job, the sanitized 80-test parser job
+with fuzz smoke and the Windows/MSVC 68-test core job. Reference-fixture run
+`30744535645` passed for the same commit. ESP-IDF run `30744535677` also
 passed, covering the bounded memory profiles and the supported cross-build
 matrix.
 
-Status: complete self-tested and cross-build-verified implementation candidate. Physical-board execution, stack high-water marks, on-target latency, fragmentation and hardware decoder/USB integration remain stronger validation gates rather than absent Stage S7 implementation items.
+Status: complete self-tested and cross-build-verified implementation candidate.
+Manual ESP32-P4 measurements now cover process-call timing and memory for one
+board/configuration. CI still does not execute firmware on hardware, and stack
+high-water marks, fragmentation, hardware decoder/USB integration and
+repeatable measurements on intended production targets remain stronger
+validation gates rather than absent Stage S7 implementation items.
 
 See [`S7-ESP-IDF-PORT-STATUS.md`](S7-ESP-IDF-PORT-STATUS.md), [`../reference/APTA-ESP-IDF-MEMORY-PROFILES-0.1.md`](../reference/APTA-ESP-IDF-MEMORY-PROFILES-0.1.md), [`../conformance/APTA-S7-READINESS-0.1.md`](../conformance/APTA-S7-READINESS-0.1.md) and [`../../ports/espidf/README.md`](../../ports/espidf/README.md).
 

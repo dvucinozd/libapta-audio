@@ -6,6 +6,10 @@
 #define APTA_SPEC_VERSION_MINOR 1u
 
 /*
+ * 0.3.0 reduces APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS from 4096 to 3072. The
+ * constant is public and may size host storage, so the change uses a minor API
+ * bump even though no public structure layout changed.
+ *
  * 0.2.0 adds public API surface without changing any struct size:
  *
  *   - apta_query_workspace_requirements();

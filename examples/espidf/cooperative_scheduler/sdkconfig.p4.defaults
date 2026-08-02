@@ -2,16 +2,15 @@
 #
 # ESP32-P4 with external PSRAM.
 #
-# The global beatgrid needs 807,296 bytes of workspace. Measured on a P4 v1.3
-# board with internal RAM only, 606,484 bytes were free and requesting it failed
-# with APTA_ERROR_OUT_OF_MEMORY before the first block was accepted. The S6 bin
-# ring accounts for roughly 624 KB of that on its own.
+# At API 0.3.0 the measured global-beatgrid configuration needs 602,496 bytes
+# of workspace. It completes on the P4 v1.3 with internal memory only, averaging
+# 12,738 us per process call for that feature set.
 #
 # With these settings the same board reports 32 MB of PSRAM and every feature
-# set runs. It is not free: the S6 workspace no longer fits in internal SRAM, so
-# it lands in PSRAM, and the global-grid rows cost about 3.5 times more relative
-# to the host than the rows whose working set stays internal. See section 29 of
-# the S4 status document.
+# set runs. At the same 602,496-byte workspace the PSRAM-enabled placement
+# averaged 4,835 us for the global-grid feature set, 2.6 times faster than
+# forcing all allocations into the board's fragmented internal regions. See
+# sections 29 and 30 of the S4 status document.
 #
 # Use alongside sdkconfig.defaults:
 #

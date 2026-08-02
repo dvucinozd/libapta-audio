@@ -135,7 +135,7 @@ See [`../../examples/espidf/cooperative_scheduler`](../../examples/espidf/cooper
 
 ## Evidence boundary
 
-CI cross-compiles and links complete firmware images for the listed ESP-IDF/target combinations and runs host-side allocator, lifetime, bounded-profile, sanitizer and fuzz tests. CI does not flash or execute the example on a physical ESP board. On-target heap, stack and latency measurements must therefore be recorded separately before making a device resource-class or real-time claim.
+CI cross-compiles and links complete firmware images for the listed ESP-IDF/target combinations and runs host-side allocator, lifetime, bounded-profile, sanitizer and fuzz tests. CI does not flash or execute the example on a physical ESP board. Manual ESP32-P4 timing and memory measurements are recorded in the cooperative-example README and the S4 status document, but hosts must still measure their intended target, stack, heap and workload before making a device resource-class or real-time claim.
 
 ## Tunable capacities
 
