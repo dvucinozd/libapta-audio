@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <apta/desktop/apta_posix_file.h>
 
@@ -22,14 +21,14 @@ int main(void)
     static const uint8_t payload[] = {
         0x10u, 0x20u, 0x30u, 0x40u, 0x50u, 0x60u, 0x70u
     };
-    char path[64];
+    char path[APTA_TEST_TEMP_PATH_CAPACITY];
     FILE *writer;
     apta_posix_file_t *file = NULL;
     uint8_t output[8] = {0};
     uint64_t size = 0u;
     size_t read_bytes = 0u;
 
-    CHECK(apta_test_make_temp_path(path));
+    CHECK(apta_test_make_temp_path(path, sizeof(path)));
     writer = fopen(path, "wb");
     CHECK(writer != NULL);
     CHECK(fwrite(payload, 1u, sizeof(payload), writer) == sizeof(payload));
@@ -59,7 +58,7 @@ int main(void)
 
     apta_posix_file_close(file);
     file = NULL;
-    CHECK(unlink(path) == 0);
+    CHECK(apta_test_remove_path(path));
     CHECK(apta_posix_file_open_read(path, &file) == APTA_ERROR_SOURCE);
     CHECK(file == NULL);
     return 0;

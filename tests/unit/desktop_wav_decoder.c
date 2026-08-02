@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <apta/desktop/apta_decoder.h>
 
@@ -24,14 +23,14 @@ static int run_case(
     int extensible,
     apta_sample_format_t expected_format)
 {
-    char path[64];
+    char path[APTA_TEST_TEMP_PATH_CAPACITY];
     apta_decoder_t decoder;
     apta_decoder_info_t info;
     apta_pcm_source_t source;
     apta_pcm_block_t block;
     apta_pcm_block_t second;
 
-    CHECK(apta_test_make_temp_path(path));
+    CHECK(apta_test_make_temp_path(path, sizeof(path)));
     CHECK(apta_test_write_wav(
         path,
         format,
@@ -84,7 +83,7 @@ static int run_case(
 
     apta_decoder_close(&decoder);
     CHECK(decoder.user_data == NULL);
-    CHECK(unlink(path) == 0);
+    CHECK(apta_test_remove_path(path));
     return 0;
 }
 

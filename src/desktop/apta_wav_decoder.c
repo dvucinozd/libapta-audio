@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <apta/desktop/apta_decoder.h>
-#include <apta/desktop/apta_posix_file.h>
+#include <apta/desktop/apta_file.h>
 
 #include <limits.h>
 #include <stdlib.h>
@@ -11,7 +11,7 @@
 #define APTA_WAV_FORMAT_EXTENSIBLE 0xFFFEu
 
 typedef struct {
-    apta_posix_file_t *file;
+    apta_file_t *file;
     uint64_t data_offset;
     uint64_t data_size;
     uint64_t total_frames;
@@ -40,13 +40,13 @@ static uint32_t apta_wav_get_u32(const uint8_t *data)
 }
 
 static apta_status_t apta_wav_read_exact(
-    apta_posix_file_t *file,
+    apta_file_t *file,
     uint64_t offset,
     void *buffer,
     size_t size)
 {
     size_t read_bytes = 0u;
-    apta_status_t status = apta_posix_file_read_at(
+    apta_status_t status = apta_file_read_at(
         file,
         offset,
         buffer,
@@ -225,7 +225,7 @@ static void APTA_CALL apta_wav_destroy(void *user_data)
     if (state == NULL) {
         return;
     }
-    apta_posix_file_close(state->file);
+    apta_file_close(state->file);
     free(state->buffer);
     free(state);
 }
@@ -236,7 +236,7 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
     apta_decoder_info_t *info_out)
 {
     apta_wav_decoder_state_t *state = NULL;
-    apta_posix_file_t *file = NULL;
+    apta_file_t *file = NULL;
     uint8_t riff[12];
     uint64_t file_size;
     uint64_t riff_end;
@@ -264,24 +264,24 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
     apta_decoder_init(decoder_out);
     apta_decoder_info_init(info_out);
 
-    status = apta_posix_file_open_read(path, &file);
+    status = apta_file_open_read(path, &file);
     if (status < 0) {
         return status;
     }
-    status = apta_posix_file_get_size(file, &file_size);
+    status = apta_file_get_size(file, &file_size);
     if (status < 0 || file_size < sizeof(riff)) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return status < 0 ? status : APTA_ERROR_CORRUPT_DATA;
     }
     status = apta_wav_read_exact(file, 0u, riff, sizeof(riff));
     if (status < 0 || memcmp(riff, "RIFF", 4u) != 0 ||
         memcmp(riff + 8u, "WAVE", 4u) != 0) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return status < 0 ? status : APTA_ERROR_UNSUPPORTED;
     }
     riff_end = (uint64_t)apta_wav_get_u32(riff + 4u) + 8u;
     if (riff_end < sizeof(riff) || riff_end > file_size) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return APTA_ERROR_CORRUPT_DATA;
     }
 
@@ -294,18 +294,18 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
 
         status = apta_wav_read_exact(file, cursor, chunk_header, sizeof(chunk_header));
         if (status < 0) {
-            apta_posix_file_close(file);
+            apta_file_close(file);
             return status;
         }
         chunk_size = apta_wav_get_u32(chunk_header + 4u);
         payload_offset = cursor + 8u;
         if ((uint64_t)chunk_size > riff_end - payload_offset) {
-            apta_posix_file_close(file);
+            apta_file_close(file);
             return APTA_ERROR_CORRUPT_DATA;
         }
         next_offset = payload_offset + chunk_size + (chunk_size & 1u);
         if (next_offset < payload_offset || next_offset > riff_end) {
-            apta_posix_file_close(file);
+            apta_file_close(file);
             return APTA_ERROR_CORRUPT_DATA;
         }
 
@@ -315,13 +315,13 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
             size_t read_size;
 
             if (found_fmt != 0u || chunk_size < 16u) {
-                apta_posix_file_close(file);
+                apta_file_close(file);
                 return APTA_ERROR_CORRUPT_DATA;
             }
             read_size = chunk_size < sizeof(fmt) ? chunk_size : sizeof(fmt);
             status = apta_wav_read_exact(file, payload_offset, fmt, read_size);
             if (status < 0) {
-                apta_posix_file_close(file);
+                apta_file_close(file);
                 return status;
             }
             parsed_format = apta_wav_get_u16(fmt);
@@ -336,12 +336,12 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
                 uint16_t valid_bits;
                 if (chunk_size < 40u || apta_wav_get_u16(fmt + 16u) < 22u ||
                     !apta_wav_is_extensible_guid(fmt + 24u, &subformat)) {
-                    apta_posix_file_close(file);
+                    apta_file_close(file);
                     return APTA_ERROR_UNSUPPORTED;
                 }
                 valid_bits = apta_wav_get_u16(fmt + 18u);
                 if (valid_bits == 0u || valid_bits > bits_per_sample) {
-                    apta_posix_file_close(file);
+                    apta_file_close(file);
                     return APTA_ERROR_CORRUPT_DATA;
                 }
                 parsed_format = subformat;
@@ -350,7 +350,7 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
             found_fmt = 1u;
         } else if (memcmp(chunk_header, "data", 4u) == 0) {
             if (found_data != 0u) {
-                apta_posix_file_close(file);
+                apta_file_close(file);
                 return APTA_ERROR_CORRUPT_DATA;
             }
             data_offset = payload_offset;
@@ -367,7 +367,7 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
         block_align != channel_count * (bits_per_sample / 8u) ||
         block_align == 0u || data_size % block_align != 0u ||
         (uint64_t)byte_rate != (uint64_t)sample_rate * block_align) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return APTA_ERROR_CORRUPT_DATA;
     }
     status = apta_wav_select_format(
@@ -375,13 +375,13 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
         bits_per_sample,
         &sample_format);
     if (status < 0) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return status;
     }
 
     state = (apta_wav_decoder_state_t *)calloc(1u, sizeof(*state));
     if (state == NULL) {
-        apta_posix_file_close(file);
+        apta_file_close(file);
         return APTA_ERROR_OUT_OF_MEMORY;
     }
     state->file = file;

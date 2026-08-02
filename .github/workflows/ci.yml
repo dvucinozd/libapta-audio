@@ -47,8 +47,9 @@ jobs:
         run: >-
           cmake -S . -B build-windows
           -DAPTA_BUILD_TESTS=ON
-          -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF
-          -DAPTA_BUILD_TOOLS=OFF
+          -DAPTA_BUILD_DESKTOP_ADAPTERS=ON
+          -DAPTA_BUILD_TOOLS=ON
+          -DAPTA_WARNINGS_AS_ERRORS=ON
 
       - name: Compile library and tests
         run: cmake --build build-windows --config Release --parallel 2
