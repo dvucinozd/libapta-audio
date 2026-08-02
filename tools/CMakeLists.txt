@@ -53,6 +53,8 @@ function(apta_add_tool target output_name source)
             target_compile_options(${target} PRIVATE -Werror)
         endif()
     elseif(MSVC)
+        # The tools intentionally use portable C stdio APIs such as fopen.
+        target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
         target_compile_options(${target} PRIVATE /W4)
         if(APTA_WARNINGS_AS_ERRORS)
             target_compile_options(${target} PRIVATE /WX)
