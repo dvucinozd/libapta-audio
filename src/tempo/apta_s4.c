@@ -491,12 +491,17 @@ apta_status_t apta_internal_s4_process_sample(
     }
 
     bin_index = source_frame / APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
+    /* The bin identity is stored in 32 bits. Beyond that a bin would alias an
+     * earlier one and the ring would report evidence it does not hold. */
+    if (bin_index > APTA_INTERNAL_MAX_BIN_INDEX) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
     slot = (uint32_t)(bin_index % session->onset_bin_capacity);
     bin = &session->onset_bins[slot];
-    if (!bin->occupied || bin->bin_index != bin_index) {
+    if (!bin->occupied || bin->bin_index != (uint32_t)bin_index) {
         memset(bin, 0, sizeof(*bin));
         bin->occupied = 1u;
-        bin->bin_index = bin_index;
+        bin->bin_index = (uint32_t)bin_index;
     }
     if (bin->sample_count == UINT32_MAX) {
         return APTA_ERROR_LIMIT_EXCEEDED;

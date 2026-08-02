@@ -419,13 +419,39 @@ typedef struct {
 #define APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE 55000u
 #endif
 
+/*
+ * One onset bin, shared by the local and global rings.
+ *
+ * `bin_index` is 32 bits rather than 64 because the width decides the size of
+ * the largest allocation the library makes. A 64-bit field forces eight-byte
+ * alignment and pads the struct to 24 bytes for 17 bytes of data; 32 bits packs
+ * it to 16. Across S6's 16,384-entry ring that is 131,072 bytes, and on an
+ * ESP32-P4 the difference between an S6 workspace that fits in internal SRAM
+ * and one that spills to PSRAM -- measured at 3.5 times the cost per call, see
+ * section 29 of the S4 status document.
+ *
+ * The range is not a constraint in practice. At the local ring's 256 frames per
+ * bin, 2^32 bins is 1.1e12 frames, or 6.9 million hours at 44.1 kHz. It is
+ * still checked rather than assumed: both writers reject a frame position that
+ * would not round-trip.
+ */
 typedef struct {
-    uint64_t bin_index;
+    uint32_t bin_index;
     uint32_t sum_absolute;
     uint32_t sample_count;
     uint8_t occupied;
     uint8_t reserved8[3];
 } apta_internal_onset_bin_t;
+
+_Static_assert(sizeof(apta_internal_onset_bin_t) <= 16u,
+               "the onset bin is the unit of the library's largest allocation; "
+               "growing it past 16 bytes pushes the S6 workspace out of "
+               "internal SRAM on the intended target");
+
+/* The largest bin index either ring can store. Both process_sample() entry
+ * points reject a frame beyond it rather than wrapping into a bin that would
+ * silently alias an earlier one. */
+#define APTA_INTERNAL_MAX_BIN_INDEX UINT32_MAX
 
 typedef struct apta_internal_result_pool_control
     apta_internal_result_pool_control_t;

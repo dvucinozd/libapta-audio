@@ -1365,9 +1365,14 @@ Microseconds per `apta_session_process()` call. Heap delta is zero on every row.
 The rows whose working set stays in internal SRAM cost 10 to 13 times the host.
 The rows that request the global grid cost 37 to 38.
 
-That is not S6 being slow. Its workspace is 807 KB, the board has about 570 KB
-of internal RAM, so the working set lands in PSRAM at 20 MHz. The extra factor
-of three and a half is the memory it sits in, not the arithmetic it does.
+That is not S6 being slow. Its workspace is 807 KB against about 570 KB of
+internal RAM.
+
+> **Corrected in section 30.3.** This section originally attributed the extra
+> factor of three and a half to the working set sitting in PSRAM rather than
+> internal SRAM. Measuring with the workspace reduced showed that is wrong: the
+> factor comes from the size of the working set, and PSRAM is the *better*
+> placement of the two once it is small enough.
 
 Section 22.1 concluded that trading target cost for host cost would be
 optimising the wrong machine, and that measuring on hardware was the way to
@@ -1416,3 +1421,107 @@ chip revision v3.1 or newer, so a v1.x board needs 5.5, which supports v0.0
 through v1.0. And the sweep needs `vTaskDelay()` rather than `taskYIELD()`
 between blocks: seven sessions back to back never let the idle task run, and the
 task watchdog fires.
+
+## 30. Packing the onset bin, and what it does not reach
+
+Section 29 made the workspace size the interesting number rather than a
+footnote: it is what decides whether S6 runs from internal SRAM at 11 times the
+host or from PSRAM at 38.
+
+The onset bin was 24 bytes carrying 17 bytes of data. `bin_index` was a
+`uint64_t`, which forced eight-byte alignment and seven bytes of padding. It is
+now `uint32_t` and the struct is 16 bytes.
+
+The range was never the reason for 64 bits. At the local ring's 256 frames per
+bin, 2^32 bins is 1.1e12 frames, or 6.9 million hours at 44.1 kHz. Both
+`process_sample()` entry points now reject a frame beyond that rather than
+letting the index wrap into a bin that would alias an earlier one, so the bound
+is checked rather than assumed, and a `_Static_assert` keeps the struct from
+growing back.
+
+### 30.1 What it saved
+
+| Feature set | Before | After | Saved |
+|---|---:|---:|---:|
+| `+ BPM`, `+ LOCAL_BEATGRID` | 183,376 | 150,608 | 32,768 |
+| `+ GLOBAL_BEATGRID` | 807,296 | 643,456 | 163,840 |
+
+Every reported value is byte-identical, on the synthetic corpus and on all three
+modes of the 68-track real corpus.
+
+The smaller working set is also slightly quicker on target, which was not the
+point but is worth recording: `+ BPM` went from 4,266 to 4,137 microseconds per
+call and its worst case from 17,525 to 17,265. Three percent, from the same
+arithmetic over a smaller footprint.
+
+### 30.2 It does not reach internal RAM
+
+The board has 606,484 bytes free with internal RAM only. The global grid now
+asks for 643,456. It is **36,972 bytes short**, and still fails with
+`APTA_ERROR_OUT_OF_MEMORY`. Measured on hardware rather than predicted, because
+the margin is small enough that arithmetic alone would not have settled it.
+
+What remains is 16,384 bins at 20 bytes each of ring and flux, and 4,096 beats
+at 40 bytes. Three ways to close the gap, none of them free:
+
+| Change | Saves | Costs |
+|---|---:|---|
+| `GLOBAL_GRID_MAX_BEATS` 4096 to 3072 | 40,960 | A published grid holds 24 minutes of beats at 128 BPM instead of 32. Public API. |
+| `GLOBAL_BIN_CAPACITY` 16384 to 8192 | 163,840 | Analysis coverage halves, 12.7 minutes to 6.3. |
+| Neither | 0 | S6 requires PSRAM on this board. |
+
+The first is the cheapest sufficient one, and the beat array is the more
+oversized of the two: 4,096 beats is 32 minutes at 128 BPM against a ring that
+holds 12.7. But `APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS` is public, a host may
+size its own storage from it, and the beats a segment publishes are not bounded
+by the analysis window. That makes it a decision about the contract rather than
+an implementation detail.
+
+### 30.3 The beat array reduced, and what that actually bought
+
+The contract decision was taken: 24 minutes of beats at 128 BPM is enough, so
+`APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS` is 3072 and the API minor version is
+0.3.0. The global-grid workspace is now 602,496 bytes.
+
+Three measurements on the same board, same firmware except where noted:
+
+| Workspace | PSRAM | `+ GLOBAL_BEATGRID` avg | Ratio to host |
+|---:|---|---:|---:|
+| 807,296 | yes | 16,827 | 37x |
+| 602,496 | no | 12,738 | 28x |
+| **602,496** | **yes** | **4,835** | **10.7x** |
+
+The middle row is what section 30.2 was aiming for -- S6 running with no PSRAM
+at all -- and it works. The bottom row is the one that matters, and it
+contradicts the explanation section 29.1 gave.
+
+Reducing the workspace by 25 percent cut the cost by a factor of three and a
+half. Keeping PSRAM is *faster* than forcing everything into internal SRAM, by
+a factor of 2.6 at the same workspace size. So the penalty was never "S6 sits in
+PSRAM"; it was the size of the working set, and once that is small enough PSRAM
+is the better of the two placements. On a board whose internal RAM comes in
+fragmented regions of 166, 18 and 384 KB, squeezing 602 KB into them is worse
+than letting the large arrays go external and keeping the small hot ones
+internal, which is what `SPIRAM_MALLOC_ALWAYSINTERNAL` does by default.
+
+The mechanism behind the threshold is not established here. The board has a
+cache in front of external memory and the correlation loops stream the same
+arrays repeatedly, so a cache-capacity effect is the obvious candidate, but
+nothing in this measurement isolates it and it is not claimed.
+
+What the numbers do settle is the anomaly: with the reduced workspace the S6
+rows cost 10.7 times the host, which is the same 10 to 13 every other row
+costs. There is no S6 penalty left to explain.
+
+| Feature set | Workspace | Host | Target avg | Ratio |
+|---|---:|---:|---:|---:|
+| `+ BPM` | 150,608 | ~395 | 4,153 | 10.5x |
+| `+ LOCAL_BEATGRID` | 150,608 | ~400 | 4,144 | 10.4x |
+| `+ GLOBAL_BEATGRID` | 602,496 | ~452 | 4,835 | 10.7x |
+| `+ DYNAMIC_TEMPO` | 602,496 | ~443 | 4,847 | 10.9x |
+| `+ DETAIL + GRID_LOCKING` | 610,736 | ~484 | 6,525 | 13.5x |
+
+Against real time, a 1024-frame block at 48 kHz being 21.33 ms of audio: the
+full feature set now averages 3.3x real time where it managed 1.15x before, and
+its worst call is 20,456 microseconds, which is under the block period for the
+first time.
