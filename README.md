@@ -6,7 +6,7 @@
 
 APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container, POSIX reference desktop tools and an ESP-IDF platform component.
 
-> Project status: functional implementation candidate through roadmap Stage S7. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.
+> Project status: functional implementation candidate through roadmap Stage S7. The specification remains Working Draft 0.1; the current public API is 0.3.0, and no stable API or ABI is claimed before APTA 1.0.
 
 ## Why APTA
 
@@ -31,12 +31,12 @@ the POSIX reference tools.
 
 | Area | Current reference support | Important boundary |
 |---|---|---|
-| Overview and detail waveform | Progressive peak/RMS results, focus-driven detail and WOVR/WDTL interchange | Optional three-band fields are modeled, but the reference three-band algorithm is not implemented |
+| Overview and detail waveform | Progressive peak/RMS results, focus-driven detail, three-band overview columns and WOVR/WDTL interchange | Detail tiles do not publish three-band values, and Core 0.1 does not mandate a bit-exact three-band filterbank |
 | Tempo and local beatgrid | BPM candidates, confidence, locking and TEMP/LGRD interchange | Core 0.1 does not mandate a bit-exact tempo algorithm |
-| Global grid and dynamic tempo | Segments, explicit beats, pending revisions and GGRD/REVN interchange | Available through the library/container; not yet exposed by the S5 CLI |
+| Global grid and dynamic tempo | Segments, explicit beats, pending revisions, GGRD/REVN interchange and CLI selection/inspection | The S6 model remains draft and has no independent interoperability claim |
 | Memory control | Custom allocator, memory budget, static session workspace and two-slot bounded result pools | Resource-class certification is not yet claimed |
 | Desktop input | Reference WAV decoder for PCM16, packed PCM24, PCM32 and float32; mono/stereo | Other codecs require an application or third-party decoder backend |
-| Embedded integration | ESP-IDF component, cooperative example and three bounded memory profiles | Cross-build verified; physical hardware timing and memory high-water marks remain validation gates |
+| Embedded integration | ESP-IDF component, cooperative example, three bounded memory profiles and ESP32-P4 measurements | CI remains cross-build-only; repeatable target-specific stack, heap and latency evidence is still required for a resource-class claim |
 | Portability | ISO C11 core with C++11 header/ABI compile checks and a green MSVC 2022 core build/test preflight | A second independent platform integration is still Stage S8 |
 
 ## Functional implementation stages
@@ -262,6 +262,7 @@ Inspect the result:
 build/tools/apta-inspect track.apta
 build/tools/apta-inspect track.apta --json
 build/tools/apta-inspect track.apta --section LGRD
+build/tools/apta-inspect track.apta --section GGRD
 ```
 
 Validate it:
@@ -274,10 +275,10 @@ Detailed desktop-tool contract:
 
 [`docs/reference/APTA-DESKTOP-TOOLS-0.1.md`](docs/reference/APTA-DESKTOP-TOOLS-0.1.md)
 
-The current S5 command-line feature list and inspector cover waveform, detail,
-tempo and local-grid data. Stage S6 global-grid and revision data are available
-through the library API and container reader/writer, but `apta-analyze` and
-`apta-inspect --section` do not yet expose `GGRD` or `REVN`.
+The command-line feature list exposes the supported waveform, tempo, local-grid,
+global-grid, dynamic-tempo and locking features. `--features all` is derived
+from the context capability mask, while `apta-inspect` supports both `GGRD` and
+`REVN` in human-readable and JSON output.
 
 ## The `.apta` container
 
@@ -325,10 +326,10 @@ The ESP-IDF integration is an IDF component under `ports/espidf`, not a native C
 
 ## Testing
 
-The default POSIX build registers 69 CTest tests: 59 portable core tests, four
-POSIX adapter/decoder tests and six generated CLI fixture tests. A core-only
-build with desktop adapters and tools disabled registers 59 tests. The suite
-contains unit, generated-audio integration, malformed-input,
+The current default POSIX build registers 80 CTest tests: 68 portable core
+tests, four POSIX adapter/decoder tests and eight generated CLI/tool tests. A
+core-only build with desktop adapters and tools disabled registers 68 tests.
+The suite contains unit, generated-audio integration, malformed-input,
 allocation-failure, concurrency, exhaustive truncation and parser-hardening
 coverage; sanitizer and fuzz-smoke execution are separate CI steps.
 
@@ -356,8 +357,8 @@ The reference workflows generate click-track WAV and `.apta` parser seeds at run
 - The Windows/MSVC job is a passing portable-core build/test preflight, not a
   supported Windows adapter or complete Stage S8 platform integration.
 - Long-running fuzzing, cross-endian interoperability, a second independent
-  implementation and real-device performance measurements remain release
-  gates.
+  implementation and repeatable performance measurements across intended
+  devices remain release gates.
 
 The current per-stage evidence and exact limitations are maintained in
 [`docs/status/APTA-ROADMAP-STATUS.md`](docs/status/APTA-ROADMAP-STATUS.md).

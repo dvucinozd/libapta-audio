@@ -3,7 +3,7 @@
 **Status:** Reference implementation contract  
 **Platform:** POSIX  
 **Built-in decoder:** RIFF/WAVE PCM and IEEE float  
-**API version:** 0.1.0 draft
+**API version:** 0.3.0 draft
 
 ## 1. Scope
 
@@ -339,7 +339,8 @@ Stage S5 does not claim:
 - recursive directory/batch analysis;
 - stable command-line output compatibility;
 - stable APTA API or ABI;
-- package-manager installation;
-- Stage S6 global-grid/revision analysis or `GGRD`/`REVN` inspection through
-  the S5 command-line interfaces. Those features exist in the library API and
-  container layer but are not selectable/displayed by the current tools.
+- package-manager installation.
+
+The tools now select Stage S6 global/dynamic features and inspect `GGRD` and
+`REVN`. This support extends the original S5 command surface; it does not turn
+the draft S6 model into a stable interoperability or CLI-compatibility claim.

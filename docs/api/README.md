@@ -19,3 +19,5 @@ Current documents:
   concurrent immutable readers, cancellation and destruction.
 - [`APTA-PCM-PULL-0.1.md`](APTA-PCM-PULL-0.1.md) — callback ownership,
   backpressure and end-of-input behavior for pull sessions.
+- [`APTA-SESSION-SEEDING-0.1.md`](APTA-SESSION-SEEDING-0.1.md) — compatibility
+  checks and waveform-coverage continuation from a parsed partial result.

@@ -8,6 +8,7 @@ Canonical integration and configuration guidance:
 - [`../../status/S7-ESP-IDF-PORT-STATUS.md`](../../status/S7-ESP-IDF-PORT-STATUS.md)
 - [`../../conformance/APTA-S7-READINESS-0.1.md`](../../conformance/APTA-S7-READINESS-0.1.md)
 
-The current evidence covers host regressions and firmware cross-build/link
-checks. It does not include physical-board execution or on-target performance
-certification.
+The CI evidence covers host regressions and firmware cross-build/link checks;
+CI itself does not execute a physical board. A separate manual ESP32-P4
+measurement is recorded in the S4 status and cooperative-example documents,
+but it is not a certified performance or resource-class claim.

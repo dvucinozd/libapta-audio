@@ -9,6 +9,11 @@ For the current project state, start with
 that identify a source commit or CI run are milestone evidence snapshots; their
 test counts and forward-looking sections describe that recorded baseline.
 
+The root README, the whole-project roadmap status and documents labelled as
+current implementation contracts are maintained against the current source
+tree. Evidence snapshots retain their recorded commit, CI run and test totals
+instead of being rewritten to imply validation of later changes.
+
 Repository-wide contribution, governance and vulnerability-reporting policies
 are maintained in [`../CONTRIBUTING.md`](../CONTRIBUTING.md),
 [`../GOVERNANCE.md`](../GOVERNANCE.md) and
