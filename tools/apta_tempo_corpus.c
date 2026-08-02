@@ -569,6 +569,8 @@ typedef struct {
 #define CORPUS_MAX_CANDIDATES 8u
     uint32_t candidate_millibpm[CORPUS_MAX_CANDIDATES];
     uint16_t candidate_score[CORPUS_MAX_CANDIDATES];
+    uint32_t global_millibpm;
+    uint32_t global_confidence;
     int ok;
 } analysis_t;
 
@@ -607,7 +609,7 @@ static void corpus_take_global(analysis_t *out, const apta_result_t *result)
 {
     apta_grid_view_t grid;
 
-    if (!g_global) {
+    if (!g_global && !g_request_global) {
         return;
     }
     apta_grid_view_init(&grid);
@@ -615,12 +617,18 @@ static void corpus_take_global(analysis_t *out, const apta_result_t *result)
             result, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &grid) !=
             APTA_STATUS_OK ||
         grid.segment_count == 0u) {
-        out->ok = 0;
+        if (g_global) {
+            out->ok = 0;
+        }
         return;
     }
-    out->reported_millibpm = grid.segments[0].nominal_tempo_millibpm;
-    out->confidence = grid.confidence;
-    out->state = grid.state;
+    out->global_millibpm = grid.segments[0].nominal_tempo_millibpm;
+    out->global_confidence = grid.confidence;
+    if (g_global) {
+        out->reported_millibpm = out->global_millibpm;
+        out->confidence = grid.confidence;
+        out->state = grid.state;
+    }
 }
 
 static analysis_t analyze(const float *audio, size_t frames)
@@ -989,7 +997,7 @@ static void record(const char *label,
                 (unsigned)a.reported_millibpm);
         csv_field(g_results_csv, relation_name(rel));
         fprintf(g_results_csv,
-                ",%u,%d,%u,%.6f,%d,%d,%d\n",
+                ",%u,%d,%u,%.6f,%d,%d,%d,\"",
                 (unsigned)a.confidence,
                 (int)a.state,
                 (unsigned)a.candidate_count,
@@ -998,6 +1006,26 @@ static void record(const char *label,
                         a.confidence != APTA_CONFIDENCE_UNKNOWN,
                 rel == REL_EXACT,
                 is_octave_error(rel));
+        {
+            uint32_t i;
+
+            for (i = 0u;
+                 i < a.candidate_count && i < CORPUS_MAX_CANDIDATES;
+                 ++i) {
+                fprintf(g_results_csv, "%s%u", i == 0u ? "" : ";",
+                        (unsigned)a.candidate_millibpm[i]);
+            }
+            fputs("\",\"", g_results_csv);
+            for (i = 0u;
+                 i < a.candidate_count && i < CORPUS_MAX_CANDIDATES;
+                 ++i) {
+                fprintf(g_results_csv, "%s%u", i == 0u ? "" : ";",
+                        (unsigned)a.candidate_score[i]);
+            }
+            fprintf(g_results_csv, "\",%u,%u\n",
+                    (unsigned)a.global_millibpm,
+                    (unsigned)a.global_confidence);
+        }
     }
 }
 
@@ -1129,7 +1157,8 @@ int main(int argc, char **argv)
         }
         fputs("track,truth_millibpm,reported_millibpm,relation,confidence,"
               "state,candidate_count,separation,actionable,exact,"
-              "octave_error\n",
+              "octave_error,candidate_millibpm,candidate_scores,"
+              "global_millibpm,global_confidence\n",
               g_results_csv);
     }
 

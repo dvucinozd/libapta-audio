@@ -30,10 +30,13 @@ from typing import Sequence
 
 
 FORMAT_VERSION = "apta-rekordbox-tempo-corpus-0.1"
+SPLIT_FORMAT_VERSION = "apta-rekordbox-tempo-split-0.1"
 DEFAULT_START_SECONDS = 30
 DEFAULT_DURATION_SECONDS = 90
 DEFAULT_SAMPLE_RATE = 44100
 DEFAULT_CHANNELS = 2
+DEFAULT_SPLIT_SEED = "libapta-phase5-v1"
+DEFAULT_HOLDOUT_FRACTION = 0.25
 ACTIONABLE_CONFIDENCE = 75
 GATES = (50, 55, 60, 65, 70, 75, 80, 85, 90, 95)
 MODES = {
@@ -431,6 +434,18 @@ def _read_results(path: Path) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     with path.open(newline="", encoding="utf-8") as source:
         for row in csv.DictReader(source):
+            candidate_tempi = [
+                int(value) / 1000.0
+                for value in row.get("candidate_millibpm", "").split(";")
+                if value
+            ]
+            candidate_scores = [
+                int(value)
+                for value in row.get("candidate_scores", "").split(";")
+                if value
+            ]
+            if len(candidate_tempi) != len(candidate_scores):
+                raise ValueError(f"candidate column length mismatch in {path}")
             rows.append(
                 {
                     "track": Path(row["track"]).stem,
@@ -442,9 +457,289 @@ def _read_results(path: Path) -> list[dict[str, object]]:
                     "candidate_count": int(row["candidate_count"]),
                     "separation": float(row["separation"]),
                     "octave_error": bool(int(row["octave_error"])),
+                    "candidate_tempi": candidate_tempi,
+                    "candidate_scores": candidate_scores,
+                    "global_tempo": int(row.get("global_millibpm", "0") or 0)
+                    / 1000.0,
+                    "global_confidence": int(row.get("global_confidence", "0") or 0),
                 }
             )
     return rows
+
+
+def _split_stratum(
+    s4: dict[str, object], endorsed: dict[str, object]
+) -> str:
+    """Classify a baseline outcome before any phase-5 tuning occurs."""
+
+    if bool(s4["octave_error"]) and int(s4["confidence"]) >= ACTIONABLE_CONFIDENCE:
+        return "s4-high-confidence-octave"
+    if s4["relation"] == "exact" and endorsed["relation"] != "exact":
+        return "endorsement-broken"
+    if s4["relation"] != "exact" and endorsed["relation"] == "exact":
+        return "endorsement-fixed"
+    if s4["relation"] == "exact":
+        return "s4-exact-unchanged"
+    if bool(s4["octave_error"]):
+        return "s4-octave-unresolved"
+    return "s4-other-unresolved"
+
+
+def make_split(
+    s4_rows: Sequence[dict[str, object]],
+    endorsed_rows: Sequence[dict[str, object]],
+    seed: str = DEFAULT_SPLIT_SEED,
+    holdout_fraction: float = DEFAULT_HOLDOUT_FRACTION,
+) -> dict[str, object]:
+    """Return a deterministic stratified development/hold-out assignment."""
+
+    if not 0.0 < holdout_fraction < 1.0:
+        raise ValueError("holdout fraction must be between zero and one")
+    endorsed_by_id = {str(row["track"]): row for row in endorsed_rows}
+    if len(endorsed_by_id) != len(endorsed_rows):
+        raise ValueError("endorsed result set contains duplicate track IDs")
+
+    strata: dict[str, list[str]] = {}
+    seen_s4: set[str] = set()
+    for row in s4_rows:
+        track_id = str(row["track"])
+        if track_id in seen_s4:
+            raise ValueError("S4 result set contains duplicate track IDs")
+        seen_s4.add(track_id)
+        endorsed = endorsed_by_id.get(track_id)
+        if endorsed is None:
+            raise ValueError(f"endorsed result set lacks {track_id}")
+        stratum = _split_stratum(row, endorsed)
+        strata.setdefault(stratum, []).append(track_id)
+    if len(endorsed_by_id) != len(s4_rows):
+        raise ValueError("S4 and endorsed result sets have different track IDs")
+
+    assignments: dict[str, tuple[str, str]] = {}
+    stratum_counts: dict[str, dict[str, int]] = {}
+    for stratum in sorted(strata):
+        ids = sorted(
+            strata[stratum],
+            key=lambda track_id: (
+                hashlib.sha256(f"{seed}\0{track_id}".encode("utf-8")).digest(),
+                track_id,
+            ),
+        )
+        holdout_count = int(len(ids) * holdout_fraction + 0.5)
+        if len(ids) >= 2:
+            holdout_count = min(max(holdout_count, 1), len(ids) - 1)
+        else:
+            holdout_count = 0
+        holdout_ids = set(ids[:holdout_count])
+        stratum_counts[stratum] = {
+            "total": len(ids),
+            "development": len(ids) - holdout_count,
+            "holdout": holdout_count,
+        }
+        for track_id in ids:
+            partition = "holdout" if track_id in holdout_ids else "development"
+            assignments[track_id] = (partition, stratum)
+
+    tracks = [
+        {"id": track_id, "partition": partition, "stratum": stratum}
+        for track_id, (partition, stratum) in sorted(assignments.items())
+    ]
+    return {
+        "format": SPLIT_FORMAT_VERSION,
+        "seed": seed,
+        "requested_holdout_fraction": holdout_fraction,
+        "track_count": len(tracks),
+        "development_count": sum(
+            track["partition"] == "development" for track in tracks
+        ),
+        "holdout_count": sum(track["partition"] == "holdout" for track in tracks),
+        "strata": stratum_counts,
+        "tracks": tracks,
+    }
+
+
+def _track_lines_by_id(path: Path) -> dict[str, str]:
+    lines: dict[str, str] = {}
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        audio_path, separator, _truth = line.rpartition(" ")
+        if not separator or not audio_path:
+            raise ValueError(f"malformed track-list row: {raw!r}")
+        track_id = Path(audio_path).stem
+        if track_id in lines:
+            raise ValueError(f"duplicate track-list ID: {track_id}")
+        lines[track_id] = line
+    return lines
+
+
+def _partition_rows(
+    rows: Sequence[dict[str, object]], split: dict[str, object], partition: str
+) -> list[dict[str, object]]:
+    selected = {
+        str(track["id"])
+        for track in split["tracks"]
+        if track["partition"] == partition
+    }
+    result = [row for row in rows if str(row["track"]) in selected]
+    result_ids = [str(row["track"]) for row in result]
+    if len(result_ids) != len(set(result_ids)):
+        raise ValueError(f"{partition} result set contains duplicate track IDs")
+    if set(result_ids) != selected:
+        raise ValueError(f"{partition} result IDs do not match the frozen split")
+    return result
+
+
+def _comparison_counts(comparison: dict[str, object]) -> dict[str, int]:
+    return {
+        "changed_selection_count": int(comparison["changed_selection_count"]),
+        "fixed_count": int(comparison["fixed_count"]),
+        "broken_count": int(comparison["broken_count"]),
+        "net_exact_gain": int(comparison["net_exact_gain"]),
+    }
+
+
+def split_summary(
+    rows_by_mode: dict[str, Sequence[dict[str, object]]], split: dict[str, object]
+) -> dict[str, object]:
+    partitions: dict[str, object] = {}
+    for partition in ("development", "holdout"):
+        partition_rows = {
+            name: _partition_rows(rows, split, partition)
+            for name, rows in rows_by_mode.items()
+        }
+        summaries = {
+            name: summarize_results(rows) for name, rows in partition_rows.items()
+        }
+        comparison = compare_results(
+            partition_rows["S4"], partition_rows["S4 + S6 endorsement"]
+        )
+        partitions[partition] = {
+            "modes": summaries,
+            "endorsement": _comparison_counts(comparison),
+        }
+    return {
+        "format": "apta-rekordbox-tempo-split-report-0.1",
+        "split_format": split["format"],
+        "seed": split["seed"],
+        "track_count": split["track_count"],
+        "partitions": partitions,
+    }
+
+
+def render_split_report(report: dict[str, object]) -> str:
+    lines = [
+        "# Phase-5 frozen split baseline",
+        "",
+        f"- Tracks: {report['track_count']}",
+        f"- Seed: `{report['seed']}`",
+        "- Hold-out rows are reported only as aggregates.",
+    ]
+    for partition in ("development", "holdout"):
+        data = report["partitions"][partition]
+        lines.extend(
+            [
+                "",
+                f"## {partition.title()}",
+                "",
+                "| Mode | Tracks | Within 1% | Octave | Other | Errors >=75 | Octave errors >=75 |",
+                "|---|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for name, summary in data["modes"].items():
+            lines.append(
+                f"| {name} | {summary['tracks']} | "
+                f"{summary['within_1_percent']} ({_percent(summary['within_1_percent_rate'])}) | "
+                f"{summary['octave_family_errors']} | {summary['other_errors']} | "
+                f"{summary['high_confidence_errors']} | "
+                f"{summary['high_confidence_octave_errors']} |"
+            )
+        endorsement = data["endorsement"]
+        lines.extend(
+            [
+                "",
+                "Endorsement: "
+                f"changed {endorsement['changed_selection_count']}, "
+                f"fixed {endorsement['fixed_count']}, "
+                f"broke {endorsement['broken_count']}, "
+                f"net {endorsement['net_exact_gain']:+d}.",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "Audio, titles, source paths and per-track hold-out outcomes are absent.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def write_split_baseline(prepared: Path, split: dict[str, object]) -> None:
+    rows_by_mode = {
+        name: _read_results(prepared / f"results-{stem}.csv")
+        for name, (stem, _mode_args) in MODES.items()
+    }
+    report = split_summary(rows_by_mode, split)
+    report["generated_utc"] = datetime.now(timezone.utc).isoformat()
+    (prepared / "split-baseline-report.json").write_text(
+        json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    (prepared / "SPLIT-BASELINE.md").write_text(
+        render_split_report(report), encoding="utf-8"
+    )
+
+
+def split_corpus(args: argparse.Namespace) -> int:
+    prepared = Path(args.prepared).resolve()
+    manifest_path = prepared / "corpus.json"
+    tracks_path = prepared / "tracks.txt"
+    if not manifest_path.is_file() or not tracks_path.is_file():
+        raise SystemExit("prepared directory lacks corpus.json or tracks.txt")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    s4_rows = _read_results(prepared / "results-s4.csv")
+    endorsed_rows = _read_results(prepared / "results-s4-endorsed.csv")
+    split = make_split(s4_rows, endorsed_rows, args.seed, args.holdout_fraction)
+    if split["track_count"] != manifest["decoded_track_count"]:
+        raise SystemExit("baseline result count does not match corpus manifest")
+
+    split["generated_utc"] = datetime.now(timezone.utc).isoformat()
+    split["corpus_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    split["baseline_sha256"] = {
+        name: hashlib.sha256((prepared / name).read_bytes()).hexdigest()
+        for name in ("results-s4.csv", "results-s4-endorsed.csv", "results-s6.csv")
+    }
+    output_path = prepared / args.output
+    output_path.write_text(
+        json.dumps(split, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
+    source_lines = _track_lines_by_id(tracks_path)
+    assignments = {track["id"]: track["partition"] for track in split["tracks"]}
+    if set(source_lines) != set(assignments):
+        raise SystemExit("track list and split contain different IDs")
+    for partition in ("development", "holdout"):
+        rows = [
+            source_lines[track_id]
+            for track_id in sorted(source_lines)
+            if assignments[track_id] == partition
+        ]
+        (prepared / f"tracks-{partition}.txt").write_text(
+            "# Phase-5 frozen partition; source audio remains outside Git.\n"
+            + "\n".join(rows)
+            + "\n",
+            encoding="utf-8",
+        )
+
+    write_split_baseline(prepared, split)
+
+    print(
+        f"split {split['track_count']} track(s): "
+        f"development={split['development_count']}, holdout={split['holdout_count']}; "
+        f"output: {output_path}"
+    )
+    return 0
 
 
 def summarize_results(rows: Sequence[dict[str, object]]) -> dict[str, object]:
@@ -801,6 +1096,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     report_parser.add_argument("--prepared", required=True)
     report_parser.set_defaults(func=report_existing)
+
+    split_parser = subparsers.add_parser(
+        "split", help="freeze deterministic development and hold-out partitions"
+    )
+    split_parser.add_argument("--prepared", required=True)
+    split_parser.add_argument("--seed", default=DEFAULT_SPLIT_SEED)
+    split_parser.add_argument(
+        "--holdout-fraction", type=float, default=DEFAULT_HOLDOUT_FRACTION
+    )
+    split_parser.add_argument("--output", default="split.json")
+    split_parser.set_defaults(func=split_corpus)
     return parser
 
 

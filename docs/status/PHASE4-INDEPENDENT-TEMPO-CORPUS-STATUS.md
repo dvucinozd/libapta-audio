@@ -234,3 +234,7 @@ then diagnose the retained half-time selections and the four broken promotions.
 Any new prior, endorsement or confidence rule must be selected on a training
 partition and reported unchanged on a held-out partition. The 188-track frozen
 baseline in this document remains the comparison point.
+
+Phase 5 implemented that protocol and rejected its first candidate after the
+development gains did not generalize. See
+[`PHASE5-TEMPO-GENERALIZATION-STATUS.md`](PHASE5-TEMPO-GENERALIZATION-STATUS.md).

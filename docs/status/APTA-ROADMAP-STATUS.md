@@ -126,6 +126,10 @@ reopens the zero-high-confidence-metrical-error acceptance gate; confidence 75
 admits three S4 errors and two endorsed S4 errors. See
 [`S4-TEMPO-LOCAL-GRID-STATUS.md`](S4-TEMPO-LOCAL-GRID-STATUS.md) and
 [`PHASE4-INDEPENDENT-TEMPO-CORPUS-STATUS.md`](PHASE4-INDEPENDENT-TEMPO-CORPUS-STATUS.md).
+Phase 5 added a frozen development/hold-out protocol and rejected its first
+confidence/endorsement candidate when the development gains did not generalize;
+no candidate behavior was shipped. See
+[`PHASE5-TEMPO-GENERALIZATION-STATUS.md`](PHASE5-TEMPO-GENERALIZATION-STATUS.md).
 
 ## S5 — Reference desktop tools
 
