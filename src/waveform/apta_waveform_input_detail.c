@@ -82,6 +82,25 @@ apta_status_t apta_internal_waveform_accept_pcm(
     }
 
     for (frame = 0u; frame < *accepted_frames_out; ++frame) {
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+        float onset_bands[APTA_INTERNAL_BAND_COUNT];
+        const apta_source_frame_t source_frame = node->first_frame + frame;
+
+        if (s4_enabled) {
+            if (!session->onset_band_filter_valid ||
+                session->onset_band_next_frame != source_frame) {
+                /* A seek or gap starts a new causal run. This avoids leaking
+                 * filter history across unrelated accepted ranges. */
+                apta_internal_band_filter_reset(&session->onset_band_filter);
+            }
+            apta_internal_band_filter_split(
+                &session->onset_band_filter,
+                node->samples[frame],
+                onset_bands);
+            session->onset_band_next_frame = source_frame + 1u;
+            session->onset_band_filter_valid = 1u;
+        }
+#endif
         if (detail_enabled) {
             const apta_status_t detail_status =
                 apta_internal_detail_process_sample(
@@ -96,7 +115,11 @@ apta_status_t apta_internal_waveform_accept_pcm(
             const apta_status_t s4_status = apta_internal_s4_process_sample(
                 session,
                 node->first_frame + frame,
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+                onset_bands);
+#else
                 node->samples[frame]);
+#endif
             if (s4_status != APTA_STATUS_OK) {
                 break;
             }

@@ -130,6 +130,13 @@ Phase 5 added a frozen development/hold-out protocol and rejected its first
 confidence/endorsement candidate when the development gains did not generalize;
 no candidate behavior was shipped. See
 [`PHASE5-TEMPO-GENERALIZATION-STATUS.md`](PHASE5-TEMPO-GENERALIZATION-STATUS.md).
+Phase 6 implemented a bounded, compile-time B3 three-band onset candidate for
+S4. It improved the full 188-track S4 result by four and the endorsed result by
+three without breaking a previously correct selection. The candidate remains
+opt-in because the 48-track partition had already been observed in phase 5 and
+the high-confidence metrical-error gate is unchanged. Applying B3 to S6 was
+measured and rejected; S6 retains its production broadband envelope. See
+[`PHASE6-MULTIBAND-ONSET-STATUS.md`](PHASE6-MULTIBAND-ONSET-STATUS.md).
 
 ## S5 — Reference desktop tools
 

@@ -52,6 +52,16 @@ apta_add_c_test(apta_pcm_pull_bounded apta.source.pcm_pull_bounded unit/pcm_pull
 
 apta_add_c_test(apta_waveform_overview apta.waveform.overview unit/waveform_overview.c)
 apta_add_c_test(apta_waveform_determinism apta.waveform.determinism unit/waveform_determinism.c)
+if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+    apta_add_c_test(
+        apta_multiband_onset
+        apta.experimental.multiband_onset
+        unit/multiband_onset.c)
+    target_include_directories(apta_multiband_onset PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+    if(UNIX)
+        target_link_libraries(apta_multiband_onset PRIVATE m)
+    endif()
+endif()
 apta_add_c_test(apta_waveform_priority apta.waveform.priority unit/waveform_priority.c)
 apta_add_c_test(apta_scheduler_deadline apta.scheduler.deadline unit/scheduler_deadline.c)
 apta_add_c_test(apta_scheduler_process_deadline apta.scheduler.process_deadline unit/scheduler_process_deadline.c)

@@ -11,6 +11,14 @@ config APTA_ESP_DSP_BACKEND
         The portable libapta core remains algorithmically identical and does
         not require ESP-DSP.
 
+config APTA_EXPERIMENTAL_MULTIBAND_ONSET
+    bool "Enable experimental three-band onset novelty"
+    default n
+    help
+        Build the phase-6 B3 onset experiment. The production default remains
+        the established broadband novelty path until a real-audio corpus and
+        target performance measurement justify promotion.
+
 config APTA_OVERVIEW_FRAMES_PER_COLUMN
     int "Overview waveform frames per column"
     default 1024

@@ -16,6 +16,17 @@ option(
     APTA_ENABLE_INTERNAL_PROFILING
     "Build opt-in internal timing probes (never enable for a shipped library)"
     OFF)
+option(
+    APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET
+    "Build the phase-6 B3 three-band onset novelty experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+    # Directory scope deliberately reaches the internal tests and tools too.
+    # The macro changes private structure layout, but never enters public
+    # headers or an installed target's interface.
+    add_compile_definitions(APTA_INTERNAL_MULTIBAND_ONSET=1)
+endif()
 
 add_library(apta_headers INTERFACE)
 add_library(apta::headers ALIAS apta_headers)

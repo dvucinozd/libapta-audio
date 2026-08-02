@@ -150,9 +150,37 @@ static int apta_s4_bin_complete(
     return bin != NULL && expected != 0u && bin->sample_count == expected;
 }
 
-/* A3: recover the normalized mean magnitude from the integer accumulator. One
- * division per bin, called O(bins) per refresh rather than O(bins x lags)
- * since A1 precomputes the flux. */
+/* A3/B3: recover normalized mean magnitude from the integer accumulator. */
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+static float apta_s4_band_energy(
+    const apta_session_t *session,
+    uint64_t bin_index,
+    uint32_t band)
+{
+    const apta_internal_onset_bin_t *bin =
+        apta_s4_const_bin(session, bin_index);
+
+    return bin != NULL && bin->sample_count != 0u
+               ? (float)bin->sums.multiband.band_sums[band] /
+                     ((float)bin->sample_count *
+                      (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE)
+               : 0.0f;
+}
+
+static float apta_s4_broadband_energy(
+    const apta_session_t *session,
+    uint64_t bin_index)
+{
+    const apta_internal_onset_bin_t *bin =
+        apta_s4_const_bin(session, bin_index);
+
+    return bin != NULL && bin->sample_count != 0u
+               ? (float)bin->sums.multiband.broadband_sum /
+                     ((float)bin->sample_count *
+                      (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE)
+               : 0.0f;
+}
+#else
 static float apta_s4_energy(
     const apta_session_t *session,
     uint64_t bin_index)
@@ -166,6 +194,7 @@ static float apta_s4_energy(
                       APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE)
                : 0.0f;
 }
+#endif
 
 /* A1: the single definition of the flux computation. Called once per bin by
  * the fill loop in apta_internal_s4_refresh(); the lag and phase loops read
@@ -175,11 +204,53 @@ static float apta_s4_flux_uncached(
     uint64_t bin_index,
     uint64_t evidence_first)
 {
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    static const float weights[APTA_INTERNAL_BAND_COUNT] = {
+        APTA_INTERNAL_ONSET_WEIGHT_LOW,
+        APTA_INTERNAL_ONSET_WEIGHT_MID,
+        APTA_INTERNAL_ONSET_WEIGHT_HIGH};
+    float novelty = 0.0f;
+    float current_total = 0.0f;
+    float previous_total = 0.0f;
+    const float broadband_current =
+        apta_s4_broadband_energy(session, bin_index);
+    const float broadband_previous =
+        bin_index > evidence_first
+            ? apta_s4_broadband_energy(session, bin_index - 1u)
+            : 0.0f;
+    const float broadband_rise =
+        broadband_current > broadband_previous
+            ? broadband_current - broadband_previous
+            : 0.0f;
+    uint32_t band;
+
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        const float current = apta_s4_band_energy(session, bin_index, band);
+        const float previous =
+            bin_index > evidence_first
+                ? apta_s4_band_energy(session, bin_index - 1u, band)
+                : 0.0f;
+        const float rise = current > previous ? current - previous : 0.0f;
+
+        novelty += weights[band] * rise;
+        current_total += current;
+        previous_total += previous;
+    }
+    /* A filter impulse redistributes energy from high to mid to low as its
+     * tails decay. Per-band rectification alone mistakes those crossings for
+     * fresh onsets. Require the aggregate band envelope to rise too, while
+     * retaining per-band flux as the novelty magnitude. */
+    return broadband_rise +
+           (current_total > previous_total
+                ? APTA_INTERNAL_ONSET_MULTIBAND_MIX * novelty
+                : 0.0f);
+#else
     float current = apta_s4_energy(session, bin_index);
     float previous = bin_index > evidence_first
                          ? apta_s4_energy(session, bin_index - 1u)
                          : 0.0f;
     return current > previous ? current - previous : 0.0f;
+#endif
 }
 
 /*
@@ -546,12 +617,20 @@ apta_status_t apta_internal_s4_prepare(apta_session_t *session)
 apta_status_t apta_internal_s4_process_sample(
     apta_session_t *session,
     apta_source_frame_t source_frame,
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    const float bands[APTA_INTERNAL_BAND_COUNT])
+#else
     float sample)
+#endif
 {
     uint64_t bin_index;
     uint32_t slot;
     apta_internal_onset_bin_t *bin;
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    uint32_t band;
+#else
     float magnitude;
+#endif
 
     if (!apta_s4_enabled(session)) {
         return APTA_STATUS_OK;
@@ -576,7 +655,13 @@ apta_status_t apta_internal_s4_process_sample(
         bin->occupied = 1u;
         bin->bin_index = (uint32_t)bin_index;
     }
-    if (bin->sample_count == UINT32_MAX) {
+    if (bin->sample_count ==
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+        UINT16_MAX
+#else
+        UINT32_MAX
+#endif
+    ) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
 
@@ -584,9 +669,26 @@ apta_status_t apta_internal_s4_process_sample(
      * [-1, 1], but the conversion below must not depend on a caller invariant
      * for its defined behaviour. fminf is branchless, so the guard costs one
      * instruction rather than a per-sample branch. */
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+    const float sample = bands[0] + bands[1] + bands[2];
+    const float broadband_magnitude = fminf(fabsf(sample), 1.0f);
+
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        const float magnitude = fminf(fabsf(bands[band]), 1.0f);
+        bin->sums.multiband.band_sums[band] = (uint16_t)(
+            bin->sums.multiband.band_sums[band] +
+            (uint16_t)(magnitude *
+                       (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE));
+    }
+    bin->sums.multiband.broadband_sum = (uint16_t)(
+        bin->sums.multiband.broadband_sum +
+        (uint16_t)(broadband_magnitude *
+                   (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE));
+#else
     magnitude = fminf(fabsf(sample), 1.0f);
     bin->sum_absolute +=
         (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
+#endif
     bin->sample_count += 1u;
     if (bin->sample_count ==
         apta_s4_expected_bin_samples(session, bin_index)) {

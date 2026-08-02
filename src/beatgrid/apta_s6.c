@@ -88,14 +88,16 @@ static int apta_s6_bin_complete(
     return bin != NULL && expected != 0u && bin->sample_count == expected;
 }
 
-/* A3: see apta_s4_energy(). */
+/* A3: the global estimator deliberately retains the production broadband
+ * envelope. Phase 6 measured a one-track development regression when B3 was
+ * applied here, while local S4 gained four tracks without a break. */
 static float apta_s6_energy(
     const apta_internal_s6_session_state_t *state,
     uint64_t bin_index)
 {
     const apta_internal_onset_bin_t *bin = apta_s6_const_bin(state, bin_index);
     return bin != NULL && bin->sample_count != 0u
-               ? (float)bin->sum_absolute /
+               ? (float)APTA_INTERNAL_ONSET_SUM_ABSOLUTE(bin) /
                      ((float)bin->sample_count *
                       APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE)
                : 0.0f;
@@ -601,12 +603,18 @@ apta_status_t apta_internal_s6_process_sample(
         bin->occupied = 1u;
         bin->bin_index = (uint32_t)bin_index;
     }
-    if (bin->sample_count == UINT32_MAX) {
+    if (bin->sample_count ==
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+        UINT16_MAX
+#else
+        UINT32_MAX
+#endif
+    ) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
     /* A3: branchless clamp, as in S4. */
     magnitude = fminf(fabsf(sample), 1.0f);
-    bin->sum_absolute +=
+    APTA_INTERNAL_ONSET_SUM_ABSOLUTE(bin) +=
         (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
     bin->sample_count += 1u;
     return APTA_STATUS_OK;
