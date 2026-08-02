@@ -1610,3 +1610,33 @@ improvement follows the host stage measurement: feature sets that do not run S4
 remain within noise, while every tempo-enabled profile avoids the repeated ring
 scan. The full profile's worst call remains below the 21.33 ms duration of one
 input block.
+
+## 32. Independent Rekordbox corpus reopens the confidence gate
+
+The second annotated library section 28.4 called for is now measured. A
+previously untouched Rekordbox USB yielded 188 readable PPTH/PQTZ/audio triples
+after three explicit FAT32 exclusions. The exact 0:30 plus 90-second extraction
+contract used for the earlier 68 tracks is now implemented by
+`tools/rekordbox_tempo_corpus.py`; no audio, title or source path enters the
+repository.
+
+| Mode | Within 1% | Within 0.1% | Metrical-ratio errors | Errors at confidence >=75 |
+|---|---:|---:|---:|---:|
+| S4 | 143/188 (76.1%) | 112 | 4 | 3, all metrical |
+| S4 + S6 endorsement | **166/188 (88.3%)** | **123** | **2** | 4, 2 metrical |
+| S6 | 164/188 (87.2%) | 22 | 8 | 4, 2 metrical |
+
+Endorsement changed 43 selections, fixed 27 misses and broke four correct S4
+answers. It generalizes as a large net accuracy gain, not as the “fixed, none
+broken” rule section 28 observed on its development corpus.
+
+More importantly, the actionable threshold of 75 does not generalize. S4 has
+three half-time answers at confidence 90, 92 and 94. Endorsed S4 retains two of
+them, so B1's zero-high-confidence-metrical-error requirement is open again.
+The threshold remains 75 in the measurement tool: raising it after observing
+this validation set would fit the gate to the test data, and 95 -- the first S4
+zero-error sweep point -- admits only 16 tracks.
+
+The full inventory, source fingerprints, extraction contract, accuracy,
+confidence sweep, drift precision and evidence boundary are recorded in
+[`PHASE4-INDEPENDENT-TEMPO-CORPUS-STATUS.md`](PHASE4-INDEPENDENT-TEMPO-CORPUS-STATUS.md).

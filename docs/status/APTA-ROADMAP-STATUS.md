@@ -5,7 +5,7 @@
 - **Next stage:** S8 — Second independent platform
 - **Current source baseline:** `9709c674e9bda200c55091c52b0e92bcbc1b5924`
 - **Current public API:** 0.3.0 draft
-- **Current CTest inventory:** 80 default POSIX tests; 68 core-only tests
+- **Current CTest inventory:** 82 default POSIX tests; 70 core-only tests
 - **Latest all-green native CI:** GitHub Actions run `30744535644` at the current source baseline
 - **Current-head platform/fixture checks:** ESP-IDF run `30744535677` and reference-fixture run `30744535645` passed
 
@@ -120,7 +120,12 @@ Implemented:
 - TEMP/LGRD interchange;
 - push, pull, heap, static-workspace and bounded-result support.
 
-Status: complete self-tested implementation candidate. See [`S4-TEMPO-LOCAL-GRID-STATUS.md`](S4-TEMPO-LOCAL-GRID-STATUS.md).
+Status: complete self-tested functional implementation candidate. Independent
+188-track validation confirms a substantial endorsement accuracy gain but
+reopens the zero-high-confidence-metrical-error acceptance gate; confidence 75
+admits three S4 errors and two endorsed S4 errors. See
+[`S4-TEMPO-LOCAL-GRID-STATUS.md`](S4-TEMPO-LOCAL-GRID-STATUS.md) and
+[`PHASE4-INDEPENDENT-TEMPO-CORPUS-STATUS.md`](PHASE4-INDEPENDENT-TEMPO-CORPUS-STATUS.md).
 
 ## S5 — Reference desktop tools
 
