@@ -1,7 +1,7 @@
 # Stage S8 — Windows platform integration status
 
-**Status:** implementation and local runtime validation complete; MSVC CI pending
-**Source parent:** `c9743e3` plus the Stage S8 working branch
+**Status:** complete self-tested and CI-verified implementation candidate
+**Source baseline:** `d21572a`
 **Selected platform:** native Windows desktop/runtime
 
 ## 1. Scope and independence
@@ -51,7 +51,7 @@ POSIX and delegate to the same native contract.
 
 ## 3. Runtime and interchange evidence
 
-Local validation on the working branch:
+Validation at the source baseline:
 
 | Configuration | Result |
 |---|---:|
@@ -64,6 +64,8 @@ Local validation on the working branch:
 | Independent Python fixture consumed on Windows | Passed strict validation |
 | Linux-produced `.apta` consumed on Windows | Passed strict validation and TEMP inspection |
 | Windows-produced `.apta` consumed on Linux | Passed strict validation |
+| GitHub Windows/MSVC release, warnings as errors | 84/84 CTest tests; run `30765409478` |
+| GitHub ESP-IDF supported-build matrix | All three configurations passed; run `30765409488` |
 
 The generated click-track result was identical at the semantic boundary on
 both platforms: 125,000 millibpm, final state and confidence 98.
@@ -74,19 +76,17 @@ byte-reproduces it in the regular CTest inventory, including the Windows CI job.
 
 ## 4. Acceptance boundary
 
-The implementation satisfies the Stage S8 functional scope locally:
+The implementation satisfies the Stage S8 functional scope and completion
+gate:
 
 - a platform adapter exists and is independent of ESP-IDF;
 - the platform executes the public pull-analysis API over real file I/O;
 - it generates, validates and inspects canonical `.apta` output;
 - both directions of Linux/Windows interchange have passed;
 - an independently produced fixture is accepted and reproduced;
-- malformed WAV and corrupt `.apta` paths remain covered.
-
-Stage S8 must not be marked fully complete until the updated GitHub
-Windows/MSVC job builds and runs the entire registered test inventory. This
-document records the local implementation result without pre-claiming that CI
-evidence.
+- malformed WAV and corrupt `.apta` paths remain covered;
+- the updated GitHub Windows/MSVC job builds the adapters and tools and passes
+  the entire 84-test Windows inventory with warnings as errors.
 
 This is a platform integration claim, not an independent DSP implementation,
 formal Windows certification or APTA 1.0 conformance claim. Long-path policy,

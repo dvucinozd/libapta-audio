@@ -1,14 +1,14 @@
 # APTA development roadmap status
 
 - **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)
-- **Current completed stage:** S7 — ESP-IDF port
-- **Current implementation stage:** S8 — Windows platform integration; local validation complete, MSVC CI pending
-- **Next completed-stage gate:** green Windows/MSVC adapter, tool and runtime CI
-- **Current source parent:** `c9743e37333fcb7aae499f6d3ff0431a709c77b7` plus the Stage S8 working branch
+- **Current completed stage:** S8 — Windows platform integration
+- **Current implementation stage:** S9 — APTA 1.0; not started
+- **Next completed-stage gate:** stable specification/API/format and multi-platform conformance
+- **Current source baseline:** `d21572a`
 - **Current public API:** 0.3.0 draft
 - **Current CTest inventory:** 85 default POSIX tests; 84 Windows tests; 72 core-only tests
-- **Latest all-green native CI:** GitHub Actions run `30744535644` at the current source baseline
-- **Current-head platform/fixture checks:** ESP-IDF run `30744535677` and reference-fixture run `30744535645` passed
+- **Latest all-green native CI:** GitHub Actions run `30765409478` at the current source baseline
+- **Current-head platform/fixture checks:** ESP-IDF run `30765409488` and reference-fixture run `30765409477` passed
 
 ## Status summary
 
@@ -22,7 +22,7 @@
 | S5 — Reference desktop tools | Functionally complete implementation candidate | POSIX/WAV input, analyzer, inspector, validator, global/dynamic selection, diagnostics and generated fixtures |
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
 | S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP adapter, optional ESP-DSP helper, cooperative example, bounded profiles, 5.5.4/6.0.2 firmware builds and manual P4 measurements |
-| S8 — Second independent platform | Implementation complete locally; MSVC CI pending | Native Windows adapter, WAV pull runtime, CLI tools and bidirectional Linux/Windows `.apta` interchange pass locally |
+| S8 — Second independent platform | Complete self-tested and CI-verified implementation candidate | Native Windows adapter, WAV pull runtime, CLI tools, independent fixture, bidirectional Linux/Windows `.apta` interchange and 84-test MSVC CI |
 | S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
 
 ## S0 — Foundation
@@ -229,7 +229,7 @@ See [`S7-ESP-IDF-PORT-STATUS.md`](S7-ESP-IDF-PORT-STATUS.md), [`../reference/APT
 
 ## S8 — Second independent platform
 
-Windows is the selected second platform. The working branch implements:
+Windows is the selected second platform. Stage S8 implements:
 
 - a native Win32 file adapter with a platform-neutral UTF-8 path API;
 - checked 64-bit reads and flushed atomic result-file replacement;
@@ -242,9 +242,10 @@ Windows is the selected second platform. The working branch implements:
 Local Windows x64 MinGW builds and native runtime tests pass. Linux-produced
 containers validate and inspect on Windows, Windows-produced containers
 validate on Linux, and the independent Python fixture validates on Windows.
-The final stage-completion gate is the updated MSVC CI run; until it passes,
-S8 remains an implementation candidate rather than the current completed
-stage.
+GitHub Actions run `30765409478` builds the adapters, decoder and tools with
+MSVC warnings as errors and passes all 84 registered Windows tests. The
+supported ESP-IDF matrix and independent-fixture workflow also pass at the same
+source baseline. S8 is therefore the current completed stage.
 
 See [`S8-WINDOWS-PORT-STATUS.md`](S8-WINDOWS-PORT-STATUS.md) and
 [`../../ports/windows/README.md`](../../ports/windows/README.md).

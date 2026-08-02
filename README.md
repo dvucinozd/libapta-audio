@@ -4,9 +4,9 @@
 
 `libapta-audio` is the home of the Adaptive Progressive Track Analysis (APTA) standard and its portable ISO C11 reference implementation.
 
-APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container, POSIX reference desktop tools and an ESP-IDF platform component.
+APTA provides progressive, bounded and portable audio analysis for waveform, tempo, local beatgrid, global beatgrid and dynamic-tempo data. The reference implementation supports push and pull PCM, immutable result generations, static-workspace operation, bounded result slots, the versioned `.apta` container, native POSIX and Windows reference desktop tools and an ESP-IDF platform component.
 
-> Project status: functional implementation candidate through roadmap Stage S7. The specification remains Working Draft 0.1; the current public API is 0.3.0, and no stable API or ABI is claimed before APTA 1.0.
+> Project status: functional implementation candidate through roadmap Stage S8. The specification remains Working Draft 0.1; the current public API is 0.3.0, and no stable API or ABI is claimed before APTA 1.0.
 
 ## Why APTA
 
@@ -37,7 +37,7 @@ the POSIX reference tools.
 | Memory control | Custom allocator, memory budget, static session workspace and two-slot bounded result pools | Resource-class certification is not yet claimed |
 | Desktop input | Reference WAV decoder for PCM16, packed PCM24, PCM32 and float32; mono/stereo | Other codecs require an application or third-party decoder backend |
 | Embedded integration | ESP-IDF component, cooperative example, three bounded memory profiles and ESP32-P4 measurements | CI remains cross-build-only; repeatable target-specific stack, heap and latency evidence is still required for a resource-class claim |
-| Portability | ISO C11 core, ESP-IDF component, and a native Windows file/decoder/CLI integration with UTF-8 paths | The Windows integration remains an implementation candidate until its MSVC CI gate is green |
+| Portability | ISO C11 core, ESP-IDF component, and native POSIX/Windows file, decoder and CLI integrations with UTF-8 paths | No formal Windows certification, ARM64 Windows or network-share atomic-replacement claim is made |
 
 ## Functional implementation stages
 
@@ -76,7 +76,7 @@ Stage S6 status and evidence:
 - [`src/`](src/) — portable core plus optional desktop adapter implementation.
 - [`backends/`](backends/) — reserved scaffolding for future replaceable DSP
   backend packages; the current reference algorithms are built from `src/`.
-- [`ports/`](ports/) — platform integration layers, including ESP-IDF.
+- [`ports/`](ports/) — platform integration layers, including ESP-IDF and Windows.
 - [`tools/`](tools/) — `apta-analyze`, `apta-inspect`, `apta-validate`, the
   tempo harness and the read-only Rekordbox corpus importer.
 - [`tests/`](tests/) — unit, integration, conformance, fuzz and generated-fixture tests.
@@ -361,8 +361,9 @@ The reference workflows generate click-track WAV and `.apta` parser seeds at run
   self-test evidence exist. It is not formal certification.
 - CI cross-builds the ESP-IDF examples but does not flash or execute them on
   physical hardware.
-- The Windows adapter is a Stage S8 implementation candidate. A green MSVC
-  adapter/tool/runtime CI run is required before the roadmap marks S8 complete.
+- The Windows adapter, tools and runtime pass the Stage S8 MSVC CI gate; formal
+  Windows certification, ARM64 Windows and application decoder integrations
+  remain outside that stage.
 - Long-running fuzzing, cross-endian interoperability, a second independent
   implementation and repeatable performance measurements across intended
   devices remain release gates.
