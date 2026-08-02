@@ -59,6 +59,19 @@ endif()
 # Measurement instrument rather than a deliverable, but it needs the WAV
 # decoder for --tracks, so it is built like the tools rather than by hand.
 apta_add_tool(apta_tempo_corpus apta-tempo-corpus apta_tempo_corpus.c)
+apta_add_tool(apta_workspace_probe apta-workspace-probe apta_workspace_probe.c)
+
+if(APTA_ENABLE_INTERNAL_PROFILING)
+    apta_add_tool(apta_cost_probe apta-cost-probe apta_cost_probe.c)
+    target_compile_definitions(
+        apta_cost_probe
+        PRIVATE
+            APTA_INTERNAL_PROFILE_S4=1)
+    target_include_directories(
+        apta_cost_probe
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/core)
+endif()
 
 apta_add_tool(apta_analyze apta-analyze apta_analyze.c)
 apta_add_tool(apta_inspect apta-inspect apta_inspect.c)

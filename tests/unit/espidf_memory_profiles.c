@@ -74,7 +74,8 @@ static void APTA_CALL profile_deallocate(void *user_data, void *memory)
 static int run_profile(const profile_t *profile)
 {
     apta_session_config_t session_config;
-    apta_memory_requirements_t requirements;
+    apta_memory_requirements_t workspace_requirements;
+    apta_memory_requirements_t result_pool_requirements;
     apta_context_config_t context_config;
     apta_context_t *context = NULL;
     apta_session_t *session = NULL;
@@ -104,10 +105,18 @@ static int run_profile(const profile_t *profile)
     session_config.static_workspace_size = profile->workspace_bytes;
     session_config.flags = APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS;
 
-    apta_memory_requirements_init(&requirements);
-    CHECK(apta_query_memory_requirements(&session_config, &requirements) ==
+    apta_memory_requirements_init(&workspace_requirements);
+    CHECK(apta_query_workspace_requirements(
+              &session_config,
+              &workspace_requirements) == APTA_STATUS_OK);
+    CHECK(workspace_requirements.minimum_bytes <= profile->workspace_bytes);
+
+    apta_memory_requirements_init(&result_pool_requirements);
+    CHECK(apta_query_memory_requirements(
+              &session_config,
+              &result_pool_requirements) ==
           APTA_STATUS_OK);
-    CHECK((requirements.flags &
+    CHECK((result_pool_requirements.flags &
            APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL) != 0u);
 
     apta_context_config_init(&context_config);
@@ -115,7 +124,7 @@ static int run_profile(const profile_t *profile)
     context_config.allocator.allocate = profile_allocate;
     context_config.allocator.deallocate = profile_deallocate;
     context_config.requested_capabilities = profile->features;
-    context_config.memory_limit_bytes = requirements.minimum_bytes;
+    context_config.memory_limit_bytes = result_pool_requirements.minimum_bytes;
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
     CHECK(apta_session_create(context, &session_config, &session) ==
           APTA_STATUS_OK);
@@ -172,12 +181,14 @@ static int run_profile(const profile_t *profile)
               &confidence) == APTA_STATUS_OK);
     CHECK(state == APTA_FEATURE_FINAL);
 
-    printf("APTA_ESP_PROFILE name=%s workspace=%zu result_pool=%zu alignment=%zu "
+    printf("APTA_ESP_PROFILE name=%s queried_workspace=%zu "
+           "profile_workspace=%zu result_pool=%zu alignment=%zu "
            "total_frames=%u allocator_calls=%u\n",
            profile->name,
+           workspace_requirements.minimum_bytes,
            profile->workspace_bytes,
-           requirements.minimum_bytes,
-           requirements.required_alignment,
+           result_pool_requirements.minimum_bytes,
+           workspace_requirements.required_alignment,
            profile->total_frames,
            allocator.allocate_calls);
 

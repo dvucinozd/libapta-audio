@@ -85,10 +85,11 @@ CI verifies the linked firmware artifacts but does not execute them on physical 
 ## ESP32-P4
 
 ESP-IDF 6.0.2 builds P4 firmware that requires chip revision v3.1 or newer. A
-v1.x board needs 5.5, which supports v0.0 through v1.0; flashing a 6.0.2 build
-to one fails with `requires chip revision in range [v3.1 - v3.99]`.
+v1.x board needs 5.5; the measured revision 1.3 board reports an accepted image
+range of v0.1 through v1.99. Flashing a 6.0.2 image to it would fail the image
+revision check.
 
-At API 0.3.0 the measured global-beatgrid configuration queries 602,496 bytes
+At API 0.3.0 the measured global-beatgrid configuration queries 602,528 bytes
 of workspace. It completes on the measured P4 both with internal memory only
 and with PSRAM enabled. The PSRAM-enabled placement was faster for this working
 set; neither result is a universal resource-class claim.
@@ -108,14 +109,13 @@ cost probe measures, printing the queried workspace requirement beside each:
 
 ```text
 --- per-feature cost, 8 s @ 48000 Hz, 1024-frame blocks ---
-overview                 workspace=  68592 calls= 376 average_us=  1943 ...
-+BPM                     workspace= 150608 calls= 376 average_us=  4153 ...
-+global grid             workspace= 602496 calls= 376 average_us=  4835 ...
+overview                 workspace=  68624 calls= 376 average_us=  1941 ...
++BPM                     workspace= 150640 calls= 376 average_us=  3555 ...
++global grid             workspace= 602528 calls= 376 average_us=  4232 ...
 ```
 
 Sections 29 and 30 of `docs/status/S4-TEMPO-LOCAL-GRID-STATUS.md` read those
 numbers against the host table and retain the earlier 807,296-byte result for
-comparison. With the reduced working set, the S6 rows cost about 10.7 times the
-host, in line with the other measured feature sets. The full feature set's
-worst measured process call was 20,456 microseconds, below one 1024-frame block
-period at 48 kHz.
+comparison. Section 31 records the later incremental-evidence cache measurement.
+The full feature set's current worst measured process call is 19,360
+microseconds, below one 1024-frame block period at 48 kHz.

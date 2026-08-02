@@ -95,7 +95,8 @@ static void refresh_meta_crc(uint8_t *file)
 
 static int build_file(
     apta_context_t *context,
-    uint8_t output[1024 * APTA_TEST_WORKSPACE_SCALE],
+    uint8_t *output,
+    size_t output_capacity,
     size_t *size_out,
     int empty)
 {
@@ -157,12 +158,12 @@ static int build_file(
     if (result == NULL ||
         apta_result_query_serialized_size(result, NULL, &required) !=
             APTA_STATUS_OK ||
-        required > 1024u ||
+        required > output_capacity ||
         apta_result_serialize(
             result,
             NULL,
             output,
-            1024u,
+            output_capacity,
             &written) != APTA_STATUS_OK ||
         written != (size_t)required) {
         goto cleanup;
@@ -225,8 +226,8 @@ int main(void)
     apta_context_config_init(&context_config);
     context_config.requested_capabilities = APTA_FEATURE_WAVEFORM_OVERVIEW;
     CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
-    CHECK(build_file(context, valid, &valid_size, 0));
-    CHECK(build_file(context, empty, &empty_size, 1));
+    CHECK(build_file(context, valid, sizeof(valid), &valid_size, 0));
+    CHECK(build_file(context, empty, sizeof(empty), &empty_size, 1));
 
     entry = find_meta_directory(valid);
     CHECK(entry != NULL);

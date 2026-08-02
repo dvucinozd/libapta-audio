@@ -9,6 +9,10 @@
 
 #include <apta/apta.h>
 
+#ifdef APTA_INTERNAL_PROFILE_S4
+#include "apta_internal_profile.h"
+#endif
+
 /*
  * C3: geometry and capacity constants.
  *
@@ -586,6 +590,15 @@ struct apta_session {
      * avoiding the modulo keeps a hardware divide out of the lag loop. */
     float *onset_flux;
     uint32_t onset_flux_capacity;
+    /* Incremental longest contiguous run of complete onset bins. Sequential
+     * input extends this in O(1), including ordinary ring wrap. Gaps or an
+     * unexpected overwrite mark it dirty and the next refresh rebuilds it with
+     * the conservative full scan. End-of-input also rebuilds once because the
+     * final partial bin becomes complete only when its true length is known. */
+    uint64_t s4_evidence_first;
+    uint64_t s4_evidence_end;
+    uint32_t s4_evidence_valid;
+    uint32_t s4_evidence_dirty;
     /* A2: evidence_end of the last refresh that actually ran the
      * autocorrelation, and the estimate it produced. A gated refresh reloads
      * the estimate and recomputes everything derived from the current ranges,
@@ -633,6 +646,9 @@ struct apta_session {
     uint32_t local_grid_segment_id;
     uint64_t s4_mutation_serial;
     uint64_t s4_published_serial;
+#ifdef APTA_INTERNAL_PROFILE_S4
+    apta_internal_s4_profile_t s4_profile;
+#endif
 
     apta_internal_s6_session_state_t *s6;
 };

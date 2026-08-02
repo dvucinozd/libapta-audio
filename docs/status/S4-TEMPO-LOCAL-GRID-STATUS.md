@@ -356,11 +356,49 @@ section 14:
 | `+ DYNAMIC_TEMPO` | 14,204.0 | 1,158.9 | 418.6 |
 | `+ WAVEFORM_DETAIL + GRID_LOCKING` | 14,217.0 | 1,162.6 | 465.6 |
 
-The dominant remaining ungated cost is `apta_s4_find_evidence()`, which runs on
-every call ahead of the gate -- it has to, because the gate needs the evidence
-range to decide -- and scans the whole bin capacity in two passes. Reducing it
-would require tracking the completed-bin high-water mark incrementally as bins
-fill, rather than rediscovering it by scan.
+The dominant remaining ungated cost at that milestone was
+`apta_s4_find_evidence()`. It ran on every call ahead of the gate and scanned
+the whole bin capacity in two passes. Section 15.1 records the later
+instrumentation and incremental evidence-range cache that removed this scan.
+
+### 15.1 Stage-level profiling and incremental evidence discovery
+
+`APTA_ENABLE_INTERNAL_PROFILING` is an opt-in CMake option, off by default. In
+that build only, each opaque session carries independent S4 counters and stage
+timers. Timing uses the context's monotonic clock callback, so the instrumented
+library does not acquire a POSIX dependency and remains usable by platform
+ports. `apta-cost-probe` is built only with the option enabled and can emit
+machine-readable JSON. Production builds contain neither the counters nor the
+profiling API.
+
+A 30-second, 44.1 kHz, 1024-frame synthetic run confirmed the suspected cost.
+Before the cache, the BPM row spent 25.23 ms across 1,293 calls in
+`apta_s4_find_evidence()`, about 19.5 microseconds per call, while the full BPM
+row cost 140.6 microseconds per call.
+
+S4 now maintains the longest contiguous complete-bin range as bins complete.
+The ordinary sequential ring-wrap path advances both ends in O(1). An
+unexpected overwrite inside the cached range marks it dirty and falls back to
+the conservative full scan; end-of-input also scans so the last partial bin is
+classified against the now-known final frame. This preserves correctness for
+out-of-order internal input while making the normal path constant-time.
+
+The same workload after the change recorded 1,292 cache hits, one full scan and
+0.833 ms total in evidence discovery: a 96.7 percent reduction in that stage.
+The complete BPM row fell to 112.1 microseconds per call, a 20.3 percent
+reduction. The lag sweep remains the largest stage at 63.9 ms total, but it runs
+only on the 147 ungated refreshes.
+
+`apta.s4.evidence_cache` covers initial discovery, normal ring wrap, a split
+caused by an out-of-order overwrite, backwards extension and the final partial
+bin. The profile can be reproduced with:
+
+```bash
+cmake -S . -B build-s4-profile -DCMAKE_BUILD_TYPE=Release \
+  -DAPTA_ENABLE_INTERNAL_PROFILING=ON -DAPTA_WARNINGS_AS_ERRORS=ON
+cmake --build build-s4-profile --target apta_cost_probe
+./build-s4-profile/tools/apta-cost-probe --seconds 30 --json
+```
 
 ## 16. Types: double removed from per-sample and inner-loop paths
 
@@ -456,6 +494,23 @@ On x86-64 the static library text grew from 131,695 to 134,005 bytes, but that
 is not the measurement the criterion is about, and the per-sample `__muldi3`
 regression above was invisible there -- both operand widths compile to one
 instruction on a 64-bit host. It was only found by running CI.
+
+### 16.3 Current isolated P4 regression check
+
+The phases 0--3 closure was cross-built locally with ESP-IDF 6.0.2 and GCC
+15.2.0 for ESP32-P4, then compared with an otherwise identical build of source
+baseline `b0be6b2`. The APTA component archive contributes 42,876 bytes versus
+42,436 bytes at the baseline, an increase of 440 bytes (1.04 percent). That
+increase is the production evidence-cache and shared relation-classifier code;
+the opt-in profiler and its tool are absent from this build.
+
+The linked `libgcc.a` contribution is unchanged at 542 bytes. More importantly,
+the RISC-V component archive has no undefined `__muldi3`: the remaining helper
+references are cold 64-bit division/conversion paths already described above.
+This isolates the A3 regression risk directly on RV32 and confirms that the
+per-sample 64-by-64 multiply has not returned. The test board on COM12 identifies
+as ESP32-P4 revision 1.3, so the 6.0.2 image was not flashed; that IDF release's
+firmware requires a newer P4 revision.
 
 ## 17. Activation: CONFIDENCE decoupled from the tempo engine
 
@@ -724,18 +779,22 @@ Accuracy is unchanged, which is correct: this task changes what is reported,
 not what is selected. 23 of 40 exact, threshold 75, no high-confidence octave
 errors.
 
-### 21.1 Coverage gap
+### 21.1 Relation and wire coverage
 
-`apta.s4.relations` pins every relation's numeric value and the flag's bit
-position, so a future renumbering fails a test rather than silently
-reinterpreting existing files. That is the risk worth guarding.
+The classifier and family scan now consume one internal ratio table rather than
+two independently maintained lists. `apta.s4.relations` calls that production
+classifier for all eight relations at the exact ratio, at both tolerance edges
+and immediately outside them. It also pins every public numeric value and the
+generic ambiguity flag's bit position, so a future renumbering cannot silently
+reinterpret an existing file.
 
-What is not covered is a test driving the estimator to emit each of the eight
-relations. `apta_s4_relation()` is static, and reaching each relation through
-the public API needs a signal whose autocorrelation carries two strong peaks at
-that exact ratio -- eight purpose-built signals. Those were not written. The
-relations that occur in practice, `two-thirds`, `third` and `half`, are
-exercised by the accuracy corpus, which reports the relation for every track.
+`apta.s4.serialization` injects every value from independent through quadruple
+into a real immutable result, serializes it through the production TEMP writer,
+parses it through the production reader and verifies the recovered relation.
+Together these tests cover every classifier output and every wire value. They
+do not claim eight purpose-built public PCM signals; the existing accuracy
+corpus remains the end-to-end signal coverage and currently exercises the
+relations that occur in practice, including two-thirds, third and half.
 
 ## 22. Final cost measurement
 
@@ -1525,3 +1584,29 @@ Against real time, a 1024-frame block at 48 kHz being 21.33 ms of audio: the
 full feature set now averages 3.3x real time where it managed 1.15x before, and
 its worst call is 20,456 microseconds, which is under the block period for the
 first time.
+
+## 31. Incremental-evidence cache on ESP32-P4
+
+The section 15.1 cache was also measured on the same COM12 board: ESP32-P4
+revision 1.3, 360 MHz, 32 MiB PSRAM, ESP-IDF 5.5, scalar backend, eight seconds
+at 48 kHz and 1024-frame process blocks. The firmware completed normally,
+reported the expected 125,000 millibpm at confidence 98, performed no net heap
+allocation in any profile and returned to the exact pre-run free-heap value.
+
+| Feature set | Workspace | Before cache | After cache | Change | After max |
+|---|---:|---:|---:|---:|---:|
+| `WAVEFORM_OVERVIEW` | 68,624 | 1,943 | 1,941 | noise | 3,062 |
+| `+ CONFIDENCE` | 68,624 | 1,939 | 1,950 | noise | 3,075 |
+| `+ BPM` | 150,640 | 4,153 | 3,555 | -14.4% | 16,193 |
+| `+ LOCAL_BEATGRID` | 150,640 | 4,144 | 3,549 | -14.4% | 16,186 |
+| `+ GLOBAL_BEATGRID` | 602,528 | 4,835 | 4,232 | -12.5% | 16,958 |
+| `+ DYNAMIC_TEMPO` | 602,528 | 4,847 | 4,239 | -12.5% | 16,945 |
+| `+ DETAIL + GRID_LOCKING` | 610,768 | 6,525 | 5,930 | -9.1% | 19,360 |
+
+Times are average and maximum microseconds per `apta_session_process()` call.
+The 32-byte workspace increase is the four evidence-cache fields in the opaque
+session. The profiler is not present in this production build. The target
+improvement follows the host stage measurement: feature sets that do not run S4
+remain within noise, while every tempo-enabled profile avoids the repeated ring
+scan. The full profile's worst call remains below the 21.33 ms duration of one
+input block.
