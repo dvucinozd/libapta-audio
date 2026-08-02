@@ -1416,3 +1416,58 @@ chip revision v3.1 or newer, so a v1.x board needs 5.5, which supports v0.0
 through v1.0. And the sweep needs `vTaskDelay()` rather than `taskYIELD()`
 between blocks: seven sessions back to back never let the idle task run, and the
 task watchdog fires.
+
+## 30. Packing the onset bin, and what it does not reach
+
+Section 29 made the workspace size the interesting number rather than a
+footnote: it is what decides whether S6 runs from internal SRAM at 11 times the
+host or from PSRAM at 38.
+
+The onset bin was 24 bytes carrying 17 bytes of data. `bin_index` was a
+`uint64_t`, which forced eight-byte alignment and seven bytes of padding. It is
+now `uint32_t` and the struct is 16 bytes.
+
+The range was never the reason for 64 bits. At the local ring's 256 frames per
+bin, 2^32 bins is 1.1e12 frames, or 6.9 million hours at 44.1 kHz. Both
+`process_sample()` entry points now reject a frame beyond that rather than
+letting the index wrap into a bin that would alias an earlier one, so the bound
+is checked rather than assumed, and a `_Static_assert` keeps the struct from
+growing back.
+
+### 30.1 What it saved
+
+| Feature set | Before | After | Saved |
+|---|---:|---:|---:|
+| `+ BPM`, `+ LOCAL_BEATGRID` | 183,376 | 150,608 | 32,768 |
+| `+ GLOBAL_BEATGRID` | 807,296 | 643,456 | 163,840 |
+
+Every reported value is byte-identical, on the synthetic corpus and on all three
+modes of the 68-track real corpus.
+
+The smaller working set is also slightly quicker on target, which was not the
+point but is worth recording: `+ BPM` went from 4,266 to 4,137 microseconds per
+call and its worst case from 17,525 to 17,265. Three percent, from the same
+arithmetic over a smaller footprint.
+
+### 30.2 It does not reach internal RAM
+
+The board has 606,484 bytes free with internal RAM only. The global grid now
+asks for 643,456. It is **36,972 bytes short**, and still fails with
+`APTA_ERROR_OUT_OF_MEMORY`. Measured on hardware rather than predicted, because
+the margin is small enough that arithmetic alone would not have settled it.
+
+What remains is 16,384 bins at 20 bytes each of ring and flux, and 4,096 beats
+at 40 bytes. Three ways to close the gap, none of them free:
+
+| Change | Saves | Costs |
+|---|---:|---|
+| `GLOBAL_GRID_MAX_BEATS` 4096 to 3072 | 40,960 | A published grid holds 24 minutes of beats at 128 BPM instead of 32. Public API. |
+| `GLOBAL_BIN_CAPACITY` 16384 to 8192 | 163,840 | Analysis coverage halves, 12.7 minutes to 6.3. |
+| Neither | 0 | S6 requires PSRAM on this board. |
+
+The first is the cheapest sufficient one, and the beat array is the more
+oversized of the two: 4,096 beats is 32 minutes at 128 BPM against a ring that
+holds 12.7. But `APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS` is public, a host may
+size its own storage from it, and the beats a segment publishes are not bounded
+by the analysis window. That makes it a decision about the contract rather than
+an implementation detail, and it is not taken here.

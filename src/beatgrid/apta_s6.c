@@ -590,11 +590,16 @@ apta_status_t apta_internal_s6_process_sample(
         return APTA_ERROR_INTERNAL;
     }
     bin_index = source_frame / APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
+    /* See the note in apta_s4.c: the identity is 32 bits, so a frame beyond
+     * that would alias an earlier bin. */
+    if (bin_index > APTA_INTERNAL_MAX_BIN_INDEX) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
     bin = &state->global_bins[(uint32_t)(bin_index % state->global_bin_capacity)];
-    if (!bin->occupied || bin->bin_index != bin_index) {
+    if (!bin->occupied || bin->bin_index != (uint32_t)bin_index) {
         memset(bin, 0, sizeof(*bin));
         bin->occupied = 1u;
-        bin->bin_index = bin_index;
+        bin->bin_index = (uint32_t)bin_index;
     }
     if (bin->sample_count == UINT32_MAX) {
         return APTA_ERROR_LIMIT_EXCEEDED;
