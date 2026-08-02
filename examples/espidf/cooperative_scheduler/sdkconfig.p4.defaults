@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# ESP32-P4 with external PSRAM.
+#
+# The global beatgrid needs 807,296 bytes of workspace. Measured on a P4 v1.3
+# board with internal RAM only, 606,484 bytes were free and requesting it failed
+# with APTA_ERROR_OUT_OF_MEMORY before the first block was accepted. The S6 bin
+# ring accounts for roughly 624 KB of that on its own.
+#
+# With these settings the same board reports 32 MB of PSRAM and every feature
+# set runs. It is not free: the S6 workspace no longer fits in internal SRAM, so
+# it lands in PSRAM, and the global-grid rows cost about 3.5 times more relative
+# to the host than the rows whose working set stays internal. See section 29 of
+# the S4 status document.
+#
+# Use alongside sdkconfig.defaults:
+#
+#   idf.py -B build-esp32p4 \
+#     -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.p4.defaults" \
+#     set-target esp32p4 build
+#
+# ESP-IDF 6.0.2 builds P4 firmware requiring chip revision v3.1 or newer. A
+# v1.x board needs 5.5, which supports v0.0 through v1.0.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_HEX=y
+CONFIG_SPIRAM_SPEED_20M=y
+CONFIG_SPIRAM_USE_MALLOC=y
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
