@@ -107,6 +107,15 @@ target_compile_definitions(apta_espidf_port PRIVATE CONFIG_APTA_ESP_DSP_BACKEND=
 set_target_properties(apta_espidf_port PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
 add_test(NAME apta.port.espidf COMMAND apta_espidf_port)
 
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(
+        NAME apta.tools.rekordbox_tempo_corpus
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/unit/rekordbox_tempo_corpus.py)
+endif()
+
 if(TARGET apta_decoder_wav)
     apta_add_desktop_test(apta_desktop_posix_file apta.desktop.posix_file unit/desktop_posix_file.c)
     apta_add_desktop_test(apta_desktop_wav_decoder apta.desktop.wav_decoder unit/desktop_wav_decoder.c)

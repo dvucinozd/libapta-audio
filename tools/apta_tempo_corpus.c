@@ -21,7 +21,7 @@
  *
  * Usage:
  *   apta-tempo-corpus [--seconds N] [--write-wav DIR] [--verbose]
- *   apta-tempo-corpus --tracks LIST [--verbose]
+ *   apta-tempo-corpus --tracks LIST [--results-csv FILE] [--verbose]
  *
  * --tracks reads a plain-text list of real recordings with known ground-truth
  * tempo, one per line:
@@ -53,9 +53,11 @@
  * are gated on confidence, and a confidently wrong grid is worse than an
  * absent one. B1's acceptance asks for the threshold to be stated explicitly.
  *
- * 75 is not assumed, it is read off the sweep printed below: it is the lowest
- * gate at which no incorrect answer survives while a useful number of correct
- * ones do. Anything lower admits octave errors.
+ * 75 is retained as the documented host action threshold selected on the
+ * original 68-track corpus. Independent validation must report against that
+ * frozen value rather than move the gate after seeing new errors. The newer
+ * corpus may therefore fail the zero-error requirement; that is evidence, not
+ * a reason for this measurement tool to tune the threshold in place.
  */
 #define ACTIONABLE_CONFIDENCE 75u
 
@@ -885,6 +887,22 @@ static uint32_t g_correct_sum, g_correct_n, g_correct_min = 255u, g_correct_max;
 static uint32_t g_wrong_sum, g_wrong_n, g_wrong_min = 255u, g_wrong_max;
 static uint32_t g_high_confidence_errors;
 static uint32_t g_high_confidence_octave_errors;
+static FILE *g_results_csv;
+
+static void csv_field(FILE *file, const char *text)
+{
+    const unsigned char *cursor = (const unsigned char *)text;
+
+    fputc('"', file);
+    while (*cursor != '\0') {
+        if (*cursor == '"') {
+            fputc('"', file);
+        }
+        fputc((int)*cursor, file);
+        cursor += 1;
+    }
+    fputc('"', file);
+}
 
 /*
  * Blending the two populations into one rate is what made the synthetic corpus
@@ -962,6 +980,25 @@ static void record(const char *label,
         }
         fputc('\n', stdout);
     }
+
+    if (g_results_csv != NULL) {
+        csv_field(g_results_csv, label);
+        fprintf(g_results_csv,
+                ",%u,%u,",
+                (unsigned)truth_millibpm,
+                (unsigned)a.reported_millibpm);
+        csv_field(g_results_csv, relation_name(rel));
+        fprintf(g_results_csv,
+                ",%u,%d,%u,%.6f,%d,%d,%d\n",
+                (unsigned)a.confidence,
+                (int)a.state,
+                (unsigned)a.candidate_count,
+                (double)a.separation,
+                a.confidence >= ACTIONABLE_CONFIDENCE &&
+                        a.confidence != APTA_CONFIDENCE_UNKNOWN,
+                rel == REL_EXACT,
+                is_octave_error(rel));
+    }
 }
 
 /* Run every entry of a "path<space>bpm" list. Returns non-zero on a file the
@@ -1033,6 +1070,7 @@ int main(int argc, char **argv)
     uint32_t seconds = DEFAULT_SECONDS;
     const char *wav_dir = NULL;
     const char *tracks_path = NULL;
+    const char *results_csv_path = NULL;
     int verbose = 0;
     size_t frames;
     float *audio;
@@ -1047,6 +1085,9 @@ int main(int argc, char **argv)
             wav_dir = argv[++arg];
         } else if (strcmp(argv[arg], "--tracks") == 0 && arg + 1 < argc) {
             tracks_path = argv[++arg];
+        } else if (strcmp(argv[arg], "--results-csv") == 0 &&
+                   arg + 1 < argc) {
+            results_csv_path = argv[++arg];
         } else if (strcmp(argv[arg], "--humanize") == 0) {
             g_jitter = g_dynamics = g_drift = g_swing = 1;
         } else if (strcmp(argv[arg], "--jitter") == 0) {
@@ -1073,10 +1114,23 @@ int main(int argc, char **argv)
                     "       engine:  --global (judge S6 instead of S4)\n"
                     "                --request-global (run S6, judge S4)\n"
                     "       detail:  --candidates (dump every candidate)\n"
-                    "       %s --tracks LIST [--verbose]\n",
+                    "       %s --tracks LIST [--results-csv FILE]"
+                    " [--verbose]\n",
                     argv[0], argv[0]);
             return 2;
         }
+    }
+
+    if (results_csv_path != NULL) {
+        g_results_csv = fopen(results_csv_path, "w");
+        if (g_results_csv == NULL) {
+            fprintf(stderr, "cannot open results CSV %s\n", results_csv_path);
+            return 1;
+        }
+        fputs("track,truth_millibpm,reported_millibpm,relation,confidence,"
+              "state,candidate_count,separation,actionable,exact,"
+              "octave_error\n",
+              g_results_csv);
     }
 
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -1125,6 +1179,7 @@ int main(int argc, char **argv)
 
         if (g_total == 0u) {
             puts("\nno tracks analysed");
+            if (g_results_csv != NULL) fclose(g_results_csv);
             return 1;
         }
         if (failures != 0) {
@@ -1137,6 +1192,7 @@ int main(int argc, char **argv)
         audio = (float *)malloc(frames * sizeof(*audio));
         if (audio == NULL) {
             puts("allocation failed");
+            if (g_results_csv != NULL) fclose(g_results_csv);
             return 1;
         }
 
@@ -1240,7 +1296,8 @@ int main(int argc, char **argv)
 
     /* B1 asks for a threshold to be defined explicitly and reported against.
      * The useful question is not one number but whether any threshold
-     * separates correct from incorrect at all, so sweep it. */
+     * separates correct from incorrect at all, so sweep it without changing
+     * the frozen actionable threshold above. */
     printf("\nthreshold sweep (how many of each survive a >= gate):\n");
     printf("  %-10s %-18s %-18s %s\n",
            "threshold", "correct admitted", "wrong admitted", "usable");
@@ -1287,6 +1344,12 @@ int main(int argc, char **argv)
                (g_jitter || g_dynamics || g_drift || g_swing)
                    ? ", with the realism knobs listed above"
                    : " with exact timing and no dynamics");
+    }
+
+    if (g_results_csv != NULL && fclose(g_results_csv) != 0) {
+        fprintf(stderr, "could not finalize results CSV %s\n",
+                results_csv_path);
+        return 1;
     }
 
     return 0;

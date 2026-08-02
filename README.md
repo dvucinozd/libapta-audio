@@ -32,7 +32,7 @@ the POSIX reference tools.
 | Area | Current reference support | Important boundary |
 |---|---|---|
 | Overview and detail waveform | Progressive peak/RMS results, focus-driven detail, three-band overview columns and WOVR/WDTL interchange | Detail tiles do not publish three-band values, and Core 0.1 does not mandate a bit-exact three-band filterbank |
-| Tempo and local beatgrid | BPM candidates, confidence, locking and TEMP/LGRD interchange | Core 0.1 does not mandate a bit-exact tempo algorithm |
+| Tempo and local beatgrid | BPM candidates, confidence, locking and TEMP/LGRD interchange | Independent 188-track validation reopens the confidence-75 zero-metrical-error gate; Core 0.1 does not mandate a bit-exact tempo algorithm |
 | Global grid and dynamic tempo | Segments, explicit beats, pending revisions, GGRD/REVN interchange and CLI selection/inspection | The S6 model remains draft and has no independent interoperability claim |
 | Memory control | Custom allocator, memory budget, static session workspace and two-slot bounded result pools | Resource-class certification is not yet claimed |
 | Desktop input | Reference WAV decoder for PCM16, packed PCM24, PCM32 and float32; mono/stereo | Other codecs require an application or third-party decoder backend |
@@ -76,7 +76,8 @@ Stage S6 status and evidence:
 - [`backends/`](backends/) — reserved scaffolding for future replaceable DSP
   backend packages; the current reference algorithms are built from `src/`.
 - [`ports/`](ports/) — platform integration layers, including ESP-IDF.
-- [`tools/`](tools/) — `apta-analyze`, `apta-inspect` and `apta-validate`.
+- [`tools/`](tools/) — `apta-analyze`, `apta-inspect`, `apta-validate`, the
+  tempo harness and the read-only Rekordbox corpus importer.
 - [`tests/`](tests/) — unit, integration, conformance, fuzz and generated-fixture tests.
 - [`examples/`](examples/) — usage and platform examples.
 - [`packaging/`](packaging/) — reserved packaging scaffolding; install and
