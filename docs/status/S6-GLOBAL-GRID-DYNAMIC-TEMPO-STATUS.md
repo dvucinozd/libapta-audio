@@ -379,10 +379,12 @@ windows make it robust about which tempo region to believe, S4's finer bins make
 it precise once the region is settled.
 
 Section 24.2 of the S4 document proposed comparing independent estimates as a
-source of confidence and noted that neither engine looks at the other. This is
-the first evidence that the comparison would carry information, and it suggests
-something stronger than a confidence term: S6 for selection, S4 for the value.
-That is an architectural change and is not attempted here.
+source of confidence and noted that neither engine looks at the other. Both
+obvious ways to use the comparison were simulated over these 68 tracks before
+being proposed as work, and both fail. Section 16.8 records that.
+
+The headroom is real -- taking whichever engine is closer on each track would
+reach 61 of 68 against S4's 43 -- but neither simple rule captures it.
 
 ### 16.6 Cost, which fell
 
@@ -414,3 +416,45 @@ The synthetic corpus is unchanged for S4 at 23 of 60. S4's output over the 68
 real tracks is byte-identical after the refactor, which is the check that the
 shared helper did not alter the local estimator. 77/77 tests pass, including
 under ASan and UBSan.
+
+### 16.8 Both ways of combining the engines, simulated and rejected
+
+Now that both engines produce a tempo for the same track, the two uses section
+24.2 suggested can be evaluated without writing them. Both were, over these 68
+tracks, and neither survives.
+
+**S6 selects, S4 supplies the value.** Keep S4's answer; where it disagrees with
+S6 by more than three percent, rescale it by the metrical ratio that brings it
+closest to S6. S4 still supplies the precision, S6 only decides which multiple
+of it to believe.
+
+| | within 1% | within 0.1% | median error |
+|---|---:|---:|---:|
+| S4 alone | 43 | 33 | 0.013% |
+| S6 selects, S4 values | 40 | 30 | 0.015% |
+
+It fixes one track and breaks four. The failure is not marginal: S6 answers
+234.91 where the truth is 120.00 and S4 already had 120.01, and the rule dutifully
+drags a correct answer to 240.02. Trusting S6 for selection requires knowing
+when S6 is trustworthy, and S6's own confidence does not say -- it averages 83.6
+when right and 76.8 when wrong.
+
+**Agreement between the engines as confidence.** The disagreement does separate
+the populations, with a median of 0.7% where S4 is right against 4.4% where it
+is wrong. It is still not worth having:
+
+| Gate | precision | recall |
+|---|---:|---:|
+| agreement within 1% | 94.1% | 74.4% |
+| agreement within 2% | 87.5% | 81.4% |
+| shipped confidence >= 70 | **100%** | 67.4% |
+| shipped confidence >= 60 | 97.4% | 86.0% |
+| both, confidence >= 70 and agreement within 2% | 100% | 60.5% |
+
+The grid-fit confidence merged earlier already admits no wrong answer at 70, so
+there is nothing for agreement to catch; combining them only costs recall.
+Section 24.2 named this as one of two candidates for a confidence that knows
+whether the answer is right. The other one, grid fit, took the whole job.
+
+What remains is that S6 is right on 18 tracks where S4 is badly wrong, and no
+rule tried here can tell which those are in advance.
