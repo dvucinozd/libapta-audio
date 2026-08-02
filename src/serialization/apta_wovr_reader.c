@@ -708,6 +708,14 @@ static apta_status_t apta_build_parsed_result(
             column_output->mid = column_input[7];
             column_output->high = column_input[8];
             column_output->flags = column_input[9];
+            /* C1: band values round-trip, so a reader that restored them must
+             * say so. Advertising it from the columns rather than from a
+             * header bit keeps the claim tied to what is actually present. */
+            if ((column_output->flags &
+                 APTA_WAVEFORM_COLUMN_HAS_3BAND) != 0u) {
+                result->info.available_features |=
+                    APTA_FEATURE_WAVEFORM_3BAND;
+            }
         }
 
         packed_output_offset += column_count;

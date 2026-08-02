@@ -34,6 +34,14 @@ apta_status_t apta_tool_write_file_atomic(
     const void *data,
     size_t size);
 
+/*
+ * Every feature a context can be asked for, which is what `--features all`
+ * expands to. Exposed so a test can assert the two agree: spelling the set out
+ * in the parser is how the global grid, dynamic tempo, the three-band overview
+ * and grid locking each came to have no CLI path at one time or another.
+ */
+apta_feature_mask_t apta_tool_all_features(void);
+
 apta_status_t apta_tool_parse_feature_list(
     const char *text,
     apta_feature_mask_t *features_out);

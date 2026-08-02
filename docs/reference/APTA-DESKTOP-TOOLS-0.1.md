@@ -127,7 +127,7 @@ Options:
 ```text
 --profile waveform
 --profile performance
---features waveform,detail,bpm,beatgrid,global,dynamic,all
+--features waveform,detail,3band,bpm,beatgrid,global,dynamic,locking,all
 --help
 --version
 ```
@@ -158,15 +158,24 @@ Each `--features` token adds the features it depends on, so `beatgrid` implies
 |---|---|
 | `waveform` | `WAVEFORM_OVERVIEW` |
 | `detail` | `+ WAVEFORM_DETAIL` |
+| `3band` | `+ WAVEFORM_3BAND` |
 | `bpm` | `+ BPM`, `CONFIDENCE` |
 | `beatgrid` | `+ LOCAL_BEATGRID` |
 | `global` | `+ GLOBAL_BEATGRID` |
 | `dynamic` | `+ DYNAMIC_TEMPO` |
-| `all` | every feature above |
+| `locking` | `+ GRID_LOCKING` |
+| `all` | every feature a context supports |
 
-`global` and `dynamic` were previously unreachable: no token requested them and
-`all` stopped at the local grid, so no shipped tool could run S6 over real
-audio.
+Four features were unreachable at one point or another: no token requested them
+and `all` was a hand-written list that read as complete. `global` and `dynamic`
+had no path at all, which is why S6 had never run over a real recording; the
+first fix for that spelled the list out again and missed `3band` and `locking`.
+
+`all` is now defined as the context's own supported set rather than a list, and
+`apta.tools.features_all` asserts the two agree. The same test requires every
+feature to have a printed name, because `waveform-3band`, `global-beatgrid` and
+`dynamic-tempo` were missing from the name table and so were silently dropped
+from the `features:` line even when their data was in the file.
 
 ### 6.3. Output behavior
 

@@ -337,6 +337,14 @@ apta_status_t apta_internal_waveform_build_snapshot(
             : (full_coverage ? APTA_FEATURE_STABLE : APTA_FEATURE_PARTIAL);
 
     result->info.available_features |= APTA_FEATURE_WAVEFORM_OVERVIEW;
+    /* C1: the columns carry band values and the per-column HAS_3BAND flag, and
+     * the container round-trips both, but the feature bit was never published.
+     * A host asking what it got was told the bands were absent while they sat
+     * in every column. */
+    if ((session->config.requested_features &
+         APTA_FEATURE_WAVEFORM_3BAND) != 0u) {
+        result->info.available_features |= APTA_FEATURE_WAVEFORM_3BAND;
+    }
     /* A4: the overview reports confidence on its own, without S4. */
     if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) != 0u) {
         result->info.available_features |= APTA_FEATURE_CONFIDENCE;
