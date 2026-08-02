@@ -4,6 +4,7 @@
 import importlib.util
 import struct
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -59,6 +60,26 @@ class AnlzParserTests(unittest.TestCase):
 
 
 class ReportTests(unittest.TestCase):
+    def test_reads_optional_candidate_and_global_diagnostics(self):
+        header = (
+            "track,truth_millibpm,reported_millibpm,relation,confidence,state,"
+            "candidate_count,separation,actionable,exact,octave_error,"
+            "candidate_millibpm,candidate_scores,global_millibpm,"
+            "global_confidence\n"
+        )
+        row = (
+            "rbx-a.wav,128000,64000,half,70,4,2,0.1,0,0,1,"
+            '"64000;128000","65535;60000",128400,80\n'
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "results.csv"
+            path.write_text(header + row, encoding="utf-8")
+            result = corpus._read_results(path)
+        self.assertEqual(result[0]["candidate_tempi"], [64.0, 128.0])
+        self.assertEqual(result[0]["candidate_scores"], [65535, 60000])
+        self.assertEqual(result[0]["global_tempo"], 128.4)
+        self.assertEqual(result[0]["global_confidence"], 80)
+
     def test_summarizes_accuracy_confidence_and_octaves(self):
         rows = [
             {
@@ -100,6 +121,61 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(result["fixed_track_ids"], ["a"])
         self.assertEqual(result["broken_track_ids"], ["b"])
         self.assertEqual(result["net_exact_gain"], 0)
+
+    def test_split_is_deterministic_disjoint_and_stratified(self):
+        s4 = [
+            {
+                "track": f"rbx-{index}",
+                "relation": "half-time" if index < 4 else "exact",
+                "confidence": 90 if index < 4 else 70,
+                "octave_error": index < 4,
+            }
+            for index in range(12)
+        ]
+        endorsed = [dict(row) for row in s4]
+        first = corpus.make_split(s4, endorsed, seed="test", holdout_fraction=0.25)
+        second = corpus.make_split(s4, endorsed, seed="test", holdout_fraction=0.25)
+        self.assertEqual(first, second)
+        self.assertEqual(first["track_count"], 12)
+        self.assertEqual(first["development_count"] + first["holdout_count"], 12)
+        assignments = {row["id"]: row["partition"] for row in first["tracks"]}
+        self.assertEqual(len(assignments), 12)
+        self.assertEqual(
+            first["strata"]["s4-high-confidence-octave"]["holdout"], 1
+        )
+        self.assertEqual(first["strata"]["s4-exact-unchanged"]["holdout"], 2)
+
+    def test_split_keeps_singleton_stratum_in_development(self):
+        s4 = [
+            {
+                "track": "rbx-only",
+                "relation": "exact",
+                "confidence": 80,
+                "octave_error": False,
+            }
+        ]
+        endorsed = [
+            {
+                "track": "rbx-only",
+                "relation": "OTHER",
+                "confidence": 80,
+                "octave_error": False,
+            }
+        ]
+        result = corpus.make_split(s4, endorsed)
+        self.assertEqual(result["development_count"], 1)
+        self.assertEqual(result["holdout_count"], 0)
+        self.assertEqual(result["tracks"][0]["stratum"], "endorsement-broken")
+
+    def test_split_rejects_duplicate_s4_ids(self):
+        row = {
+            "track": "rbx-duplicate",
+            "relation": "exact",
+            "confidence": 80,
+            "octave_error": False,
+        }
+        with self.assertRaisesRegex(ValueError, "S4 result set contains duplicate"):
+            corpus.make_split([row, dict(row)], [row, dict(row, track="rbx-other")])
 
 
 if __name__ == "__main__":
