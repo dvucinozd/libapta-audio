@@ -657,7 +657,6 @@ apta_status_t apta_internal_waveform_process(
     uint32_t consumed;
     uint32_t steps;
     uint32_t completed_before;
-    uint64_t start_time;
     apta_status_t status;
 
     *did_work_out = 0u;
@@ -674,13 +673,6 @@ apta_status_t apta_internal_waveform_process(
     completed_before = session->overview_complete_count;
 
     apta_refresh_completed_columns(session);
-
-    start_time = 0u;
-    if (budget->soft_time_budget_us != 0u &&
-        session->context->clock.monotonic_time_ns != NULL) {
-        start_time = session->context->clock.monotonic_time_ns(
-            session->context->clock.user_data);
-    }
 
     while (session->pcm_head != NULL &&
            consumed < frame_limit &&
@@ -718,14 +710,13 @@ apta_status_t apta_internal_waveform_process(
             apta_remove_pcm_node(session, node, previous);
         }
 
-        if (start_time != 0u) {
+        if (session->process_deadline_ns != 0u &&
+            session->context->clock.monotonic_time_ns != NULL) {
             uint64_t now;
-            uint64_t budget_ns;
 
             now = session->context->clock.monotonic_time_ns(
                 session->context->clock.user_data);
-            budget_ns = (uint64_t)budget->soft_time_budget_us * 1000u;
-            if (now - start_time >= budget_ns) {
+            if (now >= session->process_deadline_ns) {
                 break;
             }
         }

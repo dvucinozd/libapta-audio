@@ -276,6 +276,20 @@ apta_status_t APTA_CALL apta_session_process(
         return APTA_ERROR_BUSY;
     }
 
+    session->process_deadline_ns = 0u;
+    if (budget->soft_time_budget_us != 0u &&
+        session->context->clock.monotonic_time_ns != NULL) {
+        const uint64_t now = session->context->clock.monotonic_time_ns(
+            session->context->clock.user_data);
+        const uint64_t duration =
+            (uint64_t)budget->soft_time_budget_us * UINT64_C(1000);
+
+        if (now != 0u) {
+            session->process_deadline_ns =
+                UINT64_MAX - now < duration ? UINT64_MAX : now + duration;
+        }
+    }
+
     if (progress_out != NULL) {
         memset(progress_out, 0, sizeof(*progress_out));
         progress_out->struct_size = (uint32_t)sizeof(*progress_out);
@@ -289,20 +303,24 @@ apta_status_t APTA_CALL apta_session_process(
         status = apta_internal_session_transition(
             session,
             APTA_SESSION_CANCELLED);
+        session->process_deadline_ns = 0u;
         atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
         return status < 0 ? status : APTA_ERROR_CANCELLED;
     }
 
     state = atomic_load_explicit(&session->state, memory_order_acquire);
     if (state == APTA_SESSION_COMPLETED) {
+        session->process_deadline_ns = 0u;
         atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
         return APTA_STATUS_END_OF_INPUT;
     }
     if (state == APTA_SESSION_CANCELLED) {
+        session->process_deadline_ns = 0u;
         atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
         return APTA_ERROR_CANCELLED;
     }
     if (state == APTA_SESSION_FAILED) {
+        session->process_deadline_ns = 0u;
         atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
         return APTA_ERROR_INTERNAL;
     }
@@ -320,6 +338,7 @@ apta_status_t APTA_CALL apta_session_process(
             &did_work,
             &published_output);
         if (work_status < 0) {
+            session->process_deadline_ns = 0u;
             atomic_flag_clear_explicit(
                 &session->process_lock,
                 memory_order_release);
@@ -328,21 +347,27 @@ apta_status_t APTA_CALL apta_session_process(
     }
 
     state = atomic_load_explicit(&session->state, memory_order_acquire);
-    if (state == APTA_SESSION_DRAINING && session->pcm_head == NULL) {
+    if (state == APTA_SESSION_DRAINING && session->pcm_head == NULL &&
+        !apta_internal_analysis_pending(session)) {
         status = apta_internal_session_transition(
             session,
             APTA_SESSION_COMPLETED);
         if (progress_out != NULL && status >= 0) {
             progress_out->published_generation = session->generation;
         }
+        session->process_deadline_ns = 0u;
         atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
         return status < 0 ? status : APTA_STATUS_END_OF_INPUT;
     }
 
+    session->process_deadline_ns = 0u;
     atomic_flag_clear_explicit(&session->process_lock, memory_order_release);
 
     if (did_work != 0u || published_output != 0u) {
         return work_status;
+    }
+    if (work_status == APTA_STATUS_MORE_WORK) {
+        return APTA_STATUS_MORE_WORK;
     }
 
     return APTA_STATUS_WOULD_BLOCK;

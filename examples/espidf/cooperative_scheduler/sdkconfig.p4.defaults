@@ -2,15 +2,15 @@
 #
 # ESP32-P4 with external PSRAM.
 #
-# At API 0.3.0 the measured global-beatgrid configuration needs 602,496 bytes
+# At API 0.3.0 the Phase 7 global-beatgrid configuration needs 603,504 bytes
 # of workspace. It completes on the P4 v1.3 with internal memory only, averaging
 # 12,738 us per process call for that feature set.
 #
 # With these settings the same board reports 32 MB of PSRAM and every feature
-# set runs. At the same 602,496-byte workspace the PSRAM-enabled placement
-# averaged 4,835 us for the global-grid feature set, 2.6 times faster than
-# forcing all allocations into the board's fragmented internal regions. See
-# sections 29 and 30 of the S4 status document.
+# set runs. Phase 7 measured the cooperative global-grid profile at 2,670 us
+# average, p99 <= 6,000 us and 10,295 us maximum. See the Phase 7 bounded-refresh
+# status document; sections 29 and 30 of the S4 status document retain the
+# pre-Phase-7 workspace/placement history.
 #
 # Use alongside sdkconfig.defaults:
 #

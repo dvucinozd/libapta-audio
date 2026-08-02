@@ -166,12 +166,12 @@ The ESP-IDF component exposes the four most useful ones through `Kconfig`; see
 `ports/espidf/README.md`.
 
 Derived constants stay derived and are not overridable:
-`APTA_INTERNAL_DETAIL_TILE_FRAMES`, `APTA_INTERNAL_GLOBAL_MAX_WINDOWS`,
-`APTA_INTERNAL_GLOBAL_MAX_SEGMENTS` and `APTA_INTERNAL_GLOBAL_MAX_BEATS`.
+`APTA_INTERNAL_DETAIL_TILE_FRAMES`, `APTA_INTERNAL_GLOBAL_MAX_SEGMENTS` and
+`APTA_INTERNAL_GLOBAL_MAX_BEATS`.
 
 Every invariant the code depends on is a `_Static_assert` in the same header,
-so an incoherent combination fails to compile instead of corrupting a ring
-buffer or overflowing a stack array.
+so an incoherent combination fails to compile instead of corrupting a ring or
+bounded workspace array.
 
 Any override changes what `apta_query_workspace_requirements()` reports,
 because that function is computed from the same constants. Call it rather than

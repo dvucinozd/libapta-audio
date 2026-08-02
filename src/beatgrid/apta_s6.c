@@ -371,6 +371,75 @@ static int apta_s6_estimate_window(
     return 1;
 }
 
+static void apta_s6_refresh_add_window(
+    apta_internal_s6_session_state_t *state,
+    const apta_s6_window_t *window)
+{
+    apta_grid_segment_t *segment;
+    uint32_t difference = UINT32_MAX;
+
+    if (state == NULL || window == NULL) {
+        return;
+    }
+    if (state->refresh_segment_count != 0u) {
+        const uint32_t previous_tempo =
+            state->refresh_segments[state->refresh_segment_count - 1u]
+                .nominal_tempo_millibpm;
+        difference = previous_tempo > window->tempo_millibpm
+                         ? previous_tempo - window->tempo_millibpm
+                         : window->tempo_millibpm - previous_tempo;
+    }
+    if (state->refresh_segment_count == 0u || difference > 1500u) {
+        if (state->refresh_segment_count >=
+            APTA_INTERNAL_GLOBAL_MAX_SEGMENTS) {
+            segment =
+                &state->refresh_segments[state->refresh_segment_count - 1u];
+            segment->applicability_range.end_frame =
+                window->end_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
+            segment->flags |= APTA_GRID_FLAG_DEGRADED;
+            state->refresh_degraded = 1u;
+            return;
+        }
+        segment = &state->refresh_segments[state->refresh_segment_count];
+        memset(segment, 0, sizeof(*segment));
+        segment->struct_size = (uint32_t)sizeof(*segment);
+        segment->api_version = APTA_API_VERSION;
+        apta_s6_init_range(
+            &segment->applicability_range,
+            window->first_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN,
+            window->end_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN);
+        segment->anchor_position.whole_frame =
+            (window->first_bin + window->phase_bins) *
+            APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
+        segment->nominal_tempo_millibpm = window->tempo_millibpm;
+        segment->confidence = window->confidence;
+        segment->state = APTA_FEATURE_PROVISIONAL;
+        segment->segment_id = state->refresh_segment_count + 1u;
+        state->refresh_segment_window_counts[
+            state->refresh_segment_count] = 1u;
+        state->refresh_segment_count += 1u;
+    } else {
+        const uint32_t segment_index = state->refresh_segment_count - 1u;
+        const uint32_t count =
+            state->refresh_segment_window_counts[segment_index];
+
+        segment = &state->refresh_segments[segment_index];
+        segment->nominal_tempo_millibpm =
+            (uint32_t)(((uint64_t)segment->nominal_tempo_millibpm * count +
+                        window->tempo_millibpm) /
+                       (count + 1u));
+        segment->confidence = (apta_confidence_value_t)(
+            ((uint32_t)segment->confidence * count + window->confidence) /
+            (count + 1u));
+        segment->applicability_range.end_frame =
+            window->end_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
+        state->refresh_segment_window_counts[segment_index] = count + 1u;
+    }
+    state->refresh_total_confidence += window->confidence;
+    state->refresh_valid_confidence_count += 1u;
+    state->refresh_window_count += 1u;
+}
+
 static uint64_t apta_s6_signature(
     const apta_internal_s6_session_state_t *state)
 {
@@ -620,15 +689,12 @@ apta_status_t apta_internal_s6_process_sample(
     return APTA_STATUS_OK;
 }
 
-apta_status_t apta_internal_s6_refresh(apta_session_t *session)
+apta_status_t apta_internal_s6_refresh(
+    apta_session_t *session,
+    uint32_t step_limit,
+    uint32_t *completed_steps_out)
 {
     apta_internal_s6_session_state_t *state;
-    /* C3: stack array, bounded and asserted by APTA_INTERNAL_GLOBAL_MAX_WINDOWS
-     * in apta_internal.h. This runs inside process(), so its size is part of
-     * the host's task stack budget. */
-    apta_s6_window_t windows[APTA_INTERNAL_GLOBAL_MAX_WINDOWS];
-    uint32_t window_count = 0u;
-    uint32_t segment_window_counts[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS] = {0u};
     uint64_t evidence_first;
     uint64_t evidence_end;
     uint64_t cursor;
@@ -642,149 +708,153 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
     uint32_t valid_confidence_count = 0u;
     int degraded = 0;
     apta_status_t status;
+    uint32_t completed_steps = 0u;
+
+    if (completed_steps_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    *completed_steps_out = 0u;
 
     if (!apta_s6_enabled(session) || session->s6 == NULL) {
         return APTA_STATUS_OK;
     }
     state = session->s6;
-    if (!apta_s6_find_evidence(session, &evidence_first, &evidence_end) ||
-        evidence_end - evidence_first < APTA_INTERNAL_GLOBAL_MIN_BINS) {
-        return APTA_STATUS_OK;
+    if (state->refresh_stage == 0u) {
+        if (!apta_s6_find_evidence(session, &evidence_first, &evidence_end) ||
+            evidence_end - evidence_first < APTA_INTERNAL_GLOBAL_MIN_BINS) {
+            state->refresh_pending = 0u;
+            return APTA_STATUS_OK;
+        }
+
+        /* A2: as in S4, skip the autocorrelation until evidence grows. */
+        if (evidence_end < state->refreshed_evidence_end) {
+            state->refreshed_evidence_end = 0u;
+        } else if (!(session->end_of_input_signalled &&
+                     state->state != APTA_FEATURE_FINAL) &&
+                   evidence_end < state->refreshed_evidence_end +
+                                      APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS) {
+            state->refresh_pending = 0u;
+            return APTA_STATUS_OK;
+        }
+        if (state->global_flux == NULL ||
+            evidence_end - evidence_first >
+                (uint64_t)state->global_flux_capacity) {
+            state->refresh_pending = 0u;
+            return APTA_STATUS_OK;
+        }
+        if (step_limit == 0u) {
+            state->refresh_pending = 1u;
+            return APTA_STATUS_MORE_WORK;
+        }
+
+        /* Flux fill is one bounded scheduler step; each following step owns
+         * one compile-time-bounded global window. */
+        for (cursor = evidence_first; cursor < evidence_end; ++cursor) {
+            state->global_flux[(uint32_t)(cursor - evidence_first)] =
+                (float)apta_s6_flux_uncached(state, cursor, evidence_first);
+        }
+        state->flux_base_bin = evidence_first;
+        state->refresh_evidence_first = evidence_first;
+        state->refresh_evidence_end = evidence_end;
+        state->refresh_next_window = evidence_first;
+        state->refresh_segment_count = 0u;
+        state->refresh_window_count = 0u;
+        state->refresh_total_confidence = 0u;
+        state->refresh_valid_confidence_count = 0u;
+        state->refresh_degraded = 0u;
+        memset(state->refresh_segments, 0, sizeof(state->refresh_segments));
+        memset(state->refresh_segment_window_counts,
+               0,
+               sizeof(state->refresh_segment_window_counts));
+        state->refresh_stage = 1u;
+        state->refresh_pending = 0u;
+        completed_steps += 1u;
     }
 
-    /* A2: as in S4, skip the per-window autocorrelation when too little new
-     * evidence has arrived. Draining and completed sessions always refresh so
-     * the grid can reach its final state. */
-    if (evidence_end < state->refreshed_evidence_end) {
-        state->refreshed_evidence_end = 0u;
-    } else if (!session->end_of_input_signalled &&
-               atomic_load_explicit(&session->state, memory_order_acquire) !=
-                   APTA_SESSION_COMPLETED &&
-               evidence_end < state->refreshed_evidence_end +
-                                  APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS) {
+    evidence_first = state->refresh_evidence_first;
+    evidence_end = state->refresh_evidence_end;
+    while (state->refresh_next_window < evidence_end &&
+           completed_steps < step_limit) {
+        apta_s6_window_t window;
+        uint64_t window_end = state->refresh_next_window +
+                              APTA_INTERNAL_GLOBAL_WINDOW_BINS;
+
+        if (window_end > evidence_end) {
+            window_end = evidence_end;
+        }
+        cursor = state->refresh_next_window;
+        state->global_flux[(uint32_t)(cursor - state->flux_base_bin)] =
+            (float)apta_s6_flux_uncached(state, cursor, cursor);
+        if (apta_s6_estimate_window(session, cursor, window_end, &window)) {
+            apta_s6_refresh_add_window(state, &window);
+        }
+        state->refresh_next_window = window_end;
+        completed_steps += 1u;
+        if (session->process_deadline_ns != 0u &&
+            session->context->clock.monotonic_time_ns != NULL &&
+            session->context->clock.monotonic_time_ns(
+                session->context->clock.user_data) >=
+                session->process_deadline_ns) {
+            break;
+        }
+    }
+    if (state->refresh_next_window < evidence_end ||
+        completed_steps >= step_limit) {
+        *completed_steps_out = completed_steps;
+        return APTA_STATUS_MORE_WORK;
+    }
+
+    /* Fallback and atomic commit are one final scheduler step. */
+    completed_steps += 1u;
+    if (state->refresh_window_count == 0u && session->has_tempo) {
+        apta_s6_window_t window;
+
+        memset(&window, 0, sizeof(window));
+        window.first_bin = evidence_first;
+        window.end_bin = evidence_end;
+        window.tempo_millibpm = session->tempo_value.tempo_millibpm;
+        window.confidence = session->tempo_value.confidence;
+        window.score = 0.05f;
+        state->refresh_degraded = 1u;
+        apta_s6_refresh_add_window(state, &window);
+    }
+
+    state->refreshed_evidence_end = evidence_end;
+    state->refresh_stage = 0u;
+    state->refresh_pending = 0u;
+    {
+        uint64_t current_first;
+        uint64_t current_end;
+
+        if (apta_s6_find_evidence(session, &current_first, &current_end) &&
+            (current_first < evidence_first ||
+             current_end < evidence_end ||
+             (session->end_of_input_signalled &&
+              (current_first != evidence_first ||
+               current_end != evidence_end)) ||
+             current_end >= evidence_end +
+                                APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS)) {
+            state->refresh_pending = 1u;
+        }
+    }
+    *completed_steps_out = completed_steps;
+    if (state->refresh_segment_count == 0u) {
         return APTA_STATUS_OK;
     }
-    state->refreshed_evidence_end = evidence_end;
 
     old_signature = state->signature;
     old_state = state->state;
     old_revision_state = state->revision.state;
     old_mutation = state->mutation_serial;
-    state->segment_count = 0u;
+    state->segment_count = state->refresh_segment_count;
+    memcpy(state->segments,
+           state->refresh_segments,
+           (size_t)state->segment_count * sizeof(state->segments[0]));
     state->beat_count = 0u;
     state->flags = 0u;
-
-    /* A1: fill the flux array once for the whole evidence range rather than
-     * once per window. Flux depends on the window start only at the window's
-     * first bin, where the predecessor is treated as absent, so each window
-     * needs a single boundary patch below instead of its own fill. */
-    if (state->global_flux == NULL ||
-        evidence_end - evidence_first > (uint64_t)state->global_flux_capacity) {
-        return APTA_STATUS_OK;
-    }
-    for (cursor = evidence_first; cursor < evidence_end; ++cursor) {
-        state->global_flux[(uint32_t)(cursor - evidence_first)] =
-            (float)apta_s6_flux_uncached(state, cursor, evidence_first);
-    }
-    state->flux_base_bin = evidence_first;
-
-    for (cursor = evidence_first; cursor < evidence_end;) {
-        uint64_t window_end = cursor + APTA_INTERNAL_GLOBAL_WINDOW_BINS;
-        if (window_end > evidence_end) {
-            window_end = evidence_end;
-        }
-        /* Boundary patch: for this window the bin at `cursor` has no
-         * predecessor. Windows are disjoint and contiguous, so this slot is
-         * read only by the window that starts on it and never needs
-         * restoring. */
-        state->global_flux[(uint32_t)(cursor - state->flux_base_bin)] =
-            (float)apta_s6_flux_uncached(state, cursor, cursor);
-        if (window_count < sizeof(windows) / sizeof(windows[0]) &&
-            apta_s6_estimate_window(
-                session,
-                cursor,
-                window_end,
-                &windows[window_count])) {
-            window_count += 1u;
-        }
-        cursor = window_end;
-    }
-
-    if (window_count == 0u && session->has_tempo) {
-        memset(&windows[0], 0, sizeof(windows[0]));
-        windows[0].first_bin = evidence_first;
-        windows[0].end_bin = evidence_end;
-        windows[0].tempo_millibpm = session->tempo_value.tempo_millibpm;
-        windows[0].phase_bins = 0u;
-        windows[0].confidence = session->tempo_value.confidence;
-        windows[0].score = 0.05f;
-        window_count = 1u;
-        degraded = 1;
-    }
-    if (window_count == 0u) {
-        return APTA_STATUS_OK;
-    }
-
-    for (index = 0u; index < window_count; ++index) {
-        const apta_s6_window_t *window = &windows[index];
-        apta_grid_segment_t *segment;
-        uint32_t difference = UINT32_MAX;
-
-        if (state->segment_count != 0u) {
-            const uint32_t previous_tempo =
-                state->segments[state->segment_count - 1u].nominal_tempo_millibpm;
-            difference = previous_tempo > window->tempo_millibpm
-                             ? previous_tempo - window->tempo_millibpm
-                             : window->tempo_millibpm - previous_tempo;
-        }
-        if (state->segment_count == 0u || difference > 1500u) {
-            if (state->segment_count >= APTA_INTERNAL_GLOBAL_MAX_SEGMENTS) {
-                segment = &state->segments[state->segment_count - 1u];
-                segment->applicability_range.end_frame =
-                    window->end_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
-                segment->flags |= APTA_GRID_FLAG_DEGRADED;
-                degraded = 1;
-                continue;
-            }
-            segment = &state->segments[state->segment_count];
-            memset(segment, 0, sizeof(*segment));
-            segment->struct_size = (uint32_t)sizeof(*segment);
-            segment->api_version = APTA_API_VERSION;
-            apta_s6_init_range(
-                &segment->applicability_range,
-                window->first_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN,
-                window->end_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN);
-            segment->anchor_position.whole_frame =
-                (window->first_bin + window->phase_bins) *
-                APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
-            segment->nominal_tempo_millibpm = window->tempo_millibpm;
-            segment->confidence = window->confidence;
-            segment->state = APTA_FEATURE_PROVISIONAL;
-            segment->segment_id = state->segment_count + 1u;
-            segment_window_counts[state->segment_count] = 1u;
-            state->segment_count += 1u;
-        } else {
-            const uint32_t segment_index = state->segment_count - 1u;
-            const uint32_t count = segment_window_counts[segment_index];
-            segment = &state->segments[segment_index];
-            segment->nominal_tempo_millibpm =
-                (uint32_t)(((uint64_t)segment->nominal_tempo_millibpm * count +
-                            window->tempo_millibpm) /
-                           (count + 1u));
-            segment->confidence = (apta_confidence_value_t)(
-                ((uint32_t)segment->confidence * count + window->confidence) /
-                (count + 1u));
-            segment->applicability_range.end_frame =
-                window->end_bin * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN;
-            segment_window_counts[segment_index] = count + 1u;
-        }
-        total_confidence += window->confidence;
-        valid_confidence_count += 1u;
-    }
-
-    if (state->segment_count == 0u) {
-        return APTA_STATUS_OK;
-    }
+    total_confidence = state->refresh_total_confidence;
+    valid_confidence_count = state->refresh_valid_confidence_count;
+    degraded = state->refresh_degraded != 0u;
 
     /*
      * Hand the nominal tempo to the local estimator, which uses it to break
@@ -827,8 +897,10 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
     if (session->end_of_input_signalled && evidence_first == 0u &&
         evidence_end * APTA_INTERNAL_GLOBAL_FRAMES_PER_BIN >=
             session->final_end_frame &&
-        atomic_load_explicit(&session->state, memory_order_acquire) ==
-            APTA_SESSION_COMPLETED) {
+        (atomic_load_explicit(&session->state, memory_order_acquire) ==
+             APTA_SESSION_DRAINING ||
+         atomic_load_explicit(&session->state, memory_order_acquire) ==
+             APTA_SESSION_COMPLETED)) {
         state->state = APTA_FEATURE_FINAL;
     }
 
@@ -941,7 +1013,28 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
         old_revision_state != state->revision.state || old_mutation == 0u) {
         state->mutation_serial += 1u;
     }
+    if (state->refresh_pending) {
+        if (completed_steps < step_limit) {
+            uint32_t follow_steps = 0u;
+            const apta_status_t follow_status = apta_internal_s6_refresh(
+                session,
+                step_limit - completed_steps,
+                &follow_steps);
+
+            completed_steps += follow_steps;
+            *completed_steps_out = completed_steps;
+            return follow_status;
+        }
+        return APTA_STATUS_MORE_WORK;
+    }
     return APTA_STATUS_OK;
+}
+
+int apta_internal_s6_refresh_pending(const apta_session_t *session)
+{
+    return session != NULL && session->s6 != NULL &&
+           (session->s6->refresh_stage != 0u ||
+            session->s6->refresh_pending != 0u);
 }
 
 apta_feature_mask_t apta_internal_s6_pending_features(

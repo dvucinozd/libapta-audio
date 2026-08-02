@@ -18,6 +18,15 @@
         }                                                                    \
     } while (0)
 
+static apta_status_t refresh_now(apta_session_t *session)
+{
+    uint32_t completed_steps = 0u;
+    return apta_internal_s4_refresh(
+        session,
+        UINT32_MAX,
+        &completed_steps);
+}
+
 static int create_session(
     apta_context_t *context,
     apta_session_t **session_out)
@@ -98,7 +107,7 @@ int main(void)
     CHECK(session->s4_evidence_dirty == 0u);
     CHECK(session->s4_evidence_first == 0u);
     CHECK(session->s4_evidence_end == APTA_INTERNAL_MIN_TEMPO_BINS);
-    CHECK(apta_internal_s4_refresh(session) == APTA_STATUS_OK);
+    CHECK(refresh_now(session) == APTA_STATUS_OK);
     CHECK(session->s4_evidence_first == 0u);
     CHECK(session->s4_evidence_end == APTA_INTERNAL_MIN_TEMPO_BINS);
 
@@ -121,7 +130,7 @@ int main(void)
      * itself dirty and the conservative scan finds the longer surviving side. */
     CHECK(fill_bin(session, 5000u, APTA_INTERNAL_ONSET_FRAMES_PER_BIN) == 0);
     CHECK(session->s4_evidence_dirty != 0u);
-    CHECK(apta_internal_s4_refresh(session) == APTA_STATUS_OK);
+    CHECK(refresh_now(session) == APTA_STATUS_OK);
     CHECK(session->s4_evidence_dirty == 0u);
     CHECK(session->s4_evidence_first == 905u);
     CHECK(session->s4_evidence_end ==
@@ -148,7 +157,7 @@ int main(void)
     CHECK(session->s4_evidence_end == 1u);
     session->end_of_input_signalled = 1u;
     session->final_end_frame = APTA_INTERNAL_ONSET_FRAMES_PER_BIN + 17u;
-    CHECK(apta_internal_s4_refresh(session) == APTA_STATUS_OK);
+    CHECK(refresh_now(session) == APTA_STATUS_OK);
     CHECK(session->s4_evidence_first == 0u);
     CHECK(session->s4_evidence_end == 2u);
 

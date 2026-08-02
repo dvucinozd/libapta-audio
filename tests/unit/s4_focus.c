@@ -118,7 +118,7 @@ int main(void)
     focus.lookahead_frames = 24000u;
     CHECK(apta_session_set_focus(session, &focus) == APTA_STATUS_OK);
     status = apta_session_process(session, &budget, NULL);
-    CHECK(status == APTA_STATUS_OK);
+    CHECK(status == APTA_STATUS_OK || status == APTA_STATUS_MORE_WORK);
 
     new_result = apta_session_acquire_result(session);
     CHECK(new_result != NULL);
