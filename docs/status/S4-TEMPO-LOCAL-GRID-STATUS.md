@@ -1237,3 +1237,101 @@ The ambiguous patterns are kept. They exercise the octave machinery, and B1's
 requirement of zero high-confidence octave errors is meaningful only against
 material that offers octave errors to make. What changes is that their rate is
 no longer averaged into a number presented as accuracy.
+
+## 28. The global estimator endorses a local candidate
+
+Section 16.8 of the S6 status document rejected both obvious ways of combining
+the engines, and closed by noting that S6 is right on 18 tracks where S4 is
+badly wrong with no rule able to say which those are. This is a third way,
+found by asking what is actually wrong on each of the 25 misses rather than by
+proposing a combination and testing it.
+
+### 28.1 Two faults, not one
+
+The corpus tool gained `--candidates`, which dumps every candidate with its
+score instead of only the winner. That separates faults the selected tempo
+cannot distinguish:
+
+| Fault | Count | What it means |
+|---|---:|---|
+| Proposed and lost | 11 | The right answer was in the list and was outscored |
+| Never proposed | 14 | The search did not offer it at all |
+
+The eleven are strikingly consistent. The correct answer sits at slot 1 or 2
+with a score of 53,470 to 64,553 against the winner's 65,535 -- 82 to 98 percent
+-- and confidence is low, 40 to 66. The estimator is not confidently wrong; it
+is uncertain, and the runner-up is right.
+
+Eight of the 18 tracks S6 gets right are in this group. Those need no new
+search, only a reason to prefer a candidate already published.
+
+### 28.2 Promotion, and why it is this weak
+
+S6 supplies that reason. When its nominal tempo lands within one percent of a
+candidate that already scored at least 55,000, that candidate moves to the head
+of the list.
+
+The rule never computes a tempo. That is deliberate: the combiner rejected in
+section 16.8 rescaled S4's winner by a metrical ratio toward S6, which could
+produce a value neither engine had proposed -- 240.02 against a truth of
+120.00 -- and broke four tracks to fix one. Promotion can only ever choose a
+worse member of a list S4 already published, and `apta.s4.endorsement` pins
+that: the candidate set is identical with and without the global grid
+requested, only its order changes.
+
+S6 runs after S4 within a process call, so S4 reads the previous generation's
+value. Analysis is progressive and S6 settles long before the end of a track,
+so the published result converges on a current endorsement.
+
+The tempo handed over is the longest segment's, not the first. A track that
+opens with an intro at a different feel would otherwise be represented by its
+least typical part.
+
+### 28.3 Measured
+
+Over the same 68 Rekordbox-annotated tracks, with both features requested:
+
+| | S4 alone | With endorsement |
+|---|---:|---:|
+| within 1% | 43 | **50** |
+| within 0.1% | 33 | **40** |
+| median error among correct | 0.013% | 0.013% |
+| median minutes to half a beat | 31.2 | 31.2 |
+| precision at confidence 70 | 29/29 | 29/29 |
+
+Seven fixed, none broken. The precision figures are unchanged because promotion
+selects an S4 candidate, which carries S4's sub-bin refinement; what improves is
+which candidate.
+
+It fires on 8 of 68 tracks and is correct on all 8. One of those was already
+correct and stayed so.
+
+Synthetic material is unaffected: the representative population holds at 18 of
+20, and the ambiguous one moves from 5 to 6.
+
+### 28.4 The thresholds were chosen on this corpus
+
+One percent and 55,000 were selected by sweeping the same 68 tracks the result
+is reported on, which is fitting to the test set and worth naming.
+
+What makes it defensible rather than fitted is the shape of the surface. Every
+tolerance from 0.3 to 2 percent and every score threshold from 0 to 58,000
+improves on the baseline, over a range of 45 to 49 within 1%. A threshold of
+55,000 or above produces zero regressions at every tolerance tested. The gain
+sits on a plateau, not a peak.
+
+A second annotated library would still be the thing that confirms it, and none
+was available.
+
+### 28.5 What this does not reach
+
+The 14 tracks where the right answer was never proposed are untouched, and ten
+of the eighteen S6 gets right are among them. Reaching those means changing the
+search, not the selection.
+
+The seven newly-correct tracks all sit at confidence 40 to 48, below the
+actionable threshold of 75 and below the gate of 70 where precision is
+currently perfect. They are right and not trusted. Raising confidence on an
+endorsement is arguable -- independent agreement is evidence -- but section 16.8
+measured cross-engine agreement as a gate and found it worse than the shipped
+confidence, so it is not done here on a sample of eight.

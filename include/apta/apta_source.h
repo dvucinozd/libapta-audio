@@ -175,12 +175,11 @@ apta_session_signal_end_of_input(
  * Callable only in APTA_SESSION_CREATED, like apta_session_set_source(), and
  * subject to the same host-serialization rule as every other mutating call.
  *
- * The result must carry APTA_FEATURE_WAVEFORM_OVERVIEW and its column geometry
- * must match the session, or APTA_ERROR_CONFLICT is returned. Note that a
- * parsed result does not record the source sample rate, channel count or track
- * length, so the library cannot check those: seeding from a result produced
- * with different source geometry is the caller's responsibility to avoid. See
- * docs/api/APTA-SESSION-SEEDING-0.1.md.
+ * The result must carry APTA_FEATURE_WAVEFORM_OVERVIEW, and its column
+ * geometry, source sample rate, channel count and track length must match the
+ * session, or APTA_ERROR_CONFLICT is returned. A length that is unknown on
+ * either side is not a conflict, since a checkpoint can predate the point where
+ * the length became known. See docs/api/APTA-SESSION-SEEDING-0.1.md.
  *
  * Only waveform coverage is seeded. Tempo and beatgrid engines rebuild their
  * own evidence from the PCM that follows, because the onset timeline they need

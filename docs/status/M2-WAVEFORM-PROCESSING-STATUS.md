@@ -317,7 +317,13 @@ all three rather than a fourth copy.
 ### Not changed
 
 The detail tile mechanism keeps its own fixed geometry, per the work order.
-Whether the WOVR container header carries `frames_per_column` was not
-investigated; a serialize and parse round trip at a non-default resolution is
-not covered by `apta.waveform.resolution`, which checks the live result only.
-That is the remaining gap for this task.
+
+> **Closed.** The WOVR payload does carry `frames_per_column`, at offset 4,
+> written and restored symmetrically, so nothing was broken -- only untested.
+> `apta.waveform.resolution` now serializes and parses at 256, 512, 1024 and
+> 4096 and requires the parsed resolution and column count to match what was
+> requested. More than one value is checked because a reader that ignored the
+> field would still agree with whichever value happens to be the default.
+>
+> The file header of that test had claimed the round trip was covered since it
+> was written. It was not.

@@ -751,6 +751,54 @@ estimate_ready:
         return APTA_STATUS_OK;
     }
 
+    /*
+     * Let the global estimator promote one of these candidates over the local
+     * winner. Only a candidate already in the list, only when S6 lands squarely
+     * on it, and only when it already scored well on S4's own evidence. See
+     * APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE for why it is this weak.
+     */
+    if (session->s6_nominal_tempo_millibpm != 0u && candidate_count > 1u) {
+        const float endorsed = (float)session->s6_nominal_tempo_millibpm;
+        uint32_t best = 0u;
+        uint32_t entry;
+
+        for (entry = 1u; entry < candidate_count; ++entry) {
+            const apta_tempo_candidate_t *candidate =
+                &session->tempo_candidates[entry];
+            float distance;
+
+            if (candidate->score < APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE) {
+                continue;
+            }
+            distance = (float)candidate->tempo_millibpm - endorsed;
+            if (distance < 0.0f) {
+                distance = -distance;
+            }
+            if (distance / endorsed >
+                APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
+                continue;
+            }
+            if (best == 0u ||
+                candidate->score > session->tempo_candidates[best].score) {
+                best = entry;
+            }
+        }
+        if (best != 0u) {
+            const apta_tempo_candidate_t promoted =
+                session->tempo_candidates[best];
+
+            /* Move it to the front rather than rewriting the selection, so the
+             * candidate list stays ordered by what was published and a host
+             * reading it sees the same answer at slot zero. */
+            for (entry = best; entry > 0u; --entry) {
+                session->tempo_candidates[entry] =
+                    session->tempo_candidates[entry - 1u];
+            }
+            session->tempo_candidates[0] = promoted;
+            flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+        }
+    }
+
     selected_tempo = session->tempo_candidates[0].tempo_millibpm;
     for (lag = 0u; lag < candidate_count; ++lag) {
         session->tempo_candidates[lag].relation_to_selected =

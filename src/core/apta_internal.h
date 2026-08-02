@@ -384,6 +384,41 @@ typedef struct {
 #define APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS 16u
 #endif
 
+/*
+ * When the global estimator may promote one of the local estimator's own
+ * candidates over the local winner.
+ *
+ * The two engines fail differently: S6's long windows make it robust about
+ * which tempo region is right, S4's fine bins make it precise once the region
+ * is settled. Measured over 68 real tracks, S4 is wrong on 25, and on 11 of
+ * those the correct answer was already in its candidate list, beaten by a
+ * margin -- the runner-up scored 82 to 98 percent of the winner.
+ *
+ * Promotion is deliberately weak. It selects a candidate S4 already produced
+ * and never computes a new tempo, because an earlier attempt that rescaled the
+ * winner toward S6 by a metrical ratio could invent a value neither engine
+ * proposed -- 240.02 against a truth of 120.00 -- and lost more than it gained.
+ *
+ * ENDORSE_TOLERANCE: how close S6 must be to a candidate to endorse it, as a
+ * fraction of the candidate. One percent is tighter than S6's own resolution,
+ * so agreement means S6 landed squarely on the candidate rather than near it.
+ *
+ * ENDORSE_MIN_SCORE: the endorsed candidate must already have scored this much
+ * of the winner, out of 65535. Below it S6 can promote something S4's own
+ * evidence rejected, which is where the regressions were.
+ *
+ * Both were chosen on that corpus, which is a risk worth naming: the gain sits
+ * on a plateau rather than a peak -- every tolerance from 0.3 to 2 percent and
+ * every threshold from 0 to 58000 improves on the baseline -- but a second
+ * library has not confirmed them.
+ */
+#ifndef APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE
+#define APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE 0.01f
+#endif
+#ifndef APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE
+#define APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE 55000u
+#endif
+
 typedef struct {
     uint64_t bin_index;
     uint32_t sum_absolute;
@@ -551,6 +586,12 @@ struct apta_session {
      * half a beat inside two minutes. Cached with the estimate for the same
      * reason as the ambiguity and the grid fit. */
     float s4_cached_lag_offsets[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];
+    /* The global estimator's most recent nominal tempo, or zero before it has
+     * one. S6 runs after S4 within a process call -- the layering is waveform,
+     * then S4, then S6 -- so S4 reads the previous generation's value. Analysis
+     * is progressive and S6 settles well before the end of a track, so the
+     * published result converges on an endorsement from a current estimate. */
+    uint32_t s6_nominal_tempo_millibpm;
     uint32_t tempo_candidate_count;
     apta_tempo_value_t tempo_value;
     apta_tempo_candidate_t tempo_candidates[APTA_INTERNAL_MAX_TEMPO_CANDIDATES];

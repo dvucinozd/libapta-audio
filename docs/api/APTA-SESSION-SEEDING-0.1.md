@@ -70,23 +70,33 @@ Checked by the library:
   resolution;
 - no seeded range extends past the session's `total_frames`.
 
-**Not checked, because the data does not exist:** the source sample rate, the
-channel count and the source track length. `apta_result_info_t` carries none of
-them and no container section records them. A result produced from a 48 kHz
-stereo master and seeded into a 44.1 kHz mono session is accepted, and the
-seeded columns then describe different audio than the session will analyse.
+**Also checked:** the source sample rate, the channel count and the source
+track length. A length that is unknown on either side is not a conflict, since
+a checkpoint can predate the point where the length became known; two known
+lengths that disagree are.
 
-The caller must guarantee that the result came from the same source, decoded
-the same way. In practice that means storing the checkpoint alongside whatever
-identifies the source in the host's own library -- a track identifier and a
-decoder configuration -- and refusing to seed when either differs. The session
-metadata section is a reasonable place to carry that, since it round trips
-through the container.
+> **Correction.** This section previously said none of the three could be
+> checked, because "`apta_result_info_t` carries none of them and no container
+> section records them", and that closing the gap meant a format change with a
+> section version bump and a conformance-manifest update.
+>
+> That was wrong. They are not in a *section* -- they are in the container
+> *header*, at offsets 40, 48 and 52, written by `apta_wovr_writer.c` and
+> restored by the parser into the result. Nothing but a comparison was missing,
+> and no format change was involved. A result from a 48 kHz stereo master
+> seeded into a 44.1 kHz mono session used to be accepted; it now returns
+> `APTA_ERROR_CONFLICT`, and `apta.session.seeding` covers all three.
 
-Closing this gap properly means recording source geometry in the container,
-which is a format change requiring a section version bump and a
-conformance-manifest update. That was outside the scope of the change that
-added this entry point.
+`apta_result_info_t` still does not expose these fields, so a host cannot run
+the same comparison itself before calling. Adding them is an API addition
+rather than a format change, and is not done here.
+
+Identity is still the caller's problem. Matching geometry does not mean matching
+audio: two different 44.1 kHz stereo tracks of the same length seed each other
+without complaint. Storing the checkpoint alongside whatever identifies the
+source in the host's own library remains necessary, and the session metadata
+section is a reasonable place to carry that, since it round trips through the
+container.
 
 ## 5. Example
 

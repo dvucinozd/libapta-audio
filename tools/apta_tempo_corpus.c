@@ -335,6 +335,15 @@ static int g_swing;
  * pipeline around it. */
 static int g_global;
 
+/* --candidates: dump every candidate with its score, not just the winner.
+ * Diagnosing a miss means knowing whether the right answer was proposed and
+ * lost or never proposed at all. */
+static int g_candidates;
+
+/* --request-global: run S6 alongside S4 but keep judging S4. That is what a
+ * host asking for both features gets, and it is where the endorsement shows. */
+static int g_request_global;
+
 /* Standard deviation of per-hit timing error, seconds. Around 6 ms is typical
  * of a tight human performer; fully quantized electronic music has none. */
 #define HUMAN_JITTER_SECONDS 0.006
@@ -551,6 +560,13 @@ typedef struct {
      * from outside: 1 - score[1]/score[0] is exactly its `separation` term. */
     uint32_t candidate_count;
     float separation;
+    /* Every candidate, not just the winner. Diagnosing a miss means asking
+     * whether the right answer was in the list at all and lost, or was never
+     * proposed -- two different faults with two different fixes, and the
+     * selected tempo alone cannot tell them apart. */
+#define CORPUS_MAX_CANDIDATES 8u
+    uint32_t candidate_millibpm[CORPUS_MAX_CANDIDATES];
+    uint16_t candidate_score[CORPUS_MAX_CANDIDATES];
     int ok;
 } analysis_t;
 
@@ -562,10 +578,25 @@ static apta_feature_mask_t corpus_features(void)
         APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE;
 
-    if (g_global) {
+    /* Requesting the global grid is separate from judging it. With S6 running,
+     * S4 can promote one of its own candidates on S6's endorsement, so
+     * --request-global measures what a host asking for both actually gets. */
+    if (g_global || g_request_global) {
         features |= APTA_FEATURE_GLOBAL_BEATGRID;
     }
     return features;
+}
+
+/* Copy the candidate list out of the view, which does not outlive the result. */
+static void corpus_take_candidates(analysis_t *out,
+                                   const apta_tempo_view_t *tempo)
+{
+    uint32_t i;
+
+    for (i = 0u; i < tempo->candidate_count && i < CORPUS_MAX_CANDIDATES; ++i) {
+        out->candidate_millibpm[i] = tempo->candidates[i].tempo_millibpm;
+        out->candidate_score[i] = tempo->candidates[i].score;
+    }
 }
 
 /* Replace the S4 reading with S6's nominal tempo, so every downstream figure --
@@ -679,6 +710,7 @@ static analysis_t analyze(const float *audio, size_t frames)
                              (float)tempo.candidates[0].score
                 : 1.0f;
         out.ok = 1;
+        corpus_take_candidates(&out, &tempo);
         corpus_take_global(&out, result);
     }
     apta_result_release(result);
@@ -772,6 +804,7 @@ static analysis_t analyze_file(const char *path)
                                  (float)tempo.candidates[0].score
                     : 1.0f;
             out.ok = 1;
+            corpus_take_candidates(&out, &tempo);
             corpus_take_global(&out, result);
         }
         apta_result_release(result);
@@ -909,11 +942,25 @@ static void record(const char *label,
     }
 
     if (verbose || rel != REL_EXACT) {
-        printf("%-34s %8.3f  %10.3f  %-13s %5u %d  n=%u sep=%.2f\n",
+        printf("%-34s %8.3f  %10.3f  %-13s %5u %d  n=%u sep=%.2f",
                label, (double)truth_millibpm / 1000.0,
                (double)a.reported_millibpm / 1000.0,
                relation_name(rel), a.confidence, (int)a.state,
                a.candidate_count, (double)a.separation);
+        if (g_candidates) {
+            uint32_t i;
+
+            printf("  cand=");
+            for (i = 0u;
+                 i < a.candidate_count && i < CORPUS_MAX_CANDIDATES;
+                 ++i) {
+                printf("%s%.3f@%u",
+                       i == 0u ? "" : ",",
+                       (double)a.candidate_millibpm[i] / 1000.0,
+                       (unsigned)a.candidate_score[i]);
+            }
+        }
+        fputc('\n', stdout);
     }
 }
 
@@ -1012,6 +1059,10 @@ int main(int argc, char **argv)
             g_swing = 1;
         } else if (strcmp(argv[arg], "--global") == 0) {
             g_global = 1;
+        } else if (strcmp(argv[arg], "--request-global") == 0) {
+            g_request_global = 1;
+        } else if (strcmp(argv[arg], "--candidates") == 0) {
+            g_candidates = 1;
         } else if (strcmp(argv[arg], "--verbose") == 0) {
             verbose = 1;
         } else {
@@ -1020,6 +1071,8 @@ int main(int argc, char **argv)
                     "       realism: --humanize | any of --jitter"
                     " --dynamics --drift --swing\n"
                     "       engine:  --global (judge S6 instead of S4)\n"
+                    "                --request-global (run S6, judge S4)\n"
+                    "       detail:  --candidates (dump every candidate)\n"
                     "       %s --tracks LIST [--verbose]\n",
                     argv[0], argv[0]);
             return 2;
