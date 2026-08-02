@@ -6,6 +6,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_internal.h"
+
 #define SAMPLE_RATE 48000u
 #define BEAT_FRAMES 23040u
 #define TOTAL_FRAMES 288000u
@@ -206,6 +208,7 @@ int main(void)
     size_t written = 0u;
     size_t roundtrip_written = 0u;
     size_t prefix;
+    uint32_t relation;
     uint8_t *temp_entry;
     uint8_t *grid_entry;
 
@@ -255,6 +258,44 @@ int main(void)
     CHECK(memcmp(bytes, roundtrip, written) == 0);
     apta_result_release(parsed);
     parsed = NULL;
+
+    /* B2: every append-only relation value survives the TEMP writer and
+     * reader. The result is deliberately edited through the internal test
+     * view: the classifier test produces the semantic values, while this loop
+     * isolates the wire contract from a fragile audio signal per ratio. */
+    for (relation = APTA_TEMPO_RELATION_INDEPENDENT;
+         relation <= APTA_TEMPO_RELATION_QUADRUPLE;
+         ++relation) {
+        apta_result_t *mutable_result = (apta_result_t *)(void *)result;
+        apta_tempo_view_t relation_tempo;
+        size_t relation_written = 0u;
+
+        CHECK(mutable_result->tempo_candidates != NULL);
+        mutable_result->tempo_candidates[0].relation_to_selected = relation;
+        CHECK(apta_result_serialize(
+                  result,
+                  NULL,
+                  copy,
+                  (size_t)size64,
+                  &relation_written) == APTA_STATUS_OK);
+        CHECK(relation_written == written);
+        CHECK(apta_result_parse(
+                  parse_context,
+                  NULL,
+                  copy,
+                  relation_written,
+                  &parsed) == APTA_STATUS_OK);
+        CHECK(parsed != NULL);
+        apta_tempo_view_init(&relation_tempo);
+        CHECK(apta_result_get_tempo(parsed, NULL, &relation_tempo) ==
+              APTA_STATUS_OK);
+        CHECK(relation_tempo.candidate_count >= 1u);
+        CHECK(relation_tempo.candidates[0].relation_to_selected == relation);
+        apta_result_release(parsed);
+        parsed = NULL;
+    }
+    ((apta_result_t *)(void *)result)->tempo_candidates[0].relation_to_selected =
+        APTA_TEMPO_RELATION_INDEPENDENT;
 
     for (prefix = 0u; prefix < written; ++prefix) {
         const apta_result_t *truncated = NULL;

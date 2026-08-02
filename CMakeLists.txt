@@ -12,6 +12,10 @@ option(APTA_BUILD_FUZZING "Build libFuzzer targets" OFF)
 option(APTA_BUILD_DESKTOP_ADAPTERS "Build POSIX and reference decoder adapters" ON)
 option(APTA_BUILD_TOOLS "Build reference desktop command-line tools" ON)
 option(APTA_WARNINGS_AS_ERRORS "Treat apta_core compiler warnings as errors" OFF)
+option(
+    APTA_ENABLE_INTERNAL_PROFILING
+    "Build opt-in internal timing probes (never enable for a shipped library)"
+    OFF)
 
 add_library(apta_headers INTERFACE)
 add_library(apta::headers ALIAS apta_headers)
@@ -366,6 +370,10 @@ foreach(APTA_DISCOVERED_SOURCE IN LISTS APTA_DISCOVERED_CORE_SOURCES)
 endforeach()
 
 add_library(apta::core ALIAS apta_core)
+
+if(APTA_ENABLE_INTERNAL_PROFILING)
+    target_compile_definitions(apta_core PRIVATE APTA_INTERNAL_PROFILE_S4=1)
+endif()
 
 set_target_properties(
     apta_core

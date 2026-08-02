@@ -24,9 +24,9 @@ The profile test verifies final feature publication, result lifetime and complet
 
 | Profile | Features | Source | Queried workspace | Profile workspace | Queried result-pool allocation | Workspace + pool | Alignment | Allocator calls |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| `WAVEFORM_8S` | overview waveform | 8.0 s / 384,000 frames | 68,832 B | 131,072 B | 55,664 B | 186,736 B | 16 B | 2 |
-| `PERFORMANCE_LOCAL_6S` | overview, BPM, local grid, confidence | 6.0 s / 288,000 frames | 183,648 B | 262,144 B | 46,736 B | 308,880 B | 16 B | 2 |
-| `GLOBAL_DYNAMIC_10_9S` | overview, BPM, global grid, dynamic tempo, confidence | 10.92 s / 524,288 frames | 807,664 B | 1,572,864 B | 399,408 B | 1,972,272 B | 16 B | 2 |
+| `WAVEFORM_8S` | overview waveform | 8.0 s / 384,000 frames | 68,912 B | 131,072 B | 55,664 B | 186,736 B | 16 B | 2 |
+| `PERFORMANCE_LOCAL_6S` | overview, BPM, local grid, confidence | 6.0 s / 288,000 frames | 150,960 B | 262,144 B | 46,736 B | 308,880 B | 16 B | 2 |
+| `GLOBAL_DYNAMIC_10_9S` | overview, BPM, global grid, dynamic tempo, confidence | 10.92 s / 524,288 frames | 602,944 B | 1,572,864 B | 317,488 B | 1,890,352 B | 16 B | 2 |
 
 The `Queried workspace` column is `minimum_bytes` from
 `apta_query_workspace_requirements()` for each profile's configuration. It
@@ -57,15 +57,15 @@ The workspace is not dominated by fixed capacities. The overview accumulator arr
 
 | Duration | Queried workspace |
 |---|---:|
-| 30 s | 914,352 B |
-| 5 min | 1,832,048 B |
-| 12 min | 2,880,688 B |
+| 30 s | 709,632 B |
+| 5 min | 1,627,328 B |
+| 12 min | 2,675,968 B |
 
 The growth is sublinear only because the doubling sequence steps in powers of two; within a step the figure is flat, and across steps it roughly tracks duration.
 
-The figure also accounts for the doubling transient. A growable array is replaced before the old one is released, and the freed fragments can never serve the next request, which is strictly larger than everything released so far. The whole doubling sequence is therefore charged, not just the final capacity. Verified by bisection: for a 5-minute full-feature configuration the reported 1,832,048 B completes and the true boundary lies within about 800 bytes of it.
+The figure also accounts for the doubling transient. A growable array is replaced before the old one is released, and the freed fragments can never serve the next request, which is strictly larger than everything released so far. The whole doubling sequence is therefore charged, not just the final capacity. `apta.memory.workspace_requirements` creates a five-minute full-feature session at exactly the queried value and rejects one byte less.
 
-The `Workspace + pool` column is useful for integration planning, but it is not total application RAM.
+The `Workspace + pool` column uses the workspace actually supplied by the published profile plus the queried result pool. It is useful for integration planning, but it is not total application RAM.
 
 ## 4. What the numbers exclude
 
@@ -108,6 +108,15 @@ tests/unit/espidf_memory_profiles.c
 ```
 
 The ESP-IDF workflow builds the production native library without tests or desktop adapters, compiles the profile executable against that library and runs all three configurations.
+
+`apta-workspace-probe` prints the same query results directly from the current
+library, including a Markdown form used to refresh the tables above:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target apta_workspace_probe
+./build/tools/apta-workspace-probe --markdown
+```
 
 Equivalent commands are:
 

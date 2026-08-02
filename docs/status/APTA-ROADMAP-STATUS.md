@@ -183,8 +183,8 @@ Implemented:
 - manual ESP32-P4 timing and memory measurements for the seven feature sets in
   the cooperative example.
 
-The current source tree registers 80 tests in the default POSIX configuration
-and 68 in a core-only configuration without the POSIX desktop adapters and
+The current source tree registers 81 tests in the default POSIX configuration
+and 69 in a core-only configuration without the POSIX desktop adapters and
 tools. The ESP-IDF matrix links and verifies complete firmware artifacts and
 runs component-size reports.
 

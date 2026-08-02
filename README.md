@@ -326,9 +326,9 @@ The ESP-IDF integration is an IDF component under `ports/espidf`, not a native C
 
 ## Testing
 
-The current default POSIX build registers 80 CTest tests: 68 portable core
+The current default POSIX build registers 81 CTest tests: 69 portable core
 tests, four POSIX adapter/decoder tests and eight generated CLI/tool tests. A
-core-only build with desktop adapters and tools disabled registers 68 tests.
+core-only build with desktop adapters and tools disabled registers 69 tests.
 The suite contains unit, generated-audio integration, malformed-input,
 allocation-failure, concurrency, exhaustive truncation and parser-hardening
 coverage; sanitizer and fuzz-smoke execution are separate CI steps.

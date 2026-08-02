@@ -3,11 +3,74 @@
 #include "../core/apta_period_refine.h"
 #include "../core/apta_session_workspace.h"
 #include "../core/apta_tempo_prior.h"
+#include "../core/apta_tempo_relation.h"
 
 #include <math.h>
 #include <stdalign.h>
 #include <stdint.h>
 #include <string.h>
+
+#ifdef APTA_INTERNAL_PROFILE_S4
+static uint64_t apta_s4_profile_now(const apta_session_t *session)
+{
+    if (session == NULL || session->context == NULL ||
+        session->context->clock.monotonic_time_ns == NULL) {
+        return 0u;
+    }
+    return session->context->clock.monotonic_time_ns(
+        session->context->clock.user_data);
+}
+
+static uint64_t apta_s4_profile_mark(
+    const apta_session_t *session,
+    uint64_t *accumulator,
+    uint64_t started_at)
+{
+    uint64_t finished_at = apta_s4_profile_now(session);
+
+    if (accumulator != NULL && started_at != 0u && finished_at >= started_at) {
+        *accumulator += finished_at - started_at;
+    }
+    return finished_at;
+}
+
+void apta_internal_s4_profile_reset(apta_session_t *session)
+{
+    if (session != NULL) {
+        memset(&session->s4_profile, 0, sizeof(session->s4_profile));
+    }
+}
+
+void apta_internal_s4_profile_snapshot(
+    const apta_session_t *session,
+    apta_internal_s4_profile_t *profile_out)
+{
+    if (profile_out == NULL) {
+        return;
+    }
+    if (session == NULL) {
+        memset(profile_out, 0, sizeof(*profile_out));
+        return;
+    }
+    *profile_out = session->s4_profile;
+}
+
+#define APTA_S4_PROFILE_DECLARE uint64_t apta_s4_profile_started_at = 0u
+#define APTA_S4_PROFILE_BEGIN(session)                                      \
+    do {                                                                    \
+        apta_s4_profile_started_at = apta_s4_profile_now(session);           \
+    } while (0)
+#define APTA_S4_PROFILE_ADD(session, field)                                 \
+    do {                                                                    \
+        apta_s4_profile_started_at = apta_s4_profile_mark(                  \
+            session, &(session)->s4_profile.field,                          \
+            apta_s4_profile_started_at);                                    \
+    } while (0)
+#else
+#define APTA_S4_PROFILE_DECLARE
+#define APTA_S4_PROFILE_BEGIN(session) ((void)(session))
+#define APTA_S4_PROFILE_ADD(session, field) ((void)(session))
+#endif
 
 static int apta_s4_enabled(const apta_session_t *session)
 {
@@ -222,7 +285,7 @@ static float apta_s4_correlation_at_lag(
 }
 
 static int apta_s4_find_evidence(
-    const apta_session_t *session,
+    apta_session_t *session,
     uint64_t *first_out,
     uint64_t *end_out)
 {
@@ -236,6 +299,20 @@ static int apta_s4_find_evidence(
     int have_bin = 0;
     int in_run = 0;
 
+    if (!session->end_of_input_signalled && session->s4_evidence_valid &&
+        !session->s4_evidence_dirty) {
+        *first_out = session->s4_evidence_first;
+        *end_out = session->s4_evidence_end;
+#ifdef APTA_INTERNAL_PROFILE_S4
+        session->s4_profile.evidence_cache_hits += 1u;
+#endif
+        return 1;
+    }
+
+#ifdef APTA_INTERNAL_PROFILE_S4
+    session->s4_profile.evidence_full_scans += 1u;
+#endif
+
     for (slot = 0u; slot < session->onset_bin_capacity; ++slot) {
         const apta_internal_onset_bin_t *bin = &session->onset_bins[slot];
         if (bin->occupied && apta_s4_bin_complete(session, bin->bin_index)) {
@@ -246,6 +323,8 @@ static int apta_s4_find_evidence(
         }
     }
     if (!have_bin) {
+        session->s4_evidence_valid = 0u;
+        session->s4_evidence_dirty = 0u;
         return 0;
     }
 
@@ -273,11 +352,62 @@ static int apta_s4_find_evidence(
     }
 
     if (best_end <= best_first) {
+        session->s4_evidence_valid = 0u;
+        session->s4_evidence_dirty = 0u;
         return 0;
     }
+    session->s4_evidence_first = best_first;
+    session->s4_evidence_end = best_end;
+    session->s4_evidence_valid = 1u;
+    session->s4_evidence_dirty = 0u;
     *first_out = best_first;
     *end_out = best_end;
     return 1;
+}
+
+static void apta_s4_note_bin_replaced(
+    apta_session_t *session,
+    uint64_t replaced_index)
+{
+    if (!session->s4_evidence_valid || session->s4_evidence_dirty ||
+        replaced_index < session->s4_evidence_first ||
+        replaced_index >= session->s4_evidence_end) {
+        return;
+    }
+    if (replaced_index == session->s4_evidence_first) {
+        session->s4_evidence_first += 1u;
+        if (session->s4_evidence_first == session->s4_evidence_end) {
+            session->s4_evidence_valid = 0u;
+        }
+        return;
+    }
+    session->s4_evidence_dirty = 1u;
+}
+
+static void apta_s4_note_bin_complete(
+    apta_session_t *session,
+    uint64_t completed_index)
+{
+    if (session->s4_evidence_dirty) {
+        return;
+    }
+    if (!session->s4_evidence_valid) {
+        session->s4_evidence_first = completed_index;
+        session->s4_evidence_end = completed_index + 1u;
+        session->s4_evidence_valid = 1u;
+        return;
+    }
+    if (completed_index == session->s4_evidence_end) {
+        session->s4_evidence_end += 1u;
+    } else if (completed_index + 1u == session->s4_evidence_first) {
+        session->s4_evidence_first = completed_index;
+    } else if (completed_index < session->s4_evidence_first ||
+               completed_index >= session->s4_evidence_end) {
+        /* A disjoint complete run may be longer than the cached one. Rebuild
+         * conservatively on the next refresh rather than maintaining a second
+         * interval in the hot per-sample state. */
+        session->s4_evidence_dirty = 1u;
+    }
 }
 
 static uint32_t apta_s4_tempo_from_lag(
@@ -319,66 +449,6 @@ static uint32_t apta_s4_tempo_from_refined_lag(
 {
     return apta_internal_tempo_with_offset(
         apta_s4_tempo_from_lag(session, lag), lag, offset);
-}
-
-/*
- * B2: the metrical relations the estimator can report, as exact ratios.
- *
- * One table serves two callers: apta_s4_relation() classifies a candidate
- * against the selected tempo, and B1's octave-family scan walks the same
- * ratios looking for a competing peak. They were separate before, which meant
- * the set of relations the estimator could detect and the set it searched
- * could drift apart.
- *
- * Ordered by increasing distance from unity so the nearest match wins when
- * tolerances would otherwise overlap.
- */
-typedef struct {
-    uint32_t numerator;
-    uint32_t denominator;
-    apta_tempo_relation_t relation;
-} apta_s4_ratio_t;
-
-static const apta_s4_ratio_t apta_s4_ratios[] = {
-    {3u, 2u, APTA_TEMPO_RELATION_THREE_HALF},
-    {2u, 3u, APTA_TEMPO_RELATION_TWO_THIRDS},
-    {2u, 1u, APTA_TEMPO_RELATION_DOUBLE},
-    {1u, 2u, APTA_TEMPO_RELATION_HALF},
-    {3u, 1u, APTA_TEMPO_RELATION_TRIPLE},
-    {1u, 3u, APTA_TEMPO_RELATION_THIRD},
-    {4u, 1u, APTA_TEMPO_RELATION_QUADRUPLE},
-    {1u, 4u, APTA_TEMPO_RELATION_QUARTER}
-};
-
-#define APTA_S4_RATIO_COUNT \
-    (sizeof(apta_s4_ratios) / sizeof(apta_s4_ratios[0]))
-
-static apta_tempo_relation_t apta_s4_relation(
-    uint32_t selected,
-    uint32_t candidate)
-{
-    uint32_t entry;
-
-    if (selected == 0u || candidate == 0u || selected == candidate) {
-        return APTA_TEMPO_RELATION_INDEPENDENT;
-    }
-
-    for (entry = 0u; entry < APTA_S4_RATIO_COUNT; ++entry) {
-        const uint64_t expected =
-            (uint64_t)selected * apta_s4_ratios[entry].numerator /
-            apta_s4_ratios[entry].denominator;
-        const uint64_t difference = candidate > expected
-                                        ? (uint64_t)candidate - expected
-                                        : expected - (uint64_t)candidate;
-        /* Two percent, the tolerance the half-time case already used. */
-        const uint64_t tolerance = expected / 50u + 1u;
-
-        if (difference <= tolerance) {
-            return apta_s4_ratios[entry].relation;
-        }
-    }
-
-    return APTA_TEMPO_RELATION_INDEPENDENT;
 }
 
 static void apta_s4_period_from_tempo(
@@ -499,6 +569,9 @@ apta_status_t apta_internal_s4_process_sample(
     slot = (uint32_t)(bin_index % session->onset_bin_capacity);
     bin = &session->onset_bins[slot];
     if (!bin->occupied || bin->bin_index != (uint32_t)bin_index) {
+        if (bin->occupied) {
+            apta_s4_note_bin_replaced(session, bin->bin_index);
+        }
         memset(bin, 0, sizeof(*bin));
         bin->occupied = 1u;
         bin->bin_index = (uint32_t)bin_index;
@@ -515,11 +588,16 @@ apta_status_t apta_internal_s4_process_sample(
     bin->sum_absolute +=
         (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
     bin->sample_count += 1u;
+    if (bin->sample_count ==
+        apta_s4_expected_bin_samples(session, bin_index)) {
+        apta_s4_note_bin_complete(session, bin_index);
+    }
     return APTA_STATUS_OK;
 }
 
 apta_status_t apta_internal_s4_refresh(apta_session_t *session)
 {
+    APTA_S4_PROFILE_DECLARE;
     float best_scores[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
     uint32_t best_lags[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0u, 0u, 0u};
     float lag_offsets[APTA_INTERNAL_MAX_TEMPO_CANDIDATES] = {0.0f, 0.0f, 0.0f};
@@ -557,6 +635,10 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+#ifdef APTA_INTERNAL_PROFILE_S4
+    session->s4_profile.process_calls += 1u;
+#endif
+
     if (session->local_grid_locked) {
         if (atomic_load_explicit(&session->state, memory_order_acquire) ==
                 APTA_SESSION_COMPLETED &&
@@ -568,9 +650,12 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    APTA_S4_PROFILE_BEGIN(session);
     if (!apta_s4_find_evidence(session, &evidence_first, &evidence_end)) {
+        APTA_S4_PROFILE_ADD(session, find_evidence_ns);
         return APTA_STATUS_OK;
     }
+    APTA_S4_PROFILE_ADD(session, find_evidence_ns);
     run_count = evidence_end - evidence_first;
     if (run_count < APTA_INTERNAL_MIN_TEMPO_BINS) {
         return APTA_STATUS_OK;
@@ -621,10 +706,9 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
 
     /* A1: flux[index] depends only on index and evidence_first, both invariant
      * across the lag loop. Compute it once here; the loops below are pure
-     * array reads. Storing flux as float rounds each term once, but the
-     * accumulators stay double so that the only arithmetic difference from the
-     * previous implementation is that single rounding. A3 converts the
-     * accumulators.
+     * array reads. A3 subsequently converted the correlation, refinement and
+     * phase accumulators to float, so the whole hot path now stays in the
+     * target's native single-precision arithmetic.
      *
      * The array is indexed linearly by (index - evidence_first), not by the
      * onset_bins ring mapping. apta_s4_find_evidence() returns a contiguous
@@ -638,6 +722,9 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
     }
     if (!estimate) {
         /* A2: reuse the last estimate; skip the fill and both loops. */
+#ifdef APTA_INTERNAL_PROFILE_S4
+        session->s4_profile.gated_calls += 1u;
+#endif
         for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
             best_scores[lag] = session->s4_cached_scores[lag];
             best_lags[lag] = session->s4_cached_lags[lag];
@@ -646,10 +733,16 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         goto estimate_ready;
     }
 
+#ifdef APTA_INTERNAL_PROFILE_S4
+    session->s4_profile.refresh_scans += 1u;
+    session->s4_profile.evidence_bins_scanned += run_count;
+#endif
+    APTA_S4_PROFILE_BEGIN(session);
     for (index = evidence_first; index < evidence_end; ++index) {
         session->onset_flux[(uint32_t)(index - evidence_first)] =
             (float)apta_s4_flux_uncached(session, index, evidence_first);
     }
+    APTA_S4_PROFILE_ADD(session, flux_ns);
 
     for (lag = minimum_lag; lag <= maximum_lag; ++lag) {
         float score;
@@ -688,6 +781,8 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
         }
     }
 
+    APTA_S4_PROFILE_ADD(session, lag_sweep_ns);
+
     /* Refine each candidate, not just the winner: all three are published, and
      * the duplicate suppression below compares their tempi. Three correlations
      * per candidate against several hundred in the scan above. */
@@ -699,6 +794,8 @@ apta_status_t apta_internal_s4_refresh(apta_session_t *session)
                                                     best_lags[lag])
                                : 0.0f;
     }
+
+    APTA_S4_PROFILE_ADD(session, refinement_ns);
 
     /* A2: cache the estimate so a gated pass can reuse it. */
     for (lag = 0u; lag < APTA_INTERNAL_MAX_TEMPO_CANDIDATES; ++lag) {
@@ -807,8 +904,9 @@ estimate_ready:
     selected_tempo = session->tempo_candidates[0].tempo_millibpm;
     for (lag = 0u; lag < candidate_count; ++lag) {
         session->tempo_candidates[lag].relation_to_selected =
-            apta_s4_relation(selected_tempo,
-                             session->tempo_candidates[lag].tempo_millibpm);
+            apta_internal_tempo_relation(
+                selected_tempo,
+                session->tempo_candidates[lag].tempo_millibpm);
         if (lag != 0u &&
             session->tempo_candidates[lag].score >=
                 (uint16_t)((uint32_t)session->tempo_candidates[0].score * 7u / 10u)) {
@@ -836,6 +934,9 @@ estimate_ready:
      * the honest response is lower confidence rather than high confidence with
      * a flag nobody reads. That failure -- confidence 82 on a third-relation
      * error -- is what this task exists to stop. */
+    if (estimate) {
+        APTA_S4_PROFILE_BEGIN(session);
+    }
     if (!estimate) {
         /* A2/B1: a gated pass must not run the family scan. It reads
          * onset_flux, which was filled relative to the evidence start of the
@@ -848,14 +949,14 @@ estimate_ready:
         uint32_t entry;
 
         family_best = 0.0f;
-        for (entry = 0u; entry < APTA_S4_RATIO_COUNT; ++entry) {
+        for (entry = 0u; entry < APTA_INTERNAL_TEMPO_RATIO_COUNT; ++entry) {
             /* B2: the same ratio table the relation classifier uses. A lag
              * scaled by r corresponds to a tempo scaled by 1/r, so the
              * numerator and denominator swap here. */
             const float scaled =
                 (float)best_lags[0] *
-                    (float)apta_s4_ratios[entry].denominator /
-                    (float)apta_s4_ratios[entry].numerator + 0.5f;
+                    (float)apta_internal_tempo_ratios[entry].denominator /
+                    (float)apta_internal_tempo_ratios[entry].numerator + 0.5f;
             uint32_t sibling_lag;
             float sibling;
 
@@ -896,6 +997,9 @@ estimate_ready:
         }
         session->s4_cached_ambiguity = family_ambiguity;
     }
+    if (estimate) {
+        APTA_S4_PROFILE_ADD(session, family_scan_ns);
+    }
 
     /* B2: a strong family sibling is ambiguity even when it did not survive
      * into the candidate list, which holds only three entries. */
@@ -904,6 +1008,7 @@ estimate_ready:
     }
 
     if (estimate) {
+        APTA_S4_PROFILE_BEGIN(session);
         for (lag = 0u; lag < best_lags[0]; ++lag) {
             float score = 0.0f;
             for (index = evidence_first + lag;
@@ -927,7 +1032,12 @@ estimate_ready:
     } else {
         phase = session->s4_cached_phase;
     }
+    if (estimate) {
+        APTA_S4_PROFILE_ADD(session, phase_search_ns);
+    }
     grid_fit = session->s4_cached_grid_fit;
+
+    APTA_S4_PROFILE_BEGIN(session);
 
     /*
      * Confidence is computed here rather than with the candidate list because
@@ -1104,6 +1214,7 @@ estimate_ready:
         old_evidence.end_frame != evidence_end_frame) {
         session->s4_mutation_serial += 1u;
     }
+    APTA_S4_PROFILE_ADD(session, publication_ns);
     return APTA_STATUS_OK;
 }
 
