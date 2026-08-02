@@ -107,6 +107,17 @@ if(TARGET apta_decoder_wav)
     apta_add_desktop_test(apta_desktop_wav_pull apta.desktop.wav_pull unit/desktop_wav_pull_integration.c)
 endif()
 
+if(TARGET apta_tool_common)
+    add_executable(apta_tool_features_all unit/tool_features_all.c)
+    target_link_libraries(apta_tool_features_all PRIVATE apta_tool_common)
+    set_target_properties(
+        apta_tool_features_all
+        PROPERTIES
+            C_STANDARD 11
+            C_STANDARD_REQUIRED YES)
+    add_test(NAME apta.tools.features_all COMMAND apta_tool_features_all)
+endif()
+
 if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)
     set(APTA_CLI_WAV "${CMAKE_CURRENT_BINARY_DIR}/apta-cli-click.wav")
     set(APTA_CLI_CONTAINER "${CMAKE_CURRENT_BINARY_DIR}/apta-cli-result.apta")
