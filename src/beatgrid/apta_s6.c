@@ -773,6 +773,35 @@ apta_status_t apta_internal_s6_refresh(apta_session_t *session)
         return APTA_STATUS_OK;
     }
 
+    /*
+     * Hand the nominal tempo to the local estimator, which uses it to break
+     * ties among its own candidates on the next refresh. The longest segment
+     * rather than the first, because a track that opens with an intro at a
+     * different feel would otherwise be represented by the least typical part
+     * of it.
+     */
+    {
+        uint64_t widest = 0u;
+        uint32_t widest_index = 0u;
+
+        for (index = 0u; index < state->segment_count; ++index) {
+            const apta_grid_segment_t *segment = &state->segments[index];
+            const uint64_t span =
+                segment->applicability_range.end_frame >
+                        segment->applicability_range.first_frame
+                    ? segment->applicability_range.end_frame -
+                          segment->applicability_range.first_frame
+                    : 0u;
+
+            if (span > widest) {
+                widest = span;
+                widest_index = index;
+            }
+        }
+        session->s6_nominal_tempo_millibpm =
+            state->segments[widest_index].nominal_tempo_millibpm;
+    }
+
     state->confidence = valid_confidence_count != 0u
                             ? (apta_confidence_value_t)(
                                   total_confidence / valid_confidence_count)
