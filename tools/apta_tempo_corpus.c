@@ -170,6 +170,77 @@ typedef struct {
 
 static const int semitone_offsets[4] = {0, 0, 3, 5};
 
+/*
+ * Whether a pattern singles out its own annotated beat.
+ *
+ * Judging a pattern by whether the estimator gets it right is circular, so this
+ * measures the pattern instead. The cyclic autocorrelation of the onset
+ * envelope is evaluated at every shift within the bar; the annotated beat is
+ * four sixteenth steps. Shifts that are whole beats are excluded as rivals,
+ * because those are the octave family and B1's prior exists to resolve them.
+ * What is left are the odd rivals -- a dotted period at six steps, a
+ * subdivision at two -- which no prior addresses.
+ *
+ * A negative margin means some odd period correlates better than the annotated
+ * beat. The pattern is then ambiguous by construction, and counting the
+ * estimator's answer as an error measures the annotation rather than the
+ * estimator. Measured over the six patterns, the margin predicts the outcome
+ * almost exactly: the two with a positive margin score 9 of 10, and the three
+ * furthest below zero score 0 of 10.
+ *
+ * Weights are the rough novelty each voice contributes. A kick carries far more
+ * than a hat, and the estimator sees the sum, so equal weights would describe a
+ * signal nobody rendered.
+ */
+#define PATTERN_STEPS 16u
+#define PATTERN_BEAT_STEPS 4u
+#define PATTERN_AMBIGUITY_MARGIN 0.0f
+
+static float pattern_cyclic_correlation(const float *envelope, uint32_t shift)
+{
+    float numerator = 0.0f;
+    float energy = 0.0f;
+    uint32_t i;
+
+    for (i = 0u; i < PATTERN_STEPS; ++i) {
+        numerator += envelope[i] * envelope[(i + shift) % PATTERN_STEPS];
+        energy += envelope[i] * envelope[i];
+    }
+    return energy > 0.0f ? numerator / energy : 0.0f;
+}
+
+static float pattern_beat_margin(const pattern_t *pattern)
+{
+    float envelope[PATTERN_STEPS];
+    float beat;
+    float rival = 0.0f;
+    uint32_t i;
+
+    for (i = 0u; i < PATTERN_STEPS; ++i) {
+        envelope[i] = 1.00f * (float)pattern->kick[i] +
+                      0.80f * (float)pattern->snare[i] +
+                      0.25f * (float)pattern->hat[i] +
+                      0.40f * (float)pattern->open_hat[i];
+    }
+    beat = pattern_cyclic_correlation(envelope, PATTERN_BEAT_STEPS);
+    for (i = 1u; i < PATTERN_STEPS; ++i) {
+        float score;
+        if (i % PATTERN_BEAT_STEPS == 0u) {
+            continue;
+        }
+        score = pattern_cyclic_correlation(envelope, i);
+        if (score > rival) {
+            rival = score;
+        }
+    }
+    return beat - rival;
+}
+
+static int pattern_is_representative(const pattern_t *pattern)
+{
+    return pattern_beat_margin(pattern) >= PATTERN_AMBIGUITY_MARGIN;
+}
+
 static const pattern_t g_patterns[] = {
     {
         "four_on_floor",
@@ -258,6 +329,11 @@ static int g_jitter;
 static int g_dynamics;
 static int g_drift;
 static int g_swing;
+
+/* --global: request S6 as well and judge its nominal tempo instead of S4's.
+ * The two engines estimate independently, so this measures S6 rather than the
+ * pipeline around it. */
+static int g_global;
 
 /* Standard deviation of per-hit timing error, seconds. Around 6 ms is typical
  * of a tight human performer; fully quantized electronic music has none. */
@@ -478,11 +554,45 @@ typedef struct {
     int ok;
 } analysis_t;
 
-static analysis_t analyze(const float *audio, size_t frames)
+/* The feature set under test. S6 is only requested when it is being judged,
+ * so the default run measures the same thing it always did. */
+static apta_feature_mask_t corpus_features(void)
 {
-    const apta_feature_mask_t features =
+    apta_feature_mask_t features =
         APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE;
+
+    if (g_global) {
+        features |= APTA_FEATURE_GLOBAL_BEATGRID;
+    }
+    return features;
+}
+
+/* Replace the S4 reading with S6's nominal tempo, so every downstream figure --
+ * accuracy, octave relation, threshold sweep -- describes S6. */
+static void corpus_take_global(analysis_t *out, const apta_result_t *result)
+{
+    apta_grid_view_t grid;
+
+    if (!g_global) {
+        return;
+    }
+    apta_grid_view_init(&grid);
+    if (apta_result_get_beatgrid(
+            result, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &grid) !=
+            APTA_STATUS_OK ||
+        grid.segment_count == 0u) {
+        out->ok = 0;
+        return;
+    }
+    out->reported_millibpm = grid.segments[0].nominal_tempo_millibpm;
+    out->confidence = grid.confidence;
+    out->state = grid.state;
+}
+
+static analysis_t analyze(const float *audio, size_t frames)
+{
+    const apta_feature_mask_t features = corpus_features();
     apta_context_config_t cc;
     apta_session_config_t sc;
     apta_context_t *ctx = NULL;
@@ -569,6 +679,7 @@ static analysis_t analyze(const float *audio, size_t frames)
                              (float)tempo.candidates[0].score
                 : 1.0f;
         out.ok = 1;
+        corpus_take_global(&out, result);
     }
     apta_result_release(result);
 
@@ -585,9 +696,7 @@ cleanup:
  * geometry comes from the file rather than from the synthesizer. */
 static analysis_t analyze_file(const char *path)
 {
-    const apta_feature_mask_t features =
-        APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
-        APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE;
+    const apta_feature_mask_t features = corpus_features();
     apta_decoder_t decoder;
     apta_decoder_info_t decoder_info;
     apta_pcm_source_t source;
@@ -663,6 +772,7 @@ static analysis_t analyze_file(const char *path)
                                  (float)tempo.candidates[0].score
                     : 1.0f;
             out.ok = 1;
+            corpus_take_global(&out, result);
         }
         apta_result_release(result);
     }
@@ -743,6 +853,19 @@ static uint32_t g_wrong_sum, g_wrong_n, g_wrong_min = 255u, g_wrong_max;
 static uint32_t g_high_confidence_errors;
 static uint32_t g_high_confidence_octave_errors;
 
+/*
+ * Blending the two populations into one rate is what made the synthetic corpus
+ * misleading. Three of six patterns are ambiguous by construction, so the
+ * aggregate said 38% where real recordings say 63%, and the gap read as an
+ * estimator weakness rather than a property of the material.
+ */
+#define POPULATION_REPRESENTATIVE 0
+#define POPULATION_AMBIGUOUS 1
+static int g_population = POPULATION_REPRESENTATIVE;
+static uint32_t g_population_total[2];
+static uint32_t g_population_exact[2];
+static uint32_t g_population_octave[2];
+
 /* `truth_millibpm` allows fractional ground truth such as 174.5 BPM. */
 static void record(const char *label,
                    uint32_t truth_millibpm,
@@ -754,6 +877,12 @@ static void record(const char *label,
 
     g_counts[rel] += 1u;
     g_total += 1u;
+    g_population_total[g_population] += 1u;
+    if (rel == REL_EXACT) {
+        g_population_exact[g_population] += 1u;
+    } else if (is_octave_error(rel)) {
+        g_population_octave[g_population] += 1u;
+    }
     if (result_count < sizeof(g_results) / sizeof(g_results[0])) {
         g_results[result_count].confidence = a.confidence;
         g_results[result_count].exact = (rel == REL_EXACT);
@@ -881,6 +1010,8 @@ int main(int argc, char **argv)
             g_drift = 1;
         } else if (strcmp(argv[arg], "--swing") == 0) {
             g_swing = 1;
+        } else if (strcmp(argv[arg], "--global") == 0) {
+            g_global = 1;
         } else if (strcmp(argv[arg], "--verbose") == 0) {
             verbose = 1;
         } else {
@@ -888,6 +1019,7 @@ int main(int argc, char **argv)
                     "usage: %s [--seconds N] [--write-wav DIR] [--verbose]\n"
                     "       realism: --humanize | any of --jitter"
                     " --dynamics --drift --swing\n"
+                    "       engine:  --global (judge S6 instead of S4)\n"
                     "       %s --tracks LIST [--verbose]\n",
                     argv[0], argv[0]);
             return 2;
@@ -899,10 +1031,27 @@ int main(int argc, char **argv)
     printf("APTA tempo accuracy, %s corpus\n",
            tracks_path != NULL ? "REAL" : "SYNTHETIC");
     if (tracks_path == NULL) {
+        size_t p;
+
         printf("%u patterns x %u tempi, %u s each at %u Hz mono\n",
                (unsigned)PATTERN_COUNT, (unsigned)TEMPO_COUNT, seconds,
                SAMPLE_RATE);
-        printf("timing:%s%s%s%s\n\n",
+        puts("\nThis corpus is a stress test, not a model of real music. Use");
+        puts("--tracks with annotated recordings for an accuracy figure.");
+        puts("\npattern            beat margin  population");
+        for (p = 0u; p < PATTERN_COUNT; ++p) {
+            const float margin = pattern_beat_margin(&g_patterns[p]);
+            printf("  %-16s %+7.2f     %s\n",
+                   g_patterns[p].name, (double)margin,
+                   margin >= PATTERN_AMBIGUITY_MARGIN
+                       ? "representative"
+                       : "ambiguous by construction");
+        }
+        puts("\nThe margin is how much better the annotated beat correlates");
+        puts("than the best rival period that is not a whole number of beats.");
+        puts("Where it is negative the pattern does not single out its own");
+        puts("annotation, and a miss there measures the annotation.");
+        printf("\ntiming:%s%s%s%s\n\n",
                g_jitter ? " jitter(6ms)" : "",
                g_dynamics ? " dynamics" : "",
                g_drift ? " drift(0.5%)" : "",
@@ -943,6 +1092,10 @@ int main(int argc, char **argv)
              ++pattern_index) {
             const pattern_t *pattern = &g_patterns[pattern_index];
 
+            g_population = pattern_is_representative(pattern)
+                               ? POPULATION_REPRESENTATIVE
+                               : POPULATION_AMBIGUOUS;
+
             for (tempo_index = 0u; tempo_index < TEMPO_COUNT; ++tempo_index) {
                 const uint32_t bpm = g_tempos[tempo_index];
 
@@ -960,8 +1113,35 @@ int main(int argc, char **argv)
         free(audio);
     }
 
+    if (tracks_path == NULL) {
+        int pop;
+
+        puts("\n=== summary by population ===");
+        puts("Reporting one rate over both would blend material the estimator");
+        puts("can be expected to get right with material that contradicts its");
+        puts("own annotation. Only the first line is an accuracy figure.");
+        printf("\n%-28s %6s %8s %8s\n",
+               "population", "tracks", "exact", "octave");
+        for (pop = 0; pop < 2; ++pop) {
+            const uint32_t n = g_population_total[pop];
+            if (n == 0u) {
+                continue;
+            }
+            printf("%-28s %6u %5u (%3.0f%%) %8u\n",
+                   pop == POPULATION_REPRESENTATIVE
+                       ? "representative"
+                       : "ambiguous by construction",
+                   n, g_population_exact[pop],
+                   100.0 * g_population_exact[pop] / (double)n,
+                   g_population_octave[pop]);
+        }
+    }
+
     printf("\n=== summary (%s corpus) ===\n",
            tracks_path != NULL ? "REAL" : "SYNTHETIC");
+    if (tracks_path == NULL) {
+        puts("(both populations combined; see the split above)");
+    }
     printf("tracks                     %u\n", g_total);
     printf("exact                      %u (%.1f%%)\n",
            g_counts[REL_EXACT], 100.0 * g_counts[REL_EXACT] / (double)g_total);

@@ -286,3 +286,175 @@ Measured against the pre-A1 baseline the two rows are 34.0x and 33.9x cheaper.
 
 `apta.s6.global_grid`, `apta.s6.revision` and `apta.s6.bounded` pass without
 modification.
+
+## 16. S6 measured on real audio, and what that found
+
+Every S6 figure before this section came from synthetic material. That was not a
+choice: no shipped tool could request the feature. `apta-analyze --features all`
+stopped at the local grid, no token existed for the global grid or dynamic
+tempo, and the only reference to either was in a cost probe that is not in the
+build. S6 had never run over a real recording.
+
+### 16.1 Making it reachable
+
+`--features` gains `global` and `dynamic`, and `all` now means all.
+`apta-inspect` prints a `GGRD` section, including the nominal tempo, which it
+did not report for any grid before. The accuracy corpus gains `--global`, which
+requests S6 and judges its nominal tempo in place of S4's, so every figure the
+harness produces then describes S6.
+
+### 16.2 First measurement
+
+68 tracks from a Rekordbox USB export, the same ground truth section 25 of the
+S4 status document describes.
+
+| | exact of 68 | octave-family errors | high-confidence octave errors |
+|---|---:|---:|---:|
+| As found | 8 (11.8%) | 40 (58.8%) | 30 |
+| S4, for comparison | 43 (63.2%) | 1 | 0 |
+
+S6 reported 19 distinct tempi for 68 tracks. Of the 60 wrong answers, 25 landed
+on half the true tempo and 11 on a third; values like 41.68 and 44.55 BPM were
+common. No threshold separated right from wrong anywhere in the range, and B1's
+requirement of zero high-confidence octave errors failed by 30.
+
+Two independent causes, and the measurement separates them cleanly.
+
+### 16.3 The prior S6 never got
+
+B1 gave S4 a log-normal preferred-tempo prior because autocorrelation peaks at
+every multiple of the true period, so a bare argmax is free to pick any member
+of the octave family. S6 does its own independent scan and never received it.
+
+Adding it, with the same centre and width:
+
+| | exact | octave-family errors | high-confidence octave errors |
+|---|---:|---:|---:|
+| Before | 8 | 40 | 30 |
+| With the prior | 17 | 2 | **0** |
+
+The gate that decides whether a window has enough evidence still measures the
+raw correlation rather than the weighted score. Weighting it would reject
+correct answers at the edges of the prior for having an unfashionable tempo.
+
+Other errors rose from 20 to 49 in the same step. That is the expected shape:
+the prior fixed which octave S6 picks, leaving the errors that come from not
+being able to express the answer at all.
+
+### 16.4 The resolution S6 cannot express
+
+A global bin is 2048 frames, 46 ms. Near 128 BPM consecutive integer lags are 13
+BPM apart, and the entire 110-150 BPM range contains three reachable values:
+117.45, 129.20 and 143.55. The worst-case error from the grid alone is 6.8%.
+
+The same sub-bin refinement section 26 of the S4 document describes applies
+here, and matters more: correlating across N beats and dividing recovers N times
+the precision. It also helps less, because the analysis window bounds how far
+the measurement can reach -- a window is 128 bins, under six seconds.
+
+| | exact of 68 | octave-family | other |
+|---|---:|---:|---:|
+| As found | 8 | 40 | 20 |
+| + prior | 17 | 2 | 49 |
+| + refinement | **52 (76.5%)** | 3 | 13 |
+
+### 16.5 S6 is not simply better than S4 now
+
+52 of 68 against S4's 43 is not the whole picture, and reading it as "S6 wins"
+would repeat the mistake section 26 of the S4 document warns about: exact is a
+1% pass mark, and 1% at 128 BPM is 1.3 BPM.
+
+| | within 1% | median error among those | median minutes to half a beat | within 0.1% |
+|---|---:|---:|---:|---:|
+| S4 | 43 | 0.013% | 31.3 | 33 of 68 |
+| S6 | 52 | 0.557% | 0.66 | 16 of 68 |
+
+S4 is far more precise when it is right; S6 is more often roughly right. On the
+34 tracks where both land within 1%, S4 is closer on 30. S6 is right on 18
+tracks where S4 is wrong, and those are not near misses -- S4 reports 145.83
+against a truth of 124.00, or 137.13 against 127.00, while S6 gets both.
+
+The two engines fail differently because they are built differently: S6's longer
+windows make it robust about which tempo region to believe, S4's finer bins make
+it precise once the region is settled.
+
+Section 24.2 of the S4 document proposed comparing independent estimates as a
+source of confidence and noted that neither engine looks at the other. Both
+obvious ways to use the comparison were simulated over these 68 tracks before
+being proposed as work, and both fail. Section 16.8 records that.
+
+The headroom is real -- taking whichever engine is closer on each track would
+reach 61 of 68 against S4's 43 -- but neither simple rule captures it.
+
+### 16.6 Cost, which fell
+
+The shared correlation helper indexes its slice with a 32-bit offset where the
+previous per-engine copies carried 64-bit bin indices through the innermost
+loop. Measured with the section 22 harness of the S4 document, three runs:
+
+| Row | Before | After |
+|---|---:|---:|
+| `+ BPM` | 497.2 - 512.7 | 394.5 - 395.8 |
+| `+ LOCAL_BEATGRID` | 478.9 - 498.2 | 398.9 - 401.5 |
+| `+ GLOBAL_BEATGRID` | 553.9 - 563.1 | 447.3 - 458.1 |
+| `+ DYNAMIC_TEMPO` | 558.5 - 581.3 | 439.9 - 446.8 |
+| `+ WAVEFORM_DETAIL + GRID_LOCKING` | 572.4 - 593.4 | 475.5 - 494.9 |
+
+The `+ BPM` row isolates the refactor, since S6 is not requested there. All
+seven rows are now under 500 microseconds per call, including the three that
+section 22.1 of the S4 document recorded as the one success condition of seven
+that the work did not meet. That claim is now out of date and is corrected
+there.
+
+This is a host measurement. On RV32IMAFC a 64-bit index costs a register pair
+and multi-instruction arithmetic, so the same change should help at least as
+much on target -- but that is an expectation, not a measurement.
+
+### 16.7 Verification
+
+The synthetic corpus is unchanged for S4 at 23 of 60. S4's output over the 68
+real tracks is byte-identical after the refactor, which is the check that the
+shared helper did not alter the local estimator. 77/77 tests pass, including
+under ASan and UBSan.
+
+### 16.8 Both ways of combining the engines, simulated and rejected
+
+Now that both engines produce a tempo for the same track, the two uses section
+24.2 suggested can be evaluated without writing them. Both were, over these 68
+tracks, and neither survives.
+
+**S6 selects, S4 supplies the value.** Keep S4's answer; where it disagrees with
+S6 by more than three percent, rescale it by the metrical ratio that brings it
+closest to S6. S4 still supplies the precision, S6 only decides which multiple
+of it to believe.
+
+| | within 1% | within 0.1% | median error |
+|---|---:|---:|---:|
+| S4 alone | 43 | 33 | 0.013% |
+| S6 selects, S4 values | 40 | 30 | 0.015% |
+
+It fixes one track and breaks four. The failure is not marginal: S6 answers
+234.91 where the truth is 120.00 and S4 already had 120.01, and the rule dutifully
+drags a correct answer to 240.02. Trusting S6 for selection requires knowing
+when S6 is trustworthy, and S6's own confidence does not say -- it averages 83.6
+when right and 76.8 when wrong.
+
+**Agreement between the engines as confidence.** The disagreement does separate
+the populations, with a median of 0.7% where S4 is right against 4.4% where it
+is wrong. It is still not worth having:
+
+| Gate | precision | recall |
+|---|---:|---:|
+| agreement within 1% | 94.1% | 74.4% |
+| agreement within 2% | 87.5% | 81.4% |
+| shipped confidence >= 70 | **100%** | 67.4% |
+| shipped confidence >= 60 | 97.4% | 86.0% |
+| both, confidence >= 70 and agreement within 2% | 100% | 60.5% |
+
+The grid-fit confidence merged earlier already admits no wrong answer at 70, so
+there is nothing for agreement to catch; combining them only costs recall.
+Section 24.2 named this as one of two candidates for a confidence that knows
+whether the answer is right. The other one, grid fit, took the whole job.
+
+What remains is that S6 is right on 18 tracks where S4 is badly wrong, and no
+rule tried here can tell which those are in advance.

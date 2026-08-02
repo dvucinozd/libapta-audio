@@ -763,6 +763,14 @@ existed to satisfy: that row is 84x cheaper than at baseline.
 
 ### 22.1 The under-500-microsecond target is not met, and should not be chased
 
+> **Superseded.** All seven rows now measure under 500 microseconds. Section
+> 16.6 of the S6 status document has the current figures and the cause: sharing
+> the correlation loop between the two estimators replaced a 64-bit bin index
+> with a 32-bit slice offset in the innermost loop, and the `+ BPM` row fell
+> from about 500 to about 395. The reasoning below is kept because its argument
+> -- that the host figure is a proxy and the target has never been measured --
+> still holds, and is the reason the target was not chased at the time.
+
 Three rows exceed 500 microseconds per call. The work order's section 17.4 lists
 that as a success condition, and it is the one condition of seven that this work
 does not satisfy.
@@ -1149,3 +1157,83 @@ improves from 18 to 20. `apta.s4.tempo_subbin` is a new test: a click train
 beating every 20,608 frames, exactly 80.5 bins, so the true period sits halfway
 between lag 80 and lag 81. It fails on HEAD reporting 127,604 millibpm, and
 passes with the refinement. 77/77 tests pass, including under ASan and UBSan.
+
+## 27. The synthetic corpus was measuring its own annotation
+
+Section 25.1 established that the humanized corpus models a population this
+library rarely sees. The corpus has a second and larger problem, which the real
+recordings exposed by contrast: it reported 38.3% exact where real music
+reported 63.2%, and that gap was read as an estimator weakness.
+
+It was not. It was the mix of material.
+
+### 27.1 A pattern can contradict its own annotation
+
+Judging a pattern by whether the estimator gets it right is circular, so the
+tool now measures the pattern instead. `pattern_beat_margin()` takes the cyclic
+autocorrelation of the onset envelope across the bar and compares the annotated
+beat, four sixteenth steps, against the best rival period that is not a whole
+number of beats. Whole-beat rivals are excluded because those are the octave
+family, which B1's prior exists to resolve; what remains are odd rivals such as
+a dotted period at six steps, which no prior addresses.
+
+A negative margin means the pattern does not single out its own annotation.
+
+| Pattern | Beat margin | Population | Exact |
+|---|---:|---|---:|
+| `four_on_floor` | +0.41 | representative | 9 of 10 |
+| `offbeat_bass` | +0.37 | representative | 9 of 10 |
+| `sixteenth_hats` | -0.04 | ambiguous | 0 of 10 |
+| `ghost_funk` | -0.06 | ambiguous | 0 of 10 |
+| `breakbeat` | -0.13 | ambiguous | 5 of 10 |
+| `halftime` | -0.34 | ambiguous | 0 of 10 |
+
+The margin predicts the outcome almost exactly, and it is computed from the
+pattern definition without reference to any result. `halftime` is the clearest
+case: its annotated beat correlates at 0.22 while the six-step period correlates
+at 0.56. Its own description calls it "the classic half/double trap". Counting
+the estimator's answer there as an error measures the annotation.
+
+### 27.2 What the corpus actually says
+
+Four of six patterns are ambiguous by construction, so two thirds of the corpus
+is adversarial. Splitting the populations:
+
+| Population | Tracks | Exact | Octave errors |
+|---|---:|---:|---:|
+| Representative | 20 | **18 (90%)** | 2 |
+| Ambiguous by construction | 40 | 5 (12%) | 30 |
+| Blended, as previously reported | 60 | 23 (38%) | 32 |
+
+90% on representative synthetic material sits sensibly beside 63% on real
+recordings, which are harder than anything rendered from a step grid. The 38%
+figure was an artifact of the population mix and never described the estimator.
+
+Humanized, the representative population gives 16 of 20; S6 gives the same 18 of
+20 as S4.
+
+### 27.3 What changed in the tool
+
+The corpus prints the per-pattern margin and its population before any result,
+states in its own header that it is a stress test rather than a model of real
+music, and points at `--tracks` for an accuracy figure. The summary reports the
+two populations separately, with only the representative line labelled as
+accuracy. The blended total is still printed, marked as such, because sections
+18 to 26 quote it and those numbers should remain locatable.
+
+The classification is derived, not assigned. A pattern added later is measured
+and placed automatically, and one edited into ambiguity moves without anyone
+remembering to reclassify it.
+
+### 27.4 What this does not fix
+
+Every figure in sections 18 to 26 was measured on the blended population. They
+are not restated here, because most were comparisons between two builds over the
+same corpus, and a comparison survives a biased population as long as both sides
+share it. The absolute rates in those sections do not, and should be read as
+describing the corpus rather than the estimator.
+
+The ambiguous patterns are kept. They exercise the octave machinery, and B1's
+requirement of zero high-confidence octave errors is meaningful only against
+material that offers octave errors to make. What changes is that their rate is
+no longer averaged into a number presented as accuracy.

@@ -28,7 +28,7 @@ static void print_usage(FILE *stream)
     fputs(
         "Usage: apta-inspect INPUT.apta [--json] [--section SECTION]\n"
         "\n"
-        "SECTION: WOVR, WDTL, META, TEMP, LGRD\n"
+        "SECTION: WOVR, WDTL, META, TEMP, LGRD, GGRD\n"
         "Options:\n"
         "  --json\n"
         "  --section SECTION\n"
@@ -41,7 +41,8 @@ static int section_is_valid(const char *section)
 {
     return section == NULL || strcmp(section, "WOVR") == 0 ||
            strcmp(section, "WDTL") == 0 || strcmp(section, "META") == 0 ||
-           strcmp(section, "TEMP") == 0 || strcmp(section, "LGRD") == 0;
+           strcmp(section, "TEMP") == 0 || strcmp(section, "LGRD") == 0 ||
+           strcmp(section, "GGRD") == 0;
 }
 
 static int include_section(const char *filter, const char *section)
@@ -176,6 +177,34 @@ static void print_human(
             fputc('\n', stdout);
         } else {
             printf("LGRD: unavailable\n");
+        }
+    }
+    if (include_section(section, "GGRD")) {
+        apta_grid_view_t grid;
+        apta_status_t status;
+        apta_grid_view_init(&grid);
+        status = apta_result_get_beatgrid(
+            result, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &grid);
+        if (status == APTA_STATUS_OK) {
+            printf("GGRD: state=%s confidence=%u segments=%u coverage-ranges=%u",
+                   apta_tool_feature_state_name(grid.state),
+                   (unsigned)grid.confidence,
+                   grid.segment_count,
+                   grid.coverage_range_count);
+            if (grid.segment_count != 0u) {
+                /* The nominal tempo is printed here and not for LGRD because
+                 * the global grid is where a per-segment tempo can differ from
+                 * the published one. */
+                printf(" tempo=%.3f anchor=%llu period=%llu+%u/2^32 beats=%u",
+                       grid.segments[0].nominal_tempo_millibpm / 1000.0,
+                       (unsigned long long)grid.segments[0].anchor_position.whole_frame,
+                       (unsigned long long)grid.segments[0].frames_per_beat.whole_frames,
+                       grid.segments[0].frames_per_beat.fraction_q32,
+                       grid.segments[0].beat_count);
+            }
+            fputc('\n', stdout);
+        } else {
+            printf("GGRD: unavailable\n");
         }
     }
 }
@@ -329,6 +358,39 @@ static void print_json(
             if (grid.segment_count != 0u) {
                 printf(",\"anchor_frame\":%llu,\"period_whole_frames\":%llu,"
                        "\"period_fraction_q32\":%u,\"beat_count\":%u",
+                       (unsigned long long)grid.segments[0].anchor_position.whole_frame,
+                       (unsigned long long)grid.segments[0].frames_per_beat.whole_frames,
+                       grid.segments[0].frames_per_beat.fraction_q32,
+                       grid.segments[0].beat_count);
+            }
+            fputc('}', stdout);
+        } else {
+            fputs("null", stdout);
+        }
+        first_section = 0;
+    }
+    if (include_section(section, "GGRD")) {
+        apta_grid_view_t grid;
+        apta_status_t status;
+        apta_grid_view_init(&grid);
+        status = apta_result_get_beatgrid(
+            result, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &grid);
+        printf("%s\"GGRD\":", first_section ? "" : ",");
+        if (status == APTA_STATUS_OK) {
+            printf("{\"state\":");
+            apta_tool_json_string(stdout,
+                apta_tool_feature_state_name(grid.state),
+                strlen(apta_tool_feature_state_name(grid.state)));
+            printf(",\"confidence\":%u,\"segment_count\":%u,"
+                   "\"coverage_range_count\":%u",
+                   (unsigned)grid.confidence,
+                   grid.segment_count,
+                   grid.coverage_range_count);
+            if (grid.segment_count != 0u) {
+                printf(",\"nominal_tempo_millibpm\":%u,\"anchor_frame\":%llu,"
+                       "\"period_whole_frames\":%llu,"
+                       "\"period_fraction_q32\":%u,\"beat_count\":%u",
+                       grid.segments[0].nominal_tempo_millibpm,
                        (unsigned long long)grid.segments[0].anchor_position.whole_frame,
                        (unsigned long long)grid.segments[0].frames_per_beat.whole_frames,
                        grid.segments[0].frames_per_beat.fraction_q32,

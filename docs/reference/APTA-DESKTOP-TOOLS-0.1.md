@@ -127,7 +127,7 @@ Options:
 ```text
 --profile waveform
 --profile performance
---features waveform,detail,bpm,beatgrid,all
+--features waveform,detail,bpm,beatgrid,global,dynamic,all
 --help
 --version
 ```
@@ -150,6 +150,23 @@ APTA_FEATURE_CONFIDENCE
 ```
 
 The default profile is `performance`.
+
+Each `--features` token adds the features it depends on, so `beatgrid` implies
+`bpm`, and `global` implies `beatgrid`:
+
+| Token | Adds |
+|---|---|
+| `waveform` | `WAVEFORM_OVERVIEW` |
+| `detail` | `+ WAVEFORM_DETAIL` |
+| `bpm` | `+ BPM`, `CONFIDENCE` |
+| `beatgrid` | `+ LOCAL_BEATGRID` |
+| `global` | `+ GLOBAL_BEATGRID` |
+| `dynamic` | `+ DYNAMIC_TEMPO` |
+| `all` | every feature above |
+
+`global` and `dynamic` were previously unreachable: no token requested them and
+`all` stopped at the local grid, so no shipped tool could run S6 over real
+audio.
 
 ### 6.3. Output behavior
 
