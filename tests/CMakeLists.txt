@@ -116,6 +116,15 @@ if(TARGET apta_tool_common)
             C_STANDARD 11
             C_STANDARD_REQUIRED YES)
     add_test(NAME apta.tools.features_all COMMAND apta_tool_features_all)
+
+    add_executable(apta_tool_sections_all unit/tool_sections_all.c)
+    target_link_libraries(apta_tool_sections_all PRIVATE apta_tool_common)
+    set_target_properties(
+        apta_tool_sections_all
+        PROPERTIES
+            C_STANDARD 11
+            C_STANDARD_REQUIRED YES)
+    add_test(NAME apta.tools.sections_all COMMAND apta_tool_sections_all)
 endif()
 
 if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)

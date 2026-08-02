@@ -28,7 +28,7 @@ static void print_usage(FILE *stream)
     fputs(
         "Usage: apta-inspect INPUT.apta [--json] [--section SECTION]\n"
         "\n"
-        "SECTION: WOVR, WDTL, META, TEMP, LGRD, GGRD\n"
+        "SECTION: WOVR, WDTL, META, TEMP, LGRD, GGRD, REVN\n"
         "Options:\n"
         "  --json\n"
         "  --section SECTION\n"
@@ -37,12 +37,11 @@ static void print_usage(FILE *stream)
         stream);
 }
 
+/* The list lives in apta_tool_common.c so a test can pin it against a
+ * container that actually carries every section. */
 static int section_is_valid(const char *section)
 {
-    return section == NULL || strcmp(section, "WOVR") == 0 ||
-           strcmp(section, "WDTL") == 0 || strcmp(section, "META") == 0 ||
-           strcmp(section, "TEMP") == 0 || strcmp(section, "LGRD") == 0 ||
-           strcmp(section, "GGRD") == 0;
+    return section == NULL || apta_tool_section_is_known(section);
 }
 
 static int include_section(const char *filter, const char *section)
@@ -205,6 +204,51 @@ static void print_human(
             fputc('\n', stdout);
         } else {
             printf("GGRD: unavailable\n");
+        }
+    }
+    if (include_section(section, "REVN")) {
+        apta_grid_revision_view_t revision;
+        apta_grid_revision_view_init(&revision);
+        if (apta_result_get_grid_revision(result, &revision) ==
+            APTA_STATUS_OK) {
+            printf("REVN: revision=%u previous=%u state=%s confidence=%u"
+                   " segments=%u beats=%u flags=0x%08x\n",
+                   revision.revision_id,
+                   revision.previous_revision_id,
+                   apta_tool_grid_revision_state_name(revision.state),
+                   (unsigned)revision.confidence,
+                   revision.proposed_segment_count,
+                   revision.proposed_beat_count,
+                   revision.flags);
+        } else {
+            printf("REVN: unavailable\n");
+        }
+    }
+    if (section == NULL) {
+        /* Diagnostics are not a container section, so they have no --section
+         * filter. They were also not printed at all: a result carrying a
+         * warning or an error passed through every tool in silence. */
+        const uint32_t count = apta_result_get_diagnostic_count(result);
+        uint32_t index;
+
+        printf("diagnostics: %u\n", count);
+        for (index = 0u; index < count; ++index) {
+            apta_diagnostic_view_t diagnostic;
+            apta_diagnostic_view_init(&diagnostic);
+            if (apta_result_get_diagnostic(result, index, &diagnostic) !=
+                APTA_STATUS_OK) {
+                continue;
+            }
+            printf("  [%s] code=%u features=0x%08lx range=%llu..%llu",
+                   apta_tool_diagnostic_severity_name(diagnostic.severity),
+                   diagnostic.code,
+                   (unsigned long)diagnostic.affected_features,
+                   (unsigned long long)diagnostic.affected_range.first_frame,
+                   (unsigned long long)diagnostic.affected_range.end_frame);
+            if (diagnostic.message != NULL) {
+                printf(" %s", diagnostic.message);
+            }
+            fputc('\n', stdout);
         }
     }
 }
@@ -397,6 +441,29 @@ static void print_json(
                        grid.segments[0].beat_count);
             }
             fputc('}', stdout);
+        } else {
+            fputs("null", stdout);
+        }
+        first_section = 0;
+    }
+    if (include_section(section, "REVN")) {
+        apta_grid_revision_view_t revision;
+        apta_grid_revision_view_init(&revision);
+        printf("%s\"REVN\":", first_section ? "" : ",");
+        if (apta_result_get_grid_revision(result, &revision) ==
+            APTA_STATUS_OK) {
+            printf("{\"revision_id\":%u,\"previous_revision_id\":%u,"
+                   "\"state\":",
+                   revision.revision_id, revision.previous_revision_id);
+            apta_tool_json_string(stdout,
+                apta_tool_grid_revision_state_name(revision.state),
+                strlen(apta_tool_grid_revision_state_name(revision.state)));
+            printf(",\"confidence\":%u,\"proposed_segment_count\":%u,"
+                   "\"proposed_beat_count\":%u,\"flags\":%u}",
+                   (unsigned)revision.confidence,
+                   revision.proposed_segment_count,
+                   revision.proposed_beat_count,
+                   revision.flags);
         } else {
             fputs("null", stdout);
         }
