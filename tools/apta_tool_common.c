@@ -210,6 +210,48 @@ static int apta_tool_token_equals(
            memcmp(token, expected, token_size) == 0;
 }
 
+const char *apta_tool_diagnostic_severity_name(
+    apta_diagnostic_severity_t severity)
+{
+    switch (severity) {
+    case APTA_DIAGNOSTIC_INFO: return "info";
+    case APTA_DIAGNOSTIC_WARNING: return "warning";
+    case APTA_DIAGNOSTIC_ERROR: return "error";
+    case APTA_DIAGNOSTIC_FATAL: return "fatal";
+    default: return "unknown";
+    }
+}
+
+const char *apta_tool_grid_revision_state_name(
+    apta_grid_revision_state_t state)
+{
+    switch (state) {
+    case APTA_GRID_REVISION_NONE: return "none";
+    case APTA_GRID_REVISION_PENDING: return "pending";
+    case APTA_GRID_REVISION_APPLIED: return "applied";
+    default: return "unknown";
+    }
+}
+
+const char *const apta_tool_section_codes[] = {
+    "WOVR", "WDTL", "META", "TEMP", "LGRD", "GGRD", "REVN", NULL
+};
+
+int apta_tool_section_is_known(const char *code)
+{
+    size_t index;
+
+    if (code == NULL) {
+        return 0;
+    }
+    for (index = 0u; apta_tool_section_codes[index] != NULL; ++index) {
+        if (strcmp(apta_tool_section_codes[index], code) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 apta_feature_mask_t apta_tool_all_features(void)
 {
     return APTA_FEATURE_WAVEFORM_OVERVIEW |

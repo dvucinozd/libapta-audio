@@ -177,6 +177,35 @@ feature to have a printed name, because `waveform-3band`, `global-beatgrid` and
 `dynamic-tempo` were missing from the name table and so were silently dropped
 from the `features:` line even when their data was in the file.
 
+### 6.2.1. Lists pinned against a source of truth
+
+The same mistake — a hand-written list of constants that reads as complete —
+produced four separate defects, each of which hid data the tools already had.
+Where a runtime authority exists, the list is now derived from it and a test
+enforces the match:
+
+| List | Authority | Test |
+|---|---|---|
+| `--features all` | a context's supported capability mask | `apta.tools.features_all` |
+| feature names | every bit in that mask | `apta.tools.features_all` |
+| `--section` codes | the section directory of a full container | `apta.tools.sections_all` |
+
+`GGRD` and `REVN` were both absent from the section list. A container carrying a
+populated global grid or a grid revision reported neither, and `--section REVN`
+was rejected as invalid on a file that contained one.
+
+Diagnostics had a different failure: `apta_result_get_diagnostic()` has always
+existed and no tool called it, so a result carrying a warning or an error passed
+through every tool in silence. `apta-inspect` now prints them.
+
+No such pin exists for `apta_status_t`, `apta_feature_state_t`,
+`apta_session_state_t`, `apta_diagnostic_severity_t` or
+`apta_tempo_relation_t`. Those are `typedef uint32_t` with `#define` constants
+rather than enums, for ABI stability, so the compiler cannot check a switch and
+there is nothing to enumerate at runtime. Their name tables were checked by hand
+and are complete as of this revision; a constant appended later without a name
+will not be caught automatically.
+
 ### 6.3. Output behavior
 
 The analyzer:
