@@ -183,6 +183,41 @@ int main(void)
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     session = NULL;
 
+    /*
+     * D1: source geometry. A checkpoint from a different sample rate, channel
+     * count or track length describes different audio, and seeding it means
+     * the columns and the session disagree about what they cover.
+     *
+     * This used to be accepted. A note in the implementation said the parsed
+     * result carried none of the three; in fact the container header records
+     * all of them and the parser restores them, so nothing but a comparison
+     * was missing.
+     */
+    configure(&config);
+    config.source_sample_rate = 48000u;
+    CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_seed_from_result(session, checkpoint) ==
+          APTA_ERROR_CONFLICT);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
+
+    configure(&config);
+    config.channel_count = 2u;
+    config.channel_layout = APTA_CHANNEL_LAYOUT_STEREO;
+    CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_seed_from_result(session, checkpoint) ==
+          APTA_ERROR_CONFLICT);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
+
+    configure(&config);
+    config.total_frames = TOTAL_FRAMES * 2u;
+    CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_seed_from_result(session, checkpoint) ==
+          APTA_ERROR_CONFLICT);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
+
     configure(&config);
     CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
     CHECK(apta_session_seed_from_result(session, NULL) ==

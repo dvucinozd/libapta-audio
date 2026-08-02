@@ -344,13 +344,42 @@ apta_status_t APTA_CALL apta_session_seed_from_result(
     }
 
     /*
-     * Compatibility. The work order asks for source_sample_rate, channel_count
-     * and total_frames to be checked against the session config as well, but a
-     * parsed result carries none of the three: apta_result_info_t has no such
-     * fields and no container section records them. Only the column geometry
-     * and the coverage extent can be validated here. The caller has to
-     * guarantee the rest -- documented in docs/api/APTA-SESSION-SEEDING-0.1.md.
+     * D1: source geometry, which the work order asks for and an earlier note
+     * here said was impossible.
+     *
+     * That note was wrong. It claimed no container section records the sample
+     * rate, channel count or track length. They are not in a section -- they
+     * are in the container header, at offsets 40, 48 and 52, written by
+     * apta_wovr_writer.c and restored by the parser into the fields read below.
+     * The gap was never a format limitation; nothing had compared them.
+     *
+     * A result from a 48 kHz stereo master seeded into a 44.1 kHz mono session
+     * used to be accepted, and the seeded columns then described different
+     * audio than the session was about to analyse.
+     *
+     * `apta_result_info_t` still does not expose these publicly, so a host
+     * cannot run the same check itself. That is a separate API addition.
      */
+    if (result->source_sample_rate != 0u &&
+        result->source_sample_rate != session->config.source_sample_rate) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+    if (result->source_channel_count != 0u &&
+        result->source_channel_count != session->config.channel_count) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+    /* An unknown length on either side is not a conflict: a checkpoint can
+     * predate the point where the length became known. Two known lengths that
+     * disagree are. */
+    if (result->total_source_frames != APTA_TOTAL_FRAMES_UNKNOWN &&
+        session->config.total_frames != APTA_TOTAL_FRAMES_UNKNOWN &&
+        result->total_source_frames != session->config.total_frames) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+
     if (overview.level.frames_per_column !=
         session->overview_frames_per_column) {
         status = APTA_ERROR_CONFLICT;

@@ -40,13 +40,22 @@ static void configure(apta_session_config_t *config, uint32_t frames_per_column)
     config->overview_frames_per_column = frames_per_column;
 }
 
-/* Analyse a full track at the given resolution and return the reported
- * frames_per_column and column count. */
-static int analyse(apta_context_t *context,
-                   uint32_t frames_per_column,
-                   const float *audio,
-                   uint32_t *reported_out,
-                   uint32_t *columns_out)
+/*
+ * Analyse a full track at the given resolution and return the reported
+ * frames_per_column and column count.
+ *
+ * When `round_trip` is set the result is serialized and parsed back first, and
+ * the values returned describe the parsed copy. The header of this file has
+ * always claimed the round trip was covered; it was not, and the M2 status
+ * document recorded the gap. The container does carry frames_per_column, at
+ * offset 4 of the WOVR payload, so this only ever needed checking.
+ */
+static int analyse_impl(apta_context_t *context,
+                        uint32_t frames_per_column,
+                        const float *audio,
+                        uint32_t *reported_out,
+                        uint32_t *columns_out,
+                        int round_trip)
 {
     apta_session_config_t config;
     apta_session_t *session = NULL;
@@ -105,6 +114,48 @@ static int analyse(apta_context_t *context,
     if (result == NULL) {
         return 1;
     }
+
+    if (round_trip) {
+        apta_serialize_options_t serialize_options;
+        apta_parse_options_t parse_options;
+        const apta_result_t *parsed = NULL;
+        uint8_t *bytes;
+        uint64_t size = 0u;
+        uint64_t written = 0u;
+        int failed = 0;
+
+        apta_serialize_options_init(&serialize_options);
+        if (apta_result_query_serialized_size(result, &serialize_options,
+                                              &size) != APTA_STATUS_OK) {
+            apta_result_release(result);
+            return 1;
+        }
+        bytes = (uint8_t *)malloc((size_t)size);
+        if (bytes == NULL) {
+            apta_result_release(result);
+            return 1;
+        }
+        if (apta_result_serialize(result, &serialize_options, bytes,
+                                  (size_t)size, &written) != APTA_STATUS_OK) {
+            failed = 1;
+        }
+        apta_result_release(result);
+        result = NULL;
+
+        apta_parse_options_init(&parse_options);
+        if (!failed &&
+            apta_result_parse(context, &parse_options, bytes, (size_t)written,
+                              &parsed) != APTA_STATUS_OK) {
+            failed = 1;
+        }
+        free(bytes);
+        if (failed) {
+            (void)apta_session_destroy(session);
+            return 1;
+        }
+        result = parsed;
+    }
+
     apta_waveform_overview_view_init(&overview);
     if (apta_result_get_waveform_overview(result, 0u, &overview) !=
             APTA_STATUS_OK ||
@@ -117,6 +168,26 @@ static int analyse(apta_context_t *context,
     apta_result_release(result);
     (void)apta_session_destroy(session);
     return 0;
+}
+
+static int analyse(apta_context_t *context,
+                   uint32_t frames_per_column,
+                   const float *audio,
+                   uint32_t *reported_out,
+                   uint32_t *columns_out)
+{
+    return analyse_impl(context, frames_per_column, audio, reported_out,
+                        columns_out, 0);
+}
+
+static int analyse_round_trip(apta_context_t *context,
+                              uint32_t frames_per_column,
+                              const float *audio,
+                              uint32_t *reported_out,
+                              uint32_t *columns_out)
+{
+    return analyse_impl(context, frames_per_column, audio, reported_out,
+                        columns_out, 1);
 }
 
 int main(void)
@@ -186,6 +257,37 @@ int main(void)
     CHECK(apta_query_workspace_requirements(&config, &fine) ==
           APTA_STATUS_OK);
     CHECK(fine.minimum_bytes > coarse.minimum_bytes);
+
+    /*
+     * And the resolution survives the container. Without this the reader could
+     * substitute its own default and every column would describe a different
+     * stretch of audio than it claims, silently. Checked across the range
+     * rather than at one value, because a reader that ignored the field would
+     * still agree with whichever value happens to be the default.
+     */
+    {
+        static const uint32_t resolutions[] = {256u, 512u, 1024u, 4096u};
+        size_t which;
+
+        for (which = 0u;
+             which < sizeof(resolutions) / sizeof(resolutions[0]);
+             ++which) {
+            const uint32_t requested = resolutions[which];
+
+            CHECK(analyse_round_trip(context, requested, audio, &reported,
+                                     &columns) == 0);
+            if (reported != requested ||
+                columns != TOTAL_FRAMES / requested) {
+                fprintf(stderr,
+                        "resolution %u did not survive the container: "
+                        "parsed frames_per_column %u, columns %u "
+                        "(expected %u)\n",
+                        requested, reported, columns,
+                        TOTAL_FRAMES / requested);
+                return 1;
+            }
+        }
+    }
 
     free(audio);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
