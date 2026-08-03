@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <apta/apta.h>
 
 #define REQUIRE(condition) do { if (!(condition)) return __LINE__; } while (0)
+
+static void stage(const char *name)
+{
+    (void)fprintf(stderr, "APTA_ABI_STAGE %s\n", name);
+    (void)fflush(stderr);
+}
 
 int main(void)
 {
@@ -16,11 +23,18 @@ int main(void)
     apta_result_info_t result_info;
     apta_source_info_t source_info;
 
+    stage("01 context_config_init begin");
     apta_context_config_init(&context_config);
+    stage("01 context_config_init end");
     context_config.api_version = APTA_API_VERSION_ENCODE(1u, 0u, 123u);
-    REQUIRE(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
 
+    stage("02 context_create begin");
+    REQUIRE(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
+    stage("02 context_create end");
+
+    stage("03 session_config_init begin");
     apta_session_config_init(&session_config);
+    stage("03 session_config_init end");
     session_config.source_sample_rate = 48000u;
     session_config.channel_count = 1u;
     session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
@@ -30,20 +44,35 @@ int main(void)
         APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256;
     session_config.source_fingerprint[0] = 0x10u;
     session_config.source_fingerprint[31] = 0x01u;
+
+    stage("04 session_create begin");
     REQUIRE(apta_session_create(context, &session_config, &session) ==
             APTA_STATUS_OK);
+    stage("04 session_create end");
 
+    stage("05 acquire_result begin");
     result = apta_session_acquire_result(session);
     REQUIRE(result != NULL);
+    stage("05 acquire_result end");
 
+    stage("06 result_info_init begin");
     apta_result_info_init(&result_info);
+    stage("06 result_info_init end");
     result_info.api_version = APTA_API_VERSION_ENCODE(1u, 0u, 999u);
+
+    stage("07 result_get_info begin");
     REQUIRE(apta_result_get_info(result, &result_info) == APTA_STATUS_OK);
+    stage("07 result_get_info end");
     REQUIRE(result_info.producer_api_version == APTA_API_VERSION);
 
+    stage("08 source_info_init begin");
     apta_source_info_init(&source_info);
+    stage("08 source_info_init end");
     source_info.api_version = APTA_API_VERSION_ENCODE(1u, 0u, 7u);
+
+    stage("09 result_get_source_info begin");
     REQUIRE(apta_result_get_source_info(result, &source_info) == APTA_STATUS_OK);
+    stage("09 result_get_source_info end");
     REQUIRE(source_info.sample_rate == 48000u);
     REQUIRE(source_info.channel_count == 1u);
     REQUIRE(source_info.fingerprint_kind ==
@@ -51,8 +80,16 @@ int main(void)
     REQUIRE(source_info.fingerprint[0] == 0x10u);
     REQUIRE(source_info.fingerprint[31] == 0x01u);
 
+    stage("10 result_release begin");
     apta_result_release(result);
+    stage("10 result_release end");
+
+    stage("11 session_destroy begin");
     REQUIRE(apta_session_destroy(session) == APTA_STATUS_OK);
+    stage("11 session_destroy end");
+
+    stage("12 context_destroy begin");
     REQUIRE(apta_context_destroy(context) == APTA_STATUS_OK);
+    stage("12 context_destroy end");
     return 0;
 }
