@@ -1,10 +1,10 @@
 # Tempo model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Scope
 
-This document defines portable tempo estimates and tempo candidates for APTA Core 0.1.
+This document defines portable tempo estimates and tempo candidates for APTA 1.0.
 
 Tempo is a range-scoped analysis result. A local estimate around playback focus may become usable before a track-wide estimate exists.
 

@@ -1,10 +1,10 @@
 # Waveform model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Scope
 
-This document defines portable progressive waveform results for APTA Core 0.1.
+This document defines portable progressive waveform results for APTA 1.0.
 
 The waveform model covers:
 
@@ -33,7 +33,7 @@ A waveform result with missing PCM MUST represent the missing area as a gap. It 
 
 Waveform values are computed from a normalized signed analysis signal `x` in the mathematical range `[-1, +1]`.
 
-For APTA Core 0.1 reference-waveform conformance:
+For APTA 1.0 reference-waveform conformance:
 
 - mono input uses the mono sample directly;
 - stereo input uses `(left + right) / 2` for the analysis signal;
@@ -128,7 +128,7 @@ RMS is linear, not decibel encoded.
 
 When `APTA_WAVEFORM_COLUMN_HAS_3BAND` is not set, all three values MUST be zero and MUST be ignored by readers.
 
-APTA Core 0.1 defines the meaning as relative non-negative energy estimates for low-, mid- and high-frequency content over the same column range. It does not yet mandate one bit-exact filterbank. Producers MUST identify their filterbank or backend provenance when publishing three-band data.
+APTA 1.0 defines the meaning as relative non-negative energy estimates for low-, mid- and high-frequency content over the same column range. It does not yet mandate one bit-exact filterbank. Producers MUST identify their filterbank or backend provenance when publishing three-band data.
 
 A future reference-filterbank profile may define exact crossover frequencies, filtering, windowing and quantization without changing the baseline column layout.
 

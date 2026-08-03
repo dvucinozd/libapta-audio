@@ -1,6 +1,6 @@
 # Analysis lifecycle
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Separate lifecycle domains
 
@@ -167,7 +167,7 @@ A new result generation MUST identify every feature or range whose state changed
 
 The aggregate snapshot MAY expose a convenience summary state, but applications MUST be able to inspect per-feature state and coverage.
 
-## Seeding a session from a parsed result
+## 11. Seeding a session from a parsed result
 
 A session in the created state MAY be seeded from a previously parsed result
 through `apta_session_seed_from_result()`, so that a partially analysed source
@@ -185,8 +185,13 @@ evidence it was derived from. An implementation MUST NOT present a seeded
 tempo as though it had been re-derived from the current source.
 
 An implementation MUST reject a result whose overview column geometry differs
-from the session's, and MUST reject one whose coverage extends past the
-session's declared source length. Note that container version 1 does not record
-the source sample rate, channel count or track length, so an implementation
-cannot verify that a result came from the same source; that guarantee is the
-caller's. See `docs/api/APTA-SESSION-SEEDING-0.1.md`.
+from the session's, whose known source sample rate or channel count differs,
+or whose known source length conflicts with the session. An unknown length on
+either side is not itself a conflict. Container version 1 records sample rate,
+channel count and source length in the fixed header.
+
+Matching geometry does not prove matching audio. The host MUST associate a
+checkpoint with the intended source identity unless a present fingerprint and
+application policy provide an equivalent check. APTA 1.0 does not require a
+mandatory decoded-audio hash. See
+[`../docs/api/APTA-SESSION-SEEDING-0.1.md`](../docs/api/APTA-SESSION-SEEDING-0.1.md).

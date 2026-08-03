@@ -1,6 +1,6 @@
 # Conformance model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Purpose
 
@@ -93,7 +93,7 @@ They do not require bit-identical optional three-band values unless a reference-
 
 ## 7. Reference waveform conformance
 
-The `REFERENCE-WAVEFORM-0.1` qualifier requires exact expected values for:
+The `REFERENCE-WAVEFORM-1.0` qualifier requires exact expected values for:
 
 - mono and stereo reduction;
 - peak quantization;
@@ -118,9 +118,11 @@ Until a reference algorithm is normatively defined, tempo and beatgrid conforman
 - fractional-frame encoding;
 - segment and explicit representation authority;
 - stable-range revision protection;
-- serialization semantics when the corresponding section version exists.
+- version-1 TEMP, LGRD, GGRD and REVN serialization semantics.
 
 Independent algorithms are not required to choose identical BPM or beat positions.
+
+APTA 1.0 defines no reference-tempo or reference-beatgrid qualifier. A conformance tool MUST NOT turn reference implementation corpus accuracy into a semantic pass/fail requirement.
 
 ## 9. Numerical consistency tests
 
@@ -229,7 +231,7 @@ The mandatory negative corpus includes:
 - malformed metadata;
 - invalid waveform spans and column bounds;
 - duplicate tile identity;
-- inconsistent tempo/period fields when those sections become normative.
+- inconsistent TEMP/LGRD/GGRD/REVN fields and cross-section revision identity.
 
 The parser MUST fail safely without out-of-bounds access, unbounded allocation, use-after-free or integer wraparound.
 

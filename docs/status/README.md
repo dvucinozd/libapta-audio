@@ -7,6 +7,8 @@ Current S9 preparation:
 
 - [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md) — contractual gap analysis and
   blocker inventory for the APTA 1.0 freeze.
+- [`S9-P1-NORMATIVE-SCOPE-STATUS.md`](S9-P1-NORMATIVE-SCOPE-STATUS.md) —
+  APTA 1.0 candidate scope, profiles and normative authority freeze.
 - [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md) —
   ordered implementation, evidence and release gates for Stage S9.
 

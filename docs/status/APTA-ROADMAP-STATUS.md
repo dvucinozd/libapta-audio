@@ -2,7 +2,7 @@
 
 - **Roadmap source:** [`../architecture/APTA-ARCHITECTURE-DRAFT.md`](../architecture/APTA-ARCHITECTURE-DRAFT.md)
 - **Current completed stage:** S8 — Windows platform integration
-- **Current implementation stage:** S9 — APTA 1.0; not started
+- **Current implementation stage:** S9 — APTA 1.0; P0 complete and P1 normative scope freeze in progress
 - **Next completed-stage gate:** stable specification/API/format and multi-platform conformance
 - **Current source baseline:** `d21572a`
 - **Current public API:** 0.3.0 draft
@@ -23,7 +23,7 @@
 | S6 — Global grid and dynamic tempo | Functionally complete implementation candidate | Global refinement, multiple segments, dynamic tempo, explicit beats, immutable revisions and GGRD/REVN interchange |
 | S7 — ESP-IDF port | Complete self-tested and cross-build-verified implementation candidate | ESP adapter, optional ESP-DSP helper, cooperative example, bounded profiles, 5.5.4/6.0.2 firmware builds and manual P4 measurements |
 | S8 — Second independent platform | Complete self-tested and CI-verified implementation candidate | Native Windows adapter, WAV pull runtime, CLI tools, independent fixture, bidirectional Linux/Windows `.apta` interchange and 84-test MSVC CI |
-| S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |
+| S9 — APTA 1.0 | In progress; P0 audit complete, P1 normative scope freeze active | Stable API/ABI, complete container freeze, installable package, public conformance, independent interchange and release gates remain |
 
 ## S0 — Foundation
 
@@ -249,6 +249,22 @@ source baseline. S8 is therefore the current completed stage.
 
 See [`S8-WINDOWS-PORT-STATUS.md`](S8-WINDOWS-PORT-STATUS.md) and
 [`../../ports/windows/README.md`](../../ports/windows/README.md).
+
+## S9 — APTA 1.0
+
+Phase P0 established the freeze audit and ordered P0–P9 work programme. Phase
+P1 promotes a single release-candidate normative document set, fixes historical
+GGRD/REVN and seeding contradictions, and approves the initial 1.0 profile and
+deferred-feature boundary.
+
+This does not claim stable APTA 1.0. Public API/ABI compatibility, complete
+container fixture authority, installable packaging, a separable conformance
+suite, independent full-feature interchange, a release fuzz campaign and RC
+publication gates remain later S9 phases.
+
+See [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md),
+[`S9-P1-NORMATIVE-SCOPE-STATUS.md`](S9-P1-NORMATIVE-SCOPE-STATUS.md) and
+[`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md).
 
 ## Claims
 

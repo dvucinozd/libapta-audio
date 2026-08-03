@@ -1,16 +1,16 @@
 # `.apta` container format
 
-**Status:** APTA Working Draft 0.1  
+**Status:** APTA 1.0 Release Candidate Draft  
 **Container version:** 1  
-**Initial profiles:** waveform interchange and local tempo/grid interchange
+**Profiles:** `APTA-WAVEFORM-1.0` and `APTA-CORE-ANALYSIS-1.0`
 
 ## 1. Scope
 
-This document defines the byte-level `.apta` container and the version-1 waveform, tempo-candidate and local-beatgrid sections.
+This document defines the common byte-level `.apta` container and the version-1 META, WOVR, WDTL, TEMP and LGRD sections. The normative GGRD and REVN version-1 payloads are defined by [`global-grid-container.md`](global-grid-container.md) and are part of the same APTA 1.0 container contract.
 
 The container is a portable interchange format. Native C structure layout, pointer values, host endianness and compiler padding MUST NOT be written directly.
 
-Global beatgrid, dynamic-tempo and future feature sections require separately defined versioned payloads. Their FourCC values may be reserved before their payloads become normative.
+Future features use separately versioned optional sections or extensions. A reserved name or architecture example is not a normative allocation.
 
 ## 2. Integer encoding
 
@@ -173,6 +173,8 @@ A reader:
 - MUST reject duplicate required singleton sections;
 - MAY preserve unknown optional sections during a lossless rewrite.
 
+APTA 1.0 requires safe skipping of unknown optional sections. It does not require parse-to-result-to-serialize preservation of their bytes unless an implementation claims a separately documented opaque-preservation extension.
+
 ## 10. FourCC values
 
 The byte sequence shown is stored literally.
@@ -184,15 +186,17 @@ The byte sequence shown is stored literally.
 | `WDTL` | Detail waveform tiles | Optional, normative |
 | `TEMP` | Selected tempo and candidate set | Optional, normative |
 | `LGRD` | Local constant-period beatgrid | Optional, normative |
-| `BGRD` | Global or multi-segment beatgrid | Reserved for Stage S6 |
+| `GGRD` | Global or multi-segment beatgrid | Optional, normative in `global-grid-container.md` |
 | `CONF` | Additional confidence payload | Reserved |
-| `REVN` | Pending revisions | Reserved |
+| `REVN` | Pending or applied global-grid revision | Optional, normative in `global-grid-container.md` |
 
 Multiple `WOVR` sections are permitted only when each carries a distinct `level_id`.
 
 One `WDTL` section may contain multiple tiles. Multiple `WDTL` sections are permitted when their tile identities do not conflict.
 
 `TEMP` and `LGRD` are optional singleton sections. `LGRD` version 1 requires one valid `TEMP` version-1 section in the same container.
+
+`GGRD` and `REVN` are optional singleton sections that MUST appear as an adjacent pair in that order. Their payload, count, revision and cross-section rules are normative in [`global-grid-container.md`](global-grid-container.md).
 
 ## 11. `META` section version 1
 
@@ -415,6 +419,8 @@ A reader MUST reject:
 - two detail tiles with the same identity but different payload;
 - duplicate `TEMP` singleton sections;
 - duplicate `LGRD` singleton sections;
+- duplicate `GGRD` or `REVN` singleton sections;
+- an unpaired or non-adjacent `GGRD`/`REVN` pair;
 - `LGRD` without `TEMP`;
 - an `LGRD` nominal tempo that differs from the selected `TEMP` tempo;
 - section ranges that overlap;
@@ -435,6 +441,7 @@ Before allocation, a parser MUST apply configured limits including:
 - maximum detail tiles;
 - maximum tempo candidates;
 - maximum local-grid coverage ranges and segments;
+- maximum global-grid segments and explicit beats;
 - maximum metadata nesting and item count;
 - maximum aggregate allocation.
 
@@ -450,6 +457,7 @@ A file with `PARTIAL_RESULT` may contain:
 - provisional waveform columns;
 - provisional tempo candidates;
 - a provisional local grid with explicit evidence, applicability and coverage;
+- a provisional global grid with a valid paired revision section;
 - unknown source duration;
 - missing overview, detail, tempo or grid regions.
 
@@ -461,7 +469,7 @@ A canonical version-1 writer:
 
 - writes a 96-byte header;
 - writes the directory immediately after aligned header bytes;
-- orders known sections as `WOVR`, `WDTL`, `META`, `TEMP`, `LGRD`, omitting absent optional sections;
+- orders known sections as `WOVR`, `WDTL`, `META`, `TEMP`, `LGRD`, `GGRD`, `REVN`, omitting absent optional sections and keeping `REVN` immediately after `GGRD`;
 - orders overview spans and tile descriptors as required above;
 - orders tempo candidates by non-increasing score;
 - writes zero padding and reserved fields;
@@ -489,8 +497,9 @@ Malformed-container tests MUST include:
 - malformed deterministic CBOR;
 - WOVR span and column range overflow;
 - WDTL duplicate tile identity;
-- duplicate `TEMP` or `LGRD`;
+- duplicate `TEMP`, `LGRD`, `GGRD` or `REVN`;
 - `LGRD` without `TEMP`;
+- missing, reordered or mismatched `GGRD`/`REVN`;
 - invalid tempo, state, confidence, relation or range fields;
 - `TEMP`/`LGRD` nominal-tempo conflict;
 - non-zero reserved values in strict mode.

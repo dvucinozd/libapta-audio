@@ -1,6 +1,6 @@
 # Confidence model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Purpose
 
@@ -18,7 +18,7 @@ typedef uint8_t apta_confidence_value_t;
 #define APTA_CONFIDENCE_UNKNOWN 255u
 ```
 
-Values `101` through `254` are reserved and MUST NOT be emitted by APTA Core 0.1.
+Values `101` through `254` are reserved and MUST NOT be emitted by APTA 1.0.
 
 `0` means the implementation evaluated the value and has effectively no supporting confidence. `255` means confidence was not computed or is unavailable. These meanings MUST NOT be conflated.
 
