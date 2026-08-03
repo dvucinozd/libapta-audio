@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git diff --check main...HEAD
+          git diff --check origin/main...HEAD
           python3 - <<'PY'
           from pathlib import Path
           import re
