@@ -1,6 +1,6 @@
 {
   "index_version": "apta-container-v1-conformance-index-1",
-  "manifest_sha256": "2ba6ab6fb979912dc35eb6d1b19c9b14658686a052159833c3d0af4c77fc3704",
+  "manifest_sha256": "88d5b9b57f463e99e55c60bd738bb0ecfd50983f82cb99ecfe8486ada1f1d24d",
   "case_count": 42,
   "expectation_counts": {
     "ok/ok": 7,
