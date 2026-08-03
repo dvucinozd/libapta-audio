@@ -53,10 +53,12 @@ The complete version-1 standard section set is:
 META WOVR WDTL TEMP LGRD GGRD REVN
 ```
 
-Sections are optional or profile-dependent according to
-[`file-format.md`](file-format.md),
-[`global-grid-container.md`](global-grid-container.md) and
-[`profiles.md`](profiles.md).
+The authoritative multiplicity, dependency, ordering, strictness, finality and
+future-compatibility rules are in
+[`container-v1-registry.md`](container-v1-registry.md). Byte layouts are defined
+by [`file-format.md`](file-format.md) and
+[`global-grid-container.md`](global-grid-container.md). Profile requirements are
+in [`profiles.md`](profiles.md).
 
 ## 4. Features deferred from APTA 1.0 core
 
@@ -98,31 +100,32 @@ It contains:
 10. [`lifecycle.md`](lifecycle.md);
 11. [`confidence.md`](confidence.md);
 12. [`result-model.md`](result-model.md);
-13. [`file-format.md`](file-format.md);
-14. [`global-grid-container.md`](global-grid-container.md);
-15. [`wovr-state-flags.md`](wovr-state-flags.md);
-16. [`profiles.md`](profiles.md);
-17. [`extensions.md`](extensions.md);
-18. [`conformance.md`](conformance.md).
+13. [`container-v1-registry.md`](container-v1-registry.md);
+14. [`file-format.md`](file-format.md);
+15. [`global-grid-container.md`](global-grid-container.md);
+16. [`wovr-state-flags.md`](wovr-state-flags.md);
+17. [`profiles.md`](profiles.md);
+18. [`extensions.md`](extensions.md);
+19. [`conformance.md`](conformance.md).
 
 Architecture drafts, implementation status records, readiness reports,
 reference integration documents, examples and code comments are informative.
 They do not override this normative set.
 
-## 6. Public API candidate
+## 6. Public API and ABI
 
-The current public API candidate is maintained under
+The frozen APTA 1.0 public API is maintained under
 [`../include/apta/`](../include/apta/).
 
-The headers are the reference implementation vehicle for this specification.
-They remain a draft ABI until Stage S9 P2 completes version compatibility,
-layout, symbol and installed-consumer gates. The API version number is
-independent of the specification and container versions.
+Stage S9 P2 established the 1.x version compatibility predicate, public layout
+manifests, frozen header snapshot, old-header/new-library tests and exact shared
+library symbol manifests. The API version number remains independent of the
+specification and container versions.
 
 Public API and ABI policy is documented in
 [`../docs/api/APTA-PUBLIC-API-ABI-POLICY-0.1.md`](../docs/api/APTA-PUBLIC-API-ABI-POLICY-0.1.md).
-That policy is informative until incorporated into the final 1.0 normative
-manifest or replaced by a normative API contract.
+Any later release-candidate change to the frozen surface requires the explicit
+freeze-exception process and renewed compatibility evidence.
 
 ## 7. Separation of responsibilities
 
@@ -207,6 +210,11 @@ When requirements conflict, precedence is:
 5. architecture documents;
 6. reference implementation and integration documentation;
 7. examples.
+
+For container version 1, `container-v1-registry.md` is the dedicated authority
+for registry, multiplicity, dependency, ordering, strictness, finality and
+future-compatibility rules. `file-format.md` and `global-grid-container.md` are
+the dedicated authorities for their byte layouts.
 
 A conflict between two dedicated normative documents is a specification defect
 and MUST be resolved before final APTA 1.0 publication.

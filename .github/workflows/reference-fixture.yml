@@ -8,16 +8,20 @@ on:
       - ".github/workflows/reference-fixture.yml"
       - "CMakeLists.txt"
       - "include/**"
+      - "specification/**"
       - "src/**"
       - "tests/fixtures/**"
+      - "tests/spec/**"
       - "tests/unit/external_fixture.c"
   pull_request:
     paths:
       - ".github/workflows/reference-fixture.yml"
       - "CMakeLists.txt"
       - "include/**"
+      - "specification/**"
       - "src/**"
       - "tests/fixtures/**"
+      - "tests/spec/**"
       - "tests/unit/external_fixture.c"
 
 permissions:
@@ -35,6 +39,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Verify normative manifest blob hashes
+        run: python3 tests/spec/check_normative_manifest.py
 
       - name: Regenerate fixture and compare committed hex
         run: >-
