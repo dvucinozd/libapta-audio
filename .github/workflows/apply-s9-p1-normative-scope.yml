@@ -1,0 +1,318 @@
+name: Apply S9 P1 normative scope
+
+on:
+  push:
+    branches:
+      - agent/s9-p1-normative-scope
+    paths:
+      - .github/workflows/apply-s9-p1-normative-scope.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-normative-scope:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: agent/s9-p1-normative-scope
+
+      - name: Apply normative consistency changes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          root = Path('.')
+          normative = [
+              'specification/APTA-SPEC.md',
+              'specification/normative-language.md',
+              'specification/terminology.md',
+              'specification/time-model.md',
+              'specification/pcm-input.md',
+              'specification/progressive-scheduling.md',
+              'specification/waveform.md',
+              'specification/tempo.md',
+              'specification/beatgrid.md',
+              'specification/lifecycle.md',
+              'specification/confidence.md',
+              'specification/result-model.md',
+              'specification/file-format.md',
+              'specification/global-grid-container.md',
+              'specification/wovr-state-flags.md',
+              'specification/profiles.md',
+              'specification/extensions.md',
+              'specification/conformance.md',
+          ]
+
+          def read(path):
+              return (root / path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              if not text.endswith('\n'):
+                  text += '\n'
+              (root / path).write_text(text, encoding='utf-8')
+
+          # Promote all still-labelled modules into the same release-candidate set.
+          for path in normative:
+              text = read(path)
+              text = text.replace(
+                  '**Status:** APTA Working Draft 0.1',
+                  '**Status:** APTA 1.0 Release Candidate Draft')
+              text = text.replace('APTA Core 0.1', 'APTA 1.0')
+              write(path, text)
+
+          # Align the common container registry and rules with implemented S6 bytes.
+          path = 'specification/file-format.md'
+          text = read(path)
+          text = text.replace(
+              '**Initial profiles:** waveform interchange and local tempo/grid interchange',
+              '**Profiles:** `APTA-WAVEFORM-1.0` and `APTA-CORE-ANALYSIS-1.0`')
+          old_scope = (
+              'This document defines the byte-level `.apta` container and the version-1 waveform, tempo-candidate and local-beatgrid sections.\n\n'
+              'The container is a portable interchange format. Native C structure layout, pointer values, host endianness and compiler padding MUST NOT be written directly.\n\n'
+              'Global beatgrid, dynamic-tempo and future feature sections require separately defined versioned payloads. Their FourCC values may be reserved before their payloads become normative.'
+          )
+          new_scope = (
+              'This document defines the common byte-level `.apta` container and the version-1 META, WOVR, WDTL, TEMP and LGRD sections. '
+              'The normative GGRD and REVN version-1 payloads are defined by [`global-grid-container.md`](global-grid-container.md) and are part of the same APTA 1.0 container contract.\n\n'
+              'The container is a portable interchange format. Native C structure layout, pointer values, host endianness and compiler padding MUST NOT be written directly.\n\n'
+              'Future features use separately versioned optional sections or extensions. A reserved name or architecture example is not a normative allocation.'
+          )
+          if old_scope not in text:
+              raise SystemExit('file-format scope anchor not found')
+          text = text.replace(old_scope, new_scope)
+          text = text.replace(
+              '| `BGRD` | Global or multi-segment beatgrid | Reserved for Stage S6 |',
+              '| `GGRD` | Global or multi-segment beatgrid | Optional, normative in `global-grid-container.md` |')
+          text = text.replace(
+              '| `REVN` | Pending revisions | Reserved |',
+              '| `REVN` | Pending or applied global-grid revision | Optional, normative in `global-grid-container.md` |')
+          anchor = '`TEMP` and `LGRD` are optional singleton sections. `LGRD` version 1 requires one valid `TEMP` version-1 section in the same container.'
+          addition = anchor + '\n\n`GGRD` and `REVN` are optional singleton sections that MUST appear as an adjacent pair in that order. Their payload, count, revision and cross-section rules are normative in [`global-grid-container.md`](global-grid-container.md).'
+          if anchor not in text:
+              raise SystemExit('file-format section relationship anchor not found')
+          text = text.replace(anchor, addition)
+          unknown_anchor = '- MAY preserve unknown optional sections during a lossless rewrite.'
+          unknown_new = (
+              '- MAY preserve unknown optional sections during a lossless rewrite.\n\n'
+              'APTA 1.0 requires safe skipping of unknown optional sections. It does not require parse-to-result-to-serialize preservation of their bytes unless an implementation claims a separately documented opaque-preservation extension.'
+          )
+          if unknown_anchor not in text:
+              raise SystemExit('unknown optional anchor not found')
+          text = text.replace(unknown_anchor, unknown_new)
+          text = text.replace(
+              '- duplicate `LGRD` singleton sections;\n- `LGRD` without `TEMP`;',
+              '- duplicate `LGRD` singleton sections;\n- duplicate `GGRD` or `REVN` singleton sections;\n- an unpaired or non-adjacent `GGRD`/`REVN` pair;\n- `LGRD` without `TEMP`;')
+          text = text.replace(
+              '- maximum local-grid coverage ranges and segments;',
+              '- maximum local-grid coverage ranges and segments;\n- maximum global-grid segments and explicit beats;')
+          text = text.replace(
+              '- a provisional local grid with explicit evidence, applicability and coverage;\n- unknown source duration;',
+              '- a provisional local grid with explicit evidence, applicability and coverage;\n- a provisional global grid with a valid paired revision section;\n- unknown source duration;')
+          text = text.replace(
+              'orders known sections as `WOVR`, `WDTL`, `META`, `TEMP`, `LGRD`, omitting absent optional sections;',
+              'orders known sections as `WOVR`, `WDTL`, `META`, `TEMP`, `LGRD`, `GGRD`, `REVN`, omitting absent optional sections and keeping `REVN` immediately after `GGRD`;')
+          text = text.replace(
+              '- duplicate `TEMP` or `LGRD`;\n- `LGRD` without `TEMP`;',
+              '- duplicate `TEMP`, `LGRD`, `GGRD` or `REVN`;\n- `LGRD` without `TEMP`;\n- missing, reordered or mismatched `GGRD`/`REVN`;')
+          write(path, text)
+
+          # Align beatgrid revision wording with the shipped API and section contract.
+          path = 'specification/beatgrid.md'
+          text = read(path)
+          text = text.replace(
+              'The host acceptance API and serialized revision payload are specified separately from this baseline grid representation.',
+              'The host applies an exact pending revision through `apta_session_apply_grid_revision()`. The immutable revision view is exposed through `apta_result_get_grid_revision()`, and the version-1 serialized contract is defined by [`global-grid-container.md`](global-grid-container.md).')
+          text = text.replace(
+              'Native C structure layout MUST NOT be serialized directly.\n\n## 18. Conformance fixtures',
+              'Native C structure layout MUST NOT be serialized directly. Version-1 local grids use `LGRD`; global, dynamic and explicit/hybrid grids use the paired `GGRD` and `REVN` sections defined by [`global-grid-container.md`](global-grid-container.md).\n\n## 18. Conformance fixtures')
+          write(path, text)
+
+          # Correct the old geometry statement and make seeding a numbered 1.0 section.
+          path = 'specification/lifecycle.md'
+          text = read(path)
+          text = text.replace('## Seeding a session from a parsed result', '## 11. Seeding a session from a parsed result')
+          old = (
+              'An implementation MUST reject a result whose overview column geometry differs\n'
+              "from the session's, and MUST reject one whose coverage extends past the\n"
+              "session's declared source length. Note that container version 1 does not record\n"
+              'the source sample rate, channel count or track length, so an implementation\n'
+              "cannot verify that a result came from the same source; that guarantee is the\n"
+              'caller\'s. See `docs/api/APTA-SESSION-SEEDING-0.1.md`.'
+          )
+          new = (
+              'An implementation MUST reject a result whose overview column geometry differs\n'
+              "from the session's, whose known source sample rate or channel count differs,\n"
+              "or whose known source length conflicts with the session. An unknown length on\n"
+              'either side is not itself a conflict. Container version 1 records sample rate,\n'
+              'channel count and source length in the fixed header.\n\n'
+              'Matching geometry does not prove matching audio. The host MUST associate a\n'
+              'checkpoint with the intended source identity unless a present fingerprint and\n'
+              'application policy provide an equivalent check. APTA 1.0 does not require a\n'
+              'mandatory decoded-audio hash. See\n'
+              '[`../docs/api/APTA-SESSION-SEEDING-0.1.md`](../docs/api/APTA-SESSION-SEEDING-0.1.md).'
+          )
+          if old not in text:
+              raise SystemExit('lifecycle seeding anchor not found')
+          text = text.replace(old, new)
+          write(path, text)
+
+          # Replace the stale future-import section with the implemented portable subset.
+          path = 'specification/result-model.md'
+          text = read(path)
+          old = (
+              '## 13. Import and continuation\n\n'
+              'A future result-import API will allow a compatible deserialized generation to seed a new session.\n\n'
+              'Import MUST validate:\n\n'
+              '- source identity;\n'
+              '- source format;\n'
+              '- specification and feature-model versions;\n'
+              '- backend-sensitive state compatibility;\n'
+              '- serialized coverage and integrity.\n\n'
+              'Portable result payloads may be reused across backends. Private backend work state MUST NOT be required for another conforming implementation to consume the portable result.'
+          )
+          new = (
+              '## 13. Import and continuation\n\n'
+              '`apta_session_seed_from_result()` allows a fresh created session to import compatible parsed waveform coverage and continue missing analysis. The result is not retained by the call.\n\n'
+              'The portable 1.0 seeding subset MUST validate:\n\n'
+              '- overview geometry;\n'
+              '- known sample rate and channel count;\n'
+              '- known source length;\n'
+              '- coverage bounds and integrity;\n'
+              '- session state and source compatibility required by the operation.\n\n'
+              'Tempo and beatgrid publication is not resumable from the portable result because the onset work state is not serialized. The implementation MUST rebuild that evidence from PCM and MUST NOT present a cached estimate as newly derived.\n\n'
+              'Source identity remains an explicit host policy when no usable fingerprint is present. Private backend work state MUST NOT be required for another conforming implementation to consume portable published payloads.'
+          )
+          if old not in text:
+              raise SystemExit('result-model import anchor not found')
+          text = text.replace(old, new)
+          write(path, text)
+
+          # Update conformance identifiers and the now-normative tempo/grid format boundary.
+          path = 'specification/conformance.md'
+          text = read(path)
+          text = text.replace('`REFERENCE-WAVEFORM-0.1`', '`REFERENCE-WAVEFORM-1.0`')
+          text = text.replace(
+              '- serialization semantics when the corresponding section version exists.',
+              '- version-1 TEMP, LGRD, GGRD and REVN serialization semantics.')
+          tempo_anchor = 'Independent algorithms are not required to choose identical BPM or beat positions.'
+          tempo_new = tempo_anchor + '\n\nAPTA 1.0 defines no reference-tempo or reference-beatgrid qualifier. A conformance tool MUST NOT turn reference implementation corpus accuracy into a semantic pass/fail requirement.'
+          if tempo_anchor not in text:
+              raise SystemExit('conformance tempo anchor not found')
+          text = text.replace(tempo_anchor, tempo_new)
+          text = text.replace(
+              '- inconsistent tempo/period fields when those sections become normative.',
+              '- inconsistent TEMP/LGRD/GGRD/REVN fields and cross-section revision identity.')
+          write(path, text)
+
+          # Make the extension document explicit about the frozen 1.0 boundary.
+          path = 'specification/extensions.md'
+          text = read(path)
+          text = text.replace(
+              'APTA extensions add capabilities, result payloads, container sections or platform integration contracts without silently changing existing Core semantics.',
+              'APTA extensions add capabilities, result payloads, container sections or platform integration contracts without silently changing APTA 1.0 core semantics.')
+          text = text.replace('Core capability bits `0..31`', 'APTA 1.0 core capability bits `0..31`')
+          text = text.replace('through a Core capability bit', 'through an APTA 1.0 core capability bit')
+          write(path, text)
+
+          # Update current project status without declaring S9 complete.
+          path = 'docs/status/APTA-ROADMAP-STATUS.md'
+          text = read(path)
+          text = text.replace(
+              '- **Current implementation stage:** S9 — APTA 1.0; not started',
+              '- **Current implementation stage:** S9 — APTA 1.0; P0 complete and P1 normative scope freeze in progress')
+          text = text.replace(
+              '| S9 — APTA 1.0 | Not started | Stable specification/API/format and multi-platform conformance remain |',
+              '| S9 — APTA 1.0 | In progress; P0 audit complete, P1 normative scope freeze active | Stable API/ABI, complete container freeze, installable package, public conformance, independent interchange and release gates remain |')
+          if '## S9 — APTA 1.0' not in text:
+              section = '''## S9 — APTA 1.0\n\nPhase P0 established the freeze audit and ordered P0–P9 work programme. Phase\nP1 promotes a single release-candidate normative document set, fixes historical\nGGRD/REVN and seeding contradictions, and approves the initial 1.0 profile and\ndeferred-feature boundary.\n\nThis does not claim stable APTA 1.0. Public API/ABI compatibility, complete\ncontainer fixture authority, installable packaging, a separable conformance\nsuite, independent full-feature interchange, a release fuzz campaign and RC\npublication gates remain later S9 phases.\n\nSee [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md),\n[`S9-P1-NORMATIVE-SCOPE-STATUS.md`](S9-P1-NORMATIVE-SCOPE-STATUS.md) and\n[`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md).\n\n'''
+              text = text.replace('## Claims\n', section + '## Claims\n')
+          write(path, text)
+
+          # Update root status wording.
+          path = 'README.md'
+          text = read(path)
+          text = text.replace(
+              '> Project status: functional implementation candidate through roadmap Stage S8. The specification, public API and ABI remain draft 0.1 and are not yet APTA 1.0 stable.',
+              '> Project status: functional implementation candidate through roadmap Stage S8, with Stage S9 APTA 1.0 freeze work in progress. The specification is a 1.0 release-candidate draft; the public API/ABI and package are not yet stable 1.0.')
+          write(path, text)
+
+          # P1 status record.
+          p1_status = '''# Stage S9 P1 — Normative scope freeze status\n\n**Status:** implementation complete on the P1 branch; awaiting review and CI  \n**Parent audit:** [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md)  \n**Work order:** [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md)\n\n## Scope completed\n\n- promote one APTA 1.0 release-candidate normative set;\n- define the complete 1.0 core feature and deferred-feature boundary;\n- approve WAVEFORM-1.0, ADAPTIVE-WAVEFORM-1.0 and CORE-ANALYSIS-1.0;\n- approve REFERENCE-WAVEFORM-1.0 and prohibit unavailable reference tempo/grid claims;\n- adopt implemented GGRD and REVN version-1 names and contracts;\n- correct obsolete seeding geometry and future-import statements;\n- distinguish multi-platform integrations from independent DSP implementations;\n- generate a blob-hashed normative manifest.\n\n## Deliberately unchanged\n\n- public API version remains 0.3.0 until P2;\n- container version remains 1;\n- canonical writer bytes are unchanged;\n- DSP behaviour and test expectations are unchanged;\n- no final APTA 1.0 claim is issued.\n\n## P1 acceptance\n\nP1 is complete when documentation and link checks pass, the PR contains no\nproduction-code change, and the maintainer approves the scope/profile set.\n\n## Next phase\n\nP2 freezes the version model and public API/ABI: compatibility predicate,\nstructure layouts, exported symbols, source geometry/identity access and\nold-header/new-library tests.\n'''
+          write('docs/status/S9-P1-NORMATIVE-SCOPE-STATUS.md', p1_status)
+
+          # Index P1 status.
+          path = 'docs/status/README.md'
+          text = read(path)
+          anchor = '- [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md) — contractual gap analysis and\n  blocker inventory for the APTA 1.0 freeze.\n'
+          addition = anchor + '- [`S9-P1-NORMATIVE-SCOPE-STATUS.md`](S9-P1-NORMATIVE-SCOPE-STATUS.md) —\n  APTA 1.0 candidate scope, profiles and normative authority freeze.\n'
+          if anchor not in text:
+              raise SystemExit('status index anchor not found')
+          text = text.replace(anchor, addition)
+          write(path, text)
+
+          # Remove this one-shot workflow before committing the resulting branch.
+          workflow = root / '.github/workflows/apply-s9-p1-normative-scope.yml'
+          workflow.unlink()
+
+          # Build a manifest over every normative module except the manifest itself.
+          rows = []
+          for doc in normative:
+              blob = subprocess.check_output(['git', 'hash-object', doc], text=True).strip()
+              title = read(doc).splitlines()[0].lstrip('# ').strip()
+              rows.append((doc.removeprefix('specification/'), title, blob))
+
+          manifest = [
+              '# APTA 1.0 normative manifest',
+              '',
+              '**Status:** Release Candidate Draft manifest  ',
+              '**Candidate:** APTA 1.0  ',
+              '**Hash domain:** Git blob SHA-1 of UTF-8 file content',
+              '',
+              '## 1. Authority',
+              '',
+              'The files below are the complete normative release-candidate set. A path not',
+              'listed here is informative unless one of these documents normatively',
+              'incorporates it.',
+              '',
+              'The manifest does not list its own blob hash because that would be',
+              'self-referential. The enclosing Git commit or release tag identifies the exact',
+              'manifest instance.',
+              '',
+              '## 2. Candidate files',
+              '',
+              '| Path | Title | Git blob SHA-1 |',
+              '|---|---|---|',
+          ]
+          for rel, title, blob in rows:
+              manifest.append(f'| `{rel}` | {title} | `{blob}` |')
+          manifest += [
+              '',
+              '## 3. Change control',
+              '',
+              'Any change to a listed file changes its blob hash and requires a manifest',
+              'update. A normative change also requires compatibility impact, implementation',
+              'and conformance review under project governance. Editorial corrections may',
+              'change hashes without changing the specification version only when they do not',
+              'alter requirements.',
+              '',
+              'Final APTA 1.0 publication will replace the candidate label and pin this',
+              'manifest through the accepted release tag.',
+          ]
+          write('specification/APTA-1.0-NORMATIVE-MANIFEST.md', '\n'.join(manifest))
+          PY
+
+      - name: Commit P1 consistency pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "spec(s9): complete P1 normative scope freeze"
+          git push origin HEAD:agent/s9-p1-normative-scope
