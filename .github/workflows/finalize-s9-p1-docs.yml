@@ -29,7 +29,6 @@ jobs:
           import re
           import subprocess
 
-          root = Path('.').resolve()
           manifest_path = Path('specification/APTA-1.0-NORMATIVE-MANIFEST.md')
           report_path = Path('docs/status/S9-P1-DOCUMENTATION-CHECK.md')
           workflow_path = Path('.github/workflows/finalize-s9-p1-docs.yml')
@@ -109,8 +108,8 @@ jobs:
           ]
           manifest_path.write_text('\n'.join(manifest), encoding='utf-8')
 
-          # Remove this one-shot workflow before evaluating the final diff.
           workflow_path.unlink()
+          report_path.write_text('', encoding='utf-8')
 
           changed = subprocess.check_output(
               ['git', 'diff', '--name-only', 'origin/main...HEAD'],
@@ -164,7 +163,7 @@ jobs:
           report_path.write_text('\n'.join(report), encoding='utf-8')
 
           if not passed:
-              raise SystemExit('P1 documentation verification failed; inspect the committed report source logic locally')
+              raise SystemExit('P1 documentation verification failed')
           PY
 
       - name: Commit normalized documents and PASS report
