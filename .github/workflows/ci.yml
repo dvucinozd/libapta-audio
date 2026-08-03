@@ -7,60 +7,13 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  p2-abi-bootstrap:
-    name: Apply P2 ABI freeze
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/s9-p2-api-abi-freeze'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out P2 branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: agent/s9-p2-api-abi-freeze
-
-      - name: Install multilib toolchain
-        if: hashFiles('.github/scripts/apply_s9_p2_abi.py') != ''
-        run: sudo apt-get update && sudo apt-get install -y gcc-multilib
-
-      - name: Apply ABI freeze
-        run: |
-          if [ -f .github/scripts/apply_s9_p2_abi.py ]; then
-            python3 .github/scripts/apply_s9_p2_abi.py
-            git checkout -- .github/workflows/ci.yml
-          else
-            echo "ABI freeze already generated."
-          fi
-
-      - name: Commit ABI freeze artifacts
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("tests/CMakeLists.txt")
-          if path.exists():
-              path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")
-          PY
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No ABI artifact changes remain."
-            exit 0
-          fi
-          git diff --cached --check
-          git commit -m "feat(s9): freeze the APTA 1.0 public ABI"
-          git push origin HEAD:agent/s9-p2-api-abi-freeze
-
   core-build:
     name: Core build and tests
     runs-on: ubuntu-latest
