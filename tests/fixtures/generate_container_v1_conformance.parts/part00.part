@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+"""Generate registry-driven malformed and future-compatibility vectors."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import struct
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable
+
+import generate_container_v1_suite as suite
+
+HEADER_SIZE = 96
+ENTRY_SIZE = 40
+PARTIAL_RESULT = 1 << 0
+SOURCE_DURATION_UNKNOWN = 1 << 1
+HAS_REQUIRED_EXTENSIONS = 1 << 2
+REQUIRED = 1 << 0
+COMPRESSED = 1 << 1
+ENCRYPTED = 1 << 2
+UINT64_MAX = (1 << 64) - 1
+FINAL = 4
+PROVISIONAL = 2
+REVISION_PENDING = 1
+
+OK = "ok"
+UNSUPPORTED = "unsupported"
+CORRUPT = "corrupt"
+
+
+@dataclass(frozen=True)
+class Entry:
+    fourcc: str
+    payload: bytes
+    version: int = 1
+    flags: int = 0
+    reserved: int = 0
+
+
+@dataclass(frozen=True)
+class Case:
+    name: str
+    data: bytes
+    strict: str
+    permissive: str
+    rule: str
+
+
+def crc32c(data: bytes) -> int:
+    return suite.crc32c(data)
+
+
+def put_u16(buffer: bytearray, offset: int, value: int) -> None:
+    struct.pack_into("<H", buffer, offset, value)
+
+
+def put_u32(buffer: bytearray, offset: int, value: int) -> None:
+    struct.pack_into("<I", buffer, offset, value)
+
+
+def put_u64(buffer: bytearray, offset: int, value: int) -> None:
+    struct.pack_into("<Q", buffer, offset, value)
+
+
+def get_u32(buffer: bytes, offset: int) -> int:
+    return struct.unpack_from("<I", buffer, offset)[0]
+
+
+def get_u64(buffer: bytes, offset: int) -> int:
+    return struct.unpack_from("<Q", buffer, offset)[0]
+
+
+def payload(fourcc: str) -> bytes:
+    return suite.PAYLOAD_BUILDERS[fourcc]()
+
+
+def mutate(data: bytes, callback: Callable[[bytearray], None]) -> bytes:
+    output = bytearray(data)
+    callback(output)
+    return bytes(output)
+
+
+def payload_u32(fourcc: str, offset: int, value: int) -> bytes:
+    output = bytearray(payload(fourcc))
+    put_u32(output, offset, value)
+    return bytes(output)
+
+
+def payload_u8(fourcc: str, offset: int, value: int) -> bytes:
+    output = bytearray(payload(fourcc))
+    output[offset] = value
+    return bytes(output)
+
+
+def provisional_ggrd() -> bytes:
+    output = bytearray(payload("GGRD"))
+    output[2] = PROVISIONAL
+    output[96 + 72] = PROVISIONAL
+    return bytes(output)
+
+
+def pending_revn() -> bytes:
+    return payload_u8("REVN", 2, REVISION_PENDING)
+
+
+def provisional_wovr() -> bytes:
+    return payload_u32("WOVR", 40, PROVISIONAL)
+
+
+def provisional_temp() -> bytes:
+    return payload_u8("TEMP", 2, PROVISIONAL)
+
+
+def assemble(
+    entries: list[Entry],
+    *,
+    container_flags: int = 0,
+    total_frames: int = suite.TOTAL_SOURCE_FRAMES,
+    header_size: int = HEADER_SIZE,
+    extended_header: bytes = b"",
+    container_version: int = 1,
+    specification_major: int = 1,
+    specification_minor: int = 0,
+) -> bytes:
+    if header_size < HEADER_SIZE:
+        raise ValueError("header_size must be at least 96")
+    if len(extended_header) > header_size - HEADER_SIZE:
+        raise ValueError("extended header exceeds header_size")
+
+    directory_offset = suite.align8(header_size)
+    cursor = suite.align8(directory_offset + len(entries) * ENTRY_SIZE)
+    layout: list[tuple[Entry, int]] = []
+    for index, entry in enumerate(entries):
+        layout.append((entry, cursor))
+        cursor += len(entry.payload)
+        if index + 1 != len(entries):
+            cursor = suite.align8(cursor)
+
+    output = bytearray(cursor)
+    output[0:4] = b"APTA"
+    put_u16(output, 4, header_size)
+    put_u16(output, 6, container_version)
+    put_u16(output, 8, specification_major)
+    put_u16(output, 10, specification_minor)
+    put_u32(output, 12, suite.PRODUCER_API_VERSION)
+    put_u32(output, 16, container_flags)
+    put_u32(output, 20, len(entries))
+    put_u64(output, 24, directory_offset)
+    put_u64(output, 32, len(output))
+    put_u64(output, 40, total_frames)
+    put_u32(output, 48, suite.SOURCE_SAMPLE_RATE)
+    put_u16(output, 52, suite.SOURCE_CHANNEL_COUNT)
+    put_u16(output, 54, suite.SOURCE_CHANNEL_LAYOUT_MONO)
+    output[HEADER_SIZE : HEADER_SIZE + len(extended_header)] = extended_header
+
+    for index, (entry, offset) in enumerate(layout):

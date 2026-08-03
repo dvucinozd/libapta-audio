@@ -346,6 +346,10 @@ def build_manifest(fixtures: dict[str, tuple[tuple[str, ...], bytes]]) -> dict[s
             {
                 "name": name,
                 "sections": list(sections),
+                "section_versions": [1 for _ in sections],
+                "canonical": True,
+                "expected_strict": "ok",
+                "expected_permissive": "ok",
                 "size_bytes": len(fixture),
                 "sha256": hashlib.sha256(fixture).hexdigest(),
                 "hex_path": f"tests/fixtures/container-v1-suite/{name}.apta.hex",
@@ -356,6 +360,7 @@ def build_manifest(fixtures: dict[str, tuple[tuple[str, ...], bytes]]) -> dict[s
         "container_version": CONTAINER_VERSION,
         "specification_version": "1.0",
         "producer_api_version": "1.0.0",
+        "producer": "independent-python-container-v1-suite-generator",
         "generator_path": "tests/fixtures/generate_container_v1_suite.py",
         "consumer_path": "tests/unit/external_fixture.c",
         "fixtures": rows,

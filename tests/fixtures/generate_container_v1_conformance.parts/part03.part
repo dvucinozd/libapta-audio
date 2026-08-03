@@ -1,0 +1,112 @@
+        CORRUPT, CORRUPT, "known duration must clear SOURCE_DURATION_UNKNOWN")
+
+    canonical = assemble([wovr, meta])
+    add(
+        "trailing-byte",
+        canonical + b"\x00",
+        CORRUPT, CORRUPT, "actual size must equal total_file_size")
+    add(
+        "payload-crc-mismatch",
+        mutate(canonical, lambda output: output.__setitem__(get_u64(output, directory_entry_offset(output, 0) + 8), output[get_u64(output, directory_entry_offset(output, 0) + 8)] ^ 1)),
+        CORRUPT, CORRUPT, "section CRC32C")
+    add(
+        "payload-misaligned",
+        with_header_mutation(
+            canonical,
+            lambda output: put_u64(
+                output,
+                directory_entry_offset(output, 0) + 8,
+                get_u64(output, directory_entry_offset(output, 0) + 8) + 1)),
+        CORRUPT, CORRUPT, "section payload alignment")
+    add(
+        "payload-overlap",
+        with_header_mutation(
+            canonical,
+            lambda output: put_u64(
+                output,
+                directory_entry_offset(output, 1) + 8,
+                get_u64(output, directory_entry_offset(output, 0) + 8))),
+        CORRUPT, CORRUPT, "stored section ranges must not overlap")
+    add(
+        "extended-header-directory-before-end",
+        with_header_mutation(
+            canonical,
+            lambda output: put_u16(output, 4, 104)),
+        CORRUPT, CORRUPT, "directory must begin at or after header_size")
+
+    return cases
+
+
+def wrap_hex(data: bytes, width: int = 96) -> str:
+    encoded = data.hex()
+    return "\n".join(encoded[index : index + width] for index in range(0, len(encoded), width)) + "\n"
+
+
+def section_sequence(data: bytes) -> list[str]:
+    count = get_u32(data, 20)
+    directory = get_u64(data, 24)
+    return [
+        data[directory + index * ENTRY_SIZE : directory + index * ENTRY_SIZE + 4].decode("ascii")
+        for index in range(count)
+    ]
+
+
+def section_versions(data: bytes) -> list[int]:
+    count = get_u32(data, 20)
+    directory = get_u64(data, 24)
+    return [
+        struct.unpack_from("<H", data, directory + index * ENTRY_SIZE + 4)[0]
+        for index in range(count)
+    ]
+
+
+def manifest(cases: list[Case]) -> dict[str, object]:
+    return {
+        "manifest_version": "apta-container-v1-conformance-suite-1",
+        "container_version": 1,
+        "specification_version": "1.0",
+        "producer_api_version": "1.0.0",
+        "producer": "independent-python-container-v1-conformance-generator",
+        "generator_path": "tests/fixtures/generate_container_v1_conformance.py",
+        "consumer_path": "tests/unit/external_fixture.c",
+        "repository_artifact_index": "tests/fixtures/container-v1-conformance.index.json",
+        "cases": [
+            {
+                "name": case.name,
+                "sections": section_sequence(case.data),
+                "section_versions": section_versions(case.data),
+                "canonical": False,
+                "size_bytes": len(case.data),
+                "sha256": hashlib.sha256(case.data).hexdigest(),
+                "record": index,
+                "expected_strict": case.strict,
+                "expected_permissive": case.permissive,
+                "rule": case.rule,
+            }
+            for index, case in enumerate(cases)
+        ],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--check-bundle", type=Path)
+    parser.add_argument("--check-manifest", type=Path)
+    parser.add_argument("--write-bundle", type=Path)
+    parser.add_argument("--write-manifest", type=Path)
+    args = parser.parse_args()
+
+    cases = build_cases()
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    for case in cases:
+        (args.output_dir / f"{case.name}.apta").write_bytes(case.data)
+
+    expected_manifest = manifest(cases)
+    bundle_text = "".join(
+        f"{case.name}\t{case.strict}\t{case.permissive}\t{case.data.hex()}\n"
+        for case in cases
+    )
+    if args.check_bundle is not None:
+        committed_bundle = args.check_bundle.read_text(encoding="ascii")
+        if committed_bundle != bundle_text:

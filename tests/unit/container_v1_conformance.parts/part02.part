@@ -1,0 +1,29 @@
+        CHECK(apta_result_query_serialized_size(result, NULL, &serialized_size) == APTA_STATUS_OK);
+        CHECK(serialized_size != 0u && serialized_size <= SIZE_MAX);
+        serialized = (uint8_t *)malloc((size_t)serialized_size);
+        CHECK(serialized != NULL);
+        CHECK(apta_result_serialize(result, NULL, serialized, (size_t)serialized_size, &written) == APTA_STATUS_OK);
+        CHECK(written == (size_t)serialized_size);
+        apta_parse_options_init(&strict);
+        strict.flags = APTA_PARSE_STRICT;
+        CHECK(apta_result_parse(context, &strict, serialized, written, &reparsed) == APTA_STATUS_OK);
+        CHECK(reparsed != NULL);
+        apta_result_release(reparsed);
+        free(serialized);
+    }
+    apta_result_release(result);
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    const apta_feature_mask_t capabilities =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_FEATURE_BPM |
+        APTA_FEATURE_LOCAL_BEATGRID |
+        APTA_FEATURE_GLOBAL_BEATGRID |
+        APTA_FEATURE_DYNAMIC_TEMPO |
+        APTA_FEATURE_CONFIDENCE;
+    apta_context_config_t config;
+    apta_context_t *context = NULL;

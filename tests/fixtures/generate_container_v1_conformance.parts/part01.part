@@ -1,0 +1,111 @@
+        directory = directory_offset + index * ENTRY_SIZE
+        output[directory : directory + 4] = entry.fourcc.encode("ascii")
+        put_u16(output, directory + 4, entry.version)
+        put_u16(output, directory + 6, entry.flags)
+        put_u64(output, directory + 8, offset)
+        put_u64(output, directory + 16, len(entry.payload))
+        put_u64(output, directory + 24, len(entry.payload))
+        put_u32(output, directory + 32, crc32c(entry.payload))
+        put_u32(output, directory + 36, entry.reserved)
+        output[offset : offset + len(entry.payload)] = entry.payload
+
+    put_u32(output, 92, crc32c(bytes(output[:92])))
+    return bytes(output)
+
+
+def entry(fourcc: str, **kwargs: int | bytes) -> Entry:
+    return Entry(fourcc, kwargs.pop("payload", payload(fourcc)), **kwargs)
+
+
+def with_header_mutation(data: bytes, callback: Callable[[bytearray], None]) -> bytes:
+    output = bytearray(data)
+    callback(output)
+    put_u32(output, 92, crc32c(bytes(output[:92])))
+    return bytes(output)
+
+
+def directory_entry_offset(data: bytes, index: int) -> int:
+    return get_u64(data, 24) + index * ENTRY_SIZE
+
+
+def build_cases() -> list[Case]:
+    wovr = entry("WOVR", flags=REQUIRED)
+    meta = entry("META")
+    wdtl = entry("WDTL")
+    temp = entry("TEMP")
+    lgrd = entry("LGRD")
+    ggrd = entry("GGRD")
+    revn = entry("REVN")
+    cases: list[Case] = []
+
+    def add(name: str, data: bytes, strict: str, permissive: str, rule: str) -> None:
+        cases.append(Case(name, data, strict, permissive, rule))
+
+    add(
+        "unknown-optional",
+        assemble([wovr, Entry("XOPT", b"\x11\x22\x33\x44")]),
+        OK, OK, "unknown optional FourCC is safely skipped")
+    add(
+        "unknown-required",
+        assemble(
+            [wovr, Entry("XREQ", b"\x01", flags=REQUIRED)],
+            container_flags=HAS_REQUIRED_EXTENSIONS),
+        UNSUPPORTED, UNSUPPORTED,
+        "unknown REQUIRED FourCC is unsupported")
+    add(
+        "required-extension-summary-only",
+        assemble([wovr], container_flags=HAS_REQUIRED_EXTENSIONS),
+        OK, OK, "HAS_REQUIRED_EXTENSIONS is advisory")
+    add(
+        "extended-header-opaque",
+        assemble([wovr], header_size=104, extended_header=b"future!!"),
+        OK, OK, "opaque extended-header bytes are skippable")
+    add(
+        "noncanonical-standard-order",
+        assemble([wovr, meta, wdtl, temp, lgrd, ggrd, revn]),
+        OK, OK, "standard sections need not use canonical order")
+
+    add(
+        "unsupported-wovr-version",
+        assemble([Entry("WOVR", payload("WOVR"), version=2, flags=REQUIRED)]),
+        UNSUPPORTED, UNSUPPORTED,
+        "recognized unsupported WOVR version")
+    add(
+        "unsupported-meta-version",
+        assemble([wovr, Entry("META", payload("META"), version=2)]),
+        UNSUPPORTED, UNSUPPORTED,
+        "recognized unsupported META version")
+    add(
+        "unsupported-container-version",
+        assemble([wovr], container_version=2),
+        UNSUPPORTED, UNSUPPORTED,
+        "unsupported container version")
+    add(
+        "unsupported-spec-minor",
+        assemble([wovr], specification_minor=1),
+        UNSUPPORTED, UNSUPPORTED,
+        "unsupported specification minor")
+
+    add(
+        "wovr-required-clear",
+        assemble([entry("WOVR")]),
+        CORRUPT, CORRUPT, "WOVR REQUIRED flag is mandatory")
+    add(
+        "meta-required-set",
+        assemble([wovr, Entry("META", payload("META"), flags=REQUIRED)]),
+        CORRUPT, CORRUPT, "optional standard section must clear REQUIRED")
+    add(
+        "unknown-section-flag",
+        assemble([Entry("WOVR", payload("WOVR"), flags=REQUIRED | 0x8)]),
+        CORRUPT, CORRUPT, "unknown semantic section flag bits")
+    add(
+        "compressed-section",
+        assemble([Entry("WOVR", payload("WOVR"), flags=REQUIRED | COMPRESSED)]),
+        UNSUPPORTED, UNSUPPORTED, "compression is unsupported in v1")
+    add(
+        "encrypted-section",
+        assemble([Entry("WOVR", payload("WOVR"), flags=REQUIRED | ENCRYPTED)]),
+        UNSUPPORTED, UNSUPPORTED, "encryption is unsupported in v1")
+
+    add(
+        "directory-reserved",

@@ -1,0 +1,15 @@
+{
+  "index_version": "apta-container-v1-conformance-index-1",
+  "manifest_sha256": "2ba6ab6fb979912dc35eb6d1b19c9b14658686a052159833c3d0af4c77fc3704",
+  "case_count": 42,
+  "expectation_counts": {
+    "ok/ok": 7,
+    "unsupported/unsupported": 7,
+    "corrupt/corrupt": 22,
+    "corrupt/ok": 6
+  },
+  "generator_path": "tests/fixtures/generate_container_v1_conformance.py",
+  "consumer_path": "tests/unit/container_v1_conformance.c",
+  "generated_manifest": "build-fixture/container-v1-conformance.manifest.json",
+  "generated_vector_directory": "build-fixture/container-v1-conformance"
+}
