@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#if defined(_WIN32) && defined(APTA_SHARED)
+#include <windows.h>
+#pragma comment(lib, "delayimp.lib")
+#pragma comment(linker, "/delayload:apta.dll")
+#endif
+
 #include <apta/apta.h>
 
 #define REQUIRE(condition) do { if (!(condition)) return __LINE__; } while (0)
@@ -11,6 +17,59 @@ static void stage(const char *name)
 {
     (void)fprintf(stderr, "APTA_ABI_STAGE %s\n", name);
     (void)fflush(stderr);
+}
+
+static int configure_shared_library_search_path(void)
+{
+#if defined(_WIN32) && defined(APTA_SHARED)
+    static const char release_suffix[] = "\\Release";
+    char module_path[MAX_PATH];
+    char *separator;
+    DWORD length;
+    size_t base_length;
+
+    /*
+     * A Visual Studio multi-config build places this executable in
+     * tests/Release and apta.dll in the sibling Release directory. Delay-load
+     * lets the test establish that directory before the first imported APTA
+     * function is resolved. Static builds and non-Windows platforms do not
+     * enter this path.
+     */
+    length = GetModuleFileNameA(NULL, module_path, (DWORD)sizeof(module_path));
+    if (length == 0u || length >= (DWORD)sizeof(module_path)) {
+        return 0;
+    }
+
+    separator = strrchr(module_path, '\\');
+    if (separator == NULL) {
+        return 0;
+    }
+    *separator = '\0'; /* tests/Release */
+
+    separator = strrchr(module_path, '\\');
+    if (separator == NULL) {
+        return 0;
+    }
+    *separator = '\0'; /* tests */
+
+    separator = strrchr(module_path, '\\');
+    if (separator == NULL) {
+        return 0;
+    }
+    *separator = '\0'; /* build-windows-shared */
+
+    base_length = strlen(module_path);
+    if (base_length + sizeof(release_suffix) > sizeof(module_path)) {
+        return 0;
+    }
+    memcpy(
+        module_path + base_length,
+        release_suffix,
+        sizeof(release_suffix));
+    return SetDllDirectoryA(module_path) != 0;
+#else
+    return 1;
+#endif
 }
 
 int main(void)
@@ -22,6 +81,10 @@ int main(void)
     const apta_result_t *result = NULL;
     apta_result_info_t result_info;
     apta_source_info_t source_info;
+
+    stage("00 loader_path begin");
+    REQUIRE(configure_shared_library_search_path());
+    stage("00 loader_path end");
 
     stage("01 context_config_init begin");
     apta_context_config_init(&context_config);
