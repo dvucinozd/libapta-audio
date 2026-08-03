@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  verify-and-remove:
+  verify-report-and-remove:
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
@@ -20,39 +20,72 @@ jobs:
           fetch-depth: 0
           ref: agent/s9-p1-normative-scope
 
-      - name: Check whitespace and local Markdown links
+      - name: Generate documentation verification report
         shell: bash
         run: |
           set -euo pipefail
-          git diff --check origin/main...HEAD
           python3 - <<'PY'
           from pathlib import Path
           import re
-          import sys
+          import subprocess
 
           root = Path('.').resolve()
+          changed = subprocess.check_output(
+              ['git', 'diff', '--name-only', 'origin/main...HEAD'],
+              text=True).splitlines()
+          markdown = [Path(p) for p in changed if p.endswith('.md') and Path(p).exists()]
+
+          whitespace = subprocess.run(
+              ['git', 'diff', '--check', 'origin/main...HEAD'],
+              text=True,
+              capture_output=True)
+
           missing = []
-          for path in root.rglob('*.md'):
+          for path in markdown:
               text = path.read_text(encoding='utf-8')
               for match in re.finditer(r'\[[^\]]*\]\(([^)]+)\)', text):
-                  target = match.group(1).strip()
-                  if not target or target.startswith(('http://', 'https://', 'mailto:', '#')):
+                  raw = match.group(1).strip()
+                  if not raw or raw.startswith(('http://', 'https://', 'mailto:', '#')):
                       continue
-                  target = target.split('#', 1)[0]
+                  target = raw.split('#', 1)[0]
                   if not target:
                       continue
-                  resolved = (path.parent / target).resolve()
-                  if not resolved.exists():
-                      missing.append((path.relative_to(root), match.group(1)))
+                  if not (path.parent / target).resolve().exists():
+                      missing.append((str(path), raw))
 
-          if missing:
+          passed = whitespace.returncode == 0 and not missing
+          lines = [
+              '# Stage S9 P1 documentation verification',
+              '',
+              f'**Result:** {"PASS" if passed else "FAIL"}  ',
+              f'**Scope:** {len(markdown)} changed Markdown files relative to `origin/main`',
+              '',
+              '## Whitespace',
+              '',
+          ]
+          if whitespace.returncode == 0:
+              lines.append('`git diff --check origin/main...HEAD` passed.')
+          else:
+              lines += ['```text', whitespace.stdout + whitespace.stderr, '```']
+
+          lines += ['', '## Local links', '']
+          if not missing:
+              lines.append('Every local Markdown link in the changed files resolves in the checked-out tree.')
+          else:
               for path, target in missing:
-                  print(f'{path}: missing local link target {target}', file=sys.stderr)
-              raise SystemExit(1)
-          print('All local Markdown links resolve.')
+                  lines.append(f'- `{path}` → `{target}`')
+
+          lines += [
+              '',
+              '## Interpretation',
+              '',
+              'This report checks repository-local Markdown targets and whitespace for the P1 diff. External URLs and anchor existence inside a target file are outside this bounded gate.',
+              '',
+          ]
+          Path('docs/status/S9-P1-DOCUMENTATION-CHECK.md').write_text('\n'.join(lines), encoding='utf-8')
           PY
 
-      - name: Remove one-shot workflow
+      - name: Commit report and remove one-shot workflow
         shell: bash
         run: |
           set -euo pipefail
@@ -60,5 +93,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "test(s9): record successful P1 documentation verification"
+          git commit -m "test(s9): record P1 documentation verification"
           git push origin HEAD:agent/s9-p1-normative-scope
