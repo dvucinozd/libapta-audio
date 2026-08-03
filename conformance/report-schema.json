@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://libapta.example/schema/conformance-report-1.json",
+  "title": "APTA public conformance report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "implementation",
+    "claim",
+    "platform",
+    "suite",
+    "counts",
+    "tests",
+    "deviations",
+    "platform_exceptions",
+    "evidence",
+    "overall_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "apta-conformance-report-1"
+    },
+    "implementation": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "source_revision"
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "profiles",
+        "qualifiers",
+        "profile_results"
+      ]
+    },
+    "platform": {
+      "type": "object",
+      "required": [
+        "system",
+        "processor",
+        "toolchain",
+        "build_options"
+      ]
+    },
+    "suite": {
+      "type": "object",
+      "required": [
+        "version",
+        "manifest_version",
+        "manifest_sha256",
+        "fixture_manifest_version",
+        "fixture_manifest_sha256"
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "pass",
+        "fail",
+        "skip"
+      ]
+    },
+    "tests": {
+      "type": "array"
+    },
+    "deviations": {
+      "type": "array"
+    },
+    "platform_exceptions": {
+      "type": "array"
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "overall_status": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    }
+  }
+}

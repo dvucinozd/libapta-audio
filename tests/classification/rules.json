@@ -1,0 +1,37 @@
+{
+  "manifest_version": "apta-test-classification-1",
+  "categories": {
+    "public_conformance": "Black-box contract evidence using public API or package surfaces.",
+    "reference_qualifier": "Reference-implementation exact vector or canonical byte evidence.",
+    "implementation_regression": "White-box, platform adapter, tool or implementation-specific regression.",
+    "performance_evidence": "Timing, scheduler, corpus or selection-quality evidence outside semantic conformance.",
+    "fuzz_security": "Malformed-input, hardening, allocation-failure, concurrency or fuzz/security evidence."
+  },
+  "rules": [
+    {
+      "id": "fuzz-security",
+      "category": "fuzz_security",
+      "pattern": "(^apta\\..*(malformed|hardening|allocation_failure|truncation|reject_corrupt|concurrency|cancellation_thread)$)"
+    },
+    {
+      "id": "performance-evidence",
+      "category": "performance_evidence",
+      "pattern": "^apta\\.(scheduler\\.(deadline|process_deadline|aging)|tools\\.rekordbox_tempo_corpus|s4\\.(tempo_vectors|tempo_subbin|endorsement|relations))$"
+    },
+    {
+      "id": "reference-qualifier",
+      "category": "reference_qualifier",
+      "pattern": "^apta\\.(waveform\\.determinism|interchange\\.external_fixture)$"
+    },
+    {
+      "id": "public-conformance",
+      "category": "public_conformance",
+      "pattern": "^apta\\.(api\\.(initializers|version_validation|version_report)|core\\.smoke|waveform\\.(overview|detail_contracts|three_band)|serialization\\.wovr_roundtrip|abi\\..*|package\\..*|conformance\\..*)$"
+    },
+    {
+      "id": "implementation-regression-default",
+      "category": "implementation_regression",
+      "pattern": "^apta\\..+$"
+    }
+  ]
+}

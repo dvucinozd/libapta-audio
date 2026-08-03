@@ -51,13 +51,24 @@ jobs:
           --target apta_core apta_abi_layout_manifest apta_compat_1_0_client
           --parallel 2
 
-      - name: Run shared-library ABI tests
+      - name: Run shared-library ABI and conformance tests
         run: >-
           ctest --test-dir build-shared
-          -R "^apta\.abi\."
-          --timeout 60
+          -R "^(apta\.abi\..*|apta\.conformance\.installed)$"
+          --timeout 600
           --verbose
           --output-on-failure
+
+      - name: Upload Linux conformance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-conformance-linux-attempt-${{ github.run_attempt }}
+          path: |
+            build/conformance-reports/*.json
+            build-shared/conformance-reports/*.json
+          if-no-files-found: warn
+          retention-days: 30
 
   windows-core:
     name: Windows core build and tests
@@ -103,14 +114,25 @@ jobs:
           build-windows-shared/Release/apta.dll
           build-windows-shared/tests/Release/apta.dll
 
-      - name: Run shared-library ABI tests
+      - name: Run shared-library ABI and conformance tests
         run: >-
           ctest --test-dir build-windows-shared
           -C Release
-          -R "^apta\.abi\."
-          --timeout 60
+          -R "^(apta\.abi\..*|apta\.conformance\.installed)$"
+          --timeout 600
           --verbose
           --output-on-failure
+
+      - name: Upload Windows conformance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-conformance-windows-attempt-${{ github.run_attempt }}
+          path: |
+            build-windows/conformance-reports/*.json
+            build-windows-shared/conformance-reports/*.json
+          if-no-files-found: warn
+          retention-days: 30
 
   core-build-32:
     name: 32-bit core build and tests
@@ -141,6 +163,15 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build-32 --output-on-failure
+
+      - name: Upload ILP32 conformance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-conformance-ilp32-attempt-${{ github.run_attempt }}
+          path: build-32/conformance-reports/*.json
+          if-no-files-found: warn
+          retention-days: 30
 
   parser-hardening:
     name: Parser sanitizers and fuzz smoke
@@ -191,3 +222,12 @@ jobs:
           -runs=2000
           -max_len=4096
           -timeout=5
+
+      - name: Upload sanitizer classification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-conformance-sanitized-attempt-${{ github.run_attempt }}
+          path: build-sanitized/conformance-reports/*.json
+          if-no-files-found: warn
+          retention-days: 30

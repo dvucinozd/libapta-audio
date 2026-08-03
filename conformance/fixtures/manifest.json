@@ -1,0 +1,78 @@
+{
+  "manifest_version": "apta-public-fixture-manifest-1",
+  "suite_version": "1.0.0-rc.1",
+  "fixtures": [
+    {
+      "name": "reference-wovr-meta",
+      "path": "reference-wovr-meta.apta.hex",
+      "producer": "independent-python-reference-fixture-generator",
+      "generator": "tests/fixtures/generate_reference_fixture.py",
+      "size_bytes": 303,
+      "sha256": "ca8cf09ec405f67cf42a5ee30d09e5433091c9a6b371bb5669d13bcc402d557f",
+      "canonical": true
+    },
+    {
+      "name": "v1-wovr-only",
+      "path": "container-v1-suite/v1-wovr-only.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 226,
+      "sha256": "0d954beeb13b9e380ea769800a9a9a0ff44908d202043022fead76929f56ea37",
+      "canonical": true
+    },
+    {
+      "name": "v1-wovr-meta",
+      "path": "container-v1-suite/v1-wovr-meta.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 280,
+      "sha256": "8ed6ab99fbdc9ad69a47855fd370d67fd4efe84bee9f8072f61e136a6b037d5c",
+      "canonical": true
+    },
+    {
+      "name": "v1-wovr-wdtl",
+      "path": "container-v1-suite/v1-wovr-wdtl.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 346,
+      "sha256": "8f679125ce2b620983c5199388fa575967fa40a01c263223fc7c5bdf9d3ba209",
+      "canonical": true
+    },
+    {
+      "name": "v1-wovr-temp",
+      "path": "container-v1-suite/v1-wovr-temp.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 344,
+      "sha256": "c89503a97bfe2b39aa89a9475c382bec1da235c21becf812c33f0733ba3f2456",
+      "canonical": true
+    },
+    {
+      "name": "v1-wovr-temp-lgrd",
+      "path": "container-v1-suite/v1-wovr-temp-lgrd.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 528,
+      "sha256": "bd7f83946ea4bd039d85ee721abff1bf2c3d41c33a844aace4659c969f631911",
+      "canonical": true
+    },
+    {
+      "name": "v1-wovr-temp-ggrd-revn",
+      "path": "container-v1-suite/v1-wovr-temp-ggrd-revn.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 680,
+      "sha256": "a3338f7ec978eabe9977a187c093e942bce8789b5b59fee5e0a1badd242da323",
+      "canonical": true
+    },
+    {
+      "name": "v1-all-standard-sections",
+      "path": "container-v1-suite/v1-all-standard-sections.apta.hex",
+      "producer": "independent-python-container-v1-suite-generator",
+      "generator": "tests/fixtures/generate_container_v1_suite.py",
+      "size_bytes": 1032,
+      "sha256": "bf83d543e021087a90b90046868d70eecf25c4ef17f9b2633111df9be65e2d09",
+      "canonical": true
+    }
+  ]
+}

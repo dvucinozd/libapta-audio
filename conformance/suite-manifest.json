@@ -1,0 +1,129 @@
+{
+  "manifest_version": "apta-public-conformance-manifest-1",
+  "suite_version": "1.0.0-rc.1",
+  "profiles": {
+    "WAVEFORM-1.0": {
+      "extends": [],
+      "mandatory": [
+        "api.initializers",
+        "api.version_compatibility",
+        "core.lifecycle",
+        "waveform.semantic",
+        "waveform.serialization"
+      ],
+      "optional": [
+        "waveform.three_band"
+      ]
+    },
+    "ADAPTIVE-WAVEFORM-1.0": {
+      "extends": [
+        "WAVEFORM-1.0"
+      ],
+      "mandatory": [
+        "waveform.detail_region"
+      ],
+      "optional": []
+    },
+    "CORE-ANALYSIS-1.0": {
+      "extends": [
+        "ADAPTIVE-WAVEFORM-1.0"
+      ],
+      "mandatory": [
+        "analysis.tempo_grid_semantics",
+        "analysis.revision_semantics",
+        "container.canonical_fixtures"
+      ],
+      "optional": []
+    }
+  },
+  "qualifiers": {
+    "REFERENCE-WAVEFORM-1.0": {
+      "mandatory": [
+        "reference.waveform_vectors",
+        "reference.block_partition",
+        "reference.canonical_wovr"
+      ],
+      "optional": []
+    }
+  },
+  "tests": [
+    {
+      "id": "api.initializers",
+      "executable": "apta_conf_api_initializers",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "api.version_compatibility",
+      "executable": "apta_conf_api_version",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "core.lifecycle",
+      "executable": "apta_conf_core_lifecycle",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "waveform.semantic",
+      "executable": "apta_conf_waveform_semantic",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "waveform.serialization",
+      "executable": "apta_conf_waveform_serialization",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "waveform.detail_region",
+      "executable": "apta_conf_waveform_detail",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "waveform.three_band",
+      "executable": "apta_conf_waveform_three_band",
+      "classification": "optional",
+      "platform_exempt": []
+    },
+    {
+      "id": "analysis.tempo_grid_semantics",
+      "executable": "apta_conf_analysis_semantics",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "analysis.revision_semantics",
+      "executable": "apta_conf_revision_semantics",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "container.canonical_fixtures",
+      "executable": "apta_conf_canonical_fixtures",
+      "classification": "mandatory",
+      "platform_exempt": []
+    },
+    {
+      "id": "reference.waveform_vectors",
+      "executable": "apta_conf_reference_waveform",
+      "classification": "qualifier-specific",
+      "platform_exempt": []
+    },
+    {
+      "id": "reference.block_partition",
+      "executable": "apta_conf_reference_partition",
+      "classification": "qualifier-specific",
+      "platform_exempt": []
+    },
+    {
+      "id": "reference.canonical_wovr",
+      "executable": "apta_conf_reference_wovr",
+      "classification": "qualifier-specific",
+      "platform_exempt": []
+    }
+  ]
+}

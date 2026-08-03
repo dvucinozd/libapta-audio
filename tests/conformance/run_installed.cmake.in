@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: Apache-2.0
+cmake_minimum_required(VERSION 3.16)
+
+set(test_root "@CMAKE_CURRENT_BINARY_DIR@/public-conformance-${APTA_TEST_CONFIG}")
+set(prefix "${test_root}/prefix")
+set(suite_build "${test_root}/build")
+set(report "@CMAKE_CURRENT_BINARY_DIR@/conformance-reports/apta-conformance-${APTA_TEST_CONFIG}.json")
+file(REMOVE_RECURSE "${test_root}")
+file(MAKE_DIRECTORY "${test_root}")
+
+set(install_command
+    "@CMAKE_COMMAND@"
+    --install "@CMAKE_CURRENT_BINARY_DIR@"
+    --prefix "${prefix}")
+if(NOT "${APTA_TEST_CONFIG}" STREQUAL "")
+    list(APPEND install_command --config "${APTA_TEST_CONFIG}")
+endif()
+execute_process(COMMAND ${install_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA conformance install failed: ${result}")
+endif()
+
+set(configure_command
+    "@CMAKE_COMMAND@"
+    -S "@CMAKE_CURRENT_SOURCE_DIR@/conformance"
+    -B "${suite_build}"
+    -G "@CMAKE_GENERATOR@"
+    "-DCMAKE_PREFIX_PATH=${prefix}"
+    "-DAPTA_CONFORMANCE_REPORT=${report}"
+    "-DAPTA_CONFORMANCE_SOURCE_REVISION=$ENV{GITHUB_SHA}"
+    "-DCMAKE_C_COMPILER=@CMAKE_C_COMPILER@"
+    "-DCMAKE_C_FLAGS=@CMAKE_C_FLAGS@"
+    "-DCMAKE_EXE_LINKER_FLAGS=@CMAKE_EXE_LINKER_FLAGS@")
+if(NOT "@CMAKE_GENERATOR_PLATFORM@" STREQUAL "")
+    list(APPEND configure_command -A "@CMAKE_GENERATOR_PLATFORM@")
+endif()
+if(NOT "@CMAKE_GENERATOR_TOOLSET@" STREQUAL "")
+    list(APPEND configure_command -T "@CMAKE_GENERATOR_TOOLSET@")
+endif()
+if(NOT "@CMAKE_BUILD_TYPE@" STREQUAL "")
+    list(APPEND configure_command "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@")
+endif()
+execute_process(COMMAND ${configure_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA conformance configure failed: ${result}")
+endif()
+
+set(build_command
+    "@CMAKE_COMMAND@"
+    --build "${suite_build}"
+    --target apta_conformance_report)
+if(NOT "${APTA_TEST_CONFIG}" STREQUAL "")
+    list(APPEND build_command --config "${APTA_TEST_CONFIG}")
+endif()
+execute_process(COMMAND ${build_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA conformance suite failed: ${result}")
+endif()
+if(NOT EXISTS "${report}")
+    message(FATAL_ERROR "APTA conformance report was not generated: ${report}")
+endif()
