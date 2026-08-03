@@ -1,0 +1,122 @@
+# SPDX-License-Identifier: Apache-2.0
+cmake_minimum_required(VERSION 3.16)
+
+if(NOT DEFINED APTA_PACKAGE_MODE)
+    message(FATAL_ERROR "APTA_PACKAGE_MODE is required")
+endif()
+
+set(package_root "@CMAKE_CURRENT_BINARY_DIR@/package-test-${APTA_PACKAGE_MODE}")
+set(consumer_build "${package_root}/consumer-build")
+file(REMOVE_RECURSE "${package_root}")
+file(MAKE_DIRECTORY "${package_root}")
+
+set(package_dir "@APTA_BUILD_TREE_PACKAGE_DIR@")
+if(APTA_PACKAGE_MODE STREQUAL "install")
+    set(prefix "${package_root}/prefix")
+    set(install_command
+        "@CMAKE_COMMAND@" --install "@CMAKE_CURRENT_BINARY_DIR@" --prefix "${prefix}")
+    if(NOT "${APTA_TEST_CONFIG}" STREQUAL "")
+        list(APPEND install_command --config "${APTA_TEST_CONFIG}")
+    endif()
+    execute_process(COMMAND ${install_command} RESULT_VARIABLE result)
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "APTA install failed: ${result}")
+    endif()
+    set(package_dir "${prefix}/@CMAKE_INSTALL_LIBDIR@/cmake/APTA")
+endif()
+
+set(configure_command
+    "@CMAKE_COMMAND@"
+    -S "@CMAKE_CURRENT_SOURCE_DIR@/tests/package/consumer"
+    -B "${consumer_build}"
+    "-DCMAKE_PREFIX_PATH=${package_dir}"
+    "-DCMAKE_C_COMPILER=@CMAKE_C_COMPILER@"
+    "-DCMAKE_C_FLAGS=@CMAKE_C_FLAGS@"
+    "-DCMAKE_EXE_LINKER_FLAGS=@CMAKE_EXE_LINKER_FLAGS@")
+if(NOT "@CMAKE_BUILD_TYPE@" STREQUAL "")
+    list(APPEND configure_command "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@")
+endif()
+execute_process(COMMAND ${configure_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA consumer configure failed: ${result}")
+endif()
+
+set(build_command "@CMAKE_COMMAND@" --build "${consumer_build}" --target apta_package_consumer)
+if(NOT "${APTA_TEST_CONFIG}" STREQUAL "")
+    list(APPEND build_command --config "${APTA_TEST_CONFIG}")
+endif()
+execute_process(COMMAND ${build_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA consumer build failed: ${result}")
+endif()
+
+set(consumer "${consumer_build}/bin/apta_package_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+set(run_command "@CMAKE_COMMAND@" -E env)
+if(@APTA_PACKAGE_IS_SHARED@)
+    if(APTA_PACKAGE_MODE STREQUAL "build")
+        set(runtime_dir "@APTA_BUILD_TREE_RUNTIME_DIR@")
+        set(runtime_file "@APTA_BUILD_TREE_RUNTIME_FILE@")
+    elseif(WIN32)
+        set(runtime_dir "${package_root}/prefix/@CMAKE_INSTALL_BINDIR@")
+        set(runtime_file "${runtime_dir}/@CMAKE_SHARED_LIBRARY_PREFIX@apta@CMAKE_SHARED_LIBRARY_SUFFIX@")
+    else()
+        set(runtime_dir "${package_root}/prefix/@CMAKE_INSTALL_LIBDIR@")
+    endif()
+
+    if(WIN32)
+        file(COPY "${runtime_file}" DESTINATION "${consumer_build}/bin")
+    elseif(APPLE)
+        list(APPEND run_command "DYLD_LIBRARY_PATH=${runtime_dir}:$ENV{DYLD_LIBRARY_PATH}")
+    else()
+        list(APPEND run_command "LD_LIBRARY_PATH=${runtime_dir}:$ENV{LD_LIBRARY_PATH}")
+    endif()
+endif()
+list(APPEND run_command "${consumer}")
+execute_process(COMMAND ${run_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA consumer execution failed: ${result}")
+endif()
+
+if(APTA_PACKAGE_MODE STREQUAL "install" AND UNIX AND NOT APPLE)
+    find_program(PKG_CONFIG_EXECUTABLE pkg-config REQUIRED)
+    set(pkg_executable "${package_root}/pkg-config-consumer@CMAKE_EXECUTABLE_SUFFIX@")
+    set(pkg_environment
+        "PKG_CONFIG_PATH=${package_root}/prefix/@CMAKE_INSTALL_LIBDIR@/pkgconfig")
+    set(pkg_query "--cflags" "--libs")
+    if(NOT @APTA_PACKAGE_IS_SHARED@)
+        list(APPEND pkg_query "--static")
+    endif()
+    list(APPEND pkg_query libapta)
+    execute_process(
+        COMMAND "@CMAKE_COMMAND@" -E env "${pkg_environment}"
+                "${PKG_CONFIG_EXECUTABLE}" ${pkg_query}
+        OUTPUT_VARIABLE pkg_flags
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE result)
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "pkg-config query failed: ${result}")
+    endif()
+    separate_arguments(pkg_flags NATIVE_COMMAND "${pkg_flags}")
+    separate_arguments(package_c_flags NATIVE_COMMAND "@CMAKE_C_FLAGS@")
+    separate_arguments(package_link_flags NATIVE_COMMAND "@CMAKE_EXE_LINKER_FLAGS@")
+    execute_process(
+        COMMAND "@CMAKE_C_COMPILER@"
+                ${package_c_flags}
+                "@CMAKE_CURRENT_SOURCE_DIR@/tests/package/consumer/main.c"
+                ${pkg_flags}
+                ${package_link_flags}
+                -o "${pkg_executable}"
+        RESULT_VARIABLE result)
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "pkg-config consumer compile failed: ${result}")
+    endif()
+    list(POP_BACK run_command)
+    if(WIN32 AND @APTA_PACKAGE_IS_SHARED@)
+        file(COPY "${runtime_file}" DESTINATION "${package_root}")
+    endif()
+    list(APPEND run_command "${pkg_executable}")
+    execute_process(COMMAND ${run_command} RESULT_VARIABLE result)
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "pkg-config consumer execution failed: ${result}")
+    endif()
+endif()

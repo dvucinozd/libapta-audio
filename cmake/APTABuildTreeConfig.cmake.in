@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+set(APTA_VERSION_FULL "@APTA_VERSION_FULL@")
+set(APTA_SHARED_PACKAGE @APTA_PACKAGE_IS_SHARED@)
+set(APTA_RUNTIME_DIR "$<TARGET_FILE_DIR:apta_core>")
+
+if(NOT TARGET apta::headers)
+    add_library(apta::headers INTERFACE IMPORTED)
+    set_target_properties(
+        apta::headers
+        PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "@CMAKE_CURRENT_SOURCE_DIR@/include"
+            INTERFACE_COMPILE_FEATURES "c_std_11;cxx_std_11")
+endif()
+
+if(NOT TARGET apta::core)
+    add_library(apta::core @APTA_IMPORTED_LIBRARY_TYPE@ IMPORTED)
+    set_target_properties(
+        apta::core
+        PROPERTIES
+            IMPORTED_LOCATION "$<TARGET_FILE:apta_core>"
+            INTERFACE_LINK_LIBRARIES
+                "apta::headers@APTA_PACKAGE_LINK_SUFFIX@")
+@APTA_BUILD_TREE_IMPLIB_PROPERTY@
+@APTA_PACKAGE_SHARED_DEFINITION@
+endif()

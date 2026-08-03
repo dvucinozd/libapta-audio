@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: libapta
+Description: Adaptive Progressive Track Analysis core library
+Version: @APTA_VERSION_FULL@
+Libs: -L${libdir} -lapta
+Libs.private: @APTA_PC_PRIVATE_LIBS@
+Cflags: -I${includedir}
