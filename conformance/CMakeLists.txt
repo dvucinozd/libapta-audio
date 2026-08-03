@@ -4,6 +4,8 @@ project(APTAConformance VERSION 1.0.0 LANGUAGES C)
 
 find_package(APTA 1.0 CONFIG REQUIRED)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
+include(CheckLibraryExists)
+check_library_exists(m sin "" APTA_CONFORMANCE_HAVE_LIBM)
 
 execute_process(
     COMMAND
@@ -82,6 +84,9 @@ apta_add_conformance_case(
     apta_conf_waveform_detail tests/waveform_detail.c)
 apta_add_conformance_case(
     apta_conf_waveform_three_band tests/waveform_three_band.c)
+if(APTA_CONFORMANCE_HAVE_LIBM)
+    target_link_libraries(apta_conf_waveform_three_band PRIVATE m)
+endif()
 apta_add_conformance_case(
     apta_conf_analysis_semantics tests/analysis_semantics.c)
 apta_add_conformance_case(
