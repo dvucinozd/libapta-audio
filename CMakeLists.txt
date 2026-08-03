@@ -1,10 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 cmake_minimum_required(VERSION 3.16)
 
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" APTA_VERSION_FULL)
+string(STRIP "${APTA_VERSION_FULL}" APTA_VERSION_FULL)
+if(NOT APTA_VERSION_FULL MATCHES "^([0-9]+\.[0-9]+\.[0-9]+)(-[0-9A-Za-z.-]+)?$")
+    message(FATAL_ERROR "VERSION must be SemVer, got: ${APTA_VERSION_FULL}")
+endif()
+set(APTA_VERSION_NUMERIC "${CMAKE_MATCH_1}")
+
 project(
     libapta
-    VERSION 0.1.0
+    VERSION ${APTA_VERSION_NUMERIC}
     LANGUAGES C CXX)
+
+include(cmake/APTAVersionCheck.cmake)
 
 option(APTA_BUILD_TESTS "Build libapta tests" ON)
 option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)

@@ -2,36 +2,27 @@
 #ifndef APTA_VERSION_H
 #define APTA_VERSION_H
 
-#define APTA_SPEC_VERSION_MAJOR 0u
-#define APTA_SPEC_VERSION_MINOR 1u
+#define APTA_PACKAGE_VERSION_MAJOR 1u
+#define APTA_PACKAGE_VERSION_MINOR 0u
+#define APTA_PACKAGE_VERSION_PATCH 0u
+#define APTA_PACKAGE_VERSION_PRERELEASE "rc.1"
+#define APTA_PACKAGE_VERSION_STRING "1.0.0-rc.1"
 
-/*
- * 0.3.0 reduces APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS from 4096 to 3072. The
- * constant is public and may size host storage, so the change uses a minor API
- * bump even though no public structure layout changed.
- *
- * 0.2.0 adds public API surface without changing any struct size:
- *
- *   - apta_query_workspace_requirements();
- *   - apta_session_config_t.overview_frames_per_column, taken from reserved
- *     space;
- *   - APTA_FEATURE_WAVEFORM_3BAND becomes a supported capability;
- *   - APTA_TEMPO_RELATION_THIRD, _TRIPLE, _QUARTER, _QUADRUPLE;
- *   - APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY.
- *
- * Note that apta_internal_validate_struct() compares api_version for exact
- * equality, so a minor bump is a hard compatibility break rather than an
- * additive marker: a caller compiled against 0.1.0 headers is rejected with
- * APTA_ERROR_INCOMPATIBLE_VERSION until it is recompiled. That is acceptable
- * while the project withholds any stable API/ABI claim, and the check is left
- * as it is rather than quietly relaxed.
- */
-#define APTA_API_VERSION_MAJOR 0u
-#define APTA_API_VERSION_MINOR 3u
+#define APTA_SPEC_VERSION_MAJOR 1u
+#define APTA_SPEC_VERSION_MINOR 0u
+
+#define APTA_API_VERSION_MAJOR 1u
+#define APTA_API_VERSION_MINOR 0u
 #define APTA_API_VERSION_PATCH 0u
+
+#define APTA_CONTAINER_VERSION 1u
 
 #define APTA_API_VERSION_ENCODE(major, minor, patch) \
     ((((major) & 0x3ffu) << 22) | (((minor) & 0x3ffu) << 12) | ((patch) & 0xfffu))
+
+#define APTA_API_VERSION_GET_MAJOR(version) (((version) >> 22) & 0x3ffu)
+#define APTA_API_VERSION_GET_MINOR(version) (((version) >> 12) & 0x3ffu)
+#define APTA_API_VERSION_GET_PATCH(version) ((version) & 0xfffu)
 
 #define APTA_API_VERSION \
     APTA_API_VERSION_ENCODE( \

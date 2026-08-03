@@ -150,10 +150,22 @@ apta_status_t apta_internal_result_pool_create_empty_result(
             result->result_flags = APTA_INTERNAL_RESULT_FLAG_POOLED;
             apta_metadata_view_init(&result->metadata.view);
 
-            result->total_source_frames = config->total_frames;
-            result->source_sample_rate = config->source_sample_rate;
-            result->source_channel_count = config->channel_count;
-            result->source_channel_layout = config->channel_layout;
+            apta_source_info_init(&result->source_info);
+            result->source_info.total_frames = config->total_frames;
+            result->source_info.sample_rate = config->source_sample_rate;
+            result->source_info.channel_count = config->channel_count;
+            result->source_info.channel_layout = config->channel_layout;
+            result->source_info.fingerprint_kind =
+                config->source_fingerprint_kind;
+            memcpy(
+                result->source_info.fingerprint,
+                config->source_fingerprint,
+                APTA_SOURCE_FINGERPRINT_SIZE);
+
+            result->total_source_frames = result->source_info.total_frames;
+            result->source_sample_rate = result->source_info.sample_rate;
+            result->source_channel_count = result->source_info.channel_count;
+            result->source_channel_layout = result->source_info.channel_layout;
 
             result->info.struct_size = (uint32_t)sizeof(result->info);
             result->info.api_version = APTA_API_VERSION;

@@ -24,6 +24,9 @@ APTA_API void APTA_CALL
 apta_request_progress_init(apta_request_progress_t *progress);
 
 APTA_API void APTA_CALL
+apta_source_info_init(apta_source_info_t *info);
+
+APTA_API void APTA_CALL
 apta_result_info_init(apta_result_info_t *info);
 
 APTA_API void APTA_CALL

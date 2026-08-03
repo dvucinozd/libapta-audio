@@ -110,10 +110,22 @@ apta_status_t apta_internal_publish_result(
     atomic_init(&result->reference_count, 1u);
     apta_metadata_view_init(&result->metadata.view);
 
-    result->total_source_frames = session->config.total_frames;
-    result->source_sample_rate = session->config.source_sample_rate;
-    result->source_channel_count = session->config.channel_count;
-    result->source_channel_layout = session->config.channel_layout;
+    apta_source_info_init(&result->source_info);
+    result->source_info.total_frames = session->config.total_frames;
+    result->source_info.sample_rate = session->config.source_sample_rate;
+    result->source_info.channel_count = session->config.channel_count;
+    result->source_info.channel_layout = session->config.channel_layout;
+    result->source_info.fingerprint_kind =
+        session->config.source_fingerprint_kind;
+    memcpy(
+        result->source_info.fingerprint,
+        session->config.source_fingerprint,
+        APTA_SOURCE_FINGERPRINT_SIZE);
+
+    result->total_source_frames = result->source_info.total_frames;
+    result->source_sample_rate = result->source_info.sample_rate;
+    result->source_channel_count = result->source_info.channel_count;
+    result->source_channel_layout = result->source_info.channel_layout;
 
     next_generation = session->generation + 1u;
     result->info.struct_size = (uint32_t)sizeof(result->info);
@@ -212,6 +224,25 @@ apta_status_t APTA_CALL apta_result_get_info(
     }
 
     memcpy(info_out, &result->info, sizeof(*info_out));
+    return APTA_STATUS_OK;
+}
+
+apta_status_t APTA_CALL apta_result_get_source_info(
+    const apta_result_t *result,
+    apta_source_info_t *info_out)
+{
+    if (result == NULL || info_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_validate_struct(
+            info_out,
+            sizeof(*info_out),
+            info_out->struct_size,
+            info_out->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+
+    memcpy(info_out, &result->source_info, sizeof(*info_out));
     return APTA_STATUS_OK;
 }
 

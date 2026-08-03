@@ -213,6 +213,21 @@ typedef struct {
     uint32_t struct_size;
     uint32_t api_version;
 
+    apta_source_frame_t total_frames;
+    uint32_t sample_rate;
+    uint16_t channel_count;
+    uint16_t reserved16;
+    apta_channel_layout_t channel_layout;
+    apta_source_fingerprint_kind_t fingerprint_kind;
+    uint8_t fingerprint[APTA_SOURCE_FINGERPRINT_SIZE];
+    uint32_t flags;
+    uint32_t reserved32[3];
+} apta_source_info_t;
+
+typedef struct {
+    uint32_t struct_size;
+    uint32_t api_version;
+
     uint32_t specification_major;
     uint32_t specification_minor;
     uint32_t producer_api_version;
@@ -253,6 +268,11 @@ APTA_API apta_status_t APTA_CALL
 apta_result_get_info(
     const apta_result_t *result,
     apta_result_info_t *info_out);
+
+APTA_API apta_status_t APTA_CALL
+apta_result_get_source_info(
+    const apta_result_t *result,
+    apta_source_info_t *info_out);
 
 APTA_API apta_generation_t APTA_CALL
 apta_result_get_generation(const apta_result_t *result);

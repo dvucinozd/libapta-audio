@@ -176,10 +176,15 @@ apta_session_signal_end_of_input(
  * subject to the same host-serialization rule as every other mutating call.
  *
  * The result must carry APTA_FEATURE_WAVEFORM_OVERVIEW, and its column
- * geometry, source sample rate, channel count and track length must match the
- * session, or APTA_ERROR_CONFLICT is returned. A length that is unknown on
- * either side is not a conflict, since a checkpoint can predate the point where
- * the length became known. See docs/api/APTA-SESSION-SEEDING-0.1.md.
+ * geometry, known source sample rate, channel layout/count and known track
+ * length must match the session, or APTA_ERROR_CONFLICT is returned. A length
+ * that is unknown on either side is not a conflict.
+ *
+ * When both sides carry a source fingerprint, kind and bytes must match. A
+ * missing identity is accepted by default because equal geometry does not prove
+ * equal audio; hosts that require an identity set
+ * APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING. See
+ * docs/api/APTA-SESSION-SEEDING-0.1.md.
  *
  * Only waveform coverage is seeded. Tempo and beatgrid engines rebuild their
  * own evidence from the PCM that follows, because the onset timeline they need

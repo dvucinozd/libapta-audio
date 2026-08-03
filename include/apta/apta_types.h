@@ -18,6 +18,14 @@
 #  define APTA_API
 #endif
 
+#if defined(_MSC_VER)
+#  define APTA_DEPRECATED(message) __declspec(deprecated(message))
+#elif defined(__GNUC__) || defined(__clang__)
+#  define APTA_DEPRECATED(message) __attribute__((deprecated(message)))
+#else
+#  define APTA_DEPRECATED(message)
+#endif
+
 #if defined(_WIN32) && !defined(_WIN64) && defined(APTA_USE_STDCALL)
 #  define APTA_CALL __stdcall
 #else
@@ -50,6 +58,12 @@ typedef uint32_t apta_log_level_t;
 typedef uint32_t apta_diagnostic_severity_t;
 typedef uint32_t apta_tempo_millibpm_t;
 typedef int64_t apta_beat_ordinal_t;
+typedef uint32_t apta_source_fingerprint_kind_t;
+
+#define APTA_SOURCE_FINGERPRINT_NONE                       0u
+#define APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256     1u
+#define APTA_SOURCE_FINGERPRINT_SHA256_SOURCE_OBJECT_BYTES 2u
+#define APTA_SOURCE_FINGERPRINT_SIZE                       32u
 
 #define APTA_TOTAL_FRAMES_UNKNOWN UINT64_MAX
 

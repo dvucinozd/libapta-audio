@@ -6,6 +6,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+int apta_internal_api_version_is_compatible(uint32_t api_version)
+{
+    return APTA_API_VERSION_GET_MAJOR(api_version) ==
+               APTA_API_VERSION_MAJOR &&
+           APTA_API_VERSION_GET_MINOR(api_version) <=
+               APTA_API_VERSION_MINOR;
+}
+
 int apta_internal_validate_struct(
     const void *structure,
     size_t minimum_size,
@@ -14,7 +22,37 @@ int apta_internal_validate_struct(
 {
     return structure != NULL &&
            structure_size >= minimum_size &&
-           api_version == APTA_API_VERSION;
+           apta_internal_api_version_is_compatible(api_version);
+}
+
+int apta_internal_source_fingerprint_is_valid(
+    apta_source_fingerprint_kind_t kind,
+    const uint8_t fingerprint[APTA_SOURCE_FINGERPRINT_SIZE])
+{
+    uint32_t index;
+
+    if (fingerprint == NULL) {
+        return 0;
+    }
+    if (kind == APTA_SOURCE_FINGERPRINT_NONE) {
+        for (index = 0u; index < APTA_SOURCE_FINGERPRINT_SIZE; ++index) {
+            if (fingerprint[index] != 0u) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    return kind == APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256 ||
+           kind == APTA_SOURCE_FINGERPRINT_SHA256_SOURCE_OBJECT_BYTES;
+}
+
+int apta_internal_source_identity_is_valid(
+    const apta_session_config_t *config)
+{
+    return config != NULL &&
+           apta_internal_source_fingerprint_is_valid(
+               config->source_fingerprint_kind,
+               config->source_fingerprint);
 }
 
 int apta_internal_is_power_of_two(size_t value)

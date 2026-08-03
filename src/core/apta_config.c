@@ -250,7 +250,9 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
     }
 
     if ((config->flags &
-         ~APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
+         ~(APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS |
+           APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING)) != 0u ||
+        !apta_internal_source_identity_is_valid(config)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     if (!apta_internal_overview_resolution_is_valid(config)) {
@@ -351,6 +353,12 @@ apta_status_t APTA_CALL apta_query_workspace_requirements(
             requirements_out->struct_size,
             requirements_out->api_version)) {
         return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+    if ((config->flags &
+         ~(APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS |
+           APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING)) != 0u ||
+        !apta_internal_source_identity_is_valid(config)) {
+        return APTA_ERROR_INVALID_ARGUMENT;
     }
 
     required = apta_internal_session_workspace_requirement(config);

@@ -108,7 +108,10 @@ static apta_status_t apta_serialization_calculate_layout(
         result->source_sample_rate == 0u ||
         result->source_channel_count == 0u ||
         result->source_channel_count > UINT16_MAX ||
-        result->source_channel_layout > UINT16_MAX) {
+        result->source_channel_layout > UINT16_MAX ||
+        !apta_internal_source_fingerprint_is_valid(
+            result->source_info.fingerprint_kind,
+            result->source_info.fingerprint)) {
         return APTA_ERROR_INTERNAL;
     }
 
@@ -296,7 +299,13 @@ apta_status_t APTA_CALL apta_result_serialize(
     apta_put_u32(bytes + 48u, result->source_sample_rate);
     apta_put_u16(bytes + 52u, (uint16_t)result->source_channel_count);
     apta_put_u16(bytes + 54u, (uint16_t)result->source_channel_layout);
-    apta_put_u32(bytes + 88u, 0u);
+    memcpy(
+        bytes + 56u,
+        result->source_info.fingerprint,
+        APTA_SOURCE_FINGERPRINT_SIZE);
+    apta_put_u32(
+        bytes + 88u,
+        result->source_info.fingerprint_kind);
 
     directory[0] = 'W';
     directory[1] = 'O';

@@ -40,6 +40,14 @@ void APTA_CALL apta_request_progress_init(apta_request_progress_t *progress)
     }
 }
 
+void APTA_CALL apta_source_info_init(apta_source_info_t *info)
+{
+    if (info != NULL) {
+        APTA_INIT_STRUCT(info);
+        info->total_frames = APTA_TOTAL_FRAMES_UNKNOWN;
+    }
+}
+
 void APTA_CALL apta_result_info_init(apta_result_info_t *info)
 {
     if (info != NULL) {

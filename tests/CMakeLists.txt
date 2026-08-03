@@ -165,6 +165,15 @@ if(TARGET apta_decoder_wav)
     apta_add_desktop_test(apta_desktop_wav_pull apta.desktop.wav_pull unit/desktop_wav_pull_integration.c)
 endif()
 
+if(TARGET apta_version)
+    add_test(NAME apta.api.version_report COMMAND apta_version)
+    set_tests_properties(
+        apta.api.version_report
+        PROPERTIES
+            PASS_REGULAR_EXPRESSION
+                "package=1.0.0-rc.1.*api=1.0.0.*spec=1.0.*container=1")
+endif()
+
 if(TARGET apta_tool_common)
     add_executable(apta_tool_features_all unit/tool_features_all.c)
     target_link_libraries(apta_tool_features_all PRIVATE apta_tool_common)

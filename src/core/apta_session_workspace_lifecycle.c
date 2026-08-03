@@ -38,6 +38,12 @@ static int apta_workspace_config_is_valid(
         config->input_mode != APTA_INPUT_MODE_PULL) {
         return 0;
     }
+    if ((config->flags &
+         ~(APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS |
+           APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING)) != 0u ||
+        !apta_internal_source_identity_is_valid(config)) {
+        return 0;
+    }
 
     if (config->source_sample_rate == 0u ||
         config->channel_count == 0u ||

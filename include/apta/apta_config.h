@@ -12,7 +12,8 @@
 extern "C" {
 #endif
 
-#define APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS (1u << 0)
+#define APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS              (1u << 0)
+#define APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING (1u << 1)
 
 #define APTA_MEMORY_REQUIREMENTS_INCLUDE_RESULT_POOL (1u << 0)
 
@@ -119,8 +120,18 @@ typedef struct {
      */
     uint32_t overview_frames_per_column;
 
-    uint32_t reserved32[4];
-    uint64_t reserved64[4];
+    /*
+     * Optional portable source identity used by result inspection,
+     * serialization and checkpoint-seeding policy. Kind NONE requires all
+     * fingerprint bytes to be zero. The two defined non-zero kinds map to the
+     * version-1 container header.
+     *
+     * These fields consume the pre-1.0 reserved tail; sizeof and alignment of
+     * apta_session_config_t are unchanged.
+     */
+    apta_source_fingerprint_kind_t source_fingerprint_kind;
+    uint32_t reserved32[3];
+    uint8_t source_fingerprint[APTA_SOURCE_FINGERPRINT_SIZE];
 } apta_session_config_t;
 
 typedef struct {
