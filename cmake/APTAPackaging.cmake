@@ -3,8 +3,8 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 set(APTA_PACKAGE_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/APTA")
-set(APTA_BUILD_TREE_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/package-build-tree/APTA")
-file(MAKE_DIRECTORY "${APTA_BUILD_TREE_PACKAGE_DIR}")
+set(APTA_BUILD_TREE_PACKAGE_ROOT "${CMAKE_CURRENT_BINARY_DIR}/package-build-tree/APTA")
+set(APTA_BUILD_TREE_PACKAGE_DIR "${APTA_BUILD_TREE_PACKAGE_ROOT}/$<CONFIG>")
 
 if(BUILD_SHARED_LIBS)
     set(APTA_IMPORTED_LIBRARY_TYPE SHARED)
@@ -69,10 +69,10 @@ file(
     GENERATE
     OUTPUT "${APTA_BUILD_TREE_PACKAGE_DIR}/APTAConfig.cmake"
     INPUT "${CMAKE_CURRENT_BINARY_DIR}/APTAConfig.build.in.cmake")
-configure_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/APTAConfigVersion.cmake"
-    "${APTA_BUILD_TREE_PACKAGE_DIR}/APTAConfigVersion.cmake"
-    COPYONLY)
+file(
+    GENERATE
+    OUTPUT "${APTA_BUILD_TREE_PACKAGE_DIR}/APTAConfigVersion.cmake"
+    INPUT "${CMAKE_CURRENT_BINARY_DIR}/APTAConfigVersion.cmake")
 
 configure_file(
     "${CMAKE_CURRENT_LIST_DIR}/libapta.pc.in"
@@ -123,7 +123,7 @@ configure_file(
     @ONLY)
 file(
     GENERATE
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer.cmake"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer-$<CONFIG>.cmake"
     INPUT "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer.in.cmake")
 
 if(NOT APTA_ENABLE_SANITIZERS AND NOT APTA_BUILD_FUZZING)
@@ -133,12 +133,12 @@ if(NOT APTA_ENABLE_SANITIZERS AND NOT APTA_BUILD_FUZZING)
             "${CMAKE_COMMAND}"
             -DAPTA_PACKAGE_MODE=build
             -DAPTA_TEST_CONFIG=$<CONFIG>
-            -P "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer.cmake")
+            -P "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer-$<CONFIG>.cmake")
     add_test(
         NAME apta.abi.package_install
         COMMAND
             "${CMAKE_COMMAND}"
             -DAPTA_PACKAGE_MODE=install
             -DAPTA_TEST_CONFIG=$<CONFIG>
-            -P "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer.cmake")
+            -P "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer-$<CONFIG>.cmake")
 endif()
