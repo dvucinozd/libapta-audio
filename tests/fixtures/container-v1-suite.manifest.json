@@ -1,0 +1,144 @@
+{
+  "manifest_version": "apta-container-v1-fixture-suite-1",
+  "container_version": 1,
+  "specification_version": "1.0",
+  "producer_api_version": "1.0.0",
+  "producer": "independent-python-container-v1-suite-generator",
+  "generator_path": "tests/fixtures/generate_container_v1_suite.py",
+  "consumer_path": "tests/unit/external_fixture.c",
+  "fixtures": [
+    {
+      "name": "v1-wovr-only",
+      "sections": [
+        "WOVR"
+      ],
+      "section_versions": [
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 226,
+      "sha256": "0d954beeb13b9e380ea769800a9a9a0ff44908d202043022fead76929f56ea37",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-wovr-only.apta.hex"
+    },
+    {
+      "name": "v1-wovr-meta",
+      "sections": [
+        "WOVR",
+        "META"
+      ],
+      "section_versions": [
+        1,
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 280,
+      "sha256": "8ed6ab99fbdc9ad69a47855fd370d67fd4efe84bee9f8072f61e136a6b037d5c",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-wovr-meta.apta.hex"
+    },
+    {
+      "name": "v1-wovr-wdtl",
+      "sections": [
+        "WOVR",
+        "WDTL"
+      ],
+      "section_versions": [
+        1,
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 346,
+      "sha256": "8f679125ce2b620983c5199388fa575967fa40a01c263223fc7c5bdf9d3ba209",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-wovr-wdtl.apta.hex"
+    },
+    {
+      "name": "v1-wovr-temp",
+      "sections": [
+        "WOVR",
+        "TEMP"
+      ],
+      "section_versions": [
+        1,
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 344,
+      "sha256": "c89503a97bfe2b39aa89a9475c382bec1da235c21becf812c33f0733ba3f2456",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-wovr-temp.apta.hex"
+    },
+    {
+      "name": "v1-wovr-temp-lgrd",
+      "sections": [
+        "WOVR",
+        "TEMP",
+        "LGRD"
+      ],
+      "section_versions": [
+        1,
+        1,
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 528,
+      "sha256": "bd7f83946ea4bd039d85ee721abff1bf2c3d41c33a844aace4659c969f631911",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-wovr-temp-lgrd.apta.hex"
+    },
+    {
+      "name": "v1-wovr-temp-ggrd-revn",
+      "sections": [
+        "WOVR",
+        "TEMP",
+        "GGRD",
+        "REVN"
+      ],
+      "section_versions": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 680,
+      "sha256": "a3338f7ec978eabe9977a187c093e942bce8789b5b59fee5e0a1badd242da323",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-wovr-temp-ggrd-revn.apta.hex"
+    },
+    {
+      "name": "v1-all-standard-sections",
+      "sections": [
+        "WOVR",
+        "WDTL",
+        "META",
+        "TEMP",
+        "LGRD",
+        "GGRD",
+        "REVN"
+      ],
+      "section_versions": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "canonical": true,
+      "expected_strict": "ok",
+      "expected_permissive": "ok",
+      "size_bytes": 1032,
+      "sha256": "bf83d543e021087a90b90046868d70eecf25c4ef17f9b2633111df9be65e2d09",
+      "hex_path": "tests/fixtures/container-v1-suite/v1-all-standard-sections.apta.hex"
+    }
+  ]
+}

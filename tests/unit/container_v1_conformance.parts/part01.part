@@ -1,0 +1,35 @@
+    if (strcmp(text, "unsupported") == 0) { *status_out = APTA_ERROR_UNSUPPORTED; return 1; }
+    if (strcmp(text, "corrupt") == 0) { *status_out = APTA_ERROR_CORRUPT_DATA; return 1; }
+    return 0;
+}
+
+static int run_mode(
+    apta_context_t *context,
+    const char *name,
+    const uint8_t *data,
+    size_t size,
+    uint32_t flags,
+    apta_status_t expected)
+{
+    apta_parse_options_t options;
+    const apta_result_t *result = NULL;
+    apta_status_t status;
+    apta_parse_options_init(&options);
+    options.flags = flags;
+    status = apta_result_parse(context, &options, data, size, &result);
+    if (status != expected) {
+        fprintf(stderr, "%s flags=%u expected=%d got=%d\n", name, flags, (int)expected, (int)status);
+        if (result != NULL) { apta_result_release(result); }
+        return 1;
+    }
+    if (expected != APTA_STATUS_OK) {
+        CHECK(result == NULL);
+        return 0;
+    }
+    CHECK(result != NULL);
+    {
+        uint64_t serialized_size = 0u;
+        uint8_t *serialized;
+        size_t written = 0u;
+        const apta_result_t *reparsed = NULL;
+        apta_parse_options_t strict;

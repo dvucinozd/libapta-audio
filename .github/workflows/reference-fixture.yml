@@ -8,17 +8,25 @@ on:
       - ".github/workflows/reference-fixture.yml"
       - "CMakeLists.txt"
       - "include/**"
+      - "specification/**"
       - "src/**"
       - "tests/fixtures/**"
+      - "tests/spec/**"
       - "tests/unit/external_fixture.c"
+      - "tests/unit/container_v1_conformance.c"
+      - "tests/unit/container_v1_conformance.parts/**"
   pull_request:
     paths:
       - ".github/workflows/reference-fixture.yml"
       - "CMakeLists.txt"
       - "include/**"
+      - "specification/**"
       - "src/**"
       - "tests/fixtures/**"
+      - "tests/spec/**"
       - "tests/unit/external_fixture.c"
+      - "tests/unit/container_v1_conformance.c"
+      - "tests/unit/container_v1_conformance.parts/**"
 
 permissions:
   contents: read
@@ -36,11 +44,60 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Verify normative manifest blob hashes
+        run: python3 tests/spec/check_normative_manifest.py
+
       - name: Regenerate fixture and compare committed hex
         run: >-
           python3 tests/fixtures/generate_reference_fixture.py
           --output build-fixture/reference-wovr-meta.apta
           --check-hex tests/fixtures/reference-wovr-meta.apta.hex
+
+      - name: Regenerate container-v1 fixture suite
+        run: >-
+          python3 tests/fixtures/generate_container_v1_suite.py
+          --output-dir build-fixture/container-v1-suite
+          --check-hex-dir tests/fixtures/container-v1-suite
+          --check-manifest tests/fixtures/container-v1-suite.manifest.json
+
+      - name: Generate container-v1 conformance suite
+        run: >-
+          python3 tests/fixtures/generate_container_v1_conformance.py
+          --output-dir build-fixture/container-v1-conformance
+          --write-manifest build-fixture/container-v1-conformance.manifest.json
+
+      - name: Verify conformance manifest commitment
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          manifest_path = Path("build-fixture/container-v1-conformance.manifest.json")
+          index = json.loads(
+              Path("tests/fixtures/container-v1-conformance.index.json")
+              .read_text(encoding="utf-8"))
+          manifest_bytes = manifest_path.read_bytes()
+          manifest = json.loads(manifest_bytes)
+          counts = Counter(
+              f"{case['expected_strict']}/{case['expected_permissive']}"
+              for case in manifest["cases"])
+
+          assert hashlib.sha256(manifest_bytes).hexdigest() == index["manifest_sha256"]
+          assert len(manifest["cases"]) == index["case_count"]
+          assert dict(counts) == index["expectation_counts"]
+          assert manifest["generator_path"] == index["generator_path"]
+          assert manifest["consumer_path"] == index["consumer_path"]
+
+          rows = [
+              f"{case['name']}\t{case['expected_strict']}\t"
+              f"{case['expected_permissive']}\n"
+              for case in manifest["cases"]
+          ]
+          Path("build-fixture/container-v1-conformance.expected").write_text(
+              "".join(rows), encoding="ascii")
+          PY
 
       - name: Verify machine-readable manifest
         run: |
@@ -60,6 +117,10 @@ jobs:
           assert manifest["sha256"] == hashlib.sha256(fixture).hexdigest()
           assert manifest["generator_path"] == "tests/fixtures/generate_reference_fixture.py"
           assert manifest["fixture_hex_path"] == "tests/fixtures/reference-wovr-meta.apta.hex"
+          assert manifest["producer"] == "independent-python-reference-fixture-generator"
+          assert manifest["canonical"] is True
+          assert manifest["expected_strict"] == "ok"
+          assert manifest["expected_permissive"] == "ok"
           PY
 
       - name: Configure library
@@ -68,7 +129,7 @@ jobs:
       - name: Compile library
         run: cmake --build build-fixture/library --parallel 2
 
-      - name: Compile independent fixture consumer
+      - name: Compile independent fixture consumers
         run: |
           cc -std=c11 -Wall -Wextra -Wpedantic \
             -Iinclude \
@@ -77,6 +138,16 @@ jobs:
             build-fixture/library/libapta.a \
             -lm -pthread \
             -o build-fixture/external_fixture
+          cc -std=c11 -Wall -Wextra -Wpedantic \
+            -Iinclude \
+            tests/unit/container_v1_conformance.c \
+            build-fixture/library/libapta.a \
+            -lm -pthread \
+            -o build-fixture/container_v1_conformance
 
-      - name: Parse and reproduce fixture
-        run: build-fixture/external_fixture
+      - name: Parse and reproduce fixture suites
+        run: |
+          build-fixture/external_fixture
+          build-fixture/container_v1_conformance \
+            build-fixture/container-v1-conformance \
+            build-fixture/container-v1-conformance.expected

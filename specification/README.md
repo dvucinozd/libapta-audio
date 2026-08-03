@@ -6,8 +6,8 @@ release-candidate document set. Start with
 [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md).
 
 The release-candidate label does not authorise a final APTA 1.0 claim. Final
-publication requires completion of the Stage S9 API/ABI, container,
-conformance, interoperability, security and packaging gates.
+publication requires completion of the Stage S9 container, conformance,
+interoperability, security and packaging gates.
 
 Normative documents use RFC 2119/8174-style requirement terms such as MUST,
 MUST NOT, SHOULD, SHOULD NOT and MAY.
@@ -28,6 +28,9 @@ Normative candidate documents:
 - [`lifecycle.md`](lifecycle.md)
 - [`confidence.md`](confidence.md)
 - [`result-model.md`](result-model.md)
+- [`container-v1-registry.md`](container-v1-registry.md) — authoritative
+  version-1 FourCC registry, dependencies, ordering, strictness, finality and
+  future-compatibility rules.
 - [`file-format.md`](file-format.md)
 - [`global-grid-container.md`](global-grid-container.md)
 - [`wovr-state-flags.md`](wovr-state-flags.md)

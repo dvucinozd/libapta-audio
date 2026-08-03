@@ -1,0 +1,121 @@
+                return APTA_ERROR_INTERNAL;
+            }
+            for (tile_index = 0u; tile_index < tile_count; ++tile_index) {
+                const uint8_t *descriptor =
+                    payload + (size_t)tile_directory_offset +
+                    (size_t)tile_index * APTA_CONTAINER_V1_WDTL_TILE_SIZE;
+                if (apta_s6_get_u32(descriptor + 40u) !=
+                    APTA_FEATURE_FINAL) {
+                    partial_required = 1u;
+                }
+            }
+        } else if (memcmp(entry, "TEMP", 4u) == 0) {
+            if (stored_size < 56u) {
+                return APTA_ERROR_INTERNAL;
+            }
+            if (payload[2] != APTA_FEATURE_FINAL) {
+                partial_required = 1u;
+            }
+        } else if (memcmp(entry, "LGRD", 4u) == 0) {
+            if (stored_size < 144u) {
+                return APTA_ERROR_INTERNAL;
+            }
+            if (payload[2] != APTA_FEATURE_FINAL ||
+                payload[136] != APTA_FEATURE_FINAL) {
+                partial_required = 1u;
+            }
+        } else if (memcmp(entry, "GGRD", 4u) == 0) {
+            uint32_t segment_count;
+            uint32_t segment_index;
+
+            if (stored_size < APTA_CONTAINER_V1_GGRD_HEADER_SIZE) {
+                return APTA_ERROR_INTERNAL;
+            }
+            global_grid_state = payload[2];
+            if (global_grid_state != APTA_FEATURE_FINAL) {
+                partial_required = 1u;
+            }
+            segment_count = apta_s6_get_u32(payload + 16u);
+            if (!apta_container_v1_range_fits(
+                    APTA_CONTAINER_V1_GGRD_HEADER_SIZE,
+                    (uint64_t)segment_count *
+                        APTA_CONTAINER_V1_GGRD_SEGMENT_SIZE,
+                    stored_size)) {
+                return APTA_ERROR_INTERNAL;
+            }
+            for (segment_index = 0u;
+                 segment_index < segment_count;
+                 ++segment_index) {
+                const uint8_t *segment =
+                    payload + APTA_CONTAINER_V1_GGRD_HEADER_SIZE +
+                    (size_t)segment_index *
+                        APTA_CONTAINER_V1_GGRD_SEGMENT_SIZE;
+                if (segment[72] != APTA_FEATURE_FINAL) {
+                    partial_required = 1u;
+                }
+            }
+        } else if (memcmp(entry, "REVN", 4u) == 0) {
+            if (stored_size < 80u) {
+                return APTA_ERROR_INTERNAL;
+            }
+            if (payload[2] == APTA_GRID_REVISION_PENDING) {
+                if (global_grid_state == APTA_FEATURE_FINAL) {
+                    return APTA_ERROR_INVALID_STATE;
+                }
+                partial_required = 1u;
+            } else if (payload[2] != APTA_GRID_REVISION_APPLIED) {
+                return APTA_ERROR_INTERNAL;
+            }
+        }
+    }
+
+    if (partial_required != 0u) {
+        apta_s6_put_u32(
+            bytes + 16u,
+            apta_s6_get_u32(bytes + 16u) |
+                APTA_CONTAINER_V1_PARTIAL_RESULT);
+        apta_s6_put_u32(bytes + 92u, apta_internal_crc32c(bytes, 92u));
+    }
+    return APTA_STATUS_OK;
+}
+
+APTA_CONTAINER_V1_PUBLIC apta_status_t APTA_CALL
+apta_result_query_serialized_size(
+    const apta_result_t *result,
+    const apta_serialize_options_t *options,
+    uint64_t *size_out)
+{
+    if (size_out == NULL) {
+        return apta_result_query_serialized_size_s6_base(
+            result,
+            options,
+            size_out);
+    }
+    if (apta_container_v1_result_is_contradictory(result)) {
+        *size_out = 0u;
+        return APTA_ERROR_INVALID_STATE;
+    }
+    return apta_result_query_serialized_size_s6_base(
+        result,
+        options,
+        size_out);
+}
+
+APTA_CONTAINER_V1_PUBLIC apta_status_t APTA_CALL
+apta_result_serialize(
+    const apta_result_t *result,
+    const apta_serialize_options_t *options,
+    void *buffer,
+    size_t buffer_size,
+    size_t *bytes_written_out)
+{
+    apta_status_t status;
+
+    if (bytes_written_out == NULL) {
+        return apta_result_serialize_s6_base(
+            result,
+            options,
+            buffer,
+            buffer_size,
+            bytes_written_out);
+    }

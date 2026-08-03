@@ -1,0 +1,27 @@
+    FILE *expectations;
+    char line[1024];
+    uint32_t count = 0u;
+
+    CHECK(argc == 3);
+    apta_context_config_init(&config);
+    config.requested_capabilities = capabilities;
+    CHECK(apta_context_create(&config, &context) == APTA_STATUS_OK);
+    expectations = fopen(argv[2], "rb");
+    CHECK(expectations != NULL);
+
+    while (fgets(line, sizeof(line), expectations) != NULL) {
+        char *name = strtok(line, "\t");
+        char *strict_text = strtok(NULL, "\t");
+        char *permissive_text = strtok(NULL, "\r\n");
+        apta_status_t strict_status;
+        apta_status_t permissive_status;
+        char path[2048];
+        uint8_t *data = NULL;
+        size_t size = 0u;
+        CHECK(name != NULL && strict_text != NULL && permissive_text != NULL);
+        CHECK(expected_status(strict_text, &strict_status));
+        CHECK(expected_status(permissive_text, &permissive_status));
+        CHECK(snprintf(path, sizeof(path), "%s/%s.apta", argv[1], name) > 0);
+        CHECK(load_file(path, &data, &size));
+        CHECK(run_mode(context, name, data, size, APTA_PARSE_STRICT, strict_status) == 0);
+        CHECK(run_mode(context, name, data, size, 0u, permissive_status) == 0);

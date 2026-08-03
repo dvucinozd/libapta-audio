@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: Apache-2.0
+#define APTA_INTERNAL_LAYER 1
+#define apta_result_query_serialized_size apta_result_query_serialized_size_s6_base
+#define apta_result_serialize apta_result_serialize_s6_base
+#include "apta_s6_writer_base.inc"
+#undef apta_result_serialize
+#undef apta_result_query_serialized_size
+#undef APTA_INTERNAL_LAYER
+
+#define APTA_CONTAINER_V1_HEADER_SIZE 96u
+#define APTA_CONTAINER_V1_DIRECTORY_ENTRY_SIZE 40u
+#define APTA_CONTAINER_V1_PARTIAL_RESULT (1u << 0)
+#define APTA_CONTAINER_V1_WOVR_STATE_MASK 0x7u
+#define APTA_CONTAINER_V1_WDTL_HEADER_SIZE 16u
+#define APTA_CONTAINER_V1_WDTL_TILE_SIZE 48u
+#define APTA_CONTAINER_V1_GGRD_HEADER_SIZE 96u
+#define APTA_CONTAINER_V1_GGRD_SEGMENT_SIZE 80u
+
+#if defined(_WIN32) && defined(APTA_SHARED)
+#define APTA_CONTAINER_V1_PUBLIC __declspec(dllexport)
+#elif defined(__GNUC__) && defined(APTA_SHARED)
+#define APTA_CONTAINER_V1_PUBLIC __attribute__((visibility("default")))
+#else
+#define APTA_CONTAINER_V1_PUBLIC
+#endif
+
+APTA_CONTAINER_V1_PUBLIC apta_status_t APTA_CALL
+apta_result_query_serialized_size(
+    const apta_result_t *result,
+    const apta_serialize_options_t *options,
+    uint64_t *size_out);
+
+APTA_CONTAINER_V1_PUBLIC apta_status_t APTA_CALL
+apta_result_serialize(
+    const apta_result_t *result,
+    const apta_serialize_options_t *options,
+    void *buffer,
+    size_t buffer_size,
+    size_t *bytes_written_out);
+
+static int apta_container_v1_range_fits(
+    uint64_t offset,
+    uint64_t size,
+    uint64_t total)
+{
+    return offset <= total && size <= total - offset;
+}
+
+static int apta_container_v1_result_is_contradictory(
+    const apta_result_t *result)
+{
+    return result != NULL && result->s6 != NULL &&
+           (result->info.available_features &
+            APTA_FEATURE_GLOBAL_BEATGRID) != 0u &&
+           result->s6->global_grid.state == APTA_FEATURE_FINAL &&
+           result->s6->revision.state == APTA_GRID_REVISION_PENDING;
+}
+
+static apta_status_t apta_container_v1_patch_aggregate_state(
+    uint8_t *bytes,
+    size_t size)
+{
+    uint32_t section_count;
+    uint64_t directory_offset;
+    uint32_t index;
+    uint32_t partial_required = 0u;
+    uint32_t global_grid_state = APTA_FEATURE_ABSENT;
+
+    if (bytes == NULL || size < APTA_CONTAINER_V1_HEADER_SIZE) {
+        return APTA_ERROR_INTERNAL;
+    }
+    section_count = apta_s6_get_u32(bytes + 20u);
+    directory_offset = apta_s6_get_u64(bytes + 24u);
+    if (!apta_container_v1_range_fits(
+            directory_offset,
+            (uint64_t)section_count *
+                APTA_CONTAINER_V1_DIRECTORY_ENTRY_SIZE,
+            size)) {
+        return APTA_ERROR_INTERNAL;
+    }
+
+    for (index = 0u; index < section_count; ++index) {
+        const uint8_t *entry = bytes + (size_t)directory_offset +
+                               (size_t)index *
+                                   APTA_CONTAINER_V1_DIRECTORY_ENTRY_SIZE;
+        const uint64_t offset = apta_s6_get_u64(entry + 8u);
+        const uint64_t stored_size = apta_s6_get_u64(entry + 16u);
+        const uint8_t *payload;
+
+        if (!apta_container_v1_range_fits(offset, stored_size, size)) {
+            return APTA_ERROR_INTERNAL;
+        }
+        payload = bytes + (size_t)offset;
+
+        if (memcmp(entry, "WOVR", 4u) == 0) {
+            if (stored_size < 48u) {
+                return APTA_ERROR_INTERNAL;
+            }
+            if ((apta_s6_get_u32(payload + 40u) &
+                 APTA_CONTAINER_V1_WOVR_STATE_MASK) !=
+                APTA_FEATURE_FINAL) {
+                partial_required = 1u;
+            }
+        } else if (memcmp(entry, "WDTL", 4u) == 0) {
+            uint32_t tile_count;
+            uint64_t tile_directory_offset;
+            uint32_t tile_index;
+
+            if (stored_size < APTA_CONTAINER_V1_WDTL_HEADER_SIZE) {
+                return APTA_ERROR_INTERNAL;
+            }
+            tile_count = apta_s6_get_u32(payload);
+            tile_directory_offset = apta_s6_get_u64(payload + 8u);
+            if (!apta_container_v1_range_fits(
+                    tile_directory_offset,
+                    (uint64_t)tile_count *
+                        APTA_CONTAINER_V1_WDTL_TILE_SIZE,
+                    stored_size)) {

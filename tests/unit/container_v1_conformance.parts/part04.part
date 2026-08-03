@@ -1,0 +1,9 @@
+        free(data);
+        count += 1u;
+    }
+
+    CHECK(fclose(expectations) == 0);
+    CHECK(count == EXPECTED_CASES);
+    CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
+    return 0;
+}

@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: Apache-2.0
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <apta/apta.h>
+
+#define CHECK(c) do { if (!(c)) { fprintf(stderr, "CHECK failed %s:%d: %s\n", __FILE__, __LINE__, #c); return 1; } } while (0)
+#define EXPECTED_CASES 42u
+
+static int load_file(const char *path, uint8_t **data_out, size_t *size_out)
+{
+    FILE *file = fopen(path, "rb");
+    long length;
+    uint8_t *data;
+    if (file == NULL || fseek(file, 0, SEEK_END) != 0) {
+        if (file != NULL) { (void)fclose(file); }
+        return 0;
+    }
+    length = ftell(file);
+    if (length <= 0 || fseek(file, 0, SEEK_SET) != 0) {
+        (void)fclose(file);
+        return 0;
+    }
+    data = (uint8_t *)malloc((size_t)length);
+    if (data == NULL || fread(data, 1u, (size_t)length, file) != (size_t)length || fclose(file) != 0) {
+        free(data);
+        return 0;
+    }
+    *data_out = data;
+    *size_out = (size_t)length;
+    return 1;
+}
+
+static int expected_status(const char *text, apta_status_t *status_out)
+{
+    if (strcmp(text, "ok") == 0) { *status_out = APTA_STATUS_OK; return 1; }

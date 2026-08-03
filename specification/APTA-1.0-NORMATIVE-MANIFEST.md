@@ -18,7 +18,7 @@ manifest instance.
 
 | Path | Title | Git blob SHA-1 |
 |---|---|---|
-| `APTA-SPEC.md` | Adaptive Progressive Track Analysis Specification | `0d8437bc5dccd90cb8dd5d9ec0744f7fe081a5cd` |
+| `APTA-SPEC.md` | Adaptive Progressive Track Analysis Specification | `8b3dd5069c7192fa6e836dc3fb84e8fcf4ba1aeb` |
 | `normative-language.md` | Normative language | `c7528d4f9cdb66fb9241d4f72e98c682b05b26a2` |
 | `terminology.md` | APTA terminology | `28b8fa0f41dd75d0165b7cdddf8b8dc79f84eb5e` |
 | `time-model.md` | Source time model | `90b56401697878b2cbc20d56e6c8fe8da91f1ed7` |
@@ -30,6 +30,7 @@ manifest instance.
 | `lifecycle.md` | Analysis lifecycle | `b62560f8e600db8aae484cd3c6258511b38babc7` |
 | `confidence.md` | Confidence model | `6b06fde78f91813192fa48c9ed0243e8b49452a3` |
 | `result-model.md` | Result and snapshot model | `cfda09e9369c53b86619bcf1a2b501ed2a329578` |
+| `container-v1-registry.md` | Container version 1 section registry | `0bc7aa7199f341498d7a4c45c7442f7bc08d021e` |
 | `file-format.md` | `.apta` container format | `4ddbe68f9b89be7c5a10eaca90cd1d7e0dedf8cc` |
 | `global-grid-container.md` | Global-grid and revision container sections | `9e2362e06282a597a8eac0502988e2739947773c` |
 | `wovr-state-flags.md` | WOVR version-1 lifecycle-state flags | `7ba8c516ad73c3532b737d289b1a9e53cbb4ef5c` |

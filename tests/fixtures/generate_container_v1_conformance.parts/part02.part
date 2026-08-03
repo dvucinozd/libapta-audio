@@ -1,0 +1,108 @@
+        assemble([Entry("WOVR", payload("WOVR"), flags=REQUIRED, reserved=1)]),
+        CORRUPT, OK, "defined directory reserved field")
+    add(
+        "wovr-reserved",
+        assemble([Entry("WOVR", payload_u32("WOVR", 44, 1), flags=REQUIRED)]),
+        CORRUPT, OK, "defined WOVR reserved field")
+    add(
+        "temp-reserved",
+        assemble([wovr, Entry("TEMP", payload_u32("TEMP", 52, 1))]),
+        CORRUPT, OK, "defined TEMP reserved field")
+    add(
+        "lgrd-reserved",
+        assemble([wovr, temp, Entry("LGRD", payload_u32("LGRD", 92, 1))]),
+        CORRUPT, OK, "defined LGRD reserved field")
+    add(
+        "ggrd-reserved",
+        assemble([wovr, temp, Entry("GGRD", payload_u32("GGRD", 88, 1)), revn]),
+        CORRUPT, OK, "defined GGRD reserved field")
+    add(
+        "revn-reserved",
+        assemble([wovr, temp, ggrd, Entry("REVN", payload_u32("REVN", 28, 1))]),
+        CORRUPT, OK, "defined REVN reserved field")
+
+    add(
+        "duplicate-wovr",
+        assemble([wovr, wovr]),
+        CORRUPT, CORRUPT, "exactly one WOVR")
+    add(
+        "duplicate-meta",
+        assemble([wovr, meta, meta]),
+        CORRUPT, CORRUPT, "META is singleton")
+    add(
+        "duplicate-wdtl-tile",
+        assemble([wovr, wdtl, wdtl]),
+        CORRUPT, CORRUPT, "WDTL tile identity is globally unique")
+    add(
+        "lgrd-without-temp",
+        assemble([wovr, lgrd]),
+        CORRUPT, CORRUPT, "LGRD requires TEMP")
+    add(
+        "ggrd-without-revn",
+        assemble([wovr, temp, ggrd]),
+        CORRUPT, CORRUPT, "GGRD requires REVN")
+    add(
+        "revn-without-ggrd",
+        assemble([wovr, temp, revn]),
+        CORRUPT, CORRUPT, "REVN requires GGRD")
+    add(
+        "ggrd-revn-nonadjacent",
+        assemble([wovr, temp, ggrd, meta, revn]),
+        CORRUPT, CORRUPT, "REVN must immediately follow GGRD")
+    add(
+        "ggrd-revn-reversed",
+        assemble([wovr, temp, revn, ggrd]),
+        CORRUPT, CORRUPT, "GGRD must precede REVN")
+
+    add(
+        "complete-provisional-temp",
+        assemble([wovr, Entry("TEMP", provisional_temp())]),
+        CORRUPT, CORRUPT, "complete container requires final TEMP")
+    add(
+        "partial-mixed-final-provisional",
+        assemble(
+            [wovr, Entry("TEMP", provisional_temp())],
+            container_flags=PARTIAL_RESULT),
+        OK, OK, "partial container may mix final and provisional features")
+    add(
+        "complete-pending-revision",
+        assemble([wovr, temp, ggrd, Entry("REVN", pending_revn())]),
+        CORRUPT, CORRUPT, "pending REVN requires PARTIAL_RESULT")
+    add(
+        "partial-final-grid-pending-revision",
+        assemble(
+            [wovr, temp, ggrd, Entry("REVN", pending_revn())],
+            container_flags=PARTIAL_RESULT),
+        CORRUPT, CORRUPT,
+        "final GGRD with pending REVN is contradictory")
+    add(
+        "partial-provisional-grid-pending-revision",
+        assemble(
+            [wovr, temp, Entry("GGRD", provisional_ggrd()), Entry("REVN", pending_revn())],
+            container_flags=PARTIAL_RESULT),
+        OK, OK, "partial provisional GGRD with pending REVN")
+
+    add(
+        "unknown-duration-valid",
+        assemble(
+            [Entry("WOVR", provisional_wovr(), flags=REQUIRED)],
+            container_flags=PARTIAL_RESULT | SOURCE_DURATION_UNKNOWN,
+            total_frames=UINT64_MAX),
+        OK, OK, "unknown duration requires partial and exact provisional coverage")
+    add(
+        "unknown-duration-without-partial",
+        assemble(
+            [Entry("WOVR", provisional_wovr(), flags=REQUIRED)],
+            container_flags=SOURCE_DURATION_UNKNOWN,
+            total_frames=UINT64_MAX),
+        CORRUPT, CORRUPT, "unknown duration requires PARTIAL_RESULT")
+    add(
+        "unknown-duration-without-flag",
+        assemble(
+            [Entry("WOVR", provisional_wovr(), flags=REQUIRED)],
+            container_flags=PARTIAL_RESULT,
+            total_frames=UINT64_MAX),
+        CORRUPT, CORRUPT, "UINT64_MAX duration requires SOURCE_DURATION_UNKNOWN")
+    add(
+        "known-duration-with-unknown-flag",
+        assemble([wovr], container_flags=PARTIAL_RESULT | SOURCE_DURATION_UNKNOWN),

@@ -1,0 +1,19 @@
+            raise SystemExit(f"conformance vector bundle mismatch: {args.check_bundle}")
+    if args.check_manifest is not None:
+        committed = json.loads(args.check_manifest.read_text(encoding="utf-8"))
+        if committed != expected_manifest:
+            raise SystemExit(f"conformance manifest mismatch: {args.check_manifest}")
+    if args.write_bundle is not None:
+        args.write_bundle.parent.mkdir(parents=True, exist_ok=True)
+        args.write_bundle.write_text(bundle_text, encoding="ascii")
+    if args.write_manifest is not None:
+        args.write_manifest.parent.mkdir(parents=True, exist_ok=True)
+        args.write_manifest.write_text(json.dumps(expected_manifest, indent=2) + "\n", encoding="utf-8")
+
+    for case in cases:
+        print(f"{hashlib.sha256(case.data).hexdigest()}  {case.name}.apta  {case.strict}/{case.permissive}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

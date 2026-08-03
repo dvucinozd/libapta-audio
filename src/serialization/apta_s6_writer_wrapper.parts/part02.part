@@ -1,0 +1,21 @@
+    if (apta_container_v1_result_is_contradictory(result)) {
+        *bytes_written_out = 0u;
+        return APTA_ERROR_INVALID_STATE;
+    }
+    status = apta_result_serialize_s6_base(
+        result,
+        options,
+        buffer,
+        buffer_size,
+        bytes_written_out);
+    if (status != APTA_STATUS_OK) {
+        return status;
+    }
+    status = apta_container_v1_patch_aggregate_state(
+        (uint8_t *)buffer,
+        *bytes_written_out);
+    if (status < 0) {
+        *bytes_written_out = 0u;
+    }
+    return status;
+}
