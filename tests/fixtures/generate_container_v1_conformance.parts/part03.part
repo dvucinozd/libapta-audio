@@ -68,7 +68,7 @@ def manifest(cases: list[Case]) -> dict[str, object]:
         "producer_api_version": "1.0.0",
         "producer": "independent-python-container-v1-conformance-generator",
         "generator_path": "tests/fixtures/generate_container_v1_conformance.py",
-        "consumer_path": "tests/unit/external_fixture.c",
+        "consumer_path": "tests/unit/container_v1_conformance.c",
         "repository_artifact_index": "tests/fixtures/container-v1-conformance.index.json",
         "cases": [
             {
