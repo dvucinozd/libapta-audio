@@ -3,6 +3,13 @@
 Start with [`APTA-ROADMAP-STATUS.md`](APTA-ROADMAP-STATUS.md), the current
 whole-project status and validation boundary.
 
+Current S9 preparation:
+
+- [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md) — contractual gap analysis and
+  blocker inventory for the APTA 1.0 freeze.
+- [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md) —
+  ordered implementation, evidence and release gates for Stage S9.
+
 Stage and milestone evidence snapshots:
 
 - [`M2-WAVEFORM-PROCESSING-STATUS.md`](M2-WAVEFORM-PROCESSING-STATUS.md)
