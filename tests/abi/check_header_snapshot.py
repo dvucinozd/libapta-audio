@@ -6,9 +6,10 @@ from pathlib import Path
 
 
 def files(root: Path) -> dict[str, bytes]:
+    """Return only the frozen core headers directly below include/apta."""
     return {
-        str(path.relative_to(root)): path.read_bytes()
-        for path in sorted(root.rglob("*.h"))
+        path.name: path.read_bytes()
+        for path in sorted(root.glob("*.h"))
     }
 
 

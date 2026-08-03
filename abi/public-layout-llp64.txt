@@ -1,1 +1,1 @@
-# PENDING LLP64 MANIFEST -- Windows CI prints the authoritative layout.
+@same-as public-layout-lp64.txt
