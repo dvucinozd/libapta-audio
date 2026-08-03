@@ -9,7 +9,11 @@ from pathlib import Path
 
 
 def run(command: list[str]) -> str:
-    return subprocess.check_output(command, text=True, errors="replace")
+    return subprocess.check_output(
+        command,
+        text=True,
+        errors="replace",
+        timeout=30)
 
 
 def elf_symbols(library: Path) -> set[str]:
@@ -23,21 +27,23 @@ def elf_symbols(library: Path) -> set[str]:
 
 
 def pe_symbols(library: Path) -> set[str]:
+    llvm = shutil.which("llvm-readobj") or shutil.which("llvm-readobj.exe")
+    if llvm:
+        output = run([llvm, "--coff-exports", str(library)])
+        return set(re.findall(r"Name: (apta_[A-Za-z0-9_]+)", output))
+
     dumpbin = shutil.which("dumpbin") or shutil.which("dumpbin.exe")
     if dumpbin:
         output = run([dumpbin, "/exports", str(library)])
         symbols = set()
         for line in output.splitlines():
-            match = re.match(r"\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)", line)
+            match = re.match(
+                r"\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)",
+                line)
             if match:
                 symbols.add(match.group(1))
         return symbols
-
-    llvm = shutil.which("llvm-readobj") or shutil.which("llvm-readobj.exe")
-    if llvm:
-        output = run([llvm, "--coff-exports", str(library)])
-        return set(re.findall(r"Name: (apta_[A-Za-z0-9_]+)", output))
-    raise RuntimeError("neither dumpbin nor llvm-readobj is available")
+    raise RuntimeError("neither llvm-readobj nor dumpbin is available")
 
 
 def main() -> int:
@@ -51,7 +57,10 @@ def main() -> int:
         for line in args.manifest.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.startswith("#")
     }
-    discovered = pe_symbols(args.library) if args.library.suffix.lower() == ".dll" else elf_symbols(args.library)
+    discovered = (
+        pe_symbols(args.library)
+        if args.library.suffix.lower() == ".dll"
+        else elf_symbols(args.library))
     actual = {symbol for symbol in discovered if symbol.startswith("apta_")}
 
     missing = sorted(expected - actual)

@@ -403,7 +403,7 @@ set_target_properties(
         C_STANDARD 11
         C_STANDARD_REQUIRED YES
         C_EXTENSIONS NO
-        C_VISIBILITY_PRESET hidden
+        C_VISIBILITY_PRESET default
         VISIBILITY_INLINES_HIDDEN YES)
 
 target_link_libraries(
@@ -417,6 +417,13 @@ target_link_libraries(
 
 if(UNIX)
     target_link_libraries(apta_core PRIVATE m)
+endif()
+
+if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
+    target_link_options(
+        apta_core
+        PRIVATE
+            "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/abi/public-symbols-1.0.map")
 endif()
 
 target_include_directories(
