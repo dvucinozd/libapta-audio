@@ -49,6 +49,13 @@ jobs:
           --output build-fixture/reference-wovr-meta.apta
           --check-hex tests/fixtures/reference-wovr-meta.apta.hex
 
+      - name: Regenerate container-v1 fixture suite
+        run: >-
+          python3 tests/fixtures/generate_container_v1_suite.py
+          --output-dir build-fixture/container-v1-suite
+          --check-hex-dir tests/fixtures/container-v1-suite
+          --check-manifest tests/fixtures/container-v1-suite.manifest.json
+
       - name: Verify machine-readable manifest
         run: |
           python3 - <<'PY'
@@ -85,5 +92,5 @@ jobs:
             -lm -pthread \
             -o build-fixture/external_fixture
 
-      - name: Parse and reproduce fixture
+      - name: Parse and reproduce fixture suite
         run: build-fixture/external_fixture
