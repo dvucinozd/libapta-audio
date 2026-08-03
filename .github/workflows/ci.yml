@@ -7,13 +7,43 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  p2-abi-bootstrap:
+    name: Apply P2 ABI freeze
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'agent/s9-p2-api-abi-freeze'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out P2 branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: agent/s9-p2-api-abi-freeze
+
+      - name: Install multilib toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-multilib
+
+      - name: Apply ABI freeze
+        run: python3 .github/scripts/apply_s9_p2_abi.py
+
+      - name: Commit ABI freeze and restore CI
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "feat(s9): freeze the APTA 1.0 public ABI"
+          git push origin HEAD:agent/s9-p2-api-abi-freeze
+
   core-build:
     name: Core build and tests
     runs-on: ubuntu-latest
@@ -35,6 +65,22 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
+      - name: Configure shared-library ABI build
+        run: >-
+          cmake -S . -B build-shared
+          -DBUILD_SHARED_LIBS=ON
+          -DAPTA_BUILD_TESTS=ON
+          -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF
+          -DAPTA_BUILD_TOOLS=OFF
+          -DAPTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile shared library and ABI checks
+        run: cmake --build build-shared --parallel 2
+
+      - name: Run shared-library ABI tests
+        run: ctest --test-dir build-shared --output-on-failure
+
   windows-core:
     name: Windows core build and tests
     runs-on: windows-latest
@@ -46,6 +92,7 @@ jobs:
       - name: Configure
         run: >-
           cmake -S . -B build-windows
+          -DBUILD_SHARED_LIBS=ON
           -DAPTA_BUILD_TESTS=ON
           -DAPTA_BUILD_DESKTOP_ADAPTERS=ON
           -DAPTA_BUILD_TOOLS=ON
