@@ -1,6 +1,6 @@
 # APTA terminology
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## Analysis session
 

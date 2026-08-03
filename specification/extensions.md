@@ -1,10 +1,10 @@
 # Extension model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Purpose
 
-APTA extensions add capabilities, result payloads, container sections or platform integration contracts without silently changing existing Core semantics.
+APTA extensions add capabilities, result payloads, container sections or platform integration contracts without silently changing APTA 1.0 core semantics.
 
 An extension MUST be independently versioned and MUST declare its compatibility requirements.
 
@@ -55,7 +55,7 @@ An extension is not normative merely because a capability bit, FourCC or placeho
 
 ## 4. Capability allocation
 
-Core capability bits `0..31` are allocated by the Core specification.
+APTA 1.0 core capability bits `0..31` are allocated by the Core specification.
 
 Bits `32..47` are reserved for future standards-track APTA extensions.
 
@@ -63,7 +63,7 @@ Bits `48..63` are implementation-private and MUST NOT be serialized as portable 
 
 A standards-track bit requires an accepted extension specification and conformance tests.
 
-Implementations MUST NOT advertise key, downbeat, phrase or another deferred feature through a Core capability bit before its extension is normative.
+Implementations MUST NOT advertise key, downbeat, phrase or another deferred feature through an APTA 1.0 core capability bit before its extension is normative.
 
 ## 5. Public API additions
 

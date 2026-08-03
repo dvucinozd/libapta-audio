@@ -1,6 +1,6 @@
 # Result and snapshot model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Immutable generations
 
@@ -152,14 +152,16 @@ A partial or provisional generation MAY be serialized when the container profile
 
 ## 13. Import and continuation
 
-A future result-import API will allow a compatible deserialized generation to seed a new session.
+`apta_session_seed_from_result()` allows a fresh created session to import compatible parsed waveform coverage and continue missing analysis. The result is not retained by the call.
 
-Import MUST validate:
+The portable 1.0 seeding subset MUST validate:
 
-- source identity;
-- source format;
-- specification and feature-model versions;
-- backend-sensitive state compatibility;
-- serialized coverage and integrity.
+- overview geometry;
+- known sample rate and channel count;
+- known source length;
+- coverage bounds and integrity;
+- session state and source compatibility required by the operation.
 
-Portable result payloads may be reused across backends. Private backend work state MUST NOT be required for another conforming implementation to consume the portable result.
+Tempo and beatgrid publication is not resumable from the portable result because the onset work state is not serialized. The implementation MUST rebuild that evidence from PCM and MUST NOT present a cached estimate as newly derived.
+
+Source identity remains an explicit host policy when no usable fingerprint is present. Private backend work state MUST NOT be required for another conforming implementation to consume portable published payloads.

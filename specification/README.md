@@ -1,13 +1,22 @@
 # APTA specification
 
-This directory contains the normative Adaptive Progressive Track Analysis
-Working Draft 0.1 document set. Start with [`APTA-SPEC.md`](APTA-SPEC.md).
+This directory contains the normative Adaptive Progressive Track Analysis 1.0
+release-candidate document set. Start with
+[`APTA-SPEC.md`](APTA-SPEC.md) and verify the exact candidate files through
+[`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md).
 
-Normative documents must clearly use RFC 2119-style requirement terms such as MUST, MUST NOT, SHOULD, SHOULD NOT and MAY.
+The release-candidate label does not authorise a final APTA 1.0 claim. Final
+publication requires completion of the Stage S9 API/ABI, container,
+conformance, interoperability, security and packaging gates.
 
-Current documents:
+Normative documents use RFC 2119/8174-style requirement terms such as MUST,
+MUST NOT, SHOULD, SHOULD NOT and MAY.
 
-- [`APTA-SPEC.md`](APTA-SPEC.md) — master scope, precedence and document set.
+Normative candidate documents:
+
+- [`APTA-SPEC.md`](APTA-SPEC.md) — master scope, precedence and version domains.
+- [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md) — exact
+  candidate paths and repository blob hashes.
 - [`normative-language.md`](normative-language.md)
 - [`terminology.md`](terminology.md)
 - [`time-model.md`](time-model.md)
@@ -20,14 +29,19 @@ Current documents:
 - [`confidence.md`](confidence.md)
 - [`result-model.md`](result-model.md)
 - [`file-format.md`](file-format.md)
+- [`global-grid-container.md`](global-grid-container.md)
 - [`wovr-state-flags.md`](wovr-state-flags.md)
 - [`profiles.md`](profiles.md)
 - [`extensions.md`](extensions.md)
 - [`conformance.md`](conformance.md)
 
-The original architecture proposed a separate `processing-model.md`; Core 0.1
-currently defines that material across PCM input, scheduling, lifecycle and
-result-model documents instead.
+Architecture drafts, status reports, reference contracts, implementation
+readiness records and examples are informative. They cannot override the
+normative set.
+
+The original architecture proposed a separate `processing-model.md`; APTA 1.0
+defines that material across PCM input, progressive scheduling, lifecycle and
+result-model documents.
 
 The specification is distributed under the repository's
 [Apache License 2.0](../LICENSE). Proposed normative changes follow

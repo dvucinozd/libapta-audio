@@ -1,6 +1,6 @@
 # PCM input contract
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Scope
 
@@ -24,7 +24,7 @@ A host that encounters a true source-format change MUST terminate the session or
 
 ## 3. Baseline sample formats
 
-APTA Core 0.1 defines the following in-memory formats:
+APTA 1.0 defines the following in-memory formats:
 
 ```c
 typedef uint32_t apta_sample_format_t;

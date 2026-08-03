@@ -1,14 +1,14 @@
 # Beatgrid model
 
-**Status:** APTA Working Draft 0.1
+**Status:** APTA 1.0 Release Candidate Draft
 
 ## 1. Scope
 
-This document defines local and global beat timing for APTA Core 0.1.
+This document defines local and global beat timing for APTA 1.0.
 
 A beatgrid describes beat positions on the decoded source-frame timeline. It is separate from tempo selection, bar/downbeat classification and phrase analysis.
 
-APTA Core 0.1 does not assign musical bar numbers or downbeat labels. Those are reserved for future extensions.
+APTA 1.0 does not assign musical bar numbers or downbeat labels. Those are reserved for future extensions.
 
 ## 2. Beat position
 
@@ -239,7 +239,7 @@ The host may later lock a stable range for playback use. Locking preserves:
 
 When later global evidence conflicts with a stable or locked range, the implementation publishes a pending revision rather than mutating the current authoritative grid.
 
-The host acceptance API and serialized revision payload are specified separately from this baseline grid representation.
+The host applies an exact pending revision through `apta_session_apply_grid_revision()`. The immutable revision view is exposed through `apta_result_get_grid_revision()`, and the version-1 serialized contract is defined by [`global-grid-container.md`](global-grid-container.md).
 
 ## 15. Revisions
 
@@ -282,7 +282,7 @@ Serialized beatgrid data MUST include:
 - segment identifiers and revisions;
 - explicit authority and override rules for hybrid data.
 
-Native C structure layout MUST NOT be serialized directly.
+Native C structure layout MUST NOT be serialized directly. Version-1 local grids use `LGRD`; global, dynamic and explicit/hybrid grids use the paired `GGRD` and `REVN` sections defined by [`global-grid-container.md`](global-grid-container.md).
 
 ## 18. Conformance fixtures
 
