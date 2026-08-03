@@ -97,6 +97,12 @@ jobs:
           --target apta_core apta_abi_layout_manifest apta_compat_1_0_client
           --parallel 2
 
+      - name: Stage shared runtime beside ABI client
+        run: >-
+          cmake -E copy_if_different
+          build-windows-shared/Release/apta.dll
+          build-windows-shared/tests/Release/apta.dll
+
       - name: Run shared-library ABI tests
         run: >-
           ctest --test-dir build-windows-shared
