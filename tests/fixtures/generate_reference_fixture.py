@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 
-"""Generate the independent version-1 WOVR+META reference fixture."""
+"""Generate the independent APTA 1.0 WOVR+META reference fixture."""
 
 from __future__ import annotations
 
@@ -14,11 +14,7 @@ POLYNOMIAL = 0x82F63B78
 CONTAINER_HEADER_SIZE = 96
 DIRECTORY_ENTRY_SIZE = 40
 EXPECTED_SIZE = 303
-# Moves with APTA_API_VERSION_MINOR, most recently 2 -> 3: the fixture records
-# the producer API version at byte 12, and tests/unit/external_fixture.c
-# re-serializes the parsed fixture and requires byte equality. The size is
-# unchanged each time; only that field and the header CRC move.
-EXPECTED_SHA256 = "367fe83d2780da9d8aabc4276565d2f344d69981c2167d02184ffb3329ab4ea4"
+EXPECTED_SHA256 = "ca8cf09ec405f67cf42a5ee30d09e5433091c9a6b371bb5669d13bcc402d557f"
 
 
 def crc32c(data: bytes) -> int:
@@ -152,13 +148,10 @@ def build_fixture() -> bytes:
     output[0:4] = b"APTA"
     put_u16(output, 4, 96)
     put_u16(output, 6, 1)
-    put_u16(output, 8, 0)
-    put_u16(output, 10, 1)
-    # APTA_API_VERSION_ENCODE(0, 3, 0). The fixture records the producer API
-    # version, and tests/unit/external_fixture.c re-serializes the parsed
-    # fixture and requires byte equality, so this has to move with
-    # APTA_API_VERSION_MINOR in include/apta/apta_version.h.
-    put_u32(output, 12, 0x00003000)
+    put_u16(output, 8, 1)  # specification major
+    put_u16(output, 10, 0) # specification minor
+    # APTA_API_VERSION_ENCODE(1, 0, 0).
+    put_u32(output, 12, 0x00400000)
     put_u32(output, 16, 0)
     put_u32(output, 20, 2)
     put_u64(output, 24, 96)
