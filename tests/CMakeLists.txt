@@ -365,3 +365,65 @@ set_tests_properties(
     apta.result.bounded_waveform_publication
     apta.result.publication_retry
     PROPERTIES LABELS default_geometry)
+
+# Stage S9 P2 public API/ABI freeze gates.
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+add_executable(apta_abi_layout_manifest abi/layout_manifest.c)
+target_link_libraries(apta_abi_layout_manifest PRIVATE apta::headers)
+set_target_properties(
+    apta_abi_layout_manifest
+    PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED YES
+        C_EXTENSIONS NO)
+
+if(WIN32)
+    set(APTA_ABI_LAYOUT_MODEL llp64)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(APTA_ABI_LAYOUT_MODEL ilp32)
+else()
+    set(APTA_ABI_LAYOUT_MODEL lp64)
+endif()
+
+add_test(
+    NAME apta.abi.public_layout
+    COMMAND
+        ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/abi/check_layout_manifest.py
+        --probe $<TARGET_FILE:apta_abi_layout_manifest>
+        --manifest
+        ${CMAKE_SOURCE_DIR}/abi/public-layout-${APTA_ABI_LAYOUT_MODEL}.txt)
+
+add_test(
+    NAME apta.abi.header_snapshot
+    COMMAND
+        ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/abi/check_header_snapshot.py
+        --live ${CMAKE_SOURCE_DIR}/include/apta
+        --snapshot ${CMAKE_CURRENT_SOURCE_DIR}/compat/1.0.0/include/apta)
+
+add_executable(apta_compat_1_0_client compat/1.0.0/client.c)
+target_include_directories(
+    apta_compat_1_0_client
+    BEFORE
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/compat/1.0.0/include)
+target_link_libraries(apta_compat_1_0_client PRIVATE apta::core)
+set_target_properties(
+    apta_compat_1_0_client
+    PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED YES
+        C_EXTENSIONS NO)
+add_test(NAME apta.abi.old_header_new_library COMMAND apta_compat_1_0_client)
+
+if(BUILD_SHARED_LIBS)
+    add_test(
+        NAME apta.abi.public_symbols
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/abi/check_symbols.py
+            --library $<TARGET_FILE:apta_core>
+            --manifest ${CMAKE_SOURCE_DIR}/abi/public-symbols-1.0.txt)
+endif()

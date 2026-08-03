@@ -15,9 +15,9 @@
 
 ## Remaining P2 gates
 
-- checked-in 1.0 public-header snapshot and old-header/new-library client;
-- LP64, ILP32 and LLP64 public layout manifests;
-- public symbol manifest and shared-library export checks;
+- checked-in 1.0 public-header snapshot and old-header/new-library client (implemented);
+- LP64 and ILP32 public layout manifests (implemented); LLP64 capture pending Windows CI;
+- public symbol manifest and ELF/PE shared-library export checks (implemented, validation pending);
 - final P2 compatibility report and roadmap transition.
 
 No analysis algorithm or canonical waveform/tempo/grid payload semantics change
