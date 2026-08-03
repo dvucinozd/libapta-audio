@@ -52,7 +52,9 @@ apta_status_t APTA_CALL apta_session_create(
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
     if ((config->flags &
-         ~APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS) != 0u) {
+         ~(APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS |
+           APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING)) != 0u ||
+        !apta_internal_source_identity_is_valid(config)) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
