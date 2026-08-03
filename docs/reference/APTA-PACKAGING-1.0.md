@@ -108,3 +108,20 @@ build-tree package and a staged installation. The install test executes the
 public context-create/destroy smoke API. Linux additionally compiles and runs
 the same source through `pkg-config`; shared Windows verification executes the
 consumer with the installed DLL.
+
+## Release archives and checksums
+
+After configuring and building a release tree, generate the native binary and
+source archives with:
+
+```sh
+cmake --build build-static --target package
+cmake --build build-static --target package_source
+```
+
+The binary archive name contains the full package version, operating system and
+processor. The source archive uses `libapta-<version>-source`. CPack emits a
+`.sha256` sidecar for every archive. Release verification sets
+`SOURCE_DATE_EPOCH` and compares independently generated binary and source
+archives byte-for-byte; it also verifies that VERSION, CHANGELOG.md, LICENSE,
+CMake package metadata and pkg-config metadata are present where applicable.

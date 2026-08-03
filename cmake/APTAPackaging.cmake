@@ -114,6 +114,38 @@ install(
 install(
     FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/licenses/libapta")
+install(
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/libapta")
+install(
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/VERSION"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/libapta")
+
+set(CPACK_PACKAGE_NAME "libapta")
+set(CPACK_PACKAGE_VENDOR "APTA")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "Adaptive Progressive Track Analysis core library")
+set(CPACK_PACKAGE_VERSION "${APTA_VERSION_FULL}")
+set(
+    CPACK_PACKAGE_FILE_NAME
+    "libapta-${APTA_VERSION_FULL}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_PACKAGE_CHECKSUM SHA256)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+if(WIN32)
+    set(CPACK_GENERATOR ZIP)
+else()
+    set(CPACK_GENERATOR TGZ)
+endif()
+set(CPACK_SOURCE_GENERATOR TGZ)
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "libapta-${APTA_VERSION_FULL}-source")
+set(
+    CPACK_SOURCE_IGNORE_FILES
+    "/\.git/"
+    "/build[^/]*/"
+    "/package-test-/"
+    "~$"
+    "\.swp$")
+include(CPack)
 
 set(APTA_BUILD_TREE_RUNTIME_DIR "$<TARGET_FILE_DIR:apta_core>")
 set(APTA_BUILD_TREE_RUNTIME_FILE "$<TARGET_FILE:apta_core>")
@@ -125,6 +157,10 @@ file(
     GENERATE
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer-$<CONFIG>.cmake"
     INPUT "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer.in.cmake")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/package/check_archives.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/check_package_archives.cmake"
+    @ONLY)
 
 if(NOT APTA_ENABLE_SANITIZERS AND NOT APTA_BUILD_FUZZING)
     add_test(
@@ -141,4 +177,10 @@ if(NOT APTA_ENABLE_SANITIZERS AND NOT APTA_BUILD_FUZZING)
             -DAPTA_PACKAGE_MODE=install
             -DAPTA_TEST_CONFIG=$<CONFIG>
             -P "${CMAKE_CURRENT_BINARY_DIR}/run_package_consumer-$<CONFIG>.cmake")
+    add_test(
+        NAME apta.package.archives
+        COMMAND
+            "${CMAKE_COMMAND}"
+            -DAPTA_TEST_CONFIG=$<CONFIG>
+            -P "${CMAKE_CURRENT_BINARY_DIR}/check_package_archives.cmake")
 endif()

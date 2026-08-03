@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+cmake_minimum_required(VERSION 3.16)
+
+find_program(CPACK_EXECUTABLE cpack REQUIRED)
+set(package_root "@CMAKE_CURRENT_BINARY_DIR@/package-archive-test")
+file(REMOVE_RECURSE "${package_root}")
+file(MAKE_DIRECTORY "${package_root}")
+
+function(run_cpack config output_dir)
+    file(MAKE_DIRECTORY "${output_dir}")
+    execute_process(
+        COMMAND
+            "@CMAKE_COMMAND@" -E env SOURCE_DATE_EPOCH=1767225600
+            "${CPACK_EXECUTABLE}"
+            --config "${config}"
+            -B "${output_dir}"
+        WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@"
+        RESULT_VARIABLE result)
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "CPack failed for ${config}: ${result}")
+    endif()
+endfunction()
+
+function(single_archive directory output)
+    file(GLOB archives
+        "${directory}/*.tar.gz"
+        "${directory}/*.zip")
+    list(LENGTH archives count)
+    if(NOT count EQUAL 1)
+        message(FATAL_ERROR "Expected one archive in ${directory}, found ${count}")
+    endif()
+    list(GET archives 0 archive)
+    if(NOT EXISTS "${archive}.sha256")
+        message(FATAL_ERROR "Missing SHA-256 sidecar for ${archive}")
+    endif()
+    set(${output} "${archive}" PARENT_SCOPE)
+endfunction()
+
+run_cpack("@CMAKE_CURRENT_BINARY_DIR@/CPackConfig.cmake" "${package_root}/binary-a")
+run_cpack("@CMAKE_CURRENT_BINARY_DIR@/CPackConfig.cmake" "${package_root}/binary-b")
+run_cpack("@CMAKE_CURRENT_BINARY_DIR@/CPackSourceConfig.cmake" "${package_root}/source-a")
+run_cpack("@CMAKE_CURRENT_BINARY_DIR@/CPackSourceConfig.cmake" "${package_root}/source-b")
+
+single_archive("${package_root}/binary-a" binary_a)
+single_archive("${package_root}/binary-b" binary_b)
+single_archive("${package_root}/source-a" source_a)
+single_archive("${package_root}/source-b" source_b)
+
+file(SHA256 "${binary_a}" binary_a_sha)
+file(SHA256 "${binary_b}" binary_b_sha)
+file(SHA256 "${source_a}" source_a_sha)
+file(SHA256 "${source_b}" source_b_sha)
+if(NOT binary_a_sha STREQUAL binary_b_sha)
+    message(FATAL_ERROR "Binary package archive is not reproducible")
+endif()
+if(NOT source_a_sha STREQUAL source_b_sha)
+    message(FATAL_ERROR "Source package archive is not reproducible")
+endif()
+
+execute_process(
+    COMMAND "@CMAKE_COMMAND@" -E tar tf "${binary_a}"
+    OUTPUT_VARIABLE binary_listing
+    RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Unable to inspect binary package")
+endif()
+foreach(required VERSION CHANGELOG.md LICENSE APTAConfig.cmake libapta.pc)
+    if(NOT binary_listing MATCHES "${required}")
+        message(FATAL_ERROR "Binary package is missing ${required}")
+    endif()
+endforeach()
+
+execute_process(
+    COMMAND "@CMAKE_COMMAND@" -E tar tf "${source_a}"
+    OUTPUT_VARIABLE source_listing
+    RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Unable to inspect source package")
+endif()
+foreach(required VERSION CHANGELOG.md LICENSE CMakeLists.txt)
+    if(NOT source_listing MATCHES "${required}")
+        message(FATAL_ERROR "Source package is missing ${required}")
+    endif()
+endforeach()
