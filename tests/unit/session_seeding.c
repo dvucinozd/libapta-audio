@@ -39,6 +39,12 @@ static void configure(apta_session_config_t *config)
     config->channel_layout = APTA_CHANNEL_LAYOUT_MONO;
     config->total_frames = TOTAL_FRAMES;
     config->requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    config->source_fingerprint_kind =
+        APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256;
+    config->source_fingerprint[0] = 0x41u;
+    config->source_fingerprint[1] = 0x50u;
+    config->source_fingerprint[2] = 0x54u;
+    config->source_fingerprint[3] = 0x41u;
 }
 
 /* Push [first, end) and drive processing. */
@@ -115,6 +121,7 @@ int main(void)
     apta_parse_options_t parse_options;
     apta_waveform_overview_view_t reference;
     apta_waveform_overview_view_t resumed;
+    apta_source_info_t source_info;
     float *audio;
     uint8_t *serialized;
     size_t written = 0u;
@@ -173,6 +180,17 @@ int main(void)
     CHECK(apta_result_parse(context, &parse_options, serialized, written,
                             &checkpoint) == APTA_STATUS_OK);
     CHECK(checkpoint != NULL);
+    apta_source_info_init(&source_info);
+    CHECK(apta_result_get_source_info(checkpoint, &source_info) ==
+          APTA_STATUS_OK);
+    CHECK(source_info.total_frames == TOTAL_FRAMES);
+    CHECK(source_info.sample_rate == RATE);
+    CHECK(source_info.channel_count == 1u);
+    CHECK(source_info.channel_layout == APTA_CHANNEL_LAYOUT_MONO);
+    CHECK(source_info.fingerprint_kind ==
+          APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256);
+    CHECK(source_info.fingerprint[0] == 0x41u);
+    CHECK(source_info.fingerprint[3] == 0x41u);
 
     /* 3. Seeding is rejected outside APTA_SESSION_CREATED and on mismatch. */
     configure(&config);
@@ -212,6 +230,35 @@ int main(void)
 
     configure(&config);
     config.total_frames = TOTAL_FRAMES * 2u;
+    CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_seed_from_result(session, checkpoint) ==
+          APTA_ERROR_CONFLICT);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
+
+    configure(&config);
+    config.source_fingerprint[0] ^= 0x01u;
+    CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_seed_from_result(session, checkpoint) ==
+          APTA_ERROR_CONFLICT);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
+
+    /* Missing identity remains host policy by default. */
+    configure(&config);
+    config.source_fingerprint_kind = APTA_SOURCE_FINGERPRINT_NONE;
+    memset(config.source_fingerprint, 0, sizeof(config.source_fingerprint));
+    CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
+    CHECK(apta_session_seed_from_result(session, checkpoint) ==
+          APTA_STATUS_OK);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    session = NULL;
+
+    /* The opt-in strict policy requires identity on both sides. */
+    configure(&config);
+    config.source_fingerprint_kind = APTA_SOURCE_FINGERPRINT_NONE;
+    memset(config.source_fingerprint, 0, sizeof(config.source_fingerprint));
+    config.flags |= APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING;
     CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
     CHECK(apta_session_seed_from_result(session, checkpoint) ==
           APTA_ERROR_CONFLICT);

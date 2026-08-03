@@ -1,0 +1,1 @@
+@same-as public-layout-lp64.txt

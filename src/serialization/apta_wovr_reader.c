@@ -47,6 +47,8 @@ typedef struct {
     uint32_t source_sample_rate;
     uint32_t source_channel_count;
     uint32_t source_channel_layout;
+    apta_source_fingerprint_kind_t source_fingerprint_kind;
+    uint8_t source_fingerprint[APTA_SOURCE_FINGERPRINT_SIZE];
     uint32_t specification_major;
     uint32_t specification_minor;
     uint32_t producer_api_version;
@@ -232,6 +234,11 @@ static apta_status_t apta_validate_container(
     input->source_channel_count = apta_get_u16(bytes + 52u);
     input->source_channel_layout = apta_get_u16(bytes + 54u);
     source_fingerprint_kind = apta_get_u32(bytes + 88u);
+    input->source_fingerprint_kind = source_fingerprint_kind;
+    memcpy(
+        input->source_fingerprint,
+        bytes + 56u,
+        APTA_SOURCE_FINGERPRINT_SIZE);
 
     if (header_size < APTA_CONTAINER_HEADER_SIZE ||
         header_size > buffer_size ||
@@ -270,10 +277,17 @@ static apta_status_t apta_validate_container(
     if (apta_internal_crc32c(bytes, 92u) != apta_get_u32(bytes + 92u)) {
         return APTA_ERROR_CORRUPT_DATA;
     }
-    if (source_fingerprint_kind != 0u) {
+    if (source_fingerprint_kind != APTA_SOURCE_FINGERPRINT_NONE &&
+        source_fingerprint_kind !=
+            APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256 &&
+        source_fingerprint_kind !=
+            APTA_SOURCE_FINGERPRINT_SHA256_SOURCE_OBJECT_BYTES) {
         return APTA_ERROR_UNSUPPORTED;
     }
-    if (!apta_bytes_are_zero(bytes + 56u, 32u)) {
+    if (source_fingerprint_kind == APTA_SOURCE_FINGERPRINT_NONE &&
+        !apta_bytes_are_zero(
+            bytes + 56u,
+            APTA_SOURCE_FINGERPRINT_SIZE)) {
         return APTA_ERROR_CORRUPT_DATA;
     }
 
@@ -652,10 +666,23 @@ static apta_status_t apta_build_parsed_result(
             ? APTA_SESSION_COMPLETED
             : APTA_SESSION_ACTIVE;
 
-    result->total_source_frames = input->total_source_frames;
-    result->source_sample_rate = input->source_sample_rate;
-    result->source_channel_count = input->source_channel_count;
-    result->source_channel_layout = input->source_channel_layout;
+    apta_source_info_init(&result->source_info);
+    result->source_info.total_frames = input->total_source_frames;
+    result->source_info.sample_rate = input->source_sample_rate;
+    result->source_info.channel_count =
+        (uint16_t)input->source_channel_count;
+    result->source_info.channel_layout = input->source_channel_layout;
+    result->source_info.fingerprint_kind =
+        input->source_fingerprint_kind;
+    memcpy(
+        result->source_info.fingerprint,
+        input->source_fingerprint,
+        APTA_SOURCE_FINGERPRINT_SIZE);
+
+    result->total_source_frames = result->source_info.total_frames;
+    result->source_sample_rate = result->source_info.sample_rate;
+    result->source_channel_count = result->source_info.channel_count;
+    result->source_channel_layout = result->source_info.channel_layout;
 
     result->overview.struct_size = (uint32_t)sizeof(result->overview);
     result->overview.api_version = APTA_API_VERSION;

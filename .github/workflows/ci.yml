@@ -35,6 +35,30 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
+      - name: Configure shared-library ABI build
+        run: >-
+          cmake -S . -B build-shared
+          -DBUILD_SHARED_LIBS=ON
+          -DAPTA_BUILD_TESTS=ON
+          -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF
+          -DAPTA_BUILD_TOOLS=OFF
+          -DAPTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile shared library and ABI checks
+        run: >-
+          cmake --build build-shared
+          --target apta_core apta_abi_layout_manifest apta_compat_1_0_client
+          --parallel 2
+
+      - name: Run shared-library ABI tests
+        run: >-
+          ctest --test-dir build-shared
+          -R "^apta\.abi\."
+          --timeout 60
+          --verbose
+          --output-on-failure
+
   windows-core:
     name: Windows core build and tests
     runs-on: windows-latest
@@ -56,6 +80,37 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build-windows -C Release --output-on-failure
+
+      - name: Configure shared-library ABI build
+        run: >-
+          cmake -S . -B build-windows-shared
+          -DBUILD_SHARED_LIBS=ON
+          -DAPTA_BUILD_TESTS=ON
+          -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF
+          -DAPTA_BUILD_TOOLS=OFF
+          -DAPTA_WARNINGS_AS_ERRORS=ON
+
+      - name: Compile shared library and ABI checks
+        run: >-
+          cmake --build build-windows-shared
+          --config Release
+          --target apta_core apta_abi_layout_manifest apta_compat_1_0_client
+          --parallel 2
+
+      - name: Stage shared runtime beside ABI client
+        run: >-
+          cmake -E copy_if_different
+          build-windows-shared/Release/apta.dll
+          build-windows-shared/tests/Release/apta.dll
+
+      - name: Run shared-library ABI tests
+        run: >-
+          ctest --test-dir build-windows-shared
+          -C Release
+          -R "^apta\.abi\."
+          --timeout 60
+          --verbose
+          --output-on-failure
 
   core-build-32:
     name: 32-bit core build and tests

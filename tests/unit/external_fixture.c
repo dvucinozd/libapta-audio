@@ -84,6 +84,7 @@ int main(void)
     apta_context_t *context = NULL;
     const apta_result_t *result = NULL;
     apta_result_info_t info;
+    apta_source_info_t source_info;
     apta_waveform_overview_view_t overview;
     apta_metadata_view_t metadata;
     uint8_t fixture[FIXTURE_SIZE];
@@ -107,11 +108,20 @@ int main(void)
 
     apta_result_info_init(&info);
     CHECK(apta_result_get_info(result, &info) == APTA_STATUS_OK);
-    CHECK(info.container_version == 1u);
-    CHECK(info.specification_major == 0u);
-    CHECK(info.specification_minor == 1u);
+    CHECK(info.container_version == APTA_CONTAINER_VERSION);
+    CHECK(info.specification_major == APTA_SPEC_VERSION_MAJOR);
+    CHECK(info.specification_minor == APTA_SPEC_VERSION_MINOR);
+    CHECK(info.producer_api_version == APTA_API_VERSION);
     CHECK(info.session_state == APTA_SESSION_COMPLETED);
     CHECK((info.available_features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u);
+
+    apta_source_info_init(&source_info);
+    CHECK(apta_result_get_source_info(result, &source_info) == APTA_STATUS_OK);
+    CHECK(source_info.total_frames == 1024u);
+    CHECK(source_info.sample_rate == 48000u);
+    CHECK(source_info.channel_count == 1u);
+    CHECK(source_info.channel_layout == APTA_CHANNEL_LAYOUT_MONO);
+    CHECK(source_info.fingerprint_kind == APTA_SOURCE_FINGERPRINT_NONE);
 
     apta_waveform_overview_view_init(&overview);
     CHECK(apta_result_get_waveform_overview(result, 0u, &overview) ==

@@ -549,6 +549,7 @@ struct apta_result {
     uint32_t result_pool_slot_index;
     uint32_t result_flags;
     apta_result_info_t info;
+    apta_source_info_t source_info;
 
     apta_source_frame_t total_source_frames;
     uint32_t source_sample_rate;
@@ -739,11 +740,20 @@ struct apta_session {
     apta_internal_s6_session_state_t *s6;
 };
 
+int apta_internal_api_version_is_compatible(uint32_t api_version);
+
 int apta_internal_validate_struct(
     const void *structure,
     size_t minimum_size,
     uint32_t structure_size,
     uint32_t api_version);
+
+int apta_internal_source_fingerprint_is_valid(
+    apta_source_fingerprint_kind_t kind,
+    const uint8_t fingerprint[APTA_SOURCE_FINGERPRINT_SIZE]);
+
+int apta_internal_source_identity_is_valid(
+    const apta_session_config_t *config);
 
 int apta_internal_is_power_of_two(size_t value);
 

@@ -370,6 +370,34 @@ apta_status_t APTA_CALL apta_session_seed_from_result(
         status = APTA_ERROR_CONFLICT;
         goto done;
     }
+    if (result->source_channel_layout != APTA_CHANNEL_LAYOUT_UNSPECIFIED &&
+        session->config.channel_layout != APTA_CHANNEL_LAYOUT_UNSPECIFIED &&
+        result->source_channel_layout != session->config.channel_layout) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+    if ((session->config.flags &
+         APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING) != 0u &&
+        (session->config.source_fingerprint_kind ==
+             APTA_SOURCE_FINGERPRINT_NONE ||
+         result->source_info.fingerprint_kind ==
+             APTA_SOURCE_FINGERPRINT_NONE)) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
+    if (session->config.source_fingerprint_kind !=
+            APTA_SOURCE_FINGERPRINT_NONE &&
+        result->source_info.fingerprint_kind !=
+            APTA_SOURCE_FINGERPRINT_NONE &&
+        (session->config.source_fingerprint_kind !=
+             result->source_info.fingerprint_kind ||
+         memcmp(
+             session->config.source_fingerprint,
+             result->source_info.fingerprint,
+             APTA_SOURCE_FINGERPRINT_SIZE) != 0)) {
+        status = APTA_ERROR_CONFLICT;
+        goto done;
+    }
     /* An unknown length on either side is not a conflict: a checkpoint can
      * predate the point where the length became known. Two known lengths that
      * disagree are. */

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_internal.h"
+#include "apta_windows_exports.h"
 
 #include <string.h>
 
@@ -37,6 +38,14 @@ void APTA_CALL apta_request_progress_init(apta_request_progress_t *progress)
     if (progress != NULL) {
         APTA_INIT_STRUCT(progress);
         apta_frame_range_init(&progress->requested_range);
+    }
+}
+
+void APTA_CALL apta_source_info_init(apta_source_info_t *info)
+{
+    if (info != NULL) {
+        APTA_INIT_STRUCT(info);
+        info->total_frames = APTA_TOTAL_FRAMES_UNKNOWN;
     }
 }
 

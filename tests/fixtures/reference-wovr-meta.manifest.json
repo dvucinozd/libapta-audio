@@ -5,15 +5,16 @@
   "fixture_hex_path": "tests/fixtures/reference-wovr-meta.apta.hex",
   "generator_path": "tests/fixtures/generate_reference_fixture.py",
   "size_bytes": 303,
-  "sha256": "367fe83d2780da9d8aabc4276565d2f344d69981c2167d02184ffb3329ab4ea4",
+  "sha256": "ca8cf09ec405f67cf42a5ee30d09e5433091c9a6b371bb5669d13bcc402d557f",
   "container_version": 1,
-  "specification_version": "0.1",
-  "producer_api_version": "0.1.0",
+  "specification_version": "1.0",
+  "producer_api_version": "1.0.0",
   "source": {
     "total_frames": 1024,
     "sample_rate": 48000,
     "channel_count": 1,
-    "channel_layout": "mono"
+    "channel_layout": "mono",
+    "fingerprint_kind": "none"
   },
   "sections": [
     {
