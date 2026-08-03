@@ -141,7 +141,10 @@ int main(void)
     session = NULL;
 
     invalid_config = config;
-    invalid_config.api_version = APTA_API_VERSION + 1u;
+    invalid_config.api_version = APTA_API_VERSION_ENCODE(
+        APTA_API_VERSION_MAJOR,
+        APTA_API_VERSION_MINOR + 1u,
+        0u);
     CHECK(apta_session_create(context, &invalid_config, &session) ==
           APTA_ERROR_INCOMPATIBLE_VERSION);
     CHECK(session == NULL);
