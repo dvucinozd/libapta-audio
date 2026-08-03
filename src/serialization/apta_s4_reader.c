@@ -9,6 +9,7 @@
 #define APTA_TEMP_HEADER_SIZE 56u
 #define APTA_TEMP_CANDIDATE_SIZE 16u
 #define APTA_LGRD_PAYLOAD_SIZE 144u
+#define APTA_CONTAINER_FLAG_PARTIAL_RESULT (1u << 0)
 
 APTA_API apta_status_t APTA_CALL apta_result_parse_meta_hardened(
     apta_context_t *context,
@@ -43,17 +44,25 @@ static uint64_t apta_s4_get_u64(const uint8_t *p)
            ((uint64_t)apta_s4_get_u32(p + 4u) << 32u);
 }
 
+static int apta_s4_is_strict(const apta_parse_options_t *options)
+{
+    return options == NULL || (options->flags & APTA_PARSE_STRICT) != 0u;
+}
+
 static int apta_s4_state_valid(uint32_t state)
 {
     return state >= APTA_FEATURE_PROVISIONAL &&
            state <= APTA_FEATURE_FINAL;
 }
 
+static int apta_s4_state_allowed(uint32_t state, int partial)
+{
+    return apta_s4_state_valid(state) &&
+           (partial || state == APTA_FEATURE_FINAL);
+}
+
 static int apta_s4_relation_valid(uint32_t relation)
 {
-    /* B2: the relation set is append-only, so this bound moves with it. A
-     * reader built before those values rejects a section carrying them, which
-     * is the intended conservative behaviour. */
     return relation <= APTA_TEMPO_RELATION_QUADRUPLE;
 }
 
@@ -65,6 +74,7 @@ static int apta_s4_range_valid(uint64_t first, uint64_t end)
 static apta_status_t apta_s4_find_sections(
     const uint8_t *bytes,
     size_t size,
+    int strict,
     apta_s4_sections_t *sections)
 {
     uint32_t count;
@@ -107,12 +117,12 @@ static apta_status_t apta_s4_find_sections(
             continue;
         }
 
-        if (apta_s4_get_u16(entry + 4u) != 1u ||
-            apta_s4_get_u16(entry + 6u) != 0u ||
-            apta_s4_get_u32(entry + 36u) != 0u) {
-            return apta_s4_get_u16(entry + 4u) != 1u
-                       ? APTA_ERROR_UNSUPPORTED
-                       : APTA_ERROR_CORRUPT_DATA;
+        if (apta_s4_get_u16(entry + 4u) != 1u) {
+            return APTA_ERROR_UNSUPPORTED;
+        }
+        if (apta_s4_get_u16(entry + 6u) != 0u ||
+            (strict && apta_s4_get_u32(entry + 36u) != 0u)) {
+            return APTA_ERROR_CORRUPT_DATA;
         }
         offset = apta_s4_get_u64(entry + 8u);
         section_size = apta_s4_get_u64(entry + 16u);
@@ -139,20 +149,21 @@ static apta_status_t apta_s4_parse_temp(
     const apta_parse_options_t *options,
     const uint8_t *payload,
     size_t size,
+    int partial,
     apta_result_t *result)
 {
     uint32_t count;
     size_t expected_size;
     size_t bytes;
     uint32_t index;
+    const int strict = apta_s4_is_strict(options);
     uint64_t limit = options != NULL &&
                              options->maximum_allocation_bytes != 0u
                          ? options->maximum_allocation_bytes
                          : UINT64_C(268435456);
 
     if (size < APTA_TEMP_HEADER_SIZE || apta_s4_get_u16(payload) != 1u ||
-        payload[2] < APTA_FEATURE_PROVISIONAL ||
-        payload[2] > APTA_FEATURE_FINAL ||
+        !apta_s4_state_allowed(payload[2], partial) ||
         payload[3] > APTA_CONFIDENCE_MAX ||
         apta_s4_get_u32(payload + 8u) <
             APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
@@ -162,7 +173,7 @@ static apta_status_t apta_s4_parse_temp(
                              apta_s4_get_u64(payload + 24u)) ||
         !apta_s4_range_valid(apta_s4_get_u64(payload + 32u),
                              apta_s4_get_u64(payload + 40u)) ||
-        apta_s4_get_u32(payload + 52u) != 0u) {
+        (strict && apta_s4_get_u32(payload + 52u) != 0u)) {
         return APTA_ERROR_CORRUPT_DATA;
     }
 
@@ -216,7 +227,7 @@ static apta_status_t apta_s4_parse_temp(
             apta_s4_get_u32(entry) > APTA_REFERENCE_TEMPO_MAX_MILLIBPM ||
             entry[6] > APTA_CONFIDENCE_MAX ||
             !apta_s4_relation_valid(relation) ||
-            apta_s4_get_u32(entry + 12u) != 0u ||
+            (strict && apta_s4_get_u32(entry + 12u) != 0u) ||
             (index != 0u &&
              apta_s4_get_u16(entry + 4u) >
                  result->tempo_candidates[index - 1u].score)) {
@@ -241,9 +252,11 @@ static apta_status_t apta_s4_parse_grid(
     const apta_parse_options_t *options,
     const uint8_t *payload,
     size_t size,
+    int partial,
     apta_result_t *result)
 {
     apta_grid_segment_t *segment;
+    const int strict = apta_s4_is_strict(options);
     uint64_t limit = options != NULL &&
                              options->maximum_allocation_bytes != 0u
                          ? options->maximum_allocation_bytes
@@ -252,7 +265,7 @@ static apta_status_t apta_s4_parse_grid(
         sizeof(apta_frame_range_t) + sizeof(apta_grid_segment_t);
 
     if (size != APTA_LGRD_PAYLOAD_SIZE || apta_s4_get_u16(payload) != 1u ||
-        !apta_s4_state_valid(payload[2]) ||
+        !apta_s4_state_allowed(payload[2], partial) ||
         payload[3] > APTA_CONFIDENCE_MAX ||
         apta_s4_get_u32(payload + 8u) !=
             APTA_GRID_REPRESENTATION_SEGMENTS ||
@@ -270,10 +283,12 @@ static apta_status_t apta_s4_parse_grid(
             APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
         apta_s4_get_u32(payload + 120u) >
             APTA_REFERENCE_TEMPO_MAX_MILLIBPM ||
-        !apta_s4_state_valid(payload[136]) ||
+        !apta_s4_state_allowed(payload[136], partial) ||
         payload[137] > APTA_CONFIDENCE_MAX ||
-        payload[138] != 0u || payload[139] != 0u ||
-        apta_s4_get_u32(payload + 140u) != 0u) {
+        (strict &&
+         (apta_s4_get_u32(payload + 92u) != 0u ||
+          payload[138] != 0u || payload[139] != 0u ||
+          apta_s4_get_u32(payload + 140u) != 0u))) {
         return APTA_ERROR_CORRUPT_DATA;
     }
     if (!apta_internal_result_allocation_fits(result, needed, limit)) {
@@ -364,6 +379,8 @@ apta_status_t APTA_CALL apta_result_parse(
     apta_result_t *result;
     apta_s4_sections_t sections;
     apta_status_t status;
+    int partial;
+    int strict;
 
     if (result_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -383,9 +400,13 @@ apta_status_t APTA_CALL apta_result_parse(
         return status;
     }
 
+    strict = apta_s4_is_strict(options);
+    partial = (apta_s4_get_u32((const uint8_t *)buffer + 16u) &
+               APTA_CONTAINER_FLAG_PARTIAL_RESULT) != 0u;
     status = apta_s4_find_sections(
         (const uint8_t *)buffer,
         buffer_size,
+        strict,
         &sections);
     if (status < 0) {
         apta_result_release(base_result);
@@ -402,6 +423,7 @@ apta_status_t APTA_CALL apta_result_parse(
         options,
         sections.temp,
         sections.temp_size,
+        partial,
         result);
     if (status >= 0 && sections.grid != NULL) {
         status = apta_s4_parse_grid(
@@ -409,6 +431,7 @@ apta_status_t APTA_CALL apta_result_parse(
             options,
             sections.grid,
             sections.grid_size,
+            partial,
             result);
     }
     if (status < 0) {

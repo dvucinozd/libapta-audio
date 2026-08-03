@@ -114,6 +114,17 @@ static int apta_bytes_are_zero(const uint8_t *data, size_t size)
     return 1;
 }
 
+static int apta_is_standard_section(const uint8_t *entry)
+{
+    return memcmp(entry, "META", 4u) == 0 ||
+           memcmp(entry, "WOVR", 4u) == 0 ||
+           memcmp(entry, "WDTL", 4u) == 0 ||
+           memcmp(entry, "TEMP", 4u) == 0 ||
+           memcmp(entry, "LGRD", 4u) == 0 ||
+           memcmp(entry, "GGRD", 4u) == 0 ||
+           memcmp(entry, "REVN", 4u) == 0;
+}
+
 void APTA_CALL apta_parse_options_init(apta_parse_options_t *options)
 {
     if (options == NULL) {
@@ -250,9 +261,6 @@ static apta_status_t apta_validate_container(
     if ((container_flags & ~APTA_CONTAINER_FLAG_MASK) != 0u) {
         return APTA_ERROR_CORRUPT_DATA;
     }
-    if ((container_flags & APTA_CONTAINER_FLAG_HAS_REQUIRED_EXTENSIONS) != 0u) {
-        return APTA_ERROR_UNSUPPORTED;
-    }
     if (section_count == 0u ||
         section_count > options->maximum_section_count) {
         return section_count == 0u
@@ -292,7 +300,8 @@ static apta_status_t apta_validate_container(
     }
 
     if (total_source_frames == APTA_TOTAL_FRAMES_UNKNOWN) {
-        if ((container_flags & APTA_CONTAINER_FLAG_SOURCE_DURATION_UNKNOWN) == 0u) {
+        if ((container_flags & APTA_CONTAINER_FLAG_SOURCE_DURATION_UNKNOWN) == 0u ||
+            (container_flags & APTA_CONTAINER_FLAG_PARTIAL_RESULT) == 0u) {
             return APTA_ERROR_CORRUPT_DATA;
         }
     } else if ((container_flags &
@@ -313,6 +322,7 @@ static apta_status_t apta_validate_container(
         uint32_t reserved = apta_get_u32(entry + 36u);
         uint32_t earlier;
         int is_wovr = memcmp(entry, "WOVR", 4u) == 0;
+        int is_standard = apta_is_standard_section(entry);
 
         if ((section_flags &
              (APTA_SECTION_FLAG_COMPRESSED | APTA_SECTION_FLAG_ENCRYPTED)) != 0u) {
@@ -320,6 +330,15 @@ static apta_status_t apta_validate_container(
         }
         if ((section_flags & ~APTA_SECTION_FLAG_MASK) != 0u ||
             (((options->flags & APTA_PARSE_STRICT) != 0u) && reserved != 0u)) {
+            return APTA_ERROR_CORRUPT_DATA;
+        }
+        if (is_standard && section_version != 1u) {
+            return APTA_ERROR_UNSUPPORTED;
+        }
+        if ((is_wovr &&
+             (section_flags & APTA_SECTION_FLAG_REQUIRED) == 0u) ||
+            (!is_wovr && is_standard &&
+             (section_flags & APTA_SECTION_FLAG_REQUIRED) != 0u)) {
             return APTA_ERROR_CORRUPT_DATA;
         }
         if ((section_offset & 7u) != 0u ||
@@ -358,15 +377,14 @@ static apta_status_t apta_validate_container(
         }
 
         if (is_wovr) {
-            if (found_wovr || section_version != 1u) {
-                return found_wovr
-                           ? APTA_ERROR_CORRUPT_DATA
-                           : APTA_ERROR_UNSUPPORTED;
+            if (found_wovr) {
+                return APTA_ERROR_CORRUPT_DATA;
             }
             found_wovr = 1;
             input->payload = bytes + (size_t)section_offset;
             input->payload_size = (size_t)stored_size;
-        } else if ((section_flags & APTA_SECTION_FLAG_REQUIRED) != 0u) {
+        } else if (!is_standard &&
+                   (section_flags & APTA_SECTION_FLAG_REQUIRED) != 0u) {
             return APTA_ERROR_UNSUPPORTED;
         }
     }
@@ -428,8 +446,7 @@ static apta_status_t apta_validate_wovr_geometry(
         return APTA_ERROR_CORRUPT_DATA;
     }
     if (state == APTA_FEATURE_FINAL) {
-        if ((input->container_flags & APTA_CONTAINER_FLAG_PARTIAL_RESULT) != 0u ||
-            input->total_source_frames == APTA_TOTAL_FRAMES_UNKNOWN) {
+        if (input->total_source_frames == APTA_TOTAL_FRAMES_UNKNOWN) {
             return APTA_ERROR_CORRUPT_DATA;
         }
     } else if ((input->container_flags &
@@ -661,10 +678,9 @@ static apta_status_t apta_build_parsed_result(
     result->info.available_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
     result->info.changed_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
     result->info.session_state =
-        (apta_get_u32(payload + 40u) & APTA_WOVR_STATE_MASK) ==
-                APTA_FEATURE_FINAL
-            ? APTA_SESSION_COMPLETED
-            : APTA_SESSION_ACTIVE;
+        (input->container_flags & APTA_CONTAINER_FLAG_PARTIAL_RESULT) != 0u
+            ? APTA_SESSION_ACTIVE
+            : APTA_SESSION_COMPLETED;
 
     apta_source_info_init(&result->source_info);
     result->source_info.total_frames = input->total_source_frames;
@@ -735,9 +751,6 @@ static apta_status_t apta_build_parsed_result(
             column_output->mid = column_input[7];
             column_output->high = column_input[8];
             column_output->flags = column_input[9];
-            /* C1: band values round-trip, so a reader that restored them must
-             * say so. Advertising it from the columns rather than from a
-             * header bit keeps the claim tied to what is actually present. */
             if ((column_output->flags &
                  APTA_WAVEFORM_COLUMN_HAS_3BAND) != 0u) {
                 result->info.available_features |=

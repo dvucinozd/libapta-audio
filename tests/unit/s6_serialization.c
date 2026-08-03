@@ -16,6 +16,9 @@
 #define TEMPO_9_BIN 156250u
 #define DIRECTORY_OFFSET 96u
 #define DIRECTORY_ENTRY_SIZE 40u
+#define CONTAINER_FLAG_PARTIAL_RESULT (1u << 0)
+#define GGRD_HEADER_SIZE 96u
+#define GGRD_SEGMENT_SIZE 80u
 
 #define CHECK(condition)                                                     \
     do {                                                                     \
@@ -89,6 +92,18 @@ static uint8_t *find_entry(uint8_t *bytes, const char id[4], uint32_t *index_out
         }
     }
     return NULL;
+}
+
+static void refresh_header_crc(uint8_t *bytes)
+{
+    put_u32(bytes + 92u, crc32c(bytes, 92u));
+}
+
+static void refresh_entry_crc(uint8_t *entry, uint8_t *file)
+{
+    const size_t offset = (size_t)get_u64(entry + 8u);
+    const size_t size = (size_t)get_u64(entry + 16u);
+    put_u32(entry + 32u, crc32c(file + offset, size));
 }
 
 static uint32_t beat_period(uint32_t tempo_millibpm)
@@ -209,13 +224,14 @@ static int verify_result(const apta_result_t *result)
 
 static int expect_rejected(
     apta_context_t *context,
+    const apta_parse_options_t *options,
     const uint8_t *bytes,
     size_t size)
 {
     const apta_result_t *parsed = NULL;
     const apta_status_t status = apta_result_parse(
         context,
-        NULL,
+        options,
         bytes,
         size,
         &parsed);
@@ -226,11 +242,27 @@ static int expect_rejected(
     return 0;
 }
 
-static void refresh_entry_crc(uint8_t *entry, uint8_t *file)
+static int expect_accepted(
+    apta_context_t *context,
+    const apta_parse_options_t *options,
+    const uint8_t *bytes,
+    size_t size,
+    apta_session_state_t expected_state)
 {
-    const size_t offset = (size_t)get_u64(entry + 8u);
-    const size_t size = (size_t)get_u64(entry + 16u);
-    put_u32(entry + 32u, crc32c(file + offset, size));
+    const apta_result_t *parsed = NULL;
+    apta_result_info_t info;
+    CHECK(apta_result_parse(
+              context,
+              options,
+              bytes,
+              size,
+              &parsed) == APTA_STATUS_OK);
+    CHECK(parsed != NULL);
+    apta_result_info_init(&info);
+    CHECK(apta_result_get_info(parsed, &info) == APTA_STATUS_OK);
+    CHECK(info.session_state == expected_state);
+    apta_result_release(parsed);
+    return 0;
 }
 
 int main(void)
@@ -261,6 +293,7 @@ int main(void)
     uint32_t grid_index = 0u;
     uint32_t revision_index = 0u;
     apta_parse_options_t strict;
+    apta_parse_options_t permissive;
 
     apta_context_config_init(&config);
     config.requested_capabilities = capabilities;
@@ -292,6 +325,8 @@ int main(void)
 
     apta_parse_options_init(&strict);
     strict.flags = APTA_PARSE_STRICT;
+    apta_parse_options_init(&permissive);
+    permissive.flags = 0u;
     CHECK(apta_result_parse(
               parse_context,
               &strict,
@@ -356,27 +391,28 @@ int main(void)
     }
     memcpy(copy, bytes, written);
     copy[written] = 0u;
-    CHECK(expect_rejected(parse_context, copy, written + 1u) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written + 1u) == 0);
 
     memcpy(copy, bytes, written);
     grid_entry = find_entry(copy, "GGRD", NULL);
     revision_entry = find_entry(copy, "REVN", NULL);
     CHECK(grid_entry != NULL && revision_entry != NULL);
     memcpy(revision_entry, "GGRD", 4u);
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
     memcpy(copy, bytes, written);
     revision_entry = find_entry(copy, "REVN", NULL);
     CHECK(revision_entry != NULL);
     memcpy(revision_entry, "UNKN", 4u);
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
     memcpy(copy, bytes, written);
     grid_entry = find_entry(copy, "GGRD", NULL);
     CHECK(grid_entry != NULL);
     put_u16(grid_entry + 4u, 2u);
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
+    /* GGRD and REVN defined reserved bytes are strict-only. */
     memcpy(copy, bytes, written);
     grid_entry = find_entry(copy, "GGRD", NULL);
     CHECK(grid_entry != NULL);
@@ -385,7 +421,83 @@ int main(void)
         payload[88] = 1u;
         refresh_entry_crc(grid_entry, copy);
     }
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    CHECK(expect_accepted(
+              parse_context,
+              &permissive,
+              copy,
+              written,
+              APTA_SESSION_COMPLETED) == 0);
+
+    memcpy(copy, bytes, written);
+    revision_entry = find_entry(copy, "REVN", NULL);
+    CHECK(revision_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(revision_entry + 8u);
+        payload[48] = 1u;
+        refresh_entry_crc(revision_entry, copy);
+    }
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    CHECK(expect_accepted(
+              parse_context,
+              &permissive,
+              copy,
+              written,
+              APTA_SESSION_COMPLETED) == 0);
+
+    /* Non-final GGRD state requires PARTIAL_RESULT. */
+    memcpy(copy, bytes, written);
+    grid_entry = find_entry(copy, "GGRD", NULL);
+    CHECK(grid_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(grid_entry + 8u);
+        payload[2] = APTA_FEATURE_PROVISIONAL;
+        refresh_entry_crc(grid_entry, copy);
+    }
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    put_u32(copy + 16u, get_u32(copy + 16u) | CONTAINER_FLAG_PARTIAL_RESULT);
+    refresh_header_crc(copy);
+    CHECK(expect_accepted(
+              parse_context,
+              &strict,
+              copy,
+              written,
+              APTA_SESSION_ACTIVE) == 0);
+
+    /* PENDING REVN is partial-only and cannot pair with a final GGRD. */
+    memcpy(copy, bytes, written);
+    revision_entry = find_entry(copy, "REVN", NULL);
+    CHECK(revision_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(revision_entry + 8u);
+        payload[2] = APTA_GRID_REVISION_PENDING;
+        refresh_entry_crc(revision_entry, copy);
+    }
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    put_u32(copy + 16u, get_u32(copy + 16u) | CONTAINER_FLAG_PARTIAL_RESULT);
+    refresh_header_crc(copy);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+
+    grid_entry = find_entry(copy, "GGRD", NULL);
+    CHECK(grid_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(grid_entry + 8u);
+        uint32_t segment_count = get_u32(payload + 16u);
+        uint32_t index;
+        payload[2] = APTA_FEATURE_PROVISIONAL;
+        for (index = 0u; index < segment_count; ++index) {
+            payload[GGRD_HEADER_SIZE +
+                    (size_t)index * GGRD_SEGMENT_SIZE + 72u] =
+                APTA_FEATURE_PROVISIONAL;
+        }
+        refresh_entry_crc(grid_entry, copy);
+    }
+    CHECK(expect_accepted(
+              parse_context,
+              &strict,
+              copy,
+              written,
+              APTA_SESSION_ACTIVE) == 0);
 
     memcpy(copy, bytes, written);
     grid_entry = find_entry(copy, "GGRD", NULL);
@@ -395,7 +507,7 @@ int main(void)
         put_u32(payload + 16u, APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS + 1u);
         refresh_entry_crc(grid_entry, copy);
     }
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
     memcpy(copy, bytes, written);
     revision_entry = find_entry(copy, "REVN", NULL);
@@ -405,7 +517,7 @@ int main(void)
         put_u32(payload + 8u, get_u32(payload + 8u) + 1u);
         refresh_entry_crc(revision_entry, copy);
     }
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
     memcpy(copy, bytes, written);
     grid_entry = find_entry(copy, "GGRD", NULL);
@@ -413,7 +525,7 @@ int main(void)
     CHECK(grid_entry != NULL && revision_entry != NULL);
     memcpy(grid_entry, "REVN", 4u);
     memcpy(revision_entry, "GGRD", 4u);
-    CHECK(expect_rejected(parse_context, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
     {
         apta_parse_options_t limited;
