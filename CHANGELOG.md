@@ -2,6 +2,41 @@
 
 All notable changes to libapta-audio are documented in this file.
 
+## [1.0.0] - 2026-08-04
+
+### Finalized
+
+- removed the release-candidate suffix from package metadata without changing the public API, ABI, container wire format or production analysis behavior;
+- promoted the APTA specification and normative manifest from release candidate to final 1.0 status;
+- added a final-release verifier that proves the P8 frozen contracts remain unchanged outside the explicitly approved version and publication files;
+- added deterministic Linux and Windows final-package validation and governance-approved `v1.0.0` publication automation;
+- published the final roadmap, security-policy and release documentation boundary.
+
+### Compatibility boundary
+
+- package version: `1.0.0`;
+- public API version: `1.0.0`;
+- specification version: stable `1.0`;
+- container version: stable `1`;
+- shared-library ABI: `SOVERSION 1`;
+- the finalization changes no exported symbol, public structure layout, canonical fixture, conformance profile, parser/writer behavior or DSP result contract;
+- desktop file adapters, the WAV reference decoder and CLI tools remain source components rather than stable exported package components;
+- POSIX, Windows and ESP-IDF evidence represents platform integrations of libapta, not independent DSP implementations;
+- exact qualification is published only for REFERENCE-WAVEFORM-1.0; no REFERENCE-TEMPO-1.0 or REFERENCE-BEATGRID-1.0 claim is made.
+
+### Known limitations
+
+- no supported native big-endian release target was available; deterministic byte-swap evidence is retained instead;
+- hosted ESP-IDF CI compiles and links firmware and the strict interchange probe but does not claim execution on physical hardware;
+- POSIX atomic replacement does not `fsync()` the parent directory after rename, an accepted power-loss durability limitation rather than a parser memory-safety defect;
+- tempo and beatgrid selection accuracy remain implementation-quality evidence outside semantic conformance.
+
+### Security and licensing
+
+- `1.0.0` is the first maintained stable 1.x release under `SECURITY.md`;
+- source and binary archives are distributed under Apache License 2.0 and include `LICENSE`, `VERSION` and this changelog;
+- the core release package contains no bundled third-party source tree and no identified project-specific NOTICE payload.
+
 ## [1.0.0-rc.1] - 2026-08-04
 
 ### Added

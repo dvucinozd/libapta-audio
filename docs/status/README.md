@@ -1,31 +1,30 @@
 # Implementation status
 
 Start with [`APTA-ROADMAP-STATUS.md`](APTA-ROADMAP-STATUS.md), the current
-whole-project status and validation boundary.
+whole-project release and validation boundary.
 
-Current S9 work:
+Stage S9 — APTA 1.0:
 
 - [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md) — contractual gap analysis and
-  blocker inventory for the APTA 1.0 freeze.
+  original blocker inventory.
 - [`S9-P1-NORMATIVE-SCOPE-STATUS.md`](S9-P1-NORMATIVE-SCOPE-STATUS.md) —
-  APTA 1.0 candidate scope, profiles and normative authority freeze.
-- [`S9-P2-API-ABI-STATUS.md`](S9-P2-API-ABI-STATUS.md) — completed release
-  version model, public API/ABI compatibility contract, layout manifests,
-  exported-symbol freeze and source identity/geometry access.
-- [`S9-P3-CONTAINER-V1-STATUS.md`](S9-P3-CONTAINER-V1-STATUS.md) — completed
-  container-version-1 registry, parser/writer consistency and canonical fixture
-  freeze.
+  normative authority, profile and scope freeze.
+- [`S9-P2-API-ABI-STATUS.md`](S9-P2-API-ABI-STATUS.md) — stable version model,
+  API/ABI compatibility, layout and exported-symbol freeze.
+- [`S9-P3-CONTAINER-V1-STATUS.md`](S9-P3-CONTAINER-V1-STATUS.md) — stable
+  container-version-1 registry and canonical fixture authority.
 - [`S9-P6-INTEROPERABILITY-STATUS.md`](S9-P6-INTEROPERABILITY-STATUS.md) —
-  independent producer/consumer exchange and Linux, Windows, ILP32 and ESP-IDF
-  platform-evidence boundary.
+  independent producer/consumer exchange and platform evidence boundary.
 - [`S9-P7-SECURITY-CAMPAIGN.md`](S9-P7-SECURITY-CAMPAIGN.md) — frozen fuzz
-  inventory, reproducible ASan/UBSan campaign and security-review boundary.
-- [`S9-P8-RC-FREEZE.md`](S9-P8-RC-FREEZE.md) — release-candidate identity,
-  frozen manifests, blocker/legal review and reproducible RC package gates.
+  inventory, reproducible ASan/UBSan campaign and security review.
+- [`S9-P8-RC-FREEZE.md`](S9-P8-RC-FREEZE.md) — accepted `1.0.0-rc.1`
+  candidate, frozen manifests and retained release evidence.
+- [`S9-P9-RELEASE.md`](S9-P9-RELEASE.md) — stable 1.0 identity, finalization
+  boundary and `v1.0.0` publication workflow.
 - [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md) —
-  ordered implementation, evidence and release gates for Stage S9.
+  ordered P0–P9 implementation and release gates.
 
-Stage and milestone evidence snapshots:
+Earlier stage and milestone evidence snapshots:
 
 - [`M2-WAVEFORM-PROCESSING-STATUS.md`](M2-WAVEFORM-PROCESSING-STATUS.md)
 - [`S4-TEMPO-LOCAL-GRID-STATUS.md`](S4-TEMPO-LOCAL-GRID-STATUS.md)
@@ -39,4 +38,4 @@ Stage and milestone evidence snapshots:
 - [`PHASE7-P4-BOUNDED-REFRESH-STATUS.md`](PHASE7-P4-BOUNDED-REFRESH-STATUS.md)
 
 Snapshot test totals and “next stage” sections apply to the commit and CI run
-named by each document; they do not override the current roadmap status.
+named by each document. They do not override the current release status.
