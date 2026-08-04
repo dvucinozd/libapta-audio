@@ -1,0 +1,19 @@
+{
+  "schema": "apta-s9-blocker-closure-1",
+  "release_candidate": "1.0.0-rc.1",
+  "baseline": "44bc78020eb00e51c70fb542550301a058e9133f",
+  "status": "closed",
+  "open_blocker_count": 0,
+  "blockers": [
+    {"id": "S9-B01", "title": "GGRD/REVN normative conflict", "status": "closed", "closed_by": ["P1", "P3"], "evidence": ["specification/container-v1-registry.md", "specification/APTA-1.0-NORMATIVE-MANIFEST.md"]},
+    {"id": "S9-B02", "title": "Exact API-version equality", "status": "closed", "closed_by": ["P2"], "evidence": ["docs/api/APTA-API-ABI-1.0.md", "tests/unit/version_validation.c"]},
+    {"id": "S9-B03", "title": "Missing symbol/layout manifests", "status": "closed", "closed_by": ["P2"], "evidence": ["abi/public-symbols-1.0.txt", "abi/public-layout-lp64.txt", "abi/public-layout-ilp32.txt", "abi/public-layout-llp64.txt"]},
+    {"id": "S9-B04", "title": "Missing install/shared package", "status": "closed", "closed_by": ["P4"], "evidence": ["cmake/APTAPackaging.cmake", "tests/package/check_archives.cmake.in"]},
+    {"id": "S9-B05", "title": "Conformance not independently packaged", "status": "closed", "closed_by": ["P5"], "evidence": ["conformance/suite-manifest.json", "conformance/CMakeLists.txt"]},
+    {"id": "S9-B06", "title": "Partial independent fixture coverage", "status": "closed", "closed_by": ["P6"], "evidence": ["interoperability/manifest-v1.json", "docs/status/S9-P6-INTEROPERABILITY-STATUS.md"]},
+    {"id": "S9-B07", "title": "No release fuzz campaign", "status": "closed", "closed_by": ["P7"], "evidence": ["tests/fuzz/campaign-v1.json", "docs/status/S9-P7-SECURITY-CAMPAIGN.md"]},
+    {"id": "S9-B08", "title": "Fragmented release identity", "status": "closed", "closed_by": ["P2", "P8"], "evidence": ["VERSION", "CHANGELOG.md", "release/rc-freeze-v1.json"]},
+    {"id": "S9-B09", "title": "Incomplete result identity contract", "status": "closed", "closed_by": ["P2", "P3"], "evidence": ["include/apta/apta_result.h", "specification/container-v1-registry.md"]},
+    {"id": "S9-B10", "title": "Unapproved profile claims", "status": "closed", "closed_by": ["P1", "P5"], "evidence": ["specification/profiles.md", "conformance/suite-manifest.json"]}
+  ]
+}
