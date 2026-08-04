@@ -45,13 +45,6 @@ replacement for GitHub dependency review.
 The project has no runtime package-manager dependency, but GitHub Actions and
 future build dependencies still form part of the supply chain.
 
-### OpenSSF Scorecard
-
-A monthly Scorecard workflow publishes SARIF results to GitHub code scanning
-and retains the raw report briefly as a workflow artifact. Scorecard findings
-are advisory repository-health evidence; they do not replace code review,
-tests or the frozen compatibility checks.
-
 ### Dependabot
 
 Dependabot checks GitHub Actions monthly. Updates are grouped into at most one
