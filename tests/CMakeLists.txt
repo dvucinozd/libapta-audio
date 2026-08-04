@@ -171,7 +171,7 @@ if(TARGET apta_version)
         apta.api.version_report
         PROPERTIES
             PASS_REGULAR_EXPRESSION
-                "package=1.0.0-rc.1.*api=1.0.0.*spec=1.0.*container=1")
+                "package=1.0.0.*api=1.0.0.*spec=1.0.*container=1")
 endif()
 
 if(TARGET apta_tool_common)

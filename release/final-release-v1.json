@@ -20,7 +20,9 @@
     "release/release-notes-1.0.0.md",
     "specification/APTA-1.0-NORMATIVE-MANIFEST.md",
     "specification/APTA-SPEC.md",
-    "specification/README.md"
+    "specification/README.md",
+    "tests/CMakeLists.txt",
+    "tests/compat/1.0.0/include/apta/apta_version.h"
   ],
   "blocker_manifest": "release/s9-blockers-v1.json",
   "legal_review_manifest": "release/legal-review-final-v1.json",
