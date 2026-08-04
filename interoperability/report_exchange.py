@@ -10,12 +10,10 @@ import json
 from pathlib import Path
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def sha256_text_lf(path: Path) -> str:
+    text = path.read_text(encoding="utf-8")
+    canonical = text.replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def load_hex(path: Path) -> bytes:
@@ -67,13 +65,13 @@ def main() -> int:
         "fixture": {
             "canonical_output_sha256": canonical_sha,
             "independent_fixture_sha256": fixture_sha,
-            "semantic_manifest_sha256": sha256_file(args.manifest),
+            "semantic_manifest_sha256": sha256_text_lf(args.manifest),
             "size_bytes": len(fixture),
         },
         "independent_producer": {
             "imports_or_links_libapta": False,
             "source_path": manifest["producer"]["source_path"],
-            "source_sha256": sha256_file(args.producer_source),
+            "source_sha256": sha256_text_lf(args.producer_source),
         },
         "libapta_bridge": bridge["bridge"],
         "platform": {
