@@ -1,7 +1,7 @@
 # libapta-audio
 
 <p align="center">
-  <img src="docs/assets/libapta-audio-logo.svg" alt="libapta-audio — Adaptive Progressive Track Analysis" width="760">
+  <img src="docs/libapta-audio-logo.svg" alt="libapta-audio — Adaptive Progressive Track Analysis" width="760">
 </p>
 
 [![CI](https://github.com/dvucinozd/libapta-audio/actions/workflows/ci.yml/badge.svg)](https://github.com/dvucinozd/libapta-audio/actions/workflows/ci.yml)
