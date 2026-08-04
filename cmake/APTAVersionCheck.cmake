@@ -62,3 +62,4 @@ set(APTA_CONTAINER_VERSION_STRING "${APTA_HEADER_CONTAINER_VERSION}")
 
 include("${CMAKE_CURRENT_LIST_DIR}/APTAPackaging.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/APTAConformance.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/APTAInterchange.cmake")

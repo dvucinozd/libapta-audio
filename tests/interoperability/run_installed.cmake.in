@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: Apache-2.0
+cmake_minimum_required(VERSION 3.16)
+
+set(test_root "@CMAKE_CURRENT_BINARY_DIR@/interchange-${APTA_TEST_CONFIG}")
+set(prefix "${test_root}/prefix")
+set(bridge_build "${test_root}/bridge-build")
+set(canonical "${test_root}/libapta-canonical.apta")
+set(bridge_report "${test_root}/bridge-report.json")
+set(consumer_report "${test_root}/consumer-report.json")
+set(report "@CMAKE_CURRENT_BINARY_DIR@/conformance-reports/apta-interchange-${APTA_TEST_CONFIG}.json")
+set(fixture "@CMAKE_CURRENT_SOURCE_DIR@/tests/fixtures/container-v1-suite/v1-all-standard-sections.apta.hex")
+set(manifest "@CMAKE_CURRENT_SOURCE_DIR@/interoperability/manifest-v1.json")
+file(REMOVE_RECURSE "${test_root}")
+file(MAKE_DIRECTORY "${test_root}")
+
+set(install_command
+    "@CMAKE_COMMAND@"
+    --install "@CMAKE_CURRENT_BINARY_DIR@"
+    --prefix "${prefix}")
+if(NOT "${APTA_TEST_CONFIG}" STREQUAL "")
+    list(APPEND install_command --config "${APTA_TEST_CONFIG}")
+endif()
+execute_process(COMMAND ${install_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA interchange install failed: ${result}")
+endif()
+
+set(configure_command
+    "@CMAKE_COMMAND@"
+    -S "@CMAKE_CURRENT_SOURCE_DIR@/interoperability/libapta_bridge"
+    -B "${bridge_build}"
+    -G "@CMAKE_GENERATOR@"
+    "-DCMAKE_PREFIX_PATH=${prefix}"
+    "-DCMAKE_C_COMPILER=@CMAKE_C_COMPILER@"
+    "-DCMAKE_C_FLAGS=@CMAKE_C_FLAGS@"
+    "-DCMAKE_EXE_LINKER_FLAGS=@CMAKE_EXE_LINKER_FLAGS@")
+if(NOT "@CMAKE_GENERATOR_PLATFORM@" STREQUAL "")
+    list(APPEND configure_command -A "@CMAKE_GENERATOR_PLATFORM@")
+endif()
+if(NOT "@CMAKE_GENERATOR_TOOLSET@" STREQUAL "")
+    list(APPEND configure_command -T "@CMAKE_GENERATOR_TOOLSET@")
+endif()
+if(NOT "@CMAKE_BUILD_TYPE@" STREQUAL "")
+    list(APPEND configure_command "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@")
+endif()
+execute_process(COMMAND ${configure_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA interchange bridge configure failed: ${result}")
+endif()
+
+set(build_command
+    "@CMAKE_COMMAND@"
+    --build "${bridge_build}"
+    --target apta_interchange_bridge)
+if(NOT "${APTA_TEST_CONFIG}" STREQUAL "")
+    list(APPEND build_command --config "${APTA_TEST_CONFIG}")
+endif()
+execute_process(COMMAND ${build_command} RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA interchange bridge build failed: ${result}")
+endif()
+
+set(bridge_executable
+    "${bridge_build}/bin/apta_interchange_bridge@CMAKE_EXECUTABLE_SUFFIX@")
+if(WIN32 AND "@BUILD_SHARED_LIBS@")
+    file(GLOB runtime_dlls "${prefix}/bin/*.dll")
+    if(NOT runtime_dlls)
+        message(FATAL_ERROR "APTA shared runtime DLL was not installed")
+    endif()
+    file(COPY ${runtime_dlls} DESTINATION "${bridge_build}/bin")
+endif()
+execute_process(
+    COMMAND
+        "${bridge_executable}"
+        "${fixture}"
+        "${canonical}"
+        "${bridge_report}"
+    RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA libapta bridge failed: ${result}")
+endif()
+
+execute_process(
+    COMMAND
+        "@Python3_EXECUTABLE@"
+        "@CMAKE_CURRENT_SOURCE_DIR@/interoperability/independent_consumer.py"
+        --input "${canonical}"
+        --manifest "${manifest}"
+        --output "${consumer_report}"
+    RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA independent consumer failed: ${result}")
+endif()
+
+execute_process(
+    COMMAND
+        "@Python3_EXECUTABLE@"
+        "@CMAKE_CURRENT_SOURCE_DIR@/interoperability/report_exchange.py"
+        --bridge-report "${bridge_report}"
+        --consumer-report "${consumer_report}"
+        --fixture-hex "${fixture}"
+        --canonical "${canonical}"
+        --manifest "${manifest}"
+        --producer-source
+            "@CMAKE_CURRENT_SOURCE_DIR@/tests/fixtures/generate_container_v1_suite.py"
+        --platform-system "@CMAKE_SYSTEM_NAME@"
+        --platform-processor "@CMAKE_SYSTEM_PROCESSOR@"
+        --platform-toolchain "@CMAKE_C_COMPILER_ID@ @CMAKE_C_COMPILER_VERSION@"
+        --configuration "${APTA_TEST_CONFIG}"
+        --shared "@BUILD_SHARED_LIBS@"
+        --source-revision "$ENV{GITHUB_SHA}"
+        --output "${report}"
+    RESULT_VARIABLE result)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "APTA interchange report generation failed: ${result}")
+endif()
+if(NOT EXISTS "${report}")
+    message(FATAL_ERROR "APTA interchange report was not generated: ${report}")
+endif()

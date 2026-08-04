@@ -51,10 +51,10 @@ jobs:
           --target apta_core apta_abi_layout_manifest apta_compat_1_0_client
           --parallel 2
 
-      - name: Run shared-library ABI and conformance tests
+      - name: Run shared-library ABI, conformance and interchange tests
         run: >-
           ctest --test-dir build-shared
-          -R "^(apta\.abi\..*|apta\.conformance\.installed)$"
+          -R "^(apta\.abi\..*|apta\.conformance\.installed|apta\.interchange\.versioned)$"
           --timeout 600
           --verbose
           --output-on-failure
@@ -114,11 +114,11 @@ jobs:
           build-windows-shared/Release/apta.dll
           build-windows-shared/tests/Release/apta.dll
 
-      - name: Run shared-library ABI and conformance tests
+      - name: Run shared-library ABI, conformance and interchange tests
         run: >-
           ctest --test-dir build-windows-shared
           -C Release
-          -R "^(apta\.abi\..*|apta\.conformance\.installed)$"
+          -R "^(apta\.abi\..*|apta\.conformance\.installed|apta\.interchange\.versioned)$"
           --timeout 600
           --verbose
           --output-on-failure
