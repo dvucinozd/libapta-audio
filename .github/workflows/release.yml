@@ -112,7 +112,7 @@ jobs:
           -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
           --timeout 900
           --output-on-failure
-      - name: Configure and build shared package
+      - name: Configure and build shared test package
         run: |
           cmake -S . -B build-shared \
             -DBUILD_SHARED_LIBS=ON \
@@ -121,13 +121,39 @@ jobs:
             -DAPTA_BUILD_TOOLS=OFF \
             -DAPTA_WARNINGS_AS_ERRORS=ON \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-shared --parallel 2
-      - name: Validate shared package
+          cmake --build build-shared \
+            --target apta_core apta_abi_layout_manifest apta_compat_1_0_client \
+            --parallel 2
+      - name: Validate shared installed package
         run: >-
           ctest --test-dir build-shared
-          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
+          -R "^(apta\.package\.build_tree|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
           --timeout 900
           --output-on-failure
+      - name: Build reproducible shared package archives
+        run: |
+          cmake -S . -B build-shared-package \
+            -DBUILD_SHARED_LIBS=ON \
+            -DAPTA_BUILD_TESTS=OFF \
+            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
+            -DAPTA_BUILD_TOOLS=OFF \
+            -DAPTA_WARNINGS_AS_ERRORS=ON \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-shared-package --parallel 2
+          mkdir -p build-shared-package/final-a build-shared-package/final-b
+          SOURCE_DATE_EPOCH=1767225600 cpack \
+            --config build-shared-package/CPackConfig.cmake \
+            -B build-shared-package/final-a
+          SOURCE_DATE_EPOCH=1767225600 cpack \
+            --config build-shared-package/CPackConfig.cmake \
+            -B build-shared-package/final-b
+          mapfile -t archives_a < <(find build-shared-package/final-a -maxdepth 1 -type f -name '*.tar.gz' | sort)
+          mapfile -t archives_b < <(find build-shared-package/final-b -maxdepth 1 -type f -name '*.tar.gz' | sort)
+          test "${#archives_a[@]}" -eq 1
+          test "${#archives_b[@]}" -eq 1
+          test "$(sha256sum "${archives_a[0]}" | cut -d' ' -f1)" = \
+               "$(sha256sum "${archives_b[0]}" | cut -d' ' -f1)"
+          test -s "${archives_a[0]}.sha256"
       - name: Stage final archives and evidence
         shell: bash
         run: |
@@ -137,7 +163,7 @@ jobs:
           for file in build-static/package-archive-test/binary-a/*; do
             cp "${file}" "release-artifacts/linux-static-$(basename "${file}")"
           done
-          for file in build-shared/package-archive-test/binary-a/*; do
+          for file in build-shared-package/final-a/*; do
             cp "${file}" "release-artifacts/linux-shared-$(basename "${file}")"
           done
           for file in build-static/package-archive-test/source-a/*; do
@@ -204,7 +230,7 @@ jobs:
       - name: Configure and build shared package
         run: |
           cmake -S . -B build-shared -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
-          cmake --build build-shared --config Release --parallel 2
+          cmake --build build-shared --config Release --target apta_core apta_abi_layout_manifest apta_compat_1_0_client --parallel 2
       - name: Stage shared runtime beside test clients
         shell: pwsh
         run: |
