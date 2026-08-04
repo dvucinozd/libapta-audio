@@ -115,7 +115,9 @@ jobs:
             -DAPTA_BUILD_TOOLS=OFF \
             -DAPTA_WARNINGS_AS_ERRORS=ON \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-shared --parallel 2
+          cmake --build build-shared \
+            --target apta_core apta_abi_layout_manifest apta_compat_1_0_client \
+            --parallel 2
       - name: Validate shared package and create archives
         run: >-
           ctest --test-dir build-shared
@@ -163,7 +165,7 @@ jobs:
       - name: Configure and build shared package
         run: |
           cmake -S . -B build-shared -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
-          cmake --build build-shared --config Release --parallel 2
+          cmake --build build-shared --config Release --target apta_core apta_abi_layout_manifest apta_compat_1_0_client --parallel 2
       - name: Stage shared runtime beside test clients
         shell: pwsh
         run: |
