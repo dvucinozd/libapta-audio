@@ -164,6 +164,10 @@ jobs:
         run: |
           cmake -S . -B build-shared -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
           cmake --build build-shared --config Release --parallel 2
+      - name: Stage shared runtime beside test clients
+        shell: pwsh
+        run: |
+          Copy-Item build-shared/Release/apta.dll build-shared/tests/Release/apta.dll -Force
       - name: Validate shared package and create archives
         run: >-
           ctest --test-dir build-shared -C Release
