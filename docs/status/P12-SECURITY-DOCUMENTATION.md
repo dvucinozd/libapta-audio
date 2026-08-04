@@ -14,7 +14,6 @@ changing any APTA 1.0 specification, API, ABI, container or DSP contract.
 - an automated workflow-reference pin verifier;
 - CodeQL analysis for the C/C++ library and public examples;
 - pull-request dependency review with an explicit unavailable-feature preflight;
-- monthly OpenSSF Scorecard analysis;
 - grouped monthly Dependabot updates for GitHub Actions;
 - deterministic SPDX 2.3 release SBOM generation and self-test;
 - consolidated release checksums and GitHub artifact attestations for future
@@ -36,8 +35,13 @@ P12.
 - workflow and Dependabot YAML parse successfully;
 - the SPDX generator produces byte-identical output for identical inputs and
   changes its package verification code when an input changes;
-- the normal CI, security, Scorecard and relevant platform workflows remain the
-  merge authority.
+- the normal CI, security and relevant platform workflows remain the merge
+  authority.
+
+The advisory OpenSSF Scorecard workflow was retired during the post-P13
+workflow audit because it did not gate merges, releases or product behavior.
+CodeQL, dependency review, immutable-reference verification, Dependabot and
+release provenance remain the maintained security controls.
 
 The repository dependency graph is currently disabled, so the full dependency
 review gate cannot run yet. The source-controlled implementation is complete,
