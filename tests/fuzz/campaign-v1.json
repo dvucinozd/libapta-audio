@@ -1,0 +1,93 @@
+{
+  "schema": "apta-fuzz-campaign-policy-1",
+  "campaign_version": "APTA-1.0-P7.1",
+  "engine": "libFuzzer",
+  "sanitizers": [
+    "address",
+    "undefined"
+  ],
+  "policy": {
+    "minimum_executions_per_target": 8192,
+    "minimum_aggregate_executions": 73728,
+    "timeout_seconds": 5,
+    "rss_limit_mb": 512,
+    "malloc_limit_mb": 128,
+    "zero_crashes": true,
+    "zero_hangs": true,
+    "zero_sanitizer_findings": true
+  },
+  "targets": [
+    {
+      "id": "container-parser",
+      "binary": "apta_container_parser_fuzz",
+      "corpus": "container-parser",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 65536,
+      "source": "tests/fuzz/container_parser_fuzz.c"
+    },
+    {
+      "id": "header-directory",
+      "binary": "apta_header_directory_fuzz",
+      "corpus": "header-directory",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 4096,
+      "source": "tests/fuzz/header_directory_fuzz.c"
+    },
+    {
+      "id": "meta-reader",
+      "binary": "apta_meta_reader_fuzz",
+      "corpus": "meta-reader",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 16384,
+      "source": "tests/fuzz/meta_reader_fuzz.c"
+    },
+    {
+      "id": "wovr-wdtl-readers",
+      "binary": "apta_wovr_reader_fuzz",
+      "corpus": "wovr-wdtl-readers",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 65536,
+      "source": "tests/fuzz/wovr_reader_p7_fuzz.c"
+    },
+    {
+      "id": "temp-lgrd-readers",
+      "binary": "apta_temp_lgrd_reader_fuzz",
+      "corpus": "temp-lgrd-readers",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 65536,
+      "source": "tests/fuzz/temp_lgrd_reader_fuzz.c"
+    },
+    {
+      "id": "ggrd-revn-readers",
+      "binary": "apta_ggrd_revn_reader_fuzz",
+      "corpus": "ggrd-revn-readers",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 65536,
+      "source": "tests/fuzz/ggrd_revn_reader_fuzz.c"
+    },
+    {
+      "id": "serializer-roundtrip",
+      "binary": "apta_serializer_roundtrip_fuzz",
+      "corpus": "serializer-roundtrip",
+      "dictionary": "tests/fuzz/wovr_reader.dict",
+      "max_input_bytes": 65536,
+      "source": "tests/fuzz/serializer_roundtrip_fuzz.c"
+    },
+    {
+      "id": "pcm-validation",
+      "binary": "apta_pcm_validation_fuzz",
+      "corpus": "pcm-validation",
+      "dictionary": null,
+      "max_input_bytes": 2048,
+      "source": "tests/fuzz/pcm_validation_fuzz.c"
+    },
+    {
+      "id": "state-transitions",
+      "binary": "apta_state_transition_fuzz",
+      "corpus": "state-transitions",
+      "dictionary": null,
+      "max_input_bytes": 4096,
+      "source": "tests/fuzz/state_transition_fuzz.c"
+    }
+  ]
+}

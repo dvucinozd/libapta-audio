@@ -2,16 +2,23 @@
 
 ## Supported versions
 
-APTA is currently a 0.1 working draft with no stable release.
+The project is preparing the APTA 1.0 release line.
 
 | Version or branch | Security fixes |
 |---|---|
 | Current `main` branch | Supported |
-| Older commits and untagged snapshots | Not supported |
-| Stable releases | None published |
+| Current `1.0.0-rc.x` release candidate | Supported until superseded by a newer RC or final 1.0 |
+| Latest published `1.x` release | Supported after APTA 1.0 is published |
+| Older RCs, older commits and untagged snapshots | Not supported |
+| Historical `0.x` drafts | Not supported |
 
-Security fixes are prepared for the current development line. Backports are
-considered only after a maintained release line is explicitly announced.
+Security fixes are prepared first for the current development line. After the
+final 1.0 release, the latest maintained 1.x line receives fixes. Backports to
+an older maintained 1.x release are considered when the issue severity and
+compatibility risk justify them; no 0.x backport commitment exists.
+
+The exact supported release list may be narrowed or expanded by a later
+security-policy update, but a release is never silently treated as maintained.
 
 ## Report a vulnerability privately
 
@@ -85,7 +92,7 @@ Reports are especially useful for:
   automation.
 
 Audio-analysis accuracy disagreements without a security impact, unsupported
-optional features and documented pre-1.0 compatibility changes should use the
+optional features and documented compatibility boundaries should use the
 regular issue tracker.
 
 ## Safe-harbor intent

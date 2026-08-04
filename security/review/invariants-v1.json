@@ -1,0 +1,102 @@
+{
+  "schema": "apta-security-review-invariants-1",
+  "review_version": "APTA-1.0-P7.1",
+  "reviewed_paths": [
+    {
+      "path": "src/serialization/apta_wovr_reader.c",
+      "category": "container/WOVR parser"
+    },
+    {
+      "path": "src/serialization/apta_wovr_reader_hardening.c",
+      "category": "container/WOVR bounds hardening"
+    },
+    {
+      "path": "src/serialization/apta_wdtl_reader.c",
+      "category": "container/WDTL parser"
+    },
+    {
+      "path": "src/serialization/apta_meta_reader.c",
+      "category": "container/META parser"
+    },
+    {
+      "path": "src/serialization/apta_meta_reader_hardening.c",
+      "category": "container/META bounds hardening"
+    },
+    {
+      "path": "src/serialization/apta_s4_reader.c",
+      "category": "container TEMP/LGRD parser"
+    },
+    {
+      "path": "src/serialization/apta_s6_reader.c",
+      "category": "container GGRD/REVN parser",
+      "required_substrings": [
+        "section_size > size - offset",
+        "apta_internal_result_allocation_fits"
+      ]
+    },
+    {
+      "path": "src/serialization/apta_wovr_writer.c",
+      "category": "canonical serializer"
+    },
+    {
+      "path": "src/serialization/apta_wdtl_writer.c",
+      "category": "canonical serializer"
+    },
+    {
+      "path": "src/serialization/apta_meta_writer.c",
+      "category": "canonical serializer"
+    },
+    {
+      "path": "src/serialization/apta_s4_writer.c",
+      "category": "canonical serializer"
+    },
+    {
+      "path": "src/serialization/apta_s6_writer.c",
+      "category": "canonical serializer"
+    },
+    {
+      "path": "src/core/apta_session_source.c",
+      "category": "PCM block/range validation"
+    },
+    {
+      "path": "src/core/apta_session_scheduler.c",
+      "category": "request/focus state transitions"
+    },
+    {
+      "path": "src/beatgrid/apta_s6_session_guard.c",
+      "category": "revision/session state guard"
+    },
+    {
+      "path": "src/desktop/apta_posix_file.c",
+      "category": "POSIX atomic file replacement",
+      "required_substrings": [
+        "mkstemp(temporary_path)",
+        "fflush(stream)",
+        "fsync(descriptor)",
+        "rename(temporary_path, path)",
+        "unlink(temporary_path)"
+      ]
+    },
+    {
+      "path": "ports/windows/apta_windows_file.c",
+      "category": "Windows UTF-8 conversion and atomic file replacement",
+      "required_substrings": [
+        "MB_ERR_INVALID_CHARS",
+        "strlen(path) > (size_t)INT_MAX",
+        "SIZE_MAX / sizeof(*wide)",
+        "CREATE_NEW",
+        "FlushFileBuffers(handle)",
+        "MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH",
+        "DeleteFileW(temporary)"
+      ]
+    }
+  ],
+  "accepted_deviations": [
+    {
+      "id": "P7-D01",
+      "path": "src/desktop/apta_posix_file.c",
+      "statement": "The parent directory is not fsync()'d after rename(). Atomic visibility and temporary-file cleanup are preserved, but metadata durability across sudden power loss is not guaranteed.",
+      "classification": "documented crash-durability limitation; not a parser memory-safety defect"
+    }
+  ]
+}

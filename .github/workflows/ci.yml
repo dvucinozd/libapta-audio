@@ -174,7 +174,7 @@ jobs:
           retention-days: 30
 
   parser-hardening:
-    name: Parser sanitizers and fuzz smoke
+    name: P7 security and fuzz release campaign
     runs-on: ubuntu-latest
 
     env:
@@ -195,16 +195,24 @@ jobs:
           -DAPTA_BUILD_FUZZING=ON
           -DCMAKE_BUILD_TYPE=Debug
 
-      - name: Compile sanitized tests and fuzz target
+      - name: Compile sanitized tests and seed generators
         run: cmake --build build-sanitized --parallel 2
 
       - name: Run sanitized runtime tests
         run: ctest --test-dir build-sanitized --output-on-failure
 
+      - name: Verify frozen security-review invariants
+        run: >-
+          python3 security/review/check_invariants.py
+          --root .
+          --manifest security/review/invariants-v1.json
+          --source-revision "${GITHUB_SHA}"
+          --output build-sanitized/security-reports/security-invariants.json
+
       - name: Generate canonical fuzz seeds
         run: |
-          mkdir -p build-sanitized/fuzz-corpus
-          cd build-sanitized/fuzz-corpus
+          mkdir -p build-sanitized/fuzz-generated
+          cd build-sanitized/fuzz-generated
           ../tests/apta_wovr_seed_generator
           ../tests/apta_s6_seed_generator
           test -s valid-final.apta
@@ -214,20 +222,42 @@ jobs:
           test -s valid-s4.apta
           test -s valid-s6.apta
 
-      - name: Run bounded fuzz smoke
+      - name: Build frozen P7 fuzz target inventory
         run: >-
-          ./build-sanitized/tests/apta_wovr_reader_fuzz
-          build-sanitized/fuzz-corpus
-          -dict=tests/fuzz/wovr_reader.dict
-          -runs=2000
-          -max_len=4096
-          -timeout=5
+          python3 tests/fuzz/build_campaign_targets.py
+          --source-root .
+          --build-dir build-sanitized
+          --campaign tests/fuzz/campaign-v1.json
+          --cc clang
 
-      - name: Upload sanitizer classification evidence
+      - name: Materialize versioned seed corpora
+        run: >-
+          python3 tests/fuzz/prepare_corpora.py
+          --policy tests/fuzz/campaign-v1.json
+          --manifest tests/fuzz/corpus-v1.json
+          --generated build-sanitized/fuzz-generated
+          --output build-sanitized/fuzz-corpora
+          --source-root .
+          --source-revision "${GITHUB_SHA}"
+
+      - name: Run reproducible P7 release campaign
+        run: >-
+          python3 tests/fuzz/run_release_campaign.py
+          --source-root .
+          --build-dir build-sanitized
+          --corpus-root build-sanitized/fuzz-corpora
+          --campaign tests/fuzz/campaign-v1.json
+          --source-revision "${GITHUB_SHA}"
+          --output build-sanitized/security-reports/fuzz-campaign.json
+
+      - name: Upload P7 security evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: apta-conformance-sanitized-attempt-${{ github.run_attempt }}
-          path: build-sanitized/conformance-reports/*.json
-          if-no-files-found: warn
-          retention-days: 30
+          name: apta-security-campaign-attempt-${{ github.run_attempt }}
+          path: |
+            build-sanitized/security-reports/**
+            build-sanitized/fuzz-corpora/corpus-report.json
+            build-sanitized/conformance-reports/*.json
+          if-no-files-found: error
+          retention-days: 90
