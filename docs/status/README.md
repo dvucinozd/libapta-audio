@@ -39,3 +39,5 @@ Earlier stage and milestone evidence snapshots:
 
 Snapshot test totals and “next stage” sections apply to the commit and CI run
 named by each document. They do not override the current release status.
+
+- [`P10-1.0.1-COHERENCE.md`](P10-1.0.1-COHERENCE.md) — maintained documentation, metadata and release-automation coherence patch.

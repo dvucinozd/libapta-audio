@@ -2,7 +2,7 @@
 #
 # ESP32-P4 with external PSRAM.
 #
-# At API 0.3.0 the Phase 7 global-beatgrid configuration needs 603,504 bytes
+# With the APTA 1.0 API, the Phase 7 global-beatgrid configuration needs 603,504 bytes
 # of workspace. It completes on the P4 v1.3 with internal memory only, averaging
 # 12,738 us per process call for that feature set.
 #

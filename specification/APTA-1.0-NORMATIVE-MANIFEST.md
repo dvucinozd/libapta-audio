@@ -1,7 +1,7 @@
 # APTA 1.0 normative manifest
 
-**Status:** Final APTA 1.0 manifest  
-**Release:** APTA 1.0  
+**Status:** Final APTA 1.0 manifest — editorial revision 1  
+**Release:** APTA 1.0 / libapta 1.0.1  
 **Hash domain:** Git blob SHA-1 of UTF-8 file content
 
 ## 1. Authority
@@ -10,32 +10,33 @@ The files below are the complete normative APTA 1.0 set. A path not listed
 here is informative unless one of these documents normatively incorporates it.
 
 The manifest does not list its own blob hash because that would be
-self-referential. The governance-approved `v1.0.0` release tag identifies the
-exact published manifest instance.
+self-referential. The governance-approved `v1.0.0` release tag identifies the original
+published manifest instance. The `v1.0.1` tag identifies editorial revision 1
+and its corrected file hashes.
 
 ## 2. Normative files
 
 | Path | Title | Git blob SHA-1 |
 |---|---|---|
-| `APTA-SPEC.md` | Adaptive Progressive Track Analysis Specification | `e0eb760d5bcdef55d5c7bf8bd1aff2c981f5f686` |
-| `normative-language.md` | Normative language | `c7528d4f9cdb66fb9241d4f72e98c682b05b26a2` |
-| `terminology.md` | APTA terminology | `28b8fa0f41dd75d0165b7cdddf8b8dc79f84eb5e` |
-| `time-model.md` | Source time model | `90b56401697878b2cbc20d56e6c8fe8da91f1ed7` |
-| `pcm-input.md` | PCM input contract | `d01dc7c37b14b98657b508331d23302b93959bff` |
-| `progressive-scheduling.md` | Progressive and adaptive scheduling model | `cd16ed2363d44c33937c9e0c9e5f50dfd0d36c8e` |
-| `waveform.md` | Waveform model | `e66f5a667729610483a17d3cfae28ffd3341b63b` |
-| `tempo.md` | Tempo model | `39b75ad9dc51b8089499b529cbea5a648003242a` |
-| `beatgrid.md` | Beatgrid model | `35b64bcdea6a8c2b42164027b4160a43b7a5376b` |
-| `lifecycle.md` | Analysis lifecycle | `b62560f8e600db8aae484cd3c6258511b38babc7` |
-| `confidence.md` | Confidence model | `6b06fde78f91813192fa48c9ed0243e8b49452a3` |
-| `result-model.md` | Result and snapshot model | `cfda09e9369c53b86619bcf1a2b501ed2a329578` |
-| `container-v1-registry.md` | Container version 1 section registry | `0bc7aa7199f341498d7a4c45c7442f7bc08d021e` |
-| `file-format.md` | `.apta` container format | `4ddbe68f9b89be7c5a10eaca90cd1d7e0dedf8cc` |
-| `global-grid-container.md` | Global-grid and revision container sections | `9e2362e06282a597a8eac0502988e2739947773c` |
-| `wovr-state-flags.md` | WOVR version-1 lifecycle-state flags | `7ba8c516ad73c3532b737d289b1a9e53cbb4ef5c` |
-| `profiles.md` | Conformance profiles and resource classes | `faf9aa1bfc005354a0e4baed15b154499ab96dcc` |
-| `extensions.md` | Extension model | `f4db847e8b30ed1a85ac464e1d64c2bfe8f22273` |
-| `conformance.md` | Conformance model | `af6b308e8bed8fa6bd15364efbaad0ab717821f7` |
+| `APTA-SPEC.md` | Adaptive Progressive Track Analysis Specification | `3ffbc65316c5352aa2ad39531057e5bdda9a6b31` |
+| `normative-language.md` | Normative language | `2dfd6d49ca00c794b157af5ad43975d76acad80c` |
+| `terminology.md` | APTA terminology | `5e06d8a9133c37a4cc38d06f174a12fa23e833c8` |
+| `time-model.md` | Source time model | `666851c52b9d067a6b700e711bcd7b28cfd1fbd9` |
+| `pcm-input.md` | PCM input contract | `b37e169dd5f51e90c1221fd13ee3f6780d92c8eb` |
+| `progressive-scheduling.md` | Progressive and adaptive scheduling model | `66459d5aa00a1e51df5a27ce6a8e993549a2fa15` |
+| `waveform.md` | Waveform model | `e5bdf3063ab18441ba43802be9991299fa609365` |
+| `tempo.md` | Tempo model | `bf572a69e9c1242ecd9ded4b8e64a8ee5cc803e5` |
+| `beatgrid.md` | Beatgrid model | `843b28a22c4cf995b2374cee8a25dae2ba478545` |
+| `lifecycle.md` | Analysis lifecycle | `5f3e92124016b876920e949954f762619b78e443` |
+| `confidence.md` | Confidence model | `538711a97dfd18fda6ee5e6203207ec6f7d1fbbf` |
+| `result-model.md` | Result and snapshot model | `2ad5d6809e640602f715d5bd6fb73741fc7a4b45` |
+| `container-v1-registry.md` | Container version 1 section registry | `8107c9c7e9638d34ffdf2d075f490c4ace2e7d03` |
+| `file-format.md` | `.apta` container format | `3aa2f41608310073e3db082117f6b3a4706c0a1e` |
+| `global-grid-container.md` | Global-grid and revision container sections | `33253d15128e0ffa81a3515592b750429e6a9277` |
+| `wovr-state-flags.md` | WOVR version-1 lifecycle-state flags | `a3377a2bd2bbc85c88d7981d8b141157d5ee8a37` |
+| `profiles.md` | Conformance profiles and resource classes | `c9358d7504cfb280be6edb39ebbe9546eb8e37d7` |
+| `extensions.md` | Extension model | `f62f69552e9aae7d27bceb1d869d376750a3efd1` |
+| `conformance.md` | Conformance model | `0c2f7f8d676f2569db01064f5e8c812e2fba9ff4` |
 
 ## 3. Change control
 
@@ -45,6 +46,7 @@ and conformance review under project governance. Editorial corrections may
 change hashes without changing the specification version only when they do not
 alter requirements.
 
-The `v1.0.0` tag freezes this manifest as the published APTA 1.0 authority.
-Later compatible corrections are published through the documented 1.x change
-process and never silently rewrite the tagged release.
+The `v1.0.0` tag remains the immutable first published APTA 1.0 authority.
+The `v1.0.1` tag publishes editorial revision 1 together with
+[`APTA-1.0-ERRATA-1.md`](APTA-1.0-ERRATA-1.md). The corrections do not alter
+normative semantics and never rewrite the tagged `v1.0.0` release.

@@ -1,6 +1,6 @@
 # PCM input contract
 
-**Status:** APTA 1.0 Release Candidate Draft
+**Status:** Final APTA 1.0
 
 ## 1. Scope
 

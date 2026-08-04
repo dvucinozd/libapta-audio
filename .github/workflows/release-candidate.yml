@@ -1,16 +1,6 @@
 name: APTA 1.0 release candidate (historical)
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/release-candidate.yml"
-      - "VERSION"
-      - "CHANGELOG.md"
-      - "SECURITY.md"
-      - "release/**"
-      - "specification/**"
   workflow_dispatch:
 
 permissions:

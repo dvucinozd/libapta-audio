@@ -1,8 +1,9 @@
 # libapta-audio governance
 
-`libapta-audio` is currently a maintainer-led open-source project. This model
-keeps decisions explicit while the APTA specification and reference
-implementation are still pre-1.0.
+`libapta-audio` is a maintainer-led open-source project. This model keeps
+specification, compatibility, security and release decisions explicit for the
+stable APTA 1.0 standard and the maintained `libapta` 1.x reference
+implementation.
 
 ## Roles
 
@@ -76,10 +77,11 @@ The specification version, C API version and `.apta` container/section versions
 are related but distinct. A release must identify all applicable versions and
 the validation evidence behind its claims.
 
-Before APTA 1.0, breaking changes are allowed when they are deliberate,
-documented and accompanied by migration guidance. After a stable 1.0 contract
-is declared, compatibility policy must be tightened and recorded before the
-release.
+APTA 1.0, the public API 1.x contract, shared-library `SOVERSION 1` and
+container version 1 are stable. Patch releases may correct defects, metadata and
+editorial errors without changing those contracts. Compatible additions require
+an explicit minor-release proposal and evidence. Incompatible API, ABI or wire
+changes require a new major version and migration guidance.
 
 Passing the repository's tests means that an implementation passed those
 specific checks. It does not by itself grant certification, trademark rights

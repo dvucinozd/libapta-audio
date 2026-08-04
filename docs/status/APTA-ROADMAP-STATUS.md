@@ -2,10 +2,12 @@
 
 - **Current completed stage:** S9 — APTA 1.0
 - **Stable specification:** APTA 1.0
-- **Stable public API/package:** 1.0.0
+- **Stable public API:** 1.0.0
+- **Maintained package:** 1.0.1
 - **Stable container:** version 1
 - **Stable shared ABI:** SOVERSION 1
-- **Release tag:** `v1.0.0`
+- **Current release tag:** `v1.0.1`
+- **First stable tag:** `v1.0.0` (immutable)
 - **License:** Apache-2.0
 
 ## Status summary
@@ -45,8 +47,9 @@ ILP32, sanitizer/fuzz, independent-fixture, ESP-IDF, package, conformance and
 interoperability gates.
 
 The P9 release verifier permits only version-bound and publication changes from
-that accepted candidate. The final release workflow regenerates deterministic
-Linux and Windows package evidence and publishes the `v1.0.0` assets.
+that accepted candidate. The stable release workflow regenerates deterministic Linux and Windows
+package evidence. `v1.0.1` publishes editorial errata and corrected release
+metadata without changing API/ABI, wire bytes or production DSP behavior.
 
 ## Known limitations
 
@@ -61,4 +64,5 @@ Linux and Windows package evidence and publishes the `v1.0.0` assets.
 
 APTA 1.1 planning is separate from the stable 1.0 release. New features,
 extensions or compatibility changes require their own roadmap, versioning and
-evidence. The `v1.0.0` tag remains immutable.
+evidence. The `v1.0.0` tag remains immutable; `v1.0.1` is the maintained
+coherence release.

@@ -1,6 +1,6 @@
 # WOVR version-1 lifecycle-state flags
 
-**Status:** APTA 1.0 Release Candidate Draft  
+**Status:** Final APTA 1.0  
 **Applies to:** `.apta` container version 1, `WOVR` section version 1
 
 ## 1. Purpose

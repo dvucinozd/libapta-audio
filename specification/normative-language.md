@@ -1,6 +1,6 @@
 # Normative language
 
-**Status:** APTA 1.0 Release Candidate Draft
+**Status:** Final APTA 1.0
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY** and **OPTIONAL** are normative requirement terms when written in uppercase.
 

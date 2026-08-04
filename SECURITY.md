@@ -8,7 +8,8 @@ APTA 1.0 is the current maintained stable release line.
 |---|---|
 | Current `main` branch | Supported |
 | Latest published `1.x` release | Supported |
-| `1.0.0` | Supported until superseded by a newer maintained 1.x release |
+| `1.0.1` | Supported |
+| `1.0.0` | Superseded; upgrade to the latest maintained 1.x release |
 | Release candidates, older commits and untagged snapshots | Not supported |
 | Historical `0.x` drafts | Not supported |
 

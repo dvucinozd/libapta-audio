@@ -42,9 +42,10 @@ if(NOT APTA_HEADER_PACKAGE_NUMERIC VERSION_EQUAL PROJECT_VERSION)
         "CMake project version (${PROJECT_VERSION}) and public package version "
         "(${APTA_HEADER_PACKAGE_NUMERIC}) disagree")
 endif()
-if(NOT APTA_HEADER_API_NUMERIC VERSION_EQUAL PROJECT_VERSION)
+if(NOT APTA_HEADER_API_MAJOR EQUAL PROJECT_VERSION_MAJOR OR
+   NOT APTA_HEADER_API_MINOR EQUAL PROJECT_VERSION_MINOR)
     message(FATAL_ERROR
-        "P2 requires package and API numeric versions to agree: "
+        "Package and API major/minor versions must agree: "
         "${PROJECT_VERSION} versus ${APTA_HEADER_API_NUMERIC}")
 endif()
 if(NOT APTA_HEADER_SPEC_MAJOR EQUAL 1 OR NOT APTA_HEADER_SPEC_MINOR EQUAL 0)

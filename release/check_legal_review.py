@@ -34,7 +34,7 @@ def main() -> int:
     if manifest.get("release_candidate") != (root / "VERSION").read_text(encoding="utf-8").strip(): failures.append("legal review release candidate does not match VERSION")
     if manifest.get("license_spdx") != "Apache-2.0": failures.append("release license is not Apache-2.0")
     if manifest.get("review_status") != "approved": failures.append("legal review is not approved")
-    if manifest.get("bundled_third_party_sources") != []: failures.append("bundled third-party source inventory must be empty for rc.1")
+    if manifest.get("bundled_third_party_sources") != []: failures.append("bundled third-party source inventory must be empty for the release")
 
     for item in manifest.get("reviewed_files", []):
         relative = item["path"]

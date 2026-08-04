@@ -195,8 +195,8 @@ The project maintains independent version domains:
 Compatibility in one domain MUST NOT be inferred from a number in another
 domain.
 
-The stable APTA 1.0 mapping is specification 1.0, API/package 1.0.0 and
-container version 1.
+The stable APTA 1.0 mapping is specification 1.0, package line 1.0.x,
+public API 1.0.0 and container version 1.
 
 ## 11. Document precedence
 

@@ -1,0 +1,77 @@
+{
+  "bundled_third_party_sources": [],
+  "decisions": [
+    "Core source and binary archives are distributed under Apache-2.0.",
+    "No third-party source tree is bundled in the 1.0.1 release archives.",
+    "Build and platform system dependencies retain their own upstream terms and are not redistributed by libapta.",
+    "No project-specific NOTICE payload has been identified for 1.0.1.",
+    "Release archives must contain LICENSE, VERSION and CHANGELOG.md."
+  ],
+  "license_spdx": "Apache-2.0",
+  "project_notice_required": false,
+  "release_candidate": "1.0.1",
+  "review_date": "2026-08-04",
+  "review_status": "approved",
+  "reviewed_files": [
+    {
+      "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+      "path": "LICENSE",
+      "required_fragments": [
+        "Apache License",
+        "Version 2.0, January 2004"
+      ]
+    },
+    {
+      "git_blob_sha1": "2398d5a5aa6c038ec6103201d4059cf8b0358dec",
+      "path": "SECURITY.md",
+      "required_fragments": [
+        "APTA 1.0 is the current maintained stable release line",
+        "| `1.0.1` | Supported |",
+        "Report a vulnerability privately"
+      ]
+    },
+    {
+      "git_blob_sha1": "0cc9e2450065f983b02bad5176f29df43a2a0c3a",
+      "path": "CHANGELOG.md",
+      "required_fragments": [
+        "## [1.0.1] - 2026-08-04",
+        "### Security and licensing",
+        "Apache License 2.0"
+      ]
+    },
+    {
+      "git_blob_sha1": "f03ea18d33e9d8c0e614ea0ebcf9349242b3ff34",
+      "path": "cmake/APTAPackaging.cmake",
+      "required_fragments": [
+        "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE",
+        "licenses/libapta"
+      ]
+    },
+    {
+      "git_blob_sha1": "f779fa11b59e0aced01e27f006bb781cc8adae7e",
+      "path": "tests/package/check_archives.cmake.in",
+      "required_fragments": [
+        "VERSION CHANGELOG.md LICENSE APTAConfig.cmake libapta.pc",
+        "VERSION CHANGELOG.md LICENSE CMakeLists.txt"
+      ]
+    },
+    {
+      "git_blob_sha1": "4f651fc27080fcd5556b8e54592024aa8df1af15",
+      "path": "release/release-notes-1.0.1.md",
+      "required_fragments": [
+        "APTA 1.0.1",
+        "Apache-2.0",
+        "Known limitations"
+      ]
+    }
+  ],
+  "schema": "apta-legal-review-1",
+  "scope": "repository and generated stable maintenance-release package license audit; not legal advice",
+  "system_dependencies": [
+    "ISO C runtime",
+    "platform threading runtime",
+    "libm on static Unix consumers",
+    "Windows system libraries",
+    "ESP-IDF framework supplied by the integrator"
+  ]
+}

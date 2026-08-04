@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 cmake_minimum_required(VERSION 3.16)
-project(APTAConformance VERSION 1.0.0 LANGUAGES C)
+project(APTAConformance VERSION 1.0.1 LANGUAGES C)
 
 find_package(APTA 1.0 CONFIG REQUIRED)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)

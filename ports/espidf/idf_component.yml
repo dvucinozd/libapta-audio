@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-version: "0.1.0"
+version: "1.0.1"
 description: "ESP-IDF port for libapta-audio"
 url: "https://github.com/dvucinozd/libapta-audio"
 dependencies:

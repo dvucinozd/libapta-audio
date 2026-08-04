@@ -2,6 +2,35 @@
 
 All notable changes to libapta-audio are documented in this file.
 
+## [1.0.1] - 2026-08-04
+
+### Corrected
+
+- aligned current normative component status labels, API/package documentation,
+  governance and contribution guidance with the final APTA 1.0 contract;
+- published APTA 1.0 errata 1 and refreshed the normative Git-blob manifest for
+  the editorially corrected document set;
+- corrected public conformance-suite and ESP-IDF component release metadata;
+- replaced the one-off 1.0.0 publication workflow with a version-derived stable
+  maintenance-release workflow.
+
+### Compatibility boundary
+
+- package version: `1.0.1`;
+- public API version: `1.0.0`;
+- specification version: stable `1.0`;
+- container version: stable `1`;
+- shared-library ABI: `SOVERSION 1`;
+- no public symbol, structure layout, canonical fixture, wire rule, parser/writer
+  behavior or production DSP contract changed;
+- the `v1.0.0` tag and its original evidence remain immutable.
+
+### Security and licensing
+
+- `1.0.1` supersedes `1.0.0` as the maintained release;
+- licensing remains Apache License 2.0 with no bundled third-party source tree
+  and no project-specific NOTICE payload.
+
 ## [1.0.0] - 2026-08-04
 
 ### Finalized

@@ -1,6 +1,6 @@
 # Result and snapshot model
 
-**Status:** APTA 1.0 Release Candidate Draft
+**Status:** Final APTA 1.0
 
 ## 1. Immutable generations
 

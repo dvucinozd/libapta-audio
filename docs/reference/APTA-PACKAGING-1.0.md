@@ -1,7 +1,8 @@
 # APTA 1.0 package contract
 
-**Status:** release-candidate package contract  
-**Package version:** 1.0.0-rc.1  
+**Status:** Stable 1.x package contract  
+**Package line:** 1.0.x  
+**Public API:** 1.0.0  
 **Public CMake target:** `apta::core`
 
 ## Scope
@@ -9,7 +10,7 @@
 The installable 1.0 package contains the portable APTA core, its public headers,
 CMake package metadata, pkg-config metadata and the Apache-2.0 license. Native
 file adapters, the WAV reference decoder and command-line tools remain source
-components in this release-candidate package and are not exported as stable
+components in the stable core package and are not exported as stable
 package components.
 
 The package never exports internal sanitizer, profiling, fuzzing or C11-atomics
@@ -55,7 +56,7 @@ target_link_libraries(consumer PRIVATE apta::core)
 
 `APTAConfig.cmake` also exposes:
 
-- `APTA_VERSION_FULL`, including the release-candidate suffix;
+- `APTA_VERSION_FULL`, containing the complete package version;
 - `APTA_SHARED_PACKAGE`, indicating whether the installation is shared;
 - `APTA_RUNTIME_DIR`, the installed runtime-library directory.
 
@@ -86,8 +87,8 @@ share/licenses/libapta/LICENSE
 
 Unix static builds install `lib/libapta.a`. Unix shared builds install the
 unversioned linker name, the ABI-major soname and the full-version library.
-The 1.x ABI policy is `SOVERSION 1`; the current full filename version is
-`1.0.0` while the package metadata retains `1.0.0-rc.1`.
+The 1.x ABI policy is `SOVERSION 1`; the full library filename and package
+metadata use the current `1.0.x` release version.
 
 Windows static builds install `lib/apta.lib`. Windows shared builds install
 `bin/apta.dll` and the import library `lib/apta.lib`. No debug postfix is part

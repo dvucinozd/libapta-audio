@@ -6,10 +6,11 @@ from pathlib import Path
 
 
 def files(root: Path) -> dict[str, bytes]:
-    """Return only the frozen core headers directly below include/apta."""
+    """Return frozen ABI headers; package-version metadata is checked separately."""
     return {
         path.name: path.read_bytes()
         for path in sorted(root.glob("*.h"))
+        if path.name != "apta_version.h"
     }
 
 
