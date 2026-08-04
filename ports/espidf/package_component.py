@@ -73,7 +73,6 @@ def copy_tree(source: Path, destination: Path) -> None:
         copy_file(path, destination / relative)
 
 
-
 def rewrite_component_cmake(component_root: Path) -> None:
     cmake = component_root / "CMakeLists.txt"
     text = cmake.read_text(encoding="utf-8")
@@ -86,6 +85,7 @@ def rewrite_component_cmake(component_root: Path) -> None:
         encoding="utf-8",
         newline="\n",
     )
+
 
 def rewrite_example_for_package(example_root: Path, version: str) -> None:
     cmake = example_root / "CMakeLists.txt"
@@ -109,6 +109,25 @@ def rewrite_example_for_package(example_root: Path, version: str) -> None:
         f"  {COMPONENT_NAME}:\n"
         f"    version: \"^{version}\"\n"
         "    override_path: \"../../..\"\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    main_cmake = example_root / "main" / "CMakeLists.txt"
+    main_cmake_text = main_cmake.read_text(encoding="utf-8")
+    monorepo_requirement = "REQUIRES espidf esp_timer heap log"
+    packaged_requirement = f"REQUIRES {COMPONENT_NAME} esp_timer heap log"
+    if main_cmake_text.count(monorepo_requirement) != 1:
+        fail("packaged example component requirement marker is missing or ambiguous")
+    rewritten_main_cmake = main_cmake_text.replace(
+        monorepo_requirement,
+        packaged_requirement,
+        1,
+    )
+    if "REQUIRES espidf" in rewritten_main_cmake:
+        fail("packaged example still requires the monorepo component name")
+    main_cmake.write_text(
+        rewritten_main_cmake,
         encoding="utf-8",
         newline="\n",
     )
