@@ -23,9 +23,19 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
+
+      - name: Verify immutable workflow references
+        run: >-
+          python3 security/automation/check_workflow_pins.py
+          --root .
+          --output build/security/action-pins.json
+
+      - name: Test deterministic SPDX generator
+        run: python3 release/test_spdx_sbom.py
 
       - name: Configure
         run: >-
@@ -67,7 +77,7 @@ jobs:
 
       - name: Upload Linux conformance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: apta-conformance-linux-attempt-${{ github.run_attempt }}
           path: |
@@ -82,9 +92,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
 
       - name: Configure
         run: >-
@@ -134,7 +145,7 @@ jobs:
 
       - name: Upload Windows conformance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: apta-conformance-windows-attempt-${{ github.run_attempt }}
           path: |
@@ -149,9 +160,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
 
       - name: Install multilib toolchain
         run: sudo apt-get update && sudo apt-get install -y g++-multilib
@@ -177,7 +189,7 @@ jobs:
 
       - name: Upload ILP32 conformance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: apta-conformance-ilp32-attempt-${{ github.run_attempt }}
           path: build-32/conformance-reports/*.json
@@ -196,9 +208,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
 
       - name: Configure sanitized parser build
         run: >-
@@ -265,7 +278,7 @@ jobs:
 
       - name: Upload P7 security evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: apta-security-campaign-attempt-${{ github.run_attempt }}
           path: |

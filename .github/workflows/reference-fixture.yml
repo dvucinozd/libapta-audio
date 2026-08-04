@@ -47,9 +47,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
 
       - name: Verify normative manifest blob hashes
         run: python3 tests/spec/check_normative_manifest.py
