@@ -1,22 +1,21 @@
 # APTA specification
 
-This directory contains the normative Adaptive Progressive Track Analysis 1.0
-release-candidate document set. Start with
-[`APTA-SPEC.md`](APTA-SPEC.md) and verify the exact candidate files through
+This directory contains the final normative Adaptive Progressive Track
+Analysis 1.0 document set. Start with
+[`APTA-SPEC.md`](APTA-SPEC.md) and verify the exact published files through
 [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md).
 
-The release-candidate label does not authorise a final APTA 1.0 claim. Final
-publication requires completion of the Stage S9 container, conformance,
-interoperability, security and packaging gates.
+The governance-approved `v1.0.0` tag pins the stable APTA 1.0 specification,
+public API/package 1.0.0 and container version 1 release boundary.
 
 Normative documents use RFC 2119/8174-style requirement terms such as MUST,
 MUST NOT, SHOULD, SHOULD NOT and MAY.
 
-Normative candidate documents:
+Normative documents:
 
 - [`APTA-SPEC.md`](APTA-SPEC.md) — master scope, precedence and version domains.
 - [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md) — exact
-  candidate paths and repository blob hashes.
+  paths and repository blob hashes.
 - [`normative-language.md`](normative-language.md)
 - [`terminology.md`](terminology.md)
 - [`time-model.md`](time-model.md)
@@ -47,6 +46,6 @@ defines that material across PCM input, progressive scheduling, lifecycle and
 result-model documents.
 
 The specification is distributed under the repository's
-[Apache License 2.0](../LICENSE). Proposed normative changes follow
+[Apache License 2.0](../LICENSE). Normative changes follow
 [`../CONTRIBUTING.md`](../CONTRIBUTING.md) and the decision process in
 [`../GOVERNANCE.md`](../GOVERNANCE.md).
