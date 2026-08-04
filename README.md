@@ -1,5 +1,9 @@
 # libapta-audio
 
+<p align="center">
+  <img src="docs/assets/libapta-audio-logo.svg" alt="libapta-audio — Adaptive Progressive Track Analysis" width="760">
+</p>
+
 [![CI](https://github.com/dvucinozd/libapta-audio/actions/workflows/ci.yml/badge.svg)](https://github.com/dvucinozd/libapta-audio/actions/workflows/ci.yml)
 [![ESP-IDF](https://github.com/dvucinozd/libapta-audio/actions/workflows/espidf.yml/badge.svg)](https://github.com/dvucinozd/libapta-audio/actions/workflows/espidf.yml)
 [![Latest release](https://img.shields.io/github/v/release/dvucinozd/libapta-audio)](https://github.com/dvucinozd/libapta-audio/releases/latest)
