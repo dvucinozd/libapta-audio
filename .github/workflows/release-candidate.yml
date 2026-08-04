@@ -1,0 +1,194 @@
+name: APTA 1.0 release candidate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/release-candidate.yml"
+      - "VERSION"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - "SECURITY.md"
+      - "release/**"
+      - "specification/**"
+      - "abi/**"
+      - "conformance/**"
+      - "interoperability/**"
+      - "security/**"
+      - "tests/fixtures/**"
+      - "tests/fuzz/**"
+      - "docs/status/S9-P8-RC-FREEZE.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/release-candidate.yml"
+      - "VERSION"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - "SECURITY.md"
+      - "release/**"
+      - "specification/**"
+      - "abi/**"
+      - "conformance/**"
+      - "interoperability/**"
+      - "security/**"
+      - "tests/fixtures/**"
+      - "tests/fuzz/**"
+      - "docs/status/S9-P8-RC-FREEZE.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rc-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+  APTA_RC_VERSION: 1.0.0-rc.1
+
+jobs:
+  freeze:
+    name: Freeze, blocker and legal review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact RC revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+          fetch-depth: 0
+      - name: Verify frozen release contracts
+        run: >-
+          python3 release/check_rc_freeze.py
+          --root .
+          --manifest release/rc-freeze-v1.json
+          --source-revision "${APTA_SOURCE_REVISION}"
+          --output rc-reports/rc-freeze-report.json
+      - name: Verify legal and license review
+        run: >-
+          python3 release/check_legal_review.py
+          --root .
+          --manifest release/legal-review-v1.json
+          --source-revision "${APTA_SOURCE_REVISION}"
+          --output rc-reports/legal-review-report.json
+      - name: Upload freeze evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-rc-freeze-attempt-${{ github.run_attempt }}
+          path: rc-reports/*.json
+          if-no-files-found: error
+          retention-days: 180
+
+  linux-packages:
+    name: Linux reproducible RC packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact RC revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+      - name: Configure and build static package
+        run: |
+          cmake -S . -B build-static \
+            -DAPTA_BUILD_TESTS=ON \
+            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
+            -DAPTA_BUILD_TOOLS=OFF \
+            -DAPTA_WARNINGS_AS_ERRORS=ON \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-static --parallel 2
+      - name: Validate static package and create archives
+        run: >-
+          ctest --test-dir build-static
+          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
+          --timeout 900
+          --output-on-failure
+      - name: Configure and build shared package
+        run: |
+          cmake -S . -B build-shared \
+            -DBUILD_SHARED_LIBS=ON \
+            -DAPTA_BUILD_TESTS=ON \
+            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
+            -DAPTA_BUILD_TOOLS=OFF \
+            -DAPTA_WARNINGS_AS_ERRORS=ON \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-shared --parallel 2
+      - name: Validate shared package and create archives
+        run: >-
+          ctest --test-dir build-shared
+          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
+          --timeout 900
+          --output-on-failure
+      - name: Stage and verify RC archives
+        run: |
+          mkdir -p rc-artifacts/binary-static rc-artifacts/binary-shared rc-artifacts/source
+          cp build-static/package-archive-test/binary-a/* rc-artifacts/binary-static/
+          cp build-shared/package-archive-test/binary-a/* rc-artifacts/binary-shared/
+          cp build-static/package-archive-test/source-a/* rc-artifacts/source/
+          python3 release/generate_artifact_manifest.py \
+            --root rc-artifacts \
+            --source-revision "${APTA_SOURCE_REVISION}" \
+            --platform linux-x86_64 \
+            --version "${APTA_RC_VERSION}" \
+            --output rc-artifacts/apta-rc-linux-manifest.json
+      - name: Upload Linux RC packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-rc-linux-attempt-${{ github.run_attempt }}
+          path: rc-artifacts/**
+          if-no-files-found: error
+          retention-days: 180
+
+  windows-packages:
+    name: Windows reproducible RC packages
+    runs-on: windows-latest
+    steps:
+      - name: Check out exact RC revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+      - name: Configure and build static package
+        run: |
+          cmake -S . -B build-static -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
+          cmake --build build-static --config Release --parallel 2
+      - name: Validate static package and create archives
+        run: >-
+          ctest --test-dir build-static -C Release
+          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
+          --timeout 900
+          --output-on-failure
+      - name: Configure and build shared package
+        run: |
+          cmake -S . -B build-shared -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
+          cmake --build build-shared --config Release --parallel 2
+      - name: Validate shared package and create archives
+        run: >-
+          ctest --test-dir build-shared -C Release
+          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
+          --timeout 900
+          --output-on-failure
+      - name: Stage and verify RC archives
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force rc-artifacts/binary-static | Out-Null
+          New-Item -ItemType Directory -Force rc-artifacts/binary-shared | Out-Null
+          New-Item -ItemType Directory -Force rc-artifacts/source | Out-Null
+          Copy-Item build-static/package-archive-test/binary-a/* rc-artifacts/binary-static/
+          Copy-Item build-shared/package-archive-test/binary-a/* rc-artifacts/binary-shared/
+          Copy-Item build-static/package-archive-test/source-a/* rc-artifacts/source/
+          python release/generate_artifact_manifest.py `
+            --root rc-artifacts `
+            --source-revision "$env:APTA_SOURCE_REVISION" `
+            --platform windows-x86_64 `
+            --version "$env:APTA_RC_VERSION" `
+            --output rc-artifacts/apta-rc-windows-manifest.json
+      - name: Upload Windows RC packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: apta-rc-windows-attempt-${{ github.run_attempt }}
+          path: rc-artifacts/**
+          if-no-files-found: error
+          retention-days: 180
