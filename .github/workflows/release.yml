@@ -143,9 +143,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-artifacts
-          find build-static/package-archive-test/binary-a -maxdepth 1 -type f -exec cp {} release-artifacts/ \;
-          find build-static/package-archive-test/source-a -maxdepth 1 -type f -exec cp {} release-artifacts/ \;
-          find build-shared-package/repro-a -maxdepth 1 -type f -exec cp {} release-artifacts/ \;
+          while IFS= read -r -d '' file; do
+            cp "${file}" "release-artifacts/linux-static-$(basename "${file}")"
+          done < <(find build-static/package-archive-test/binary-a -maxdepth 1 -type f -print0)
+          while IFS= read -r -d '' file; do
+            cp "${file}" "release-artifacts/linux-source-$(basename "${file}")"
+          done < <(find build-static/package-archive-test/source-a -maxdepth 1 -type f -print0)
+          while IFS= read -r -d '' file; do
+            cp "${file}" "release-artifacts/linux-shared-$(basename "${file}")"
+          done < <(find build-shared-package/repro-a -maxdepth 1 -type f -print0)
           evidence="apta-${APTA_RELEASE_VERSION}-linux-conformance-evidence.zip"
           python3 - "release-artifacts/${evidence}" <<'PY'
           from pathlib import Path
