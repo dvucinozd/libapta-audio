@@ -15,6 +15,7 @@ on:
       - "tests/unit/external_fixture.c"
       - "tests/unit/container_v1_conformance.c"
       - "tests/unit/container_v1_conformance.parts/**"
+      - "release/**"
   pull_request:
     paths:
       - ".github/workflows/reference-fixture.yml"
@@ -27,6 +28,7 @@ on:
       - "tests/unit/external_fixture.c"
       - "tests/unit/container_v1_conformance.c"
       - "tests/unit/container_v1_conformance.parts/**"
+      - "release/**"
 
 permissions:
   contents: read
