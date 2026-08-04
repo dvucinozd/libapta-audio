@@ -1,0 +1,19 @@
+{
+  "schema": "apta-legal-review-1",
+  "release_candidate": "1.0.0-rc.1",
+  "review_date": "2026-08-04",
+  "review_status": "approved",
+  "scope": "repository and generated release-package license audit; not legal advice",
+  "license_spdx": "Apache-2.0",
+  "project_notice_required": false,
+  "bundled_third_party_sources": [],
+  "system_dependencies": ["ISO C runtime", "platform threading runtime", "libm on static Unix consumers", "Windows system libraries", "ESP-IDF framework supplied by the integrator"],
+  "reviewed_files": [
+    {"path": "LICENSE", "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64", "required_fragments": ["Apache License", "Version 2.0, January 2004"]},
+    {"path": "SECURITY.md", "git_blob_sha1": "e9206a6a266e8bcc5db089d93a59a5f98e41c211", "required_fragments": ["Current `1.0.0-rc.x` release candidate", "Report a vulnerability privately"]},
+    {"path": "CHANGELOG.md", "git_blob_sha1": "574dd965d04c6997d57b2013c74ae16326bad9b3", "required_fragments": ["### Security and licensing", "Apache License 2.0"]},
+    {"path": "cmake/APTAPackaging.cmake", "git_blob_sha1": "f03ea18d33e9d8c0e614ea0ebcf9349242b3ff34", "required_fragments": ["${CMAKE_CURRENT_SOURCE_DIR}/LICENSE", "licenses/libapta"]},
+    {"path": "tests/package/check_archives.cmake.in", "git_blob_sha1": "f779fa11b59e0aced01e27f006bb781cc8adae7e", "required_fragments": ["VERSION CHANGELOG.md LICENSE APTAConfig.cmake libapta.pc", "VERSION CHANGELOG.md LICENSE CMakeLists.txt"]}
+  ],
+  "decisions": ["Core source and binary archives are distributed under Apache-2.0.", "No third-party source tree is bundled in the release archives.", "Build and platform system dependencies retain their own upstream terms and are not redistributed by libapta.", "No project-specific NOTICE payload has been identified for rc.1.", "Release archives must contain LICENSE, VERSION and CHANGELOG.md."]
+}
