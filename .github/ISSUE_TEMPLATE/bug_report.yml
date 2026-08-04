@@ -1,0 +1,68 @@
+name: Library bug report
+description: Report a reproducible defect in libapta, packaging, tools or a supported port.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not report security vulnerabilities here. Use private vulnerability reporting."
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "1.0.1 or full commit SHA"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Portable core API
+        - Waveform analysis
+        - Tempo or beatgrid analysis
+        - Container parser or writer
+        - CMake or package installation
+        - Desktop tools or adapters
+        - ESP-IDF integration
+        - Windows integration
+        - Conformance or interoperability
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, architecture, compiler/toolchain, CMake or ESP-IDF version and relevant build options.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Exact commands and the smallest code or fixture that reproduces the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Include status codes, logs and sanitizer output when available.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues and release notes.
+          required: true
+        - label: This report does not disclose a security vulnerability or sensitive audio/data.
+          required: true

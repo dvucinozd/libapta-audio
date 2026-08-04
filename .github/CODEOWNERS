@@ -1,0 +1,9 @@
+# Default maintainer review
+* @dvucinozd
+
+# Stable public contracts and release material
+/include/apta/ @dvucinozd
+/specification/ @dvucinozd
+/abi/ @dvucinozd
+/release/ @dvucinozd
+/.github/workflows/ @dvucinozd

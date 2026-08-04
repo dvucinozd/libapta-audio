@@ -12,6 +12,7 @@ project governance and release process.
 
 ## Before you start
 
+- Read [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) and [`SUPPORT.md`](SUPPORT.md).
 - Search existing issues and pull requests before opening a duplicate.
 - Open an issue before substantial, breaking or normative work so the scope and
   compatibility impact can be agreed first.
@@ -142,4 +143,5 @@ license. The project does not currently require a separate Contributor License
 Agreement.
 
 Project decision-making and maintainer responsibilities are documented in
-[`GOVERNANCE.md`](GOVERNANCE.md).
+[`GOVERNANCE.md`](GOVERNANCE.md). The pull-request template records compatibility,
+validation, documentation and release impact for every proposed change.

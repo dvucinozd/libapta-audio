@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use libapta-audio or the APTA specification, please cite this software."
+title: "libapta-audio: Adaptive Progressive Track Analysis"
+type: software
+authors:
+  - family-names: "Vučinović"
+    given-names: "Daniel"
+repository-code: "https://github.com/dvucinozd/libapta-audio"
+url: "https://github.com/dvucinozd/libapta-audio"
+version: "1.0.1"
+date-released: "2026-08-04"
+license: Apache-2.0
+keywords:
+  - audio analysis
+  - waveform
+  - tempo detection
+  - beatgrid
+  - embedded systems
+  - ESP-IDF
+  - ISO C11

@@ -1,0 +1,33 @@
+name: Support or integration question
+description: Ask a reproducible API, build, packaging or platform-integration question.
+title: "support: "
+labels: [question]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "1.0.1 or full commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Integration goal
+      description: What are you building and which APTA result or capability do you need?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and configuration
+      description: Platform, toolchain, build options, sample format and input mode.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried
+      description: Include minimal code, commands and the exact result or error.
+    validations:
+      required: true
