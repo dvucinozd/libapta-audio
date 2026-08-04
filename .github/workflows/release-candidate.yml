@@ -151,9 +151,12 @@ jobs:
       - name: Stage and verify RC archives
         run: |
           mkdir -p rc-artifacts/binary-static rc-artifacts/binary-shared rc-artifacts/source
-          cp build-static/package-archive-test/binary-a/* rc-artifacts/binary-static/
-          cp build-shared-package/rc-a/* rc-artifacts/binary-shared/
-          cp build-static/package-archive-test/source-a/* rc-artifacts/source/
+          find build-static/package-archive-test/binary-a -maxdepth 1 -type f \
+            -exec cp {} rc-artifacts/binary-static/ \;
+          find build-shared-package/rc-a -maxdepth 1 -type f \
+            -exec cp {} rc-artifacts/binary-shared/ \;
+          find build-static/package-archive-test/source-a -maxdepth 1 -type f \
+            -exec cp {} rc-artifacts/source/ \;
           python3 release/generate_artifact_manifest.py \
             --root rc-artifacts \
             --source-revision "${APTA_SOURCE_REVISION}" \
