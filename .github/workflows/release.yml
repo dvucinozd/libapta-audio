@@ -160,15 +160,15 @@ jobs:
           set -euo pipefail
           mkdir -p release-artifacts
 
-          for file in build-static/package-archive-test/binary-a/*; do
+          while IFS= read -r -d '' file; do
             cp "${file}" "release-artifacts/linux-static-$(basename "${file}")"
-          done
-          for file in build-shared-package/final-a/*; do
+          done < <(find build-static/package-archive-test/binary-a -maxdepth 1 -type f -print0)
+          while IFS= read -r -d '' file; do
             cp "${file}" "release-artifacts/linux-shared-$(basename "${file}")"
-          done
-          for file in build-static/package-archive-test/source-a/*; do
+          done < <(find build-shared-package/final-a -maxdepth 1 -type f -print0)
+          while IFS= read -r -d '' file; do
             cp "${file}" "release-artifacts/source-$(basename "${file}")"
-          done
+          done < <(find build-static/package-archive-test/source-a -maxdepth 1 -type f -print0)
 
           python3 - <<'PY'
           from pathlib import Path
