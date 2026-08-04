@@ -117,14 +117,14 @@ jobs:
             --target "${{ matrix.target }}" \
             --toolchain-image "${{ matrix.image }}" \
             --source-revision "${GITHUB_SHA}" \
-            --output "examples/espidf/cooperative_scheduler/${{ matrix.build_dir }}/apta-interchange-report.json"
+            --output "interchange-artifacts/${{ matrix.artifact }}/apta-interchange-report.json"
 
       - name: Upload ESP-IDF interchange evidence
         uses: actions/upload-artifact@v4
         with:
           name: apta-interchange-${{ matrix.artifact }}-attempt-${{ github.run_attempt }}
           path: |
-            examples/espidf/cooperative_scheduler/${{ matrix.build_dir }}/apta-interchange-report.json
+            interchange-artifacts/${{ matrix.artifact }}/apta-interchange-report.json
             examples/espidf/cooperative_scheduler/${{ matrix.build_dir }}/apta_cooperative_scheduler.bin
           if-no-files-found: error
           retention-days: 30

@@ -23,5 +23,9 @@ endforeach()
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(apta_interchange_bridge PRIVATE -Wall -Wextra -Wpedantic -Werror)
 elseif(MSVC)
+    target_compile_definitions(
+        apta_interchange_bridge
+        PRIVATE
+            _CRT_SECURE_NO_WARNINGS)
     target_compile_options(apta_interchange_bridge PRIVATE /W4 /WX)
 endif()
