@@ -43,3 +43,5 @@ named by each document. They do not override the current release status.
 - [`P10-1.0.1-COHERENCE.md`](P10-1.0.1-COHERENCE.md) — maintained documentation, metadata and release-automation coherence patch.
 
 - [`P11-REPOSITORY-UX.md`](P11-REPOSITORY-UX.md) — public examples, quick-start documentation and contributor onboarding.
+
+- [`P12-SECURITY-DOCUMENTATION.md`](P12-SECURITY-DOCUMENTATION.md) — security automation, immutable workflow dependencies and future release provenance.

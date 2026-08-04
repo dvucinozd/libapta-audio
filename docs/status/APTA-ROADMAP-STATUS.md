@@ -30,6 +30,9 @@
 - **P10:** complete — APTA 1.0.1 documentation and release coherence.
 - **P11:** complete — quick-start examples, repository UX and contributor
   onboarding without changing the stable contracts.
+- **P12:** source complete, owner setting pending — security automation,
+  immutable workflow dependencies and future release provenance are present;
+  GitHub dependency-graph activation is still required for the full review gate.
 
 ## APTA 1.0 claims
 

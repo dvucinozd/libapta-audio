@@ -103,3 +103,27 @@ service disruption, uses only systems and data the researcher is authorized
 to test, and provides reasonable time for remediation is welcomed. This
 statement does not authorize testing of third-party systems or data and is not
 a waiver of applicable law.
+
+## Automated security controls
+
+The repository runs CodeQL, the retained sanitizer/fuzz campaign and periodic
+OpenSSF Scorecard analysis. Pull-request dependency review is configured and
+becomes authoritative when the repository dependency graph is enabled. Until
+then, the workflow emits an explicit warning and runs only the narrower
+immutable-reference fallback. External
+GitHub Actions and literal CI container images are required to use immutable
+commit or digest references. Dependabot groups GitHub Actions updates into a
+single monthly review stream.
+
+The implementation and verification boundary is documented in
+[`docs/security/APTA-SUPPLY-CHAIN-SECURITY.md`](docs/security/APTA-SUPPLY-CHAIN-SECURITY.md).
+
+## Release provenance
+
+Stable releases produced after P12 include a deterministic SPDX 2.3 inventory,
+a consolidated `SHA256SUMS` file and GitHub artifact attestations. These
+materials establish byte integrity and build provenance; they do not replace
+the normative, ABI, conformance or interoperability evidence.
+
+The existing `v1.0.1` release predates P12. Its tag and assets remain immutable
+and are not retroactively replaced or attested.
