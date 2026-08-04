@@ -39,6 +39,9 @@ concurrency:
   group: espidf-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   profiles:
     name: Bounded embedded memory profiles
@@ -47,6 +50,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Build and run profiles
         run: |
@@ -92,6 +97,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Build component and example
         run: >-
@@ -118,7 +125,7 @@ jobs:
             --probe-source "examples/espidf/cooperative_scheduler/main/interchange_probe.c" \
             --target "${{ matrix.target }}" \
             --toolchain-image "${{ matrix.image }}" \
-            --source-revision "${GITHUB_SHA}" \
+            --source-revision "${APTA_SOURCE_REVISION}" \
             --output "interchange-artifacts/${{ matrix.artifact }}/apta-interchange-report.json"
 
       - name: Upload ESP-IDF interchange evidence
