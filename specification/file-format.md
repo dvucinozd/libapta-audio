@@ -1,6 +1,6 @@
 # `.apta` container format
 
-**Status:** APTA 1.0 Release Candidate Draft  
+**Status:** Final APTA 1.0  
 **Container version:** 1  
 **Profiles:** `APTA-WAVEFORM-1.0` and `APTA-CORE-ANALYSIS-1.0`
 

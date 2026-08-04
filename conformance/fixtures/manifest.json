@@ -1,6 +1,6 @@
 {
   "manifest_version": "apta-public-fixture-manifest-1",
-  "suite_version": "1.0.0-rc.1",
+  "suite_version": "1.0.1",
   "fixtures": [
     {
       "name": "reference-wovr-meta",

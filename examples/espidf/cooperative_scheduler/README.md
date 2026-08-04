@@ -95,7 +95,7 @@ v1.x board needs 5.5; the measured revision 1.3 board reports an accepted image
 range of v0.1 through v1.99. Flashing a 6.0.2 image to it would fail the image
 revision check.
 
-At API 0.3.0 with the Phase 7 cooperative refresh state, the measured
+With the APTA 1.0 API and the Phase 7 cooperative refresh state, the measured
 global-beatgrid configuration queries 603,504 bytes of workspace. It completes
 on the measured P4 both with internal memory only and with PSRAM enabled. The
 PSRAM-enabled placement was faster for this working set; neither result is a

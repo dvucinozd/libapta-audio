@@ -1,12 +1,10 @@
-name: APTA 1.0 release
+name: APTA stable release
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - ".github/workflows/release.yml"
-      - ".github/workflows/release-candidate.yml"
       - "VERSION"
       - "CHANGELOG.md"
       - "README.md"
@@ -14,19 +12,14 @@ on:
       - "include/apta/apta_version.h"
       - "release/**"
       - "specification/**"
-      - "abi/**"
       - "conformance/**"
-      - "interoperability/**"
-      - "security/**"
-      - "tests/fixtures/**"
-      - "tests/fuzz/**"
-      - "docs/status/**"
+      - "ports/espidf/idf_component.yml"
+      - "docs/**"
+      - "tests/CMakeLists.txt"
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - ".github/workflows/release.yml"
-      - ".github/workflows/release-candidate.yml"
       - "VERSION"
       - "CHANGELOG.md"
       - "README.md"
@@ -34,314 +27,238 @@ on:
       - "include/apta/apta_version.h"
       - "release/**"
       - "specification/**"
-      - "abi/**"
       - "conformance/**"
-      - "interoperability/**"
-      - "security/**"
-      - "tests/fixtures/**"
-      - "tests/fuzz/**"
-      - "docs/status/**"
+      - "ports/espidf/idf_component.yml"
+      - "docs/**"
+      - "tests/CMakeLists.txt"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: final-release-${{ github.workflow }}-${{ github.ref }}
+  group: stable-release-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
-  APTA_RELEASE_VERSION: 1.0.0
-  APTA_RELEASE_TAG: v1.0.0
 
 jobs:
-  finalize:
-    name: Final contract and legal verification
+  metadata:
+    name: Resolve release metadata
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      manifest: ${{ steps.release.outputs.manifest }}
+      legal_manifest: ${{ steps.release.outputs.legal_manifest }}
+      notes: ${{ steps.release.outputs.notes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+      - id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          manifest="release/maintenance-release-${version}.json"
+          legal_manifest="release/legal-review-${version}.json"
+          notes="release/release-notes-${version}.md"
+          test -f "${manifest}"
+          test -f "${legal_manifest}"
+          test -f "${notes}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${version}" >> "${GITHUB_OUTPUT}"
+          echo "manifest=${manifest}" >> "${GITHUB_OUTPUT}"
+          echo "legal_manifest=${legal_manifest}" >> "${GITHUB_OUTPUT}"
+          echo "notes=${notes}" >> "${GITHUB_OUTPUT}"
+
+  verify:
+    name: Maintenance and legal verification
+    needs: metadata
     runs-on: ubuntu-latest
     steps:
-      - name: Check out exact final revision
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
           fetch-depth: 0
-      - name: Verify final release boundary
+      - name: Verify maintenance boundary
         run: >-
-          python3 release/check_final_release.py
+          python3 release/check_maintenance_release.py
           --root .
-          --manifest release/final-release-v1.json
+          --manifest "${{ needs.metadata.outputs.manifest }}"
           --source-revision "${APTA_SOURCE_REVISION}"
-          --output final-reports/final-release-report.json
-      - name: Verify final legal and license review
+          --output release-reports/maintenance-release-report.json
+      - name: Verify legal and license review
         run: >-
           python3 release/check_legal_review.py
           --root .
-          --manifest release/legal-review-final-v1.json
+          --manifest "${{ needs.metadata.outputs.legal_manifest }}"
           --source-revision "${APTA_SOURCE_REVISION}"
-          --output final-reports/legal-review-report.json
-      - name: Upload final verification reports
-        if: always()
+          --output release-reports/legal-review-report.json
+      - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: apta-1.0.0-final-reports
-          path: final-reports/*.json
+          name: apta-${{ needs.metadata.outputs.version }}-release-reports
+          path: release-reports/*.json
           if-no-files-found: error
           retention-days: 365
 
   linux-packages:
-    name: Linux deterministic final packages
-    needs: finalize
+    name: Linux deterministic packages
+    needs: [metadata, verify]
     runs-on: ubuntu-latest
+    env:
+      APTA_RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
     steps:
-      - name: Check out exact final revision
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
-      - name: Configure and build static package
+      - name: Build and validate static package
         run: |
-          cmake -S . -B build-static \
-            -DAPTA_BUILD_TESTS=ON \
-            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
-            -DAPTA_BUILD_TOOLS=OFF \
-            -DAPTA_WARNINGS_AS_ERRORS=ON \
-            -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build-static -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build-static --parallel 2
-      - name: Validate static package
-        run: >-
-          ctest --test-dir build-static
-          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
-          --timeout 900
-          --output-on-failure
-      - name: Configure and build shared test package
+          ctest --test-dir build-static -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$" --timeout 900 --output-on-failure
+      - name: Build and validate shared package
         run: |
-          cmake -S . -B build-shared \
-            -DBUILD_SHARED_LIBS=ON \
-            -DAPTA_BUILD_TESTS=ON \
-            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
-            -DAPTA_BUILD_TOOLS=OFF \
-            -DAPTA_WARNINGS_AS_ERRORS=ON \
-            -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-shared \
-            --target apta_core apta_abi_layout_manifest apta_compat_1_0_client \
-            --parallel 2
-      - name: Validate shared installed package
-        run: >-
-          ctest --test-dir build-shared
-          -R "^(apta\.package\.build_tree|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
-          --timeout 900
-          --output-on-failure
-      - name: Build reproducible shared package archives
+          cmake -S . -B build-shared -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-shared --target apta_core apta_abi_layout_manifest apta_compat_1_0_client --parallel 2
+          ctest --test-dir build-shared -R "^(apta\.package\.build_tree|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$" --timeout 900 --output-on-failure
+      - name: Build reproducible shared archives
         run: |
-          cmake -S . -B build-shared-package \
-            -DBUILD_SHARED_LIBS=ON \
-            -DAPTA_BUILD_TESTS=OFF \
-            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
-            -DAPTA_BUILD_TOOLS=OFF \
-            -DAPTA_WARNINGS_AS_ERRORS=ON \
-            -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build-shared-package -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=OFF -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build-shared-package --parallel 2
-          mkdir -p build-shared-package/final-a build-shared-package/final-b
-          SOURCE_DATE_EPOCH=1767225600 cpack \
-            --config build-shared-package/CPackConfig.cmake \
-            -B build-shared-package/final-a
-          SOURCE_DATE_EPOCH=1767225600 cpack \
-            --config build-shared-package/CPackConfig.cmake \
-            -B build-shared-package/final-b
-          mapfile -t archives_a < <(find build-shared-package/final-a -maxdepth 1 -type f -name '*.tar.gz' | sort)
-          mapfile -t archives_b < <(find build-shared-package/final-b -maxdepth 1 -type f -name '*.tar.gz' | sort)
-          test "${#archives_a[@]}" -eq 1
-          test "${#archives_b[@]}" -eq 1
-          test "$(sha256sum "${archives_a[0]}" | cut -d' ' -f1)" = \
-               "$(sha256sum "${archives_b[0]}" | cut -d' ' -f1)"
-          test -s "${archives_a[0]}.sha256"
-      - name: Stage final archives and evidence
+          mkdir -p build-shared-package/repro-a build-shared-package/repro-b
+          SOURCE_DATE_EPOCH=1767225600 cpack --config build-shared-package/CPackConfig.cmake -B build-shared-package/repro-a
+          SOURCE_DATE_EPOCH=1767225600 cpack --config build-shared-package/CPackConfig.cmake -B build-shared-package/repro-b
+          mapfile -t a < <(find build-shared-package/repro-a -maxdepth 1 -type f -name '*.tar.gz' | sort)
+          mapfile -t b < <(find build-shared-package/repro-b -maxdepth 1 -type f -name '*.tar.gz' | sort)
+          test "${#a[@]}" -eq 1
+          test "${#b[@]}" -eq 1
+          test "$(sha256sum "${a[0]}" | cut -d' ' -f1)" = "$(sha256sum "${b[0]}" | cut -d' ' -f1)"
+      - name: Stage archives and evidence
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p release-artifacts
-
-          while IFS= read -r -d '' file; do
-            cp "${file}" "release-artifacts/linux-static-$(basename "${file}")"
-          done < <(find build-static/package-archive-test/binary-a -maxdepth 1 -type f -print0)
-          while IFS= read -r -d '' file; do
-            cp "${file}" "release-artifacts/linux-shared-$(basename "${file}")"
-          done < <(find build-shared-package/final-a -maxdepth 1 -type f -print0)
-          while IFS= read -r -d '' file; do
-            cp "${file}" "release-artifacts/source-$(basename "${file}")"
-          done < <(find build-static/package-archive-test/source-a -maxdepth 1 -type f -print0)
-
-          python3 - <<'PY'
+          find build-static/package-archive-test/binary-a -maxdepth 1 -type f -exec cp {} release-artifacts/ \\;
+          find build-static/package-archive-test/source-a -maxdepth 1 -type f -exec cp {} release-artifacts/ \\;
+          find build-shared-package/repro-a -maxdepth 1 -type f -exec cp {} release-artifacts/ \\;
+          evidence="apta-${APTA_RELEASE_VERSION}-linux-conformance-evidence.zip"
+          python3 - "release-artifacts/${evidence}" <<'PY'
           from pathlib import Path
+          from sys import argv
           from zipfile import ZIP_DEFLATED, ZipFile
-
-          output = Path("release-artifacts/apta-1.0.0-linux-conformance-evidence.zip")
           selected = []
           for root_name in ("build-static", "build-shared"):
-              root = Path(root_name)
-              for path in root.rglob("*.json"):
-                  lowered = path.as_posix().lower()
-                  if any(token in lowered for token in (
-                      "conformance", "interchange", "package", "abi"
-                  )):
+              for path in Path(root_name).rglob("*.json"):
+                  if any(token in path.as_posix().lower() for token in ("conformance", "interchange", "package", "abi")):
                       selected.append(path)
           if not selected:
-              raise SystemExit("no Linux final evidence JSON files were found")
-          with ZipFile(output, "w", compression=ZIP_DEFLATED) as archive:
+              raise SystemExit("no Linux evidence JSON files found")
+          with ZipFile(argv[1], "w", compression=ZIP_DEFLATED) as archive:
               for path in sorted(set(selected)):
                   archive.write(path, path.as_posix())
           PY
-          sha256sum release-artifacts/apta-1.0.0-linux-conformance-evidence.zip \
-            > release-artifacts/apta-1.0.0-linux-conformance-evidence.zip.sha256
-
-          python3 release/generate_final_artifact_manifest.py \
-            --root release-artifacts \
-            --source-revision "${APTA_SOURCE_REVISION}" \
-            --platform linux-x86_64 \
-            --version "${APTA_RELEASE_VERSION}" \
-            --minimum-archives 4 \
-            --output release-artifacts/apta-1.0.0-linux-manifest.json
-      - name: Upload Linux final packages
-        uses: actions/upload-artifact@v4
+          sha256sum "release-artifacts/${evidence}" > "release-artifacts/${evidence}.sha256"
+          python3 release/generate_final_artifact_manifest.py --root release-artifacts --source-revision "${APTA_SOURCE_REVISION}" --platform linux-x86_64 --version "${APTA_RELEASE_VERSION}" --minimum-archives 4 --output "release-artifacts/apta-${APTA_RELEASE_VERSION}-linux-manifest.json"
+      - uses: actions/upload-artifact@v4
         with:
-          name: apta-1.0.0-linux
+          name: apta-${{ needs.metadata.outputs.version }}-linux
           path: release-artifacts/**
           if-no-files-found: error
           retention-days: 365
 
   windows-packages:
-    name: Windows deterministic final packages
-    needs: finalize
+    name: Windows deterministic packages
+    needs: [metadata, verify]
     runs-on: windows-latest
+    env:
+      APTA_RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
     steps:
-      - name: Check out exact final revision
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
-      - name: Configure and build static package
+      - name: Build and validate static package
         run: |
           cmake -S . -B build-static -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
           cmake --build build-static --config Release --parallel 2
-      - name: Validate static package
-        run: >-
-          ctest --test-dir build-static -C Release
-          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
-          --timeout 900
-          --output-on-failure
-      - name: Configure and build shared package
+          ctest --test-dir build-static -C Release -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$" --timeout 900 --output-on-failure
+      - name: Build and validate shared package
+        shell: pwsh
         run: |
           cmake -S . -B build-shared -DBUILD_SHARED_LIBS=ON -DAPTA_BUILD_TESTS=ON -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF -DAPTA_BUILD_TOOLS=OFF -DAPTA_WARNINGS_AS_ERRORS=ON
           cmake --build build-shared --config Release --target apta_core apta_abi_layout_manifest apta_compat_1_0_client --parallel 2
-      - name: Stage shared runtime beside test clients
-        shell: pwsh
-        run: |
           Copy-Item build-shared/Release/apta.dll build-shared/tests/Release/apta.dll -Force
-      - name: Validate shared package
-        run: >-
-          ctest --test-dir build-shared -C Release
-          -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$"
-          --timeout 900
-          --output-on-failure
-      - name: Stage final archives and evidence
+          ctest --test-dir build-shared -C Release -R "^(apta\.package\..*|apta\.abi\.package_install|apta\.conformance\.installed|apta\.interchange\.versioned)$" --timeout 900 --output-on-failure
+      - name: Stage archives and evidence
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force release-artifacts | Out-Null
-
-          Get-ChildItem build-static/package-archive-test/binary-a -File | ForEach-Object {
-            Copy-Item $_.FullName ("release-artifacts/windows-static-" + $_.Name)
-          }
-          Get-ChildItem build-shared/package-archive-test/binary-a -File | ForEach-Object {
-            Copy-Item $_.FullName ("release-artifacts/windows-shared-" + $_.Name)
-          }
-
-          $evidence = Get-ChildItem build-static,build-shared -Recurse -File -Filter *.json |
-            Where-Object { $_.FullName -match "conformance|interchange|package|abi" }
-          if (-not $evidence) {
-            throw "no Windows final evidence JSON files were found"
-          }
+          Get-ChildItem build-static/package-archive-test/binary-a -File | Copy-Item -Destination release-artifacts
+          Get-ChildItem build-static/package-archive-test/source-a -File | Copy-Item -Destination release-artifacts
+          Get-ChildItem build-shared/package-archive-test/binary-a -File | Copy-Item -Destination release-artifacts
+          $evidenceFiles = Get-ChildItem build-static,build-shared -Recurse -File -Filter *.json | Where-Object { $_.FullName -match "conformance|interchange|package|abi" }
+          if (-not $evidenceFiles) { throw "no Windows evidence JSON files found" }
           New-Item -ItemType Directory -Force evidence-json | Out-Null
           $index = 0
-          foreach ($file in $evidence) {
-            $index++
-            Copy-Item $file.FullName ("evidence-json/{0:D4}-{1}" -f $index, $file.Name)
-          }
-          Compress-Archive -Path evidence-json/* -DestinationPath release-artifacts/apta-1.0.0-windows-conformance-evidence.zip -Force
-          $digest = (Get-FileHash release-artifacts/apta-1.0.0-windows-conformance-evidence.zip -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$digest  apta-1.0.0-windows-conformance-evidence.zip" |
-            Set-Content release-artifacts/apta-1.0.0-windows-conformance-evidence.zip.sha256 -Encoding ascii
-
-          python release/generate_final_artifact_manifest.py `
-            --root release-artifacts `
-            --source-revision "$env:APTA_SOURCE_REVISION" `
-            --platform windows-x86_64 `
-            --version "$env:APTA_RELEASE_VERSION" `
-            --minimum-archives 3 `
-            --output release-artifacts/apta-1.0.0-windows-manifest.json
-      - name: Upload Windows final packages
-        uses: actions/upload-artifact@v4
+          foreach ($file in $evidenceFiles) { $index++; Copy-Item $file.FullName ("evidence-json/{0:D4}-{1}" -f $index, $file.Name) }
+          $evidence = "apta-$env:APTA_RELEASE_VERSION-windows-conformance-evidence.zip"
+          Compress-Archive -Path evidence-json/* -DestinationPath "release-artifacts/$evidence" -Force
+          $digest = (Get-FileHash "release-artifacts/$evidence" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$digest  $evidence" | Set-Content "release-artifacts/$evidence.sha256" -Encoding ascii
+          python release/generate_final_artifact_manifest.py --root release-artifacts --source-revision "$env:APTA_SOURCE_REVISION" --platform windows-x86_64 --version "$env:APTA_RELEASE_VERSION" --minimum-archives 3 --output "release-artifacts/apta-$env:APTA_RELEASE_VERSION-windows-manifest.json"
+      - uses: actions/upload-artifact@v4
         with:
-          name: apta-1.0.0-windows
+          name: apta-${{ needs.metadata.outputs.version }}-windows
           path: release-artifacts/**
           if-no-files-found: error
           retention-days: 365
 
   publish:
-    name: Tag and publish APTA 1.0.0
-    needs:
-      - finalize
-      - linux-packages
-      - windows-packages
+    name: Publish stable release
+    needs: [metadata, verify, linux-packages, windows-packages]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
+      APTA_RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
+      APTA_RELEASE_TAG: ${{ needs.metadata.outputs.tag }}
+      APTA_RELEASE_NOTES: ${{ needs.metadata.outputs.notes }}
     steps:
-      - name: Check out governance-approved release commit
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
           fetch-depth: 0
-      - name: Download final release assets
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          pattern: apta-1.0.0-*
+          pattern: apta-${{ needs.metadata.outputs.version }}-*
           path: publish-assets
           merge-multiple: true
       - name: Add release documents
-        shell: bash
         run: |
-          cp CHANGELOG.md publish-assets/CHANGELOG-1.0.0.md
-          cp specification/APTA-1.0-NORMATIVE-MANIFEST.md \
-            publish-assets/APTA-1.0-NORMATIVE-MANIFEST.md
-          cp release/release-notes-1.0.0.md \
-            publish-assets/release-notes-1.0.0.md
-      - name: Create governance-approved tag and GitHub release
+          cp CHANGELOG.md "publish-assets/CHANGELOG-${APTA_RELEASE_VERSION}.md"
+          cp specification/APTA-1.0-NORMATIVE-MANIFEST.md publish-assets/
+          cp specification/APTA-1.0-ERRATA-1.md publish-assets/
+          cp "${APTA_RELEASE_NOTES}" publish-assets/
+      - name: Create immutable tag and release
         shell: bash
         run: |
           set -euo pipefail
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/${APTA_RELEASE_TAG}" >/dev/null; then
+            echo "${APTA_RELEASE_TAG} already exists; publication is intentionally skipped"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch --tags --force
-
-          if git rev-parse -q --verify "refs/tags/${APTA_RELEASE_TAG}" >/dev/null; then
-            tag_commit="$(git rev-list -n 1 "${APTA_RELEASE_TAG}")"
-            test "${tag_commit}" = "${APTA_SOURCE_REVISION}"
-          else
-            git tag -a "${APTA_RELEASE_TAG}" "${APTA_SOURCE_REVISION}" \
-              -m "APTA ${APTA_RELEASE_VERSION}"
-            git push origin "refs/tags/${APTA_RELEASE_TAG}"
-          fi
-
+          git tag -a "${APTA_RELEASE_TAG}" "${APTA_SOURCE_REVISION}" -m "APTA ${APTA_RELEASE_VERSION}"
+          git push origin "refs/tags/${APTA_RELEASE_TAG}"
           mapfile -d '' assets < <(find publish-assets -type f -print0 | sort -z)
           test "${#assets[@]}" -gt 0
-
-          if gh release view "${APTA_RELEASE_TAG}" >/dev/null 2>&1; then
-            gh release upload "${APTA_RELEASE_TAG}" "${assets[@]}" --clobber
-          else
-            gh release create "${APTA_RELEASE_TAG}" "${assets[@]}" \
-              --verify-tag \
-              --title "APTA ${APTA_RELEASE_VERSION}" \
-              --notes-file release/release-notes-1.0.0.md
-          fi
+          gh release create "${APTA_RELEASE_TAG}" "${assets[@]}" --verify-tag --title "APTA ${APTA_RELEASE_VERSION}" --notes-file "${APTA_RELEASE_NOTES}"

@@ -1,6 +1,6 @@
 # Global-grid and revision container sections
 
-**Status:** APTA 1.0 Release Candidate Draft  
+**Status:** Final APTA 1.0  
 **Container version:** 1  
 **Section versions:** `GGRD` version 1 and `REVN` version 1
 

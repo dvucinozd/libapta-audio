@@ -1,6 +1,6 @@
 # APTA container version 1 section registry
 
-**Status:** APTA 1.0 Release Candidate Draft  
+**Status:** Final APTA 1.0  
 **Container version:** 1  
 **Applies to:** all `.apta` readers, writers and conformance fixtures
 

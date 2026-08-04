@@ -5,7 +5,7 @@
 `libapta-audio` is the home of the Adaptive Progressive Track Analysis (APTA)
 standard and its portable ISO C11 reference implementation.
 
-> **Release status:** APTA specification 1.0, public API/package 1.0.0,
+> **Release status:** APTA specification 1.0, public API 1.0.0, package 1.0.1,
 > container version 1 and shared-library `SOVERSION 1`.
 
 APTA provides progressive, bounded and portable audio analysis for waveform,
@@ -136,6 +136,8 @@ ctest --test-dir build-sanitized --output-on-failure
   master specification.
 - [`specification/APTA-1.0-NORMATIVE-MANIFEST.md`](specification/APTA-1.0-NORMATIVE-MANIFEST.md)
   — exact normative files and blob hashes.
+- [`specification/APTA-1.0-ERRATA-1.md`](specification/APTA-1.0-ERRATA-1.md) —
+  editorial corrections published with 1.0.1.
 - [`docs/status/APTA-ROADMAP-STATUS.md`](docs/status/APTA-ROADMAP-STATUS.md) —
   release and roadmap status.
 - [`docs/api/APTA-API-ABI-1.0.md`](docs/api/APTA-API-ABI-1.0.md) — public API and

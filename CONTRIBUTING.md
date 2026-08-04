@@ -4,9 +4,11 @@ Thank you for helping improve APTA. Contributions are welcome from individual
 developers, product teams, researchers, documentation authors and platform
 maintainers.
 
-This project is still a 0.1 working draft. The specification, public API, ABI
-and `.apta` format may change before APTA 1.0, but compatibility impact must be
-made explicit in every proposal.
+APTA 1.0 is a stable specification and `libapta` 1.x maintains the published
+public API, ABI and `.apta` container-version-1 compatibility contracts. Every
+proposal must state its compatibility impact. Breaking public contracts require
+a new major version; compatible extensions and editorial corrections follow the
+project governance and release process.
 
 ## Before you start
 

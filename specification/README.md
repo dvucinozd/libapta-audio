@@ -5,8 +5,11 @@ Analysis 1.0 document set. Start with
 [`APTA-SPEC.md`](APTA-SPEC.md) and verify the exact published files through
 [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md).
 
+Editorial corrections published after `v1.0.0` are recorded in
+[`APTA-1.0-ERRATA-1.md`](APTA-1.0-ERRATA-1.md).
+
 The governance-approved `v1.0.0` tag pins the stable APTA 1.0 specification,
-public API/package 1.0.0 and container version 1 release boundary.
+public API 1.0.0, package line 1.0.x and container version 1 release boundary.
 
 Normative documents use RFC 2119/8174-style requirement terms such as MUST,
 MUST NOT, SHOULD, SHOULD NOT and MAY.
