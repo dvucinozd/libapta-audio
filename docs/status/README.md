@@ -12,9 +12,12 @@ Current S9 work:
 - [`S9-P2-API-ABI-STATUS.md`](S9-P2-API-ABI-STATUS.md) — completed release
   version model, public API/ABI compatibility contract, layout manifests,
   exported-symbol freeze and source identity/geometry access.
-- [`S9-P3-CONTAINER-V1-STATUS.md`](S9-P3-CONTAINER-V1-STATUS.md) — active
+- [`S9-P3-CONTAINER-V1-STATUS.md`](S9-P3-CONTAINER-V1-STATUS.md) — completed
   container-version-1 registry, parser/writer consistency and canonical fixture
   freeze.
+- [`S9-P6-INTEROPERABILITY-STATUS.md`](S9-P6-INTEROPERABILITY-STATUS.md) —
+  independent producer/consumer exchange and Linux, Windows, ILP32 and ESP-IDF
+  platform-evidence boundary.
 - [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md) —
   ordered implementation, evidence and release gates for Stage S9.
 

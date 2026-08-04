@@ -26,7 +26,7 @@
     {
       "id": "public-conformance",
       "category": "public_conformance",
-      "pattern": "^apta\\.(api\\.(initializers|version_validation|version_report)|core\\.smoke|waveform\\.(overview|detail_contracts|three_band)|serialization\\.wovr_roundtrip|abi\\..*|package\\..*|conformance\\..*)$"
+      "pattern": "^apta\\.(api\\.(initializers|version_validation|version_report)|core\\.smoke|waveform\\.(overview|detail_contracts|three_band)|serialization\\.wovr_roundtrip|abi\\..*|package\\..*|conformance\\..*|interchange\\.versioned)$"
     },
     {
       "id": "implementation-regression-default",

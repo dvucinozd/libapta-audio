@@ -1,0 +1,53 @@
+{
+  "cross_endian": {
+    "declared_limitation": "APTA 1.0 release CI has no supported native big-endian target; deterministic byte-swap evidence is retained instead.",
+    "deterministic_byte_swap_required": true,
+    "native_big_endian_executed": false
+  },
+  "directory": [
+    {"crc32c":1795677224,"flags":1,"fourcc":"WOVR","logical_size":90,"offset":376,"reserved":0,"stored_size":90,"version":1},
+    {"crc32c":744779154,"flags":0,"fourcc":"WDTL","logical_size":74,"offset":472,"reserved":0,"stored_size":74,"version":1},
+    {"crc32c":2224982791,"flags":0,"fourcc":"META","logical_size":8,"offset":552,"reserved":0,"stored_size":8,"version":1},
+    {"crc32c":300332592,"flags":0,"fourcc":"TEMP","logical_size":72,"offset":560,"reserved":0,"stored_size":72,"version":1},
+    {"crc32c":2338306412,"flags":0,"fourcc":"LGRD","logical_size":144,"offset":632,"reserved":0,"stored_size":144,"version":1},
+    {"crc32c":2808019365,"flags":0,"fourcc":"GGRD","logical_size":176,"offset":776,"reserved":0,"stored_size":176,"version":1},
+    {"crc32c":1056796892,"flags":0,"fourcc":"REVN","logical_size":80,"offset":952,"reserved":0,"stored_size":80,"version":1}
+  ],
+  "fixture": {
+    "canonical_section_order":["WOVR","WDTL","META","TEMP","LGRD","GGRD","REVN"],
+    "hex_path":"tests/fixtures/container-v1-suite/v1-all-standard-sections.apta.hex",
+    "name":"v1-all-standard-sections",
+    "sha256":"bf83d543e021087a90b90046868d70eecf25c4ef17f9b2633111df9be65e2d09",
+    "size_bytes":1032
+  },
+  "header": {
+    "channel_count":1,"channel_layout":1,"container_version":1,"crc":3546739605,"dir_offset":96,
+    "fingerprint":"0000000000000000000000000000000000000000000000000000000000000000","fingerprint_kind":0,
+    "flags":0,"header_size":96,"magic":"APTA","producer_api_version":4194304,"sample_rate":48000,
+    "section_count":7,"spec_major":1,"spec_minor":0,"total_file_size":1032,"total_source_frames":1024
+  },
+  "manifest_schema":"apta-interchange-semantic-manifest-1",
+  "producer":{"imports_or_links_libapta":false,"kind":"independent-standard-library-python","source_path":"tests/fixtures/generate_container_v1_suite.py"},
+  "sections": {
+    "GGRD": {
+      "applicability_end_frame":1024,"applicability_first_frame":0,"beat_count":0,"beats":[],
+      "coverage_end_frame":1024,"coverage_first_frame":0,"coverage_range_count":1,
+      "evidence_end_frame":1024,"evidence_first_frame":0,"grid_confidence":90,"grid_flags":0,"grid_state":4,
+      "payload_version":1,"representation":1,"requested_end_frame":1024,"requested_first_frame":0,"reserved":0,"segment_count":1,
+      "segments":[{"anchor_fraction_q32":0,"anchor_ordinal":0,"anchor_whole_frame":0,"applicability_end_frame":1024,"applicability_first_frame":0,"beat_count":1,"nominal_tempo_millibpm":120000,"period_fraction_q32":0,"period_whole_frames":24000,"reserved_anchor":0,"reserved_hex":"000000000000","revision_id":1,"segment_confidence":90,"segment_flags":0,"segment_id":2,"segment_state":4}]
+    },
+    "LGRD": {
+      "anchor_fraction_q32":0,"anchor_ordinal":0,"anchor_whole_frame":0,"applicability_end_frame":1024,"applicability_first_frame":0,"beat_count":1,
+      "coverage_end_frame":1024,"coverage_first_frame":0,"evidence_end_frame":1024,"evidence_first_frame":0,"grid_confidence":90,"grid_flags":0,"grid_state":4,
+      "nominal_tempo_millibpm":120000,"payload_version":1,"period_fraction_q32":0,"period_whole_frames":24000,"representation":1,
+      "requested_end_frame":1024,"requested_first_frame":0,"reserved16":0,"reserved32":0,"reserved_anchor":0,"revision":0,
+      "segment_confidence":90,"segment_count":1,"segment_flags":0,"segment_id":1,"segment_state":4
+    },
+    "META":{"cbor_hex":"a101657375697465","decoded":{"1":"suite"}},
+    "REVN":{"affected_end_frame":1024,"affected_first_frame":0,"payload_version":1,"previous_revision_id":0,"proposed_beat_count":0,"proposed_representation":1,"proposed_segment_count":1,"reserved32":0,"reserved_hex":"0000000000000000000000000000000000000000000000000000000000000000","revision_confidence":90,"revision_flags":0,"revision_id":1,"revision_state":2},
+    "TEMP":{"applicability_end_frame":1024,"applicability_first_frame":0,"candidate_count":1,"candidate_set_id":1,"candidates":[{"confidence":90,"flags":0,"relation_to_selected":0,"reserved":0,"score":1000,"tempo_millibpm":120000}],"confidence":90,"evidence_end_frame":1024,"evidence_first_frame":0,"feature_state":4,"payload_version":1,"reserved":0,"tempo_flags":0,"tempo_millibpm":120000},
+    "WDTL":{"flags":0,"tile_count":1,"tile_directory_offset":16,"tiles":[{"column_count":1,"columns":[{"flags":1,"high":0,"low":0,"maximum":0,"mid":0,"minimum":0,"rms":0}],"columns_offset":64,"confidence":90,"end_frame":256,"feature_state":4,"first_column_index":0,"first_frame":0,"flags":0,"level_id":1,"reserved":0,"tile_index":0}]},
+    "WOVR":{"column_data_offset":80,"columns":[{"flags":1,"high":0,"low":0,"maximum":0,"mid":0,"minimum":0,"rms":0}],"flags":4,"frames_per_column":1024,"level_id":0,"logical_column_count":1,"origin_frame":0,"reserved":0,"span_count":1,"span_directory_offset":48,"spans":[{"column_count":1,"data_column_offset":0,"end_frame":1024,"first_column_index":0,"first_frame":0,"reserved":0}]}
+  },
+  "suite_version":"APTA-INTERCHANGE-1.0"
+}
