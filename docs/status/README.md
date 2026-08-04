@@ -18,6 +18,8 @@ Current S9 work:
 - [`S9-P6-INTEROPERABILITY-STATUS.md`](S9-P6-INTEROPERABILITY-STATUS.md) —
   independent producer/consumer exchange and Linux, Windows, ILP32 and ESP-IDF
   platform-evidence boundary.
+- [`S9-P7-SECURITY-CAMPAIGN.md`](S9-P7-SECURITY-CAMPAIGN.md) — frozen fuzz
+  inventory, reproducible ASan/UBSan campaign and security-review boundary.
 - [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md) —
   ordered implementation, evidence and release gates for Stage S9.
 

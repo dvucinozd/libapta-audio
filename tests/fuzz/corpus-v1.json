@@ -1,0 +1,58 @@
+{
+  "schema": "apta-fuzz-corpus-manifest-1",
+  "corpus_version": "APTA-1.0-P7.1",
+  "container_seed_sources": [
+    {
+      "kind": "generated",
+      "path": "valid-final.apta",
+      "producer": "apta_wovr_seed_generator"
+    },
+    {
+      "kind": "generated",
+      "path": "valid-sparse-partial.apta",
+      "producer": "apta_wovr_seed_generator"
+    },
+    {
+      "kind": "generated",
+      "path": "valid-wdtl.apta",
+      "producer": "apta_wovr_seed_generator"
+    },
+    {
+      "kind": "generated",
+      "path": "valid-meta.apta",
+      "producer": "apta_wovr_seed_generator"
+    },
+    {
+      "kind": "generated",
+      "path": "valid-s4.apta",
+      "producer": "apta_wovr_seed_generator"
+    },
+    {
+      "kind": "generated",
+      "path": "valid-s6.apta",
+      "producer": "apta_s6_seed_generator"
+    },
+    {
+      "kind": "hex",
+      "path": "tests/fixtures/container-v1-suite/v1-all-standard-sections.apta.hex",
+      "producer": "independent container-v1 fixture generator"
+    }
+  ],
+  "synthetic_seeds": {
+    "pcm-validation": [
+      "000080bb000001000000000000000000",
+      "010480bb0000020001000000000000001122334455667788",
+      "010380bb000002000000000000000000ffffffffffffffff"
+    ],
+    "state-transitions": [
+      "000202010a",
+      "04020305060708090a",
+      "0000030402050102070a"
+    ]
+  },
+  "minimization_policy": {
+    "canonical_seeds_are_deduplicated_by_sha256": true,
+    "crash_inputs": "run libFuzzer minimization before retention",
+    "zero_findings": "no crash/regression input is fabricated"
+  }
+}
