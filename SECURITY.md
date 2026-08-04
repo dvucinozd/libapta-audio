@@ -2,20 +2,20 @@
 
 ## Supported versions
 
-The project is preparing the APTA 1.0 release line.
+APTA 1.0 is the current maintained stable release line.
 
 | Version or branch | Security fixes |
 |---|---|
 | Current `main` branch | Supported |
-| Current `1.0.0-rc.x` release candidate | Supported until superseded by a newer RC or final 1.0 |
-| Latest published `1.x` release | Supported after APTA 1.0 is published |
-| Older RCs, older commits and untagged snapshots | Not supported |
+| Latest published `1.x` release | Supported |
+| `1.0.0` | Supported until superseded by a newer maintained 1.x release |
+| Release candidates, older commits and untagged snapshots | Not supported |
 | Historical `0.x` drafts | Not supported |
 
-Security fixes are prepared first for the current development line. After the
-final 1.0 release, the latest maintained 1.x line receives fixes. Backports to
-an older maintained 1.x release are considered when the issue severity and
-compatibility risk justify them; no 0.x backport commitment exists.
+Security fixes are prepared first for the current development line and the
+latest maintained 1.x release. Backports to an older maintained 1.x release are
+considered when issue severity and compatibility risk justify them; no 0.x or
+release-candidate backport commitment exists.
 
 The exact supported release list may be narrowed or expanded by a later
 security-policy update, but a release is never silently treated as maintained.
