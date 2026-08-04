@@ -106,14 +106,13 @@ a waiver of applicable law.
 
 ## Automated security controls
 
-The repository runs CodeQL, the retained sanitizer/fuzz campaign and periodic
-OpenSSF Scorecard analysis. Pull-request dependency review is configured and
-becomes authoritative when the repository dependency graph is enabled. Until
-then, the workflow emits an explicit warning and runs only the narrower
-immutable-reference fallback. External
-GitHub Actions and literal CI container images are required to use immutable
-commit or digest references. Dependabot groups GitHub Actions updates into a
-single monthly review stream.
+The repository runs CodeQL and the retained sanitizer/fuzz campaign.
+Pull-request dependency review is configured and becomes authoritative when
+the repository dependency graph is enabled. Until then, the workflow emits an
+explicit warning and runs only the narrower immutable-reference fallback.
+External GitHub Actions and literal CI container images are required to use
+immutable commit or digest references. Dependabot groups GitHub Actions updates
+into a single monthly review stream.
 
 The implementation and verification boundary is documented in
 [`docs/security/APTA-SUPPLY-CHAIN-SECURITY.md`](docs/security/APTA-SUPPLY-CHAIN-SECURITY.md).
