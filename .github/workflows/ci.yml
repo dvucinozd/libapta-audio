@@ -13,6 +13,9 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   core-build:
     name: Core build and tests
@@ -21,6 +24,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Configure
         run: >-
@@ -77,6 +82,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Configure
         run: >-
@@ -141,6 +148,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Install multilib toolchain
         run: sudo apt-get update && sudo apt-get install -y g++-multilib
@@ -186,6 +195,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Configure sanitized parser build
         run: >-
@@ -206,7 +217,7 @@ jobs:
           python3 security/review/check_invariants.py
           --root .
           --manifest security/review/invariants-v1.json
-          --source-revision "${GITHUB_SHA}"
+          --source-revision "${APTA_SOURCE_REVISION}"
           --output build-sanitized/security-reports/security-invariants.json
 
       - name: Generate canonical fuzz seeds
@@ -238,7 +249,7 @@ jobs:
           --generated build-sanitized/fuzz-generated
           --output build-sanitized/fuzz-corpora
           --source-root .
-          --source-revision "${GITHUB_SHA}"
+          --source-revision "${APTA_SOURCE_REVISION}"
 
       - name: Run reproducible P7 release campaign
         run: >-
@@ -247,7 +258,7 @@ jobs:
           --build-dir build-sanitized
           --corpus-root build-sanitized/fuzz-corpora
           --campaign tests/fuzz/campaign-v1.json
-          --source-revision "${GITHUB_SHA}"
+          --source-revision "${APTA_SOURCE_REVISION}"
           --output build-sanitized/security-reports/fuzz-campaign.json
 
       - name: Upload P7 security evidence

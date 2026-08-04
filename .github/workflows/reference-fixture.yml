@@ -15,6 +15,7 @@ on:
       - "tests/unit/external_fixture.c"
       - "tests/unit/container_v1_conformance.c"
       - "tests/unit/container_v1_conformance.parts/**"
+      - "release/**"
   pull_request:
     paths:
       - ".github/workflows/reference-fixture.yml"
@@ -27,6 +28,7 @@ on:
       - "tests/unit/external_fixture.c"
       - "tests/unit/container_v1_conformance.c"
       - "tests/unit/container_v1_conformance.parts/**"
+      - "release/**"
 
 permissions:
   contents: read
@@ -34,6 +36,9 @@ permissions:
 concurrency:
   group: fixture-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   reference-fixture:
@@ -43,6 +48,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Verify normative manifest blob hashes
         run: python3 tests/spec/check_normative_manifest.py

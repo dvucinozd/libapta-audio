@@ -20,6 +20,8 @@ Current S9 work:
   platform-evidence boundary.
 - [`S9-P7-SECURITY-CAMPAIGN.md`](S9-P7-SECURITY-CAMPAIGN.md) — frozen fuzz
   inventory, reproducible ASan/UBSan campaign and security-review boundary.
+- [`S9-P8-RC-FREEZE.md`](S9-P8-RC-FREEZE.md) — release-candidate identity,
+  frozen manifests, blocker/legal review and reproducible RC package gates.
 - [`../roadmap/APTA-1.0-WORK-ORDER.md`](../roadmap/APTA-1.0-WORK-ORDER.md) —
   ordered implementation, evidence and release gates for Stage S9.
 
