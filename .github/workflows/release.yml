@@ -7,30 +7,22 @@ on:
       - ".github/workflows/release.yml"
       - "VERSION"
       - "CHANGELOG.md"
-      - "README.md"
-      - "SECURITY.md"
       - "include/apta/apta_version.h"
       - "release/**"
       - "specification/**"
       - "conformance/**"
       - "ports/espidf/idf_component.yml"
-      - "docs/**"
-      - "tests/CMakeLists.txt"
   push:
     branches: [main]
     paths:
       - ".github/workflows/release.yml"
       - "VERSION"
       - "CHANGELOG.md"
-      - "README.md"
-      - "SECURITY.md"
       - "include/apta/apta_version.h"
       - "release/**"
       - "specification/**"
       - "conformance/**"
       - "ports/espidf/idf_component.yml"
-      - "docs/**"
-      - "tests/CMakeLists.txt"
   workflow_dispatch:
 
 permissions:
@@ -53,10 +45,12 @@ jobs:
       manifest: ${{ steps.release.outputs.manifest }}
       legal_manifest: ${{ steps.release.outputs.legal_manifest }}
       notes: ${{ steps.release.outputs.notes }}
+      published: ${{ steps.release.outputs.published }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.APTA_SOURCE_REVISION }}
+          fetch-depth: 0
       - id: release
         shell: bash
         run: |
@@ -73,11 +67,26 @@ jobs:
           echo "tag=v${version}" >> "${GITHUB_OUTPUT}"
           echo "manifest=${manifest}" >> "${GITHUB_OUTPUT}"
           echo "legal_manifest=${legal_manifest}" >> "${GITHUB_OUTPUT}"
+          git fetch --tags --force
+          published=false
+          if git rev-parse -q --verify "refs/tags/v${version}" >/dev/null; then
+            published=true
+          fi
           echo "notes=${notes}" >> "${GITHUB_OUTPUT}"
+          echo "published=${published}" >> "${GITHUB_OUTPUT}"
+
+  existing-release:
+    name: Existing release detected
+    needs: metadata
+    if: needs.metadata.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "v${{ needs.metadata.outputs.version }} is already published; release packaging is skipped."
 
   verify:
     name: Maintenance and legal verification
     needs: metadata
+    if: needs.metadata.outputs.published != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -109,6 +118,7 @@ jobs:
   linux-packages:
     name: Linux deterministic packages
     needs: [metadata, verify]
+    if: needs.metadata.outputs.published != 'true'
     runs-on: ubuntu-latest
     env:
       APTA_RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
@@ -180,6 +190,7 @@ jobs:
   windows-packages:
     name: Windows deterministic packages
     needs: [metadata, verify]
+    if: needs.metadata.outputs.published != 'true'
     runs-on: windows-latest
     env:
       APTA_RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
@@ -227,7 +238,7 @@ jobs:
   publish:
     name: Publish stable release
     needs: [metadata, verify, linux-packages, windows-packages]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.metadata.outputs.published != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a library, tooling, packaging or integration improvement.
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the host or developer problem, not only the desired implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Expected compatibility impact
+      options:
+        - No public compatibility impact
+        - Backward-compatible API addition
+        - Container extension
+        - Behavioural or conformance change
+        - Breaking change
+        - Unsure
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Resource and platform constraints
+      description: Include memory, work-budget, real-time, embedded or portability requirements.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

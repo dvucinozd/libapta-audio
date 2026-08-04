@@ -41,3 +41,5 @@ Snapshot test totals and “next stage” sections apply to the commit and CI ru
 named by each document. They do not override the current release status.
 
 - [`P10-1.0.1-COHERENCE.md`](P10-1.0.1-COHERENCE.md) — maintained documentation, metadata and release-automation coherence patch.
+
+- [`P11-REPOSITORY-UX.md`](P11-REPOSITORY-UX.md) — public examples, quick-start documentation and contributor onboarding.

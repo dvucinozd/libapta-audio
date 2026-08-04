@@ -1,0 +1,46 @@
+name: APTA specification proposal
+description: Propose normative text, errata, a profile change or a versioned extension.
+title: "spec: "
+labels: [specification]
+body:
+  - type: dropdown
+    id: class
+    attributes:
+      label: Proposal class
+      options:
+        - Editorial erratum
+        - Normative clarification
+        - Backward-compatible APTA 1.x addition
+        - Optional container extension
+        - New conformance profile
+        - Future breaking-version proposal
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Interoperability problem
+      description: Identify the ambiguity, missing contract or producer/consumer mismatch.
+    validations:
+      required: true
+  - type: textarea
+    id: normative
+    attributes:
+      label: Proposed normative change
+      description: Provide draft requirements using MUST, SHOULD and MAY where applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility analysis
+      description: Address API, ABI, container bytes, old readers/writers and conformance claims.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Test and evidence plan
+      description: Describe fixtures, negative cases and cross-platform or independent-consumer evidence.
+    validations:
+      required: true

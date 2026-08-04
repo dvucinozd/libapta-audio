@@ -25,6 +25,12 @@
 | S8 — Windows platform | Complete integration | Native Windows adapter, tools and Linux/Windows interchange |
 | S9 — APTA 1.0 | Complete | Stable specification, API/ABI, container, packages, conformance, interoperability, security campaign and release publication |
 
+## Post-release repository quality
+
+- **P10:** complete — APTA 1.0.1 documentation and release coherence.
+- **P11:** complete — quick-start examples, repository UX and contributor
+  onboarding without changing the stable contracts.
+
 ## APTA 1.0 claims
 
 The stable profiles are `WAVEFORM-1.0`, `ADAPTIVE-WAVEFORM-1.0` and

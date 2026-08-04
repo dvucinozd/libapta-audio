@@ -16,6 +16,7 @@ project(
 include(cmake/APTAVersionCheck.cmake)
 
 option(APTA_BUILD_TESTS "Build libapta tests" ON)
+option(APTA_BUILD_EXAMPLES "Build libapta public API examples" OFF)
 option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(APTA_BUILD_FUZZING "Build libFuzzer targets" OFF)
 option(APTA_BUILD_DESKTOP_ADAPTERS "Build native desktop and reference decoder adapters" ON)
@@ -465,4 +466,8 @@ endif()
 if(APTA_BUILD_TESTS)
     include(CTest)
     add_subdirectory(tests)
+endif()
+
+if(APTA_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
