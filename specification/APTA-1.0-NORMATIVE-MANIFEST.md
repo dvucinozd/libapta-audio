@@ -1,24 +1,23 @@
 # APTA 1.0 normative manifest
 
-**Status:** Release Candidate Draft manifest  
-**Candidate:** APTA 1.0  
+**Status:** Final APTA 1.0 manifest  
+**Release:** APTA 1.0  
 **Hash domain:** Git blob SHA-1 of UTF-8 file content
 
 ## 1. Authority
 
-The files below are the complete normative release-candidate set. A path not
-listed here is informative unless one of these documents normatively
-incorporates it.
+The files below are the complete normative APTA 1.0 set. A path not listed
+here is informative unless one of these documents normatively incorporates it.
 
 The manifest does not list its own blob hash because that would be
-self-referential. The enclosing Git commit or release tag identifies the exact
-manifest instance.
+self-referential. The governance-approved `v1.0.0` release tag identifies the
+exact published manifest instance.
 
-## 2. Candidate files
+## 2. Normative files
 
 | Path | Title | Git blob SHA-1 |
 |---|---|---|
-| `APTA-SPEC.md` | Adaptive Progressive Track Analysis Specification | `8b3dd5069c7192fa6e836dc3fb84e8fcf4ba1aeb` |
+| `APTA-SPEC.md` | Adaptive Progressive Track Analysis Specification | `e0eb760d5bcdef55d5c7bf8bd1aff2c981f5f686` |
 | `normative-language.md` | Normative language | `c7528d4f9cdb66fb9241d4f72e98c682b05b26a2` |
 | `terminology.md` | APTA terminology | `28b8fa0f41dd75d0165b7cdddf8b8dc79f84eb5e` |
 | `time-model.md` | Source time model | `90b56401697878b2cbc20d56e6c8fe8da91f1ed7` |
@@ -46,5 +45,6 @@ and conformance review under project governance. Editorial corrections may
 change hashes without changing the specification version only when they do not
 alter requirements.
 
-Final APTA 1.0 publication will replace the candidate label and pin this
-manifest through the accepted release tag.
+The `v1.0.0` tag freezes this manifest as the published APTA 1.0 authority.
+Later compatible corrections are published through the documented 1.x change
+process and never silently rewrite the tagged release.
