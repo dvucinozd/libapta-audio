@@ -1,7 +1,7 @@
 # Adaptive Progressive Track Analysis Specification
 
 **Short name:** APTA  
-**Status:** APTA 1.0 Release Candidate Draft  
+**Status:** APTA 1.0 Final  
 **Normative language:** [`normative-language.md`](normative-language.md)  
 **Normative manifest:** [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md)  
 **Reference implementation:** `libapta`
@@ -83,7 +83,7 @@ implemented.
 
 ## 5. Normative document set
 
-The candidate normative set is listed with immutable repository blob hashes in
+The final normative set is listed with immutable repository blob hashes in
 [`APTA-1.0-NORMATIVE-MANIFEST.md`](APTA-1.0-NORMATIVE-MANIFEST.md).
 
 It contains:
@@ -124,8 +124,8 @@ specification and container versions.
 
 Public API and ABI policy is documented in
 [`../docs/api/APTA-PUBLIC-API-ABI-POLICY-0.1.md`](../docs/api/APTA-PUBLIC-API-ABI-POLICY-0.1.md).
-Any later release-candidate change to the frozen surface requires the explicit
-freeze-exception process and renewed compatibility evidence.
+Any later 1.x change to the frozen surface requires the documented
+compatibility process and renewed evidence.
 
 ## 7. Separation of responsibilities
 
@@ -195,9 +195,8 @@ The project maintains independent version domains:
 Compatibility in one domain MUST NOT be inferred from a number in another
 domain.
 
-The intended final mapping is specification 1.0, API/package 1.0.0 and
-container version 1. Release-candidate values remain non-final until the S9
-release gates pass.
+The stable APTA 1.0 mapping is specification 1.0, API/package 1.0.0 and
+container version 1.
 
 ## 11. Document precedence
 
@@ -217,11 +216,11 @@ future-compatibility rules. `file-format.md` and `global-grid-container.md` are
 the dedicated authorities for their byte layouts.
 
 A conflict between two dedicated normative documents is a specification defect
-and MUST be resolved before final APTA 1.0 publication.
+and requires a compatibility-reviewed correction.
 
-## 12. Change control during the release-candidate cycle
+## 12. Change control after APTA 1.0
 
-A normative candidate change MUST include:
+A normative change requires:
 
 - the problem and affected requirement;
 - compatibility impact;
@@ -230,5 +229,6 @@ A normative candidate change MUST include:
 - maintainer approval under project governance.
 
 Editorial changes that do not alter requirements may update document hashes
-without changing specification semantics. A public API or wire-format change
-resets affected release-candidate evidence.
+without changing specification semantics. Incompatible normative, public API,
+ABI or wire-format changes require a new version domain as defined by the
+project compatibility policy.
