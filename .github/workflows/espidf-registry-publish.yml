@@ -1,0 +1,140 @@
+name: Publish ESP-IDF component
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: "Exact stable tag to publish, for example v1.0.2"
+        required: true
+        type: string
+      namespace:
+        description: "Approved ESP Component Registry namespace"
+        required: true
+        type: string
+      registry:
+        description: "Target registry"
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: "Validate upload without creating a registry version"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: espidf-registry-publish-${{ inputs.registry }}-${{ inputs.namespace }}
+  cancel-in-progress: false
+
+env:
+  IDF_IMAGE: espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67
+  IDF_COMPONENT_MANAGER_VERSION: "3.1.0"
+
+jobs:
+  publish:
+    name: Validate exact tag and upload component
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out requested stable tag
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify immutable release identity
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          test "${{ inputs.source_ref }}" = "v${version}"
+          git rev-parse -q --verify "refs/tags/v${version}^{commit}" >/dev/null
+          source_revision="$(git rev-parse HEAD)"
+          tag_revision="$(git rev-list -n 1 "v${version}")"
+          test "${source_revision}" = "${tag_revision}"
+          manifest_version="$(sed -n 's/^version: "\([^"]*\)"$/\1/p' ports/espidf/idf_component.yml)"
+          test "${manifest_version}" = "${version}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "source_revision=${source_revision}" >> "${GITHUB_OUTPUT}"
+
+      - name: Require registry API token
+        env:
+          IDF_COMPONENT_API_TOKEN: ${{ secrets.IDF_COMPONENT_API_TOKEN }}
+        run: test -n "${IDF_COMPONENT_API_TOKEN}"
+
+      - name: Generate and test standalone package
+        run: |
+          python3 ports/espidf/test_package_component.py
+          python3 ports/espidf/package_component.py \
+            --source-root . \
+            --output-dir build/component/libapta_audio \
+            --archive "build/libapta_audio-${{ steps.release.outputs.version }}-esp-idf-component.zip" \
+            --source-revision "${{ steps.release.outputs.source_revision }}"
+
+      - name: Lint manifest and build packaged example
+        run: |
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/project" \
+            -w /project \
+            "${IDF_IMAGE}" \
+            bash -lc \
+            "python -m pip install --disable-pip-version-check --no-cache-dir idf-component-manager==${IDF_COMPONENT_MANAGER_VERSION} && compote manifest lint build/component/libapta_audio"
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/project" \
+            -w /project/build/component/libapta_audio/examples/cooperative_scheduler \
+            "${IDF_IMAGE}" \
+            idf.py -B build-registry set-target esp32 build
+
+      - name: Upload to selected registry
+        shell: bash
+        env:
+          IDF_COMPONENT_API_TOKEN: ${{ secrets.IDF_COMPONENT_API_TOKEN }}
+          IDF_COMPONENT_NAMESPACE: ${{ inputs.namespace }}
+          SOURCE_REVISION: ${{ steps.release.outputs.source_revision }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          REGISTRY: ${{ inputs.registry }}
+        run: |
+          set -euo pipefail
+          if [[ "${REGISTRY}" == "staging" ]]; then
+            registry_url="https://components-staging.espressif.com"
+          else
+            registry_url="https://components.espressif.com"
+          fi
+          extra=()
+          if [[ "${DRY_RUN}" == "true" ]]; then
+            extra+=(--dry-run)
+          fi
+          docker run --rm \
+            -e IDF_COMPONENT_API_TOKEN \
+            -e IDF_COMPONENT_NAMESPACE \
+            -e IDF_COMPONENT_REGISTRY_URL="${registry_url}" \
+            -v "${GITHUB_WORKSPACE}:/project" \
+            -w /project/build/component/libapta_audio \
+            "${IDF_IMAGE}" \
+            bash -lc \
+            "python -m pip install --disable-pip-version-check --no-cache-dir idf-component-manager==${IDF_COMPONENT_MANAGER_VERSION} && compote component upload \
+              --name libapta_audio \
+              --namespace "${IDF_COMPONENT_NAMESPACE}" \
+              --repository "https://github.com/dvucinozd/libapta-audio.git" \
+              --repository-path ports/espidf \
+              --commit-sha "${SOURCE_REVISION}" \
+              --allow-existing \
+              "${extra[@]}""
+
+      - name: Retain published package evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: libapta-audio-registry-${{ inputs.registry }}-${{ steps.release.outputs.version }}
+          path: |
+            build/libapta_audio-*-esp-idf-component.zip
+            build/component/libapta_audio/PACKAGE-MANIFEST.json
+          if-no-files-found: error
+          retention-days: 365

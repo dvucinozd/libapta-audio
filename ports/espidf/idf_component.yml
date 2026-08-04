@@ -1,8 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 version: "1.0.1"
-description: "ESP-IDF port for libapta-audio"
+description: "Portable APTA waveform, tempo and beatgrid analysis for ESP-IDF"
+maintainers:
+  - "Daniel Vucinovic <daniel.vucinovic@gmail.com>"
+license: "Apache-2.0"
+tags:
+  - audio
+  - dsp
+  - waveform
+  - tempo
+  - beatgrid
+  - embedded
 url: "https://github.com/dvucinozd/libapta-audio"
+repository: "https://github.com/dvucinozd/libapta-audio.git"
+repository_info:
+  path: "ports/espidf"
+documentation: "https://github.com/dvucinozd/libapta-audio/blob/main/docs/distribution/ESP-IDF-COMPONENT-REGISTRY.md"
+issues: "https://github.com/dvucinozd/libapta-audio/issues"
+changelog: "https://github.com/dvucinozd/libapta-audio/blob/main/CHANGELOG.md"
 dependencies:
   idf: ">=5.5"
   espressif/esp-dsp:
