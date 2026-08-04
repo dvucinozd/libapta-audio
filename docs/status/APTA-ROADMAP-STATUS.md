@@ -33,6 +33,10 @@
 - **P12:** source complete, owner setting pending — security automation,
   immutable workflow dependencies and future release provenance are present;
   GitHub dependency-graph activation is still required for the full review gate.
+- **P13:** source complete, publication pending — a deterministic standalone
+  ESP-IDF component, registry metadata, packaged-example evidence and an exact-
+  tag publication workflow are present; first staging and production uploads
+  require a later stable tag, namespace and owner token.
 
 ## APTA 1.0 claims
 
@@ -67,7 +71,9 @@ metadata without changing API/ABI, wire bytes or production DSP behavior.
 - POSIX atomic replacement omits parent-directory `fsync()` after rename;
 - tempo/beatgrid selection accuracy is outside semantic conformance;
 - desktop adapters and CLI tools are source components, not stable exported
-  package components.
+  package components;
+- the ESP Component Registry version is not published until a later stable tag
+  is validated against staging and uploaded with owner credentials.
 
 ## Post-1.0 planning boundary
 

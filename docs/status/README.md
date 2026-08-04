@@ -45,3 +45,5 @@ named by each document. They do not override the current release status.
 - [`P11-REPOSITORY-UX.md`](P11-REPOSITORY-UX.md) — public examples, quick-start documentation and contributor onboarding.
 
 - [`P12-SECURITY-DOCUMENTATION.md`](P12-SECURITY-DOCUMENTATION.md) — security automation, immutable workflow dependencies and future release provenance.
+
+- [`P13-ECOSYSTEM-DISTRIBUTION.md`](P13-ECOSYSTEM-DISTRIBUTION.md) — standalone ESP-IDF component packaging, registry metadata and exact-tag publication controls.

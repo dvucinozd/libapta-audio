@@ -1,0 +1,113 @@
+name: ESP-IDF component distribution
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/espidf-component-distribution.yml"
+      - "VERSION"
+      - "LICENSE"
+      - "CHANGELOG.md"
+      - "include/**"
+      - "src/beatgrid/**"
+      - "src/core/**"
+      - "src/serialization/**"
+      - "src/tempo/**"
+      - "src/waveform/**"
+      - "ports/espidf/**"
+      - "examples/espidf/cooperative_scheduler/**"
+      - "docs/api/APTA-API-ABI-1.0.md"
+      - "docs/distribution/ESP-IDF-COMPONENT-REGISTRY.md"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/espidf-component-distribution.yml"
+      - "VERSION"
+      - "LICENSE"
+      - "CHANGELOG.md"
+      - "include/**"
+      - "src/beatgrid/**"
+      - "src/core/**"
+      - "src/serialization/**"
+      - "src/tempo/**"
+      - "src/waveform/**"
+      - "ports/espidf/**"
+      - "examples/espidf/cooperative_scheduler/**"
+      - "docs/api/APTA-API-ABI-1.0.md"
+      - "docs/distribution/ESP-IDF-COMPONENT-REGISTRY.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: espidf-component-distribution-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+  IDF_IMAGE: espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67
+  IDF_COMPONENT_MANAGER_VERSION: "3.1.0"
+
+jobs:
+  standalone-component:
+    name: Standalone package, manifest and firmware
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
+
+      - name: Test deterministic component packager
+        run: python3 ports/espidf/test_package_component.py
+
+      - name: Generate standalone component archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          mkdir -p build/component
+          python3 ports/espidf/package_component.py \
+            --source-root . \
+            --output-dir build/component/libapta_audio \
+            --archive "build/libapta_audio-${version}-esp-idf-component.zip" \
+            --source-revision "${APTA_SOURCE_REVISION}"
+          sha256sum "build/libapta_audio-${version}-esp-idf-component.zip" \
+            > "build/libapta_audio-${version}-esp-idf-component.zip.sha256"
+
+      - name: Lint generated component manifests
+        run: >-
+          docker run --rm
+          -v "${GITHUB_WORKSPACE}:/project"
+          -w /project
+          "${IDF_IMAGE}"
+          bash -lc
+          "python -m pip install --disable-pip-version-check --no-cache-dir idf-component-manager==${IDF_COMPONENT_MANAGER_VERSION} && compote manifest lint build/component/libapta_audio"
+
+      - name: Build packaged cooperative example
+        run: >-
+          docker run --rm
+          -v "${GITHUB_WORKSPACE}:/project"
+          -w /project/build/component/libapta_audio/examples/cooperative_scheduler
+          "${IDF_IMAGE}"
+          idf.py -B build-distribution set-target esp32 build size-components
+
+      - name: Verify packaged firmware
+        run: >-
+          test -s
+          build/component/libapta_audio/examples/cooperative_scheduler/build-distribution/apta_cooperative_scheduler.bin
+
+      - name: Upload standalone distribution evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: libapta-audio-espidf-component-attempt-${{ github.run_attempt }}
+          path: |
+            build/libapta_audio-*-esp-idf-component.zip
+            build/libapta_audio-*-esp-idf-component.zip.sha256
+            build/component/libapta_audio/PACKAGE-MANIFEST.json
+            build/component/libapta_audio/examples/cooperative_scheduler/build-distribution/apta_cooperative_scheduler.bin
+          if-no-files-found: error
+          retention-days: 90
