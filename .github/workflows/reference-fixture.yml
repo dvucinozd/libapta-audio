@@ -37,6 +37,9 @@ concurrency:
   group: fixture-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   reference-fixture:
     name: Independent container fixture
@@ -45,6 +48,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
 
       - name: Verify normative manifest blob hashes
         run: python3 tests/spec/check_normative_manifest.py
