@@ -85,9 +85,7 @@ int main(int argc, char **argv)
 
     apta_parse_options_init(&parse_options);
     parse_options.maximum_file_bytes = APTA_TOOL_DEFAULT_MAX_FILE_BYTES;
-    if (strict) {
-        parse_options.flags = APTA_PARSE_STRICT;
-    }
+    parse_options.flags = strict ? APTA_PARSE_STRICT : 0u;
     status = apta_result_parse(
         context, &parse_options, file.data, file.size, &result);
     if (status < 0) {
