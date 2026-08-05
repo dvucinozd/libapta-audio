@@ -496,6 +496,24 @@ endif()
 if(APTA_BUILD_TESTS)
     include(CTest)
     add_subdirectory(tests)
+
+    if(BUILD_SHARED_LIBS AND TARGET apta_core_test)
+        get_property(
+            APTA_TEST_TARGETS
+            DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+            PROPERTY BUILDSYSTEM_TARGETS)
+        foreach(APTA_TEST_TARGET IN LISTS APTA_TEST_TARGETS)
+            get_target_property(APTA_TEST_TARGET_TYPE ${APTA_TEST_TARGET} TYPE)
+            if(APTA_TEST_TARGET_TYPE STREQUAL "EXECUTABLE" AND
+               NOT APTA_TEST_TARGET STREQUAL "apta_abi_layout_manifest" AND
+               NOT APTA_TEST_TARGET STREQUAL "apta_compat_1_0_client")
+                target_link_libraries(
+                    ${APTA_TEST_TARGET}
+                    PRIVATE
+                        apta_core_test)
+            endif()
+        endforeach()
+    endif()
 endif()
 
 if(APTA_BUILD_EXAMPLES)
