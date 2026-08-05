@@ -10,6 +10,10 @@
 #define APTA_WAV_FORMAT_IEEE_FLOAT 0x0003u
 #define APTA_WAV_FORMAT_EXTENSIBLE 0xFFFEu
 
+#define APTA_WAV_SPEAKER_FRONT_LEFT   0x00000001u
+#define APTA_WAV_SPEAKER_FRONT_RIGHT  0x00000002u
+#define APTA_WAV_SPEAKER_FRONT_CENTER 0x00000004u
+
 typedef struct {
     apta_file_t *file;
     uint64_t data_offset;
@@ -37,6 +41,30 @@ static uint32_t apta_wav_get_u32(const uint8_t *data)
            ((uint32_t)data[1] << 8u) |
            ((uint32_t)data[2] << 16u) |
            ((uint32_t)data[3] << 24u);
+}
+
+static apta_channel_layout_t apta_wav_resolve_channel_layout(
+    uint16_t channel_count,
+    uint32_t is_extensible,
+    uint32_t channel_mask)
+{
+    if (is_extensible == 0u) {
+        return channel_count == 1u
+                   ? APTA_CHANNEL_LAYOUT_MONO
+                   : APTA_CHANNEL_LAYOUT_STEREO;
+    }
+
+    if (channel_count == 1u &&
+        channel_mask == APTA_WAV_SPEAKER_FRONT_CENTER) {
+        return APTA_CHANNEL_LAYOUT_MONO;
+    }
+    if (channel_count == 2u &&
+        channel_mask == (APTA_WAV_SPEAKER_FRONT_LEFT |
+                         APTA_WAV_SPEAKER_FRONT_RIGHT)) {
+        return APTA_CHANNEL_LAYOUT_STEREO;
+    }
+
+    return APTA_CHANNEL_LAYOUT_UNSPECIFIED;
 }
 
 static apta_status_t apta_wav_read_exact(
@@ -245,12 +273,14 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
     uint64_t data_size = 0u;
     uint32_t sample_rate = 0u;
     uint32_t byte_rate = 0u;
+    uint32_t channel_mask = 0u;
     uint16_t channel_count = 0u;
     uint16_t block_align = 0u;
     uint16_t bits_per_sample = 0u;
     uint16_t wave_format = 0u;
     uint32_t found_fmt = 0u;
     uint32_t found_data = 0u;
+    uint32_t is_extensible = 0u;
     apta_sample_format_t sample_format = 0u;
     apta_status_t status;
 
@@ -344,6 +374,8 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
                     apta_file_close(file);
                     return APTA_ERROR_CORRUPT_DATA;
                 }
+                channel_mask = apta_wav_get_u32(fmt + 20u);
+                is_extensible = 1u;
                 parsed_format = subformat;
             }
             wave_format = parsed_format;
@@ -393,9 +425,10 @@ apta_status_t APTA_CALL apta_wav_decoder_open_path(
     state->bits_per_sample = bits_per_sample;
     state->block_align = block_align;
     state->sample_format = sample_format;
-    state->channel_layout = channel_count == 1u
-                                ? APTA_CHANNEL_LAYOUT_MONO
-                                : APTA_CHANNEL_LAYOUT_STEREO;
+    state->channel_layout = apta_wav_resolve_channel_layout(
+        channel_count,
+        is_extensible,
+        channel_mask);
 
     decoder_out->user_data = state;
     decoder_out->read_frames = apta_wav_read_frames;

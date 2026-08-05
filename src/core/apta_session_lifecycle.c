@@ -244,10 +244,11 @@ apta_status_t APTA_CALL apta_session_destroy(apta_session_t *session)
     return APTA_STATUS_OK;
 }
 
-apta_status_t APTA_CALL apta_session_process(
+static apta_status_t apta_session_process_impl(
     apta_session_t *session,
     const apta_work_budget_t *budget,
-    apta_progress_t *progress_out)
+    apta_progress_t *progress_out,
+    uint32_t process_lock_held)
 {
     apta_session_state_t state;
     apta_status_t status;
@@ -276,7 +277,8 @@ apta_status_t APTA_CALL apta_session_process(
         return APTA_ERROR_INCOMPATIBLE_VERSION;
     }
 
-    if (atomic_flag_test_and_set_explicit(
+    if (process_lock_held == 0u &&
+        atomic_flag_test_and_set_explicit(
             &session->process_lock,
             memory_order_acquire)) {
         return APTA_ERROR_BUSY;
@@ -377,6 +379,22 @@ apta_status_t APTA_CALL apta_session_process(
     }
 
     return APTA_STATUS_WOULD_BLOCK;
+}
+
+apta_status_t apta_internal_session_process_prelocked(
+    apta_session_t *session,
+    const apta_work_budget_t *budget,
+    apta_progress_t *progress_out)
+{
+    return apta_session_process_impl(session, budget, progress_out, 1u);
+}
+
+apta_status_t APTA_CALL apta_session_process(
+    apta_session_t *session,
+    const apta_work_budget_t *budget,
+    apta_progress_t *progress_out)
+{
+    return apta_session_process_impl(session, budget, progress_out, 0u);
 }
 
 void APTA_CALL apta_session_request_cancel(apta_session_t *session)
