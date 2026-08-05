@@ -302,8 +302,8 @@ set_source_files_properties(
     PROPERTIES
         COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_internal_detail_next_pcm_request=apta_internal_detail_next_pcm_request_base;apta_internal_detail_accept_replay=apta_internal_detail_accept_replay_base")
 
-add_library(
-    apta_core
+set(
+    APTA_CORE_SOURCES
         src/beatgrid/apta_s6.c
         src/beatgrid/apta_s6_accessors.c
         src/beatgrid/apta_s6_cleanup.c
@@ -365,6 +365,9 @@ add_library(
         src/waveform/apta_waveform_snapshot.c
         src/waveform/apta_waveform_snapshot_combined.c)
 
+add_library(apta_core_objects OBJECT ${APTA_CORE_SOURCES})
+add_library(apta_core $<TARGET_OBJECTS:apta_core_objects>)
+
 file(
     GLOB_RECURSE
     APTA_DISCOVERED_CORE_SOURCES
@@ -375,7 +378,7 @@ file(
     src/tempo/*.c
     src/beatgrid/*.c
     src/waveform/*.c)
-get_target_property(APTA_CONFIGURED_CORE_SOURCES apta_core SOURCES)
+get_target_property(APTA_CONFIGURED_CORE_SOURCES apta_core_objects SOURCES)
 foreach(APTA_DISCOVERED_SOURCE IN LISTS APTA_DISCOVERED_CORE_SOURCES)
     list(
         FIND
@@ -392,20 +395,32 @@ endforeach()
 add_library(apta::core ALIAS apta_core)
 
 if(APTA_ENABLE_INTERNAL_PROFILING)
-    target_compile_definitions(apta_core PRIVATE APTA_INTERNAL_PROFILE_S4=1)
+    target_compile_definitions(apta_core_objects PRIVATE APTA_INTERNAL_PROFILE_S4=1)
 endif()
+
+set_target_properties(
+    apta_core_objects
+    PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED YES
+        C_EXTENSIONS NO
+        C_VISIBILITY_PRESET default
+        VISIBILITY_INLINES_HIDDEN YES
+        POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 
 set_target_properties(
     apta_core
     PROPERTIES
         OUTPUT_NAME apta
         VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        C_STANDARD 11
-        C_STANDARD_REQUIRED YES
-        C_EXTENSIONS NO
-        C_VISIBILITY_PRESET default
-        VISIBILITY_INLINES_HIDDEN YES)
+        SOVERSION ${PROJECT_VERSION_MAJOR})
+
+target_link_libraries(
+    apta_core_objects
+    PRIVATE
+        apta::headers
+        apta_c11_atomics
+        apta_sanitizers)
 
 target_link_libraries(
     apta_core
@@ -428,24 +443,39 @@ if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
 endif()
 
 target_include_directories(
-    apta_core
+    apta_core_objects
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
-target_compile_definitions(apta_core PRIVATE APTA_BUILDING_LIBRARY=1)
+target_compile_definitions(apta_core_objects PRIVATE APTA_BUILDING_LIBRARY=1)
 if(BUILD_SHARED_LIBS)
+    target_compile_definitions(apta_core_objects PRIVATE APTA_SHARED=1)
     target_compile_definitions(apta_core PUBLIC APTA_SHARED=1)
 endif()
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(apta_core PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(apta_core_objects PRIVATE -Wall -Wextra -Wpedantic)
     if(APTA_WARNINGS_AS_ERRORS)
-        target_compile_options(apta_core PRIVATE -Werror)
+        target_compile_options(apta_core_objects PRIVATE -Werror)
     endif()
 elseif(MSVC)
-    target_compile_options(apta_core PRIVATE /W4)
+    target_compile_options(apta_core_objects PRIVATE /W4)
     if(APTA_WARNINGS_AS_ERRORS)
-        target_compile_options(apta_core PRIVATE /WX)
+        target_compile_options(apta_core_objects PRIVATE /WX)
+    endif()
+endif()
+
+if(BUILD_SHARED_LIBS AND APTA_BUILD_TESTS)
+    add_library(apta_core_test STATIC $<TARGET_OBJECTS:apta_core_objects>)
+    target_link_libraries(
+        apta_core_test
+        PUBLIC
+            apta::headers
+            apta_sanitizers
+        PRIVATE
+            apta_c11_atomics)
+    if(UNIX)
+        target_link_libraries(apta_core_test PUBLIC m)
     endif()
 endif()
 
