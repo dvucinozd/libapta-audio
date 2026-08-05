@@ -87,6 +87,42 @@ static int run_case(
     return 0;
 }
 
+static int run_non_stereo_extensible_mask_case(void)
+{
+    char path[APTA_TEST_TEMP_PATH_CAPACITY];
+    FILE *file;
+    apta_decoder_t decoder;
+    apta_decoder_info_t info;
+
+    CHECK(apta_test_make_temp_path(path, sizeof(path)));
+    CHECK(apta_test_write_wav(
+        path,
+        1u,
+        16u,
+        2u,
+        48000u,
+        8u,
+        1,
+        NULL,
+        NULL));
+
+    file = fopen(path, "r+b");
+    CHECK(file != NULL);
+    CHECK(fseek(file, 40L, SEEK_SET) == 0);
+    CHECK(apta_test_put_u32(file, 0x0000000Cu));
+    CHECK(fclose(file) == 0);
+
+    apta_decoder_init(&decoder);
+    apta_decoder_info_init(&info);
+    CHECK(apta_wav_decoder_open_path(path, &decoder, &info) == APTA_STATUS_OK);
+    CHECK(info.channel_count == 2u);
+    CHECK(info.channel_layout == APTA_CHANNEL_LAYOUT_UNSPECIFIED);
+
+    apta_decoder_close(&decoder);
+    CHECK(apta_test_remove_path(path));
+    return 0;
+}
+
 int main(void)
 {
     CHECK(run_case(
@@ -119,5 +155,6 @@ int main(void)
               2u,
               1,
               APTA_SAMPLE_S16_NATIVE_INTERLEAVED) == 0);
+    CHECK(run_non_stereo_extensible_mask_case() == 0);
     return 0;
 }
