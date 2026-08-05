@@ -51,28 +51,23 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
-      - name: Configure shared-library ABI build
+      - name: Configure full shared-library build
         run: >-
           cmake -S . -B build-shared
           -DBUILD_SHARED_LIBS=ON
           -DAPTA_BUILD_TESTS=ON
-          -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF
-          -DAPTA_BUILD_TOOLS=OFF
+          -DAPTA_BUILD_DESKTOP_ADAPTERS=ON
+          -DAPTA_BUILD_TOOLS=ON
           -DAPTA_WARNINGS_AS_ERRORS=ON
           -DCMAKE_BUILD_TYPE=Release
 
-      - name: Compile shared library and ABI checks
-        run: >-
-          cmake --build build-shared
-          --target apta_core apta_abi_layout_manifest apta_compat_1_0_client
-          --parallel 2
+      - name: Compile full shared-library build
+        run: cmake --build build-shared --parallel 2
 
-      - name: Run shared-library ABI, conformance and interchange tests
+      - name: Run full shared-library test suite
         run: >-
           ctest --test-dir build-shared
-          -R "^(apta\.abi\..*|apta\.conformance\.installed|apta\.interchange\.versioned)$"
           --timeout 600
-          --verbose
           --output-on-failure
 
       - name: Upload Linux conformance reports
