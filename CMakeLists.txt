@@ -15,6 +15,7 @@ project(
 
 include(cmake/APTAVersionCheck.cmake)
 
+option(BUILD_SHARED_LIBS "Build libapta as a shared library" OFF)
 option(APTA_BUILD_TESTS "Build libapta tests" ON)
 option(APTA_BUILD_EXAMPLES "Build libapta public API examples" OFF)
 option(APTA_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
