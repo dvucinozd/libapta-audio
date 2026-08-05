@@ -39,6 +39,7 @@ function(apta_add_tool target output_name source)
             apta_sanitizers)
     if(UNIX)
         target_compile_definitions(${target} PRIVATE _POSIX_C_SOURCE=200809L)
+        target_link_libraries(${target} PRIVATE m)
     endif()
     set_target_properties(
         ${target}
