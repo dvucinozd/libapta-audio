@@ -18,6 +18,11 @@ APTA_API apta_status_t APTA_CALL apta_session_process_activation_base(
     const apta_work_budget_t *budget,
     apta_progress_t *progress_out);
 
+apta_status_t apta_internal_session_process_prelocked(
+    apta_session_t *session,
+    const apta_work_budget_t *budget,
+    apta_progress_t *progress_out);
+
 apta_status_t APTA_CALL apta_query_memory_requirements(
     const apta_session_config_t *config,
     apta_memory_requirements_t *requirements_out)
@@ -132,16 +137,25 @@ apta_status_t APTA_CALL apta_session_process(
             progress_out);
     }
 
+    if (atomic_flag_test_and_set_explicit(
+            &session->process_lock,
+            memory_order_acquire)) {
+        return APTA_ERROR_BUSY;
+    }
+
     pulled_frames = 0u;
     pull_status = apta_internal_pull_pcm_before_process(
         session,
         budget,
         &pulled_frames);
     if (pull_status < 0) {
+        atomic_flag_clear_explicit(
+            &session->process_lock,
+            memory_order_release);
         return pull_status;
     }
 
-    process_status = apta_session_process_activation_base(
+    process_status = apta_internal_session_process_prelocked(
         session,
         budget,
         progress_out);
