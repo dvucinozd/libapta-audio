@@ -369,6 +369,12 @@ set(
 add_library(apta_core_objects OBJECT ${APTA_CORE_SOURCES})
 add_library(apta_core $<TARGET_OBJECTS:apta_core_objects>)
 
+if(BUILD_SHARED_LIBS AND WIN32)
+    target_sources(
+        apta_core
+        PRIVATE abi/public-symbols-1.1.def)
+endif()
+
 file(
     GLOB_RECURSE
     APTA_DISCOVERED_CORE_SOURCES
@@ -440,7 +446,7 @@ if(BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
     target_link_options(
         apta_core
         PRIVATE
-            "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/abi/public-symbols-1.0.map")
+            "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/abi/public-symbols-1.1.map")
 endif()
 
 target_include_directories(

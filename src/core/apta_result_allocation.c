@@ -72,7 +72,19 @@ int apta_internal_result_allocation_bytes(
         !apta_result_allocation_add(
             &total,
             result->local_grid.segment_count,
-            sizeof(apta_grid_segment_t))) {
+            sizeof(apta_grid_segment_t)) ||
+        !apta_result_allocation_add(
+            &total,
+            result->key.candidate_count,
+            sizeof(apta_key_candidate_t)) ||
+        !apta_result_allocation_add(
+            &total,
+            result->meter.segment_count,
+            sizeof(apta_meter_segment_t)) ||
+        !apta_result_allocation_add(
+            &total,
+            result->quality_count,
+            sizeof(apta_quality_view_t))) {
         return 0;
     }
 

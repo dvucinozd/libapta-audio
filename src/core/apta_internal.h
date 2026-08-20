@@ -573,6 +573,16 @@ struct apta_result {
     apta_frame_range_t *local_grid_coverage;
     apta_grid_segment_t *local_grid_segments;
 
+    apta_key_view_t key;
+    apta_key_candidate_t *key_candidates;
+
+    apta_meter_view_t meter;
+    apta_meter_segment_t *meter_segments;
+
+    uint32_t quality_count;
+    uint32_t reserved_quality_count;
+    apta_quality_view_t *quality;
+
     apta_internal_s6_result_state_t *s6;
 };
 

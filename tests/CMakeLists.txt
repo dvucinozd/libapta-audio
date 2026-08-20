@@ -47,6 +47,14 @@ apta_add_c_test(apta_core_smoke apta.core.smoke unit/core_smoke.c)
 apta_add_c_test(apta_allocation_failure apta.core.allocation_failure unit/allocation_failure.c)
 apta_add_c_test(apta_cancellation apta.core.cancellation unit/cancellation.c)
 apta_add_c_test(apta_initializers apta.api.initializers unit/initializers.c)
+apta_add_c_test(
+    apta_result_model_1_1
+    apta.api.result_model_1_1
+    unit/result_model_1_1.c)
+target_link_libraries(apta_result_model_1_1 PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_result_model_1_1
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 apta_add_c_test(apta_version_validation apta.api.version_validation unit/version_validation.c)
 apta_add_c_test(apta_metadata_lifecycle apta.metadata.lifecycle unit/metadata_lifecycle.c)
 apta_add_c_test(apta_pcm_pull apta.source.pcm_pull unit/pcm_pull.c)
@@ -401,7 +409,9 @@ add_test(
         ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/abi/check_header_snapshot.py
         --live ${CMAKE_SOURCE_DIR}/include/apta
-        --snapshot ${CMAKE_CURRENT_SOURCE_DIR}/compat/1.0.0/include/apta)
+        --snapshot ${CMAKE_CURRENT_SOURCE_DIR}/compat/1.0.0/include/apta
+        --delta-manifest
+        ${CMAKE_SOURCE_DIR}/abi/public-header-deltas-1.1.sha256)
 
 add_executable(apta_compat_1_0_client compat/1.0.0/client.c)
 target_include_directories(
@@ -425,5 +435,5 @@ if(BUILD_SHARED_LIBS)
             ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/abi/check_symbols.py
             --library $<TARGET_FILE:apta_core>
-            --manifest ${CMAKE_SOURCE_DIR}/abi/public-symbols-1.0.txt)
+            --manifest ${CMAKE_SOURCE_DIR}/abi/public-symbols-1.1.txt)
 endif()

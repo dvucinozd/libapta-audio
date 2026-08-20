@@ -25,6 +25,9 @@ int main(void)
     apta_waveform_tile_view_t tile;
     apta_tempo_view_t tempo;
     apta_grid_view_t grid;
+    apta_key_view_t key;
+    apta_meter_view_t meter;
+    apta_quality_view_t quality;
     apta_metadata_t metadata;
     apta_metadata_view_t metadata_view;
     apta_serialize_options_t serialization;
@@ -40,6 +43,9 @@ int main(void)
     apta_waveform_tile_view_init(&tile);
     apta_tempo_view_init(&tempo);
     apta_grid_view_init(&grid);
+    apta_key_view_init(&key);
+    apta_meter_view_init(&meter);
+    apta_quality_view_init(&quality);
     apta_metadata_init(&metadata);
     apta_metadata_view_init(&metadata_view);
     apta_serialize_options_init(&serialization);
@@ -55,6 +61,9 @@ int main(void)
     CHECK_PREFIX(tile);
     CHECK_PREFIX(tempo);
     CHECK_PREFIX(grid);
+    CHECK_PREFIX(key);
+    CHECK_PREFIX(meter);
+    CHECK_PREFIX(quality);
     CHECK_PREFIX(metadata);
     CHECK_PREFIX(metadata_view);
     CHECK_PREFIX(serialization);
@@ -70,7 +79,9 @@ int main(void)
         tempo.selected.evidence_range.struct_size !=
             (uint32_t)sizeof(tempo.selected.evidence_range) ||
         grid.requested_range.struct_size !=
-            (uint32_t)sizeof(grid.requested_range)) {
+            (uint32_t)sizeof(grid.requested_range) ||
+        key.applicability_range.struct_size !=
+            (uint32_t)sizeof(key.applicability_range)) {
         return 1;
     }
 
@@ -78,6 +89,16 @@ int main(void)
         tile.confidence != APTA_CONFIDENCE_UNKNOWN ||
         tempo.selected.confidence != APTA_CONFIDENCE_UNKNOWN ||
         grid.confidence != APTA_CONFIDENCE_UNKNOWN ||
+        key.tonic != APTA_KEY_TONIC_UNKNOWN ||
+        key.mode != APTA_KEY_MODE_UNKNOWN ||
+        key.confidence != APTA_CONFIDENCE_UNKNOWN ||
+        key.state != APTA_FEATURE_ABSENT ||
+        meter.confidence != APTA_CONFIDENCE_UNKNOWN ||
+        meter.state != APTA_FEATURE_ABSENT ||
+        quality.evidence_coverage_permille !=
+            APTA_EVIDENCE_COVERAGE_UNKNOWN ||
+        quality.confidence != APTA_CONFIDENCE_UNKNOWN ||
+        quality.state != APTA_FEATURE_ABSENT ||
         metadata.flags != 0u ||
         metadata.application_source_id_kind !=
             APTA_METADATA_SOURCE_ID_NONE ||

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from pathlib import Path
 
 
@@ -14,21 +15,46 @@ def files(root: Path) -> dict[str, bytes]:
     }
 
 
+def normalized_digest(data: bytes) -> str:
+    return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
+
+
+def read_delta_manifest(path: Path) -> dict[str, str]:
+    entries: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        digest, name = stripped.split(maxsplit=1)
+        entries[name] = digest
+    return entries
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--live", type=Path, required=True)
     parser.add_argument("--snapshot", type=Path, required=True)
+    parser.add_argument("--delta-manifest", type=Path)
     args = parser.parse_args()
 
     live = files(args.live)
     snapshot = files(args.snapshot)
-    if live == snapshot:
-        return 0
+    deltas = (
+        read_delta_manifest(args.delta_manifest)
+        if args.delta_manifest is not None
+        else {})
 
-    for name in sorted(set(live) | set(snapshot)):
-        if live.get(name) != snapshot.get(name):
-            print(f"public header snapshot drift: {name}")
-    return 1
+    mismatches: list[str] = []
+    for name in sorted(set(live) | set(snapshot) | set(deltas)):
+        if name in deltas:
+            if name not in live or normalized_digest(live[name]) != deltas[name]:
+                mismatches.append(f"public header delta drift: {name}")
+        elif live.get(name) != snapshot.get(name):
+            mismatches.append(f"public header snapshot drift: {name}")
+
+    for mismatch in mismatches:
+        print(mismatch)
+    return 1 if mismatches else 0
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@
 /*
  * MSVC does not infer DLL exports for public wrappers whose implementation
  * is composed through private source-level aliases. Keep the linker export
- * directives identical to abi/public-symbols-1.0.txt; the shared-library
+ * directives identical to abi/public-symbols-1.1.txt; the shared-library
  * ABI test rejects both missing and unexpected apta_* exports.
  */
 #if defined(_MSC_VER) && defined(APTA_SHARED) && \
@@ -21,10 +21,12 @@
 #  pragma comment(linker, "/export:apta_frame_range_init")
 #  pragma comment(linker, "/export:apta_grid_revision_view_init")
 #  pragma comment(linker, "/export:apta_grid_view_init")
+#  pragma comment(linker, "/export:apta_key_view_init")
 #  pragma comment(linker, "/export:apta_logger_init")
 #  pragma comment(linker, "/export:apta_memory_requirements_init")
 #  pragma comment(linker, "/export:apta_metadata_init")
 #  pragma comment(linker, "/export:apta_metadata_view_init")
+#  pragma comment(linker, "/export:apta_meter_view_init")
 #  pragma comment(linker, "/export:apta_parse_options_init")
 #  pragma comment(linker, "/export:apta_pcm_block_init")
 #  pragma comment(linker, "/export:apta_pcm_request_init")
@@ -42,9 +44,12 @@
 #  pragma comment(linker, "/export:apta_result_get_generation")
 #  pragma comment(linker, "/export:apta_result_get_grid_revision")
 #  pragma comment(linker, "/export:apta_result_get_info")
+#  pragma comment(linker, "/export:apta_result_get_key")
+#  pragma comment(linker, "/export:apta_result_get_meter")
 #  pragma comment(linker, "/export:apta_result_get_metadata")
 #  pragma comment(linker, "/export:apta_result_get_source_info")
 #  pragma comment(linker, "/export:apta_result_get_tempo")
+#  pragma comment(linker, "/export:apta_result_get_quality")
 #  pragma comment(linker, "/export:apta_result_get_waveform_overview")
 #  pragma comment(linker, "/export:apta_result_get_waveform_tile")
 #  pragma comment(linker, "/export:apta_result_info_init")
@@ -75,6 +80,7 @@
 #  pragma comment(linker, "/export:apta_session_signal_end_of_input")
 #  pragma comment(linker, "/export:apta_source_info_init")
 #  pragma comment(linker, "/export:apta_tempo_view_init")
+#  pragma comment(linker, "/export:apta_quality_view_init")
 #  pragma comment(linker, "/export:apta_waveform_overview_view_init")
 #  pragma comment(linker, "/export:apta_waveform_tile_view_init")
 #  pragma comment(linker, "/export:apta_work_budget_init")

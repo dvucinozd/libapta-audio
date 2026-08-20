@@ -70,6 +70,9 @@ void apta_internal_result_release(apta_result_t *result)
     }
 
     apta_internal_metadata_cleanup(context, &result->metadata);
+    apta_internal_context_deallocate(context, result->key_candidates);
+    apta_internal_context_deallocate(context, result->meter_segments);
+    apta_internal_context_deallocate(context, result->quality);
     apta_internal_waveform_cleanup_result(result);
     (void)atomic_fetch_sub_explicit(
         &context->result_count,
@@ -109,6 +112,8 @@ apta_status_t apta_internal_publish_result(
     result->context = session->context;
     atomic_init(&result->reference_count, 1u);
     apta_metadata_view_init(&result->metadata.view);
+    apta_key_view_init(&result->key);
+    apta_meter_view_init(&result->meter);
 
     apta_source_info_init(&result->source_info);
     result->source_info.total_frames = session->config.total_frames;

@@ -55,6 +55,7 @@ typedef uint32_t apta_feature_state_t;
 typedef uint32_t apta_request_state_t;
 typedef uint32_t apta_grid_representation_t;
 typedef uint32_t apta_tempo_relation_t;
+typedef uint32_t apta_key_mode_t;
 typedef uint32_t apta_memory_flags_t;
 typedef uint32_t apta_log_level_t;
 typedef uint32_t apta_diagnostic_severity_t;
@@ -82,6 +83,18 @@ typedef uint32_t apta_source_fingerprint_kind_t;
 #define APTA_FEATURE_DYNAMIC_TEMPO      (UINT64_C(1) << 6)
 #define APTA_FEATURE_CONFIDENCE         (UINT64_C(1) << 7)
 #define APTA_FEATURE_GRID_LOCKING       (UINT64_C(1) << 8)
+#define APTA_FEATURE_MUSICAL_KEY        (UINT64_C(1) << 9)
+#define APTA_FEATURE_METER_DOWNBEAT     (UINT64_C(1) << 10)
+#define APTA_FEATURE_CALIBRATED_QUALITY (UINT64_C(1) << 11)
+
+#define APTA_KEY_MODE_UNKNOWN 0u
+#define APTA_KEY_MODE_MAJOR   1u
+#define APTA_KEY_MODE_MINOR   2u
+#define APTA_KEY_TONIC_UNKNOWN UINT8_MAX
+
+#define APTA_EVIDENCE_COVERAGE_MIN     0u
+#define APTA_EVIDENCE_COVERAGE_MAX     1000u
+#define APTA_EVIDENCE_COVERAGE_UNKNOWN UINT16_MAX
 
 #define APTA_SAMPLE_S16_NATIVE_INTERLEAVED  1u
 #define APTA_SAMPLE_S24_3LE_INTERLEAVED     2u

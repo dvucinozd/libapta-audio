@@ -108,6 +108,38 @@ void APTA_CALL apta_grid_view_init(apta_grid_view_t *view)
     }
 }
 
+void APTA_CALL apta_key_view_init(apta_key_view_t *view)
+{
+    if (view != NULL) {
+        APTA_INIT_STRUCT(view);
+        apta_frame_range_init(&view->applicability_range);
+        view->tonic = APTA_KEY_TONIC_UNKNOWN;
+        view->mode = APTA_KEY_MODE_UNKNOWN;
+        view->confidence = APTA_CONFIDENCE_UNKNOWN;
+        view->state = APTA_FEATURE_ABSENT;
+    }
+}
+
+void APTA_CALL apta_meter_view_init(apta_meter_view_t *view)
+{
+    if (view != NULL) {
+        APTA_INIT_STRUCT(view);
+        view->confidence = APTA_CONFIDENCE_UNKNOWN;
+        view->state = APTA_FEATURE_ABSENT;
+    }
+}
+
+void APTA_CALL apta_quality_view_init(apta_quality_view_t *view)
+{
+    if (view != NULL) {
+        APTA_INIT_STRUCT(view);
+        view->evidence_coverage_permille =
+            APTA_EVIDENCE_COVERAGE_UNKNOWN;
+        view->confidence = APTA_CONFIDENCE_UNKNOWN;
+        view->state = APTA_FEATURE_ABSENT;
+    }
+}
+
 void APTA_CALL apta_grid_revision_view_init(apta_grid_revision_view_t *view)
 {
     if (view != NULL) {

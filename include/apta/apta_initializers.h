@@ -45,6 +45,15 @@ APTA_API void APTA_CALL
 apta_grid_view_init(apta_grid_view_t *view);
 
 APTA_API void APTA_CALL
+apta_key_view_init(apta_key_view_t *view);
+
+APTA_API void APTA_CALL
+apta_meter_view_init(apta_meter_view_t *view);
+
+APTA_API void APTA_CALL
+apta_quality_view_init(apta_quality_view_t *view);
+
+APTA_API void APTA_CALL
 apta_grid_revision_view_init(apta_grid_revision_view_t *view);
 
 #ifdef __cplusplus

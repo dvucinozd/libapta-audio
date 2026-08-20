@@ -43,6 +43,11 @@ extern "C" {
 #define APTA_GRID_FLAG_USER_EDITED           (1u << 6)
 #define APTA_GRID_FLAG_DEGRADED              (1u << 7)
 
+#define APTA_QUALITY_FLAG_AMBIGUOUS             (1u << 0)
+#define APTA_QUALITY_FLAG_DEGRADED              (1u << 1)
+#define APTA_QUALITY_FLAG_OUT_OF_DOMAIN         (1u << 2)
+#define APTA_QUALITY_FLAG_DETECTOR_DISAGREEMENT (1u << 3)
+
 typedef struct {
     int16_t minimum;
     int16_t maximum;
@@ -210,6 +215,90 @@ typedef struct {
 } apta_grid_view_t;
 
 typedef struct {
+    uint8_t tonic;
+    uint8_t reserved8;
+    int16_t tuning_offset_cents;
+    apta_key_mode_t mode;
+    uint16_t score;
+    apta_confidence_value_t confidence;
+    uint8_t reserved8_2;
+    uint32_t flags;
+} apta_key_candidate_t;
+
+typedef struct {
+    uint32_t struct_size;
+    uint32_t api_version;
+
+    apta_frame_range_t applicability_range;
+    apta_key_mode_t mode;
+    int16_t tuning_offset_cents;
+    uint8_t tonic;
+    apta_confidence_value_t confidence;
+    apta_feature_state_t state;
+
+    uint32_t candidate_count;
+    const apta_key_candidate_t *candidates;
+
+    uint32_t flags;
+    uint32_t reserved32[3];
+} apta_key_view_t;
+
+typedef struct {
+    uint32_t struct_size;
+    uint32_t api_version;
+
+    apta_frame_range_t applicability_range;
+    apta_source_frame_t downbeat_frame;
+    apta_beat_ordinal_t downbeat_ordinal;
+
+    uint16_t numerator;
+    uint16_t denominator;
+    apta_feature_state_t state;
+    apta_confidence_value_t confidence;
+    uint8_t reserved8;
+    uint16_t reserved16;
+
+    uint32_t flags;
+    uint32_t segment_id;
+    uint32_t reserved32[2];
+} apta_meter_segment_t;
+
+typedef struct {
+    uint32_t struct_size;
+    uint32_t api_version;
+
+    apta_source_frame_t downbeat_frame;
+    apta_beat_ordinal_t downbeat_ordinal;
+    uint16_t numerator;
+    uint16_t denominator;
+    apta_feature_state_t state;
+    apta_confidence_value_t confidence;
+    uint8_t reserved8;
+    uint16_t reserved16;
+
+    uint32_t segment_count;
+    const apta_meter_segment_t *segments;
+
+    uint32_t flags;
+    uint32_t reserved32[3];
+} apta_meter_view_t;
+
+typedef struct {
+    uint32_t struct_size;
+    uint32_t api_version;
+
+    apta_feature_mask_t feature;
+    uint32_t calibration_model_id;
+    uint16_t evidence_coverage_permille;
+    apta_confidence_value_t confidence;
+    uint8_t reserved8;
+    apta_feature_state_t state;
+
+    uint32_t flags;
+    uint32_t reserved32[3];
+} apta_quality_view_t;
+
+typedef struct {
     uint32_t struct_size;
     uint32_t api_version;
 
@@ -313,6 +402,25 @@ apta_result_get_beatgrid(
     apta_feature_mask_t grid_feature,
     const apta_frame_range_t *range,
     apta_grid_view_t *view_out);
+
+/* Pointers in these immutable views remain valid until result is released. */
+APTA_API apta_status_t APTA_CALL
+apta_result_get_key(
+    const apta_result_t *result,
+    const apta_frame_range_t *range,
+    apta_key_view_t *view_out);
+
+APTA_API apta_status_t APTA_CALL
+apta_result_get_meter(
+    const apta_result_t *result,
+    const apta_frame_range_t *range,
+    apta_meter_view_t *view_out);
+
+APTA_API apta_status_t APTA_CALL
+apta_result_get_quality(
+    const apta_result_t *result,
+    apta_feature_mask_t feature,
+    apta_quality_view_t *view_out);
 
 APTA_API uint32_t APTA_CALL
 apta_result_get_diagnostic_count(const apta_result_t *result);
