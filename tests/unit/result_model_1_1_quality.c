@@ -169,11 +169,55 @@ static int check_unavailable_target_is_filtered(void)
     return 0;
 }
 
+static int check_waveform_target_coverage(void)
+{
+    apta_result_t result;
+    apta_waveform_span_t span;
+    apta_quality_view_t quality[1];
+    apta_frame_range_t range;
+
+    memset(&result, 0, sizeof(result));
+    memset(&span, 0, sizeof(span));
+    set_range(&span.source_range, 100u, 200u);
+    result.overview.span_count = 1u;
+    result.overview.spans = &span;
+    result.info.available_features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_3BAND |
+        APTA_FEATURE_CALIBRATED_QUALITY;
+
+    apta_quality_view_init(&quality[0]);
+    quality[0].feature = APTA_FEATURE_WAVEFORM_3BAND;
+    quality[0].state = APTA_FEATURE_FINAL;
+    quality[0].confidence = 90u;
+    result.quality_count = 1u;
+    result.quality = quality;
+
+    set_range(&range, 300u, 400u);
+    CHECK(expect_quality_state(
+              &result, &range, APTA_FEATURE_ABSENT,
+              APTA_CONFIDENCE_UNKNOWN,
+              APTA_STATUS_NOT_AVAILABLE) == 0);
+
+    result.info.available_features &= ~APTA_FEATURE_WAVEFORM_3BAND;
+    result.info.available_features |= APTA_FEATURE_CONFIDENCE;
+    quality[0].feature = APTA_FEATURE_CONFIDENCE;
+    quality[0].state = APTA_FEATURE_STABLE;
+    quality[0].confidence = 80u;
+
+    set_range(&range, 120u, 180u);
+    CHECK(expect_quality_state(
+              &result, &range, APTA_FEATURE_STABLE, 80u,
+              APTA_STATUS_OK) == 0);
+    return 0;
+}
+
 int main(void)
 {
     CHECK(check_order(0) == 0);
     CHECK(check_order(1) == 0);
     CHECK(check_unknown_confidence_is_conservative() == 0);
     CHECK(check_unavailable_target_is_filtered() == 0);
+    CHECK(check_waveform_target_coverage() == 0);
     return 0;
 }

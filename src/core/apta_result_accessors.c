@@ -155,13 +155,50 @@ static int apta_result_meter_range_coverage(
     return overlaps ? 1 : 0;
 }
 
+#define APTA_QUALITY_TARGET_FEATURES (                                  \
+    APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_WAVEFORM_DETAIL |      \
+    APTA_FEATURE_WAVEFORM_3BAND | APTA_FEATURE_BPM |                     \
+    APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_GLOBAL_BEATGRID |         \
+    APTA_FEATURE_DYNAMIC_TEMPO | APTA_FEATURE_GRID_LOCKING |             \
+    APTA_FEATURE_CONFIDENCE | APTA_FEATURE_MUSICAL_KEY |                 \
+    APTA_FEATURE_METER_DOWNBEAT)
+
+static int apta_result_detail_range_has_coverage(
+    const apta_result_t *result,
+    const apta_frame_range_t *range)
+{
+    uint32_t index;
+
+    for (index = 0u; index < result->detail_tile_count; ++index) {
+        if (apta_result_ranges_overlap(
+                &result->detail_tiles[index].source_range, range)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int apta_result_waveform_range_has_coverage(
+    const apta_result_t *result,
+    const apta_frame_range_t *range)
+{
+    if ((result->info.available_features &
+         APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u &&
+        apta_overview_range_has_coverage(result, range)) {
+        return 1;
+    }
+    if ((result->info.available_features &
+         APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
+        return apta_result_detail_range_has_coverage(result, range);
+    }
+    return 0;
+}
+
 static int apta_result_quality_target_overlaps(
     const apta_result_t *result,
     apta_feature_mask_t feature,
     const apta_frame_range_t *range)
 {
-    uint32_t index;
-
     if ((result->info.available_features & feature) == 0u) {
         return 0;
     }
@@ -176,7 +213,8 @@ static int apta_result_quality_target_overlaps(
         return apta_result_meter_range_coverage(result, range) != 0;
     }
     if (feature == APTA_FEATURE_BPM ||
-        feature == APTA_FEATURE_CONFIDENCE) {
+        (feature == APTA_FEATURE_CONFIDENCE &&
+         (result->info.available_features & APTA_FEATURE_BPM) != 0u)) {
         return apta_result_ranges_overlap(
                    &result->tempo.selected.applicability_range, range);
     }
@@ -194,15 +232,13 @@ static int apta_result_quality_target_overlaps(
         return apta_overview_range_has_coverage(result, range);
     }
     if (feature == APTA_FEATURE_WAVEFORM_DETAIL) {
-        for (index = 0u; index < result->detail_tile_count; ++index) {
-            if (apta_result_ranges_overlap(
-                    &result->detail_tiles[index].source_range, range)) {
-                return 1;
-            }
-        }
-        return 0;
+        return apta_result_detail_range_has_coverage(result, range);
     }
-    return 1;
+    if (feature == APTA_FEATURE_WAVEFORM_3BAND ||
+        feature == APTA_FEATURE_CONFIDENCE) {
+        return apta_result_waveform_range_has_coverage(result, range);
+    }
+    return 0;
 }
 
 static apta_feature_state_t apta_result_conservative_state(
@@ -293,6 +329,7 @@ apta_status_t APTA_CALL apta_result_get_feature_state(
             const apta_quality_view_t *quality = &result->quality[index];
 
             if (quality->feature == 0u ||
+                (quality->feature & APTA_QUALITY_TARGET_FEATURES) == 0u ||
                 (quality->feature & (quality->feature - 1u)) != 0u ||
                 quality->feature == APTA_FEATURE_CALIBRATED_QUALITY ||
                 !apta_result_quality_target_overlaps(
@@ -524,6 +561,7 @@ apta_status_t APTA_CALL apta_result_get_quality(
     const apta_quality_view_t *quality;
 
     if (result == NULL || view_out == NULL || feature == 0u ||
+        (feature & APTA_QUALITY_TARGET_FEATURES) == 0u ||
         feature == APTA_FEATURE_CALIBRATED_QUALITY ||
         (feature & (feature - 1u)) != 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;

@@ -173,6 +173,9 @@ static int check_invalid_inputs(apta_result_t *result)
     CHECK(apta_result_get_quality(
               result, APTA_FEATURE_CALIBRATED_QUALITY, &quality) ==
           APTA_ERROR_INVALID_ARGUMENT);
+    CHECK(apta_result_get_quality(
+              result, UINT64_C(1) << 63, &quality) ==
+          APTA_ERROR_INVALID_ARGUMENT);
 
     apta_frame_range_init(&bad_range);
     bad_range.struct_size = 0u;

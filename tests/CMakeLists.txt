@@ -413,7 +413,31 @@ set_target_properties(
         C_EXTENSIONS NO)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(APTA_ABI_LAYOUT_MODEL ilp32)
+    include(CheckCSourceCompiles)
+    if(DEFINED CMAKE_TRY_COMPILE_TARGET_TYPE)
+        set(_APTA_HAD_TRY_COMPILE_TARGET_TYPE TRUE)
+        set(_APTA_SAVED_TRY_COMPILE_TARGET_TYPE
+            "${CMAKE_TRY_COMPILE_TARGET_TYPE}")
+    endif()
+    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+    check_c_source_compiles(
+        "#include <stdint.h>
+         _Static_assert(_Alignof(uint64_t) == 8, \"not p32a64\");
+         int apta_probe(void) { return 0; }"
+        APTA_ABI_POINTER32_ALIGN64)
+    if(_APTA_HAD_TRY_COMPILE_TARGET_TYPE)
+        set(CMAKE_TRY_COMPILE_TARGET_TYPE
+            "${_APTA_SAVED_TRY_COMPILE_TARGET_TYPE}")
+    else()
+        unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+    endif()
+    unset(_APTA_HAD_TRY_COMPILE_TARGET_TYPE)
+    unset(_APTA_SAVED_TRY_COMPILE_TARGET_TYPE)
+    if(APTA_ABI_POINTER32_ALIGN64)
+        set(APTA_ABI_LAYOUT_MODEL p32a64)
+    else()
+        set(APTA_ABI_LAYOUT_MODEL ilp32)
+    endif()
 elseif(WIN32)
     set(APTA_ABI_LAYOUT_MODEL llp64)
 else()

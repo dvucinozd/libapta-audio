@@ -419,7 +419,11 @@ apta_result_get_beatgrid(
  * returned. Confidence is the minimum, with UNKNOWN dominating any numeric
  * confidence. The result is independent of quality-record storage order.
  * apta_result_get_quality selects the record for exactly one target feature
- * and has no range filter.
+ * and has no range filter. Valid targets are the defined non-quality feature
+ * bits from WAVEFORM_OVERVIEW through METER_DOWNBEAT; unknown bits and
+ * CALIBRATED_QUALITY itself are rejected. CONFIDENCE follows BPM applicability
+ * when BPM is present and otherwise waveform coverage. WAVEFORM_3BAND follows
+ * waveform coverage.
  */
 APTA_API apta_status_t APTA_CALL
 apta_result_get_key(

@@ -5,26 +5,32 @@
 #include <apta/apta.h>
 
 #if UINTPTR_MAX == UINT32_MAX
-_Static_assert(sizeof(apta_key_view_t) == 68u,
-               "ILP32 apta_key_view_t size");
-_Static_assert(_Alignof(apta_key_view_t) == 4u,
-               "ILP32 apta_key_view_t alignment");
+_Static_assert(_Alignof(uint64_t) == 4u || _Alignof(uint64_t) == 8u,
+               "unsupported pointer-32 uint64_t alignment");
+_Static_assert(
+    sizeof(apta_key_view_t) == (_Alignof(uint64_t) == 8u ? 72u : 68u),
+    "pointer-32 apta_key_view_t size");
+_Static_assert(_Alignof(apta_key_view_t) == _Alignof(uint64_t),
+               "pointer-32 apta_key_view_t alignment");
 _Static_assert(offsetof(apta_key_view_t, flags) == 52u,
-               "ILP32 apta_key_view_t flags offset");
-_Static_assert(sizeof(apta_meter_segment_t) == 76u,
-               "ILP32 apta_meter_segment_t size");
-_Static_assert(_Alignof(apta_meter_segment_t) == 4u,
-               "ILP32 apta_meter_segment_t alignment");
-_Static_assert(sizeof(apta_meter_view_t) == 60u,
-               "ILP32 apta_meter_view_t size");
-_Static_assert(_Alignof(apta_meter_view_t) == 4u,
-               "ILP32 apta_meter_view_t alignment");
+               "pointer-32 apta_key_view_t flags offset");
+_Static_assert(
+    sizeof(apta_meter_segment_t) == (_Alignof(uint64_t) == 8u ? 80u : 76u),
+    "pointer-32 apta_meter_segment_t size");
+_Static_assert(_Alignof(apta_meter_segment_t) == _Alignof(uint64_t),
+               "pointer-32 apta_meter_segment_t alignment");
+_Static_assert(
+    sizeof(apta_meter_view_t) == (_Alignof(uint64_t) == 8u ? 64u : 60u),
+    "pointer-32 apta_meter_view_t size");
+_Static_assert(_Alignof(apta_meter_view_t) == _Alignof(uint64_t),
+               "pointer-32 apta_meter_view_t alignment");
 _Static_assert(offsetof(apta_meter_view_t, flags) == 44u,
-               "ILP32 apta_meter_view_t flags offset");
-_Static_assert(sizeof(apta_quality_view_t) == 44u,
-               "ILP32 apta_quality_view_t size");
-_Static_assert(_Alignof(apta_quality_view_t) == 4u,
-               "ILP32 apta_quality_view_t alignment");
+               "pointer-32 apta_meter_view_t flags offset");
+_Static_assert(
+    sizeof(apta_quality_view_t) == (_Alignof(uint64_t) == 8u ? 48u : 44u),
+    "pointer-32 apta_quality_view_t size");
+_Static_assert(_Alignof(apta_quality_view_t) == _Alignof(uint64_t),
+               "pointer-32 apta_quality_view_t alignment");
 #endif
 
 _Static_assert(sizeof(apta_status_t) == 4u, "apta_status_t must be 32-bit");
