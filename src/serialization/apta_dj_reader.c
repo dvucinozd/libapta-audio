@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../core/apta_grid_match_internal.h"
 #include "../beatgrid/apta_s6_internal.h"
 
 #include <stdalign.h>
 #include <stdint.h>
 #include <string.h>
+
+#if defined(APTA_ENABLE_TEST_HOOKS)
+uint64_t apta_test_reader_grid_match_work;
+#define APTA_TEST_READER_GRID_WORK_PTR (&apta_test_reader_grid_match_work)
+#else
+#define APTA_TEST_READER_GRID_WORK_PTR NULL
+#endif
 
 #define APTA_DJ_DIRECTORY_ENTRY_SIZE 40u
 #define APTA_MKEY_HEADER_SIZE 40u
@@ -118,80 +126,6 @@ static int apta_dj_meter_value_valid(uint16_t numerator, uint16_t denominator)
 {
     return numerator >= 1u && numerator <= 32u && denominator >= 1u &&
            denominator <= 32u && (denominator & (denominator - 1u)) == 0u;
-}
-
-static int apta_dj_grid_has_downbeat(
-    const apta_grid_view_t *grid,
-    apta_source_frame_t frame,
-    apta_beat_ordinal_t ordinal)
-{
-    uint32_t index;
-    if (grid == NULL ||
-        (grid->beat_count != 0u && grid->beats == NULL) ||
-        (grid->segment_count != 0u && grid->segments == NULL)) {
-        return 0;
-    }
-    for (index = 0u; index < grid->beat_count; ++index) {
-        if (grid->beats[index].position.whole_frame == frame &&
-            grid->beats[index].position.fraction_q32 == 0u &&
-            grid->beats[index].ordinal == ordinal) return 1;
-    }
-    for (index = 0u; index < grid->segment_count; ++index) {
-        const apta_grid_segment_t *segment = &grid->segments[index];
-        uint64_t delta;
-        uint64_t whole;
-        uint64_t fraction_product;
-        uint32_t fraction;
-        if (frame < segment->applicability_range.first_frame ||
-            frame >= segment->applicability_range.end_frame ||
-            ordinal < segment->anchor_ordinal) continue;
-        delta = (uint64_t)ordinal - (uint64_t)segment->anchor_ordinal;
-        if (segment->frames_per_beat.whole_frames != 0u &&
-            delta > (UINT64_MAX - segment->anchor_position.whole_frame) /
-                        segment->frames_per_beat.whole_frames) continue;
-        whole = segment->anchor_position.whole_frame +
-                delta * segment->frames_per_beat.whole_frames;
-        if (segment->frames_per_beat.fraction_q32 != 0u &&
-            delta > UINT64_MAX / segment->frames_per_beat.fraction_q32) {
-            continue;
-        }
-        fraction_product =
-            delta * (uint64_t)segment->frames_per_beat.fraction_q32;
-        if (whole > UINT64_MAX - (fraction_product >> 32u)) continue;
-        whole += fraction_product >> 32u;
-        fraction = segment->anchor_position.fraction_q32 +
-                   (uint32_t)fraction_product;
-        if (fraction < segment->anchor_position.fraction_q32) {
-            if (whole == UINT64_MAX) continue;
-            ++whole;
-        }
-        if (whole == frame && fraction == 0u) return 1;
-    }
-    return 0;
-}
-
-static int apta_dj_downbeat_matches_available_grid(
-    const apta_result_t *result,
-    apta_source_frame_t frame,
-    apta_beat_ordinal_t ordinal)
-{
-    int has_grid = 0;
-    if ((result->info.available_features & APTA_FEATURE_LOCAL_BEATGRID) !=
-        0u) {
-        has_grid = 1;
-        if (apta_dj_grid_has_downbeat(&result->local_grid, frame, ordinal)) {
-            return 1;
-        }
-    }
-    if ((result->info.available_features & APTA_FEATURE_GLOBAL_BEATGRID) !=
-        0u) {
-        has_grid = 1;
-        if (result->s6 != NULL && apta_dj_grid_has_downbeat(
-                &result->s6->global_grid, frame, ordinal)) {
-            return 1;
-        }
-    }
-    return !has_grid;
 }
 
 static uint64_t apta_dj_allocation_limit(const apta_parse_options_t *options)
@@ -386,6 +320,7 @@ static apta_status_t apta_dj_parse_meter(
     uint32_t count;
     size_t expected_size;
     uint32_t index;
+    apta_internal_grid_match_set_t grids;
 
     if (size < APTA_MTRD_HEADER_SIZE || apta_dj_get_u16(payload) != 1u ||
         !apta_dj_state_allowed(payload[2], partial) ||
@@ -408,6 +343,17 @@ static apta_status_t apta_dj_parse_meter(
     expected_size = APTA_MTRD_HEADER_SIZE +
                     (size_t)count * APTA_MTRD_SEGMENT_SIZE;
     if (size != expected_size) return APTA_ERROR_CORRUPT_DATA;
+    if ((result->info.available_features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u &&
+        result->s6 == NULL) {
+        return APTA_ERROR_CORRUPT_DATA;
+    }
+    apta_internal_grid_match_set_init(
+        &grids,
+        (result->info.available_features & APTA_FEATURE_LOCAL_BEATGRID) != 0u
+            ? &result->local_grid : NULL,
+        (result->info.available_features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u
+            ? &result->s6->global_grid : NULL,
+        APTA_TEST_READER_GRID_WORK_PTR);
     for (index = 0u; index < count; ++index) {
         const uint8_t *record = payload + APTA_MTRD_HEADER_SIZE +
                                 (size_t)index * APTA_MTRD_SEGMENT_SIZE;
@@ -426,8 +372,8 @@ static apta_status_t apta_dj_parse_meter(
             apta_dj_get_u32(record + 40u) != 0u ||
             apta_dj_get_u32(record + 44u) == 0u ||
             !apta_dj_all_zero(record + 48u, 8u) ||
-            !apta_dj_downbeat_matches_available_grid(
-                result, downbeat, apta_dj_get_i64(record + 24u)) ||
+            !apta_internal_grid_match_set_next(
+                &grids, downbeat, apta_dj_get_i64(record + 24u)) ||
             (index != 0u &&
              (apta_dj_get_u64(record - APTA_MTRD_SEGMENT_SIZE + 8u) >
                   first ||

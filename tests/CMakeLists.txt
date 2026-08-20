@@ -191,6 +191,12 @@ add_test(
 set_tests_properties(
     apta.serialization.dj_sections_id_scale
     PROPERTIES TIMEOUT 15)
+add_test(
+    NAME apta.serialization.dj_sections_grid_scale
+    COMMAND apta_dj_sections_state_scale grid-scale)
+set_tests_properties(
+    apta.serialization.dj_sections_grid_scale
+    PROPERTIES TIMEOUT 3)
 apta_add_c_test(
     apta_dj_sections_allocation_failure
     apta.serialization.dj_sections_allocation_failure

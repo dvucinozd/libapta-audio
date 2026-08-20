@@ -466,6 +466,9 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
 target_compile_definitions(apta_core_objects PRIVATE APTA_BUILDING_LIBRARY=1)
+if(APTA_BUILD_TESTS)
+    target_compile_definitions(apta_core_objects PRIVATE APTA_ENABLE_TEST_HOOKS=1)
+endif()
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(apta_core_objects PRIVATE APTA_SHARED=1)
     target_compile_definitions(apta_core PUBLIC APTA_SHARED=1)

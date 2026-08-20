@@ -6,7 +6,17 @@
 
 #include <apta/apta.h>
 
+#include "../../src/core/apta_grid_match_internal.h"
+#include "../../src/core/apta_internal.h"
+
 #define MAX_SEGMENTS 65536u
+#define GRID_BEATS APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS
+#define GRID_PERIOD 22500u
+#define GRID_LINEAR_WORK_LIMIT (4u * GRID_BEATS + 16u)
+
+extern uint64_t apta_test_builder_grid_match_work;
+extern uint64_t apta_test_writer_grid_match_work;
+extern uint64_t apta_test_reader_grid_match_work;
 
 #define CHECK(condition)                                                     \
     do {                                                                     \
@@ -507,6 +517,236 @@ cleanup:
     return ok;
 }
 
+static int grid_scale_case(apta_context_t *context)
+{
+    const uint64_t total_frames = (uint64_t)GRID_BEATS * GRID_PERIOD;
+    apta_result_builder_t *builder = NULL;
+    apta_tempo_view_t tempo;
+    apta_tempo_candidate_t candidate;
+    apta_grid_view_t grid;
+    apta_grid_revision_view_t revision;
+    apta_frame_range_t coverage;
+    apta_beat_t *beats = NULL;
+    apta_meter_segment_t *segments = NULL;
+    apta_meter_view_t meter;
+    const apta_result_t *result = NULL;
+    const apta_result_t *parsed = NULL;
+    uint8_t *bytes = NULL;
+    uint64_t size = 0u;
+    size_t written = 0u;
+    uint32_t index;
+    uint64_t builder_work = 0u;
+    uint64_t writer_work = 0u;
+    uint64_t reader_work = 0u;
+    int ok = 0;
+    int stage = 0;
+
+    beats = (apta_beat_t *)calloc(GRID_BEATS, sizeof(*beats));
+    segments = (apta_meter_segment_t *)calloc(GRID_BEATS, sizeof(*segments));
+    if (beats == NULL || segments == NULL || !create_builder(
+            context, APTA_SESSION_COMPLETED, total_frames, &builder)) {
+        goto cleanup;
+    }
+    stage = 1;
+    apta_tempo_view_init(&tempo);
+    set_range(&tempo.selected.evidence_range, 0u, total_frames);
+    set_range(&tempo.selected.applicability_range, 0u, total_frames);
+    tempo.selected.tempo_millibpm = 128000u;
+    tempo.selected.confidence = 90u;
+    tempo.selected.state = APTA_FEATURE_FINAL;
+    memset(&candidate, 0, sizeof(candidate));
+    candidate.tempo_millibpm = 128000u;
+    candidate.score = 60000u;
+    candidate.confidence = 90u;
+    tempo.candidate_count = 1u;
+    tempo.candidates = &candidate;
+    if (apta_result_builder_set_tempo(builder, &tempo) < 0) goto cleanup;
+    stage = 2;
+    for (index = 0u; index < GRID_BEATS; ++index) {
+        beats[index].position.whole_frame = (uint64_t)index * GRID_PERIOD;
+        beats[index].ordinal = index;
+        beats[index].confidence = 90u;
+        beats[index].revision = 7u;
+        init_segment(
+            &segments[index], (uint64_t)index * GRID_PERIOD,
+            (uint64_t)(index + 1u) * GRID_PERIOD, index, index + 1u,
+            APTA_FEATURE_FINAL);
+    }
+    set_range(&coverage, 0u, total_frames);
+    apta_grid_view_init(&grid);
+    set_range(&grid.requested_range, 0u, total_frames);
+    set_range(&grid.evidence_range, 0u, total_frames);
+    set_range(&grid.applicability_range, 0u, total_frames);
+    grid.representation = APTA_GRID_REPRESENTATION_EXPLICIT;
+    grid.state = APTA_FEATURE_FINAL;
+    grid.confidence = 90u;
+    grid.coverage_range_count = 1u;
+    grid.coverage_ranges = &coverage;
+    grid.beat_count = GRID_BEATS;
+    grid.beats = beats;
+    if (apta_result_builder_set_beatgrid(
+            builder, APTA_FEATURE_GLOBAL_BEATGRID, &grid) < 0) goto cleanup;
+    apta_grid_revision_view_init(&revision);
+    revision.revision_id = 7u;
+    revision.state = APTA_GRID_REVISION_APPLIED;
+    revision.confidence = 90u;
+    set_range(&revision.affected_range, 0u, total_frames);
+    revision.proposed_representation = grid.representation;
+    revision.proposed_beat_count = GRID_BEATS;
+    if (apta_result_builder_set_grid_revision(builder, &revision) < 0) {
+        goto cleanup;
+    }
+    stage = 3;
+    init_meter(&meter, segments, GRID_BEATS, APTA_FEATURE_FINAL);
+
+    /* Builder late mismatch: all preceding records match the maximum grid. */
+    ++segments[GRID_BEATS - 1u].downbeat_frame;
+    apta_test_builder_grid_match_work = 0u;
+    if (apta_result_builder_set_meter(builder, &meter) < 0 ||
+        apta_result_builder_finalize(builder, &parsed) != APTA_ERROR_CONFLICT ||
+        parsed != NULL) goto cleanup;
+    builder_work = apta_test_builder_grid_match_work;
+    stage = 4;
+    --segments[GRID_BEATS - 1u].downbeat_frame;
+    if (apta_result_builder_set_meter(builder, &meter) < 0 ||
+        apta_result_builder_finalize(builder, &result) < 0) goto cleanup;
+    apta_test_writer_grid_match_work = 0u;
+    if (apta_result_query_serialized_size(result, NULL, &size) < 0 ||
+        size > SIZE_MAX) goto cleanup;
+    writer_work = apta_test_writer_grid_match_work;
+    stage = 5;
+    bytes = (uint8_t *)malloc((size_t)size);
+    if (bytes == NULL) goto cleanup;
+    stage = 6;
+
+    if (apta_result_serialize(
+            result, NULL, bytes, (size_t)size, &written) < 0 ||
+        written != (size_t)size) goto cleanup;
+    stage = 7;
+
+    /* Writer late mismatch on otherwise-valid immutable storage. */
+    ++((apta_result_t *)result)->meter_segments[GRID_BEATS - 1u]
+          .downbeat_frame;
+    if (apta_result_query_serialized_size(result, NULL, &size) !=
+        APTA_ERROR_INVALID_STATE) goto cleanup;
+    stage = 8;
+    --((apta_result_t *)result)->meter_segments[GRID_BEATS - 1u]
+          .downbeat_frame;
+    if (apta_result_query_serialized_size(result, NULL, &size) < 0 ||
+        apta_result_serialize(
+            result, NULL, bytes, (size_t)size, &written) < 0) goto cleanup;
+    stage = 9;
+
+    apta_test_reader_grid_match_work = 0u;
+    if (apta_result_parse(context, NULL, bytes, written, &parsed) < 0) {
+        goto cleanup;
+    }
+    reader_work = apta_test_reader_grid_match_work;
+    apta_result_release(parsed);
+    parsed = NULL;
+    stage = 10;
+    fprintf(stderr,
+            "grid work builder=%llu writer=%llu reader=%llu limit=%u\n",
+            (unsigned long long)builder_work,
+            (unsigned long long)writer_work,
+            (unsigned long long)reader_work,
+            (unsigned)GRID_LINEAR_WORK_LIMIT);
+    if (builder_work > GRID_LINEAR_WORK_LIMIT ||
+        writer_work > GRID_LINEAR_WORK_LIMIT ||
+        reader_work > GRID_LINEAR_WORK_LIMIT) goto cleanup;
+    {
+        const uint32_t section_count = get_u32(bytes + 20u);
+        uint32_t section;
+        for (section = 0u; section < section_count; ++section) {
+            uint8_t *entry = bytes + (size_t)get_u64(bytes + 24u) +
+                             (size_t)section * 40u;
+            if (memcmp(entry, "MTRD", 4u) == 0) {
+                uint8_t *payload = bytes + (size_t)get_u64(entry + 8u);
+                const size_t payload_size =
+                    (size_t)get_u64(entry + 16u);
+                uint8_t *last = payload + 48u +
+                    (size_t)(GRID_BEATS - 1u) * 56u;
+                put_u64(last + 16u, get_u64(last + 16u) + 1u);
+                put_u32(entry + 32u, crc32c(payload, payload_size));
+                {
+                    const apta_status_t status = apta_result_parse(
+                        context, NULL, bytes, written, &parsed);
+                    ok = status == APTA_ERROR_CORRUPT_DATA && parsed == NULL;
+                }
+                break;
+            }
+        }
+    }
+cleanup:
+    if (!ok) fprintf(stderr, "grid_scale_case stage=%d\n", stage);
+    if (parsed != NULL) apta_result_release(parsed);
+    free(bytes);
+    if (result != NULL) apta_result_release(result);
+    if (builder != NULL) apta_result_builder_destroy(builder);
+    free(segments);
+    free(beats);
+    return ok;
+}
+
+static int grid_representation_case(void)
+{
+    apta_grid_view_t grid;
+    apta_beat_t beats[2];
+    apta_grid_segment_t segments[2];
+    apta_internal_grid_match_cursor_t cursor;
+    uint64_t work = 0u;
+
+    memset(beats, 0, sizeof(beats));
+    beats[0].position.whole_frame = 10u;
+    beats[0].position.fraction_q32 = UINT32_C(0x80000000);
+    beats[0].ordinal = 5;
+    beats[1].position.whole_frame = 20u;
+    beats[1].ordinal = 6;
+    apta_grid_view_init(&grid);
+    grid.representation = APTA_GRID_REPRESENTATION_EXPLICIT;
+    grid.beat_count = 2u;
+    grid.beats = beats;
+    apta_internal_grid_match_cursor_init(&cursor, &grid, &work);
+    if (apta_internal_grid_match_cursor_next(&cursor, 10u, 5) ||
+        !apta_internal_grid_match_cursor_next(&cursor, 20u, 6)) {
+        return 0;
+    }
+
+    memset(segments, 0, sizeof(segments));
+    set_range(&segments[0].applicability_range, 0u, 4u);
+    segments[0].anchor_position.fraction_q32 = UINT32_C(0x80000000);
+    segments[0].anchor_ordinal = 0;
+    segments[0].frames_per_beat.whole_frames = 1u;
+    segments[0].frames_per_beat.fraction_q32 = UINT32_C(0x80000000);
+    set_range(&segments[1].applicability_range, 8u, 20u);
+    segments[1].anchor_position.whole_frame = 8u;
+    segments[1].anchor_ordinal = 10;
+    segments[1].frames_per_beat.whole_frames = 2u;
+    apta_grid_view_init(&grid);
+    grid.representation = APTA_GRID_REPRESENTATION_SEGMENTS;
+    grid.segment_count = 2u;
+    grid.segments = segments;
+    work = 0u;
+    apta_internal_grid_match_cursor_init(&cursor, &grid, &work);
+    if (!apta_internal_grid_match_cursor_next(&cursor, 2u, 1) ||
+        apta_internal_grid_match_cursor_next(&cursor, 6u, 2) ||
+        !apta_internal_grid_match_cursor_next(&cursor, 8u, 10)) {
+        return 0;
+    }
+
+    beats[0].position.whole_frame = 2u;
+    beats[0].ordinal = 1;
+    grid.representation = APTA_GRID_REPRESENTATION_HYBRID;
+    grid.beat_count = 1u;
+    grid.beats = beats;
+    grid.segment_count = 2u;
+    grid.segments = segments;
+    work = 0u;
+    apta_internal_grid_match_cursor_init(&cursor, &grid, &work);
+    return apta_internal_grid_match_cursor_next(&cursor, 2u, 1) &&
+           work <= 2u;
+}
+
 int main(int argc, char **argv)
 {
     apta_context_config_t config;
@@ -516,6 +756,12 @@ int main(int argc, char **argv)
     if (argc == 2 && strcmp(argv[1], "id-scale") == 0) {
         CHECK(id_order_case(context));
         CHECK(maximum_count_case(context));
+        CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
+        return 0;
+    }
+    if (argc == 2 && strcmp(argv[1], "grid-scale") == 0) {
+        CHECK(grid_representation_case());
+        CHECK(grid_scale_case(context));
         CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
         return 0;
     }

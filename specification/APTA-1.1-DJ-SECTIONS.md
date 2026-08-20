@@ -141,7 +141,11 @@ at least as mature as the header state. A complete container therefore has a
 segment; ordinals strictly increase. When a grid is present, every segment
 downbeat identifies an exact encoded grid
 beat/anchor with the same whole frame and ordinal. Exact payload size is
-`48 + segment_count * 56`.
+`48 + segment_count * 56`. Because both MTRD records and grid records are
+ordered, implementations validate this relationship with monotonic explicit-
+beat and grid-segment cursors. No cursor restarts for a later MTRD record, so
+cross-validation is `O(M + G)` for `M` meter segments and `G` encoded grid
+records, including EXPLICIT, SEGMENTS, and HYBRID grids.
 
 ## 5. `CONF` version 1
 
