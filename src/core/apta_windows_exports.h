@@ -90,6 +90,7 @@
 #  pragma comment(linker, "/export:apta_result_builder_options_init")
 #  pragma comment(linker, "/export:apta_result_builder_reset")
 #  pragma comment(linker, "/export:apta_result_builder_set_beatgrid")
+#  pragma comment(linker, "/export:apta_result_builder_set_grid_revision")
 #  pragma comment(linker, "/export:apta_result_builder_set_info")
 #  pragma comment(linker, "/export:apta_result_builder_set_key")
 #  pragma comment(linker, "/export:apta_result_builder_set_metadata")

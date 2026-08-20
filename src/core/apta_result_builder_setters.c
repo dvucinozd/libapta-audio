@@ -142,10 +142,13 @@ apta_status_t APTA_CALL apta_result_builder_set_tempo(
     if (!apta_builder_can_replace(builder, old_bytes, new_bytes)) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
-    candidates = (apta_tempo_candidate_t *)apta_builder_allocate_copy(
-        builder, tempo->candidates, tempo->candidate_count,
-        sizeof(*candidates), alignof(apta_tempo_candidate_t));
-    if (candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    candidates = NULL;
+    if (tempo->candidate_count != 0u) {
+        candidates = (apta_tempo_candidate_t *)apta_builder_allocate_copy(
+            builder, tempo->candidates, tempo->candidate_count,
+            sizeof(*candidates), alignof(apta_tempo_candidate_t));
+        if (candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    }
     apta_internal_context_deallocate(builder->context, builder->tempo_candidates);
     builder->tempo = *tempo;
     builder->tempo_candidates = candidates;
@@ -179,6 +182,8 @@ apta_status_t APTA_CALL apta_result_builder_set_beatgrid(
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     status = apta_builder_validate_grid(builder, grid);
+    if (status < 0) return status;
+    status = apta_builder_validate_grid_modifiers(grid_feature, grid);
     if (status < 0) return status;
     destination = grid_feature == APTA_FEATURE_LOCAL_BEATGRID
                       ? &builder->local_grid
@@ -214,7 +219,23 @@ apta_status_t APTA_CALL apta_result_builder_set_beatgrid(
     replacement.view.beats = replacement.beats;
     apta_builder_clear_grid(builder, destination);
     *destination = replacement;
+    if (grid_feature == APTA_FEATURE_GLOBAL_BEATGRID) {
+        apta_grid_revision_view_init(&builder->global_revision);
+        builder->has_global_revision = 0u;
+    }
     builder->payload_bytes = builder->payload_bytes - old_bytes + new_bytes;
+    return APTA_STATUS_OK;
+}
+
+apta_status_t APTA_CALL apta_result_builder_set_grid_revision(
+    apta_result_builder_t *builder,
+    const apta_grid_revision_view_t *revision)
+{
+    apta_status_t status =
+        apta_builder_validate_grid_revision(builder, revision);
+    if (status < 0) return status;
+    builder->global_revision = *revision;
+    builder->has_global_revision = 1u;
     return APTA_STATUS_OK;
 }
 
@@ -236,10 +257,13 @@ apta_status_t APTA_CALL apta_result_builder_set_key(
     if (!apta_builder_can_replace(builder, old_bytes, new_bytes)) {
         return APTA_ERROR_LIMIT_EXCEEDED;
     }
-    candidates = (apta_key_candidate_t *)apta_builder_allocate_copy(
-        builder, key->candidates, key->candidate_count,
-        sizeof(*candidates), alignof(apta_key_candidate_t));
-    if (candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    candidates = NULL;
+    if (key->candidate_count != 0u) {
+        candidates = (apta_key_candidate_t *)apta_builder_allocate_copy(
+            builder, key->candidates, key->candidate_count,
+            sizeof(*candidates), alignof(apta_key_candidate_t));
+        if (candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    }
     apta_internal_context_deallocate(builder->context, builder->key_candidates);
     builder->key = *key;
     builder->key_candidates = candidates;

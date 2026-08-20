@@ -60,6 +60,10 @@ apta_add_c_test(
     apta.api.result_builder_allocation_failure
     unit/result_builder_allocation_failure.c)
 apta_add_c_test(
+    apta_result_builder_review_regressions
+    apta.api.result_builder_review_regressions
+    unit/result_builder_review_regressions.c)
+apta_add_c_test(
     apta_result_model_1_1
     apta.api.result_model_1_1
     unit/result_model_1_1.c)

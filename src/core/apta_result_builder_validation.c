@@ -99,7 +99,10 @@ static int apta_builder_ranges_ordered(
 static apta_status_t apta_builder_validate_column(
     const apta_waveform_column_t *column)
 {
-    if (column->minimum > column->maximum) {
+    if (column->minimum > column->maximum ||
+        (column->flags & APTA_WAVEFORM_COLUMN_VALID) == 0u ||
+        ((column->flags & APTA_WAVEFORM_COLUMN_HAS_3BAND) == 0u &&
+         (column->low != 0u || column->mid != 0u || column->high != 0u))) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
     return (column->flags & ~APTA_BUILDER_COLUMN_FLAGS) == 0u
@@ -113,6 +116,7 @@ apta_status_t apta_builder_validate_overview(
     uint32_t *column_count_out)
 {
     const apta_frame_range_t *previous = NULL;
+    uint32_t previous_end_column = 0u;
     uint32_t total = 0u;
     uint32_t index;
     if (view == NULL || column_count_out == NULL) {
@@ -149,6 +153,10 @@ apta_status_t apta_builder_validate_overview(
         const apta_waveform_span_t *span = &view->spans[index];
         uint32_t column;
         uint32_t end_column;
+        uint64_t first_offset;
+        uint64_t end_offset;
+        uint64_t expected_first;
+        uint64_t expected_end;
         apta_status_t status = apta_builder_validate_range(
             &span->source_range, apta_builder_source(builder));
         if (status < 0) {
@@ -158,10 +166,28 @@ apta_status_t apta_builder_validate_overview(
             span->column_count == 0u || span->columns == NULL ||
             !apta_builder_u32_add(
                 span->first_column_index, span->column_count, &end_column) ||
-            !apta_builder_u32_add(total, span->column_count, &total)) {
+            !apta_builder_u32_add(total, span->column_count, &total) ||
+            (index != 0u &&
+             span->first_column_index < previous_end_column)) {
             return APTA_ERROR_INVALID_ARGUMENT;
         }
-        (void)end_column;
+        first_offset = (uint64_t)span->first_column_index *
+                       view->level.frames_per_column;
+        end_offset = (uint64_t)end_column * view->level.frames_per_column;
+        if (view->level.origin_frame > UINT64_MAX - first_offset ||
+            view->level.origin_frame > UINT64_MAX - end_offset) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+        expected_first = view->level.origin_frame + first_offset;
+        expected_end = view->level.origin_frame + end_offset;
+        if (span->source_range.first_frame != expected_first ||
+            (span->source_range.end_frame != expected_end &&
+             (builder->has_source == 0u ||
+              builder->source.total_frames == APTA_TOTAL_FRAMES_UNKNOWN ||
+              span->source_range.end_frame != builder->source.total_frames ||
+              expected_end <= builder->source.total_frames))) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
         if (total > builder->options.maximum_waveform_columns ||
             !apta_builder_array_within_limit(
                 builder, total, sizeof(apta_waveform_column_t))) {
@@ -174,6 +200,21 @@ apta_status_t apta_builder_validate_overview(
             }
         }
         previous = &span->source_range;
+        previous_end_column = end_column;
+    }
+    if (builder->has_source != 0u &&
+        builder->source.total_frames != APTA_TOTAL_FRAMES_UNKNOWN) {
+        uint64_t relative;
+        uint64_t required;
+        if (builder->source.total_frames < view->level.origin_frame) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
+        relative = builder->source.total_frames - view->level.origin_frame;
+        required = relative / view->level.frames_per_column;
+        if ((relative % view->level.frames_per_column) != 0u) required += 1u;
+        if (required > UINT32_MAX || previous_end_column != required) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
     }
     *column_count_out = total;
     return APTA_STATUS_OK;
@@ -211,6 +252,9 @@ apta_status_t apta_builder_validate_detail(
     for (index = 0u; index < input->tile_count; ++index) {
         const apta_waveform_tile_view_t *tile = &input->tiles[index];
         uint32_t end_column;
+        uint64_t tile_first_column;
+        uint64_t expected_first;
+        uint64_t expected_end;
         uint32_t column;
         apta_status_t status;
         if (!apta_internal_validate_struct(
@@ -237,7 +281,24 @@ apta_status_t apta_builder_validate_detail(
                 tile->reserved32, sizeof(tile->reserved32))) {
             return APTA_ERROR_INVALID_ARGUMENT;
         }
-        (void)end_column;
+        tile_first_column = (uint64_t)tile->tile_index * 64u;
+        if ((uint64_t)tile->first_column_index < tile_first_column ||
+            (uint64_t)end_column > tile_first_column + 64u) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
+        expected_first = (uint64_t)tile->first_column_index * 256u;
+        expected_end = (uint64_t)end_column * 256u;
+        if (tile->source_range.first_frame != expected_first ||
+            (tile->source_range.end_frame != expected_end &&
+             (builder->has_source == 0u ||
+              builder->source.total_frames == APTA_TOTAL_FRAMES_UNKNOWN ||
+              tile->source_range.end_frame != builder->source.total_frames ||
+              expected_end <= builder->source.total_frames)) ||
+            (tile->state == APTA_FEATURE_FINAL &&
+             (builder->has_source == 0u ||
+              builder->source.total_frames == APTA_TOTAL_FRAMES_UNKNOWN))) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
         if (tile->flags != 0u) {
             return APTA_ERROR_UNSUPPORTED;
         }
@@ -265,6 +326,7 @@ apta_status_t apta_builder_validate_tempo(
 {
     uint16_t previous_score = UINT16_MAX;
     uint32_t index;
+    int selected_found = 0;
     apta_status_t status;
     if (view == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -291,7 +353,7 @@ apta_status_t apta_builder_validate_tempo(
         !apta_builder_bytes_zero(
             view->selected.reserved32, sizeof(view->selected.reserved32)) ||
         !apta_builder_bytes_zero(view->reserved32, sizeof(view->reserved32)) ||
-        view->candidate_count == 0u || view->candidates == NULL) {
+        (view->candidate_count == 0u) != (view->candidates == NULL)) {
         return view->flags != 0u ? APTA_ERROR_UNSUPPORTED
                                 : APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -305,19 +367,32 @@ apta_status_t apta_builder_validate_tempo(
     }
     for (index = 0u; index < view->candidate_count; ++index) {
         const apta_tempo_candidate_t *candidate = &view->candidates[index];
+        uint32_t previous_index;
+        for (previous_index = 0u; previous_index < index; ++previous_index) {
+            if (view->candidates[previous_index].tempo_millibpm ==
+                candidate->tempo_millibpm) {
+                return APTA_ERROR_CONFLICT;
+            }
+        }
         if (candidate->tempo_millibpm < APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
             candidate->tempo_millibpm > APTA_REFERENCE_TEMPO_MAX_MILLIBPM ||
             candidate->confidence > APTA_CONFIDENCE_MAX ||
             candidate->reserved8 != 0u ||
             candidate->relation_to_selected >
                 APTA_TEMPO_RELATION_QUADRUPLE ||
-            candidate->score > previous_score) {
+            (index != 0u && candidate->score >= previous_score)) {
             return APTA_ERROR_INVALID_ARGUMENT;
         }
         if ((candidate->flags & ~APTA_BUILDER_TEMPO_FLAGS) != 0u) {
             return APTA_ERROR_UNSUPPORTED;
         }
+        if (candidate->tempo_millibpm == view->selected.tempo_millibpm) {
+            selected_found = 1;
+        }
         previous_score = candidate->score;
+    }
+    if (view->candidate_count != 0u && !selected_found) {
+        return APTA_ERROR_CONFLICT;
     }
     return APTA_STATUS_OK;
 }
@@ -420,6 +495,7 @@ apta_status_t apta_builder_validate_grid(
     previous = NULL;
     for (index = 0u; index < view->segment_count; ++index) {
         const apta_grid_segment_t *segment = &view->segments[index];
+        uint32_t previous_index;
         if (!apta_internal_validate_struct(
                 segment, sizeof(*segment), segment->struct_size,
                 segment->api_version)) {
@@ -441,11 +517,18 @@ apta_status_t apta_builder_validate_grid(
                 APTA_REFERENCE_TEMPO_MAX_MILLIBPM ||
             !apta_builder_state_valid(segment->state) ||
             !apta_builder_confidence_valid(segment->confidence) ||
-            segment->reserved8 != 0u || segment->reserved16 != 0u) {
+            segment->reserved8 != 0u || segment->reserved16 != 0u ||
+            segment->segment_id == 0u) {
             return APTA_ERROR_INVALID_ARGUMENT;
         }
         if ((segment->flags & ~APTA_BUILDER_GRID_FLAGS) != 0u) {
             return APTA_ERROR_UNSUPPORTED;
+        }
+        for (previous_index = 0u; previous_index < index; ++previous_index) {
+            if (view->segments[previous_index].segment_id ==
+                segment->segment_id) {
+                return APTA_ERROR_CONFLICT;
+            }
         }
         previous = &segment->applicability_range;
     }
@@ -466,6 +549,167 @@ apta_status_t apta_builder_validate_grid(
             return APTA_ERROR_UNSUPPORTED;
         }
     }
+    if (view->representation == APTA_GRID_REPRESENTATION_HYBRID) {
+        uint32_t beat_index;
+        for (beat_index = 0u; beat_index < view->beat_count; ++beat_index) {
+            const apta_beat_t *beat = &view->beats[beat_index];
+            int matched = 0;
+            for (index = 0u; index < view->segment_count; ++index) {
+                const apta_grid_segment_t *segment = &view->segments[index];
+                uint64_t ordinal_delta;
+                uint64_t fraction_product;
+                uint64_t expected_whole;
+                uint32_t expected_fraction;
+                if (beat->position.whole_frame <
+                        segment->applicability_range.first_frame ||
+                    beat->position.whole_frame >=
+                        segment->applicability_range.end_frame) continue;
+                if (beat->ordinal < segment->anchor_ordinal) {
+                    return APTA_ERROR_CONFLICT;
+                }
+                ordinal_delta = (uint64_t)(beat->ordinal -
+                                           segment->anchor_ordinal);
+                if (segment->frames_per_beat.whole_frames != 0u &&
+                    ordinal_delta >
+                        (UINT64_MAX - segment->anchor_position.whole_frame) /
+                            segment->frames_per_beat.whole_frames) {
+                    return APTA_ERROR_LIMIT_EXCEEDED;
+                }
+                expected_whole = segment->anchor_position.whole_frame +
+                                 ordinal_delta *
+                                     segment->frames_per_beat.whole_frames;
+                if (segment->frames_per_beat.fraction_q32 != 0u &&
+                    ordinal_delta > UINT64_MAX /
+                        segment->frames_per_beat.fraction_q32) {
+                    return APTA_ERROR_LIMIT_EXCEEDED;
+                }
+                fraction_product = ordinal_delta *
+                    (uint64_t)segment->frames_per_beat.fraction_q32;
+                if (expected_whole > UINT64_MAX -
+                        (fraction_product >> 32u)) {
+                    return APTA_ERROR_LIMIT_EXCEEDED;
+                }
+                expected_whole += fraction_product >> 32u;
+                expected_fraction =
+                    segment->anchor_position.fraction_q32 +
+                    (uint32_t)fraction_product;
+                if (expected_fraction <
+                    segment->anchor_position.fraction_q32) {
+                    if (expected_whole == UINT64_MAX) {
+                        return APTA_ERROR_LIMIT_EXCEEDED;
+                    }
+                    expected_whole += 1u;
+                }
+                if (beat->position.whole_frame != expected_whole ||
+                    beat->position.fraction_q32 != expected_fraction) {
+                    return APTA_ERROR_CONFLICT;
+                }
+                matched = 1;
+                break;
+            }
+            if (!matched) return APTA_ERROR_CONFLICT;
+        }
+    }
+    return APTA_STATUS_OK;
+}
+
+apta_status_t apta_builder_validate_grid_revision(
+    const apta_result_builder_t *builder,
+    const apta_grid_revision_view_t *revision)
+{
+    const apta_grid_view_t *grid;
+    uint32_t index;
+    const uint32_t allowed_flags =
+        APTA_GRID_REVISION_FLAG_CONFLICTS_LOCKED_RANGE |
+        APTA_GRID_REVISION_FLAG_DYNAMIC_TEMPO |
+        APTA_GRID_REVISION_FLAG_DEGRADED;
+    apta_status_t status;
+    if (builder == NULL || revision == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (!apta_internal_validate_struct(
+            revision, sizeof(*revision), revision->struct_size,
+            revision->api_version)) {
+        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    }
+    if (revision->revision_id == 0u ||
+        revision->revision_id == revision->previous_revision_id ||
+        (revision->state != APTA_GRID_REVISION_PENDING &&
+         revision->state != APTA_GRID_REVISION_APPLIED) ||
+        !apta_builder_confidence_valid(revision->confidence) ||
+        revision->reserved8[0] != 0u || revision->reserved8[1] != 0u ||
+        revision->reserved8[2] != 0u ||
+        !apta_builder_bytes_zero(
+            revision->reserved32, sizeof(revision->reserved32)) ||
+        !apta_builder_bytes_zero(
+            revision->reserved64, sizeof(revision->reserved64))) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if ((revision->flags & ~allowed_flags) != 0u) {
+        return APTA_ERROR_UNSUPPORTED;
+    }
+    status = apta_builder_validate_range(
+        &revision->affected_range,
+        builder->has_source != 0u ? &builder->source : NULL);
+    if (status < 0) return status;
+    grid = &builder->global_grid.view;
+    if (grid->representation == APTA_GRID_REPRESENTATION_NONE) {
+        return APTA_ERROR_CONFLICT;
+    }
+    if (revision->proposed_representation != grid->representation ||
+        revision->proposed_segment_count != grid->segment_count ||
+        revision->proposed_beat_count != grid->beat_count ||
+        revision->affected_range.first_frame <
+            grid->applicability_range.first_frame ||
+        revision->affected_range.end_frame >
+            grid->applicability_range.end_frame ||
+        (((revision->flags & APTA_GRID_REVISION_FLAG_DYNAMIC_TEMPO) != 0u) !=
+         ((grid->flags & APTA_GRID_FLAG_DYNAMIC_TEMPO) != 0u))) {
+        return APTA_ERROR_CONFLICT;
+    }
+    for (index = 0u; index < grid->segment_count; ++index) {
+        if (grid->segments[index].revision != revision->revision_id) {
+            return APTA_ERROR_CONFLICT;
+        }
+    }
+    for (index = 0u; index < grid->beat_count; ++index) {
+        if (grid->beats[index].revision != revision->revision_id) {
+            return APTA_ERROR_CONFLICT;
+        }
+    }
+    return APTA_STATUS_OK;
+}
+
+apta_status_t apta_builder_validate_grid_modifiers(
+    apta_feature_mask_t grid_feature,
+    const apta_grid_view_t *view)
+{
+    uint32_t index;
+    uint32_t element_flags = 0u;
+    const uint32_t modifiers =
+        APTA_GRID_FLAG_DYNAMIC_TEMPO | APTA_GRID_FLAG_LOCKED;
+    if (view == NULL ||
+        (grid_feature != APTA_FEATURE_LOCAL_BEATGRID &&
+         grid_feature != APTA_FEATURE_GLOBAL_BEATGRID)) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    for (index = 0u; index < view->segment_count; ++index) {
+        element_flags |= view->segments[index].flags & modifiers;
+    }
+    for (index = 0u; index < view->beat_count; ++index) {
+        element_flags |= view->beats[index].flags & modifiers;
+    }
+    if ((view->flags & modifiers) != element_flags) {
+        return APTA_ERROR_CONFLICT;
+    }
+    if (grid_feature == APTA_FEATURE_LOCAL_BEATGRID &&
+        (element_flags & APTA_GRID_FLAG_DYNAMIC_TEMPO) != 0u) {
+        return APTA_ERROR_UNSUPPORTED;
+    }
+    if (grid_feature == APTA_FEATURE_GLOBAL_BEATGRID &&
+        (element_flags & APTA_GRID_FLAG_LOCKED) != 0u) {
+        return APTA_ERROR_UNSUPPORTED;
+    }
     return APTA_STATUS_OK;
 }
 
@@ -485,6 +729,7 @@ apta_status_t apta_builder_validate_key(
 {
     uint16_t previous_score = UINT16_MAX;
     uint32_t index;
+    int selected_found = 0;
     apta_status_t status;
     if (view == NULL) return APTA_ERROR_INVALID_ARGUMENT;
     if (!apta_internal_validate_struct(
@@ -499,7 +744,7 @@ apta_status_t apta_builder_validate_key(
         !apta_builder_state_valid(view->state) ||
         !apta_builder_confidence_valid(view->confidence) || view->flags != 0u ||
         !apta_builder_bytes_zero(view->reserved32, sizeof(view->reserved32)) ||
-        view->candidate_count == 0u || view->candidates == NULL) {
+        (view->candidate_count == 0u) != (view->candidates == NULL)) {
         return view->flags != 0u ? APTA_ERROR_UNSUPPORTED
                                 : APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -510,16 +755,36 @@ apta_status_t apta_builder_validate_key(
     }
     for (index = 0u; index < view->candidate_count; ++index) {
         const apta_key_candidate_t *candidate = &view->candidates[index];
+        uint32_t previous_index;
         if (!apta_builder_key_value_valid(
                 candidate->tonic, candidate->mode,
                 candidate->tuning_offset_cents) ||
             !apta_builder_confidence_valid(candidate->confidence) ||
             candidate->reserved8 != 0u || candidate->reserved8_2 != 0u ||
-            candidate->flags != 0u || candidate->score > previous_score) {
+            candidate->flags != 0u ||
+            (index != 0u && candidate->score >= previous_score)) {
             return candidate->flags != 0u ? APTA_ERROR_UNSUPPORTED
                                           : APTA_ERROR_INVALID_ARGUMENT;
         }
+        for (previous_index = 0u; previous_index < index; ++previous_index) {
+            const apta_key_candidate_t *previous_candidate =
+                &view->candidates[previous_index];
+            if (previous_candidate->tonic == candidate->tonic &&
+                previous_candidate->mode == candidate->mode &&
+                previous_candidate->tuning_offset_cents ==
+                    candidate->tuning_offset_cents) {
+                return APTA_ERROR_CONFLICT;
+            }
+        }
+        if (candidate->tonic == view->tonic &&
+            candidate->mode == view->mode &&
+            candidate->tuning_offset_cents == view->tuning_offset_cents) {
+            selected_found = 1;
+        }
         previous_score = candidate->score;
+    }
+    if (view->candidate_count != 0u && !selected_found) {
+        return APTA_ERROR_CONFLICT;
     }
     return APTA_STATUS_OK;
 }
@@ -535,6 +800,7 @@ apta_status_t apta_builder_validate_meter(
     const apta_meter_view_t *view)
 {
     const apta_frame_range_t *previous = NULL;
+    apta_beat_ordinal_t previous_downbeat = INT64_MIN;
     uint32_t index;
     if (view == NULL) return APTA_ERROR_INVALID_ARGUMENT;
     if (!apta_internal_validate_struct(
@@ -557,6 +823,7 @@ apta_status_t apta_builder_validate_meter(
     }
     for (index = 0u; index < view->segment_count; ++index) {
         const apta_meter_segment_t *segment = &view->segments[index];
+        uint32_t previous_index;
         apta_status_t status;
         if (!apta_internal_validate_struct(
                 segment, sizeof(*segment), segment->struct_size,
@@ -574,13 +841,23 @@ apta_status_t apta_builder_validate_meter(
             !apta_builder_state_valid(segment->state) ||
             !apta_builder_confidence_valid(segment->confidence) ||
             segment->reserved8 != 0u || segment->reserved16 != 0u ||
-            segment->flags != 0u ||
+            segment->flags != 0u || segment->segment_id == 0u ||
             !apta_builder_bytes_zero(
                 segment->reserved32, sizeof(segment->reserved32))) {
             return segment->flags != 0u ? APTA_ERROR_UNSUPPORTED
                                        : APTA_ERROR_INVALID_ARGUMENT;
         }
+        if (segment->downbeat_ordinal <= previous_downbeat) {
+            return APTA_ERROR_CONFLICT;
+        }
+        for (previous_index = 0u; previous_index < index; ++previous_index) {
+            if (view->segments[previous_index].segment_id ==
+                segment->segment_id) {
+                return APTA_ERROR_CONFLICT;
+            }
+        }
         previous = &segment->applicability_range;
+        previous_downbeat = segment->downbeat_ordinal;
     }
     if (view->downbeat_frame != view->segments[0].downbeat_frame ||
         view->downbeat_ordinal != view->segments[0].downbeat_ordinal ||

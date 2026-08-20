@@ -44,7 +44,7 @@ static apta_feature_mask_t apta_builder_features(
     if (builder->detail_tile_count != 0u) {
         features |= APTA_FEATURE_WAVEFORM_DETAIL;
     }
-    if (builder->tempo.candidate_count != 0u) {
+    if (builder->tempo.selected.tempo_millibpm != 0u) {
         features |= APTA_FEATURE_BPM | APTA_FEATURE_CONFIDENCE;
     }
     if (builder->local_grid.view.representation !=
@@ -62,16 +62,134 @@ static apta_feature_mask_t apta_builder_features(
             features |= APTA_FEATURE_DYNAMIC_TEMPO;
         }
     }
-    if (builder->key.candidate_count != 0u) {
+    if (apta_builder_state_valid(builder->key.state)) {
         features |= APTA_FEATURE_MUSICAL_KEY;
     }
-    if (builder->meter.segment_count != 0u) {
+    if (apta_builder_state_valid(builder->meter.state)) {
         features |= APTA_FEATURE_METER_DOWNBEAT;
     }
     if (builder->quality_count != 0u) {
         features |= APTA_FEATURE_CALIBRATED_QUALITY;
     }
+    if ((builder->overview.span_count != 0u &&
+         builder->overview.confidence != APTA_CONFIDENCE_UNKNOWN) ||
+        (builder->detail_tile_count != 0u &&
+         builder->detail_tiles[0].confidence != APTA_CONFIDENCE_UNKNOWN) ||
+        (builder->local_grid.view.representation !=
+             APTA_GRID_REPRESENTATION_NONE &&
+         builder->local_grid.view.confidence != APTA_CONFIDENCE_UNKNOWN) ||
+        (builder->global_grid.view.representation !=
+             APTA_GRID_REPRESENTATION_NONE &&
+         builder->global_grid.view.confidence != APTA_CONFIDENCE_UNKNOWN) ||
+        (apta_builder_state_valid(builder->key.state) &&
+         builder->key.confidence != APTA_CONFIDENCE_UNKNOWN) ||
+        (apta_builder_state_valid(builder->meter.state) &&
+         builder->meter.confidence != APTA_CONFIDENCE_UNKNOWN)) {
+        features |= APTA_FEATURE_CONFIDENCE;
+    }
     return features;
+}
+
+static int apta_builder_all_features_final(
+    const apta_result_builder_t *builder)
+{
+    uint32_t index;
+    if (builder->overview.span_count != 0u &&
+        builder->overview.state != APTA_FEATURE_FINAL) return 0;
+    for (index = 0u; index < builder->detail_tile_count; ++index) {
+        if (builder->detail_tiles[index].state != APTA_FEATURE_FINAL) return 0;
+    }
+    if (builder->tempo.selected.tempo_millibpm != 0u &&
+        builder->tempo.selected.state != APTA_FEATURE_FINAL) return 0;
+    if (builder->local_grid.view.representation !=
+            APTA_GRID_REPRESENTATION_NONE &&
+        builder->local_grid.view.state != APTA_FEATURE_FINAL) return 0;
+    if (builder->global_grid.view.representation !=
+            APTA_GRID_REPRESENTATION_NONE &&
+        (builder->global_grid.view.state != APTA_FEATURE_FINAL ||
+         builder->global_revision.state != APTA_GRID_REVISION_APPLIED)) return 0;
+    if (apta_builder_state_valid(builder->key.state) &&
+        builder->key.state != APTA_FEATURE_FINAL) return 0;
+    if (apta_builder_state_valid(builder->meter.state) &&
+        builder->meter.state != APTA_FEATURE_FINAL) return 0;
+    for (index = 0u; index < builder->quality_count; ++index) {
+        if (builder->quality[index].state != APTA_FEATURE_FINAL) return 0;
+    }
+    return 1;
+}
+
+static int apta_builder_grid_matches_tempo(
+    const apta_result_builder_t *builder,
+    const apta_grid_view_t *grid)
+{
+    uint32_t index;
+    int selected_found = 0;
+    const int dynamic =
+        (grid->flags & APTA_GRID_FLAG_DYNAMIC_TEMPO) != 0u;
+    for (index = 0u; index < grid->segment_count; ++index) {
+        const apta_grid_segment_t *segment = &grid->segments[index];
+        long double period = (long double)segment->frames_per_beat.whole_frames +
+            (long double)segment->frames_per_beat.fraction_q32 /
+                4294967296.0L;
+        long double derived =
+            ((long double)builder->source.sample_rate * 60000.0L) / period;
+        long double difference =
+            derived - (long double)segment->nominal_tempo_millibpm;
+        if (difference < 0.0L) difference = -difference;
+        if (difference > 1.0L) return 0;
+        if (segment->nominal_tempo_millibpm ==
+            builder->tempo.selected.tempo_millibpm) {
+            selected_found = 1;
+        } else if (!dynamic) {
+            return 0;
+        }
+    }
+    return selected_found;
+}
+
+static int apta_builder_grid_has_downbeat(
+    const apta_grid_view_t *grid,
+    apta_source_frame_t frame,
+    apta_beat_ordinal_t ordinal)
+{
+    uint32_t index;
+    for (index = 0u; index < grid->beat_count; ++index) {
+        if (grid->beats[index].position.whole_frame == frame &&
+            grid->beats[index].position.fraction_q32 == 0u &&
+            grid->beats[index].ordinal == ordinal) return 1;
+    }
+    for (index = 0u; index < grid->segment_count; ++index) {
+        const apta_grid_segment_t *segment = &grid->segments[index];
+        uint64_t delta;
+        uint64_t whole;
+        uint64_t fraction_product;
+        uint32_t fraction;
+        if (frame < segment->applicability_range.first_frame ||
+            frame >= segment->applicability_range.end_frame ||
+            ordinal < segment->anchor_ordinal) continue;
+        delta = (uint64_t)(ordinal - segment->anchor_ordinal);
+        if (segment->frames_per_beat.whole_frames != 0u &&
+            delta > (UINT64_MAX - segment->anchor_position.whole_frame) /
+                        segment->frames_per_beat.whole_frames) continue;
+        whole = segment->anchor_position.whole_frame +
+                delta * segment->frames_per_beat.whole_frames;
+        if (segment->frames_per_beat.fraction_q32 != 0u &&
+            delta > UINT64_MAX / segment->frames_per_beat.fraction_q32) {
+            continue;
+        }
+        fraction_product =
+            delta * (uint64_t)segment->frames_per_beat.fraction_q32;
+        if (whole > UINT64_MAX - (fraction_product >> 32u)) continue;
+        whole += fraction_product >> 32u;
+        fraction = segment->anchor_position.fraction_q32 +
+                   (uint32_t)fraction_product;
+        if (fraction < segment->anchor_position.fraction_q32) {
+            if (whole == UINT64_MAX) continue;
+            whole += 1u;
+        }
+        if (whole == frame && fraction == 0u) return 1;
+    }
+    return 0;
 }
 
 static apta_status_t apta_builder_validate_complete(
@@ -79,6 +197,7 @@ static apta_status_t apta_builder_validate_complete(
     apta_feature_mask_t *features_out)
 {
     apta_feature_mask_t features;
+    uint64_t finalized_bytes;
     apta_waveform_detail_input_t detail;
     uint32_t ignored_count;
     uint32_t index;
@@ -91,6 +210,31 @@ static apta_status_t apta_builder_validate_complete(
     }
     features = apta_builder_features(builder);
     if (features == 0u) return APTA_ERROR_CONFLICT;
+    if ((features & (APTA_FEATURE_LOCAL_BEATGRID |
+                     APTA_FEATURE_GLOBAL_BEATGRID)) != 0u &&
+        (features & APTA_FEATURE_BPM) == 0u) {
+        return APTA_ERROR_CONFLICT;
+    }
+    finalized_bytes = builder->payload_bytes;
+    if (finalized_bytes > UINT64_MAX - sizeof(apta_result_t)) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+    finalized_bytes += sizeof(apta_result_t);
+    if ((features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u) {
+        if (finalized_bytes > UINT64_MAX -
+                                  sizeof(apta_internal_s6_result_state_t)) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+        finalized_bytes += sizeof(apta_internal_s6_result_state_t);
+    }
+    if (finalized_bytes > builder->options.maximum_allocation_bytes) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+    if (builder->info.session_state == APTA_SESSION_CREATED ||
+        (builder->info.session_state == APTA_SESSION_COMPLETED &&
+         !apta_builder_all_features_final(builder))) {
+        return APTA_ERROR_CONFLICT;
+    }
     if ((features & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u) {
         status = apta_builder_validate_overview(
             builder, &builder->overview, &ignored_count);
@@ -111,21 +255,31 @@ static apta_status_t apta_builder_validate_complete(
         status = apta_builder_validate_grid(
             builder, &builder->local_grid.view);
         if (status < 0) return status;
-        if ((features & APTA_FEATURE_BPM) != 0u) {
-            for (index = 0u;
-                 index < builder->local_grid.view.segment_count; ++index) {
-                if (builder->local_grid.view.segments[index]
-                        .nominal_tempo_millibpm !=
-                    builder->tempo.selected.tempo_millibpm) {
-                    return APTA_ERROR_CONFLICT;
-                }
-            }
+        status = apta_builder_validate_grid_modifiers(
+            APTA_FEATURE_LOCAL_BEATGRID, &builder->local_grid.view);
+        if (status < 0) return status;
+        if (!apta_builder_grid_matches_tempo(
+                builder, &builder->local_grid.view)) {
+            return APTA_ERROR_CONFLICT;
         }
     }
     if ((features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u) {
         status = apta_builder_validate_grid(
             builder, &builder->global_grid.view);
         if (status < 0) return status;
+        status = apta_builder_validate_grid_modifiers(
+            APTA_FEATURE_GLOBAL_BEATGRID, &builder->global_grid.view);
+        if (status < 0) return status;
+        if (builder->has_global_revision == 0u) {
+            return APTA_ERROR_CONFLICT;
+        }
+        status = apta_builder_validate_grid_revision(
+            builder, &builder->global_revision);
+        if (status < 0) return status;
+        if (!apta_builder_grid_matches_tempo(
+                builder, &builder->global_grid.view)) {
+            return APTA_ERROR_CONFLICT;
+        }
     }
     if ((features & APTA_FEATURE_MUSICAL_KEY) != 0u) {
         status = apta_builder_validate_key(builder, &builder->key);
@@ -134,6 +288,26 @@ static apta_status_t apta_builder_validate_complete(
     if ((features & APTA_FEATURE_METER_DOWNBEAT) != 0u) {
         status = apta_builder_validate_meter(builder, &builder->meter);
         if (status < 0) return status;
+        if ((features & (APTA_FEATURE_LOCAL_BEATGRID |
+                         APTA_FEATURE_GLOBAL_BEATGRID)) != 0u) {
+            for (index = 0u; index < builder->meter.segment_count; ++index) {
+                const apta_meter_segment_t *segment =
+                    &builder->meter.segments[index];
+                int matched = 0;
+                if ((features & APTA_FEATURE_LOCAL_BEATGRID) != 0u) {
+                    matched = apta_builder_grid_has_downbeat(
+                        &builder->local_grid.view, segment->downbeat_frame,
+                        segment->downbeat_ordinal);
+                }
+                if (!matched &&
+                    (features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u) {
+                    matched = apta_builder_grid_has_downbeat(
+                        &builder->global_grid.view, segment->downbeat_frame,
+                        segment->downbeat_ordinal);
+                }
+                if (!matched) return APTA_ERROR_CONFLICT;
+            }
+        }
     }
     for (index = 0u; index < builder->quality_count; ++index) {
         status = apta_builder_validate_quality(&builder->quality[index]);
@@ -245,13 +419,16 @@ static apta_status_t apta_builder_copy_tempo(
     const apta_result_builder_t *builder,
     apta_result_t *result)
 {
-    if (builder->tempo.candidate_count == 0u) return APTA_STATUS_OK;
-    result->tempo_candidates =
-        (apta_tempo_candidate_t *)apta_builder_result_copy(
-            builder->context, builder->tempo_candidates,
-            builder->tempo.candidate_count, sizeof(apta_tempo_candidate_t),
-            alignof(apta_tempo_candidate_t));
-    if (result->tempo_candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    if (builder->tempo.selected.tempo_millibpm == 0u) return APTA_STATUS_OK;
+    if (builder->tempo.candidate_count != 0u) {
+        result->tempo_candidates =
+            (apta_tempo_candidate_t *)apta_builder_result_copy(
+                builder->context, builder->tempo_candidates,
+                builder->tempo.candidate_count,
+                sizeof(apta_tempo_candidate_t),
+                alignof(apta_tempo_candidate_t));
+        if (result->tempo_candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    }
     result->tempo = builder->tempo;
     result->tempo.candidates = result->tempo_candidates;
     return APTA_STATUS_OK;
@@ -306,7 +483,7 @@ static apta_status_t apta_builder_copy_global_grid(
             alignof(apta_internal_s6_result_state_t), APTA_MEMORY_PERSISTENT);
     if (result->s6 == NULL) return APTA_ERROR_OUT_OF_MEMORY;
     memset(result->s6, 0, sizeof(*result->s6));
-    apta_grid_revision_view_init(&result->s6->revision);
+    result->s6->revision = builder->global_revision;
     result->s6->coverage_ranges =
         (apta_frame_range_t *)apta_builder_result_copy(
             builder->context, builder->global_grid.coverage,
@@ -337,13 +514,18 @@ static apta_status_t apta_builder_copy_new_features(
     const apta_result_builder_t *builder,
     apta_result_t *result)
 {
-    if (builder->key.candidate_count != 0u) {
-        result->key_candidates =
-            (apta_key_candidate_t *)apta_builder_result_copy(
-                builder->context, builder->key_candidates,
-                builder->key.candidate_count, sizeof(apta_key_candidate_t),
-                alignof(apta_key_candidate_t));
-        if (result->key_candidates == NULL) return APTA_ERROR_OUT_OF_MEMORY;
+    if (apta_builder_state_valid(builder->key.state)) {
+        if (builder->key.candidate_count != 0u) {
+            result->key_candidates =
+                (apta_key_candidate_t *)apta_builder_result_copy(
+                    builder->context, builder->key_candidates,
+                    builder->key.candidate_count,
+                    sizeof(apta_key_candidate_t),
+                    alignof(apta_key_candidate_t));
+            if (result->key_candidates == NULL) {
+                return APTA_ERROR_OUT_OF_MEMORY;
+            }
+        }
         result->key = builder->key;
         result->key.candidates = result->key_candidates;
     }

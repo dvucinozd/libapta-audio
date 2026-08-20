@@ -39,6 +39,8 @@ struct apta_result_builder {
     apta_tempo_candidate_t *tempo_candidates;
     apta_builder_grid_t local_grid;
     apta_builder_grid_t global_grid;
+    apta_grid_revision_view_t global_revision;
+    uint32_t has_global_revision;
 
     apta_key_view_t key;
     apta_key_candidate_t *key_candidates;
@@ -68,6 +70,12 @@ apta_status_t apta_builder_validate_tempo(
 apta_status_t apta_builder_validate_grid(
     const apta_result_builder_t *builder,
     const apta_grid_view_t *view);
+apta_status_t apta_builder_validate_grid_modifiers(
+    apta_feature_mask_t grid_feature,
+    const apta_grid_view_t *view);
+apta_status_t apta_builder_validate_grid_revision(
+    const apta_result_builder_t *builder,
+    const apta_grid_revision_view_t *revision);
 apta_status_t apta_builder_validate_key(
     const apta_result_builder_t *builder,
     const apta_key_view_t *view);

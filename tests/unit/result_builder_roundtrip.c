@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <apta/apta.h>
@@ -55,12 +56,15 @@ int main(void)
     apta_grid_segment_t global_segments[2];
     apta_beat_t global_beats[3];
     apta_grid_view_t global_grid;
+    apta_grid_revision_view_t global_revision;
     apta_key_candidate_t key_candidate;
     apta_key_view_t key;
     apta_meter_segment_t meter_segments[2];
     apta_meter_view_t meter;
     apta_quality_view_t quality;
     const apta_result_t *result = NULL;
+    const apta_result_t *second_result = NULL;
+    const apta_result_t *parsed_result = NULL;
     apta_result_info_t result_info;
     apta_result_provenance_t result_provenance;
     apta_metadata_view_t result_metadata;
@@ -71,6 +75,10 @@ int main(void)
     apta_key_view_t result_key;
     apta_meter_view_t result_meter;
     apta_quality_view_t result_quality;
+    apta_grid_revision_view_t result_revision;
+    uint64_t serialized_size = 0u;
+    size_t bytes_written = 0u;
+    uint8_t *serialized = NULL;
     char producer[] = "Rekordbox";
     char comments[] = "USB export import";
     char source_name[] = "rekordbox.xml";
@@ -139,7 +147,7 @@ int main(void)
     apta_waveform_tile_view_init(&detail_tile);
     detail_tile.level_id = 1u;
     detail_tile.tile_index = 4u;
-    set_range(&detail_tile.source_range, 65536u, 131072u);
+    set_range(&detail_tile.source_range, 65536u, 66048u);
     detail_tile.first_column_index = 256u;
     detail_tile.column_count = 2u;
     detail_tile.columns = detail_columns;
@@ -176,6 +184,7 @@ int main(void)
     local_segment.confidence = 93u;
     local_segment.state = APTA_FEATURE_FINAL;
     local_segment.segment_id = 1u;
+    local_segment.flags = APTA_GRID_FLAG_LOCKED;
     apta_grid_view_init(&local_grid);
     set_range(&local_grid.requested_range, 0u, 2880000u);
     set_range(&local_grid.evidence_range, 0u, 2880000u);
@@ -195,6 +204,8 @@ int main(void)
     set_range(&global_coverage, 0u, 2880000u);
     memset(global_segments, 0, sizeof(global_segments));
     global_segments[0] = local_segment;
+    global_segments[0].flags = 0u;
+    global_segments[0].revision = 7u;
     set_range(&global_segments[0].applicability_range, 0u, 1440000u);
     global_segments[0].beat_count = 64u;
     global_segments[1] = local_segment;
@@ -202,16 +213,20 @@ int main(void)
     global_segments[1].beat_count = 64u;
     global_segments[1].segment_id = 2u;
     global_segments[1].flags = APTA_GRID_FLAG_DYNAMIC_TEMPO;
+    global_segments[1].revision = 7u;
     memset(global_beats, 0, sizeof(global_beats));
     global_beats[0].position.whole_frame = 0u;
     global_beats[0].ordinal = 0;
     global_beats[0].confidence = 90u;
+    global_beats[0].revision = 7u;
     global_beats[1].position.whole_frame = 22500u;
     global_beats[1].ordinal = 1;
     global_beats[1].confidence = 90u;
+    global_beats[1].revision = 7u;
     global_beats[2].position.whole_frame = 45000u;
     global_beats[2].ordinal = 2;
     global_beats[2].confidence = 90u;
+    global_beats[2].revision = 7u;
     apta_grid_view_init(&global_grid);
     set_range(&global_grid.requested_range, 0u, 2880000u);
     set_range(&global_grid.evidence_range, 0u, 2880000u);
@@ -228,6 +243,17 @@ int main(void)
     global_grid.flags = APTA_GRID_FLAG_DYNAMIC_TEMPO;
     CHECK(apta_result_builder_set_beatgrid(
               builder, APTA_FEATURE_GLOBAL_BEATGRID, &global_grid) ==
+          APTA_STATUS_OK);
+    apta_grid_revision_view_init(&global_revision);
+    global_revision.revision_id = 7u;
+    global_revision.state = APTA_GRID_REVISION_APPLIED;
+    global_revision.confidence = 90u;
+    set_range(&global_revision.affected_range, 0u, 2880000u);
+    global_revision.proposed_representation = global_grid.representation;
+    global_revision.proposed_segment_count = global_grid.segment_count;
+    global_revision.proposed_beat_count = global_grid.beat_count;
+    global_revision.flags = APTA_GRID_REVISION_FLAG_DYNAMIC_TEMPO;
+    CHECK(apta_result_builder_set_grid_revision(builder, &global_revision) ==
           APTA_STATUS_OK);
 
     apta_key_view_init(&key);
@@ -294,6 +320,25 @@ int main(void)
     CHECK(apta_result_builder_finalize(builder, &result) == APTA_STATUS_OK);
     CHECK(result != NULL);
 
+    /* Finalize is non-consuming, and later builder reuse does not alter result. */
+    CHECK(apta_result_builder_finalize(builder, &second_result) ==
+          APTA_STATUS_OK);
+    CHECK(second_result != NULL && second_result != result);
+    apta_result_release(second_result);
+    second_result = NULL;
+    quality.feature = APTA_FEATURE_BPM;
+    quality.calibration_model_id = 43u;
+    CHECK(apta_result_builder_set_quality(builder, &quality) == APTA_STATUS_OK);
+    CHECK(apta_result_builder_finalize(builder, &second_result) ==
+          APTA_STATUS_OK);
+    apta_quality_view_init(&result_quality);
+    CHECK(apta_result_get_quality(
+              second_result, APTA_FEATURE_BPM, &result_quality) ==
+          APTA_STATUS_OK);
+    CHECK(result_quality.calibration_model_id == 43u);
+    apta_result_release(second_result);
+    second_result = NULL;
+
     /* Reuse is supported and a finalized result does not alias the builder. */
     apta_result_builder_reset(builder);
     apta_result_builder_destroy(builder);
@@ -346,6 +391,10 @@ int main(void)
               result, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &result_grid) ==
           APTA_STATUS_OK);
     CHECK(result_grid.beats[1].position.whole_frame == 22500u);
+    apta_grid_revision_view_init(&result_revision);
+    CHECK(apta_result_get_grid_revision(result, &result_revision) ==
+          APTA_STATUS_OK);
+    CHECK(result_revision.revision_id == 7u);
     apta_key_view_init(&result_key);
     CHECK(apta_result_get_key(result, NULL, &result_key) == APTA_STATUS_OK);
     CHECK(result_key.candidates[0].tonic == 9u);
@@ -358,7 +407,26 @@ int main(void)
           APTA_STATUS_OK);
     CHECK(result_quality.calibration_model_id == 42u);
 
+    CHECK(apta_result_query_serialized_size(result, NULL, &serialized_size) ==
+          APTA_STATUS_OK);
+    CHECK(serialized_size <= SIZE_MAX);
+    serialized = (uint8_t *)malloc((size_t)serialized_size);
+    CHECK(serialized != NULL);
+    CHECK(apta_result_serialize(
+              result, NULL, serialized, (size_t)serialized_size,
+              &bytes_written) == APTA_STATUS_OK);
+    CHECK(bytes_written == (size_t)serialized_size);
+    CHECK(apta_result_parse(
+              context, NULL, serialized, bytes_written, &parsed_result) ==
+          APTA_STATUS_OK);
+    apta_grid_revision_view_init(&result_revision);
+    CHECK(apta_result_get_grid_revision(parsed_result, &result_revision) ==
+          APTA_STATUS_OK);
+    CHECK(result_revision.revision_id == 7u);
+
+    apta_result_release(parsed_result);
     apta_result_release(result);
+    free(serialized);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     return 0;
 }

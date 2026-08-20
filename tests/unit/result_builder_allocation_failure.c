@@ -82,6 +82,7 @@ static int run_case(
     const apta_result_t *result = NULL;
     apta_status_t status;
     int saw_oom = 0;
+    int finalize_started = 0;
     int success = 0;
 
     apta_context_config_init(&context_config);
@@ -162,10 +163,16 @@ static int run_case(
         goto cleanup;
     }
 
+    finalize_started = 1;
     status = apta_result_builder_finalize(builder, &result);
     if (status == APTA_ERROR_OUT_OF_MEMORY) {
         saw_oom = 1;
         if (result != NULL) {
+            goto cleanup;
+        }
+        /* Rollback leaves the builder complete and immediately reusable. */
+        status = apta_result_builder_finalize(builder, &result);
+        if (status != APTA_STATUS_OK || result == NULL) {
             goto cleanup;
         }
     } else if (status != APTA_STATUS_OK || result == NULL) {
@@ -175,7 +182,7 @@ static int run_case(
     success = fail_at_call == 0u || saw_oom;
 
 cleanup:
-    if (saw_oom) {
+    if (saw_oom && !finalize_started) {
         success = 1;
     }
     if (result != NULL) {

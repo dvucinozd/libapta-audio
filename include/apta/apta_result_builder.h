@@ -6,6 +6,7 @@
 
 #include <apta/apta_metadata.h>
 #include <apta/apta_result.h>
+#include <apta/apta_s6.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +42,12 @@ typedef struct {
     uint64_t maximum_allocation_bytes;
     uint64_t reserved64[3];
 } apta_result_builder_options_t;
+
+/*
+ * maximum_allocation_bytes bounds the complete graph owned by each finalized
+ * result: the result object, all copied payloads, and internal representation
+ * wrappers. Builder-retained setter copies are not part of that result graph.
+ */
 
 typedef struct {
     uint32_t struct_size;
@@ -94,6 +101,8 @@ apta_waveform_detail_input_init(apta_waveform_detail_input_t *input);
  * Setters copy all pointer-backed input before returning. Finalize is
  * non-consuming: it creates a second deep copy in a normal immutable result,
  * and the builder may then be changed, reset, finalized again, or destroyed.
+ * Tempo and key candidate arrays may be empty (count zero and pointer NULL);
+ * in that selected-only form the selected value remains authoritative.
  */
 APTA_API apta_status_t APTA_CALL
 apta_result_builder_create(
@@ -147,6 +156,11 @@ apta_result_builder_set_beatgrid(
     apta_result_builder_t *builder,
     apta_feature_mask_t grid_feature,
     const apta_grid_view_t *grid);
+
+APTA_API apta_status_t APTA_CALL
+apta_result_builder_set_grid_revision(
+    apta_result_builder_t *builder,
+    const apta_grid_revision_view_t *revision);
 
 APTA_API apta_status_t APTA_CALL
 apta_result_builder_set_key(

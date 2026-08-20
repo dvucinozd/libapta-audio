@@ -176,6 +176,8 @@ static void apta_builder_clear_payload(apta_result_builder_t *builder)
     builder->detail_column_count = 0u;
     apta_tempo_view_init(&builder->tempo);
     builder->tempo_candidates = NULL;
+    apta_grid_revision_view_init(&builder->global_revision);
+    builder->has_global_revision = 0u;
     apta_key_view_init(&builder->key);
     builder->key_candidates = NULL;
     apta_meter_view_init(&builder->meter);
