@@ -8,6 +8,11 @@ Analysis 1.0 document set. Start with
 Editorial corrections published after `v1.0.0` are recorded in
 [`APTA-1.0-ERRATA-1.md`](APTA-1.0-ERRATA-1.md).
 
+The APTA 1.1 implementation contract for the optional container-v1 DJ
+sections is [`APTA-1.1-DJ-SECTIONS.md`](APTA-1.1-DJ-SECTIONS.md). It is outside
+the frozen APTA 1.0 normative manifest and does not alter the published 1.0
+documents listed below.
+
 The governance-approved `v1.0.0` tag pins the stable APTA 1.0 specification,
 public API 1.0.0, package line 1.0.x and container version 1 release boundary.
 

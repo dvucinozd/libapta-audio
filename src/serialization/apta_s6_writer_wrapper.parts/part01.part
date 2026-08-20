@@ -79,8 +79,8 @@
     return APTA_STATUS_OK;
 }
 
-APTA_CONTAINER_V1_PUBLIC apta_status_t APTA_CALL
-apta_result_query_serialized_size(
+apta_status_t APTA_CALL
+apta_result_query_serialized_size_s6(
     const apta_result_t *result,
     const apta_serialize_options_t *options,
     uint64_t *size_out)
@@ -101,8 +101,8 @@ apta_result_query_serialized_size(
         size_out);
 }
 
-APTA_CONTAINER_V1_PUBLIC apta_status_t APTA_CALL
-apta_result_serialize(
+apta_status_t APTA_CALL
+apta_result_serialize_s6(
     const apta_result_t *result,
     const apta_serialize_options_t *options,
     void *buffer,

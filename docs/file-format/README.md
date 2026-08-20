@@ -7,6 +7,10 @@ section registration in
 and global-grid/revision rules in
 [`../../specification/global-grid-container.md`](../../specification/global-grid-container.md).
 
+The APTA 1.1 optional `MKEY`, `MTRD` and `CONF` payloads are specified in
+[`../../specification/APTA-1.1-DJ-SECTIONS.md`](../../specification/APTA-1.1-DJ-SECTIONS.md)
+without changing the frozen APTA 1.0 normative manifest.
+
 Implementation records in this directory:
 
 - [`APTA-WOVR-READER-WRITER-STATUS-0.1.md`](APTA-WOVR-READER-WRITER-STATUS-0.1.md)

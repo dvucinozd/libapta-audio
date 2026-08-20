@@ -174,6 +174,11 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_result_parse=apta_result_parse_s4")
 
 set_source_files_properties(
+    src/serialization/apta_s6_reader.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_result_parse=apta_result_parse_s6")
+
+set_source_files_properties(
     src/serialization/apta_wovr_writer.c
     PROPERTIES
         COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_result_query_serialized_size=apta_result_query_serialized_size_wovr;apta_result_serialize=apta_result_serialize_wovr")
@@ -341,6 +346,8 @@ set(
         src/core/apta_session_workspace.c
         src/core/apta_session_workspace_lifecycle.c
         src/serialization/apta_crc32c.c
+        src/serialization/apta_dj_reader.c
+        src/serialization/apta_dj_writer.c
         src/serialization/apta_meta_reader.c
         src/serialization/apta_meta_reader_hardening.c
         src/serialization/apta_meta_writer.c

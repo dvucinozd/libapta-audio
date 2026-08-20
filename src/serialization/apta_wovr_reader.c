@@ -122,7 +122,10 @@ static int apta_is_standard_section(const uint8_t *entry)
            memcmp(entry, "TEMP", 4u) == 0 ||
            memcmp(entry, "LGRD", 4u) == 0 ||
            memcmp(entry, "GGRD", 4u) == 0 ||
-           memcmp(entry, "REVN", 4u) == 0;
+           memcmp(entry, "REVN", 4u) == 0 ||
+           memcmp(entry, "MKEY", 4u) == 0 ||
+           memcmp(entry, "MTRD", 4u) == 0 ||
+           memcmp(entry, "CONF", 4u) == 0;
 }
 
 void APTA_CALL apta_parse_options_init(apta_parse_options_t *options)

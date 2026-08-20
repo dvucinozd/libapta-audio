@@ -28,7 +28,7 @@ static void print_usage(FILE *stream)
     fputs(
         "Usage: apta-inspect INPUT.apta [--json] [--section SECTION]\n"
         "\n"
-        "SECTION: WOVR, WDTL, META, TEMP, LGRD, GGRD, REVN\n"
+        "SECTION: WOVR, WDTL, META, TEMP, LGRD, GGRD, REVN, MKEY, MTRD, CONF\n"
         "Options:\n"
         "  --json\n"
         "  --section SECTION\n"
@@ -223,6 +223,51 @@ static void print_human(
         } else {
             printf("REVN: unavailable\n");
         }
+    }
+    if (include_section(section, "MKEY")) {
+        apta_key_view_t key;
+        apta_key_view_init(&key);
+        if (apta_result_get_key(result, NULL, &key) == APTA_STATUS_OK) {
+            printf("MKEY: tonic=%u mode=%u tuning-cents=%d state=%s "
+                   "confidence=%u candidates=%u range=%llu..%llu\n",
+                   (unsigned)key.tonic, (unsigned)key.mode,
+                   (int)key.tuning_offset_cents,
+                   apta_tool_feature_state_name(key.state),
+                   (unsigned)key.confidence, key.candidate_count,
+                   (unsigned long long)key.applicability_range.first_frame,
+                   (unsigned long long)key.applicability_range.end_frame);
+        } else {
+            printf("MKEY: unavailable\n");
+        }
+    }
+    if (include_section(section, "MTRD")) {
+        apta_meter_view_t meter;
+        apta_meter_view_init(&meter);
+        if (apta_result_get_meter(result, NULL, &meter) == APTA_STATUS_OK) {
+            printf("MTRD: meter=%u/%u downbeat=%llu ordinal=%lld state=%s "
+                   "confidence=%u segments=%u\n",
+                   (unsigned)meter.numerator, (unsigned)meter.denominator,
+                   (unsigned long long)meter.downbeat_frame,
+                   (long long)meter.downbeat_ordinal,
+                   apta_tool_feature_state_name(meter.state),
+                   (unsigned)meter.confidence, meter.segment_count);
+        } else {
+            printf("MTRD: unavailable\n");
+        }
+    }
+    if (include_section(section, "CONF")) {
+        apta_feature_mask_t target;
+        uint32_t count = 0u;
+        for (target = 1u; target <= APTA_FEATURE_METER_DOWNBEAT;
+             target <<= 1u) {
+            apta_quality_view_t quality;
+            apta_quality_view_init(&quality);
+            if (apta_result_get_quality(result, target, &quality) ==
+                APTA_STATUS_OK) {
+                ++count;
+            }
+        }
+        printf("CONF: records=%u\n", count);
     }
     if (section == NULL) {
         /* Diagnostics are not a container section, so they have no --section
@@ -467,6 +512,78 @@ static void print_json(
         } else {
             fputs("null", stdout);
         }
+    }
+    if (include_section(section, "MKEY")) {
+        apta_key_view_t key;
+        apta_key_view_init(&key);
+        printf("%s\"MKEY\":", first_section ? "" : ",");
+        if (apta_result_get_key(result, NULL, &key) == APTA_STATUS_OK) {
+            printf("{\"tonic\":%u,\"mode\":%u,\"tuning_offset_cents\":%d,"
+                   "\"state\":",
+                   (unsigned)key.tonic, (unsigned)key.mode,
+                   (int)key.tuning_offset_cents);
+            apta_tool_json_string(
+                stdout, apta_tool_feature_state_name(key.state),
+                strlen(apta_tool_feature_state_name(key.state)));
+            printf(",\"confidence\":%u,\"candidate_count\":%u,"
+                   "\"first_frame\":%llu,\"end_frame\":%llu}",
+                   (unsigned)key.confidence, key.candidate_count,
+                   (unsigned long long)key.applicability_range.first_frame,
+                   (unsigned long long)key.applicability_range.end_frame);
+        } else {
+            fputs("null", stdout);
+        }
+        first_section = 0;
+    }
+    if (include_section(section, "MTRD")) {
+        apta_meter_view_t meter;
+        apta_meter_view_init(&meter);
+        printf("%s\"MTRD\":", first_section ? "" : ",");
+        if (apta_result_get_meter(result, NULL, &meter) == APTA_STATUS_OK) {
+            printf("{\"numerator\":%u,\"denominator\":%u,"
+                   "\"downbeat_frame\":%llu,\"downbeat_ordinal\":%lld,"
+                   "\"state\":",
+                   (unsigned)meter.numerator, (unsigned)meter.denominator,
+                   (unsigned long long)meter.downbeat_frame,
+                   (long long)meter.downbeat_ordinal);
+            apta_tool_json_string(
+                stdout, apta_tool_feature_state_name(meter.state),
+                strlen(apta_tool_feature_state_name(meter.state)));
+            printf(",\"confidence\":%u,\"segment_count\":%u}",
+                   (unsigned)meter.confidence, meter.segment_count);
+        } else {
+            fputs("null", stdout);
+        }
+        first_section = 0;
+    }
+    if (include_section(section, "CONF")) {
+        apta_feature_mask_t target;
+        int first_record = 1;
+        printf("%s\"CONF\":[", first_section ? "" : ",");
+        for (target = 1u; target <= APTA_FEATURE_METER_DOWNBEAT;
+             target <<= 1u) {
+            apta_quality_view_t quality;
+            apta_quality_view_init(&quality);
+            if (apta_result_get_quality(result, target, &quality) !=
+                APTA_STATUS_OK) {
+                continue;
+            }
+            printf("%s{\"feature\":%llu,\"calibration_model_id\":%u,"
+                   "\"evidence_coverage_permille\":%u,\"confidence\":%u,"
+                   "\"state\":",
+                   first_record ? "" : ",",
+                   (unsigned long long)quality.feature,
+                   quality.calibration_model_id,
+                   (unsigned)quality.evidence_coverage_permille,
+                   (unsigned)quality.confidence);
+            apta_tool_json_string(
+                stdout, apta_tool_feature_state_name(quality.state),
+                strlen(apta_tool_feature_state_name(quality.state)));
+            printf(",\"flags\":%u}", quality.flags);
+            first_record = 0;
+        }
+        fputc(']', stdout);
+        first_section = 0;
     }
     fputs("}\n", stdout);
 }

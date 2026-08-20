@@ -162,6 +162,35 @@ apta_add_c_test(apta_s6_serialization apta.serialization.s6 unit/s6_serializatio
 target_link_libraries(apta_s6_serialization PRIVATE apta_c11_atomics)
 target_include_directories(apta_s6_serialization PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 apta_add_c_test(apta_s6_allocation_failure apta.serialization.s6_allocation_failure unit/s6_allocation_failure.c)
+apta_add_c_test(
+    apta_dj_sections_roundtrip
+    apta.serialization.dj_sections_roundtrip
+    unit/dj_sections_roundtrip.c)
+target_compile_definitions(
+    apta_dj_sections_roundtrip
+    PRIVATE
+        APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
+apta_add_c_test(
+    apta_dj_sections_malformed
+    apta.serialization.dj_sections_malformed
+    unit/dj_sections_malformed.c)
+target_compile_definitions(
+    apta_dj_sections_malformed
+    PRIVATE
+        APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
+add_executable(
+    apta_compat_1_0_container_skip
+    compat/1.0.0/frozen_container_consumer.c)
+target_compile_definitions(
+    apta_compat_1_0_container_skip
+    PRIVATE
+        APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
+set_target_properties(
+    apta_compat_1_0_container_skip
+    PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+add_test(
+    NAME apta.compat.1_0_container_skip
+    COMMAND apta_compat_1_0_container_skip)
 
 add_executable(
     apta_espidf_port
@@ -240,6 +269,13 @@ if(TARGET apta_tool_common)
             C_STANDARD 11
             C_STANDARD_REQUIRED YES)
     add_test(NAME apta.tools.sections_all COMMAND apta_tool_sections_all)
+
+    add_executable(apta_tool_dj_sections unit/tool_dj_sections.c)
+    target_link_libraries(apta_tool_dj_sections PRIVATE apta_tool_common)
+    set_target_properties(
+        apta_tool_dj_sections
+        PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+    add_test(NAME apta.tools.dj_sections COMMAND apta_tool_dj_sections)
 endif()
 
 if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)

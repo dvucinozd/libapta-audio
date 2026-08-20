@@ -163,7 +163,8 @@ const char *apta_tool_grid_revision_state_name(
 }
 
 const char *const apta_tool_section_codes[] = {
-    "WOVR", "WDTL", "META", "TEMP", "LGRD", "GGRD", "REVN", NULL
+    "WOVR", "WDTL", "META", "TEMP", "LGRD", "GGRD", "REVN",
+    "MKEY", "MTRD", "CONF", NULL
 };
 
 int apta_tool_section_is_known(const char *code)
@@ -291,7 +292,10 @@ void apta_tool_print_feature_list(
         {APTA_FEATURE_GLOBAL_BEATGRID, "global-beatgrid"},
         {APTA_FEATURE_DYNAMIC_TEMPO, "dynamic-tempo"},
         {APTA_FEATURE_CONFIDENCE, "confidence"},
-        {APTA_FEATURE_GRID_LOCKING, "grid-locking"}
+        {APTA_FEATURE_GRID_LOCKING, "grid-locking"},
+        {APTA_FEATURE_MUSICAL_KEY, "musical-key"},
+        {APTA_FEATURE_METER_DOWNBEAT, "meter-downbeat"},
+        {APTA_FEATURE_CALIBRATED_QUALITY, "calibrated-quality"}
     };
     size_t index;
 
