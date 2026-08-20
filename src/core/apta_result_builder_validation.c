@@ -132,6 +132,9 @@ apta_status_t apta_builder_validate_overview(
     if (view->level.level_id != 0u ||
         view->level.frames_per_column == 0u || view->level.flags != 0u ||
         view->flags != 0u || !apta_builder_state_valid(view->state) ||
+        (view->state == APTA_FEATURE_FINAL &&
+         (builder->has_source == 0u ||
+          builder->source.total_frames == APTA_TOTAL_FRAMES_UNKNOWN)) ||
         !apta_builder_confidence_valid(view->confidence) ||
         !apta_builder_bytes_zero(view->reserved8, sizeof(view->reserved8)) ||
         !apta_builder_bytes_zero(view->reserved32, sizeof(view->reserved32)) ||

@@ -136,6 +136,8 @@ apta_result_builder_set_provenance(
     apta_result_builder_t *builder,
     const apta_result_provenance_t *provenance);
 
+/* FINAL overview imports require a known source length and complete canonical
+ * coverage. Non-FINAL imports may describe a canonical prefix or sparse spans. */
 APTA_API apta_status_t APTA_CALL
 apta_result_builder_set_waveform_overview(
     apta_result_builder_t *builder,

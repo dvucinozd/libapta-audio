@@ -731,6 +731,81 @@ static void test_overview_state_geometry(apta_context_t *context)
     apta_result_builder_destroy(builder);
 }
 
+static void test_unknown_length_overview_state(apta_context_t *context)
+{
+    apta_result_builder_options_t options;
+    apta_result_builder_t *builder = NULL;
+    apta_result_builder_info_t info;
+    apta_waveform_column_t column = {
+        -1, 1, 1u, 0u, 0u, 0u, APTA_WAVEFORM_COLUMN_VALID};
+    apta_waveform_span_t span;
+    apta_waveform_overview_view_t overview;
+    apta_waveform_overview_view_t result_overview;
+    apta_parse_options_t strict;
+    const apta_result_t *result = NULL;
+    const apta_result_t *parsed = NULL;
+    uint64_t size = 0u;
+    size_t written = 0u;
+    uint8_t *bytes = NULL;
+
+    apta_result_builder_options_init(&options);
+    EXPECT("overview-unknown/setup",
+           create_builder(context, &options, APTA_TOTAL_FRAMES_UNKNOWN,
+                          &builder));
+    apta_result_builder_info_init(&info);
+    info.session_state = APTA_SESSION_ACTIVE;
+    EXPECT("overview-unknown/info",
+           apta_result_builder_set_info(builder, &info) == APTA_STATUS_OK);
+    memset(&span, 0, sizeof(span));
+    set_range(&span.source_range, 0u, 256u);
+    span.column_count = 1u;
+    span.columns = &column;
+    apta_waveform_overview_view_init(&overview);
+    overview.level.frames_per_column = 256u;
+    overview.state = APTA_FEATURE_PARTIAL;
+    overview.confidence = 90u;
+    overview.span_count = 1u;
+    overview.spans = &span;
+    EXPECT("overview-unknown/partial-set",
+           apta_result_builder_set_waveform_overview(builder, &overview) ==
+               APTA_STATUS_OK);
+
+    overview.state = APTA_FEATURE_FINAL;
+    EXPECT("overview-unknown/final-rejected",
+           apta_result_builder_set_waveform_overview(builder, &overview) ==
+               APTA_ERROR_INVALID_ARGUMENT);
+    EXPECT("overview-unknown/finalize-preserved",
+           apta_result_builder_finalize(builder, &result) == APTA_STATUS_OK &&
+               result != NULL);
+    if (result != NULL) {
+        apta_waveform_overview_view_init(&result_overview);
+        EXPECT("overview-unknown/partial-preserved",
+               apta_result_get_waveform_overview(
+                   result, 0u, &result_overview) == APTA_STATUS_OK &&
+                   result_overview.state == APTA_FEATURE_PARTIAL);
+        EXPECT("overview-unknown/size",
+               apta_result_query_serialized_size(result, NULL, &size) ==
+                   APTA_STATUS_OK);
+        if (size <= SIZE_MAX) bytes = (uint8_t *)malloc((size_t)size);
+        EXPECT("overview-unknown/buffer", bytes != NULL);
+        if (bytes != NULL) {
+            EXPECT("overview-unknown/serialize",
+                   apta_result_serialize(result, NULL, bytes, (size_t)size,
+                                         &written) == APTA_STATUS_OK);
+            apta_parse_options_init(&strict);
+            strict.flags = APTA_PARSE_STRICT;
+            EXPECT("overview-unknown/strict-parse",
+                   apta_result_parse(context, &strict, bytes, written,
+                                     &parsed) == APTA_STATUS_OK &&
+                       parsed != NULL);
+            if (parsed != NULL) apta_result_release(parsed);
+        }
+        apta_result_release(result);
+    }
+    free(bytes);
+    apta_result_builder_destroy(builder);
+}
+
 int main(void)
 {
     apta_context_config_t config;
@@ -745,6 +820,7 @@ int main(void)
     test_replacement_and_selected_only(context);
     test_explicit_grids(context);
     test_overview_state_geometry(context);
+    test_unknown_length_overview_state(context);
     if (apta_context_destroy(context) != APTA_STATUS_OK) return 3;
     return failures == 0 ? 0 : 1;
 }
