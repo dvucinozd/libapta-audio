@@ -28,6 +28,10 @@ int main(void)
     apta_key_view_t key;
     apta_meter_view_t meter;
     apta_quality_view_t quality;
+    apta_result_builder_options_t builder_options;
+    apta_result_builder_info_t builder_info;
+    apta_result_provenance_t provenance;
+    apta_waveform_detail_input_t detail_input;
     apta_metadata_t metadata;
     apta_metadata_view_t metadata_view;
     apta_serialize_options_t serialization;
@@ -46,6 +50,10 @@ int main(void)
     apta_key_view_init(&key);
     apta_meter_view_init(&meter);
     apta_quality_view_init(&quality);
+    apta_result_builder_options_init(&builder_options);
+    apta_result_builder_info_init(&builder_info);
+    apta_result_provenance_init(&provenance);
+    apta_waveform_detail_input_init(&detail_input);
     apta_metadata_init(&metadata);
     apta_metadata_view_init(&metadata_view);
     apta_serialize_options_init(&serialization);
@@ -64,6 +72,10 @@ int main(void)
     CHECK_PREFIX(key);
     CHECK_PREFIX(meter);
     CHECK_PREFIX(quality);
+    CHECK_PREFIX(builder_options);
+    CHECK_PREFIX(builder_info);
+    CHECK_PREFIX(provenance);
+    CHECK_PREFIX(detail_input);
     CHECK_PREFIX(metadata);
     CHECK_PREFIX(metadata_view);
     CHECK_PREFIX(serialization);
@@ -99,6 +111,10 @@ int main(void)
             APTA_EVIDENCE_COVERAGE_UNKNOWN ||
         quality.confidence != APTA_CONFIDENCE_UNKNOWN ||
         quality.state != APTA_FEATURE_ABSENT ||
+        builder_options.maximum_allocation_bytes == 0u ||
+        builder_info.generation == 0u ||
+        provenance.origin != APTA_RESULT_PROVENANCE_UNSPECIFIED ||
+        detail_input.tile_count != 0u ||
         metadata.flags != 0u ||
         metadata.application_source_id_kind !=
             APTA_METADATA_SOURCE_ID_NONE ||

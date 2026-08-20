@@ -11,6 +11,7 @@
 #include <apta/apta_s4.h>
 #include <apta/apta_s6.h>
 #include <apta/apta_metadata.h>
+#include <apta/apta_result_builder.h>
 #include <apta/apta_initializers.h>
 #include <apta/apta_serialization.h>
 

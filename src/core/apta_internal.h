@@ -557,6 +557,9 @@ struct apta_result {
     apta_channel_layout_t source_channel_layout;
 
     apta_internal_metadata_t metadata;
+    apta_result_provenance_t provenance;
+    uint8_t *provenance_storage;
+    size_t provenance_storage_size;
 
     apta_waveform_overview_view_t overview;
     apta_waveform_span_t *overview_spans;
@@ -572,6 +575,7 @@ struct apta_result {
     apta_grid_view_t local_grid;
     apta_frame_range_t *local_grid_coverage;
     apta_grid_segment_t *local_grid_segments;
+    apta_beat_t *local_grid_beats;
 
     apta_key_view_t key;
     apta_key_candidate_t *key_candidates;

@@ -1624,15 +1624,19 @@ void apta_internal_s4_cleanup_result(apta_result_t *result)
     apta_internal_context_deallocate(result->context, result->tempo_candidates);
     apta_internal_context_deallocate(result->context, result->local_grid_coverage);
     apta_internal_context_deallocate(result->context, result->local_grid_segments);
+    apta_internal_context_deallocate(result->context, result->local_grid_beats);
     result->tempo_candidates = NULL;
     result->local_grid_coverage = NULL;
     result->local_grid_segments = NULL;
+    result->local_grid_beats = NULL;
     result->tempo.candidates = NULL;
     result->tempo.candidate_count = 0u;
     result->local_grid.coverage_ranges = NULL;
     result->local_grid.coverage_range_count = 0u;
     result->local_grid.segments = NULL;
     result->local_grid.segment_count = 0u;
+    result->local_grid.beats = NULL;
+    result->local_grid.beat_count = 0u;
 }
 
 apta_status_t APTA_CALL apta_session_lock_grid_range(

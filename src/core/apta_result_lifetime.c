@@ -31,6 +31,9 @@ void apta_internal_result_init_absent_views(apta_result_t *result)
 {
     if (result != NULL) {
         apta_metadata_view_init(&result->metadata.view);
+        apta_result_provenance_init(&result->provenance);
+        result->provenance_storage = NULL;
+        result->provenance_storage_size = 0u;
         apta_key_view_init(&result->key);
         apta_meter_view_init(&result->meter);
         result->key_candidates = NULL;
@@ -83,6 +86,7 @@ void apta_internal_result_release(apta_result_t *result)
     }
 
     apta_internal_metadata_cleanup(context, &result->metadata);
+    apta_internal_context_deallocate(context, result->provenance_storage);
     apta_internal_context_deallocate(context, result->key_candidates);
     apta_internal_context_deallocate(context, result->meter_segments);
     apta_internal_context_deallocate(context, result->quality);

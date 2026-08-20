@@ -320,6 +320,10 @@ set(
         src/core/apta_result_accessors.c
         src/core/apta_result_detail_accessors.c
         src/core/apta_result_lifetime.c
+        src/core/apta_result_builder_lifecycle.c
+        src/core/apta_result_builder_validation.c
+        src/core/apta_result_builder_setters.c
+        src/core/apta_result_builder_finalize.c
         src/core/apta_result_pool.c
         src/core/apta_result_pool_layout.c
         src/core/apta_result_pool_publication.c

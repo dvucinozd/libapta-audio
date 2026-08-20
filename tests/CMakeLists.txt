@@ -48,6 +48,18 @@ apta_add_c_test(apta_allocation_failure apta.core.allocation_failure unit/alloca
 apta_add_c_test(apta_cancellation apta.core.cancellation unit/cancellation.c)
 apta_add_c_test(apta_initializers apta.api.initializers unit/initializers.c)
 apta_add_c_test(
+    apta_result_builder_roundtrip
+    apta.api.result_builder_roundtrip
+    unit/result_builder_roundtrip.c)
+apta_add_c_test(
+    apta_result_builder_validation
+    apta.api.result_builder_validation
+    unit/result_builder_validation.c)
+apta_add_c_test(
+    apta_result_builder_allocation_failure
+    apta.api.result_builder_allocation_failure
+    unit/result_builder_allocation_failure.c)
+apta_add_c_test(
     apta_result_model_1_1
     apta.api.result_model_1_1
     unit/result_model_1_1.c)

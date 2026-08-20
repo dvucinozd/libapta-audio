@@ -75,6 +75,14 @@ int apta_internal_result_allocation_bytes(
             sizeof(apta_grid_segment_t)) ||
         !apta_result_allocation_add(
             &total,
+            result->local_grid.beat_count,
+            sizeof(apta_beat_t)) ||
+        !apta_result_allocation_add(
+            &total,
+            result->provenance_storage_size,
+            sizeof(uint8_t)) ||
+        !apta_result_allocation_add(
+            &total,
             result->key.candidate_count,
             sizeof(apta_key_candidate_t)) ||
         !apta_result_allocation_add(
