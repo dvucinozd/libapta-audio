@@ -1,4 +1,4 @@
 # Normalized-LF SHA-256 for headers extended by the additive APTA 1.1 API.
 33e954c00727fcd113a45ff8a3295e8d725eeb51b2a086f310aa2f0cc477aa5e apta_initializers.h
-2b91e0395217f3fa3962000f079ec4491298c4451ba559b9f0a42f61749f3ad7 apta_result.h
+aea8bfb19dd3262e6dd3cbd24642e2b9eed489de385c0a4c336f94f0d90d23a5 apta_result.h
 da2879cbabfcfc2cada35eba1021100c46784f82a50181a693e615457a4f8b9f apta_types.h

@@ -148,9 +148,7 @@ apta_status_t apta_internal_result_pool_create_empty_result(
             result->result_pool = pool;
             result->result_pool_slot_index = slot_index;
             result->result_flags = APTA_INTERNAL_RESULT_FLAG_POOLED;
-            apta_metadata_view_init(&result->metadata.view);
-            apta_key_view_init(&result->key);
-            apta_meter_view_init(&result->meter);
+            apta_internal_result_init_absent_views(result);
 
             apta_source_info_init(&result->source_info);
             result->source_info.total_frames = config->total_frames;

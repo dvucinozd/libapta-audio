@@ -212,7 +212,7 @@ field	apta_key_candidate_t	score	8
 field	apta_key_candidate_t	confidence	10
 field	apta_key_candidate_t	reserved8_2	11
 field	apta_key_candidate_t	flags	12
-type	apta_key_view_t	72	8
+type	apta_key_view_t	68	4
 field	apta_key_view_t	struct_size	0
 field	apta_key_view_t	api_version	4
 field	apta_key_view_t	applicability_range	8
@@ -223,9 +223,9 @@ field	apta_key_view_t	confidence	39
 field	apta_key_view_t	state	40
 field	apta_key_view_t	candidate_count	44
 field	apta_key_view_t	candidates	48
-field	apta_key_view_t	flags	56
-field	apta_key_view_t	reserved32	60
-type	apta_meter_segment_t	80	8
+field	apta_key_view_t	flags	52
+field	apta_key_view_t	reserved32	56
+type	apta_meter_segment_t	76	4
 field	apta_meter_segment_t	struct_size	0
 field	apta_meter_segment_t	api_version	4
 field	apta_meter_segment_t	applicability_range	8
@@ -240,7 +240,7 @@ field	apta_meter_segment_t	reserved16	58
 field	apta_meter_segment_t	flags	60
 field	apta_meter_segment_t	segment_id	64
 field	apta_meter_segment_t	reserved32	68
-type	apta_meter_view_t	64	8
+type	apta_meter_view_t	60	4
 field	apta_meter_view_t	struct_size	0
 field	apta_meter_view_t	api_version	4
 field	apta_meter_view_t	downbeat_frame	8
@@ -253,9 +253,9 @@ field	apta_meter_view_t	reserved8	33
 field	apta_meter_view_t	reserved16	34
 field	apta_meter_view_t	segment_count	36
 field	apta_meter_view_t	segments	40
-field	apta_meter_view_t	flags	48
-field	apta_meter_view_t	reserved32	52
-type	apta_quality_view_t	48	8
+field	apta_meter_view_t	flags	44
+field	apta_meter_view_t	reserved32	48
+type	apta_quality_view_t	44	4
 field	apta_quality_view_t	struct_size	0
 field	apta_quality_view_t	api_version	4
 field	apta_quality_view_t	feature	8

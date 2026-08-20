@@ -403,7 +403,24 @@ apta_result_get_beatgrid(
     const apta_frame_range_t *range,
     apta_grid_view_t *view_out);
 
-/* Pointers in these immutable views remain valid until result is released. */
+/*
+ * Pointers in these immutable views remain valid until result is released.
+ *
+ * Ranges are half-open [first_frame, end_frame) and must be non-empty. Key is
+ * available when its applicability range overlaps the requested range. Meter
+ * is available when at least one ordered segment overlaps; the returned view
+ * contains the complete ordered segment list, so the range is an availability
+ * filter rather than a pointer/count slice.
+ *
+ * The generic APTA_FEATURE_CALIBRATED_QUALITY state filters each per-feature
+ * quality record by the target feature's applicability to the requested range,
+ * then reports the conservative state and confidence across all matches.
+ * FAILED dominates the aggregate state; otherwise the least mature state is
+ * returned. Confidence is the minimum, with UNKNOWN dominating any numeric
+ * confidence. The result is independent of quality-record storage order.
+ * apta_result_get_quality selects the record for exactly one target feature
+ * and has no range filter.
+ */
 APTA_API apta_status_t APTA_CALL
 apta_result_get_key(
     const apta_result_t *result,

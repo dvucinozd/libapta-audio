@@ -786,6 +786,8 @@ int apta_internal_result_allocation_fits(
     uint64_t additional_bytes,
     uint64_t maximum_allocation_bytes);
 
+void apta_internal_result_init_absent_views(apta_result_t *result);
+
 void apta_internal_log(
     apta_context_t *context,
     apta_log_level_t level,

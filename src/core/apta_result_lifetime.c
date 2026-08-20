@@ -27,6 +27,19 @@ static void apta_result_mark_waveform_publication_pending(
     session->overview_complete_count = 0u;
 }
 
+void apta_internal_result_init_absent_views(apta_result_t *result)
+{
+    if (result != NULL) {
+        apta_metadata_view_init(&result->metadata.view);
+        apta_key_view_init(&result->key);
+        apta_meter_view_init(&result->meter);
+        result->key_candidates = NULL;
+        result->meter_segments = NULL;
+        result->quality_count = 0u;
+        result->quality = NULL;
+    }
+}
+
 void apta_internal_result_retain(apta_result_t *result)
 {
     if (result != NULL) {
@@ -111,9 +124,7 @@ apta_status_t apta_internal_publish_result(
     memset(result, 0, sizeof(*result));
     result->context = session->context;
     atomic_init(&result->reference_count, 1u);
-    apta_metadata_view_init(&result->metadata.view);
-    apta_key_view_init(&result->key);
-    apta_meter_view_init(&result->meter);
+    apta_internal_result_init_absent_views(result);
 
     apta_source_info_init(&result->source_info);
     result->source_info.total_frames = session->config.total_frames;

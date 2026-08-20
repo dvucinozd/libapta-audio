@@ -55,6 +55,30 @@ target_link_libraries(apta_result_model_1_1 PRIVATE apta_c11_atomics)
 target_include_directories(
     apta_result_model_1_1
     PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+apta_add_c_test(
+    apta_result_model_1_1_ranges
+    apta.api.result_model_1_1_ranges
+    unit/result_model_1_1_ranges.c)
+target_link_libraries(apta_result_model_1_1_ranges PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_result_model_1_1_ranges
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+apta_add_c_test(
+    apta_result_model_1_1_quality
+    apta.api.result_model_1_1_quality
+    unit/result_model_1_1_quality.c)
+target_link_libraries(apta_result_model_1_1_quality PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_result_model_1_1_quality
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+apta_add_c_test(
+    apta_result_model_1_1_storage
+    apta.api.result_model_1_1_storage
+    unit/result_model_1_1_storage.c)
+target_link_libraries(apta_result_model_1_1_storage PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_result_model_1_1_storage
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 apta_add_c_test(apta_version_validation apta.api.version_validation unit/version_validation.c)
 apta_add_c_test(apta_metadata_lifecycle apta.metadata.lifecycle unit/metadata_lifecycle.c)
 apta_add_c_test(apta_pcm_pull apta.source.pcm_pull unit/pcm_pull.c)
@@ -294,6 +318,8 @@ apta_add_c_test(apta_publication_retry apta.result.publication_retry unit/public
 apta_add_c_test(apta_wovr_writer apta.serialization.wovr_writer unit/wovr_writer.c)
 apta_add_c_test(apta_wovr_writer_partial apta.serialization.wovr_writer_partial unit/wovr_writer_partial.c)
 apta_add_c_test(apta_wovr_roundtrip apta.serialization.wovr_roundtrip unit/wovr_roundtrip.c)
+target_link_libraries(apta_wovr_roundtrip PRIVATE apta_c11_atomics)
+target_include_directories(apta_wovr_roundtrip PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 apta_add_c_test(apta_wovr_reader_malformed apta.serialization.wovr_reader_malformed unit/wovr_reader_malformed.c)
 apta_add_c_test(apta_wovr_reader_hardening apta.serialization.wovr_reader_hardening unit/wovr_reader_hardening.c)
 apta_add_c_test(apta_wovr_reader_allocation_failure apta.serialization.wovr_reader_allocation_failure unit/wovr_reader_allocation_failure.c)
@@ -386,10 +412,10 @@ set_target_properties(
         C_STANDARD_REQUIRED YES
         C_EXTENSIONS NO)
 
-if(WIN32)
-    set(APTA_ABI_LAYOUT_MODEL llp64)
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(APTA_ABI_LAYOUT_MODEL ilp32)
+elseif(WIN32)
+    set(APTA_ABI_LAYOUT_MODEL llp64)
 else()
     set(APTA_ABI_LAYOUT_MODEL lp64)
 endif()

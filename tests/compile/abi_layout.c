@@ -4,6 +4,29 @@
 
 #include <apta/apta.h>
 
+#if UINTPTR_MAX == UINT32_MAX
+_Static_assert(sizeof(apta_key_view_t) == 68u,
+               "ILP32 apta_key_view_t size");
+_Static_assert(_Alignof(apta_key_view_t) == 4u,
+               "ILP32 apta_key_view_t alignment");
+_Static_assert(offsetof(apta_key_view_t, flags) == 52u,
+               "ILP32 apta_key_view_t flags offset");
+_Static_assert(sizeof(apta_meter_segment_t) == 76u,
+               "ILP32 apta_meter_segment_t size");
+_Static_assert(_Alignof(apta_meter_segment_t) == 4u,
+               "ILP32 apta_meter_segment_t alignment");
+_Static_assert(sizeof(apta_meter_view_t) == 60u,
+               "ILP32 apta_meter_view_t size");
+_Static_assert(_Alignof(apta_meter_view_t) == 4u,
+               "ILP32 apta_meter_view_t alignment");
+_Static_assert(offsetof(apta_meter_view_t, flags) == 44u,
+               "ILP32 apta_meter_view_t flags offset");
+_Static_assert(sizeof(apta_quality_view_t) == 44u,
+               "ILP32 apta_quality_view_t size");
+_Static_assert(_Alignof(apta_quality_view_t) == 4u,
+               "ILP32 apta_quality_view_t alignment");
+#endif
+
 _Static_assert(sizeof(apta_status_t) == 4u, "apta_status_t must be 32-bit");
 _Static_assert(sizeof(apta_source_frame_t) == 8u, "source frames must be 64-bit");
 _Static_assert(sizeof(apta_generation_t) == 8u, "generation must be 64-bit");

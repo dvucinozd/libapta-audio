@@ -635,6 +635,7 @@ static apta_status_t apta_build_parsed_result(
     memset(result, 0, sizeof(*result));
     result->context = context;
     atomic_init(&result->reference_count, 1u);
+    apta_internal_result_init_absent_views(result);
 
     result->overview_spans =
         (apta_waveform_span_t *)apta_internal_context_allocate(

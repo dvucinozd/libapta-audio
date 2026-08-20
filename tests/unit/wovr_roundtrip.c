@@ -5,6 +5,8 @@
 
 #include <apta/apta.h>
 
+#include "apta_internal.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -102,6 +104,18 @@ int main(void)
               sizeof(serialized),
               &parsed_result) == APTA_STATUS_OK);
     CHECK(parsed_result != NULL);
+
+    CHECK(parsed_result->key.struct_size == sizeof(parsed_result->key));
+    CHECK(parsed_result->key.api_version == APTA_API_VERSION);
+    CHECK(parsed_result->key.tonic == APTA_KEY_TONIC_UNKNOWN);
+    CHECK(parsed_result->key.state == APTA_FEATURE_ABSENT);
+    CHECK(parsed_result->key.confidence == APTA_CONFIDENCE_UNKNOWN);
+    CHECK(parsed_result->meter.struct_size == sizeof(parsed_result->meter));
+    CHECK(parsed_result->meter.api_version == APTA_API_VERSION);
+    CHECK(parsed_result->meter.state == APTA_FEATURE_ABSENT);
+    CHECK(parsed_result->meter.confidence == APTA_CONFIDENCE_UNKNOWN);
+    CHECK(parsed_result->quality_count == 0u);
+    CHECK(parsed_result->quality == NULL);
 
     apta_result_info_init(&info);
     CHECK(apta_result_get_info(parsed_result, &info) == APTA_STATUS_OK);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-#include "apta_internal.h"
+#include "../beatgrid/apta_s6_internal.h"
 
 #include <string.h>
 
@@ -120,6 +120,104 @@ static const apta_quality_view_t *apta_result_find_quality(
     return NULL;
 }
 
+static int apta_result_meter_range_coverage(
+    const apta_result_t *result,
+    const apta_frame_range_t *range)
+{
+    apta_source_frame_t cursor;
+    uint32_t index;
+    int overlaps = 0;
+
+    if (range == NULL) {
+        return 2;
+    }
+
+    cursor = range->first_frame;
+    for (index = 0u; index < result->meter.segment_count; ++index) {
+        const apta_frame_range_t *segment =
+            &result->meter.segments[index].applicability_range;
+
+        if (apta_result_ranges_overlap(segment, range)) {
+            overlaps = 1;
+        }
+        if (segment->end_frame <= cursor) {
+            continue;
+        }
+        if (segment->first_frame > cursor) {
+            continue;
+        }
+        cursor = segment->end_frame;
+        if (cursor >= range->end_frame) {
+            return 2;
+        }
+    }
+
+    return overlaps ? 1 : 0;
+}
+
+static int apta_result_quality_target_overlaps(
+    const apta_result_t *result,
+    apta_feature_mask_t feature,
+    const apta_frame_range_t *range)
+{
+    uint32_t index;
+
+    if ((result->info.available_features & feature) == 0u) {
+        return 0;
+    }
+    if (range == NULL) {
+        return 1;
+    }
+    if (feature == APTA_FEATURE_MUSICAL_KEY) {
+        return apta_result_ranges_overlap(
+                   &result->key.applicability_range, range);
+    }
+    if (feature == APTA_FEATURE_METER_DOWNBEAT) {
+        return apta_result_meter_range_coverage(result, range) != 0;
+    }
+    if (feature == APTA_FEATURE_BPM ||
+        feature == APTA_FEATURE_CONFIDENCE) {
+        return apta_result_ranges_overlap(
+                   &result->tempo.selected.applicability_range, range);
+    }
+    if (feature == APTA_FEATURE_LOCAL_BEATGRID ||
+        feature == APTA_FEATURE_GRID_LOCKING) {
+        return apta_result_ranges_overlap(
+                   &result->local_grid.applicability_range, range);
+    }
+    if ((feature == APTA_FEATURE_GLOBAL_BEATGRID ||
+         feature == APTA_FEATURE_DYNAMIC_TEMPO) && result->s6 != NULL) {
+        return apta_result_ranges_overlap(
+                   &result->s6->global_grid.applicability_range, range);
+    }
+    if (feature == APTA_FEATURE_WAVEFORM_OVERVIEW) {
+        return apta_overview_range_has_coverage(result, range);
+    }
+    if (feature == APTA_FEATURE_WAVEFORM_DETAIL) {
+        for (index = 0u; index < result->detail_tile_count; ++index) {
+            if (apta_result_ranges_overlap(
+                    &result->detail_tiles[index].source_range, range)) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    return 1;
+}
+
+static apta_feature_state_t apta_result_conservative_state(
+    apta_feature_state_t left,
+    apta_feature_state_t right)
+{
+    if (left == APTA_FEATURE_FAILED || right == APTA_FEATURE_FAILED) {
+        return APTA_FEATURE_FAILED;
+    }
+    if (right > APTA_FEATURE_FAILED) {
+        return APTA_FEATURE_FAILED;
+    }
+    return right < left ? right : left;
+}
+
 apta_status_t APTA_CALL apta_result_get_feature_state(
     const apta_result_t *result,
     apta_feature_mask_t feature,
@@ -127,18 +225,16 @@ apta_status_t APTA_CALL apta_result_get_feature_state(
     apta_feature_state_t *state_out,
     apta_confidence_value_t *confidence_out)
 {
+    apta_status_t range_status;
+
     if (result == NULL || feature == 0u ||
         state_out == NULL || confidence_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (range != NULL &&
-        !apta_internal_validate_struct(
-            range,
-            sizeof(*range),
-            range->struct_size,
-            range->api_version)) {
-        return APTA_ERROR_INCOMPATIBLE_VERSION;
+    range_status = apta_result_validate_range(range);
+    if (range_status < 0) {
+        return range_status;
     }
 
     *state_out = APTA_FEATURE_ABSENT;
@@ -165,21 +261,64 @@ apta_status_t APTA_CALL apta_result_get_feature_state(
     }
 
     if (feature == APTA_FEATURE_METER_DOWNBEAT) {
+        int coverage;
+
         if ((result->info.available_features & feature) == 0u) {
             return APTA_STATUS_NOT_AVAILABLE;
         }
-        *state_out = result->meter.state;
+        coverage = apta_result_meter_range_coverage(result, range);
+        if (coverage == 0) {
+            return APTA_STATUS_NOT_AVAILABLE;
+        }
+        *state_out = coverage == 2
+                         ? result->meter.state
+                         : APTA_FEATURE_PARTIAL;
         *confidence_out = result->meter.confidence;
         return APTA_STATUS_OK;
     }
 
     if (feature == APTA_FEATURE_CALIBRATED_QUALITY) {
+        apta_feature_state_t aggregate_state = APTA_FEATURE_FINAL;
+        apta_confidence_value_t aggregate_confidence =
+            APTA_CONFIDENCE_UNKNOWN;
+        uint32_t index;
+        int found = 0;
+        int confidence_unknown = 0;
+
         if ((result->info.available_features & feature) == 0u ||
             result->quality_count == 0u || result->quality == NULL) {
             return APTA_STATUS_NOT_AVAILABLE;
         }
-        *state_out = result->quality[0].state;
-        *confidence_out = result->quality[0].confidence;
+        for (index = 0u; index < result->quality_count; ++index) {
+            const apta_quality_view_t *quality = &result->quality[index];
+
+            if (quality->feature == 0u ||
+                (quality->feature & (quality->feature - 1u)) != 0u ||
+                quality->feature == APTA_FEATURE_CALIBRATED_QUALITY ||
+                !apta_result_quality_target_overlaps(
+                    result, quality->feature, range)) {
+                continue;
+            }
+            aggregate_state = found
+                                  ? apta_result_conservative_state(
+                                        aggregate_state, quality->state)
+                                  : quality->state;
+            if (quality->confidence == APTA_CONFIDENCE_UNKNOWN) {
+                confidence_unknown = 1;
+            } else if (!found ||
+                       aggregate_confidence == APTA_CONFIDENCE_UNKNOWN ||
+                       quality->confidence < aggregate_confidence) {
+                aggregate_confidence = quality->confidence;
+            }
+            found = 1;
+        }
+        if (!found) {
+            return APTA_STATUS_NOT_AVAILABLE;
+        }
+        *state_out = aggregate_state;
+        *confidence_out = confidence_unknown
+                              ? APTA_CONFIDENCE_UNKNOWN
+                              : aggregate_confidence;
         return APTA_STATUS_OK;
     }
 
@@ -192,10 +331,6 @@ apta_status_t APTA_CALL apta_result_get_feature_state(
     if (range == NULL) {
         *state_out = result->overview.state;
         return APTA_STATUS_OK;
-    }
-
-    if (range->first_frame >= range->end_frame) {
-        return APTA_ERROR_INVALID_ARGUMENT;
     }
 
     if (apta_overview_range_fully_covered(result, range)) {
@@ -355,8 +490,7 @@ apta_status_t APTA_CALL apta_result_get_meter(
     apta_meter_view_t *view_out)
 {
     apta_status_t status;
-    uint32_t index;
-    int overlaps = 0;
+    int coverage;
 
     if (result == NULL || view_out == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
@@ -372,20 +506,9 @@ apta_status_t APTA_CALL apta_result_get_meter(
     if (status < 0) {
         return status;
     }
-    if (range == NULL || result->meter.segment_count == 0u) {
-        overlaps = 1;
-    } else {
-        for (index = 0u; index < result->meter.segment_count; ++index) {
-            if (apta_result_ranges_overlap(
-                    &result->meter.segments[index].applicability_range,
-                    range)) {
-                overlaps = 1;
-                break;
-            }
-        }
-    }
+    coverage = apta_result_meter_range_coverage(result, range);
     if ((result->info.available_features &
-         APTA_FEATURE_METER_DOWNBEAT) == 0u || !overlaps) {
+         APTA_FEATURE_METER_DOWNBEAT) == 0u || coverage == 0) {
         apta_meter_view_init(view_out);
         return APTA_STATUS_NOT_AVAILABLE;
     }
@@ -401,6 +524,7 @@ apta_status_t APTA_CALL apta_result_get_quality(
     const apta_quality_view_t *quality;
 
     if (result == NULL || view_out == NULL || feature == 0u ||
+        feature == APTA_FEATURE_CALIBRATED_QUALITY ||
         (feature & (feature - 1u)) != 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }

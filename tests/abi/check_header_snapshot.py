@@ -19,6 +19,15 @@ def normalized_digest(data: bytes) -> str:
     return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
 
 
+def preserves_snapshot_lines(live: bytes, snapshot: bytes) -> bool:
+    """Require every frozen 1.0 line to remain unchanged and in order."""
+    live_lines = iter(live.replace(b"\r\n", b"\n").splitlines())
+    for expected in snapshot.replace(b"\r\n", b"\n").splitlines():
+        if not any(candidate == expected for candidate in live_lines):
+            return False
+    return True
+
+
 def read_delta_manifest(path: Path) -> dict[str, str]:
     entries: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -49,6 +58,10 @@ def main() -> int:
         if name in deltas:
             if name not in live or normalized_digest(live[name]) != deltas[name]:
                 mismatches.append(f"public header delta drift: {name}")
+            if (name in live and name in snapshot and
+                    not preserves_snapshot_lines(live[name], snapshot[name])):
+                mismatches.append(
+                    f"frozen 1.0 declarations changed or reordered: {name}")
         elif live.get(name) != snapshot.get(name):
             mismatches.append(f"public header snapshot drift: {name}")
 
