@@ -36,6 +36,11 @@
       "kind": "hex",
       "path": "tests/fixtures/container-v1-suite/v1-all-standard-sections.apta.hex",
       "producer": "independent container-v1 fixture generator"
+    },
+    {
+      "kind": "hex",
+      "path": "tests/fixtures/dj-sections-v1-combined.apta.hex",
+      "producer": "independent APTA 1.1 DJ section fixture generator"
     }
   ],
   "synthetic_seeds": {

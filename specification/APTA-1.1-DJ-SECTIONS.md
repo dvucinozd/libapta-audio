@@ -133,8 +133,13 @@ Header meter/downbeat fields exactly equal the first segment.
 | 48 | 8 | `reserved64`, zero |
 
 Segments are sorted by applicability start, non-overlapping, and have unique
-IDs. Downbeat frame lies within its segment; ordinals strictly increase. When a
-grid is present, every segment downbeat identifies an exact encoded grid
+IDs. In canonical applicability order, non-zero segment IDs are strictly
+increasing, making validation deterministic O(n) even at the 65,536-record
+limit. The header state is a conservative lower bound: every segment state is
+at least as mature as the header state. A complete container therefore has a
+`FINAL` header and only `FINAL` segments. Downbeat frame lies within its
+segment; ordinals strictly increase. When a grid is present, every segment
+downbeat identifies an exact encoded grid
 beat/anchor with the same whole frame and ordinal. Exact payload size is
 `48 + segment_count * 56`.
 

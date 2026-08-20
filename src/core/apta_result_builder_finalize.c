@@ -112,6 +112,11 @@ static int apta_builder_all_features_final(
         builder->key.state != APTA_FEATURE_FINAL) return 0;
     if (apta_builder_state_valid(builder->meter.state) &&
         builder->meter.state != APTA_FEATURE_FINAL) return 0;
+    for (index = 0u; index < builder->meter.segment_count; ++index) {
+        if (builder->meter.segments[index].state != APTA_FEATURE_FINAL) {
+            return 0;
+        }
+    }
     for (index = 0u; index < builder->quality_count; ++index) {
         if (builder->quality[index].state != APTA_FEATURE_FINAL) return 0;
     }

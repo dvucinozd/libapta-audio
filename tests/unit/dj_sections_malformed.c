@@ -106,6 +106,32 @@ static void refresh_section(uint8_t *bytes, size_t directory)
             crc32c(bytes + (size_t)offset, (size_t)size));
 }
 
+static void refresh_header(uint8_t *bytes)
+{
+    put_u32(bytes + 92u, crc32c(bytes, 92u));
+}
+
+static apta_status_t parse_case(
+    apta_context_t *context,
+    const apta_parse_options_t *options,
+    const uint8_t *bytes,
+    size_t size);
+
+static int rejected_payload_byte(
+    apta_context_t *context,
+    const uint8_t *original,
+    size_t directory,
+    size_t payload,
+    size_t relative,
+    uint8_t value)
+{
+    uint8_t mutated[FIXTURE_SIZE];
+    memcpy(mutated, original, sizeof(mutated));
+    mutated[payload + relative] = value;
+    refresh_section(mutated, directory);
+    return parse_case(context, NULL, mutated, sizeof(mutated)) < 0;
+}
+
 static apta_status_t parse_case(
     apta_context_t *context,
     const apta_parse_options_t *options,
@@ -171,6 +197,7 @@ int main(void)
     uint8_t original[FIXTURE_SIZE];
     uint8_t mutated[FIXTURE_SIZE];
     uint8_t unknown[801];
+    uint8_t trailing[FIXTURE_SIZE + 1u];
     size_t prefix;
 
     CHECK(load_fixture(original));
@@ -182,11 +209,133 @@ int main(void)
     for (prefix = 0u; prefix < sizeof(original); ++prefix) {
         CHECK(parse_case(context, NULL, original, prefix) < 0);
     }
+    memcpy(trailing, original, sizeof(original));
+    trailing[FIXTURE_SIZE] = 0u;
+    CHECK(parse_case(context, NULL, trailing, sizeof(trailing)) ==
+          APTA_ERROR_CORRUPT_DATA);
+
+    /* Common framing: alignment, directory/payload overlap, and exact sizes. */
+    memcpy(mutated, original, sizeof(mutated));
+    put_u64(mutated + MKEY_DIRECTORY + 8u, MKEY_PAYLOAD + 1u);
+    CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+    memcpy(mutated, original, sizeof(mutated));
+    memcpy(mutated + MKEY_DIRECTORY + 8u,
+           mutated + 96u + 8u, 28u);
+    CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+    memcpy(mutated, original, sizeof(mutated));
+    put_u64(mutated + MKEY_DIRECTORY + 8u, 96u);
+    put_u64(mutated + MKEY_DIRECTORY + 16u, 40u);
+    put_u64(mutated + MKEY_DIRECTORY + 24u, 40u);
+    put_u32(mutated + MKEY_DIRECTORY + 32u, crc32c(mutated + 96u, 40u));
+    CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+
+    {
+        static const size_t directories[3] = {
+            MKEY_DIRECTORY, MTRD_DIRECTORY, CONF_DIRECTORY};
+        static const size_t payloads[3] = {
+            MKEY_PAYLOAD, MTRD_PAYLOAD, CONF_PAYLOAD};
+        size_t section;
+        for (section = 0u; section < 3u; ++section) {
+            const uint64_t exact = get_u64(
+                original + directories[section] + 16u);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u16(mutated + directories[section] + 4u, 2u);
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) ==
+                  APTA_ERROR_UNSUPPORTED);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u16(mutated + directories[section] + 6u, 1u);
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) ==
+                  APTA_ERROR_CORRUPT_DATA);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u32(mutated + directories[section] + 36u, 1u);
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) ==
+                  APTA_ERROR_CORRUPT_DATA);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u16(mutated + payloads[section], 2u);
+            refresh_section(mutated, directories[section]);
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u64(mutated + directories[section] + 16u, 0u);
+            put_u64(mutated + directories[section] + 24u, 0u);
+            put_u32(mutated + directories[section] + 32u,
+                    crc32c(mutated + payloads[section], 0u));
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u64(mutated + directories[section] + 16u, exact - 1u);
+            put_u64(mutated + directories[section] + 24u, exact - 1u);
+            put_u32(mutated + directories[section] + 32u,
+                    crc32c(mutated + payloads[section], (size_t)exact - 1u));
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+            memcpy(mutated, original, sizeof(mutated));
+            put_u64(mutated + directories[section] + 16u, exact + 1u);
+            put_u64(mutated + directories[section] + 24u, exact + 1u);
+            if (payloads[section] + exact < sizeof(mutated)) {
+                put_u32(mutated + directories[section] + 32u,
+                        crc32c(mutated + payloads[section],
+                               (size_t)exact + 1u));
+            }
+            CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+        }
+    }
 
     memcpy(mutated, original, sizeof(mutated));
     mutated[MKEY_PAYLOAD + 4u] ^= 1u;
     CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) ==
           APTA_ERROR_CORRUPT_DATA);
+
+    /* Every reserved header and record area is mandatory zero. */
+    CHECK(rejected_payload_byte(context, original, MKEY_DIRECTORY,
+                                MKEY_PAYLOAD, 36u, 1u));
+    CHECK(rejected_payload_byte(context, original, MKEY_DIRECTORY,
+                                MKEY_PAYLOAD, 40u + 7u, 1u));
+    CHECK(rejected_payload_byte(context, original, MKEY_DIRECTORY,
+                                MKEY_PAYLOAD, 40u + 12u, 1u));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 36u, 1u));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 40u, 1u));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 48u + 38u, 1u));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 48u + 48u, 1u));
+    CHECK(rejected_payload_byte(context, original, CONF_DIRECTORY,
+                                CONF_PAYLOAD, 12u, 1u));
+    CHECK(rejected_payload_byte(context, original, CONF_DIRECTORY,
+                                CONF_PAYLOAD, 16u + 20u, 1u));
+    CHECK(rejected_payload_byte(context, original, CONF_DIRECTORY,
+                                CONF_PAYLOAD, 16u + 24u, 1u));
+
+    /* State/header/range/sentinel boundaries. */
+    CHECK(rejected_payload_byte(context, original, MKEY_DIRECTORY,
+                                MKEY_PAYLOAD, 2u, APTA_FEATURE_ABSENT));
+    CHECK(rejected_payload_byte(context, original, MKEY_DIRECTORY,
+                                MKEY_PAYLOAD, 2u, APTA_FEATURE_FAILED));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 48u + 36u,
+                                APTA_FEATURE_PARTIAL));
+    CHECK(rejected_payload_byte(context, original, MKEY_DIRECTORY,
+                                MKEY_PAYLOAD, 40u + 6u, 101u));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 3u, 101u));
+    CHECK(rejected_payload_byte(context, original, MTRD_DIRECTORY,
+                                MTRD_PAYLOAD, 48u + 37u, 101u));
+    CHECK(rejected_payload_byte(context, original, CONF_DIRECTORY,
+                                CONF_PAYLOAD, 16u + 14u, 254u));
+    CHECK(rejected_payload_byte(context, original, CONF_DIRECTORY,
+                                CONF_PAYLOAD, 16u + 15u,
+                                APTA_FEATURE_FAILED));
+    memcpy(mutated, original, sizeof(mutated));
+    put_u16(mutated + CONF_PAYLOAD + 16u + 12u, 1001u);
+    refresh_section(mutated, CONF_DIRECTORY);
+    CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+    memcpy(mutated, original, sizeof(mutated));
+    put_u64(mutated + MKEY_PAYLOAD + 24u, 96001u);
+    refresh_section(mutated, MKEY_DIRECTORY);
+    CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
+    memcpy(mutated, original, sizeof(mutated));
+    put_u16(mutated + MTRD_PAYLOAD + 4u, 3u);
+    refresh_section(mutated, MTRD_DIRECTORY);
+    CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) < 0);
     memcpy(mutated, original, sizeof(mutated));
     mutated[MTRD_PAYLOAD + 4u] ^= 1u;
     CHECK(parse_case(context, NULL, mutated, sizeof(mutated)) ==
@@ -312,6 +461,9 @@ int main(void)
           sizeof(unknown));
     CHECK(parse_case(context, NULL, unknown, sizeof(unknown)) ==
           APTA_STATUS_OK);
+    put_u16(unknown + 136u + 6u, 1u);
+    CHECK(parse_case(context, NULL, unknown, sizeof(unknown)) ==
+          APTA_ERROR_UNSUPPORTED);
 
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
     return 0;

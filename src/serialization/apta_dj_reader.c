@@ -414,13 +414,13 @@ static apta_status_t apta_dj_parse_meter(
         const uint64_t first = apta_dj_get_u64(record);
         const uint64_t end = apta_dj_get_u64(record + 8u);
         const uint64_t downbeat = apta_dj_get_u64(record + 16u);
-        uint32_t prior;
         if (!apta_dj_range_valid(result, first, end) ||
             downbeat < first || downbeat >= end ||
             !apta_dj_meter_value_valid(
                 apta_dj_get_u16(record + 32u),
                 apta_dj_get_u16(record + 34u)) ||
             !apta_dj_state_allowed(record[36], partial) ||
+            record[36] < payload[2] ||
             !apta_dj_confidence_valid(record[37]) ||
             !apta_dj_all_zero(record + 38u, 2u) ||
             apta_dj_get_u32(record + 40u) != 0u ||
@@ -432,16 +432,10 @@ static apta_status_t apta_dj_parse_meter(
              (apta_dj_get_u64(record - APTA_MTRD_SEGMENT_SIZE + 8u) >
                   first ||
               apta_dj_get_i64(record - APTA_MTRD_SEGMENT_SIZE + 24u) >=
-                  apta_dj_get_i64(record + 24u)))) {
+                  apta_dj_get_i64(record + 24u) ||
+              apta_dj_get_u32(record - APTA_MTRD_SEGMENT_SIZE + 44u) >=
+                  apta_dj_get_u32(record + 44u)))) {
             return APTA_ERROR_CORRUPT_DATA;
-        }
-        for (prior = 0u; prior < index; ++prior) {
-            const uint8_t *previous = payload + APTA_MTRD_HEADER_SIZE +
-                (size_t)prior * APTA_MTRD_SEGMENT_SIZE;
-            if (apta_dj_get_u32(previous + 44u) ==
-                apta_dj_get_u32(record + 44u)) {
-                return APTA_ERROR_CORRUPT_DATA;
-            }
         }
     }
     if (apta_dj_get_u64(payload + 16u) !=

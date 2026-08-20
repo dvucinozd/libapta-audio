@@ -292,15 +292,71 @@ int main(void)
           APTA_STATUS_OK);
     apta_key_view_init(&key);
     CHECK(apta_result_get_key(parsed, NULL, &key) == APTA_STATUS_OK);
-    CHECK(key.candidate_count == 2u && key.candidates[1].tonic == 0u);
+    CHECK(key.applicability_range.first_frame == 120u);
+    CHECK(key.applicability_range.end_frame == 95000u);
+    CHECK(key.tonic == 9u && key.mode == APTA_KEY_MODE_MINOR);
+    CHECK(key.tuning_offset_cents == -7 && key.confidence == 88u);
+    CHECK(key.state == APTA_FEATURE_FINAL && key.flags == 0u);
+    CHECK(key.candidate_count == 2u && key.candidates != NULL);
+    CHECK(key.candidates[0].tonic == 9u);
+    CHECK(key.candidates[0].mode == APTA_KEY_MODE_MINOR);
+    CHECK(key.candidates[0].tuning_offset_cents == -7);
+    CHECK(key.candidates[0].score == 62000u);
+    CHECK(key.candidates[0].confidence == 88u);
+    CHECK(key.candidates[0].flags == 0u);
+    CHECK(key.candidates[1].tonic == 0u);
+    CHECK(key.candidates[1].mode == APTA_KEY_MODE_MAJOR);
+    CHECK(key.candidates[1].tuning_offset_cents == 3);
+    CHECK(key.candidates[1].score == 12000u);
+    CHECK(key.candidates[1].confidence == 40u);
+    CHECK(key.candidates[1].flags == 0u);
     apta_meter_view_init(&meter);
     CHECK(apta_result_get_meter(parsed, NULL, &meter) == APTA_STATUS_OK);
-    CHECK(meter.segment_count == 2u && meter.segments[1].numerator == 3u);
+    CHECK(meter.downbeat_frame == 0u && meter.downbeat_ordinal == -4);
+    CHECK(meter.numerator == 4u && meter.denominator == 4u);
+    CHECK(meter.state == APTA_FEATURE_FINAL && meter.confidence == 86u);
+    CHECK(meter.flags == 0u && meter.segment_count == 2u);
+    CHECK(meter.segments[0].applicability_range.first_frame == 0u);
+    CHECK(meter.segments[0].applicability_range.end_frame == 48000u);
+    CHECK(meter.segments[0].downbeat_frame == 0u);
+    CHECK(meter.segments[0].downbeat_ordinal == -4);
+    CHECK(meter.segments[0].numerator == 4u);
+    CHECK(meter.segments[0].denominator == 4u);
+    CHECK(meter.segments[0].state == APTA_FEATURE_FINAL);
+    CHECK(meter.segments[0].confidence == 86u);
+    CHECK(meter.segments[0].flags == 0u);
+    CHECK(meter.segments[0].segment_id == 4u);
+    CHECK(meter.segments[1].applicability_range.first_frame == 48000u);
+    CHECK(meter.segments[1].applicability_range.end_frame == 96000u);
+    CHECK(meter.segments[1].downbeat_frame == 48000u);
+    CHECK(meter.segments[1].downbeat_ordinal == 12);
+    CHECK(meter.segments[1].numerator == 3u);
+    CHECK(meter.segments[1].denominator == 4u);
+    CHECK(meter.segments[1].state == APTA_FEATURE_FINAL);
+    CHECK(meter.segments[1].confidence == 86u);
+    CHECK(meter.segments[1].flags == 0u);
+    CHECK(meter.segments[1].segment_id == 7u);
+    apta_quality_view_init(&quality);
+    CHECK(apta_result_get_quality(
+              parsed, APTA_FEATURE_MUSICAL_KEY, &quality) ==
+          APTA_STATUS_OK);
+    CHECK(quality.feature == APTA_FEATURE_MUSICAL_KEY);
+    CHECK(quality.calibration_model_id == UINT32_C(0x10203040));
+    CHECK(quality.evidence_coverage_permille == 930u);
+    CHECK(quality.confidence == 84u);
+    CHECK(quality.state == APTA_FEATURE_FINAL);
+    CHECK(quality.flags == APTA_QUALITY_FLAG_DETECTOR_DISAGREEMENT);
     apta_quality_view_init(&quality);
     CHECK(apta_result_get_quality(
               parsed, APTA_FEATURE_METER_DOWNBEAT, &quality) ==
           APTA_STATUS_OK);
+    CHECK(quality.feature == APTA_FEATURE_METER_DOWNBEAT);
     CHECK(quality.calibration_model_id == UINT32_C(0x50607080));
+    CHECK(quality.evidence_coverage_permille ==
+          APTA_EVIDENCE_COVERAGE_UNKNOWN);
+    CHECK(quality.confidence == APTA_CONFIDENCE_UNKNOWN);
+    CHECK(quality.state == APTA_FEATURE_FINAL);
+    CHECK(quality.flags == APTA_QUALITY_FLAG_OUT_OF_DOMAIN);
     CHECK(apta_result_serialize(
               parsed, NULL, again, (size_t)size, &written) == APTA_STATUS_OK);
     CHECK(memcmp(bytes, again, (size_t)size) == 0);

@@ -273,7 +273,6 @@ static int apta_dj_meter_valid(const apta_result_t *result)
     }
     for (index = 0u; index < meter->segment_count; ++index) {
         const apta_meter_segment_t *segment = &meter->segments[index];
-        uint32_t prior;
         if (!apta_dj_range_valid(result, &segment->applicability_range) ||
             !apta_dj_meter_value_valid(
                 segment->numerator, segment->denominator) ||
@@ -281,6 +280,7 @@ static int apta_dj_meter_valid(const apta_result_t *result)
                 segment->applicability_range.first_frame ||
             segment->downbeat_frame >= segment->applicability_range.end_frame ||
             !apta_dj_state_valid(segment->state) ||
+            segment->state < meter->state ||
             !apta_dj_confidence_valid(segment->confidence) ||
             segment->reserved8 != 0u || segment->reserved16 != 0u ||
             segment->flags != 0u || segment->segment_id == 0u ||
@@ -293,13 +293,10 @@ static int apta_dj_meter_valid(const apta_result_t *result)
              (meter->segments[index - 1u].applicability_range.end_frame >
                   segment->applicability_range.first_frame ||
               meter->segments[index - 1u].downbeat_ordinal >=
-                  segment->downbeat_ordinal))) {
+                  segment->downbeat_ordinal ||
+              meter->segments[index - 1u].segment_id >=
+                  segment->segment_id))) {
             return 0;
-        }
-        for (prior = 0u; prior < index; ++prior) {
-            if (meter->segments[prior].segment_id == segment->segment_id) {
-                return 0;
-            }
         }
     }
     return meter->downbeat_frame == meter->segments[0].downbeat_frame &&
@@ -559,6 +556,33 @@ static void apta_dj_write_directory(
                     apta_internal_crc32c(payload, (size_t)size));
 }
 
+static int apta_dj_requires_partial(
+    const apta_result_t *result,
+    const apta_dj_write_layout_t *layout)
+{
+    uint32_t index;
+    int partial = layout->has_key &&
+                  result->key.state != APTA_FEATURE_FINAL;
+    if (layout->has_meter && result->meter.state != APTA_FEATURE_FINAL) {
+        partial = 1;
+    }
+    if (layout->has_meter) {
+        for (index = 0u; index < result->meter.segment_count; ++index) {
+            if (result->meter.segments[index].state != APTA_FEATURE_FINAL) {
+                partial = 1;
+            }
+        }
+    }
+    if (layout->has_quality) {
+        for (index = 0u; index < result->quality_count; ++index) {
+            if (result->quality[index].state != APTA_FEATURE_FINAL) {
+                partial = 1;
+            }
+        }
+    }
+    return partial;
+}
+
 apta_status_t APTA_CALL apta_result_query_serialized_size(
     const apta_result_t *result,
     const apta_serialize_options_t *options,
@@ -667,19 +691,11 @@ apta_status_t APTA_CALL apta_result_serialize(
     }
     apta_dj_put_u32(bytes + 20u, old_count + layout.section_count);
     apta_dj_put_u64(bytes + 32u, layout.total_size);
-    if ((layout.has_key && result->key.state != APTA_FEATURE_FINAL) ||
-        (layout.has_meter && result->meter.state != APTA_FEATURE_FINAL) ||
-        (layout.has_quality && result->quality_count != 0u)) {
-        uint32_t flags = apta_dj_get_u32(bytes + 16u);
-        for (index = 0u; index < result->quality_count; ++index) {
-            if (result->quality[index].state != APTA_FEATURE_FINAL) break;
-        }
-        if ((layout.has_key && result->key.state != APTA_FEATURE_FINAL) ||
-            (layout.has_meter && result->meter.state != APTA_FEATURE_FINAL) ||
-            index != result->quality_count) {
-            apta_dj_put_u32(
-                bytes + 16u, flags | APTA_CONTAINER_FLAG_PARTIAL_RESULT);
-        }
+    if (apta_dj_requires_partial(result, &layout)) {
+        apta_dj_put_u32(
+            bytes + 16u,
+            apta_dj_get_u32(bytes + 16u) |
+                APTA_CONTAINER_FLAG_PARTIAL_RESULT);
     }
     apta_dj_put_u32(bytes + 92u, apta_internal_crc32c(bytes, 92u));
     *bytes_written_out = (size_t)layout.total_size;

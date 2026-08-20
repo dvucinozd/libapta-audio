@@ -178,6 +178,27 @@ target_compile_definitions(
     apta_dj_sections_malformed
     PRIVATE
         APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
+apta_add_c_test(
+    apta_dj_sections_state_scale
+    apta.serialization.dj_sections_state_scale
+    unit/dj_sections_state_scale.c)
+set_tests_properties(
+    apta.serialization.dj_sections_state_scale
+    PROPERTIES TIMEOUT 15)
+add_test(
+    NAME apta.serialization.dj_sections_id_scale
+    COMMAND apta_dj_sections_state_scale id-scale)
+set_tests_properties(
+    apta.serialization.dj_sections_id_scale
+    PROPERTIES TIMEOUT 15)
+apta_add_c_test(
+    apta_dj_sections_allocation_failure
+    apta.serialization.dj_sections_allocation_failure
+    unit/dj_sections_allocation_failure.c)
+target_compile_definitions(
+    apta_dj_sections_allocation_failure
+    PRIVATE
+        APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
 add_executable(
     apta_compat_1_0_container_skip
     compat/1.0.0/frozen_container_consumer.c)
@@ -225,6 +246,19 @@ add_test(NAME apta.interchange.external_fixture COMMAND apta_external_fixture)
 
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
+    add_test(
+        NAME apta.compat.1_0_container_negative
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/compat/1.0.0/legacy_container_negative.py
+            $<TARGET_FILE:apta_compat_1_0_container_skip>
+            ${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex)
+    add_test(
+        NAME apta.serialization.dj_fuzz_seed_manifest
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/unit/dj_fuzz_seed_manifest.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/fuzz/corpus-v1.json)
     add_test(
         NAME apta.tools.rekordbox_tempo_corpus
         COMMAND

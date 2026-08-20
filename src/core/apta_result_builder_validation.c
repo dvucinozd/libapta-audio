@@ -835,7 +835,6 @@ apta_status_t apta_builder_validate_meter(
     }
     for (index = 0u; index < view->segment_count; ++index) {
         const apta_meter_segment_t *segment = &view->segments[index];
-        uint32_t previous_index;
         apta_status_t status;
         if (!apta_internal_validate_struct(
                 segment, sizeof(*segment), segment->struct_size,
@@ -859,14 +858,13 @@ apta_status_t apta_builder_validate_meter(
             return segment->flags != 0u ? APTA_ERROR_UNSUPPORTED
                                        : APTA_ERROR_INVALID_ARGUMENT;
         }
+        if (segment->state < view->state) return APTA_ERROR_CONFLICT;
         if (segment->downbeat_ordinal <= previous_downbeat) {
             return APTA_ERROR_CONFLICT;
         }
-        for (previous_index = 0u; previous_index < index; ++previous_index) {
-            if (view->segments[previous_index].segment_id ==
-                segment->segment_id) {
-                return APTA_ERROR_CONFLICT;
-            }
+        if (index != 0u &&
+            segment->segment_id <= view->segments[index - 1u].segment_id) {
+            return APTA_ERROR_CONFLICT;
         }
         previous = &segment->applicability_range;
         previous_downbeat = segment->downbeat_ordinal;
