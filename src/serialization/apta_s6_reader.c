@@ -214,13 +214,14 @@ static apta_status_t apta_s6_parse_grid(
     representation = apta_s6_get_u32(payload + 8u);
     segment_count = apta_s6_get_u32(payload + 16u);
     beat_count = apta_s6_get_u32(payload + 20u);
-    if (segment_count == 0u ||
-        segment_count > APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS ||
+    if (segment_count > APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS ||
         beat_count > APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS ||
         (representation == APTA_GRID_REPRESENTATION_SEGMENTS &&
-         beat_count != 0u) ||
-        (representation != APTA_GRID_REPRESENTATION_SEGMENTS &&
-         beat_count == 0u)) {
+         (segment_count == 0u || beat_count != 0u)) ||
+        (representation == APTA_GRID_REPRESENTATION_EXPLICIT &&
+         (segment_count != 0u || beat_count == 0u)) ||
+        (representation == APTA_GRID_REPRESENTATION_HYBRID &&
+         (segment_count == 0u || beat_count == 0u))) {
         return APTA_ERROR_CORRUPT_DATA;
     }
     segment_bytes = (size_t)segment_count * sizeof(apta_grid_segment_t);
@@ -257,11 +258,14 @@ static apta_status_t apta_s6_parse_grid(
             sizeof(apta_frame_range_t),
             alignof(apta_frame_range_t),
             APTA_MEMORY_PERSISTENT);
-    state->segments = (apta_grid_segment_t *)apta_internal_context_allocate(
-        context,
-        segment_bytes,
-        alignof(apta_grid_segment_t),
-        APTA_MEMORY_PERSISTENT);
+    state->segments = segment_count != 0u
+                          ? (apta_grid_segment_t *)
+                                apta_internal_context_allocate(
+                                    context,
+                                    segment_bytes,
+                                    alignof(apta_grid_segment_t),
+                                    APTA_MEMORY_PERSISTENT)
+                          : NULL;
     state->beats = beat_count != 0u
                        ? (apta_beat_t *)apta_internal_context_allocate(
                              context,
@@ -269,7 +273,8 @@ static apta_status_t apta_s6_parse_grid(
                              alignof(apta_beat_t),
                              APTA_MEMORY_PERSISTENT)
                        : NULL;
-    if (state->coverage_ranges == NULL || state->segments == NULL ||
+    if (state->coverage_ranges == NULL ||
+        (segment_count != 0u && state->segments == NULL) ||
         (beat_count != 0u && state->beats == NULL)) {
         return APTA_ERROR_OUT_OF_MEMORY;
     }

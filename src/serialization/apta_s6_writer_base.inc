@@ -106,15 +106,16 @@ static int apta_s6_global_is_valid(const apta_result_t *result)
         grid->state > APTA_FEATURE_FINAL ||
         grid->confidence > APTA_CONFIDENCE_MAX ||
         grid->coverage_range_count != 1u || grid->coverage_ranges == NULL ||
-        grid->segment_count == 0u ||
         grid->segment_count > APTA_REFERENCE_GLOBAL_GRID_MAX_SEGMENTS ||
-        grid->segments == NULL ||
+        (grid->segment_count != 0u && grid->segments == NULL) ||
         grid->beat_count > APTA_REFERENCE_GLOBAL_GRID_MAX_BEATS ||
         (grid->beat_count != 0u && grid->beats == NULL) ||
         (grid->representation == APTA_GRID_REPRESENTATION_SEGMENTS &&
-         grid->beat_count != 0u) ||
-        (grid->representation != APTA_GRID_REPRESENTATION_SEGMENTS &&
-         grid->beat_count == 0u) ||
+         (grid->segment_count == 0u || grid->beat_count != 0u)) ||
+        (grid->representation == APTA_GRID_REPRESENTATION_EXPLICIT &&
+         (grid->segment_count != 0u || grid->beat_count == 0u)) ||
+        (grid->representation == APTA_GRID_REPRESENTATION_HYBRID &&
+         (grid->segment_count == 0u || grid->beat_count == 0u)) ||
         !apta_s6_range_valid(&grid->requested_range) ||
         !apta_s6_range_valid(&grid->evidence_range) ||
         !apta_s6_range_valid(&grid->applicability_range) ||

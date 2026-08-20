@@ -126,6 +126,33 @@ static int apta_builder_grid_matches_tempo(
     int selected_found = 0;
     const int dynamic =
         (grid->flags & APTA_GRID_FLAG_DYNAMIC_TEMPO) != 0u;
+    if (grid->representation == APTA_GRID_REPRESENTATION_EXPLICIT) {
+        if (grid->beat_count == 1u) {
+            /* One beat establishes phase only; there is no period to compare. */
+            return 1;
+        }
+        for (index = 1u; index < grid->beat_count; ++index) {
+            const apta_beat_t *previous = &grid->beats[index - 1u];
+            const apta_beat_t *current = &grid->beats[index];
+            const uint64_t ordinal_delta =
+                (uint64_t)current->ordinal - (uint64_t)previous->ordinal;
+            long double frame_delta =
+                (long double)(current->position.whole_frame -
+                              previous->position.whole_frame) +
+                ((long double)current->position.fraction_q32 -
+                 (long double)previous->position.fraction_q32) /
+                    4294967296.0L;
+            long double derived =
+                ((long double)builder->source.sample_rate * 60000.0L *
+                 (long double)ordinal_delta) / frame_delta;
+            long double difference =
+                derived -
+                (long double)builder->tempo.selected.tempo_millibpm;
+            if (difference < 0.0L) difference = -difference;
+            if (difference > 1.0L) return 0;
+        }
+        return 1;
+    }
     for (index = 0u; index < grid->segment_count; ++index) {
         const apta_grid_segment_t *segment = &grid->segments[index];
         long double period = (long double)segment->frames_per_beat.whole_frames +

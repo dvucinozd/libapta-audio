@@ -171,6 +171,15 @@ apta_status_t apta_builder_validate_overview(
              span->first_column_index < previous_end_column)) {
             return APTA_ERROR_INVALID_ARGUMENT;
         }
+        if (view->state == APTA_FEATURE_FINAL &&
+            ((index == 0u &&
+              (span->first_column_index != 0u ||
+               span->source_range.first_frame != view->level.origin_frame)) ||
+             (index != 0u &&
+              (span->first_column_index != previous_end_column ||
+               span->source_range.first_frame != previous->end_frame)))) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
         first_offset = (uint64_t)span->first_column_index *
                        view->level.frames_per_column;
         end_offset = (uint64_t)end_column * view->level.frames_per_column;
@@ -202,7 +211,7 @@ apta_status_t apta_builder_validate_overview(
         previous = &span->source_range;
         previous_end_column = end_column;
     }
-    if (builder->has_source != 0u &&
+    if (view->state == APTA_FEATURE_FINAL && builder->has_source != 0u &&
         builder->source.total_frames != APTA_TOTAL_FRAMES_UNKNOWN) {
         uint64_t relative;
         uint64_t required;

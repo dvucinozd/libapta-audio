@@ -151,6 +151,9 @@ apta_result_builder_set_tempo(
     apta_result_builder_t *builder,
     const apta_tempo_view_t *tempo);
 
+/* EXPLICIT grids with two or more beats are checked against the selected BPM
+ * using every adjacent beat interval. A single beat is accepted as phase-only
+ * evidence: it preserves the imported position but cannot verify a period. */
 APTA_API apta_status_t APTA_CALL
 apta_result_builder_set_beatgrid(
     apta_result_builder_t *builder,

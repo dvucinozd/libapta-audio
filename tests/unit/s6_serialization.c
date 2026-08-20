@@ -509,6 +509,62 @@ int main(void)
     }
     CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
 
+    /* EXPLICIT uses only the existing beat array: segments must be absent. */
+    memcpy(copy, bytes, written);
+    grid_entry = find_entry(copy, "GGRD", NULL);
+    revision_entry = find_entry(copy, "REVN", NULL);
+    CHECK(grid_entry != NULL && revision_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(grid_entry + 8u);
+        uint8_t *revision_payload =
+            copy + (size_t)get_u64(revision_entry + 8u);
+        put_u32(payload + 8u, APTA_GRID_REPRESENTATION_EXPLICIT);
+        put_u32(revision_payload + 16u, APTA_GRID_REPRESENTATION_EXPLICIT);
+        refresh_entry_crc(grid_entry, copy);
+        refresh_entry_crc(revision_entry, copy);
+    }
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &permissive, copy, written) == 0);
+
+    /* HYBRID cannot drop its segment array while retaining explicit beats. */
+    memcpy(copy, bytes, written);
+    grid_entry = find_entry(copy, "GGRD", NULL);
+    revision_entry = find_entry(copy, "REVN", NULL);
+    CHECK(grid_entry != NULL && revision_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(grid_entry + 8u);
+        uint8_t *revision_payload =
+            copy + (size_t)get_u64(revision_entry + 8u);
+        put_u32(payload + 16u, 0u);
+        put_u32(revision_payload + 20u, 0u);
+        refresh_entry_crc(grid_entry, copy);
+        refresh_entry_crc(revision_entry, copy);
+    }
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &permissive, copy, written) == 0);
+
+    /* SEGMENTS requires at least one segment even when its beat count is zero. */
+    memcpy(copy, bytes, written);
+    grid_entry = find_entry(copy, "GGRD", NULL);
+    revision_entry = find_entry(copy, "REVN", NULL);
+    CHECK(grid_entry != NULL && revision_entry != NULL);
+    {
+        uint8_t *payload = copy + (size_t)get_u64(grid_entry + 8u);
+        uint8_t *revision_payload =
+            copy + (size_t)get_u64(revision_entry + 8u);
+        put_u32(payload + 8u, APTA_GRID_REPRESENTATION_SEGMENTS);
+        put_u32(payload + 16u, 0u);
+        put_u32(payload + 20u, 0u);
+        put_u32(revision_payload + 16u,
+                APTA_GRID_REPRESENTATION_SEGMENTS);
+        put_u32(revision_payload + 20u, 0u);
+        put_u32(revision_payload + 24u, 0u);
+        refresh_entry_crc(grid_entry, copy);
+        refresh_entry_crc(revision_entry, copy);
+    }
+    CHECK(expect_rejected(parse_context, &strict, copy, written) == 0);
+    CHECK(expect_rejected(parse_context, &permissive, copy, written) == 0);
+
     memcpy(copy, bytes, written);
     revision_entry = find_entry(copy, "REVN", NULL);
     CHECK(revision_entry != NULL);
