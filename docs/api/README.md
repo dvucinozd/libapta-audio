@@ -16,6 +16,13 @@ Current contract:
 - [`APTA-API-ABI-1.0.md`](APTA-API-ABI-1.0.md) — stable public API and ABI 1.0
   contract, version domains and compatibility rules.
 
+Current 1.1 development contract:
+
+- [`APTA-API-1.1-DEVELOPMENT.md`](APTA-API-1.1-DEVELOPMENT.md) — implemented
+  key, meter/downbeat and calibrated-quality result views, the validated
+  external-result builder, streaming I/O entry points and the pre-release
+  compatibility boundary.
+
 Historical design records retained for audit and implementation context:
 
 - [`APTA-PUBLIC-API-ABI-POLICY-0.1.md`](APTA-PUBLIC-API-ABI-POLICY-0.1.md) —

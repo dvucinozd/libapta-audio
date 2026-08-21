@@ -3,6 +3,12 @@
 Start with [`APTA-ROADMAP-STATUS.md`](APTA-ROADMAP-STATUS.md), the current
 whole-project release and validation boundary.
 
+Active post-1.0 development:
+
+- [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md) — exact
+  task-1-through-task-4 implementation boundary, retained verification and the
+  remaining algorithm, embedded-profile and release gates.
+
 Stage S9 — APTA 1.0:
 
 - [`S9-FREEZE-AUDIT.md`](S9-FREEZE-AUDIT.md) — contractual gap analysis and

@@ -11,6 +11,10 @@ The APTA 1.1 optional `MKEY`, `MTRD` and `CONF` payloads are specified in
 [`../../specification/APTA-1.1-DJ-SECTIONS.md`](../../specification/APTA-1.1-DJ-SECTIONS.md)
 without changing the frozen APTA 1.0 normative manifest.
 
+The callback and limit contract for serializing and selectively parsing the
+same container without a whole-file buffer is documented in
+[`APTA-STREAMING-IO-1.1.md`](APTA-STREAMING-IO-1.1.md).
+
 Implementation records in this directory:
 
 - [`APTA-WOVR-READER-WRITER-STATUS-0.1.md`](APTA-WOVR-READER-WRITER-STATUS-0.1.md)

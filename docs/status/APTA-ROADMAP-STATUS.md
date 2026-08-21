@@ -1,6 +1,7 @@
 # APTA development roadmap status
 
 - **Current completed stage:** S9 — APTA 1.0
+- **Active development line:** `1.1.0` branch, infrastructure tasks 1–4 complete
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1
@@ -77,7 +78,13 @@ metadata without changing API/ABI, wire bytes or production DSP behavior.
 
 ## Post-1.0 planning boundary
 
-APTA 1.1 planning is separate from the stable 1.0 release. New features,
-extensions or compatibility changes require their own roadmap, versioning and
-evidence. The `v1.0.0` tag remains immutable; `v1.0.1` is the maintained
-coherence release.
+APTA 1.1 development is separate from the stable 1.0 release. The result/API
+extensions, validated external-result builder, optional DJ sections and
+streaming container I/O are implemented on the `1.1.0` branch. Algorithmic,
+ESP32-P4 profile, corpus, release-version and publication work remains open;
+the branch must not be represented as a stable release. The detailed boundary
+is maintained in
+[`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md).
+
+The `v1.0.0` tag remains immutable and `v1.0.1` remains the maintained stable
+coherence release until a fully qualified 1.1 release supersedes it.

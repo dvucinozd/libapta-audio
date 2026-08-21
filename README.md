@@ -16,6 +16,13 @@ standard and its portable ISO C11 reference implementation.
 > **Release status:** APTA specification 1.0, public API 1.0.0, package 1.0.1,
 > container version 1 and shared-library `SOVERSION 1`.
 
+> **`1.1.0` development branch:** the result model, validated external-result
+> builder, optional `MKEY`/`MTRD`/`CONF` container sections and bounded
+> streaming container I/O are implemented. Musical-key, meter/downbeat and
+> calibrated-quality analysis algorithms, the ESP32-P4 DJ memory profile and
+> release qualification are still in progress. This branch is not a tagged
+> 1.1 release.
+
 APTA provides progressive, bounded and portable audio analysis for waveform,
 tempo, local beatgrid, global beatgrid and dynamic-tempo data. The host retains
 control of decoding, playback, storage, scheduling and device resources.
@@ -32,6 +39,32 @@ expose a pull source, assign a bounded amount of work, prioritize a playback
 region and consume immutable result generations as they become available. The
 same public contracts apply on desktop and embedded targets, and the canonical
 `.apta` container lets independent producers and consumers exchange results.
+
+## APTA 1.1 development scope
+
+The current `1.1.0` branch adds the infrastructure needed by DJ-library hosts
+without moving codec, playback, filesystem or UI ownership into libapta:
+
+- optional `APTA_FEATURE_MUSICAL_KEY`, `APTA_FEATURE_METER_DOWNBEAT` and
+  `APTA_FEATURE_CALIBRATED_QUALITY` result capabilities;
+- immutable key, meter/downbeat and per-feature quality views and accessors;
+- a bounded, validating `apta_result_builder_t` for importing results produced
+  by external analyzers or legacy library formats;
+- optional container-v1 `MKEY`, `MTRD` and `CONF` sections that old readers can
+  skip under the existing unknown-optional-section rule;
+- callback-based serialization and selective parsing with explicit input,
+  section, allocation and scratch limits.
+
+The existing buffer serialization API remains available. The branch preserves
+container version 1 and the 1.x shared-library ABI family, but package/API
+version metadata remains at the latest stable values until 1.1 release work is
+completed.
+
+See the
+[`APTA 1.1 development status`](docs/status/APTA-1.1-DEVELOPMENT-STATUS.md),
+[`1.1 API guide`](docs/api/APTA-API-1.1-DEVELOPMENT.md) and
+[`streaming I/O contract`](docs/file-format/APTA-STREAMING-IO-1.1.md) for the
+implemented boundary and remaining gates.
 
 ## Five-minute quick start
 
@@ -263,6 +296,12 @@ specification version.
   editorial corrections published with 1.0.1.
 - [`docs/status/APTA-ROADMAP-STATUS.md`](docs/status/APTA-ROADMAP-STATUS.md) —
   release and roadmap status.
+- [`docs/status/APTA-1.1-DEVELOPMENT-STATUS.md`](docs/status/APTA-1.1-DEVELOPMENT-STATUS.md)
+  — implemented 1.1 infrastructure, evidence and remaining work.
+- [`docs/api/APTA-API-1.1-DEVELOPMENT.md`](docs/api/APTA-API-1.1-DEVELOPMENT.md)
+  — result views, external-result builder and compatibility boundary.
+- [`docs/file-format/APTA-STREAMING-IO-1.1.md`](docs/file-format/APTA-STREAMING-IO-1.1.md)
+  — bounded streaming serialization and selective parsing contract.
 - [`docs/api/APTA-API-ABI-1.0.md`](docs/api/APTA-API-ABI-1.0.md) — public API and
   ABI contract.
 - [`conformance/`](conformance/) — versioned public conformance suite.

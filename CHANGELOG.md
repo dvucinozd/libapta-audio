@@ -2,6 +2,42 @@
 
 All notable changes to libapta-audio are documented in this file.
 
+## [Unreleased] - 1.1.0 development
+
+### Added
+
+- optional musical-key, meter/downbeat and calibrated-quality feature bits,
+  immutable views, initializers and result accessors;
+- a bounded `apta_result_builder_t` that validates and deep-copies imported
+  source information, metadata, provenance, waveform, tempo, grid, revision,
+  key, meter and quality data into a normal immutable result;
+- container-version-1 `MKEY`, `MTRD` and `CONF` optional sections with
+  deterministic writing, strict parsing, CRC and allocation-limit checks, and
+  frozen-1.0-reader compatibility evidence;
+- `apta_output_stream_t` and `apta_input_stream_t`, streaming serialization,
+  selective streaming parsing and caller-provided bounded scratch storage;
+- LP64, ILP32 and pointer-32/alignment-64 public-layout evidence plus the 1.1
+  exported-symbol and public-header delta manifests.
+
+### Compatibility boundary
+
+- this is development-branch state, not a released 1.1 compatibility claim;
+- the frozen APTA 1.0 normative manifest and published `v1.0.0`/`v1.0.1`
+  releases are unchanged;
+- container version remains 1; older readers validate and skip the new
+  optional sections under the existing extension rule;
+- package and encoded public-API version metadata remain at 1.0.1 and 1.0.0
+  respectively until the 1.1 release-preparation task deliberately updates and
+  requalifies them.
+
+### Not yet included
+
+- production musical-key and meter/downbeat detectors;
+- calibrated confidence models and the tempo/grid ensemble accuracy campaign;
+- the ESP32-P4 bounded DJ profile, 30-minute memory probes and physical-device
+  qualification;
+- a `v1.1.0` tag or release artifacts.
+
 ## [1.0.1] - 2026-08-04
 
 ### Corrected
