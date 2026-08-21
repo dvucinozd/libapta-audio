@@ -5,6 +5,8 @@
 
 #include <apta/apta.h>
 
+#include "stream_equivalence.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                   \
@@ -98,6 +100,8 @@ int main(void)
               sizeof(first),
               &written) == APTA_STATUS_OK);
     CHECK(written == serialized_size);
+    CHECK(apta_test_stream_matches_buffer(result, first, serialized_size));
+    CHECK(apta_test_stream_parse_matches_buffer(context, first, serialized_size));
 
     CHECK(memcmp(first, "APTA", 4u) == 0);
     CHECK(get_u32(first + 16u) == 0u);

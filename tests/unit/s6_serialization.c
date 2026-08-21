@@ -7,6 +7,7 @@
 #include <apta/apta.h>
 
 #include "apta_internal.h"
+#include "stream_equivalence.h"
 
 #define SAMPLE_RATE 48000u
 #define TOTAL_FRAMES 524288u
@@ -315,6 +316,12 @@ int main(void)
               (size_t)size64,
               &written) == APTA_STATUS_OK);
     CHECK(written == (size_t)size64);
+    CHECK(apta_test_stream_matches_buffer(result, bytes, size64));
+    CHECK(apta_test_stream_parse_matches_buffer(parse_context, bytes, size64));
+    CHECK(apta_test_stream_selects_features(
+        parse_context, bytes, size64,
+        APTA_FEATURE_GLOBAL_BEATGRID,
+        APTA_FEATURE_GLOBAL_BEATGRID));
     grid_entry = find_entry(bytes, "GGRD", &grid_index);
     revision_entry = find_entry(bytes, "REVN", &revision_index);
     CHECK(grid_entry != NULL && revision_entry != NULL);

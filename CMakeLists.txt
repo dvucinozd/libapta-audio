@@ -355,6 +355,7 @@ set(
         src/serialization/apta_s4_writer.c
         src/serialization/apta_s6_reader.c
         src/serialization/apta_s6_writer.c
+        src/serialization/apta_streaming_io.c
         src/serialization/apta_wdtl_reader.c
         src/serialization/apta_wdtl_writer.c
         src/serialization/apta_wovr_reader.c

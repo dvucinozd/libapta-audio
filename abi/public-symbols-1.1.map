@@ -74,8 +74,10 @@ APTA_1.0 {
 
 APTA_1.1 {
     global:
+        apta_input_stream_init;
         apta_key_view_init;
         apta_meter_view_init;
+        apta_output_stream_init;
         apta_quality_view_init;
         apta_result_builder_create;
         apta_result_builder_destroy;
@@ -99,6 +101,9 @@ APTA_1.1 {
         apta_result_get_meter;
         apta_result_get_provenance;
         apta_result_get_quality;
+        apta_result_parse_from_stream;
         apta_result_provenance_init;
+        apta_result_serialize_to_stream;
+        apta_stream_parse_options_init;
         apta_waveform_detail_input_init;
 } APTA_1.0;

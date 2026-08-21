@@ -205,6 +205,14 @@ target_compile_definitions(
     apta_dj_sections_allocation_failure
     PRIVATE
         APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
+apta_add_c_test(
+    apta_streaming_container_io
+    apta.serialization.streaming_container_io
+    unit/streaming_container_io.c)
+target_compile_definitions(
+    apta_streaming_container_io
+    PRIVATE
+        APTA_DJ_GOLDEN_HEX_PATH="${CMAKE_SOURCE_DIR}/tests/fixtures/dj-sections-v1-combined.apta.hex")
 add_executable(
     apta_compat_1_0_container_skip
     compat/1.0.0/frozen_container_consumer.c)

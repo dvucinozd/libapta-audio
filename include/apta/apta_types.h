@@ -86,6 +86,7 @@ typedef uint32_t apta_source_fingerprint_kind_t;
 #define APTA_FEATURE_MUSICAL_KEY        (UINT64_C(1) << 9)
 #define APTA_FEATURE_METER_DOWNBEAT     (UINT64_C(1) << 10)
 #define APTA_FEATURE_CALIBRATED_QUALITY (UINT64_C(1) << 11)
+#define APTA_FEATURE_ALL_KNOWN            ((UINT64_C(1) << 12) - 1u)
 
 #define APTA_KEY_MODE_UNKNOWN 0u
 #define APTA_KEY_MODE_MAJOR   1u

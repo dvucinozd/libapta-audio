@@ -31,6 +31,33 @@ _Static_assert(
     "pointer-32 apta_quality_view_t size");
 _Static_assert(_Alignof(apta_quality_view_t) == _Alignof(uint64_t),
                "pointer-32 apta_quality_view_t alignment");
+_Static_assert(sizeof(apta_output_stream_t) == 56u,
+               "pointer-32 apta_output_stream_t size");
+_Static_assert(offsetof(apta_output_stream_t, reserved64) == 24u,
+               "pointer-32 apta_output_stream_t reserved offset");
+_Static_assert(
+    sizeof(apta_input_stream_t) ==
+        (_Alignof(uint64_t) == 8u ? 56u : 52u),
+    "pointer-32 apta_input_stream_t size");
+_Static_assert(
+    offsetof(apta_input_stream_t, reserved64) ==
+        (_Alignof(uint64_t) == 8u ? 24u : 20u),
+    "pointer-32 apta_input_stream_t reserved offset");
+_Static_assert(
+    sizeof(apta_stream_parse_options_t) ==
+        (_Alignof(uint64_t) == 8u ? 104u : 100u),
+    "pointer-32 apta_stream_parse_options_t size");
+_Static_assert(
+    offsetof(apta_stream_parse_options_t, scratch_buffer_size) ==
+        (_Alignof(uint64_t) == 8u ? 64u : 60u),
+    "pointer-32 stream scratch-size offset");
+#else
+_Static_assert(sizeof(apta_output_stream_t) == 72u,
+               "pointer-64 apta_output_stream_t size");
+_Static_assert(sizeof(apta_input_stream_t) == 64u,
+               "pointer-64 apta_input_stream_t size");
+_Static_assert(sizeof(apta_stream_parse_options_t) == 104u,
+               "pointer-64 apta_stream_parse_options_t size");
 #endif
 
 _Static_assert(sizeof(apta_status_t) == 4u, "apta_status_t must be 32-bit");
@@ -82,6 +109,9 @@ APTA_ASSERT_EXTENSIBLE_PREFIX(apta_metadata_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_metadata_view_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_serialize_options_t);
 APTA_ASSERT_EXTENSIBLE_PREFIX(apta_parse_options_t);
+APTA_ASSERT_EXTENSIBLE_PREFIX(apta_output_stream_t);
+APTA_ASSERT_EXTENSIBLE_PREFIX(apta_input_stream_t);
+APTA_ASSERT_EXTENSIBLE_PREFIX(apta_stream_parse_options_t);
 
 int apta_abi_layout_compile_probe(void)
 {

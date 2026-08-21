@@ -9,12 +9,14 @@ apta_focus_init
 apta_frame_range_init
 apta_grid_revision_view_init
 apta_grid_view_init
+apta_input_stream_init
 apta_key_view_init
 apta_logger_init
 apta_memory_requirements_init
 apta_metadata_init
 apta_metadata_view_init
 apta_meter_view_init
+apta_output_stream_init
 apta_parse_options_init
 apta_pcm_block_init
 apta_pcm_request_init
@@ -63,9 +65,11 @@ apta_result_get_waveform_tile
 apta_result_info_init
 apta_result_provenance_init
 apta_result_parse
+apta_result_parse_from_stream
 apta_result_query_serialized_size
 apta_result_release
 apta_result_serialize
+apta_result_serialize_to_stream
 apta_serialize_options_init
 apta_session_acquire_result
 apta_session_apply_grid_revision
@@ -88,6 +92,7 @@ apta_session_set_metadata
 apta_session_set_source
 apta_session_signal_end_of_input
 apta_source_info_init
+apta_stream_parse_options_init
 apta_tempo_view_init
 apta_waveform_overview_view_init
 apta_waveform_detail_input_init

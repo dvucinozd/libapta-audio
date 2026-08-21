@@ -108,6 +108,37 @@ void APTA_CALL apta_grid_view_init(apta_grid_view_t *view)
     }
 }
 
+void APTA_CALL apta_output_stream_init(apta_output_stream_t *stream)
+{
+    if (stream != NULL) {
+        APTA_INIT_STRUCT(stream);
+    }
+}
+
+void APTA_CALL apta_input_stream_init(apta_input_stream_t *stream)
+{
+    if (stream != NULL) {
+        APTA_INIT_STRUCT(stream);
+    }
+}
+
+void APTA_CALL apta_stream_parse_options_init(
+    apta_stream_parse_options_t *options)
+{
+    if (options != NULL) {
+        APTA_INIT_STRUCT(options);
+        options->flags = APTA_PARSE_STRICT;
+        options->maximum_section_count = 64u;
+        options->maximum_overview_spans = 65536u;
+        options->maximum_waveform_columns = 16777216u;
+        options->requested_features = APTA_FEATURE_ALL_KNOWN;
+        options->maximum_input_bytes = UINT64_C(268435456);
+        options->maximum_section_bytes = UINT64_C(268435456);
+        options->maximum_allocation_bytes = UINT64_C(268435456);
+        options->maximum_scratch_bytes = UINT64_C(65536);
+    }
+}
+
 void APTA_CALL apta_key_view_init(apta_key_view_t *view)
 {
     if (view != NULL) {

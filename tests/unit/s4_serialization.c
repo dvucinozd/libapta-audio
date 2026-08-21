@@ -7,6 +7,7 @@
 #include <apta/apta.h>
 
 #include "apta_internal.h"
+#include "stream_equivalence.h"
 
 #define SAMPLE_RATE 48000u
 #define BEAT_FRAMES 23040u
@@ -285,6 +286,12 @@ int main(void)
               (size_t)size64,
               &written) == APTA_STATUS_OK);
     CHECK(written == (size_t)size64);
+    CHECK(apta_test_stream_matches_buffer(result, bytes, size64));
+    CHECK(apta_test_stream_parse_matches_buffer(parse_context, bytes, size64));
+    CHECK(apta_test_stream_selects_features(
+        parse_context, bytes, size64,
+        APTA_FEATURE_LOCAL_BEATGRID,
+        APTA_FEATURE_LOCAL_BEATGRID));
     CHECK(find_entry(bytes, "TEMP") != NULL);
     CHECK(find_entry(bytes, "LGRD") != NULL);
 

@@ -6,6 +6,8 @@
 
 #include <apta/apta.h>
 
+#include "stream_equivalence.h"
+
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                  \
@@ -136,6 +138,8 @@ int main(void)
               (size_t)required,
               &written) == APTA_STATUS_OK);
     CHECK(written == (size_t)required);
+    CHECK(apta_test_stream_matches_buffer(result, first, required));
+    CHECK(apta_test_stream_parse_matches_buffer(context, first, required));
     CHECK(get_u64(first + 32u) == required);
 
     section_count = get_u32(first + 20u);
