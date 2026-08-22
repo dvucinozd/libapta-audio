@@ -68,6 +68,8 @@ performance evidence.
 
 The detailed current boundary and exact remaining blockers are maintained in
 [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md).
+The current private-corpus preparation and manual-review boundary is recorded in
+[`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
 
 ## What still blocks APTA 1.1 release
 

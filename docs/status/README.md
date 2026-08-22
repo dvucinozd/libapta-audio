@@ -8,6 +8,9 @@ Active post-1.0 development:
 - [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md) — exact
   task-1-through-task-4 implementation boundary, retained verification and the
   remaining algorithm, embedded-profile and release gates.
+- [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md) —
+  dated 60-track private-corpus preparation snapshot, independent pre-review
+  diagnostics and the remaining manual verification/freeze boundary.
 
 Stage S9 — APTA 1.0:
 

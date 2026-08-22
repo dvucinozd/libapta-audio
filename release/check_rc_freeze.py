@@ -9,6 +9,7 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -125,7 +126,7 @@ def main() -> int:
     normative_check = root / "tests/spec/check_normative_manifest.py"
     try:
         subprocess.run(
-            ["python3", str(normative_check)], cwd=root, check=True,
+            [sys.executable, str(normative_check)], cwd=root, check=True,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
         normative_status = "pass"
