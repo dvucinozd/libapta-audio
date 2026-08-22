@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import subprocess
 from pathlib import Path
 
@@ -31,9 +32,14 @@ def main() -> int:
         return 0
 
     print(f"layout manifest mismatch: {args.manifest}")
-    print("--- ACTUAL LAYOUT BEGIN ---")
-    print(actual, end="" if actual.endswith("\n") else "\n")
-    print("--- ACTUAL LAYOUT END ---")
+    diff = difflib.unified_diff(
+        expected.splitlines(),
+        actual.splitlines(),
+        fromfile=str(args.manifest),
+        tofile="actual-layout",
+        lineterm="",
+    )
+    print("\n".join(diff))
     return 1
 
 
