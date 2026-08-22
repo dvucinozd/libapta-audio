@@ -707,7 +707,9 @@ static int grid_representation_case(void)
     grid.beat_count = 2u;
     grid.beats = beats;
     apta_internal_grid_match_cursor_init(&cursor, &grid, &work);
-    if (apta_internal_grid_match_cursor_next(&cursor, 10u, 5) ||
+    /* MTRD has integer-frame precision, so explicit fractional beats bind by
+     * their encoded whole-frame component and ordinal just like segments. */
+    if (!apta_internal_grid_match_cursor_next(&cursor, 10u, 5) ||
         !apta_internal_grid_match_cursor_next(&cursor, 20u, 6)) {
         return 0;
     }
