@@ -1,0 +1,94 @@
+name: ESP32-P4 qualification
+
+on:
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "include/**"
+      - "src/**"
+      - "ports/espidf/**"
+      - "examples/espidf/**"
+      - "tests/unit/espidf_p4_capacity_profile.c"
+      - ".github/workflows/espidf-p4.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "CMakeLists.txt"
+      - "include/**"
+      - "src/**"
+      - "ports/espidf/**"
+      - "examples/espidf/**"
+      - "tests/unit/espidf_p4_capacity_profile.c"
+      - ".github/workflows/espidf-p4.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: espidf-p4-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APTA_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+  IDF_IMAGE: espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67
+
+jobs:
+  capacity:
+    name: 30-minute bounded-capacity profile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
+      - name: Build capacity probe
+        run: |
+          cmake -S . -B build-p4-profile \
+            -DAPTA_BUILD_TESTS=OFF \
+            -DAPTA_BUILD_DESKTOP_ADAPTERS=OFF \
+            -DAPTA_BUILD_TOOLS=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-p4-profile --parallel 2
+          cc -std=c11 -Wall -Wextra -Wpedantic -Werror \
+            -Iinclude \
+            tests/unit/espidf_p4_capacity_profile.c \
+            build-p4-profile/libapta.a -lm \
+            -o build-p4-profile/apta-p4-capacity-profile
+          ./build-p4-profile/apta-p4-capacity-profile | tee build-p4-profile/p4-capacity.txt
+      - name: Upload capacity evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: apta-p4-capacity-attempt-${{ github.run_attempt }}
+          path: build-p4-profile/p4-capacity.txt
+          if-no-files-found: error
+          retention-days: 30
+
+  firmware:
+    name: ESP-IDF 6.0.2 / ESP32-P4 / scalar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.APTA_SOURCE_REVISION }}
+          persist-credentials: false
+      - name: Build component and cooperative example
+        run: >-
+          docker run --rm
+          -v "${GITHUB_WORKSPACE}:/project"
+          -w /project/examples/espidf/cooperative_scheduler
+          ${IDF_IMAGE}
+          idf.py -B build-idf60-esp32p4
+          -DSDKCONFIG_DEFAULTS="sdkconfig.defaults"
+          set-target esp32p4 build size-components
+      - name: Verify firmware artifact
+        run: test -s examples/espidf/cooperative_scheduler/build-idf60-esp32p4/apta_cooperative_scheduler.bin
+      - name: Upload P4 firmware evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: apta-p4-firmware-attempt-${{ github.run_attempt }}
+          path: examples/espidf/cooperative_scheduler/build-idf60-esp32p4/apta_cooperative_scheduler.bin
+          if-no-files-found: error
+          retention-days: 30
