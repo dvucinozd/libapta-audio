@@ -1,0 +1,49 @@
+name: APTA 1.1 pre-freeze snapshot
+
+on:
+  pull_request:
+    paths:
+      - "release/generate_1_1_freeze_snapshot.py"
+      - "release/check_1_1_readiness.py"
+      - "release/1.1-readiness.json"
+      - "tests/unit/apta_1_1_freeze_snapshot.py"
+      - ".github/workflows/freeze-snapshot-1.1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freeze-snapshot-contract:
+    name: Freeze-eligible snapshot contract
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile snapshot tooling
+        run: >-
+          python3 -m py_compile
+          release/generate_1_1_freeze_snapshot.py
+          tests/unit/apta_1_1_freeze_snapshot.py
+
+      - name: Run snapshot policy tests
+        run: python3 -m unittest tests/unit/apta_1_1_freeze_snapshot.py
+
+      - name: Run hash primitive self-test
+        run: python3 release/generate_1_1_freeze_snapshot.py --self-test
+
+      - name: Confirm current development tree is not snapshot-eligible
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python3 release/generate_1_1_freeze_snapshot.py \
+              --root . \
+              --source-revision "${GITHUB_SHA}" \
+              --output build/release/should-not-exist.json; then
+            echo "blocked development tree unexpectedly produced a freeze snapshot" >&2
+            exit 1
+          fi
+          test ! -e build/release/should-not-exist.json
