@@ -1,0 +1,32 @@
+name: APTA 1.1 P4 hardware evidence
+
+on:
+  pull_request:
+    paths:
+      - "tools/apta_1_1_p4_hardware_evidence.py"
+      - "tests/unit/apta_1_1_p4_hardware_evidence.py"
+      - "docs/status/APTA-1.1-P4-HARDWARE-EVIDENCE.md"
+      - ".github/workflows/p4-hardware-evidence-1.1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p4-hardware-contract:
+    name: Physical P4 evidence policy
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile validator
+        run: python3 -m py_compile tools/apta_1_1_p4_hardware_evidence.py tests/unit/apta_1_1_p4_hardware_evidence.py
+
+      - name: Run policy tests
+        run: python3 -m unittest tests/unit/apta_1_1_p4_hardware_evidence.py
+
+      - name: Verify protocol is present
+        run: test -s docs/status/APTA-1.1-P4-HARDWARE-EVIDENCE.md
