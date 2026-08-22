@@ -1,30 +1,38 @@
 # APTA 1.1 development status
 
 - **Branch:** `1.1.0`
-- **Implementation baseline:** `0e524bee53fb5a528dd6e3fd138c4b4777def8f0`
+- **Current implementation head:** `8d0d46c55ab0de146596d939d10854111f21d1ab`
 - **Release status:** development; no `v1.1.0` tag or release claim
 
 ## Current boundary
 
-The first four implementation tasks are complete. Task 5 is now in progress: a
-relation-aware tempo/grid ensemble gate has landed, while corpus qualification
-and acceptance remain deliberately open.
+The reusable 1.1 infrastructure and the native meter/key implementation are now
+in place. The remaining blockers are evidence-driven rather than missing core
+feature plumbing: fresh corpus qualification, confidence-model fitting/holdout,
+physical ESP32-P4 measurements and the final release freeze.
 
-| Task | Status | Delivered boundary |
+| Work item | Status | Delivered boundary |
 |---|---|---|
 | 1. APTA 1.1 result model | Complete | Feature bits, key/meter/quality views, initializers, accessors and 32/64-bit layout evidence |
 | 2. External result builder | Complete | Bounded validated deep-copy import, provenance, all current feature setters and immutable finalization |
 | 3. Container DJ sections | Complete | Deterministic `MKEY`, `MTRD`, `CONF` read/write, strict validation, golden fixture and frozen-reader compatibility |
 | 4. Streaming container I/O | Complete | Output/input callbacks, bounded serialization, selective parsing, caller scratch and buffer equivalence |
-| 5. Tempo/grid ensemble | In progress | S6 metrical proposals require independent S4 score support and a strictly better fine-grid fit before promotion; corpus acceptance is still open |
+| 5. Tempo/grid ensemble implementation | Candidate complete | Relation-aware S6 proposal + S4 refinement/grid-fit gate implemented; fresh-corpus acceptance remains open |
+| 6. Confidence calibration contract | Complete | Deterministic isotonic fitting/evaluation protocol and data-separation gate; no production calibrated model yet |
+| 7. Native meter/downbeat | Complete implementation | Bounded 3/4 vs 4/4 meter/downbeat analysis, immutable snapshots and cooperative scheduler integration |
+| 8. Native musical key | Complete implementation | Bounded global major/minor key analysis, ranked candidates, immutable snapshots and ESP-IDF packaging |
+| 9. Progressive publication | Complete implementation | Provisional -> stable -> final generations with retained-result immutability verified end to end |
+| 10. ESP32-P4 CI/capacity profile | Complete CI/layout evidence | ESP-IDF 6.0.2 `esp32p4` firmware build plus deterministic 30-minute bounded-capacity probe |
+| 11. Final DJ acceptance contract | Complete | Frozen fresh-corpus evaluator and thresholds for key, meter, downbeat, grid and high-confidence safety |
 
-The completed task-1-through-task-4 implementation is present in commits
-`d787925` through `0e524be` on the development line. The public guide is
+The public development guide is
 [`../api/APTA-API-1.1-DEVELOPMENT.md`](../api/APTA-API-1.1-DEVELOPMENT.md), the
 DJ wire contract is
-[`../../specification/APTA-1.1-DJ-SECTIONS.md`](../../specification/APTA-1.1-DJ-SECTIONS.md)
-and streaming behavior is
-[`../file-format/APTA-STREAMING-IO-1.1.md`](../file-format/APTA-STREAMING-IO-1.1.md).
+[`../../specification/APTA-1.1-DJ-SECTIONS.md`](../../specification/APTA-1.1-DJ-SECTIONS.md),
+streaming behavior is
+[`../file-format/APTA-STREAMING-IO-1.1.md`](../file-format/APTA-STREAMING-IO-1.1.md),
+and final corpus scoring is frozen in
+[`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md).
 
 ## Implemented compatibility guarantees
 
@@ -38,89 +46,115 @@ and streaming behavior is
 - Result pointers retain the established result-lifetime ownership model.
 - Streaming and buffer writers produce byte-identical canonical output for the
   same result and options.
+- Meter and key publication use the existing immutable-generation contract; a
+  retained earlier result is not rewritten when later evidence matures.
 
 These are development-branch guarantees backed by tests, not yet a tagged
 stable 1.1 compatibility promise.
 
-## Verification at the task-1-through-task-4 baseline
+## Tempo/grid ensemble boundary
 
-| Gate | Result |
-|---|---:|
-| Configured static host suite | 99/99 passed |
-| Shared ABI/export suite | 4/4 passed |
-| Focused post-commit task-1-through-task-4 suite | 8/8 passed |
-| ILP32 public-header/layout compile | Passed |
-| RISC-V 32-bit public-header compile | Passed |
-| `git diff --check` | Clean |
+The earlier Phase-5 threshold-only candidate remains rejected. Its old holdout
+is not fresh evidence and must not be reused for threshold tuning.
 
-Coverage includes result ranges and storage, builder round trips and invalid
-input, allocation-failure paths, malformed and scale DJ sections, independent
-golden bytes, frozen APTA 1.0 consumption, streaming equivalence, selective
-loading and scratch limits.
+The current candidate is structurally different: S6 chooses a known metrical
+region, S4 re-estimates/refines the exact tempo on fine onset evidence, the
+proposal must retain the existing endorsement score floor, and the proposed
+fine grid must fit strictly better before promotion. A complete ensemble
+evaluation is charged as one cooperative scheduler step and remains bounded by
+the S4 evidence capacity.
 
-## Task 5 checkpoint — tempo/grid ensemble
-
-The earlier Phase-5 threshold-only candidate remains rejected. Its hold-out
-failure is still authoritative and those 48 hold-out rows must not be reused as
-fresh tuning data.
-
-The first APTA 1.1 ensemble checkpoint adds genuinely different evidence rather
-than another fitted threshold:
-
-- S6 may propose a metrical family member even when that tempo did not survive
-  into S4's public three-candidate list;
-- S6 chooses the metrical region, while S4 fine-bin evidence re-estimates and
-  sub-bin refines the BPM before it can be published;
-- the proposal must be one of the existing half/double, two-thirds/three-half,
-  third/triple or quarter/quadruple relations;
-- the proposal must retain at least the already-existing S4 endorsement score
-  floor on the same fine onset evidence;
-- the S4 fine grid at the proposed period must fit that evidence strictly better
-  than the currently selected fine grid;
-- if promoted, the local grid is re-phased at the promoted period rather than
-  keeping the phase of the displaced S4 winner;
-- a complete ensemble evaluation is charged as one cooperative scheduler step
-  and remains bounded by the existing S4 evidence capacity;
-- no new public API, ABI, container field or release-version claim is introduced
-  by this checkpoint.
-
-The acceptance boundary is frozen in
+Acceptance remains governed by
 [`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md).
-This checkpoint is an implementation candidate, not an accuracy claim. It must
-pass native regression gates and the pre-registered fresh-corpus evaluation
-before Task 5 can be marked complete.
+No corpus-level improvement is claimed until a genuinely fresh validation set
+passes that protocol.
 
-## Work that is not complete
+## Native meter, key and progressive publication
 
-The branch is not yet a complete DJ analyzer. The following planned work remains:
+Native meter/downbeat and musical-key analysis are implemented without adding a
+second ownership model or unbounded result storage. Both publish through the
+same immutable result generations as the established waveform/tempo/grid
+features.
 
-1. tempo/grid ensemble corpus qualification for half, double, third and related
-   metrical errors, including regression limits and a non-reused validation set;
-2. calibrated confidence/quality models trained and frozen against a fully
-   separate holdout;
-3. native meter/downbeat detection;
-4. native global musical-key detection;
-5. progressive quick-pass/full-pass publication through immutable generations;
-6. the ESP32-P4 DJ memory profile, including 30-minute bounded-capacity probes,
-   9,216 explicit beats, 4,096 overview columns and the PSRAM/internal/scratch
-   budgets;
-7. mandatory ESP-IDF 6.0.2/P4 CI and hardware memory/workspace evidence;
-8. the independent manually verified corpus and the tempo, beatgrid, downbeat
-   and key acceptance thresholds;
-9. final API/ABI freeze, version metadata, package evidence, tag and release.
+Musical key passed Linux static/shared, Windows shared-ABI/interchange, ILP32,
+sanitizer/fuzz/security, ESP-IDF 5.5.4/6.0.2 and standalone ESP-IDF component
+validation before integration. The progressive publication regression retains a
+PROVISIONAL result while later analysis publishes STABLE and FINAL generations,
+then verifies all retained generations remain readable and unchanged even after
+session destruction.
+
+These tests establish lifecycle and boundedness semantics. They are not a claim
+that key or downbeat accuracy has passed the final corpus thresholds.
+
+## ESP32-P4 qualification evidence
+
+The P4 CI profile builds the cooperative example with ESP-IDF 6.0.2 for
+`esp32p4` and runs a deterministic 30-minute capacity calculation.
+
+For 48 kHz / 30 minutes (`86,400,000` source frames), the profile selected
+32,768 frames per overview column and measured:
+
+- overview columns: **2,637** (below the 4,096 design ceiling);
+- mutable S6 beat capacity: **3,072**;
+- bounded immutable result slots: **2**;
+- resident explicit beat records: **9,216** total across mutable S6 + two result slots;
+- minimum static workspace: **932,960 bytes**;
+- recommended static workspace: **991,286 bytes**;
+- bounded result pool: **531,232 bytes**;
+- combined minimum: **1,464,192 bytes**.
+
+This is firmware-build and deterministic layout evidence only. Physical-device
+latency, PSRAM bandwidth, allocator fragmentation, thermals, USB/audio
+coexistence and real hardware memory placement remain unverified until hardware
+is available.
+
+## Frozen final DJ acceptance contract
+
+`tools/apta_1_1_dj_acceptance_eval.py` and
+[`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md)
+pre-register the final independent-corpus gates before fresh results are
+inspected:
+
+- at least 48 fresh manually verified tracks;
+- exact key accuracy >=75%;
+- exact meter accuracy >=95%;
+- downbeat phase accuracy >=90%;
+- beatgrid accuracy >=90%;
+- <=5% high-confidence errors per output family at confidence >=75;
+- beat-period tolerance <=1%;
+- cyclic downbeat phase tolerance <=0.10 beat.
+
+The evaluator requires exact opaque-ID matching and SHA-256 binding of the label
+file. A smaller corpus is diagnostic-only. Its positive/negative self-test and
+the full host/ABI/security matrix passed before the evaluator was integrated.
+This freezes the measurement machinery; no fresh corpus has been scored yet.
+
+## Remaining blockers before `v1.1.0`
+
+1. Run the relation-aware tempo/grid candidate on genuinely fresh validation
+   evidence and satisfy its pre-registered regression/acceptance gates.
+2. Train the calibrated confidence model on a separate training set and pass an
+   untouched holdout under the frozen calibration protocol; only then integrate
+   a production `APTA_FEATURE_CALIBRATED_QUALITY` model.
+3. Assemble and manually verify the independent >=48-track final DJ corpus,
+   freeze its manifest/labels hash, run the analyzer and pass every final
+   key/meter/downbeat/grid/high-confidence gate.
+4. Collect physical ESP32-P4 memory/timing evidence when hardware is available,
+   including actual internal/PSRAM placement and workload interaction relevant
+   to the intended device.
+5. Freeze the final 1.1 API/ABI/wire documents, deliberately update version
+   metadata, generate package/release evidence, tag and publish.
 
 Pajoniiir application work such as scanning, tags, catalog, playlists, USB
 transactions, playback scheduling, Rekordbox import wiring and UI remains
-outside this repository and outside the first four libapta tasks.
+outside this repository.
 
 ## Release discipline
 
 The stable authority remains APTA 1.0 / package 1.0.1. The frozen 1.0 normative
-manifest and existing tags must not be rewritten. The `1.1.0` branch name is a
-development-line name; it is not evidence that package version, encoded API
-version, conformance profiles or release artifacts have been promoted.
+manifest and existing tags must not be rewritten. `VERSION` remains `1.0.1` and
+the `1.1.0` branch name is only a development-line name.
 
-Before `v1.1.0`, the project must complete the remaining algorithms and P4
-profile, rerun the complete native/shared/ILP32/ESP-IDF/fuzz/container evidence,
-freeze the final API and wire documents, update version metadata deliberately
-and publish a release-specific verification record.
+No `v1.1.0` release should be cut until the evidence blockers above are closed
+and the complete native/shared/ILP32/ESP-IDF/P4/fuzz/container/package matrix is
+rerun against the exact release candidate.
