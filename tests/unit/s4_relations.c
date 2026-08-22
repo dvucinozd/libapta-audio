@@ -1,24 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 /*
- * B2: tempo relation set.
+ * B2 / APTA 1.1: tempo relation and ensemble policy set.
  *
  * The relation is serialized as a single byte in the TEMP section, so the
  * numeric values are wire format. This pins every one of them so a future
  * renumbering fails here rather than silently changing what an existing file
  * means. The shared internal classifier is exercised at its exact ratio and
- * on both sides of its two-percent tolerance, so every relation the estimator
- * can emit is produced without copying the production ratio table here.
+ * on both sides of its two-percent tolerance.
+ *
+ * The 1.1 ensemble gate is tested here as pure policy: every recognized
+ * metrical relation is eligible only when the independent S4 score floor is
+ * met and the proposed fine grid fits the same onset evidence strictly better.
  */
 #include <stdint.h>
 #include <stdio.h>
 
 #include <apta/apta.h>
 
+#include "apta_tempo_ensemble.h"
 #include "apta_tempo_relation.h"
 
 #define CHECK(condition)                                                     \
     do {                                                                     \
-        if (!(condition)) {                                                   \
+        if (!(condition)) {                                                  \
             fprintf(stderr, "CHECK failed at %s:%d: %s\n",                  \
                     __FILE__, __LINE__, #condition);                         \
             return 1;                                                        \
@@ -88,7 +92,41 @@ int main(void)
                   selected,
                   expected + tolerance + 1u) ==
               APTA_TEMPO_RELATION_INDEPENDENT);
+
+        /* 1.1 ensemble: relation alone is insufficient; the proposal must
+         * retain local S4 support and improve the fine-grid fit. */
+        CHECK(apta_internal_tempo_ensemble_should_promote(
+                  ratio->relation,
+                  APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE,
+                  0.20f,
+                  0.21f));
+        CHECK(!apta_internal_tempo_ensemble_should_promote(
+                   ratio->relation,
+                   APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE - 1u,
+                   0.20f,
+                   0.30f));
+        CHECK(!apta_internal_tempo_ensemble_should_promote(
+                   ratio->relation,
+                   APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE,
+                   0.20f,
+                   0.20f));
+        CHECK(!apta_internal_tempo_ensemble_should_promote(
+                   ratio->relation,
+                   APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE,
+                   0.20f,
+                   0.19f));
     }
+
+    CHECK(!apta_internal_tempo_ensemble_should_promote(
+               APTA_TEMPO_RELATION_INDEPENDENT,
+               65535u,
+               0.10f,
+               0.50f));
+    CHECK(!apta_internal_tempo_ensemble_should_promote(
+               APTA_TEMPO_RELATION_DOUBLE,
+               65535u,
+               -0.10f,
+               0.0f));
 
     return 0;
 }

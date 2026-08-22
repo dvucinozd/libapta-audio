@@ -6,9 +6,9 @@
 
 ## Current boundary
 
-The first four implementation tasks are complete. They establish the public
-data model and safe interchange/import infrastructure needed before the DJ
-analysis algorithms and ESP32-P4 integration can be built.
+The first four implementation tasks are complete. Task 5 is now in progress: a
+relation-aware tempo/grid ensemble gate has landed, while corpus qualification
+and acceptance remain deliberately open.
 
 | Task | Status | Delivered boundary |
 |---|---|---|
@@ -16,9 +16,10 @@ analysis algorithms and ESP32-P4 integration can be built.
 | 2. External result builder | Complete | Bounded validated deep-copy import, provenance, all current feature setters and immutable finalization |
 | 3. Container DJ sections | Complete | Deterministic `MKEY`, `MTRD`, `CONF` read/write, strict validation, golden fixture and frozen-reader compatibility |
 | 4. Streaming container I/O | Complete | Output/input callbacks, bounded serialization, selective parsing, caller scratch and buffer equivalence |
+| 5. Tempo/grid ensemble | In progress | S6 metrical proposals require independent S4 score support and a strictly better fine-grid fit before promotion; corpus acceptance is still open |
 
-The implementation is present in commits `d787925` through `0e524be` on the
-development line. The public guide is
+The completed task-1-through-task-4 implementation is present in commits
+`d787925` through `0e524be` on the development line. The public guide is
 [`../api/APTA-API-1.1-DEVELOPMENT.md`](../api/APTA-API-1.1-DEVELOPMENT.md), the
 DJ wire contract is
 [`../../specification/APTA-1.1-DJ-SECTIONS.md`](../../specification/APTA-1.1-DJ-SECTIONS.md)
@@ -41,7 +42,7 @@ and streaming behavior is
 These are development-branch guarantees backed by tests, not yet a tagged
 stable 1.1 compatibility promise.
 
-## Verification at the baseline
+## Verification at the task-1-through-task-4 baseline
 
 | Gate | Result |
 |---|---:|
@@ -57,12 +58,38 @@ input, allocation-failure paths, malformed and scale DJ sections, independent
 golden bytes, frozen APTA 1.0 consumption, streaming equivalence, selective
 loading and scratch limits.
 
+## Task 5 checkpoint — tempo/grid ensemble
+
+The earlier Phase-5 threshold-only candidate remains rejected. Its hold-out
+failure is still authoritative and those 48 hold-out rows must not be reused as
+fresh tuning data.
+
+The first APTA 1.1 ensemble checkpoint adds genuinely different evidence rather
+than another fitted threshold:
+
+- S6 may propose a metrical family member even when that tempo did not survive
+  into S4's public three-candidate list;
+- the proposal must be one of the existing half/double, two-thirds/three-half,
+  third/triple or quarter/quadruple relations;
+- the proposal must retain at least the already-existing S4 endorsement score
+  floor on the same fine onset evidence;
+- the S4 fine grid at the proposed period must fit that evidence strictly better
+  than the currently selected fine grid;
+- if promoted, the local grid is re-phased at the promoted period rather than
+  keeping the phase of the displaced S4 winner;
+- no new public API, ABI, container field or release-version claim is introduced
+  by this checkpoint.
+
+This checkpoint is an implementation candidate, not an accuracy claim. It must
+pass native regression gates and a pre-registered corpus evaluation with fresh
+hold-out material or all-fold reporting before Task 5 can be marked complete.
+
 ## Work that is not complete
 
 The branch is not yet a complete DJ analyzer. The following planned work remains:
 
-1. tempo/grid ensemble improvements for half, double, third and related
-   metrical errors;
+1. tempo/grid ensemble corpus qualification for half, double, third and related
+   metrical errors, including regression limits and a non-reused validation set;
 2. calibrated confidence/quality models trained and frozen against a fully
    separate holdout;
 3. native meter/downbeat detection;

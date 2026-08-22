@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
+#include "../core/apta_period_refine.h"
+#include "../core/apta_tempo_ensemble.h"
+#include "../core/apta_tempo_prior.h"
+#include "../core/apta_tempo_relation.h"
+
+#include <string.h>
 
 apta_status_t apta_internal_waveform_process_s4_base(
     apta_session_t *session,
@@ -14,6 +20,358 @@ static int apta_s4_range_changed(
 {
     return before->first_frame != after->first_frame ||
            before->end_frame != after->end_frame;
+}
+
+static uint32_t apta_s4_ensemble_lag_from_tempo(
+    const apta_session_t *session,
+    uint32_t tempo_millibpm)
+{
+    uint64_t numerator;
+    uint64_t denominator;
+
+    if (session == NULL || tempo_millibpm == 0u) {
+        return 0u;
+    }
+    numerator = (uint64_t)session->config.source_sample_rate * UINT64_C(60000);
+    denominator = (uint64_t)tempo_millibpm * APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
+    if (denominator == 0u) {
+        return 0u;
+    }
+    return (uint32_t)((numerator + denominator / 2u) / denominator);
+}
+
+static void apta_s4_ensemble_period_from_tempo(
+    const apta_session_t *session,
+    uint32_t tempo_millibpm,
+    apta_frame_period_t *period)
+{
+    uint64_t numerator;
+    uint64_t remainder;
+
+    memset(period, 0, sizeof(*period));
+    if (tempo_millibpm == 0u) {
+        return;
+    }
+    numerator = (uint64_t)session->config.source_sample_rate * UINT64_C(60000);
+    period->whole_frames = numerator / tempo_millibpm;
+    remainder = numerator % tempo_millibpm;
+    period->fraction_q32 = (uint32_t)((remainder << 32) / tempo_millibpm);
+}
+
+static uint32_t apta_s4_ensemble_beat_count(
+    const apta_grid_segment_t *segment)
+{
+    uint64_t period;
+    uint64_t first;
+    uint64_t end;
+    uint64_t anchor;
+    uint64_t count;
+
+    if (segment == NULL ||
+        segment->applicability_range.end_frame <=
+            segment->applicability_range.first_frame ||
+        segment->frames_per_beat.whole_frames == 0u) {
+        return 0u;
+    }
+
+    period = segment->frames_per_beat.whole_frames +
+             (segment->frames_per_beat.fraction_q32 != 0u ? 1u : 0u);
+    first = segment->applicability_range.first_frame;
+    end = segment->applicability_range.end_frame;
+    anchor = segment->anchor_position.whole_frame;
+
+    if (anchor < first) {
+        uint64_t delta = first - anchor;
+        uint64_t steps = (delta + period - 1u) / period;
+        if (steps > (UINT64_MAX - anchor) / period) {
+            return 0u;
+        }
+        anchor += steps * period;
+    }
+    if (anchor >= end) {
+        return 0u;
+    }
+
+    count = 1u + (end - 1u - anchor) / period;
+    return count > UINT32_MAX ? UINT32_MAX : (uint32_t)count;
+}
+
+static float apta_s4_ensemble_grid_fit(
+    const float *flux,
+    uint32_t span,
+    uint32_t lag,
+    uint32_t phase)
+{
+    float on_sum = 0.0f;
+    float off_sum = 0.0f;
+    uint32_t on_count = 0u;
+    uint32_t off_count = 0u;
+    uint32_t offset;
+
+    if (flux == NULL || span == 0u || lag == 0u) {
+        return 0.0f;
+    }
+    for (offset = 0u; offset < span; ++offset) {
+        const uint32_t from_phase = (offset + lag - (phase % lag)) % lag;
+        const uint32_t distance =
+            from_phase < lag - from_phase ? from_phase : lag - from_phase;
+
+        if (distance <= 1u) {
+            on_sum += flux[offset];
+            on_count += 1u;
+        } else {
+            off_sum += flux[offset];
+            off_count += 1u;
+        }
+    }
+    if (on_count == 0u || off_count == 0u) {
+        return 0.0f;
+    }
+    {
+        const float on_mean = on_sum / (float)on_count;
+        const float off_mean = off_sum / (float)off_count;
+        const float sum = on_mean + off_mean;
+
+        return sum > 1e-12f ? (on_mean - off_mean) / sum : 0.0f;
+    }
+}
+
+static float apta_s4_ensemble_best_grid_fit(
+    const float *flux,
+    uint32_t span,
+    uint32_t lag,
+    uint32_t *phase_out)
+{
+    float best_score = -1.0f;
+    uint32_t best_phase = 0u;
+    uint32_t phase;
+
+    if (phase_out != NULL) {
+        *phase_out = 0u;
+    }
+    if (flux == NULL || span == 0u || lag == 0u || lag >= span) {
+        return 0.0f;
+    }
+    for (phase = 0u; phase < lag; ++phase) {
+        float score = 0.0f;
+        uint32_t offset;
+
+        for (offset = phase; offset < span; offset += lag) {
+            score += flux[offset];
+        }
+        if (score > best_score) {
+            best_score = score;
+            best_phase = phase;
+        }
+    }
+    if (phase_out != NULL) {
+        *phase_out = best_phase;
+    }
+    return apta_s4_ensemble_grid_fit(flux, span, lag, best_phase);
+}
+
+static uint32_t apta_s4_ensemble_normalized_score(
+    const apta_session_t *session,
+    uint32_t lag,
+    uint32_t tempo_millibpm)
+{
+    uint32_t span;
+    float score;
+    float normalized;
+
+    if (session == NULL || session->onset_flux == NULL ||
+        session->s4_refresh_evidence_end <= session->s4_refresh_evidence_first ||
+        session->s4_cached_scores[0] <= 0.0f) {
+        return 0u;
+    }
+    span = (uint32_t)(session->s4_refresh_evidence_end -
+                      session->s4_refresh_evidence_first);
+    if (lag == 0u || lag >= span) {
+        return 0u;
+    }
+    score = apta_internal_correlation_at_lag(session->onset_flux, span, lag) *
+            apta_internal_tempo_prior(tempo_millibpm);
+    if (score <= 0.0f) {
+        return 0u;
+    }
+    normalized = score / session->s4_cached_scores[0] * 65535.0f;
+    if (normalized >= 65535.0f) {
+        return 65535u;
+    }
+    return normalized > 0.0f ? (uint32_t)(normalized + 0.5f) : 0u;
+}
+
+static void apta_s4_ensemble_relate_candidates(apta_session_t *session)
+{
+    uint32_t index;
+    const uint32_t selected = session->tempo_value.tempo_millibpm;
+
+    for (index = 0u; index < session->tempo_candidate_count; ++index) {
+        const apta_tempo_relation_t relation = apta_internal_tempo_relation(
+            selected, session->tempo_candidates[index].tempo_millibpm);
+
+        session->tempo_candidates[index].relation_to_selected = relation;
+        if (index != 0u && relation != APTA_TEMPO_RELATION_INDEPENDENT) {
+            session->tempo_value.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+            session->local_grid_segment.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+        }
+        if (index != 0u && relation == APTA_TEMPO_RELATION_HALF) {
+            session->tempo_value.flags |= APTA_TEMPO_FLAG_HALF_TIME_AMBIGUITY;
+            session->local_grid_segment.flags |= APTA_TEMPO_FLAG_HALF_TIME_AMBIGUITY;
+        }
+        if (index != 0u && relation == APTA_TEMPO_RELATION_DOUBLE) {
+            session->tempo_value.flags |= APTA_TEMPO_FLAG_DOUBLE_TIME_AMBIGUITY;
+            session->local_grid_segment.flags |= APTA_TEMPO_FLAG_DOUBLE_TIME_AMBIGUITY;
+        }
+    }
+}
+
+static apta_status_t apta_s4_apply_tempo_grid_ensemble(
+    apta_session_t *session,
+    uint32_t previous_selected_tempo,
+    uint32_t previous_candidate_set_id)
+{
+    uint32_t proposed_tempo;
+    uint32_t selected_tempo;
+    uint32_t proposed_lag;
+    uint32_t selected_lag;
+    uint32_t normalized_score;
+    uint32_t proposed_phase = 0u;
+    uint32_t selected_phase = 0u;
+    uint32_t span;
+    uint32_t entry;
+    uint32_t existing = UINT32_MAX;
+    float proposed_fit;
+    float selected_fit;
+    float difference;
+    apta_tempo_relation_t relation;
+    apta_tempo_candidate_t promoted;
+
+    if (session == NULL || !session->has_tempo || !session->has_local_grid ||
+        session->local_grid_locked || session->s4_refresh_active ||
+        session->s6_nominal_tempo_millibpm == 0u ||
+        session->onset_flux == NULL || session->tempo_candidate_count == 0u ||
+        session->s4_refresh_evidence_end <= session->s4_refresh_evidence_first) {
+        return APTA_STATUS_OK;
+    }
+
+    proposed_tempo = session->s6_nominal_tempo_millibpm;
+    selected_tempo = session->tempo_value.tempo_millibpm;
+    if (selected_tempo == 0u || proposed_tempo == 0u) {
+        return APTA_STATUS_OK;
+    }
+
+    difference = (float)proposed_tempo - (float)selected_tempo;
+    if (difference < 0.0f) {
+        difference = -difference;
+    }
+    if (difference / (float)proposed_tempo <=
+        APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
+        return APTA_STATUS_OK;
+    }
+
+    relation = apta_internal_tempo_relation(selected_tempo, proposed_tempo);
+    if (relation == APTA_TEMPO_RELATION_INDEPENDENT) {
+        return APTA_STATUS_OK;
+    }
+
+    proposed_lag = apta_s4_ensemble_lag_from_tempo(session, proposed_tempo);
+    selected_lag = apta_s4_ensemble_lag_from_tempo(session, selected_tempo);
+    if (proposed_lag < session->s4_refresh_minimum_lag ||
+        proposed_lag > session->s4_refresh_maximum_lag ||
+        selected_lag < session->s4_refresh_minimum_lag ||
+        selected_lag > session->s4_refresh_maximum_lag) {
+        return APTA_STATUS_OK;
+    }
+
+    span = (uint32_t)(session->s4_refresh_evidence_end -
+                      session->s4_refresh_evidence_first);
+    if (span == 0u || proposed_lag >= span || selected_lag >= span) {
+        return APTA_STATUS_OK;
+    }
+
+    normalized_score = apta_s4_ensemble_normalized_score(
+        session, proposed_lag, proposed_tempo);
+    selected_fit = apta_s4_ensemble_best_grid_fit(
+        session->onset_flux, span, selected_lag, &selected_phase);
+    proposed_fit = apta_s4_ensemble_best_grid_fit(
+        session->onset_flux, span, proposed_lag, &proposed_phase);
+    if (!apta_internal_tempo_ensemble_should_promote(
+            relation, normalized_score, selected_fit, proposed_fit)) {
+        return APTA_STATUS_OK;
+    }
+
+    for (entry = 0u; entry < session->tempo_candidate_count; ++entry) {
+        const uint32_t candidate =
+            session->tempo_candidates[entry].tempo_millibpm;
+        const uint32_t candidate_difference = candidate > proposed_tempo
+                                                  ? candidate - proposed_tempo
+                                                  : proposed_tempo - candidate;
+        if (candidate_difference <= 500u) {
+            existing = entry;
+            break;
+        }
+    }
+
+    if (existing != UINT32_MAX) {
+        promoted = session->tempo_candidates[existing];
+        for (entry = existing; entry > 0u; --entry) {
+            session->tempo_candidates[entry] =
+                session->tempo_candidates[entry - 1u];
+        }
+    } else {
+        memset(&promoted, 0, sizeof(promoted));
+        promoted.tempo_millibpm = proposed_tempo;
+        promoted.score = (uint16_t)normalized_score;
+        promoted.confidence = (apta_confidence_value_t)(
+            25u + (normalized_score * 70u) / 65535u);
+        if (session->tempo_candidate_count < APTA_INTERNAL_MAX_TEMPO_CANDIDATES) {
+            session->tempo_candidate_count += 1u;
+        }
+        for (entry = session->tempo_candidate_count - 1u; entry > 0u; --entry) {
+            session->tempo_candidates[entry] =
+                session->tempo_candidates[entry - 1u];
+        }
+    }
+    session->tempo_candidates[0] = promoted;
+
+    session->tempo_value.tempo_millibpm = promoted.tempo_millibpm;
+    session->tempo_value.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+    session->local_grid_segment.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+    if (promoted.confidence < session->tempo_value.confidence) {
+        session->tempo_value.confidence = promoted.confidence;
+    }
+    session->local_grid_segment.confidence = session->tempo_value.confidence;
+    session->local_grid_segment.nominal_tempo_millibpm = promoted.tempo_millibpm;
+    apta_s4_ensemble_period_from_tempo(
+        session,
+        promoted.tempo_millibpm,
+        &session->local_grid_segment.frames_per_beat);
+    session->local_grid_segment.anchor_position.whole_frame =
+        (session->s4_refresh_evidence_first + proposed_phase) *
+        APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
+    session->local_grid_segment.anchor_position.fraction_q32 = 0u;
+    session->local_grid_segment.anchor_ordinal = 0;
+    session->local_grid_segment.beat_count =
+        apta_s4_ensemble_beat_count(&session->local_grid_segment);
+
+    if (previous_selected_tempo != 0u &&
+        session->tempo_value.tempo_millibpm == previous_selected_tempo &&
+        previous_candidate_set_id != 0u) {
+        session->tempo_candidate_set_id = previous_candidate_set_id;
+    } else if (previous_selected_tempo != 0u &&
+               session->tempo_value.tempo_millibpm != previous_selected_tempo &&
+               session->tempo_candidate_set_id == previous_candidate_set_id) {
+        session->tempo_candidate_set_id += 1u;
+        if (session->tempo_candidate_set_id == 0u) {
+            return APTA_ERROR_LIMIT_EXCEEDED;
+        }
+    }
+    session->tempo_value.candidate_set_id = session->tempo_candidate_set_id;
+    session->local_grid_segment.revision = session->tempo_candidate_set_id;
+    apta_s4_ensemble_relate_candidates(session);
+    session->s4_mutation_serial += 1u;
+    return APTA_STATUS_OK;
 }
 
 apta_status_t apta_internal_waveform_process(
@@ -31,8 +389,12 @@ apta_status_t apta_internal_waveform_process(
     apta_frame_range_t old_applicability =
         session->local_grid_applicability_range;
     uint64_t old_mutation_serial = session->s4_mutation_serial;
+    uint32_t previous_selected_tempo =
+        session->has_tempo ? session->tempo_value.tempo_millibpm : 0u;
+    uint32_t previous_candidate_set_id = session->tempo_candidate_set_id;
     apta_status_t status;
     apta_status_t refresh_status;
+    apta_status_t ensemble_status;
     apta_feature_mask_t pending;
     uint32_t slot;
     uint32_t refresh_steps = 0u;
@@ -109,6 +471,14 @@ apta_status_t apta_internal_waveform_process(
     }
     if (refresh_status == APTA_STATUS_MORE_WORK) {
         status = APTA_STATUS_MORE_WORK;
+    } else {
+        ensemble_status = apta_s4_apply_tempo_grid_ensemble(
+            session,
+            previous_selected_tempo,
+            previous_candidate_set_id);
+        if (ensemble_status < 0) {
+            return ensemble_status;
+        }
     }
     if (session->has_local_grid &&
         session->s4_mutation_serial == old_mutation_serial &&

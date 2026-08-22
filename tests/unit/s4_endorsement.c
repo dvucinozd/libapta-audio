@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 /*
- * The global estimator may reorder the local estimator's candidates. It may
- * never invent one.
+ * S4/S6 endorsement and APTA 1.1 ensemble boundary.
  *
- * That distinction is the whole design. An earlier attempt let S6 rescale S4's
- * winner by a metrical ratio, which could produce a tempo neither engine had
- * proposed -- 240.02 against a truth of 120.00 -- and lost more tracks than it
- * gained. Promotion selects from the list S4 already published, so the worst it
- * can do is pick a worse member of that list.
+ * Stable 1.0 endorsement may only reorder S4's own candidates. APTA 1.1 adds
+ * one narrow exception: a tempo independently proposed by S6 may enter the
+ * bounded S4 candidate list after the internal relation/score/grid-fit gate
+ * accepts it. This test therefore no longer requires the two candidate sets to
+ * be identical. Instead it requires every global-only candidate to be the
+ * selected ensemble answer and to match the nominal global-grid proposal.
  *
- * This runs the same audio with and without the global grid requested and
- * requires the candidate values to be the same set either way.
+ * The pure relation/score/grid-fit gate itself is covered by s4_relations.c.
  */
 #include <stdint.h>
 #include <stdio.h>
@@ -28,7 +27,7 @@
 #define CHECK(condition)                                                     \
     do {                                                                     \
         if (!(condition)) {                                                  \
-            fprintf(stderr, "CHECK failed at %s:%d: %s\n",                   \
+            fprintf(stderr, "CHECK failed at %s:%d: %s\n",                  \
                     __FILE__, __LINE__, #condition);                         \
             return 1;                                                        \
         }                                                                    \
@@ -38,6 +37,7 @@ typedef struct {
     uint32_t count;
     uint32_t tempo[MAX_CANDIDATES];
     uint32_t selected;
+    uint32_t global_nominal;
 } outcome_t;
 
 static int run(apta_context_t *context,
@@ -119,6 +119,38 @@ static int run(apta_context_t *context,
     for (index = 0u; index < out->count; ++index) {
         out->tempo[index] = tempo.candidates[index].tempo_millibpm;
     }
+
+    if ((features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u) {
+        apta_grid_view_t grid;
+
+        apta_grid_view_init(&grid);
+        if (apta_result_get_beatgrid(
+                result,
+                APTA_FEATURE_GLOBAL_BEATGRID,
+                NULL,
+                &grid) == APTA_STATUS_OK &&
+            grid.segment_count != 0u && grid.segments != NULL) {
+            uint64_t widest = 0u;
+            uint32_t widest_index = 0u;
+
+            for (index = 0u; index < grid.segment_count; ++index) {
+                const apta_grid_segment_t *segment = &grid.segments[index];
+                const uint64_t span =
+                    segment->applicability_range.end_frame >
+                            segment->applicability_range.first_frame
+                        ? segment->applicability_range.end_frame -
+                              segment->applicability_range.first_frame
+                        : 0u;
+                if (span > widest) {
+                    widest = span;
+                    widest_index = index;
+                }
+            }
+            out->global_nominal =
+                grid.segments[widest_index].nominal_tempo_millibpm;
+        }
+    }
+
     apta_result_release(result);
     (void)apta_session_destroy(session);
     return 0;
@@ -136,6 +168,19 @@ static int contains(const outcome_t *set, uint32_t value)
     return 0;
 }
 
+static int close_to(uint32_t left, uint32_t right, uint32_t permille)
+{
+    uint64_t difference;
+    uint64_t scale;
+
+    if (left == 0u || right == 0u) {
+        return 0;
+    }
+    difference = left > right ? (uint64_t)left - right : (uint64_t)right - left;
+    scale = right;
+    return difference * 1000u <= scale * permille;
+}
+
 int main(void)
 {
     const apta_feature_mask_t local =
@@ -149,6 +194,7 @@ int main(void)
     outcome_t alone;
     outcome_t endorsed;
     uint32_t index;
+    uint32_t global_only = 0u;
 
     audio = (int16_t *)malloc((size_t)TOTAL_FRAMES * sizeof(*audio));
     CHECK(audio != NULL);
@@ -164,28 +210,26 @@ int main(void)
     CHECK(run(context, with_global, audio, &endorsed) == 0);
 
     CHECK(alone.count > 0u);
-    CHECK(endorsed.count == alone.count);
+    CHECK(endorsed.count > 0u);
+    CHECK(endorsed.count <= APTA_REFERENCE_TEMPO_MAX_CANDIDATES);
 
-    /* The set is the same either way: promotion reorders, it does not add,
-     * remove or compute. */
     for (index = 0u; index < endorsed.count; ++index) {
         if (!contains(&alone, endorsed.tempo[index])) {
-            fprintf(stderr,
-                    "candidate %u millibpm appears only when the global grid "
-                    "is requested.\nPromotion must select from the list the "
-                    "local estimator already produced.\n",
-                    endorsed.tempo[index]);
-            return 1;
+            ++global_only;
+            CHECK(endorsed.tempo[index] == endorsed.selected);
+            CHECK(endorsed.global_nominal != 0u);
+            /* S6's own resolution is coarser than S4's. The ensemble proposal
+             * is nevertheless the S6 nominal itself, so this is intentionally
+             * a very loose guard against an unrelated synthesized value. */
+            CHECK(close_to(
+                endorsed.tempo[index], endorsed.global_nominal, 10u));
         }
     }
-    for (index = 0u; index < alone.count; ++index) {
-        CHECK(contains(&endorsed, alone.tempo[index]));
-    }
+    CHECK(global_only <= 1u);
 
-    /* And the published tempo is always the head of the list a host reads. */
+    /* The published tempo is always the head of the bounded candidate list. */
     CHECK(alone.selected == alone.tempo[0]);
     CHECK(endorsed.selected == endorsed.tempo[0]);
-    CHECK(contains(&alone, endorsed.selected));
 
     free(audio);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
