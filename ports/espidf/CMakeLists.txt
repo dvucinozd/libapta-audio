@@ -13,6 +13,10 @@ set(APTA_CORE_SRCS
     "${APTA_ROOT}/src/beatgrid/apta_meter_process.c"
     "${APTA_ROOT}/src/beatgrid/apta_meter_snapshot.c"
     "${APTA_ROOT}/src/beatgrid/apta_meter_pool_snapshot.c"
+    "${APTA_ROOT}/src/key/apta_key.c"
+    "${APTA_ROOT}/src/key/apta_key_process.c"
+    "${APTA_ROOT}/src/key/apta_key_snapshot.c"
+    "${APTA_ROOT}/src/key/apta_key_pool_snapshot.c"
     "${APTA_ROOT}/src/core/apta_config.c"
     "${APTA_ROOT}/src/core/apta_context.c"
     "${APTA_ROOT}/src/core/apta_initializers.c"
@@ -173,6 +177,15 @@ if(NOT CMAKE_BUILD_EARLY_EXPANSION)
     set_source_files_properties(
         "${APTA_ROOT}/src/beatgrid/apta_s6_pool_snapshot.c"
         PROPERTIES COMPILE_DEFINITIONS "apta_internal_result_pool_create_session_result=apta_internal_result_pool_create_session_result_meter_base")
+    set_source_files_properties(
+        "${APTA_ROOT}/src/beatgrid/apta_meter_process.c"
+        PROPERTIES COMPILE_DEFINITIONS "apta_internal_waveform_process=apta_internal_waveform_process_key_base;apta_internal_analysis_pending=apta_internal_analysis_pending_key_base")
+    set_source_files_properties(
+        "${APTA_ROOT}/src/beatgrid/apta_meter_snapshot.c"
+        PROPERTIES COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_snapshot_key_base")
+    set_source_files_properties(
+        "${APTA_ROOT}/src/beatgrid/apta_meter_pool_snapshot.c"
+        PROPERTIES COMPILE_DEFINITIONS "apta_internal_result_pool_create_session_result=apta_internal_result_pool_create_session_result_key_base")
     set_source_files_properties(
         "${APTA_ROOT}/src/waveform/apta_waveform_snapshot.c"
         PROPERTIES COMPILE_DEFINITIONS "apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_session=apta_internal_waveform_cleanup_session_base;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")

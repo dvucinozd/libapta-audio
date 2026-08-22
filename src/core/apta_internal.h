@@ -317,6 +317,14 @@ typedef struct {
  * 2048 * 32768 = 67,108,864 -- a 64x margin inside uint32_t. Readers divide by
  * sample_count and by 32768 to recover the normalized energy. */
 #define APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE 32768.0f
+
+#define APTA_INTERNAL_KEY_OCTAVES 3u
+#define APTA_INTERNAL_KEY_PITCH_CLASSES 12u
+#define APTA_INTERNAL_KEY_BIN_COUNT (APTA_INTERNAL_KEY_OCTAVES * APTA_INTERNAL_KEY_PITCH_CLASSES)
+#define APTA_INTERNAL_KEY_CANDIDATE_COUNT 3u
+#define APTA_INTERNAL_KEY_DECIMATION 4u
+#define APTA_INTERNAL_KEY_STABLE_WINDOWS 4u
+#define APTA_INTERNAL_KEY_PUBLISH_INTERVAL 4u
 #define APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE 8388608.0f
 
 /* C1: three-band split corners, in hertz. Derived into one-pole coefficients
@@ -522,6 +530,24 @@ _Static_assert(sizeof(apta_internal_onset_bin_t) <= 16u,
 
 typedef struct apta_internal_result_pool_control
     apta_internal_result_pool_control_t;
+typedef struct {
+    float coefficients[APTA_INTERNAL_KEY_BIN_COUNT];
+    float q1[APTA_INTERNAL_KEY_BIN_COUNT];
+    float q2[APTA_INTERNAL_KEY_BIN_COUNT];
+    float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];
+    float decimation_sum;
+    uint32_t decimation_count;
+    uint32_t window_samples;
+    uint32_t window_target_samples;
+    uint32_t completed_windows;
+    uint32_t selected_windows;
+    apta_source_frame_t evidence_first_frame;
+    apta_source_frame_t evidence_end_frame;
+    apta_source_frame_t next_source_frame;
+    uint32_t has_next_source_frame;
+    uint32_t initialized;
+} apta_internal_key_analysis_t;
+
 typedef struct apta_internal_s6_session_state
     apta_internal_s6_session_state_t;
 typedef struct apta_internal_s6_result_state
@@ -757,6 +783,14 @@ struct apta_session {
     uint64_t meter_source_s4_serial;
     uint64_t meter_mutation_serial;
     uint64_t meter_published_serial;
+
+    apta_internal_key_analysis_t key_analysis;
+    apta_key_view_t key_value;
+    apta_key_candidate_t key_candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+    uint32_t has_key;
+    uint32_t key_reserved32;
+    uint64_t key_mutation_serial;
+    uint64_t key_published_serial;
 
     apta_internal_s6_session_state_t *s6;
 };

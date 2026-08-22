@@ -58,6 +58,7 @@ int main(void)
            APTA_FEATURE_DYNAMIC_TEMPO |
            APTA_FEATURE_CONFIDENCE |
            APTA_FEATURE_GRID_LOCKING |
+           APTA_FEATURE_MUSICAL_KEY |
            APTA_FEATURE_METER_DOWNBEAT));
 
     apta_session_config_init(&session_config);

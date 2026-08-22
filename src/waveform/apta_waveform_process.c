@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_internal.h"
 #include "../core/apta_session_workspace.h"
+#include "../key/apta_key_internal.h"
 
 #include <math.h>
 #include <stdalign.h>
@@ -392,6 +393,7 @@ static apta_status_t apta_process_samples(
         }
 
         sample = node->samples[node->processed_frames + offset];
+        apta_internal_key_feed_sample(session, sample, source_frame);
         if (sample < accumulator->minimum) {
             accumulator->minimum = sample;
         }

@@ -128,6 +128,7 @@ static size_t apta_memory_waveform_recommendation(
     size_t s6_session = 0u;
     size_t s6_snapshots = 0u;
     size_t meter_snapshots = 0u;
+    size_t key_snapshots = 0u;
 
     if ((requested_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
         detail_snapshot =
@@ -151,6 +152,9 @@ static size_t apta_memory_waveform_recommendation(
     }
     if ((requested_features & APTA_FEATURE_METER_DOWNBEAT) != 0u) {
         meter_snapshots = 2u * sizeof(apta_meter_segment_t);
+    }
+    if ((requested_features & APTA_FEATURE_MUSICAL_KEY) != 0u) {
+        key_snapshots = 2u * APTA_INTERNAL_KEY_CANDIDATE_COUNT * sizeof(apta_key_candidate_t);
     }
     if ((requested_features & APTA_INTERNAL_S6_FEATURES) != 0u) {
         s6_session =
@@ -182,7 +186,8 @@ static size_t apta_memory_waveform_recommendation(
            s4_snapshots +
            s6_session +
            s6_snapshots +
-           meter_snapshots;
+           meter_snapshots +
+           key_snapshots;
 }
 
 /* C2: zero means the library default. Otherwise a power of two in range; the
@@ -220,6 +225,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_DYNAMIC_TEMPO |
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_GRID_LOCKING |
+        APTA_FEATURE_MUSICAL_KEY |
         APTA_FEATURE_METER_DOWNBEAT;
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
@@ -230,6 +236,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
          * the overview. Naming it explicitly keeps CONFIDENCE-alone rejected
          * while allowing WAVEFORM_OVERVIEW | CONFIDENCE. */
         APTA_FEATURE_CONFIDENCE |
+        APTA_FEATURE_MUSICAL_KEY |
         APTA_FEATURE_METER_DOWNBEAT |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
