@@ -17,21 +17,25 @@ spec.loader.exec_module(exporter)
 class AcceptanceResultExportTests(unittest.TestCase):
     def inspection(self) -> dict[str, object]:
         return {
+            "session_state": "completed",
             "MKEY": {
                 "tonic": 9,
                 "mode": 2,
                 "confidence": 82,
+                "state": "final",
             },
             "MTRD": {
                 "numerator": 4,
                 "denominator": 4,
                 "downbeat_frame": 12000,
                 "confidence": 91,
+                "state": "final",
             },
             "GGRD": {
                 "period_whole_frames": 24000,
                 "period_fraction_q32": 2147483648,
                 "confidence": 88,
+                "state": "final",
             },
         }
 
@@ -58,6 +62,21 @@ class AcceptanceResultExportTests(unittest.TestCase):
             value.pop(section)
             with self.assertRaises(exporter.ExportError):
                 exporter.parse_inspection("track-x", value)
+
+    def test_rejects_incomplete_session(self) -> None:
+        for state in ("active", "draining", "failed"):
+            value = self.inspection()
+            value["session_state"] = state
+            with self.assertRaises(exporter.ExportError):
+                exporter.parse_inspection("track-x", value)
+
+    def test_rejects_non_final_feature_snapshots(self) -> None:
+        for section in ("MKEY", "MTRD", "GGRD"):
+            for state in ("provisional", "stable", "failed"):
+                value = self.inspection()
+                value[section]["state"] = state
+                with self.assertRaises(exporter.ExportError):
+                    exporter.parse_inspection("track-x", value)
 
     def test_rejects_unknown_key_mode(self) -> None:
         value = self.inspection()
