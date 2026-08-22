@@ -200,12 +200,47 @@ hardware using the frozen hardware-evidence contract. Synthetic CI, host tests
 and deterministic capacity calculations are not substitutes for physical
 memory/timing/USB/audio coexistence evidence.
 
-## 10. Release readiness
+## 10. Release readiness and pre-freeze snapshot
 
 Only after the tempo/grid, confidence, final DJ corpus and physical ESP32-P4
 evidence blockers are closed may release readiness become `freeze-eligible`.
-That state still does not automatically release 1.1.
+That state still does not automatically release 1.1 and must retain the
+`1.0.1` development package identity with no `v1.1.0` tag.
 
-Run the final API/ABI/wire/package matrix against the exact release candidate,
-then deliberately update version metadata and create the `v1.1.0` tag/release.
-Until then, `VERSION` remains `1.0.1` and APTA 1.0 remains the stable authority.
+Verify the exact clean checkout first:
+
+```sh
+REV=$(git rev-parse HEAD)
+python3 release/check_1_1_readiness.py \
+  --root . \
+  --manifest release/1.1-readiness.json \
+  --expect freeze-eligible \
+  --output build/release/apta-1.1-readiness.json
+```
+
+Then generate the pre-freeze snapshot **before any version bump or release
+finalization changes**:
+
+```sh
+python3 release/generate_1_1_freeze_snapshot.py \
+  --root . \
+  --source-revision "$REV" \
+  --output build/release/apta-1.1-freeze-snapshot.json
+```
+
+The generator fails unless readiness passes as `freeze-eligible`, the tracked
+worktree is clean, the checkout exactly matches `REV`, and every required
+evidence/API/ABI/wire input is committed and byte-identical to HEAD. The
+snapshot binds the readiness manifest, all four external evidence files and all
+policy-required freeze inputs with SHA-256 and Git blob SHA-1.
+
+Preserve that snapshot as release-freeze evidence. It is **not** a release
+manifest, does not bump any version, and does not create a tag. Version/API/spec
+finalization remains a deliberate subsequent commit whose exact policy must be
+reviewed before it is performed.
+
+After that deliberate finalization, rerun the full native/shared/ILP32/
+ESP-IDF/P4/fuzz/container/package matrix against the exact release candidate.
+Only a candidate that passes that complete matrix may proceed to the final
+`v1.1.0` tag/release. Until then, `VERSION` remains `1.0.1` and APTA 1.0 remains
+the stable authority.
