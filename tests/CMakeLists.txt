@@ -63,6 +63,8 @@ apta_add_c_test(
     apta_result_builder_review_regressions
     apta.api.result_builder_review_regressions
     unit/result_builder_review_regressions.c)
+target_link_libraries(
+    apta_result_builder_review_regressions PRIVATE apta_c11_atomics)
 apta_add_c_test(
     apta_result_model_1_1
     apta.api.result_model_1_1
@@ -139,6 +141,7 @@ apta_add_c_test(apta_waveform_3band apta.waveform.three_band unit/waveform_3band
 apta_add_c_test(apta_waveform_resolution apta.waveform.resolution unit/waveform_resolution.c)
 apta_add_c_test(apta_session_seeding apta.session.seeding unit/session_seeding.c)
 apta_add_c_test(apta_s4_relations apta.s4.relations unit/s4_relations.c)
+target_link_libraries(apta_s4_relations PRIVATE apta_c11_atomics)
 target_include_directories(apta_s4_relations PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 apta_add_c_test(apta_s4_serialization apta.serialization.s4 unit/s4_serialization.c)
 target_link_libraries(apta_s4_serialization PRIVATE apta_c11_atomics)
@@ -182,6 +185,7 @@ apta_add_c_test(
     apta_dj_sections_state_scale
     apta.serialization.dj_sections_state_scale
     unit/dj_sections_state_scale.c)
+target_link_libraries(apta_dj_sections_state_scale PRIVATE apta_c11_atomics)
 set_tests_properties(
     apta.serialization.dj_sections_state_scale
     PROPERTIES TIMEOUT 15)

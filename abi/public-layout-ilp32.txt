@@ -454,7 +454,7 @@ type	apta_frame_period_t	16	4
 field	apta_frame_period_t	whole_frames	0
 field	apta_frame_period_t	fraction_q32	8
 field	apta_frame_period_t	reserved	12
-type	apta_result_builder_options_t	104	4
+type	apta_result_builder_options_t	100	4
 field	apta_result_builder_options_t	struct_size	0
 field	apta_result_builder_options_t	api_version	4
 field	apta_result_builder_options_t	flags	8
@@ -469,8 +469,8 @@ field	apta_result_builder_options_t	maximum_key_candidates	40
 field	apta_result_builder_options_t	maximum_meter_segments	44
 field	apta_result_builder_options_t	maximum_quality_records	48
 field	apta_result_builder_options_t	reserved32	52
-field	apta_result_builder_options_t	maximum_allocation_bytes	72
-field	apta_result_builder_options_t	reserved64	80
+field	apta_result_builder_options_t	maximum_allocation_bytes	68
+field	apta_result_builder_options_t	reserved64	76
 type	apta_result_builder_info_t	72	4
 field	apta_result_builder_info_t	struct_size	0
 field	apta_result_builder_info_t	api_version	4
