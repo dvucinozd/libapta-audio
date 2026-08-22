@@ -751,6 +751,13 @@ struct apta_session {
     apta_internal_s4_profile_t s4_profile;
 #endif
 
+    apta_meter_segment_t meter_segment;
+    uint32_t has_meter;
+    uint32_t meter_reserved32;
+    uint64_t meter_source_s4_serial;
+    uint64_t meter_mutation_serial;
+    uint64_t meter_published_serial;
+
     apta_internal_s6_session_state_t *s6;
 };
 

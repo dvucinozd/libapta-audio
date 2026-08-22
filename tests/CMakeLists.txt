@@ -166,6 +166,14 @@ target_link_libraries(apta_s6_serialization PRIVATE apta_c11_atomics)
 target_include_directories(apta_s6_serialization PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
 apta_add_c_test(apta_s6_allocation_failure apta.serialization.s6_allocation_failure unit/s6_allocation_failure.c)
 apta_add_c_test(
+    apta_meter_downbeat
+    apta.dj.meter_downbeat
+    unit/meter_downbeat.c)
+target_link_libraries(apta_meter_downbeat PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_meter_downbeat
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/beatgrid)
+apta_add_c_test(
     apta_dj_sections_roundtrip
     apta.serialization.dj_sections_roundtrip
     unit/dj_sections_roundtrip.c)

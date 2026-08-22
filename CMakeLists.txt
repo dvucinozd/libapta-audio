@@ -294,6 +294,21 @@ set_source_files_properties(
         COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_internal_waveform_process=apta_internal_waveform_process_s6_base")
 
 set_source_files_properties(
+    src/beatgrid/apta_s6_process.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_internal_waveform_process=apta_internal_waveform_process_meter_base;apta_internal_analysis_pending=apta_internal_analysis_pending_meter_base")
+
+set_source_files_properties(
+    src/waveform/apta_waveform_snapshot_combined.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_internal_waveform_build_snapshot=apta_internal_waveform_build_snapshot_meter_base")
+
+set_source_files_properties(
+    src/beatgrid/apta_s6_pool_snapshot.c
+    PROPERTIES
+        COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_internal_result_pool_create_session_result=apta_internal_result_pool_create_session_result_meter_base")
+
+set_source_files_properties(
     src/waveform/apta_waveform_snapshot.c
     PROPERTIES
         COMPILE_DEFINITIONS "APTA_INTERNAL_LAYER=1;apta_internal_waveform_build_snapshot=apta_internal_waveform_build_overview_snapshot;apta_internal_waveform_cleanup_session=apta_internal_waveform_cleanup_session_base;apta_internal_waveform_cleanup_result=apta_internal_waveform_cleanup_result_base")
@@ -316,6 +331,10 @@ set(
         src/beatgrid/apta_s6_pool_snapshot.c
         src/beatgrid/apta_s6_process.c
         src/beatgrid/apta_s6_session_guard.c
+        src/beatgrid/apta_meter.c
+        src/beatgrid/apta_meter_process.c
+        src/beatgrid/apta_meter_snapshot.c
+        src/beatgrid/apta_meter_pool_snapshot.c
         src/core/apta_config.c
         src/core/apta_context.c
         src/core/apta_initializers.c

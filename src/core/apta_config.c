@@ -127,6 +127,7 @@ static size_t apta_memory_waveform_recommendation(
     size_t s4_snapshots = 0u;
     size_t s6_session = 0u;
     size_t s6_snapshots = 0u;
+    size_t meter_snapshots = 0u;
 
     if ((requested_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
         detail_snapshot =
@@ -147,6 +148,9 @@ static size_t apta_memory_waveform_recommendation(
                       sizeof(apta_tempo_candidate_t) +
                   sizeof(apta_frame_range_t) +
                   sizeof(apta_grid_segment_t));
+    }
+    if ((requested_features & APTA_FEATURE_METER_DOWNBEAT) != 0u) {
+        meter_snapshots = 2u * sizeof(apta_meter_segment_t);
     }
     if ((requested_features & APTA_INTERNAL_S6_FEATURES) != 0u) {
         s6_session =
@@ -177,7 +181,8 @@ static size_t apta_memory_waveform_recommendation(
            s4_session +
            s4_snapshots +
            s6_session +
-           s6_snapshots;
+           s6_snapshots +
+           meter_snapshots;
 }
 
 /* C2: zero means the library default. Otherwise a power of two in range; the
@@ -214,7 +219,8 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_GLOBAL_BEATGRID |
         APTA_FEATURE_DYNAMIC_TEMPO |
         APTA_FEATURE_CONFIDENCE |
-        APTA_FEATURE_GRID_LOCKING;
+        APTA_FEATURE_GRID_LOCKING |
+        APTA_FEATURE_METER_DOWNBEAT;
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
         /* C1: bands qualify the overview, so they require it, like DETAIL. */
@@ -224,6 +230,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
          * the overview. Naming it explicitly keeps CONFIDENCE-alone rejected
          * while allowing WAVEFORM_OVERVIEW | CONFIDENCE. */
         APTA_FEATURE_CONFIDENCE |
+        APTA_FEATURE_METER_DOWNBEAT |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
     apta_internal_result_pool_layout_t pool_layout;
@@ -285,6 +292,10 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
     if ((config->requested_features & APTA_FEATURE_GRID_LOCKING) != 0u &&
         (config->requested_features &
          APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if ((config->requested_features & APTA_FEATURE_METER_DOWNBEAT) != 0u &&
+        (config->requested_features & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
 
