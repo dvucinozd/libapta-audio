@@ -1,0 +1,52 @@
+name: Complete musical key contract and tests
+
+on:
+  push:
+    branches: [dev/1.1-key]
+    paths: [.github/workflows/_patch-key-contract-tests.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: dev/1.1-key
+      - name: Patch contract and tests
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def rep(path, old, new, count=1):
+              p = Path(path); s = p.read_text(); n = s.count(old)
+              if n != count:
+                  raise SystemExit(f'{path}: expected {count}, found {n}: {old[:90]!r}')
+              p.write_text(s.replace(old, new, count))
+
+          rep('src/core/apta_session_detail_contract.c',
+              '        APTA_FEATURE_CONFIDENCE |\n        APTA_FEATURE_METER_DOWNBEAT |\n',
+              '        APTA_FEATURE_CONFIDENCE |\n        APTA_FEATURE_MUSICAL_KEY |\n        APTA_FEATURE_METER_DOWNBEAT |\n')
+          rep('src/core/apta_session_detail_contract.c',
+              '          APTA_FEATURE_GLOBAL_BEATGRID |\n          APTA_FEATURE_METER_DOWNBEAT)) == 0u) {\n',
+              '          APTA_FEATURE_GLOBAL_BEATGRID |\n          APTA_FEATURE_MUSICAL_KEY |\n          APTA_FEATURE_METER_DOWNBEAT)) == 0u) {\n')
+          rep('src/core/apta_session_detail_contract.c',
+              '         (APTA_INTERNAL_S4_FEATURES | APTA_INTERNAL_S6_FEATURES |\n          APTA_FEATURE_METER_DOWNBEAT)) != 0u) {\n',
+              '         (APTA_INTERNAL_S4_FEATURES | APTA_INTERNAL_S6_FEATURES |\n          APTA_FEATURE_MUSICAL_KEY | APTA_FEATURE_METER_DOWNBEAT)) != 0u) {\n', 2)
+
+          rep('tests/CMakeLists.txt',
+              'target_include_directories(\n    apta_meter_downbeat\n    PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/beatgrid)\n',
+              'target_include_directories(\n    apta_meter_downbeat\n    PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/beatgrid)\n'
+              'apta_add_c_test(\n    apta_musical_key\n    apta.dj.musical_key\n    unit/musical_key.c)\n'
+              'target_link_libraries(apta_musical_key PRIVATE apta_c11_atomics)\n'
+              'target_include_directories(\n    apta_musical_key\n    PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/key)\n')
+      - name: Commit
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/core/apta_session_detail_contract.c tests/CMakeLists.txt
+          git commit -m "Complete musical key contract integration"
+          git push origin HEAD:dev/1.1-key
