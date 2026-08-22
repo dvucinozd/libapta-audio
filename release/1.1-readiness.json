@@ -29,8 +29,13 @@
     "docs/api/APTA-API-1.1-DEVELOPMENT.md",
     "specification/APTA-1.1-DJ-SECTIONS.md",
     "docs/file-format/APTA-STREAMING-IO-1.1.md",
+    "abi/public-header-deltas-1.1.sha256",
     "abi/public-symbols-1.1.txt",
+    "abi/public-symbols-1.1.map",
+    "abi/public-symbols-1.1.def",
     "abi/public-layout-ilp32.txt",
-    "abi/public-layout-lp64.txt"
+    "abi/public-layout-lp64.txt",
+    "abi/public-layout-llp64.txt",
+    "abi/public-layout-p32a64.txt"
   ]
 }
