@@ -56,6 +56,14 @@ void APTA_CALL apta_result_info_init(apta_result_info_t *info)
     }
 }
 
+void APTA_CALL apta_result_provenance_init(
+    apta_result_provenance_t *provenance)
+{
+    if (provenance != NULL) {
+        APTA_INIT_STRUCT(provenance);
+    }
+}
+
 void APTA_CALL apta_diagnostic_view_init(apta_diagnostic_view_t *view)
 {
     if (view != NULL) {
