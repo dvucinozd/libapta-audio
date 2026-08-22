@@ -111,6 +111,12 @@ def parse_inspection(track: str, value: dict[str, Any]) -> dict[str, str | int]:
     if not isinstance(grid, dict):
         raise ExportError("required global/local beatgrid is unavailable")
 
+    if value.get("session_state") != "completed":
+        raise ExportError("session_state must be completed")
+    for name, section in (("MKEY", key), ("MTRD", meter), ("beatgrid", grid)):
+        if section.get("state") != "final":
+            raise ExportError(f"{name} state must be final")
+
     try:
         tonic = int(key["tonic"])
         mode_value = int(key["mode"])
