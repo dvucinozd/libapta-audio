@@ -1,15 +1,16 @@
 # APTA 1.1 development status
 
 - **Branch:** `1.1.0`
-- **Current implementation head:** `8d0d46c55ab0de146596d939d10854111f21d1ab`
+- **Current implementation head:** `d17c3671ff5318d58847643537d7e0da7667e262`
 - **Release status:** development; no `v1.1.0` tag or release claim
 
 ## Current boundary
 
-The reusable 1.1 infrastructure and the native meter/key implementation are now
-in place. The remaining blockers are evidence-driven rather than missing core
-feature plumbing: fresh corpus qualification, confidence-model fitting/holdout,
-physical ESP32-P4 measurements and the final release freeze.
+The reusable 1.1 infrastructure, native meter/key implementation and the complete
+desktop qualification path are now in place. The remaining blockers are
+evidence-driven rather than missing core feature plumbing: fresh corpus
+qualification, confidence-model fitting/holdout, physical ESP32-P4 measurements
+and the final release freeze.
 
 | Work item | Status | Delivered boundary |
 |---|---|---|
@@ -19,11 +20,12 @@ physical ESP32-P4 measurements and the final release freeze.
 | 4. Streaming container I/O | Complete | Output/input callbacks, bounded serialization, selective parsing, caller scratch and buffer equivalence |
 | 5. Tempo/grid ensemble implementation | Candidate complete | Relation-aware S6 proposal + S4 refinement/grid-fit gate implemented; fresh-corpus acceptance remains open |
 | 6. Confidence calibration contract | Complete | Deterministic isotonic fitting/evaluation protocol and data-separation gate; no production calibrated model yet |
-| 7. Native meter/downbeat | Complete implementation | Bounded 3/4 vs 4/4 meter/downbeat analysis, immutable snapshots and cooperative scheduler integration |
-| 8. Native musical key | Complete implementation | Bounded global major/minor key analysis, ranked candidates, immutable snapshots and ESP-IDF packaging |
+| 7. Native meter/downbeat | Complete implementation | Bounded 3/4 vs 4/4 meter/downbeat analysis, exact refined-grid downbeat binding, immutable snapshots and cooperative scheduler integration |
+| 8. Native musical key | Complete implementation | Bounded global major/minor key analysis, ranked candidates with strict encoded ordering, immutable snapshots and ESP-IDF packaging |
 | 9. Progressive publication | Complete implementation | Provisional -> stable -> final generations with retained-result immutability verified end to end |
 | 10. ESP32-P4 CI/capacity profile | Complete CI/layout evidence | ESP-IDF 6.0.2 `esp32p4` firmware build plus deterministic 30-minute bounded-capacity probe |
 | 11. Final DJ acceptance contract | Complete | Frozen fresh-corpus evaluator and thresholds for key, meter, downbeat, grid and high-confidence safety |
+| 12. Qualification execution path | Complete infrastructure | Privacy-preserving corpus freeze, native `apta-analyze --features all`, FINAL-only result export and frozen acceptance scoring |
 
 The public development guide is
 [`../api/APTA-API-1.1-DEVELOPMENT.md`](../api/APTA-API-1.1-DEVELOPMENT.md), the
@@ -33,6 +35,8 @@ streaming behavior is
 [`../file-format/APTA-STREAMING-IO-1.1.md`](../file-format/APTA-STREAMING-IO-1.1.md),
 and final corpus scoring is frozen in
 [`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md).
+The operational qualification sequence is documented in
+[`APTA-1.1-QUALIFICATION-RUNBOOK.md`](APTA-1.1-QUALIFICATION-RUNBOOK.md).
 
 ## Implemented compatibility guarantees
 
@@ -43,6 +47,9 @@ and final corpus scoring is frozen in
 - Canonical output is deterministic and reserved bytes are zero.
 - Builder and parser enforce range, ordering, count, cross-feature and aggregate
   allocation limits before publishing an immutable result.
+- MTRD integer downbeats bind to the same grid **whole-frame component and
+  ordinal**. A non-zero Q32 grid remainder is valid because MTRD does not encode
+  fractional frame bits.
 - Result pointers retain the established result-lifetime ownership model.
 - Streaming and buffer writers produce byte-identical canonical output for the
   same result and options.
@@ -76,15 +83,47 @@ second ownership model or unbounded result storage. Both publish through the
 same immutable result generations as the established waveform/tempo/grid
 features.
 
-Musical key passed Linux static/shared, Windows shared-ABI/interchange, ILP32,
-sanitizer/fuzz/security, ESP-IDF 5.5.4/6.0.2 and standalone ESP-IDF component
-validation before integration. The progressive publication regression retains a
-PROVISIONAL result while later analysis publishes STABLE and FINAL generations,
-then verifies all retained generations remain readable and unchanged even after
-session destruction.
+The native meter estimator may use quantized onset bins when scoring candidate
+meter phases, but publication resolves the selected ordinal through the exact
+refined S4 grid Q32 period and stores that beat's whole-frame component in
+MTRD. Builder, writer and reader cross-validation use the same whole-frame +
+ordinal contract for explicit, segmented and hybrid grids.
 
-These tests establish lifecycle and boundedness semantics. They are not a claim
-that key or downbeat accuracy has passed the final corpus thresholds.
+Musical-key candidate ranking is performed at higher precision, then its
+serialized `uint16_t` scores are made strictly descending so quantization cannot
+turn a valid native result into an unserializable MKEY candidate list.
+
+Musical key and meter passed Linux static/shared, Windows shared-ABI/interchange,
+ILP32, sanitizer/fuzz/security, ESP-IDF 5.5.4/6.0.2, standalone ESP-IDF component
+and ESP32-P4 qualification before the desktop `--features all` path was
+integrated. The progressive publication regression retains a PROVISIONAL result
+while later analysis publishes STABLE and FINAL generations, then verifies all
+retained generations remain readable and unchanged even after session
+destruction.
+
+These tests establish lifecycle, serialization and boundedness semantics. They
+are not a claim that key or downbeat accuracy has passed the final corpus
+thresholds.
+
+## Qualification execution path
+
+The repository now contains all deterministic tooling needed to execute the
+fresh-corpus gates without committing track titles, artists or local paths:
+
+1. freeze local staging data into opaque track IDs and a SHA-256-bound labels
+   manifest;
+2. analyze each source with the native desktop analyzer using all supported DJ
+   features;
+3. inspect the generated `.apta` containers and export the exact frozen
+   acceptance CSV schema;
+4. reject any export whose session is not `completed` or whose key, meter or
+   selected beatgrid snapshot is not `final`;
+5. run the pre-registered DJ acceptance evaluator against the frozen manifest
+   and labels hash.
+
+This closes the software-path gap between real audio input and the acceptance
+evaluator. It does **not** supply the fresh labelled audio evidence itself and
+no fresh corpus has been scored yet.
 
 ## ESP32-P4 qualification evidence
 
@@ -137,8 +176,8 @@ This freezes the measurement machinery; no fresh corpus has been scored yet.
    untouched holdout under the frozen calibration protocol; only then integrate
    a production `APTA_FEATURE_CALIBRATED_QUALITY` model.
 3. Assemble and manually verify the independent >=48-track final DJ corpus,
-   freeze its manifest/labels hash, run the analyzer and pass every final
-   key/meter/downbeat/grid/high-confidence gate.
+   freeze its manifest/labels hash, run the now-complete native qualification
+   path and pass every final key/meter/downbeat/grid/high-confidence gate.
 4. Collect physical ESP32-P4 memory/timing evidence when hardware is available,
    including actual internal/PSRAM placement and workload interaction relevant
    to the intended device.
