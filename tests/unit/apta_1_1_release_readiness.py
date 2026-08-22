@@ -25,8 +25,10 @@ class ReadinessTests(unittest.TestCase):
         (root / "include/apta/apta_version.h").write_text(
             f'#define APTA_PACKAGE_VERSION_STRING "{version}"\n', encoding="utf-8"
         )
-        for relative in ("api.md", "wire.md"):
-            (root / relative).write_text("frozen\n", encoding="utf-8")
+        for relative in readiness.POLICY_REQUIRED_FREEZE_PATHS:
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("frozen\n", encoding="utf-8")
         return root
 
     def setUp(self) -> None:
@@ -37,7 +39,7 @@ class ReadinessTests(unittest.TestCase):
             "development_version": "1.0.1",
             "release_version": "1.1.0",
             "release_tag": "v1.1.0",
-            "required_freeze_paths": ["api.md", "wire.md"],
+            "required_freeze_paths": list(readiness.POLICY_REQUIRED_FREEZE_PATHS),
             "blockers": [
                 {"id": "fresh-corpus", "status": "open", "evidence": ["evidence/fresh.json"]},
                 {"id": "hardware", "status": "open", "evidence": ["evidence/hardware.json"]},
@@ -83,11 +85,44 @@ class ReadinessTests(unittest.TestCase):
         for blocker in manifest["blockers"]:
             blocker["status"] = "closed"
             relative = blocker["evidence"][0]
-            (self.root / relative).write_text("{}\n", encoding="utf-8")
+            path = self.root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("{}\n", encoding="utf-8")
         report = readiness.evaluate(self.root, manifest)
         self.assertEqual(report["status"], "pass")
         self.assertEqual(report["phase"], "freeze-eligible")
         self.assertEqual(report["open_blocker_count"], 0)
+
+    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    def test_manifest_cannot_drop_policy_required_abi_surface(self, _tags: mock.Mock) -> None:
+        manifest = json.loads(json.dumps(self.manifest))
+        manifest["required_freeze_paths"].remove("abi/public-layout-llp64.txt")
+        report = readiness.evaluate(self.root, manifest)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(
+            any(
+                "policy-required freeze input omitted" in item
+                and "public-layout-llp64.txt" in item
+                for item in report["failures"]
+            )
+        )
+
+    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    def test_required_freeze_path_must_stay_inside_repository(self, _tags: mock.Mock) -> None:
+        manifest = json.loads(json.dumps(self.manifest))
+        manifest["required_freeze_paths"].append("../outside.txt")
+        report = readiness.evaluate(self.root, manifest)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("escapes repository" in item for item in report["failures"]))
+
+    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    def test_closed_evidence_path_must_stay_inside_repository(self, _tags: mock.Mock) -> None:
+        manifest = json.loads(json.dumps(self.manifest))
+        manifest["blockers"][0]["status"] = "closed"
+        manifest["blockers"][0]["evidence"] = ["../outside.json"]
+        report = readiness.evaluate(self.root, manifest)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("evidence path escapes repository" in item for item in report["failures"]))
 
 
 if __name__ == "__main__":
