@@ -40,6 +40,23 @@ static uint32_t apta_s4_ensemble_lag_from_tempo(
     return (uint32_t)((numerator + denominator / 2u) / denominator);
 }
 
+static uint32_t apta_s4_ensemble_tempo_from_lag(
+    const apta_session_t *session,
+    uint32_t lag)
+{
+    uint64_t numerator;
+    uint64_t denominator;
+
+    if (session == NULL || lag == 0u) {
+        return 0u;
+    }
+    numerator = (uint64_t)session->config.source_sample_rate * UINT64_C(60000);
+    denominator = (uint64_t)lag * APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
+    return denominator != 0u
+               ? (uint32_t)((numerator + denominator / 2u) / denominator)
+               : 0u;
+}
+
 static void apta_s4_ensemble_period_from_tempo(
     const apta_session_t *session,
     uint32_t tempo_millibpm,
@@ -231,6 +248,7 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
     uint32_t previous_selected_tempo,
     uint32_t previous_candidate_set_id)
 {
+    uint32_t s6_tempo;
     uint32_t proposed_tempo;
     uint32_t selected_tempo;
     uint32_t proposed_lag;
@@ -243,6 +261,7 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
     uint32_t existing = UINT32_MAX;
     float proposed_fit;
     float selected_fit;
+    float proposed_offset;
     float difference;
     apta_tempo_relation_t relation;
     apta_tempo_candidate_t promoted;
@@ -255,12 +274,59 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
         return APTA_STATUS_OK;
     }
 
-    proposed_tempo = session->s6_nominal_tempo_millibpm;
+    s6_tempo = session->s6_nominal_tempo_millibpm;
     selected_tempo = session->tempo_value.tempo_millibpm;
-    if (selected_tempo == 0u || proposed_tempo == 0u) {
+    if (selected_tempo == 0u) {
         return APTA_STATUS_OK;
     }
 
+    difference = (float)s6_tempo - (float)selected_tempo;
+    if (difference < 0.0f) {
+        difference = -difference;
+    }
+    if (difference / (float)s6_tempo <=
+        APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
+        return APTA_STATUS_OK;
+    }
+
+    span = (uint32_t)(session->s4_refresh_evidence_end -
+                      session->s4_refresh_evidence_first);
+    proposed_lag = apta_s4_ensemble_lag_from_tempo(session, s6_tempo);
+    selected_lag = apta_s4_ensemble_lag_from_tempo(session, selected_tempo);
+    if (span == 0u ||
+        proposed_lag < session->s4_refresh_minimum_lag ||
+        proposed_lag > session->s4_refresh_maximum_lag ||
+        selected_lag < session->s4_refresh_minimum_lag ||
+        selected_lag > session->s4_refresh_maximum_lag ||
+        proposed_lag >= span || selected_lag >= span) {
+        return APTA_STATUS_OK;
+    }
+
+    /* S6 chooses the metrical region; S4 remains the precision authority.
+     * Refine the S4 lag on the fine onset evidence instead of publishing the
+     * coarser S6 nominal value directly. */
+    proposed_offset = apta_internal_refine_lag(
+        session->onset_flux,
+        span,
+        proposed_lag,
+        APTA_INTERNAL_TEMPO_REFINE_MAX_BEATS);
+    proposed_tempo = apta_internal_tempo_with_offset(
+        apta_s4_ensemble_tempo_from_lag(session, proposed_lag),
+        proposed_lag,
+        proposed_offset);
+    if (proposed_tempo < APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
+        proposed_tempo > APTA_REFERENCE_TEMPO_MAX_MILLIBPM) {
+        return APTA_STATUS_OK;
+    }
+
+    difference = (float)proposed_tempo - (float)s6_tempo;
+    if (difference < 0.0f) {
+        difference = -difference;
+    }
+    if (difference / (float)s6_tempo >
+        APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
+        return APTA_STATUS_OK;
+    }
     difference = (float)proposed_tempo - (float)selected_tempo;
     if (difference < 0.0f) {
         difference = -difference;
@@ -272,21 +338,6 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
 
     relation = apta_internal_tempo_relation(selected_tempo, proposed_tempo);
     if (relation == APTA_TEMPO_RELATION_INDEPENDENT) {
-        return APTA_STATUS_OK;
-    }
-
-    proposed_lag = apta_s4_ensemble_lag_from_tempo(session, proposed_tempo);
-    selected_lag = apta_s4_ensemble_lag_from_tempo(session, selected_tempo);
-    if (proposed_lag < session->s4_refresh_minimum_lag ||
-        proposed_lag > session->s4_refresh_maximum_lag ||
-        selected_lag < session->s4_refresh_minimum_lag ||
-        selected_lag > session->s4_refresh_maximum_lag) {
-        return APTA_STATUS_OK;
-    }
-
-    span = (uint32_t)(session->s4_refresh_evidence_end -
-                      session->s4_refresh_evidence_first);
-    if (span == 0u || proposed_lag >= span || selected_lag >= span) {
         return APTA_STATUS_OK;
     }
 
@@ -315,6 +366,11 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
 
     if (existing != UINT32_MAX) {
         promoted = session->tempo_candidates[existing];
+        if (normalized_score > promoted.score) {
+            promoted.score = (uint16_t)normalized_score;
+            promoted.confidence = (apta_confidence_value_t)(
+                25u + (normalized_score * 70u) / 65535u);
+        }
         for (entry = existing; entry > 0u; --entry) {
             session->tempo_candidates[entry] =
                 session->tempo_candidates[entry - 1u];
