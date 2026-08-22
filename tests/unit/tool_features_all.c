@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 /*
- * `--features all` must mean every feature a context can be asked for.
+ * `--features all` must mean every native feature the build can analyze.
  *
- * This has been wrong twice. The token originally stopped at the local grid,
- * which left the global beatgrid and dynamic tempo with no CLI path at all --
- * S6 had never run over a real recording because nothing could request it. The
- * fix for that spelled the set out a second time and missed the three-band
- * overview and grid locking.
- *
- * Both mistakes look identical in review: a list of feature bits that reads as
- * complete. So the test does not check a list. It asks a context what it
- * supports and requires the parser to produce exactly that.
+ * The authority is a context created with requested_capabilities == 0, because
+ * that asks the library to expose its complete available capability set. The
+ * test must not seed the context with apta_tool_all_features(): doing so makes
+ * the comparison circular and can hide a newly implemented analyzer from the
+ * shipped CLI.
  */
 #include <stdio.h>
 
@@ -34,10 +30,9 @@ int main(void)
     apta_feature_mask_t parsed = 0u;
     apta_feature_mask_t supported;
 
-    /* Asking for everything the build offers. A context reports back what it
-     * can actually serve, which is the authority this test compares against. */
+    /* Zero requested capabilities means the full native build capability set. */
     apta_context_config_init(&config);
-    config.requested_capabilities = apta_tool_all_features();
+    config.requested_capabilities = 0u;
     CHECK(apta_context_create(&config, &context) == APTA_STATUS_OK);
     supported = apta_context_get_capabilities(context);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
@@ -49,24 +44,25 @@ int main(void)
         const apta_feature_mask_t extra = parsed & ~supported;
 
         fprintf(stderr,
-                "--features all does not match what a context supports.\n"
+                "--features all does not match what the build supports.\n"
                 "  parsed    0x%08lx\n"
                 "  supported 0x%08lx\n"
                 "  missing from all  0x%08lx\n"
-                "  requested but unsupported 0x%08lx\n"
-                "A feature the CLI cannot request is a feature no tool can\n"
-                "measure on real input.\n",
+                "  requested but unsupported 0x%08lx\n",
                 (unsigned long)parsed, (unsigned long)supported,
                 (unsigned long)missing, (unsigned long)extra);
         return 1;
     }
 
-    /* Each named token must also be accepted, or a feature can be in `all`
-     * while still having no way to be requested on its own. */
+    CHECK((parsed & APTA_FEATURE_MUSICAL_KEY) != 0u);
+    CHECK((parsed & APTA_FEATURE_METER_DOWNBEAT) != 0u);
+
+    /* Each named token must be accepted and expand its dependencies into a
+     * session-valid feature set. */
     {
         static const char *const tokens[] = {
             "waveform", "detail", "3band", "bpm", "beatgrid",
-            "global", "dynamic", "locking", "all"
+            "global", "dynamic", "locking", "key", "meter", "all"
         };
         size_t i;
 
@@ -81,9 +77,6 @@ int main(void)
             }
             CHECK(one != 0u);
 
-            /* And what it produces has to satisfy the dependency rules, so a
-             * token cannot request a feature without what that feature needs
-             * to work. */
             apta_session_config_init(&session_config);
             session_config.source_sample_rate = 44100u;
             session_config.channel_count = 2u;
@@ -93,7 +86,7 @@ int main(void)
             session_config.requested_features = one;
 
             apta_context_config_init(&config);
-            config.requested_capabilities = apta_tool_all_features();
+            config.requested_capabilities = supported;
             CHECK(apta_context_create(&config, &context) == APTA_STATUS_OK);
             {
                 apta_session_t *session = NULL;
@@ -114,10 +107,7 @@ int main(void)
         }
     }
 
-    /* Every feature must also have a printed name. Without one the tools drop
-     * it from the feature list and a reader is told the feature is absent
-     * while its section is sitting in the file -- which is what happened to
-     * the global grid, dynamic tempo and the three-band overview. */
+    /* Every native supported feature must have a printable name. */
     {
         apta_feature_mask_t bit;
 
