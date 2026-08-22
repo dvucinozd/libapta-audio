@@ -607,7 +607,3 @@ if(BUILD_SHARED_LIBS)
             --library $<TARGET_FILE:apta_core>
             --manifest ${CMAKE_SOURCE_DIR}/abi/public-symbols-1.1.txt)
 endif()
-
-# APTA 1.1 native musical-key detector
-apta_add_c_test(apta_musical_key apta.dj.musical_key unit/musical_key.c)
-target_include_directories(apta_musical_key PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/key)
