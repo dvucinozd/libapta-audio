@@ -1,0 +1,36 @@
+{
+  "schema": "apta-1.1-release-readiness-1",
+  "development_version": "1.0.1",
+  "release_version": "1.1.0",
+  "release_tag": "v1.1.0",
+  "blockers": [
+    {
+      "id": "tempo-grid-fresh-corpus",
+      "status": "open",
+      "evidence": ["evidence/1.1/tempo-ensemble-acceptance.json"]
+    },
+    {
+      "id": "confidence-calibration-holdout",
+      "status": "open",
+      "evidence": ["evidence/1.1/confidence-calibration-holdout.json"]
+    },
+    {
+      "id": "final-dj-corpus",
+      "status": "open",
+      "evidence": ["evidence/1.1/dj-acceptance-report.json"]
+    },
+    {
+      "id": "esp32-p4-hardware",
+      "status": "open",
+      "evidence": ["evidence/1.1/esp32-p4-hardware.json"]
+    }
+  ],
+  "required_freeze_paths": [
+    "docs/api/APTA-API-1.1-DEVELOPMENT.md",
+    "specification/APTA-1.1-DJ-SECTIONS.md",
+    "docs/file-format/APTA-STREAMING-IO-1.1.md",
+    "abi/public-symbols-1.1.txt",
+    "abi/public-layout-ilp32.txt",
+    "abi/public-layout-lp64.txt"
+  ]
+}
