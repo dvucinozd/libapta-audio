@@ -13,6 +13,19 @@ from typing import Any
 
 SCHEMA = "apta-1.1-release-readiness-1"
 REPORT_SCHEMA = "apta-1.1-release-readiness-report-1"
+POLICY_DEVELOPMENT_VERSION = "1.0.1"
+POLICY_RELEASE_VERSION = "1.1.0"
+POLICY_RELEASE_TAG = "v1.1.0"
+
+# Required external evidence cannot be removed or redirected by editing only the
+# manifest. Evidence contents are validated by their dedicated frozen protocols;
+# readiness intentionally requires the reviewed files to exist and be non-empty.
+POLICY_REQUIRED_BLOCKERS = {
+    "tempo-grid-fresh-corpus": ("evidence/1.1/tempo-ensemble-acceptance.json",),
+    "confidence-calibration-holdout": ("evidence/1.1/confidence-calibration-holdout.json",),
+    "final-dj-corpus": ("evidence/1.1/dj-acceptance-report.json",),
+    "esp32-p4-hardware": ("evidence/1.1/esp32-p4-hardware.json",),
+}
 
 # These inputs define the minimum release-freeze surface. Keeping this inventory
 # in code as well as in the manifest prevents a later JSON edit from silently
@@ -45,17 +58,16 @@ def define_value(text: str, name: str) -> str | None:
 
 
 def repository_tags(root: Path) -> set[str]:
-    try:
-        output = subprocess.run(
-            ["git", "tag", "--list"],
-            cwd=root,
-            check=True,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        ).stdout
-    except (OSError, subprocess.CalledProcessError):
-        return set()
+    # Do not turn a Git failure into an empty tag set: this is release policy and
+    # inability to inspect refs must fail closed at the caller.
+    output = subprocess.run(
+        ["git", "tag", "--list"],
+        cwd=root,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).stdout
     return {line.strip() for line in output.splitlines() if line.strip()}
 
 
@@ -77,12 +89,19 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     blockers = manifest.get("blockers")
     if manifest.get("schema") != SCHEMA:
         failures.append("unexpected manifest schema")
+    if manifest.get("development_version") != POLICY_DEVELOPMENT_VERSION:
+        failures.append("development_version does not match release-readiness policy")
+    if manifest.get("release_version") != POLICY_RELEASE_VERSION:
+        failures.append("release_version does not match release-readiness policy")
+    if manifest.get("release_tag") != POLICY_RELEASE_TAG:
+        failures.append("release_tag does not match release-readiness policy")
     if not isinstance(blockers, list) or not blockers:
         failures.append("blockers must be a non-empty array")
         blockers = []
 
     ids: list[str] = []
     open_ids: list[str] = []
+    blocker_by_id: dict[str, dict[str, Any]] = {}
     for blocker in blockers:
         if not isinstance(blocker, dict):
             failures.append("invalid blocker entry")
@@ -94,6 +113,8 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             failures.append("blocker id must be non-empty")
             continue
         ids.append(blocker_id)
+        if blocker_id not in blocker_by_id:
+            blocker_by_id[blocker_id] = blocker
         if status not in {"open", "closed"}:
             failures.append(f"{blocker_id}: invalid status {status!r}")
             continue
@@ -114,6 +135,15 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
 
     if len(ids) != len(set(ids)):
         failures.append("duplicate blocker ids")
+
+    for blocker_id, expected_evidence in POLICY_REQUIRED_BLOCKERS.items():
+        blocker = blocker_by_id.get(blocker_id)
+        if blocker is None:
+            failures.append(f"policy-required blocker omitted from manifest: {blocker_id}")
+            continue
+        evidence = blocker.get("evidence")
+        if evidence != list(expected_evidence):
+            failures.append(f"{blocker_id}: evidence path does not match release-readiness policy")
 
     required_paths = manifest.get("required_freeze_paths", [])
     if not isinstance(required_paths, list):
@@ -146,18 +176,18 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     version = (root / "VERSION").read_text(encoding="utf-8").strip()
     header = (root / "include/apta/apta_version.h").read_text(encoding="utf-8")
     package_string = define_value(header, "APTA_PACKAGE_VERSION_STRING")
-    expected = str(manifest.get("development_version", ""))
-    release_tag = str(manifest.get("release_tag", "v1.1.0"))
     tags = repository_tags(root)
 
-    if version != expected:
-        failures.append(f"VERSION changed before release freeze: {version!r}, expected {expected!r}")
-    if package_string != f'"{expected}"':
+    if version != POLICY_DEVELOPMENT_VERSION:
+        failures.append(
+            f"VERSION changed before release freeze: {version!r}, expected {POLICY_DEVELOPMENT_VERSION!r}"
+        )
+    if package_string != f'"{POLICY_DEVELOPMENT_VERSION}"':
         failures.append(
             f"APTA_PACKAGE_VERSION_STRING changed before release freeze: {package_string!r}"
         )
-    if release_tag in tags:
-        failures.append(f"release tag {release_tag} already exists before release freeze")
+    if POLICY_RELEASE_TAG in tags:
+        failures.append(f"release tag {POLICY_RELEASE_TAG} already exists before release freeze")
 
     phase = "blocked" if open_ids else "freeze-eligible"
 
@@ -166,7 +196,7 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         "phase": phase,
         "open_blocker_count": len(open_ids),
         "open_blockers": sorted(open_ids),
-        "release_tag": release_tag,
+        "release_tag": POLICY_RELEASE_TAG,
         "version": version,
         "status": "pass" if not failures else "fail",
         "failures": failures,
@@ -174,14 +204,8 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def self_test() -> int:
-    ids = [
-        "tempo-grid-fresh-corpus",
-        "confidence-calibration-holdout",
-        "final-dj-corpus",
-        "esp32-p4-hardware",
-    ]
-    if len(ids) != len(set(ids)) or len(ids) != 4:
-        raise RuntimeError("readiness blocker inventory self-test failed")
+    if len(POLICY_REQUIRED_BLOCKERS) != 4:
+        raise RuntimeError("readiness blocker inventory must contain exactly four blockers")
     if len(POLICY_REQUIRED_FREEZE_PATHS) != len(set(POLICY_REQUIRED_FREEZE_PATHS)):
         raise RuntimeError("release freeze inventory contains duplicates")
     print("APTA 1.1 release-readiness checker self-test: ok")
@@ -204,7 +228,7 @@ def main() -> int:
     manifest_path = args.manifest if args.manifest.is_absolute() else root / args.manifest
     try:
         report = evaluate(root, load_json(manifest_path))
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError, json.JSONDecodeError, subprocess.CalledProcessError) as exc:
         print(f"readiness error: {exc}")
         return 3
 
