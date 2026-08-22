@@ -28,6 +28,7 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
         APTA_FEATURE_WAVEFORM_DETAIL |
         APTA_FEATURE_WAVEFORM_3BAND |
         APTA_FEATURE_CONFIDENCE |
+        APTA_FEATURE_MUSICAL_KEY |
         APTA_FEATURE_METER_DOWNBEAT |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
@@ -56,6 +57,7 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
           APTA_FEATURE_BPM |
           APTA_FEATURE_LOCAL_BEATGRID |
           APTA_FEATURE_GLOBAL_BEATGRID |
+          APTA_FEATURE_MUSICAL_KEY |
           APTA_FEATURE_METER_DOWNBEAT)) == 0u) {
         return 0;
     }
@@ -177,7 +179,7 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
     saved_focus_mask = session->focus.feature_mask;
     if ((saved_focus_mask &
          (APTA_INTERNAL_S4_FEATURES | APTA_INTERNAL_S6_FEATURES |
-          APTA_FEATURE_METER_DOWNBEAT)) != 0u) {
+          APTA_FEATURE_MUSICAL_KEY | APTA_FEATURE_METER_DOWNBEAT)) != 0u) {
         session->focus.feature_mask |= APTA_FEATURE_WAVEFORM_OVERVIEW;
     }
     for (slot = 0u; slot < APTA_INTERNAL_MAX_REGION_REQUESTS; ++slot) {
@@ -185,7 +187,7 @@ apta_status_t APTA_CALL apta_session_next_pcm_request(
             session->requests[slot].request.feature_mask;
         if ((saved_request_masks[slot] &
              (APTA_INTERNAL_S4_FEATURES | APTA_INTERNAL_S6_FEATURES |
-          APTA_FEATURE_METER_DOWNBEAT)) != 0u) {
+          APTA_FEATURE_MUSICAL_KEY | APTA_FEATURE_METER_DOWNBEAT)) != 0u) {
             session->requests[slot].request.feature_mask |=
                 APTA_FEATURE_WAVEFORM_OVERVIEW;
         }

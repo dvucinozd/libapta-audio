@@ -174,6 +174,14 @@ target_include_directories(
     apta_meter_downbeat
     PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/beatgrid)
 apta_add_c_test(
+    apta_musical_key
+    apta.dj.musical_key
+    unit/musical_key.c)
+target_link_libraries(apta_musical_key PRIVATE apta_c11_atomics)
+target_include_directories(
+    apta_musical_key
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/key)
+apta_add_c_test(
     apta_dj_sections_roundtrip
     apta.serialization.dj_sections_roundtrip
     unit/dj_sections_roundtrip.c)
