@@ -1,0 +1,70 @@
+name: APTA 1.1 native CLI all-feature smoke
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "include/**"
+      - "tools/**"
+      - "tests/unit/desktop_cli_fixture.c"
+      - "tests/unit/desktop_wav_fixture.h"
+      - ".github/workflows/cli-all-smoke-1.1.yml"
+  push:
+    branches:
+      - "1.1.0"
+    paths:
+      - "src/**"
+      - "include/**"
+      - "tools/**"
+      - "tests/unit/desktop_cli_fixture.c"
+      - "tests/unit/desktop_wav_fixture.h"
+      - ".github/workflows/cli-all-smoke-1.1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  native-cli-all:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Configure desktop tools and fixtures
+        run: >-
+          cmake -S . -B build-cli-all
+          -DAPTA_BUILD_TESTS=ON
+          -DAPTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build analyzer, inspector and WAV fixture
+        run: >-
+          cmake --build build-cli-all --parallel 2
+          --target apta_analyze apta_inspect apta_desktop_cli_fixture
+
+      - name: Analyze native all-feature fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          build-cli-all/tests/apta_desktop_cli_fixture wav build-cli-all/native-all.wav
+          build-cli-all/tools/apta-analyze \
+            build-cli-all/native-all.wav \
+            --output build-cli-all/native-all.apta \
+            --features all | tee build-cli-all/native-all-analyze.txt
+          grep -q 'musical-key' build-cli-all/native-all-analyze.txt
+          grep -q 'meter-downbeat' build-cli-all/native-all-analyze.txt
+
+      - name: Require native final DJ sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          build-cli-all/tools/apta-inspect \
+            build-cli-all/native-all.apta --json --section MKEY \
+            | tee build-cli-all/native-all-key.json
+          build-cli-all/tools/apta-inspect \
+            build-cli-all/native-all.apta --json --section MTRD \
+            | tee build-cli-all/native-all-meter.json
+          grep -q '"tonic"' build-cli-all/native-all-key.json
+          grep -q '"numerator"' build-cli-all/native-all-meter.json
