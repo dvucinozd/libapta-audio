@@ -121,7 +121,7 @@ static int analyse_impl(apta_context_t *context,
         const apta_result_t *parsed = NULL;
         uint8_t *bytes;
         uint64_t size = 0u;
-        uint64_t written = 0u;
+        size_t written = 0u;
         int failed = 0;
 
         apta_serialize_options_init(&serialize_options);
@@ -144,7 +144,7 @@ static int analyse_impl(apta_context_t *context,
 
         apta_parse_options_init(&parse_options);
         if (!failed &&
-            apta_result_parse(context, &parse_options, bytes, (size_t)written,
+            apta_result_parse(context, &parse_options, bytes, written,
                               &parsed) != APTA_STATUS_OK) {
             failed = 1;
         }
