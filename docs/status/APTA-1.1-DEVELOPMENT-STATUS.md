@@ -69,6 +69,8 @@ than another fitted threshold:
 
 - S6 may propose a metrical family member even when that tempo did not survive
   into S4's public three-candidate list;
+- S6 chooses the metrical region, while S4 fine-bin evidence re-estimates and
+  sub-bin refines the BPM before it can be published;
 - the proposal must be one of the existing half/double, two-thirds/three-half,
   third/triple or quarter/quadruple relations;
 - the proposal must retain at least the already-existing S4 endorsement score
@@ -77,12 +79,16 @@ than another fitted threshold:
   than the currently selected fine grid;
 - if promoted, the local grid is re-phased at the promoted period rather than
   keeping the phase of the displaced S4 winner;
+- a complete ensemble evaluation is charged as one cooperative scheduler step
+  and remains bounded by the existing S4 evidence capacity;
 - no new public API, ABI, container field or release-version claim is introduced
   by this checkpoint.
 
+The acceptance boundary is frozen in
+[`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md).
 This checkpoint is an implementation candidate, not an accuracy claim. It must
-pass native regression gates and a pre-registered corpus evaluation with fresh
-hold-out material or all-fold reporting before Task 5 can be marked complete.
+pass native regression gates and the pre-registered fresh-corpus evaluation
+before Task 5 can be marked complete.
 
 ## Work that is not complete
 
