@@ -14,6 +14,23 @@ from typing import Any
 SCHEMA = "apta-1.1-release-readiness-1"
 REPORT_SCHEMA = "apta-1.1-release-readiness-report-1"
 
+# These inputs define the minimum release-freeze surface. Keeping this inventory
+# in code as well as in the manifest prevents a later JSON edit from silently
+# weakening the release gate by dropping a platform ABI or normative contract.
+POLICY_REQUIRED_FREEZE_PATHS = (
+    "docs/api/APTA-API-1.1-DEVELOPMENT.md",
+    "specification/APTA-1.1-DJ-SECTIONS.md",
+    "docs/file-format/APTA-STREAMING-IO-1.1.md",
+    "abi/public-header-deltas-1.1.sha256",
+    "abi/public-symbols-1.1.txt",
+    "abi/public-symbols-1.1.map",
+    "abi/public-symbols-1.1.def",
+    "abi/public-layout-ilp32.txt",
+    "abi/public-layout-lp64.txt",
+    "abi/public-layout-llp64.txt",
+    "abi/public-layout-p32a64.txt",
+)
+
 
 def load_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
@@ -40,6 +57,19 @@ def tags_at_head(root: Path) -> set[str]:
     except (OSError, subprocess.CalledProcessError):
         return set()
     return {line.strip() for line in output.splitlines() if line.strip()}
+
+
+def repository_path(root: Path, relative: str) -> Path | None:
+    candidate = Path(relative)
+    if candidate.is_absolute():
+        return None
+    resolved_root = root.resolve()
+    resolved = (resolved_root / candidate).resolve()
+    try:
+        resolved.relative_to(resolved_root)
+    except ValueError:
+        return None
+    return resolved
 
 
 def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
@@ -76,8 +106,10 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             open_ids.append(blocker_id)
         else:
             for relative in evidence:
-                path = root / relative
-                if not path.is_file() or path.stat().st_size == 0:
+                path = repository_path(root, relative)
+                if path is None:
+                    failures.append(f"{blocker_id}: evidence path escapes repository: {relative}")
+                elif not path.is_file() or path.stat().st_size == 0:
                     failures.append(f"{blocker_id}: missing evidence {relative}")
 
     if len(ids) != len(set(ids)):
@@ -87,13 +119,26 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(required_paths, list):
         failures.append("required_freeze_paths must be an array")
         required_paths = []
+
+    valid_required_paths: list[str] = []
     for relative in required_paths:
         if not isinstance(relative, str) or not relative:
             failures.append("invalid required freeze path")
             continue
-        path = root / relative
-        if not path.is_file() or path.stat().st_size == 0:
+        valid_required_paths.append(relative)
+        path = repository_path(root, relative)
+        if path is None:
+            failures.append(f"freeze input path escapes repository: {relative}")
+        elif not path.is_file() or path.stat().st_size == 0:
             failures.append(f"missing freeze input {relative}")
+
+    if len(valid_required_paths) != len(set(valid_required_paths)):
+        failures.append("duplicate required freeze paths")
+
+    required_set = set(valid_required_paths)
+    for relative in POLICY_REQUIRED_FREEZE_PATHS:
+        if relative not in required_set:
+            failures.append(f"policy-required freeze input omitted from manifest: {relative}")
 
     version = (root / "VERSION").read_text(encoding="utf-8").strip()
     header = (root / "include/apta/apta_version.h").read_text(encoding="utf-8")
@@ -130,7 +175,6 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def self_test() -> int:
-    # Exercise the policy core without relying on repository-specific evidence.
     ids = [
         "tempo-grid-fresh-corpus",
         "confidence-calibration-holdout",
@@ -139,6 +183,8 @@ def self_test() -> int:
     ]
     if len(ids) != len(set(ids)) or len(ids) != 4:
         raise RuntimeError("readiness blocker inventory self-test failed")
+    if len(POLICY_REQUIRED_FREEZE_PATHS) != len(set(POLICY_REQUIRED_FREEZE_PATHS)):
+        raise RuntimeError("release freeze inventory contains duplicates")
     print("APTA 1.1 release-readiness checker self-test: ok")
     return 0
 
