@@ -82,7 +82,25 @@ APTA 1.1 development is separate from the stable 1.0 release. The result/API
 extensions, validated external-result builder, optional DJ sections and
 streaming container I/O are implemented on the `1.1.0` branch. The first
 tempo/grid ensemble checkpoint is also implemented, but its corpus acceptance
-and regression gates remain open. Remaining algorithmic, ESP32-P4 profile,
+and regression gates remain open.
+
+Native meter/downbeat and musical-key analysis are now implemented as bounded,
+progressively published features. Musical-key passed Linux static/shared,
+Windows shared-ABI/interchange, ILP32, sanitizer/fuzz/security, ESP-IDF 5.5.4
+and 6.0.2, standalone ESP-IDF component packaging, and reference/evaluation
+contract validation before being fast-forwarded to `1.1.0`.
+
+The ESP32-P4 qualification profile also has deterministic CI evidence: ESP-IDF
+6.0.2 builds the cooperative example for `esp32p4`, and the 30-minute bounded
+capacity probe uses 32,768 frames per overview column for 2,637 columns over
+86,400,000 source frames. The measured minimum workspace is 932,960 bytes, the
+bounded result pool is 531,232 bytes, and the combined minimum is 1,464,192
+bytes. S6 retains the public 3,072-beat per-result bound; one mutable S6 store
+plus two immutable bounded result slots therefore accounts for 9,216 resident
+beat records. These are build/layout claims only, not physical-device latency,
+PSRAM bandwidth, thermals, or USB/audio coexistence measurements.
+
+Remaining algorithmic acceptance, progressive full-pass conformance,
 release-version and publication work is still incomplete; the branch must not
 be represented as a stable release. The detailed boundary is maintained in
 [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md).
