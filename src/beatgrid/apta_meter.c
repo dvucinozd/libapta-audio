@@ -243,8 +243,7 @@ apta_status_t apta_internal_meter_refresh(
     uint32_t step_limit,
     uint32_t *completed_steps_out)
 {
-    float strengths[APTA_INTERNAL_ONSET_BIN_CAPACITY /
-                    APTA_INTERNAL_MIN_TEMPO_BINS * 256u];
+    float strengths[APTA_INTERNAL_METER_MAX_BEATS];
     apta_internal_meter_selection_t selection;
     apta_meter_segment_t next;
     uint64_t first_beat_bin = 0u;

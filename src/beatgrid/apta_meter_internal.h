@@ -7,6 +7,7 @@
 
 #define APTA_INTERNAL_METER_MIN_BEATS 12u
 #define APTA_INTERNAL_METER_STABLE_BEATS 24u
+#define APTA_INTERNAL_METER_MAX_BEATS 128u
 
 typedef struct {
     uint16_t numerator;

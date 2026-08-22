@@ -87,6 +87,7 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     uint32_t global_grid_coverage;
     uint32_t global_grid_segments;
     uint32_t global_grid_beats;
+    uint32_t meter_segments;
     size_t slot_offset;
     size_t pool_offset;
     size_t slots_bytes;
@@ -149,6 +150,10 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     global_grid_beats = global_grid_state != 0u
                             ? APTA_INTERNAL_GLOBAL_MAX_BEATS
                             : 0u;
+    meter_segments =
+        (config->requested_features & APTA_FEATURE_METER_DOWNBEAT) != 0u
+            ? 1u
+            : 0u;
 
     slot_offset = 0u;
     if (!apta_pool_append_region(
@@ -225,6 +230,12 @@ apta_status_t apta_internal_result_pool_calculate_layout(
             &layout_out->global_grid_beats_offset) ||
         !apta_pool_append_region(
             &slot_offset,
+            alignof(apta_meter_segment_t),
+            meter_segments,
+            sizeof(apta_meter_segment_t),
+            &layout_out->meter_segments_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
             alignof(uint8_t),
             APTA_METADATA_MAX_TOTAL_BYTES,
             sizeof(uint8_t),
@@ -284,6 +295,7 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     layout_out->global_grid_coverage_capacity = global_grid_coverage;
     layout_out->global_grid_segment_capacity = global_grid_segments;
     layout_out->global_grid_beat_capacity = global_grid_beats;
+    layout_out->meter_segment_capacity = meter_segments;
     layout_out->metadata_capacity = APTA_METADATA_MAX_TOTAL_BYTES;
     layout_out->slot_count = APTA_INTERNAL_RESULT_SLOT_COUNT;
     return APTA_STATUS_OK;
