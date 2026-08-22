@@ -1,0 +1,34 @@
+name: Fix musical key CI
+
+on:
+  push:
+    branches: [dev/1.1-key]
+    paths: [.github/workflows/_fix-key-ci.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: dev/1.1-key
+      - name: Remove duplicate test registration
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('tests/CMakeLists.txt')
+          s=p.read_text()
+          tail='''\n# APTA 1.1 native musical-key detector\napta_add_c_test(apta_musical_key apta.dj.musical_key unit/musical_key.c)\ntarget_include_directories(apta_musical_key PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/key)\n'''
+          if s.count(tail) != 1:
+              raise SystemExit(f'expected one duplicate tail, found {s.count(tail)}')
+          p.write_text(s.replace(tail,'',1))
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/CMakeLists.txt
+          git commit -m "Fix musical key test registration"
+          git push origin HEAD:dev/1.1-key
