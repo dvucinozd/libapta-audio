@@ -166,7 +166,7 @@ static apta_status_t apta_stream_validate_materialized_result(
     return APTA_STATUS_OK;
 }
 
-static int apta_stream_state_allowed(uint8_t state, uint32_t container_flags);
+static int apta_stream_state_allowed(uint32_t state, uint32_t container_flags);
 static int apta_stream_confidence_valid(uint8_t confidence);
 
 static void apta_stream_put_u16(uint8_t *p, uint16_t value)
@@ -2244,7 +2244,7 @@ static apta_status_t apta_stream_parse_ggrd_revn(
     return APTA_STATUS_OK;
 }
 
-static int apta_stream_state_allowed(uint8_t state, uint32_t container_flags)
+static int apta_stream_state_allowed(uint32_t state, uint32_t container_flags)
 {
     return state >= APTA_FEATURE_PROVISIONAL && state <= APTA_FEATURE_FINAL &&
            (((container_flags & APTA_STREAM_FLAG_PARTIAL) != 0u) ||
