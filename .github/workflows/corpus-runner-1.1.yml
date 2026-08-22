@@ -1,0 +1,36 @@
+name: APTA 1.1 frozen corpus runner
+
+on:
+  pull_request:
+    paths:
+      - "tools/apta_1_1_analyze_frozen_corpus.py"
+      - "tools/apta_1_1_freeze_corpus.py"
+      - ".github/workflows/corpus-runner-1.1.yml"
+  push:
+    branches:
+      - "1.1.0"
+    paths:
+      - "tools/apta_1_1_analyze_frozen_corpus.py"
+      - "tools/apta_1_1_freeze_corpus.py"
+      - ".github/workflows/corpus-runner-1.1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-corpus-runner:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Compile runner and freezer
+        run: |
+          python3 -m py_compile \
+            tools/apta_1_1_freeze_corpus.py \
+            tools/apta_1_1_analyze_frozen_corpus.py
+
+      - name: Run privacy and manifest self-test
+        run: python3 tools/apta_1_1_analyze_frozen_corpus.py --self-test
