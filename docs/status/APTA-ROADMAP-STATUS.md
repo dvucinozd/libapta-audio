@@ -1,7 +1,7 @@
 # APTA development roadmap status
 
 - **Current completed stage:** S9 — APTA 1.0
-- **Active development line:** `1.1.0` branch, infrastructure tasks 1–4 complete; tempo/grid ensemble task 5 in progress
+- **Active development line:** `1.1.0`; core DJ-analysis implementation substantially complete, evidence/qualification gates remain
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1
@@ -29,63 +29,65 @@
 ## Post-release repository quality
 
 - **P10:** complete — APTA 1.0.1 documentation and release coherence.
-- **P11:** complete — quick-start examples, repository UX and contributor
-  onboarding without changing the stable contracts.
-- **P12:** source complete, owner setting pending — security automation,
-  immutable workflow dependencies and future release provenance are present;
-  GitHub dependency-graph activation is still required for the full review gate.
-- **P13:** source complete, publication pending — a deterministic standalone
-  ESP-IDF component, registry metadata, packaged-example evidence and an exact-
-  tag publication workflow are present; first staging and production uploads
-  require a later stable tag, namespace and owner token.
+- **P11:** complete — quick-start examples, repository UX and contributor onboarding without changing the stable contracts.
+- **P12:** source complete, owner setting pending — security automation and immutable workflow dependencies are present; GitHub dependency-graph activation is still an owner-side setting.
+- **P13:** source complete, publication pending — deterministic standalone ESP-IDF component packaging and guarded registry publication exist; first publication requires a later exact stable tag and owner credentials.
 
 ## APTA 1.0 claims
 
-The stable profiles are `WAVEFORM-1.0`, `ADAPTIVE-WAVEFORM-1.0` and
+The stable profiles remain `WAVEFORM-1.0`, `ADAPTIVE-WAVEFORM-1.0` and
 `CORE-ANALYSIS-1.0`, with optional exact-vector
 `+REFERENCE-WAVEFORM-1.0`.
 
-No reference tempo or reference beatgrid qualifier is defined. Algorithmic
-accuracy metrics remain implementation-quality evidence unless a normative
-profile explicitly states otherwise.
+No APTA 1.1 development work changes the meaning of the immutable 1.0 tags or
+the maintained `v1.0.1` release.
 
-POSIX, Windows and ESP-IDF are integrations of the same reference
-implementation. Independent producer/consumer evidence validates the container
-contract; it is not a claim of three independent DSP engines.
+## APTA 1.1 implementation status
 
-## Release evidence
+The `1.1.0` development line now contains:
 
-The accepted P8 candidate head
-`81e2584df7f466cd53cb21d1eb4623f5d94e1035` passed the native Linux/Windows,
-ILP32, sanitizer/fuzz, independent-fixture, ESP-IDF, package, conformance and
-interoperability gates.
+- extended result/API model for musical key, meter/downbeat and calibrated quality;
+- bounded external-result builder;
+- deterministic `MKEY`, `MTRD` and `CONF` container sections;
+- bounded streaming container I/O;
+- relation-aware tempo/grid ensemble implementation candidate;
+- pre-registered deterministic confidence-calibration contract;
+- native bounded meter/downbeat analysis;
+- native bounded global musical-key analysis;
+- provisional/stable/final immutable publication regression coverage;
+- ESP-IDF 6.0.2 `esp32p4` firmware CI;
+- deterministic 30-minute P4 capacity/layout gate;
+- frozen final DJ acceptance evaluator and protocol.
 
-The P9 release verifier permits only version-bound and publication changes from
-that accepted candidate. The stable release workflow regenerates deterministic Linux and Windows
-package evidence. `v1.0.1` publishes editorial errata and corrected release
-metadata without changing API/ABI, wire bytes or production DSP behavior.
+The P4 capacity profile covers 86,400,000 frames (30 minutes at 48 kHz), 2,637
+overview columns at 32,768 frames/column, 3,072 mutable S6 beat records and two
+immutable result slots, for 9,216 resident explicit beat records. Its measured
+minimum workspace is 932,960 bytes and bounded result pool is 531,232 bytes,
+1,464,192 bytes combined. This is CI/layout evidence, not physical-device
+performance evidence.
+
+The detailed current boundary and exact remaining blockers are maintained in
+[`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md).
+
+## What still blocks APTA 1.1 release
+
+- fresh relation-aware tempo/grid corpus qualification;
+- fitting and untouched-holdout acceptance of a production calibrated confidence model;
+- independent manually verified >=48-track final DJ corpus passing frozen key/meter/downbeat/grid and high-confidence safety gates;
+- physical ESP32-P4 memory/timing evidence when hardware is available;
+- final API/ABI/wire freeze, version bump, package evidence, exact release candidate verification, tag and publication.
+
+Until those gates close, `VERSION` remains `1.0.1`; the `1.1.0` branch is not a
+stable release claim.
 
 ## Known limitations
 
-- no native big-endian release target was available;
+- no native big-endian release target is available;
 - ESP-IDF CI is firmware-build evidence, not physical-device execution;
 - POSIX atomic replacement omits parent-directory `fsync()` after rename;
-- tempo/beatgrid selection accuracy is outside semantic conformance;
-- desktop adapters and CLI tools are source components, not stable exported
-  package components;
-- the ESP Component Registry version is not published until a later stable tag
-  is validated against staging and uploaded with owner credentials.
-
-## Post-1.0 planning boundary
-
-APTA 1.1 development is separate from the stable 1.0 release. The result/API
-extensions, validated external-result builder, optional DJ sections and
-streaming container I/O are implemented on the `1.1.0` branch. The first
-tempo/grid ensemble checkpoint is also implemented, but its corpus acceptance
-and regression gates remain open. Remaining algorithmic, ESP32-P4 profile,
-release-version and publication work is still incomplete; the branch must not
-be represented as a stable release. The detailed boundary is maintained in
-[`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md).
+- algorithmic accuracy is not a conformance claim until the corresponding frozen acceptance protocol is passed;
+- desktop adapters and CLI tools are source components, not stable exported package components;
+- the ESP Component Registry version is not published until a later stable tag is validated and uploaded with owner credentials.
 
 The `v1.0.0` tag remains immutable and `v1.0.1` remains the maintained stable
 coherence release until a fully qualified 1.1 release supersedes it.
