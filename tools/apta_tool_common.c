@@ -192,7 +192,9 @@ apta_feature_mask_t apta_tool_all_features(void)
            APTA_FEATURE_GLOBAL_BEATGRID |
            APTA_FEATURE_DYNAMIC_TEMPO |
            APTA_FEATURE_CONFIDENCE |
-           APTA_FEATURE_GRID_LOCKING;
+           APTA_FEATURE_GRID_LOCKING |
+           APTA_FEATURE_MUSICAL_KEY |
+           APTA_FEATURE_METER_DOWNBEAT;
 }
 
 apta_status_t apta_tool_parse_feature_list(
@@ -248,15 +250,16 @@ apta_status_t apta_tool_parse_feature_list(
                         APTA_FEATURE_LOCAL_BEATGRID |
                         APTA_FEATURE_GRID_LOCKING |
                         APTA_FEATURE_CONFIDENCE;
+        } else if (apta_tool_token_equals(cursor, token_size, "key")) {
+            features |= APTA_FEATURE_WAVEFORM_OVERVIEW |
+                        APTA_FEATURE_MUSICAL_KEY;
+        } else if (apta_tool_token_equals(cursor, token_size, "meter")) {
+            features |= APTA_FEATURE_WAVEFORM_OVERVIEW |
+                        APTA_FEATURE_BPM |
+                        APTA_FEATURE_LOCAL_BEATGRID |
+                        APTA_FEATURE_METER_DOWNBEAT |
+                        APTA_FEATURE_CONFIDENCE;
         } else if (apta_tool_token_equals(cursor, token_size, "all")) {
-            /* "all" has to mean all, and is defined as the whole supported set
-             * rather than a list repeated here. It previously stopped at the
-             * local grid, which left the global grid and dynamic tempo with no
-             * CLI path at all: every S6 figure on record came from synthetic
-             * harnesses because no shipped tool could run that code over real
-             * audio. The first attempt at fixing that spelled the set out again
-             * and missed two more features, which is why it is now derived.
-             * `apta.tools.features_all` pins it. */
             features |= apta_tool_all_features();
         } else {
             return APTA_ERROR_INVALID_ARGUMENT;
@@ -278,11 +281,6 @@ void apta_tool_print_feature_list(
     struct feature_name {
         apta_feature_mask_t feature;
         const char *name;
-    /* Every bit apta_tool_all_features() can set needs a name here, or the
-     * tools drop it from the printed list and a reader is told a feature is
-     * absent while its section sits in the file. That happened to the global
-     * grid, dynamic tempo and the three-band overview at once.
-     * `apta.tools.features_all` asserts the two stay in step. */
     } names[] = {
         {APTA_FEATURE_WAVEFORM_OVERVIEW, "waveform-overview"},
         {APTA_FEATURE_WAVEFORM_DETAIL, "waveform-detail"},
