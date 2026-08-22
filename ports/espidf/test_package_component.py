@@ -63,6 +63,8 @@ def main() -> int:
             "include/apta/apta.h",
             "include/apta/apta_espidf.h",
             "src/core/apta_context.c",
+            "src/key/apta_key.c",
+            "src/key/apta_key_internal.h",
             "examples/cooperative_scheduler/CMakeLists.txt",
             "examples/cooperative_scheduler/main/idf_component.yml",
         }
