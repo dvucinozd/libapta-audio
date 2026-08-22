@@ -1,0 +1,43 @@
+name: APTA 1.1 corpus preparation and labeling
+
+on:
+  pull_request:
+    paths:
+      - "tools/apta_1_1_prepare_corpus.py"
+      - "tools/apta_1_1_label_corpus.html"
+      - "tests/unit/apta_1_1_prepare_corpus.py"
+      - "docs/status/APTA-1.1-CORPUS-LABELING.md"
+      - "docs/status/APTA-1.1-QUALIFICATION-RUNBOOK.md"
+      - ".github/workflows/corpus-labeling-1.1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  corpus-labeling-contract:
+    name: Corpus preparation and labeling contract
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile preparation tool and tests
+        run: >-
+          python3 -m py_compile
+          tools/apta_1_1_prepare_corpus.py
+          tests/unit/apta_1_1_prepare_corpus.py
+
+      - name: Run preparation and labeling tests
+        run: python3 -m unittest tests/unit/apta_1_1_prepare_corpus.py
+
+      - name: Enforce local-only labeling helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E 'https?://' tools/apta_1_1_label_corpus.html
+          grep -q 'staging_labels.csv' tools/apta_1_1_label_corpus.html
+          grep -q 'beat_period_frames' tools/apta_1_1_label_corpus.html
+          grep -q 'downbeat_frame' tools/apta_1_1_label_corpus.html
