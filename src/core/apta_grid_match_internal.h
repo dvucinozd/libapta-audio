@@ -37,18 +37,17 @@ static void apta_internal_grid_match_count(
     if (cursor->work_counter != NULL) ++*cursor->work_counter;
 }
 
-static int apta_internal_grid_segment_has_downbeat(
+static int apta_internal_grid_segment_position_at_ordinal(
     const apta_grid_segment_t *segment,
-    apta_source_frame_t frame,
-    apta_beat_ordinal_t ordinal)
+    apta_beat_ordinal_t ordinal,
+    apta_fractional_frame_t *position_out)
 {
     uint64_t delta;
     uint64_t whole;
     uint64_t fraction_product;
     uint32_t fraction;
 
-    if (frame < segment->applicability_range.first_frame ||
-        frame >= segment->applicability_range.end_frame ||
+    if (segment == NULL || position_out == NULL ||
         ordinal < segment->anchor_ordinal) {
         return 0;
     }
@@ -74,7 +73,30 @@ static int apta_internal_grid_segment_has_downbeat(
         if (whole == UINT64_MAX) return 0;
         ++whole;
     }
-    return whole == frame && fraction == 0u;
+    position_out->whole_frame = whole;
+    position_out->fraction_q32 = fraction;
+    return 1;
+}
+
+static int apta_internal_grid_segment_has_downbeat(
+    const apta_grid_segment_t *segment,
+    apta_source_frame_t frame,
+    apta_beat_ordinal_t ordinal)
+{
+    apta_fractional_frame_t position;
+
+    if (frame < segment->applicability_range.first_frame ||
+        frame >= segment->applicability_range.end_frame ||
+        !apta_internal_grid_segment_position_at_ordinal(
+            segment, ordinal, &position)) {
+        return 0;
+    }
+
+    /* MTRD stores only an integer source frame. The 1.1 wire contract binds
+     * that value to the grid beat's encoded whole-frame component and ordinal;
+     * a non-zero Q32 remainder is not representable in MTRD and therefore must
+     * not make an otherwise identical beat impossible to reference. */
+    return position.whole_frame == frame;
 }
 
 static int apta_internal_grid_match_cursor_next(
@@ -94,13 +116,11 @@ static int apta_internal_grid_match_cursor_next(
         apta_internal_grid_match_count(cursor);
         if (beat->position.whole_frame < frame ||
             (beat->position.whole_frame == frame &&
-             beat->position.fraction_q32 == 0u &&
              beat->ordinal < ordinal)) {
             ++cursor->beat_index;
             continue;
         }
         if (beat->position.whole_frame == frame &&
-            beat->position.fraction_q32 == 0u &&
             beat->ordinal == ordinal) {
             return 1;
         }
