@@ -49,27 +49,43 @@ class ReadinessTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    def close_all_blockers(self, manifest: dict[str, object]) -> None:
+        evidence = self.root / "evidence"
+        evidence.mkdir(exist_ok=True)
+        blockers = manifest["blockers"]
+        assert isinstance(blockers, list)
+        for blocker in blockers:
+            assert isinstance(blocker, dict)
+            blocker["status"] = "closed"
+            paths = blocker["evidence"]
+            assert isinstance(paths, list)
+            relative = paths[0]
+            assert isinstance(relative, str)
+            path = self.root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("{}\n", encoding="utf-8")
+
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
     def test_open_blockers_are_valid_blocked_state(self, _tags: mock.Mock) -> None:
         report = readiness.evaluate(self.root, self.manifest)
         self.assertEqual(report["status"], "pass")
         self.assertEqual(report["phase"], "blocked")
         self.assertEqual(report["open_blocker_count"], 2)
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
     def test_premature_version_bump_fails(self, _tags: mock.Mock) -> None:
         (self.root / "VERSION").write_text("1.1.0\n", encoding="utf-8")
         report = readiness.evaluate(self.root, self.manifest)
         self.assertEqual(report["status"], "fail")
-        self.assertTrue(any("prematurely" in item for item in report["failures"]))
+        self.assertTrue(any("before release freeze" in item for item in report["failures"]))
 
-    @mock.patch.object(readiness, "tags_at_head", return_value={"v1.1.0"})
-    def test_premature_release_tag_fails(self, _tags: mock.Mock) -> None:
+    @mock.patch.object(readiness, "repository_tags", return_value={"v1.1.0"})
+    def test_premature_release_tag_anywhere_fails(self, _tags: mock.Mock) -> None:
         report = readiness.evaluate(self.root, self.manifest)
         self.assertEqual(report["status"], "fail")
-        self.assertTrue(any("release tag" in item for item in report["failures"]))
+        self.assertTrue(any("already exists before release freeze" in item for item in report["failures"]))
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
     def test_closed_blocker_requires_evidence(self, _tags: mock.Mock) -> None:
         manifest = json.loads(json.dumps(self.manifest))
         manifest["blockers"][0]["status"] = "closed"
@@ -77,23 +93,39 @@ class ReadinessTests(unittest.TestCase):
         self.assertEqual(report["status"], "fail")
         self.assertTrue(any("missing evidence" in item for item in report["failures"]))
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
-    def test_all_evidence_makes_tree_freeze_eligible(self, _tags: mock.Mock) -> None:
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
+    def test_all_evidence_makes_development_tree_freeze_eligible(self, _tags: mock.Mock) -> None:
         manifest = json.loads(json.dumps(self.manifest))
-        evidence = self.root / "evidence"
-        evidence.mkdir()
-        for blocker in manifest["blockers"]:
-            blocker["status"] = "closed"
-            relative = blocker["evidence"][0]
-            path = self.root / relative
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text("{}\n", encoding="utf-8")
+        self.close_all_blockers(manifest)
         report = readiness.evaluate(self.root, manifest)
         self.assertEqual(report["status"], "pass")
         self.assertEqual(report["phase"], "freeze-eligible")
         self.assertEqual(report["open_blocker_count"], 0)
+        self.assertEqual(report["version"], "1.0.1")
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
+    def test_freeze_eligible_tree_cannot_already_bump_version(self, _tags: mock.Mock) -> None:
+        manifest = json.loads(json.dumps(self.manifest))
+        self.close_all_blockers(manifest)
+        (self.root / "VERSION").write_text("1.1.0\n", encoding="utf-8")
+        (self.root / "include/apta/apta_version.h").write_text(
+            '#define APTA_PACKAGE_VERSION_STRING "1.1.0"\n', encoding="utf-8"
+        )
+        report = readiness.evaluate(self.root, manifest)
+        self.assertEqual(report["phase"], "freeze-eligible")
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("before release freeze" in item for item in report["failures"]))
+
+    @mock.patch.object(readiness, "repository_tags", return_value={"v1.1.0"})
+    def test_freeze_eligible_tree_cannot_already_have_release_tag(self, _tags: mock.Mock) -> None:
+        manifest = json.loads(json.dumps(self.manifest))
+        self.close_all_blockers(manifest)
+        report = readiness.evaluate(self.root, manifest)
+        self.assertEqual(report["phase"], "freeze-eligible")
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("release tag" in item for item in report["failures"]))
+
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
     def test_manifest_cannot_drop_policy_required_abi_surface(self, _tags: mock.Mock) -> None:
         manifest = json.loads(json.dumps(self.manifest))
         manifest["required_freeze_paths"].remove("abi/public-layout-llp64.txt")
@@ -107,7 +139,7 @@ class ReadinessTests(unittest.TestCase):
             )
         )
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
     def test_required_freeze_path_must_stay_inside_repository(self, _tags: mock.Mock) -> None:
         manifest = json.loads(json.dumps(self.manifest))
         manifest["required_freeze_paths"].append("../outside.txt")
@@ -115,7 +147,7 @@ class ReadinessTests(unittest.TestCase):
         self.assertEqual(report["status"], "fail")
         self.assertTrue(any("escapes repository" in item for item in report["failures"]))
 
-    @mock.patch.object(readiness, "tags_at_head", return_value=set())
+    @mock.patch.object(readiness, "repository_tags", return_value=set())
     def test_closed_evidence_path_must_stay_inside_repository(self, _tags: mock.Mock) -> None:
         manifest = json.loads(json.dumps(self.manifest))
         manifest["blockers"][0]["status"] = "closed"
