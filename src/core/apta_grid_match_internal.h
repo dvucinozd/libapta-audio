@@ -22,7 +22,7 @@ typedef struct {
     uint32_t has_global;
 } apta_internal_grid_match_set_t;
 
-static void apta_internal_grid_match_cursor_init(
+static inline void apta_internal_grid_match_cursor_init(
     apta_internal_grid_match_cursor_t *cursor,
     const apta_grid_view_t *grid,
     uint64_t *work_counter)
@@ -33,13 +33,13 @@ static void apta_internal_grid_match_cursor_init(
     cursor->work_counter = work_counter;
 }
 
-static void apta_internal_grid_match_count(
+static inline void apta_internal_grid_match_count(
     apta_internal_grid_match_cursor_t *cursor)
 {
     if (cursor->work_counter != NULL) ++*cursor->work_counter;
 }
 
-static int apta_internal_grid_segment_has_downbeat(
+static inline int apta_internal_grid_segment_has_downbeat(
     const apta_grid_segment_t *segment,
     apta_source_frame_t frame,
     apta_beat_ordinal_t ordinal)
@@ -60,7 +60,7 @@ static int apta_internal_grid_segment_has_downbeat(
     return position.whole_frame == frame;
 }
 
-static int apta_internal_grid_match_cursor_next(
+static inline int apta_internal_grid_match_cursor_next(
     apta_internal_grid_match_cursor_t *cursor,
     apta_source_frame_t frame,
     apta_beat_ordinal_t ordinal)
@@ -101,7 +101,7 @@ static int apta_internal_grid_match_cursor_next(
     return 0;
 }
 
-static void apta_internal_grid_match_set_init(
+static inline void apta_internal_grid_match_set_init(
     apta_internal_grid_match_set_t *set,
     const apta_grid_view_t *local,
     const apta_grid_view_t *global,
@@ -113,7 +113,7 @@ static void apta_internal_grid_match_set_init(
     apta_internal_grid_match_cursor_init(&set->global, global, work_counter);
 }
 
-static int apta_internal_grid_match_set_next(
+static inline int apta_internal_grid_match_set_next(
     apta_internal_grid_match_set_t *set,
     apta_source_frame_t frame,
     apta_beat_ordinal_t ordinal)
