@@ -1,0 +1,138 @@
+name: APTA 1.1 frozen corpus runner
+
+on:
+  pull_request:
+    paths:
+      - "tools/apta_1_1_analyze_frozen_corpus.py"
+      - "tools/apta_1_1_freeze_corpus.py"
+      - "tools/apta_1_1_export_acceptance_results.py"
+      - "tools/apta_1_1_dj_acceptance_eval.py"
+      - "tests/unit/apta_1_1_analyze_frozen_corpus.py"
+      - ".github/workflows/corpus-runner-1.1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  frozen-corpus-runner:
+    name: Privacy-safe corpus runner E2E
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Compile runner contracts
+        run: |
+          python3 -m py_compile \
+            tools/apta_1_1_freeze_corpus.py \
+            tools/apta_1_1_analyze_frozen_corpus.py \
+            tools/apta_1_1_export_acceptance_results.py \
+            tools/apta_1_1_dj_acceptance_eval.py \
+            tests/unit/apta_1_1_analyze_frozen_corpus.py
+
+      - name: Run runner unit tests
+        run: python3 -m unittest tests/unit/apta_1_1_analyze_frozen_corpus.py
+
+      - name: Configure desktop analyzer and fixture
+        run: >-
+          cmake -S . -B build-corpus-cli
+          -DAPTA_BUILD_TESTS=ON
+          -DAPTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build analyzer, inspector and WAV fixture
+        run: >-
+          cmake --build build-corpus-cli --parallel 2
+          --target apta_analyze apta_inspect apta_desktop_cli_fixture
+
+      - name: Create diagnostic frozen corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build-corpus-e2e/corpus
+          build-corpus-cli/tests/apta_desktop_cli_fixture \
+            wav "build-corpus-e2e/corpus/Private Artist - Private Title.wav"
+          cat > build-corpus-e2e/staging.csv <<'CSV'
+          source,key_tonic,key_mode,meter_numerator,meter_denominator,downbeat_frame,beat_period_frames
+          Private Artist - Private Title.wav,0,major,4,4,0,23040
+          CSV
+          python3 tools/apta_1_1_freeze_corpus.py \
+            --corpus-root build-corpus-e2e/corpus \
+            --staging-labels build-corpus-e2e/staging.csv \
+            --labels-output build-corpus-e2e/labels.csv \
+            --manifest-output build-corpus-e2e/manifest.json \
+            --frozen-utc 2000-01-01T00:00:00Z \
+            --reference-source synthetic-click-fixture \
+            --verification-procedure diagnostic-ci-only \
+            --allow-diagnostic
+
+      - name: Run native all-feature corpus analysis
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/apta_1_1_analyze_frozen_corpus.py \
+            --corpus-root build-corpus-e2e/corpus \
+            --staging-labels build-corpus-e2e/staging.csv \
+            --manifest build-corpus-e2e/manifest.json \
+            --analyzer build-corpus-cli/tools/apta-analyze \
+            --output-dir build-corpus-e2e/run/analyzed \
+            --mapping-output build-corpus-e2e/run/mapping.csv \
+            --run-metadata-output build-corpus-e2e/run/run.json \
+            --source-revision "$SOURCE_REVISION"
+
+      - name: Export final native DJ results
+        run: |
+          python3 tools/apta_1_1_export_acceptance_results.py \
+            --inspector build-corpus-cli/tools/apta-inspect \
+            --mapping build-corpus-e2e/run/mapping.csv \
+            --manifest build-corpus-e2e/manifest.json \
+            --output build-corpus-e2e/results.csv
+
+      - name: Require diagnostic-only evaluator handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python3 tools/apta_1_1_dj_acceptance_eval.py \
+            --manifest build-corpus-e2e/manifest.json \
+            --labels build-corpus-e2e/labels.csv \
+            --results build-corpus-e2e/results.csv \
+            --output build-corpus-e2e/report.json
+          rc=$?
+          set -e
+          test "$rc" -eq 2
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("build-corpus-e2e/report.json").read_text())
+          assert report["evidence_level"] == "diagnostic-only"
+          assert report["accepted"] is False
+          PY
+
+      - name: Reject private source leakage
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -a -F "Private Artist - Private Title.wav" build-corpus-e2e/run; then
+            echo "private source filename leaked into publishable runner outputs" >&2
+            exit 1
+          fi
+          if grep -R -a -F "$GITHUB_WORKSPACE" build-corpus-e2e/run; then
+            echo "absolute workspace path leaked into publishable runner outputs" >&2
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          state = json.loads(Path("build-corpus-e2e/run/run.json").read_text())
+          assert state["complete"] is True
+          assert state["completed_track_count"] == 1
+          assert state["source_revision"] == Path("/proc/self/environ").read_bytes().split(b"SOURCE_REVISION=")[1].split(b"\0", 1)[0].decode()
+          PY
