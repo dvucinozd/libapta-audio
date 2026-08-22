@@ -130,9 +130,10 @@ jobs:
           fi
           python3 - <<'PY'
           import json
+          import os
           from pathlib import Path
           state = json.loads(Path("build-corpus-e2e/run/run.json").read_text())
           assert state["complete"] is True
           assert state["completed_track_count"] == 1
-          assert state["source_revision"] == Path("/proc/self/environ").read_bytes().split(b"SOURCE_REVISION=")[1].split(b"\0", 1)[0].decode()
+          assert state["source_revision"] == os.environ["SOURCE_REVISION"]
           PY
