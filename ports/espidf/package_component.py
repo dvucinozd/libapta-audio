@@ -21,6 +21,7 @@ COPY_TREES = (
     Path("include/apta"),
     Path("src/beatgrid"),
     Path("src/core"),
+    Path("src/key"),
     Path("src/serialization"),
     Path("src/tempo"),
     Path("src/waveform"),
@@ -197,7 +198,6 @@ def build(args: argparse.Namespace) -> None:
         fail(f"unsupported package version in VERSION: {version!r}")
 
     if output_dir == source_root or source_root in output_dir.parents:
-        # Output inside source is allowed only in conventional disposable directories.
         allowed = {"build", "dist", "out"}
         relative_parts = output_dir.relative_to(source_root).parts
         if not relative_parts or relative_parts[0] not in allowed:
