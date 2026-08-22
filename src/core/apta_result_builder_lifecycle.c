@@ -63,14 +63,6 @@ void APTA_CALL apta_result_builder_info_init(
     }
 }
 
-void APTA_CALL apta_result_provenance_init(
-    apta_result_provenance_t *provenance)
-{
-    if (provenance != NULL) {
-        apta_builder_init_prefix(provenance, sizeof(*provenance));
-    }
-}
-
 void APTA_CALL apta_waveform_detail_input_init(
     apta_waveform_detail_input_t *input)
 {
