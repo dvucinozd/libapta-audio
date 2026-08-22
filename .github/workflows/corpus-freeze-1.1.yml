@@ -1,0 +1,28 @@
+name: APTA 1.1 corpus freeze
+
+on:
+  pull_request:
+    paths:
+      - "tools/apta_1_1_freeze_corpus.py"
+      - "tests/unit/apta_1_1_freeze_corpus.py"
+      - ".github/workflows/corpus-freeze-1.1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  corpus-freeze-contract:
+    name: Privacy-preserving corpus freeze
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile corpus tooling
+        run: python3 -m py_compile tools/apta_1_1_freeze_corpus.py tests/unit/apta_1_1_freeze_corpus.py
+
+      - name: Run corpus freeze tests
+        run: python3 -m unittest tests/unit/apta_1_1_freeze_corpus.py
