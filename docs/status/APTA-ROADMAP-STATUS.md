@@ -1,7 +1,7 @@
 # APTA development roadmap status
 
 - **Current completed stage:** S9 — APTA 1.0
-- **Active development line:** `1.1.0` branch, infrastructure tasks 1–4 complete
+- **Active development line:** `1.1.0` branch, infrastructure tasks 1–4 complete; tempo/grid ensemble task 5 in progress
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1
@@ -80,10 +80,11 @@ metadata without changing API/ABI, wire bytes or production DSP behavior.
 
 APTA 1.1 development is separate from the stable 1.0 release. The result/API
 extensions, validated external-result builder, optional DJ sections and
-streaming container I/O are implemented on the `1.1.0` branch. Algorithmic,
-ESP32-P4 profile, corpus, release-version and publication work remains open;
-the branch must not be represented as a stable release. The detailed boundary
-is maintained in
+streaming container I/O are implemented on the `1.1.0` branch. The first
+tempo/grid ensemble checkpoint is also implemented, but its corpus acceptance
+and regression gates remain open. Remaining algorithmic, ESP32-P4 profile,
+release-version and publication work is still incomplete; the branch must not
+be represented as a stable release. The detailed boundary is maintained in
 [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md).
 
 The `v1.0.0` tag remains immutable and `v1.0.1` remains the maintained stable
