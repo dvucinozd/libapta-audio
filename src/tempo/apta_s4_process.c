@@ -218,6 +218,35 @@ static uint32_t apta_s4_ensemble_normalized_score(
     return normalized > 0.0f ? (uint32_t)(normalized + 0.5f) : 0u;
 }
 
+static int apta_s4_ensemble_may_need_work(const apta_session_t *session)
+{
+    uint32_t selected;
+    uint32_t proposed;
+    float difference;
+
+    if (session == NULL || !session->has_tempo || !session->has_local_grid ||
+        session->local_grid_locked || session->s4_refresh_active ||
+        session->s6_nominal_tempo_millibpm == 0u || session->onset_flux == NULL ||
+        session->tempo_candidate_count == 0u ||
+        session->s4_refresh_evidence_end <= session->s4_refresh_evidence_first) {
+        return 0;
+    }
+    selected = session->tempo_value.tempo_millibpm;
+    proposed = session->s6_nominal_tempo_millibpm;
+    if (selected == 0u) {
+        return 0;
+    }
+    difference = (float)proposed - (float)selected;
+    if (difference < 0.0f) {
+        difference = -difference;
+    }
+    if (difference / (float)proposed <= APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
+        return 0;
+    }
+    return apta_internal_tempo_relation(selected, proposed) !=
+           APTA_TEMPO_RELATION_INDEPENDENT;
+}
+
 static void apta_s4_ensemble_relate_candidates(apta_session_t *session)
 {
     uint32_t index;
@@ -246,7 +275,8 @@ static void apta_s4_ensemble_relate_candidates(apta_session_t *session)
 static apta_status_t apta_s4_apply_tempo_grid_ensemble(
     apta_session_t *session,
     uint32_t previous_selected_tempo,
-    uint32_t previous_candidate_set_id)
+    uint32_t previous_candidate_set_id,
+    uint32_t *did_work_out)
 {
     uint32_t s6_tempo;
     uint32_t proposed_tempo;
@@ -266,29 +296,16 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
     apta_tempo_relation_t relation;
     apta_tempo_candidate_t promoted;
 
-    if (session == NULL || !session->has_tempo || !session->has_local_grid ||
-        session->local_grid_locked || session->s4_refresh_active ||
-        session->s6_nominal_tempo_millibpm == 0u ||
-        session->onset_flux == NULL || session->tempo_candidate_count == 0u ||
-        session->s4_refresh_evidence_end <= session->s4_refresh_evidence_first) {
+    if (did_work_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    *did_work_out = 0u;
+    if (!apta_s4_ensemble_may_need_work(session)) {
         return APTA_STATUS_OK;
     }
 
     s6_tempo = session->s6_nominal_tempo_millibpm;
     selected_tempo = session->tempo_value.tempo_millibpm;
-    if (selected_tempo == 0u) {
-        return APTA_STATUS_OK;
-    }
-
-    difference = (float)s6_tempo - (float)selected_tempo;
-    if (difference < 0.0f) {
-        difference = -difference;
-    }
-    if (difference / (float)s6_tempo <=
-        APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
-        return APTA_STATUS_OK;
-    }
-
     span = (uint32_t)(session->s4_refresh_evidence_end -
                       session->s4_refresh_evidence_first);
     proposed_lag = apta_s4_ensemble_lag_from_tempo(session, s6_tempo);
@@ -301,6 +318,10 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
         proposed_lag >= span || selected_lag >= span) {
         return APTA_STATUS_OK;
     }
+
+    /* Everything below this point is bounded by the S4 evidence-ring capacity
+     * and is charged as one cooperative scheduler step by the caller. */
+    *did_work_out = 1u;
 
     /* S6 chooses the metrical region; S4 remains the precision authority.
      * Refine the S4 lag on the fine onset evidence instead of publishing the
@@ -454,6 +475,7 @@ apta_status_t apta_internal_waveform_process(
     apta_feature_mask_t pending;
     uint32_t slot;
     uint32_t refresh_steps = 0u;
+    uint32_t ensemble_step = 0u;
     uint32_t remaining_steps;
 
     if (work_progress == NULL) {
@@ -527,13 +549,36 @@ apta_status_t apta_internal_waveform_process(
     }
     if (refresh_status == APTA_STATUS_MORE_WORK) {
         status = APTA_STATUS_MORE_WORK;
-    } else {
-        ensemble_status = apta_s4_apply_tempo_grid_ensemble(
-            session,
-            previous_selected_tempo,
-            previous_candidate_set_id);
-        if (ensemble_status < 0) {
-            return ensemble_status;
+    } else if (apta_s4_ensemble_may_need_work(session)) {
+        int ensemble_step_available =
+            budget->maximum_steps == 0u ||
+            work_progress->completed_steps < budget->maximum_steps;
+
+        if (ensemble_step_available && session->process_deadline_ns != 0u &&
+            session->context->clock.monotonic_time_ns != NULL &&
+            session->context->clock.monotonic_time_ns(
+                session->context->clock.user_data) >=
+                session->process_deadline_ns) {
+            ensemble_step_available = 0;
+        }
+        if (!ensemble_step_available) {
+            status = APTA_STATUS_MORE_WORK;
+        } else {
+            ensemble_status = apta_s4_apply_tempo_grid_ensemble(
+                session,
+                previous_selected_tempo,
+                previous_candidate_set_id,
+                &ensemble_step);
+            if (ensemble_status < 0) {
+                return ensemble_status;
+            }
+            if (ensemble_step != 0u) {
+                work_progress->completed_steps += 1u;
+                *did_work_out = 1u;
+                if (status == APTA_STATUS_WOULD_BLOCK) {
+                    status = APTA_STATUS_OK;
+                }
+            }
         }
     }
     if (session->has_local_grid &&
