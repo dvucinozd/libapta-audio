@@ -27,6 +27,8 @@ typedef struct {
     uint32_t selected_windows;
     apta_source_frame_t evidence_first_frame;
     apta_source_frame_t evidence_end_frame;
+    apta_source_frame_t next_source_frame;
+    uint32_t has_next_source_frame;
     uint32_t initialized;
 } apta_internal_key_analysis_t;
 
