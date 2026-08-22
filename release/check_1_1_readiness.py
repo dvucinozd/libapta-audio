@@ -44,10 +44,10 @@ def define_value(text: str, name: str) -> str | None:
     return match.group(1) if match else None
 
 
-def tags_at_head(root: Path) -> set[str]:
+def repository_tags(root: Path) -> set[str]:
     try:
         output = subprocess.run(
-            ["git", "tag", "--points-at", "HEAD"],
+            ["git", "tag", "--list"],
             cwd=root,
             check=True,
             text=True,
@@ -140,27 +140,26 @@ def evaluate(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         if relative not in required_set:
             failures.append(f"policy-required freeze input omitted from manifest: {relative}")
 
+    # This checker governs the tree *before* the deliberate release-freeze
+    # commit. Even with every evidence blocker closed, freeze-eligible still
+    # means development identity: no version bump and no release tag anywhere.
     version = (root / "VERSION").read_text(encoding="utf-8").strip()
     header = (root / "include/apta/apta_version.h").read_text(encoding="utf-8")
     package_string = define_value(header, "APTA_PACKAGE_VERSION_STRING")
+    expected = str(manifest.get("development_version", ""))
     release_tag = str(manifest.get("release_tag", "v1.1.0"))
-    head_tags = tags_at_head(root)
+    tags = repository_tags(root)
 
-    if open_ids:
-        expected = str(manifest.get("development_version", ""))
-        if version != expected:
-            failures.append(f"VERSION changed prematurely: {version!r}, expected {expected!r}")
-        if package_string != f'"{expected}"':
-            failures.append(
-                f"APTA_PACKAGE_VERSION_STRING changed prematurely: {package_string!r}"
-            )
-        if release_tag in head_tags:
-            failures.append(f"release tag {release_tag} exists while evidence blockers are open")
-        phase = "blocked"
-    else:
-        # Closing all evidence blockers makes the tree eligible for a deliberate
-        # release-freeze commit. It does not silently bump versions here.
-        phase = "freeze-eligible"
+    if version != expected:
+        failures.append(f"VERSION changed before release freeze: {version!r}, expected {expected!r}")
+    if package_string != f'"{expected}"':
+        failures.append(
+            f"APTA_PACKAGE_VERSION_STRING changed before release freeze: {package_string!r}"
+        )
+    if release_tag in tags:
+        failures.append(f"release tag {release_tag} already exists before release freeze")
+
+    phase = "blocked" if open_ids else "freeze-eligible"
 
     return {
         "schema": REPORT_SCHEMA,
