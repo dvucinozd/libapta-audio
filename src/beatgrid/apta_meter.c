@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_meter_internal.h"
+#include "../core/apta_grid_match_internal.h"
 
 #include <math.h>
 #include <stdalign.h>
@@ -246,8 +247,8 @@ apta_status_t apta_internal_meter_refresh(
     float strengths[APTA_INTERNAL_METER_MAX_BEATS];
     apta_internal_meter_selection_t selection;
     apta_meter_segment_t next;
+    apta_fractional_frame_t downbeat_position;
     uint64_t first_beat_bin = 0u;
-    uint64_t downbeat_bin;
     uint32_t lag;
     uint32_t beat_count;
     uint32_t index;
@@ -294,14 +295,23 @@ apta_status_t apta_internal_meter_refresh(
 
     first_ordinal = apta_meter_ordinal_at_bin(session, first_beat_bin, lag);
     index = selection.downbeat_phase;
-    downbeat_bin = first_beat_bin + (uint64_t)index * lag;
     downbeat_ordinal = first_ordinal + (apta_beat_ordinal_t)index;
+    if (!apta_internal_grid_segment_position_at_ordinal(
+            &session->local_grid_segment,
+            downbeat_ordinal,
+            &downbeat_position)) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
 
     memset(&next, 0, sizeof(next));
     next.struct_size = (uint32_t)sizeof(next);
     next.api_version = APTA_API_VERSION;
     next.applicability_range = session->local_grid_applicability_range;
-    next.downbeat_frame = downbeat_bin * APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
+    /* MTRD has integer-frame precision. Publish the whole-frame component of
+     * the exact refined S4 beat, not the rounded onset-bin sampling position
+     * used only to score meter phase. This keeps the native meter and the
+     * serialized beatgrid on one ordinal/position contract. */
+    next.downbeat_frame = downbeat_position.whole_frame;
     next.downbeat_ordinal = downbeat_ordinal;
     next.numerator = selection.numerator;
     next.denominator = selection.denominator;
