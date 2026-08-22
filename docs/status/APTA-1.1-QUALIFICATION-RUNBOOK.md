@@ -7,15 +7,19 @@ acceptance evidence by itself.
 ## Evidence boundary
 
 - Real audio remains local and is never committed to the repository.
-- The local staging CSV may contain private filenames or relative paths.
-- Frozen labels use only opaque IDs derived from full audio SHA-256 digests.
-- The corpus runner re-hashes every source and requires an exact match with the
-  frozen manifest before analysis starts.
+- Original MP3/FLAC/WAV source material may remain private in any convenient
+  directory.
+- Qualification frame labels are bound to a canonical PCM WAV, not to compressed
+  MP3/FLAC timing.
+- The local preparation manifest and staging CSV may contain private filenames
+  or relative paths and must not be committed.
+- Frozen labels use only opaque IDs derived from full canonical-WAV SHA-256
+  digests.
+- The corpus runner re-hashes every canonical WAV and requires an exact match
+  with the frozen manifest before analysis starts.
 - `apta-analyze` is invoked with an anonymous input name of the form
   `track-<hash>.wav`, so the original filename/path cannot enter `.apta`
   application-source metadata.
-- Runner mapping and run metadata contain only relative output paths, opaque
-  track IDs, exact source revision and SHA-256 digests.
 - Synthetic/undersized runs are diagnostic-only and cannot close an acceptance
   blocker.
 
@@ -36,28 +40,69 @@ REV=$(git rev-parse HEAD)
 `REV` must be the full 40-character commit SHA. Do not qualify a dirty or
 uncommitted build as release evidence.
 
-## 1. Prepare the private staging corpus
+## 1. Prepare canonical WAV files
 
 For final DJ acceptance, use at least 48 genuinely fresh, manually verified
-tracks that were not used to tune the candidate. Keep the audio outside the
-repository if desired.
+tracks that were not used to tune the candidate. A larger private pool is
+recommended so ambiguous tracks can be excluded before freezing.
 
-The private staging CSV schema is:
+The current reference desktop analyzer opens WAV directly. MP3 and FLAC are
+valid source material, but must first be converted to the exact PCM stream that
+will be labelled and analyzed.
+
+Use the corpus preparation tool:
+
+```sh
+python3 tools/apta_1_1_prepare_corpus.py \
+  --source-root /private/apta-raw \
+  --output-root /private/apta-canonical \
+  --manifest-output /private/apta-preparation.json
+```
+
+It recursively accepts `.mp3`, `.flac` and `.wav` and produces 48 kHz stereo
+PCM16 WAV files with source metadata removed. It records source/canonical
+SHA-256 values and the FFmpeg version in a **local-only** manifest. Do not commit
+that manifest.
+
+The canonical WAV is the authority for frame coordinates and frozen identity.
+Do not label an MP3/FLAC timestamp and then analyze a separately converted WAV.
+
+Detailed instructions are in
+[`APTA-1.1-CORPUS-LABELING.md`](APTA-1.1-CORPUS-LABELING.md).
+
+## 2. Label the private corpus
+
+Open `tools/apta_1_1_label_corpus.html` locally in a modern browser. The helper
+contains no remote scripts and does not upload audio.
+
+For each canonical WAV record:
+
+- `key_tonic` (`0..11`);
+- `key_mode` (`major` or `minor`);
+- meter (`3/4` or `4/4`);
+- a manually verified downbeat frame;
+- beat period in source frames.
+
+The helper parses the WAV header itself for exact sample rate/frame geometry.
+For beat period, prefer a reference beat 16–64 beat intervals after the marked
+downbeat; this averages manual cursor error better than tap tempo.
+
+Export `staging_labels.csv` with schema:
 
 ```text
 source,key_tonic,key_mode,meter_numerator,meter_denominator,downbeat_frame,beat_period_frames
 ```
 
-`source` is resolved relative to `--corpus-root`. Current final acceptance
-labels permit major/minor keys and 3/4 or 4/4 meter. Frame labels must refer to
-the exact WAV files being analyzed.
+`source` is relative to `/private/apta-canonical`. Keep the staging CSV private.
 
-## 2. Freeze the corpus
+## 3. Freeze the corpus
+
+After an independent label review:
 
 ```sh
 python3 tools/apta_1_1_freeze_corpus.py \
-  --corpus-root /private/apta-corpus \
-  --staging-labels /private/apta-staging.csv \
+  --corpus-root /private/apta-canonical \
+  --staging-labels /private/staging_labels.csv \
   --labels-output qualification/labels.csv \
   --manifest-output qualification/manifest.json \
   --frozen-utc 2026-01-01T00:00:00Z \
@@ -69,7 +114,7 @@ Do not use `--allow-diagnostic` for final acceptance. The freezer rejects fewer
 than 48 tracks, duplicate audio content, invalid labels, missing files and path
 escape from the corpus root.
 
-## 3. Analyze the exact frozen corpus
+## 4. Analyze the exact frozen corpus
 
 Run from a dedicated workspace directory. All publishable runner outputs must
 remain below the current working directory; the private corpus itself may live
@@ -77,8 +122,8 @@ elsewhere.
 
 ```sh
 python3 tools/apta_1_1_analyze_frozen_corpus.py \
-  --corpus-root /private/apta-corpus \
-  --staging-labels /private/apta-staging.csv \
+  --corpus-root /private/apta-canonical \
+  --staging-labels /private/staging_labels.csv \
   --manifest qualification/manifest.json \
   --analyzer build-qual/tools/apta-analyze \
   --output-dir qualification/run/analyzed \
@@ -88,21 +133,15 @@ python3 tools/apta_1_1_analyze_frozen_corpus.py \
 ```
 
 The runner always requests `--features all`. Each output is named by opaque
-track ID. `run.json` binds the run to:
+track ID. `run.json` binds the run to exact source revision, analyzer SHA-256,
+frozen manifest SHA-256, feature set, per-track `.apta` SHA-256 and mapping
+SHA-256.
 
-- exact source revision;
-- analyzer binary SHA-256;
-- frozen manifest SHA-256;
-- feature set;
-- per-track `.apta` SHA-256;
-- mapping SHA-256.
+An interrupted run can continue with `--resume`. Existing outputs are reused
+only when the run header matches and each stored `.apta` hash still matches the
+file on disk.
 
-The state file is written after each completed track. An interrupted run can be
-continued with `--resume`. Existing outputs are reused only when the run header
-matches and each stored `.apta` hash still matches the file on disk. A changed
-source revision, analyzer binary, manifest or output invalidates reuse.
-
-## 4. Export FINAL native DJ results
+## 5. Export FINAL native DJ results
 
 ```sh
 python3 tools/apta_1_1_export_acceptance_results.py \
@@ -116,7 +155,7 @@ The exporter requires exact manifest ID coverage, a completed session, FINAL
 `MKEY`, FINAL `MTRD`, and a FINAL global/local beatgrid. Missing or provisional
 native results fail the export.
 
-## 5. Run final DJ acceptance scoring
+## 6. Run final DJ acceptance scoring
 
 ```sh
 python3 tools/apta_1_1_dj_acceptance_eval.py \
@@ -126,7 +165,7 @@ python3 tools/apta_1_1_dj_acceptance_eval.py \
   --output qualification/dj-acceptance-report.json
 ```
 
-The frozen gates are:
+Frozen gates:
 
 - at least 48 fresh manually verified tracks;
 - exact key accuracy >=75%;
@@ -137,16 +176,16 @@ The frozen gates are:
 - beat-period tolerance <=1%;
 - cyclic downbeat phase tolerance <=0.10 beat.
 
-Do not change these thresholds after examining the fresh corpus results.
+Do not change thresholds after examining the fresh corpus results.
 
-## 6. Run the separate tempo/grid fresh-corpus protocol
+## 7. Separate tempo/grid fresh-corpus protocol
 
 The previous development corpus and prior holdout are not fresh evidence. Use
 the pre-registered APTA 1.1 tempo/grid evaluation protocol and its required
 fresh corpus. Only committed evidence produced under that protocol may close the
 `tempo-grid-fresh-corpus` readiness blocker.
 
-## 7. Confidence calibration
+## 8. Confidence calibration
 
 Confidence fitting is a separate evidence phase. Train on at least 96 rows and
 evaluate on an untouched holdout of at least 48 disjoint rows under the frozen
@@ -154,20 +193,19 @@ calibration protocol. Do not expose or enable production
 `APTA_FEATURE_CALIBRATED_QUALITY` until the accepted model passes the holdout
 gates.
 
-## 8. Physical ESP32-P4 evidence
+## 9. Physical ESP32-P4 evidence
 
 Collect the physical 30-minute ESP32-P4 qualification evidence only on real
 hardware using the frozen hardware-evidence contract. Synthetic CI, host tests
 and deterministic capacity calculations are not substitutes for physical
 memory/timing/USB/audio coexistence evidence.
 
-## 9. Release readiness
+## 10. Release readiness
 
 Only after the tempo/grid, confidence, final DJ corpus and physical ESP32-P4
-evidence blockers are closed may the release-readiness state become
-`freeze-eligible`. That state still does not automatically release 1.1.
+evidence blockers are closed may release readiness become `freeze-eligible`.
+That state still does not automatically release 1.1.
 
-Perform the final API/ABI/wire/package matrix against the exact release
-candidate, then deliberately update version metadata and create the `v1.1.0`
-tag/release. Until then, `VERSION` remains `1.0.1` and APTA 1.0 remains the
-stable authority.
+Run the final API/ABI/wire/package matrix against the exact release candidate,
+then deliberately update version metadata and create the `v1.1.0` tag/release.
+Until then, `VERSION` remains `1.0.1` and APTA 1.0 remains the stable authority.
