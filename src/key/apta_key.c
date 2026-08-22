@@ -125,6 +125,20 @@ apta_status_t apta_internal_key_select_chroma(
             apta_key_profile_score(chroma, tonic, apta_minor_profile));
     }
 
+    /* The wire contract orders candidates by the encoded uint16 score, not by
+     * the higher-precision float used for ranking. Distinct float scores can
+     * round to the same 16-bit value (and flat/broadband material can produce
+     * exact ties), which made a native MKEY result impossible to serialize.
+     * Preserve the float ranking and resolve only encoded ties by one LSB. */
+    for (pitch = 1u; pitch < APTA_INTERNAL_KEY_CANDIDATE_COUNT; ++pitch) {
+        if (candidates[pitch].score >= candidates[pitch - 1u].score) {
+            candidates[pitch].score =
+                candidates[pitch - 1u].score > 0u
+                    ? (uint16_t)(candidates[pitch - 1u].score - 1u)
+                    : 0u;
+        }
+    }
+
     separation = scores[0] > scores[1] ? scores[0] - scores[1] : 0.0f;
     confidence = 25u +
                  (completed_windows >= 8u ? 40u : completed_windows * 5u) +
