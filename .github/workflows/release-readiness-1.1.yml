@@ -1,0 +1,43 @@
+name: APTA 1.1 release readiness
+
+on:
+  pull_request:
+    paths:
+      - "release/1.1-readiness.json"
+      - "release/check_1_1_readiness.py"
+      - "tests/unit/apta_1_1_release_readiness.py"
+      - ".github/workflows/release-readiness-1.1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness-contract:
+    name: Fail-closed release readiness
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile readiness tooling
+        run: python3 -m py_compile release/check_1_1_readiness.py tests/unit/apta_1_1_release_readiness.py
+
+      - name: Run readiness policy tests
+        run: python3 -m unittest tests/unit/apta_1_1_release_readiness.py
+
+      - name: Verify current development boundary
+        run: >-
+          python3 release/check_1_1_readiness.py
+          --root .
+          --manifest release/1.1-readiness.json
+          --expect blocked
+          --output build/release/apta-1.1-readiness.json
+
+      - name: Upload readiness evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: apta-1.1-release-readiness
+          path: build/release/apta-1.1-readiness.json
