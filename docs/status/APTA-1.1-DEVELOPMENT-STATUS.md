@@ -57,7 +57,7 @@ The qualification tooling then provides the full private-corpus path:
 7. export only completed/FINAL native key, meter and selected beatgrid results;
 8. run the pre-registered acceptance evaluator.
 
-This closes the software-path gap between private source audio and the acceptance evaluator. It does **not** provide the required fresh evidence itself. A 60-track private corpus has now been selected, copied locally and canonicalized, and an independent automated pre-review has been completed without reading APTA output. Manual verification against the canonical WAV files remains pending, so the corpus has not been frozen or analyzed and no fresh acceptance result is claimed. The dated execution snapshot is recorded in [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
+This closes the software-path gap between private source audio and the acceptance evaluator. It does **not** provide the required fresh evidence itself. A 60-track private corpus has now been selected, copied locally and canonicalized, and an independent automated pre-review was completed without reading APTA output. Manual verification against the canonical WAV files remains pending, so no official corpus has been frozen and no fresh acceptance result is claimed. A separately frozen automated diagnostic run failed on long-form completion, container integrity and all primary accuracy gates; it is not acceptance evidence. The dated preparation and diagnostic snapshots are recorded in [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
 
 ## ESP32-P4 qualification boundary
 

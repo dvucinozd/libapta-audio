@@ -80,3 +80,38 @@ Only after that review may the workflow:
 
 Until those steps finish and all frozen thresholds pass, documentation and
 release metadata must continue to report the final DJ corpus blocker as open.
+
+## Automated diagnostic run — 2026-08-23
+
+At the owner's request, the prepared 60-track set was also run with automated
+Rekordbox labels and the independent DSP audit as diagnostic references. This
+run did **not** use APTA output to create the initial frozen labels, but it did
+not include human listening verification and therefore is not official
+acceptance evidence.
+
+The diagnostic run failed both operational and accuracy gates:
+
+- the exact 60-track run stopped after 37 completed tracks when one long-form
+  input exceeded the desktop analyzer's one-million-iteration guard;
+- a temporary four-million-iteration candidate passed the old guard but did
+  not complete the same input after more than 45 minutes at full CPU, so the
+  guard-only change was reverted as an unproven workaround;
+- a post-failure 59-track diagnostic subset completed, but `apta-inspect`
+  rejected 6 outputs as corrupt containers;
+- among the 53 readable completed/FINAL outputs, exact key accuracy was 24.5%,
+  meter accuracy 71.7%, downbeat phase accuracy 11.3%, and beatgrid accuracy
+  3.8%;
+- high-confidence key and grid error rates were 17.0% and 37.7%, above the 5%
+  safety ceiling. Meter and downbeat high-confidence safety passed only because
+  no corresponding wrong result reached the high-confidence threshold.
+
+The 53-track accuracy view was derived after observing APTA output-integrity
+failures and is explicitly contaminated diagnostic evidence. It cannot replace
+the original frozen set or close a release blocker. The private local report
+retains exact opaque IDs, hashes, run metadata and failure artifacts; no private
+audio, filenames or source mapping is committed.
+
+The next engineering work is to reproduce and fix the long-form non-completion
+and corrupt-container defects before repeating this frozen automated diagnostic
+run. Manual independent ground truth remains a separate prerequisite for any
+future official acceptance claim.

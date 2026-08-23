@@ -8,8 +8,7 @@
 
 #include <apta/desktop/apta_decoder.h>
 
-/* Keep a hard runaway guard while covering the frozen 30-minute profile. */
-#define APTA_ANALYZE_MAX_ITERATIONS 4000000u
+#define APTA_ANALYZE_MAX_ITERATIONS 1000000u
 #define APTA_ANALYZE_MAX_OUTPUT_BYTES UINT64_C(1073741824)
 
 static void print_usage(FILE *stream)
