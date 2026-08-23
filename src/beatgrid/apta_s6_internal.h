@@ -93,4 +93,73 @@ struct apta_internal_s6_result_state {
     apta_grid_revision_view_t revision;
 };
 
+static inline uint64_t apta_internal_s6_segment_support(
+    const apta_grid_segment_t *segment)
+{
+    const uint64_t span =
+        segment->applicability_range.end_frame >
+                segment->applicability_range.first_frame
+            ? segment->applicability_range.end_frame -
+                  segment->applicability_range.first_frame
+            : 0u;
+    const uint64_t confidence_weight =
+        segment->confidence <= APTA_CONFIDENCE_MAX
+            ? (uint64_t)segment->confidence + 1u
+            : 1u;
+
+    return span > UINT64_MAX / confidence_weight
+               ? UINT64_MAX
+               : span * confidence_weight;
+}
+
+/* Select the tempo family with the greatest confidence-weighted duration.
+ * A single longest segment is fragile when the bounded segment list ends in a
+ * long low-confidence outlier. Segments within one percent vote together;
+ * ties retain the earliest representative for deterministic publication. */
+static inline uint32_t apta_internal_s6_dominant_tempo_segment(
+    const apta_grid_segment_t *segments,
+    uint32_t segment_count)
+{
+    uint32_t best_index = 0u;
+    uint64_t best_support = 0u;
+    uint32_t candidate_index;
+
+    if (segments == NULL || segment_count == 0u) {
+        return 0u;
+    }
+    for (candidate_index = 0u;
+         candidate_index < segment_count;
+         ++candidate_index) {
+        const uint32_t candidate_tempo =
+            segments[candidate_index].nominal_tempo_millibpm;
+        uint64_t support = 0u;
+        uint32_t segment_index;
+
+        for (segment_index = 0u;
+             segment_index < segment_count;
+             ++segment_index) {
+            const uint32_t tempo =
+                segments[segment_index].nominal_tempo_millibpm;
+            const uint32_t difference = tempo > candidate_tempo
+                                            ? tempo - candidate_tempo
+                                            : candidate_tempo - tempo;
+            uint64_t contribution;
+
+            if ((uint64_t)difference * 100u > candidate_tempo) {
+                continue;
+            }
+            contribution =
+                apta_internal_s6_segment_support(&segments[segment_index]);
+            support = UINT64_MAX - support < contribution
+                          ? UINT64_MAX
+                          : support + contribution;
+        }
+        if (support > best_support) {
+            best_support = support;
+            best_index = candidate_index;
+        }
+    }
+    return best_index;
+}
+
 #endif /* APTA_S6_INTERNAL_H */

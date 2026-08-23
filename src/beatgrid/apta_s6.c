@@ -861,33 +861,16 @@ apta_status_t apta_internal_s6_refresh(
     valid_confidence_count = state->refresh_valid_confidence_count;
     degraded = state->refresh_degraded != 0u;
 
-    /*
-     * Hand the nominal tempo to the local estimator, which uses it to break
-     * ties among its own candidates on the next refresh. The longest segment
-     * rather than the first, because a track that opens with an intro at a
-     * different feel would otherwise be represented by the least typical part
-     * of it.
-     */
+    /* Hand the dominant nominal tempo to the local estimator, which uses it to
+     * arbitrate among its own candidates on the next refresh. Confidence-
+     * weighted duration prevents either a short intro or one long low-
+     * confidence tail segment from representing the whole track. */
     {
-        uint64_t widest = 0u;
-        uint32_t widest_index = 0u;
-
-        for (index = 0u; index < state->segment_count; ++index) {
-            const apta_grid_segment_t *segment = &state->segments[index];
-            const uint64_t span =
-                segment->applicability_range.end_frame >
-                        segment->applicability_range.first_frame
-                    ? segment->applicability_range.end_frame -
-                          segment->applicability_range.first_frame
-                    : 0u;
-
-            if (span > widest) {
-                widest = span;
-                widest_index = index;
-            }
-        }
+        const uint32_t dominant_index =
+            apta_internal_s6_dominant_tempo_segment(
+                state->segments, state->segment_count);
         session->s6_nominal_tempo_millibpm =
-            state->segments[widest_index].nominal_tempo_millibpm;
+            state->segments[dominant_index].nominal_tempo_millibpm;
     }
 
     state->confidence = valid_confidence_count != 0u

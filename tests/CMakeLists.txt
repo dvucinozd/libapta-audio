@@ -149,6 +149,12 @@ target_include_directories(apta_s4_serialization PRIVATE ${CMAKE_SOURCE_DIR}/src
 apta_add_c_test(apta_s4_allocation_failure apta.serialization.s4_allocation_failure unit/s4_allocation_failure.c)
 
 apta_add_c_test(apta_s6_global_grid apta.s6.global_grid unit/s6_global_grid.c)
+apta_add_c_test(
+    apta_s6_dominant_tempo
+    apta.s6.dominant_tempo
+    unit/s6_dominant_tempo.c)
+target_include_directories(
+    apta_s6_dominant_tempo PRIVATE ${CMAKE_SOURCE_DIR}/src/beatgrid)
 apta_add_c_test(apta_s6_revision apta.s6.revision unit/s6_revision.c)
 apta_add_c_test(apta_s6_bounded apta.s6.bounded unit/s6_bounded.c)
 target_include_directories(

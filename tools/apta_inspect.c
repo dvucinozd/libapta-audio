@@ -321,6 +321,30 @@ static void print_json_text_field(
     *first = 0;
 }
 
+static void print_json_grid_segments(const apta_grid_view_t *grid)
+{
+    uint32_t index;
+
+    fputs(",\"segments\":[", stdout);
+    for (index = 0u; index < grid->segment_count; ++index) {
+        const apta_grid_segment_t *segment = &grid->segments[index];
+        printf("%s{\"first_frame\":%llu,\"end_frame\":%llu,"
+               "\"nominal_tempo_millibpm\":%u,\"confidence\":%u,"
+               "\"anchor_frame\":%llu,\"period_whole_frames\":%llu,"
+               "\"period_fraction_q32\":%u,\"beat_count\":%u}",
+               index == 0u ? "" : ",",
+               (unsigned long long)segment->applicability_range.first_frame,
+               (unsigned long long)segment->applicability_range.end_frame,
+               segment->nominal_tempo_millibpm,
+               (unsigned)segment->confidence,
+               (unsigned long long)segment->anchor_position.whole_frame,
+               (unsigned long long)segment->frames_per_beat.whole_frames,
+               segment->frames_per_beat.fraction_q32,
+               segment->beat_count);
+    }
+    fputc(']', stdout);
+}
+
 static void print_json(
     const apta_tool_buffer_t *file,
     const apta_result_t *result,
@@ -479,6 +503,7 @@ static void print_json(
                        grid.segments[0].frames_per_beat.fraction_q32,
                        grid.segments[0].beat_count);
             }
+            print_json_grid_segments(&grid);
             fputc('}', stdout);
         } else {
             fputs("null", stdout);
@@ -512,6 +537,7 @@ static void print_json(
                        grid.segments[0].frames_per_beat.fraction_q32,
                        grid.segments[0].beat_count);
             }
+            print_json_grid_segments(&grid);
             fputc('}', stdout);
         } else {
             fputs("null", stdout);
