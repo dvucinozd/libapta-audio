@@ -38,6 +38,30 @@ These rules must not be changed after fresh validation labels are opened. A
 policy change starts a new candidate and requires a new frozen evaluation
 record.
 
+## Subsequent development candidate — 2026-08-23
+
+The automated 60-track DJ diagnostic exposed a second selection failure after
+the first relation-aware candidate was frozen: on 12 tracks the automated
+reference period already existed at TEMP rank 1 or 2, but the unrelated rank-0
+candidate remained selected. Inspection also showed that handing only the
+single longest S6 segment to S4 was fragile; a long low-confidence tail could
+override several mutually agreeing global segments.
+
+The subsequent development candidate therefore adds two bounded rules:
+
+1. S6 chooses its representative tempo family by confidence-weighted total
+   applicability duration across its at most eight segments; segments within
+   one percent vote together and ties retain the earliest representative.
+2. For a non-metrical proposal, S6 may reorder only an existing S4 candidate,
+   only when global confidence strictly exceeds local confidence, the existing
+   55000 score floor is retained and the proposed fine-grid fit is strictly
+   better. It may not introduce an S6-only close candidate.
+
+These rules were designed after inspecting the automated diagnostic corpus.
+That corpus is consequently development evidence for this candidate and can
+never be represented as its fresh validation set. A future qualifying run must
+use untouched labels frozen before this policy is evaluated.
+
 ## Native regression gates
 
 Corpus evaluation is not acceptance evidence unless the exact candidate first

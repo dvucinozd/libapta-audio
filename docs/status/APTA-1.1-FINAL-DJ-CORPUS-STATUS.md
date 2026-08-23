@@ -187,6 +187,70 @@ tuning must not treat the weak automated Rekordbox labels as authoritative
 ground truth. Independently verified labels remain mandatory before any
 official acceptance or release decision.
 
+## Development candidate reruns — 2026-08-23
+
+The taxonomy exposed that the automated-reference period was already present
+at TEMP rank 1 on 11 additional tracks and rank 2 on one more. It also exposed
+that the S6-to-S4 handoff used only the single longest global segment; on a
+reproduced failure that segment was a low-confidence 82.721 BPM tail while
+several mutually agreeing segments represented the correct 127.841 BPM family.
+
+Two bounded selection changes were implemented after observing this corpus:
+
+- the representative S6 tempo now comes from the confidence-weighted duration
+  of agreeing segment families rather than one longest segment;
+- a close, non-metrical S6 proposal may reorder only a candidate S4 already
+  found, and only with greater global confidence, the existing S4 score floor
+  and a strictly better fine-grid fit.
+
+The first full candidate at revision `ae603ad` changed no exported result and
+was retained only as the close-candidate plumbing prerequisite. Adding the
+dominant S6 family choice at revision `c12b303` changed three tracks: all three
+previously wrong periods became correct and no correct period was broken.
+Period accuracy therefore rose from 37/60 to 40/60. One affected track changed
+from a correct low-confidence 4/4 result to a wrong low-confidence 3/4 result,
+showing that tempo improvement alone does not stabilize meter/downbeat.
+
+Every 3/4 prediction in the baseline automated DJ run had confidence between
+38 and 54, while all 60 automated references were 4/4. Revision `1dadfb2`
+therefore adds a conservative common-time prior: a 3/4 argmax below confidence
+50 no longer overrides 4/4, while a strong synthetic 3/4 regression vector
+remains selected. The exact 60-track set was analyzed again from scratch using
+an analyzer with SHA-256
+`4e6f33ca33a82c078d08e2ca39af2ce51419d82b931b84a3b678721ea3dba82c`.
+All 60 containers passed completed/FINAL inspection.
+
+Compared with the corrected `d53ee8d` baseline, the final development rerun
+measured:
+
+| Metric | Baseline | Development candidate |
+|---|---:|---:|
+| Beat period within 1% | 37/60 (61.7%) | 40/60 (66.7%) |
+| Exact meter | 43/60 (71.7%) | 58/60 (96.7%) |
+| Downbeat phase | 6/60 (10.0%) | 5/60 (8.3%) |
+| Beatgrid (period + phase) | 4/60 (6.7%) | 4/60 (6.7%) |
+| Exact key | 15/60 (25.0%) | 15/60 (25.0%) |
+| High-confidence key errors | 10/60 (16.7%) | 10/60 (16.7%) |
+| High-confidence grid errors | 24/60 (40.0%) | 24/60 (40.0%) |
+| High-confidence meter/downbeat errors | 0/60 | 0/60 |
+
+The meter gate passes only against labels that are uniformly automated 4/4 and
+were already inspected while designing the prior. It is not evidence that real
+3/4 recall is adequate. Downbeat lost one net correct phase and remains the
+dominant blocker; onset-only phase alternatives tested against the same corpus
+produced 4–6 correct tracks, so none was promoted into production code.
+
+The corrected private result CSV, evaluator report, output audit and run
+metadata have SHA-256 values
+`8a011cf9c695ed5d2fdb5eeaeff92504d0655827306c16c291fd4d0565ae1c0e`,
+`14006b0f55fe31aec04a8a0407a85c7094f137390d48cee354a50aec338cb22c`,
+`8065694e6976ff46a262b08e16b51f4c60b970791d1b9268dbdea84702a7c911`
+and `d0e7fc996c070ad40f827649068fd2729bcd9357f81c16643a1ce58b50c2538d`
+respectively. This run is deliberately classified as contaminated development
+evidence: the same corpus informed the candidate rules, its labels lack human
+verification, and the evaluator still rejects key, downbeat, beatgrid and
+key/grid high-confidence safety.
+
 This rerun closes the two software-path failures, not the final DJ acceptance
 blocker. The labels are automated rather than independently verified by human
 review, and the measured accuracy and key/grid safety gates fail by wide

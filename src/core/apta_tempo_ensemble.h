@@ -10,18 +10,18 @@
  *
  * Phase 5 demonstrated that interpreting only the three published S4
  * candidates does not generalize: a correct metrical family member can be
- * absent from that short list. The 1.1 ensemble may therefore consider a
- * tempo independently proposed by S6, but S6 is not allowed to overrule S4 on
- * its own. Promotion requires all of the following:
+ * absent from that short list. The metrical-recovery path may therefore
+ * consider a tempo independently proposed by S6, but S6 is not allowed to
+ * overrule S4 on its own. Promotion requires all of the following:
  *
  *  - the proposal is a recognized metrical relative of the current S4 answer;
  *  - the proposal retains at least the existing S4 local-evidence floor;
  *  - a fine S4 grid fitted at the proposed period explains the onset novelty
  *    better than the currently selected grid.
  *
- * There is deliberately no new fitted threshold here. The score floor is the
- * already-shipped endorsement floor and the grid criterion is a strict
- * pairwise improvement. Corpus calibration remains a later 1.1 gate.
+ * The separate close-candidate path below cannot introduce an S6-only tempo;
+ * it only arbitrates between candidates S4 already produced, using the same
+ * score/grid-fit gates plus strictly greater global confidence.
  */
 static inline int apta_internal_tempo_ensemble_should_promote(
     apta_tempo_relation_t relation,
