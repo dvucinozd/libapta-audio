@@ -76,14 +76,26 @@ bounded low/mid energy in the native meter stage did not reproduce that gain:
 downbeat moved only from 6/40 to 7/40, meter fell from 21/40 to 20/40, and 3/4
 recall fell to 0/20. That candidate was removed.
 
-The dominant defect precedes meter phase. The current local period is within
-10% on 17/20 Ballroom 4/4 tracks and 0/20 3/4 tracks. Ten of the 20 triple-meter
-tracks place the annotated beat rate within 10% of a 2:3 or 3:2 relation of the
-selected local tempo, and eight expose an approximately correct tempo in at
-least one global segment. The next candidate must therefore evaluate bounded
-3:2 tempo families jointly with triple-meter evidence and keep TEMP/LGRD/MTRD
-internally consistent. It must not merely relabel meter on top of the wrong
-local grid or invent an unsupported tempo after publication.
+A second bounded candidate jointly evaluated reciprocal 3:2 tempo families and
+triple-meter evidence. It required a direct 3:2 relation, at least 60% local S4
+correlation support, a positive grid fit, an S6 segment within 6%, a raw 3/4
+margin over 4/4 of at least 0.04, and stronger 3/4 evidence than the currently
+selected grid. On Ballroom development it improved meter from 21/40 to 26/40
+and period within 10% from 17/40 to 20/40 while leaving every 4/4 metric
+unchanged. However, downbeat fell from 6/40 to 5/40. On the independent ASAP
+development split, meter fell from 19/40 to 17/40: 3/4 recall stayed at 1/20
+while 4/4 recall regressed from 18/20 to 16/20. Combining the candidate with
+the multiband onset experiment also regressed Ballroom 4/4 results. A bounded
+downbeat-continuity follow-up did not recover the lost phase result. The joint
+candidate and follow-up were therefore removed and are not production code.
+
+The dominant defect still precedes meter phase, but these results reject a
+hand-tuned 3:2 threshold gate as the next production boundary. Further work
+needs richer temporal evidence that can distinguish triple-meter beat lattices
+without sacrificing duple recall, followed by the same independent-development
+veto before any holdout is opened. It must keep TEMP/LGRD/MTRD internally
+consistent and must not merely relabel meter on top of the wrong local grid or
+invent an unsupported tempo after publication.
 
 Only the development partitions may inform that work. Once a candidate is
 frozen and passes all normal tests plus the contaminated development reruns,
