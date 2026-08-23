@@ -111,7 +111,47 @@ the original frozen set or close a release blocker. The private local report
 retains exact opaque IDs, hashes, run metadata and failure artifacts; no private
 audio, filenames or source mapping is committed.
 
-The next engineering work is to reproduce and fix the long-form non-completion
-and corrupt-container defects before repeating this frozen automated diagnostic
-run. Manual independent ground truth remains a separate prerequisite for any
-future official acceptance claim.
+The next engineering work identified by that run was to reproduce and fix the
+long-form non-completion and corrupt-container defects before repeating the
+frozen automated diagnostic run. Manual independent ground truth remained a
+separate prerequisite for any future official acceptance claim.
+
+## Engineering rerun after operational fixes — 2026-08-23
+
+Revision `d53ee8de6d74177d8eae805b325284ebd3ac0d6d` fixes both operational
+defects found above. S6 now performs at most one end-of-input refresh when a
+long input has rolled past its bounded evidence ring, so a downstream final key
+refresh cannot be starved indefinitely. Tempo candidate promotion also
+preserves the TEMP section's non-increasing encoded-score order, and the writer
+defensively rejects an invalid order or relation instead of emitting data its
+reader cannot parse.
+
+The exact frozen 60-track automated diagnostic set was rerun from scratch with
+an analyzer whose SHA-256 is
+`83b16851c0644a4ee6643b814d8c32020ece2344424e5db825747fe696b00fb9`.
+The runner completed all 60 tracks, and a separate inspector audit accepted all
+60 containers with completed sessions and FINAL tempo/grid/key/meter sections.
+The previously non-completing long input finished under the original
+one-million-iteration guard; the six previously unreadable TEMP containers now
+round-trip normally.
+
+The frozen evaluator still rejected the automated diagnostic result:
+
+- exact key: **15/60 (25.0%)**;
+- exact meter: **43/60 (71.7%)**;
+- downbeat phase: **6/60 (10.0%)**;
+- beatgrid: **2/60 (3.3%)**;
+- high-confidence key error: **10/60 (16.7%)**;
+- high-confidence grid error: **23/60 (38.3%)**;
+- high-confidence meter and downbeat error: **0/60**.
+
+The private result CSV and evaluator report are retained locally with SHA-256
+`03e92ddb25e53a334f78d670910a9f07ab6900fd9ad97ca6555a4c1c8805573f`
+and `6c2751a8cb36cc25b370915772e246d19ba1cc637212bf3e8758ea329a672372`
+respectively. These hashes identify reproducible diagnostic artifacts without
+publishing private audio, labels or source mappings.
+
+This rerun closes the two software-path failures, not the final DJ acceptance
+blocker. The labels are automated rather than independently verified by human
+review, and the measured accuracy and key/grid safety gates fail by wide
+margins. No acceptance or release claim is made.
