@@ -152,8 +152,12 @@ python3 tools/apta_1_1_export_acceptance_results.py \
 ```
 
 The exporter requires exact manifest ID coverage, a completed session, FINAL
-`MKEY`, FINAL `MTRD`, and a FINAL global/local beatgrid. Missing or provisional
-native results fail the export.
+`MKEY`, FINAL `MTRD`, and a FINAL global/local beatgrid. Because the native
+`MTRD` result is resolved against the refined S4 grid, the exporter uses FINAL
+`LGRD` for the scored beat period whenever it is present and falls back to
+FINAL `GGRD` only when no local grid is available. This keeps the exported
+period and downbeat on one grid. Missing or provisional native results fail the
+export.
 
 ## 6. Run final DJ acceptance scoring
 

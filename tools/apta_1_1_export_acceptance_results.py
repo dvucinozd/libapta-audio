@@ -105,9 +105,12 @@ def _required_object(value: dict[str, Any], name: str) -> dict[str, Any]:
 def parse_inspection(track: str, value: dict[str, Any]) -> dict[str, str | int]:
     key = _required_object(value, "MKEY")
     meter = _required_object(value, "MTRD")
-    grid = value.get("GGRD")
+    # MTRD downbeat_frame is defined against the local (S4) grid. Keep the
+    # exported period and downbeat on that same grid whenever LGRD is present;
+    # older/minimal inspection payloads may only expose GGRD.
+    grid = value.get("LGRD")
     if not isinstance(grid, dict):
-        grid = value.get("LGRD")
+        grid = value.get("GGRD")
     if not isinstance(grid, dict):
         raise ExportError("required global/local beatgrid is unavailable")
 

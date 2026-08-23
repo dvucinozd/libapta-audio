@@ -1,6 +1,6 @@
 # APTA 1.1 final DJ corpus status
 
-- **Snapshot date:** 2026-08-22
+- **Snapshot date:** 2026-08-23
 - **Development branch:** `1.1.0`
 - **Qualification source revision:** `9fa2a2e48d88a9732a5130db421b6da75805884b`
 - **Current state:** private corpus prepared; manual canonical-WAV verification pending
@@ -140,16 +140,52 @@ The frozen evaluator still rejected the automated diagnostic result:
 - exact key: **15/60 (25.0%)**;
 - exact meter: **43/60 (71.7%)**;
 - downbeat phase: **6/60 (10.0%)**;
-- beatgrid: **2/60 (3.3%)**;
+- beatgrid: **4/60 (6.7%)**;
 - high-confidence key error: **10/60 (16.7%)**;
-- high-confidence grid error: **23/60 (38.3%)**;
+- high-confidence grid error: **24/60 (40.0%)**;
 - high-confidence meter and downbeat error: **0/60**.
 
-The private result CSV and evaluator report are retained locally with SHA-256
-`03e92ddb25e53a334f78d670910a9f07ab6900fd9ad97ca6555a4c1c8805573f`
-and `6c2751a8cb36cc25b370915772e246d19ba1cc637212bf3e8758ea329a672372`
+These beatgrid figures supersede the initially recorded 2/60 grid result and
+23/60 high-confidence grid errors. The first export combined the `MTRD`
+downbeat, which native analysis resolves against `LGRD`, with the first `GGRD`
+segment's period. The exporter now keeps that pair on `LGRD` whenever the local
+grid is available, with a regression test for files containing both grids. A
+re-export of the same immutable 60 analyzed files changed no key, meter or
+downbeat result; it raised grid accuracy only to 4/60, so it does not alter the
+failed diagnostic outcome.
+
+The corrected private result CSV and evaluator report are retained locally
+with SHA-256
+`a9d1dd9c391c258199cdde5b7bc83a213f9eefdfb52db5c2c4e76a5406fa0ab2`
+and `b8150035cc9a8cf76fc49034d8caf72449f1fc09f55a9ebfe87476efedd3be2f`
 respectively. These hashes identify reproducible diagnostic artifacts without
 publishing private audio, labels or source mappings.
+
+## Post-run error taxonomy — 2026-08-23
+
+A read-only audit compared the frozen automated labels, both encoded grids and
+the independent pre-review estimates. It found no single evaluator conversion
+that explains the remaining gap:
+
+- both local and global periods are within 1% on 37/60 tracks, despite choosing
+  different periods on all 60 tracks;
+- 30/60 predicted downbeats are within 0.10 beat of *some* reference beat, but
+  only 6/60 are within 0.10 beat of the automated reference bar phase;
+- the predicted bar phase is spread across all four 4/4 positions rather than
+  showing one constant one-beat offset;
+- meter output is 4/4 on 43 tracks and 3/4 on 17, while the automated Rekordbox
+  reference labels every retained track as 4/4;
+- key errors comprise 13 same-tonic parallel-mode choices, one relative-mode
+  choice and 31 other choices; there is no dominant tonic transposition;
+- exact APTA key accuracy rises with agreement among the five independent key
+  estimators, while the automated reference itself has three or more matching
+  independent votes on only 24/60 tracks.
+
+This separates three follow-up problems: beat/downbeat phase selection is the
+clearest DSP defect signal, meter needs a targeted 3/4-vs-4/4 corpus, and key
+tuning must not treat the weak automated Rekordbox labels as authoritative
+ground truth. Independently verified labels remain mandatory before any
+official acceptance or release decision.
 
 This rerun closes the two software-path failures, not the final DJ acceptance
 blocker. The labels are automated rather than independently verified by human

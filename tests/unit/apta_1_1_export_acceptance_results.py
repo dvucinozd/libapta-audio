@@ -50,10 +50,20 @@ class AcceptanceResultExportTests(unittest.TestCase):
         self.assertEqual(row["beat_period_frames"], "24000.5")
         self.assertEqual(row["grid_confidence"], 88)
 
-    def test_falls_back_to_local_grid(self) -> None:
+    def test_prefers_local_grid_tied_to_meter_downbeat(self) -> None:
         value = self.inspection()
-        value["LGRD"] = value.pop("GGRD")
+        value["LGRD"] = {
+            "period_whole_frames": 25000,
+            "period_fraction_q32": 1073741824,
+            "confidence": 77,
+            "state": "final",
+        }
         row = exporter.parse_inspection("track-local", value)
+        self.assertEqual(row["beat_period_frames"], "25000.25")
+        self.assertEqual(row["grid_confidence"], 77)
+
+    def test_falls_back_to_global_grid(self) -> None:
+        row = exporter.parse_inspection("track-global", self.inspection())
         self.assertEqual(row["beat_period_frames"], "24000.5")
 
     def test_rejects_missing_key_meter_or_grid(self) -> None:
