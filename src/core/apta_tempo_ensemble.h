@@ -41,4 +41,13 @@ static inline int apta_internal_tempo_ensemble_should_promote(
     return proposed_grid_fit > selected_grid_fit;
 }
 
+/* A promoted candidate becomes rank zero. Its serialized score must therefore
+ * be no lower than the candidate shifted to rank one. */
+static inline uint16_t apta_internal_tempo_promotion_score(
+    uint16_t promoted_score,
+    uint16_t next_score)
+{
+    return promoted_score < next_score ? next_score : promoted_score;
+}
+
 #endif

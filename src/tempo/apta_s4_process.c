@@ -410,6 +410,10 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
                 session->tempo_candidates[entry - 1u];
         }
     }
+    if (session->tempo_candidate_count > 1u) {
+        promoted.score = apta_internal_tempo_promotion_score(
+            promoted.score, session->tempo_candidates[1].score);
+    }
     session->tempo_candidates[0] = promoted;
 
     session->tempo_value.tempo_millibpm = promoted.tempo_millibpm;

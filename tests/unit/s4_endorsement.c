@@ -36,6 +36,7 @@
 typedef struct {
     uint32_t count;
     uint32_t tempo[MAX_CANDIDATES];
+    uint16_t score[MAX_CANDIDATES];
     uint32_t selected;
     uint32_t global_nominal;
 } outcome_t;
@@ -118,6 +119,7 @@ static int run(apta_context_t *context,
                      : MAX_CANDIDATES;
     for (index = 0u; index < out->count; ++index) {
         out->tempo[index] = tempo.candidates[index].tempo_millibpm;
+        out->score[index] = tempo.candidates[index].score;
     }
 
     if ((features & APTA_FEATURE_GLOBAL_BEATGRID) != 0u) {
@@ -230,6 +232,12 @@ int main(void)
     /* The published tempo is always the head of the bounded candidate list. */
     CHECK(alone.selected == alone.tempo[0]);
     CHECK(endorsed.selected == endorsed.tempo[0]);
+    for (index = 1u; index < alone.count; ++index) {
+        CHECK(alone.score[index] <= alone.score[index - 1u]);
+    }
+    for (index = 1u; index < endorsed.count; ++index) {
+        CHECK(endorsed.score[index] <= endorsed.score[index - 1u]);
+    }
 
     free(audio);
     CHECK(apta_context_destroy(context) == APTA_STATUS_OK);

@@ -111,7 +111,11 @@ static int apta_s4_tempo_is_valid(const apta_result_t *result)
                 APTA_REFERENCE_TEMPO_MIN_MILLIBPM ||
             tempo->candidates[index].tempo_millibpm >
                 APTA_REFERENCE_TEMPO_MAX_MILLIBPM ||
-            tempo->candidates[index].confidence > APTA_CONFIDENCE_MAX) {
+            tempo->candidates[index].confidence > APTA_CONFIDENCE_MAX ||
+            tempo->candidates[index].relation_to_selected >
+                APTA_TEMPO_RELATION_QUADRUPLE ||
+            (index != 0u && tempo->candidates[index].score >
+                                tempo->candidates[index - 1u].score)) {
             return 0;
         }
     }

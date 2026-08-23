@@ -128,5 +128,10 @@ int main(void)
                -0.10f,
                0.0f));
 
+    /* Promotion may select a lower-scored S4 candidate, but the published
+     * TEMP order remains non-increasing and therefore round-trippable. */
+    CHECK(apta_internal_tempo_promotion_score(62312u, 65535u) == 65535u);
+    CHECK(apta_internal_tempo_promotion_score(65535u, 62312u) == 65535u);
+
     return 0;
 }

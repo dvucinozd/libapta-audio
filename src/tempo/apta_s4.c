@@ -2,6 +2,7 @@
 #include "../core/apta_internal.h"
 #include "../core/apta_period_refine.h"
 #include "../core/apta_session_workspace.h"
+#include "../core/apta_tempo_ensemble.h"
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
 
@@ -1138,7 +1139,7 @@ estimate_ready:
             }
         }
         if (best != 0u) {
-            const apta_tempo_candidate_t promoted =
+            apta_tempo_candidate_t promoted =
                 session->tempo_candidates[best];
 
             /* Move it to the front rather than rewriting the selection, so the
@@ -1148,6 +1149,12 @@ estimate_ready:
                 session->tempo_candidates[entry] =
                     session->tempo_candidates[entry - 1u];
             }
+            /* Endorsement changes the published rank, so its encoded score
+             * must reflect that rank as well. Otherwise TEMP would put a
+             * lower score before the original 65535 winner and violate the
+             * container's non-increasing candidate-order contract. */
+            promoted.score = apta_internal_tempo_promotion_score(
+                promoted.score, session->tempo_candidates[1].score);
             session->tempo_candidates[0] = promoted;
             flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
         }

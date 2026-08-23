@@ -353,6 +353,29 @@ int main(void)
     ((apta_result_t *)(void *)result)->tempo_candidates[0].relation_to_selected =
         APTA_TEMPO_RELATION_INDEPENDENT;
 
+    /* The writer must not emit TEMP data that its reader will reject. */
+    ((apta_result_t *)(void *)result)->tempo_candidates[0].relation_to_selected =
+        APTA_TEMPO_RELATION_QUADRUPLE + 1u;
+    CHECK(apta_result_query_serialized_size(result, NULL, &roundtrip_size) ==
+          APTA_ERROR_INTERNAL);
+    ((apta_result_t *)(void *)result)->tempo_candidates[0].relation_to_selected =
+        APTA_TEMPO_RELATION_INDEPENDENT;
+
+    CHECK(result->tempo.candidate_count >= 2u);
+    {
+        apta_tempo_candidate_t *mutable_candidates =
+            ((apta_result_t *)(void *)result)->tempo_candidates;
+        const uint16_t first_score = mutable_candidates[0].score;
+        const uint16_t second_score = mutable_candidates[1].score;
+
+        mutable_candidates[0].score = 0u;
+        mutable_candidates[1].score = 1u;
+        CHECK(apta_result_query_serialized_size(result, NULL, &roundtrip_size) ==
+              APTA_ERROR_INTERNAL);
+        mutable_candidates[0].score = first_score;
+        mutable_candidates[1].score = second_score;
+    }
+
     for (prefix = 0u; prefix < written; ++prefix) {
         const apta_result_t *truncated = NULL;
         CHECK(apta_result_parse(

@@ -10,6 +10,7 @@
 #include "test_alignment.h"
 
 #include "apta_test_geometry.h"
+#include "apta_s6_internal.h"
 
 #define COL APTA_TEST_COLUMN_FRAMES
 
@@ -93,6 +94,10 @@ int main(void)
 
     memset(&workspace, 0, sizeof(workspace));
     memset(&allocator_state, 0, sizeof(allocator_state));
+
+    CHECK(apta_internal_s6_evidence_requires_refresh(100u, 100u, 1, 0));
+    CHECK(!apta_internal_s6_evidence_requires_refresh(100u, 100u, 1, 1));
+    CHECK(apta_internal_s6_evidence_requires_refresh(99u, 100u, 0, 0));
 
     apta_session_config_init(&session_config);
     session_config.source_sample_rate = SAMPLE_RATE;

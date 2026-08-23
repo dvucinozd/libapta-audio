@@ -37,7 +37,7 @@ struct apta_internal_s6_session_state {
     uint8_t refresh_stage;
     uint8_t refresh_degraded;
     uint8_t refresh_pending;
-    uint8_t refresh_reserved8;
+    uint8_t refreshed_after_end_of_input;
 
     apta_grid_segment_t segments[APTA_INTERNAL_GLOBAL_MAX_SEGMENTS];
     uint32_t segment_count;
@@ -68,6 +68,22 @@ struct apta_internal_s6_session_state {
     uint64_t mutation_serial;
     uint64_t published_serial;
 };
+
+static inline int apta_internal_s6_evidence_requires_refresh(
+    uint64_t evidence_end,
+    uint64_t refreshed_evidence_end,
+    int end_of_input_signalled,
+    int refreshed_after_end_of_input)
+{
+    if (evidence_end < refreshed_evidence_end) {
+        return 1;
+    }
+    if (end_of_input_signalled && !refreshed_after_end_of_input) {
+        return 1;
+    }
+    return evidence_end - refreshed_evidence_end >=
+           APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS;
+}
 
 struct apta_internal_s6_result_state {
     apta_grid_view_t global_grid;

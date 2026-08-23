@@ -729,10 +729,13 @@ apta_status_t apta_internal_s6_refresh(
         /* A2: as in S4, skip the autocorrelation until evidence grows. */
         if (evidence_end < state->refreshed_evidence_end) {
             state->refreshed_evidence_end = 0u;
-        } else if (!(session->end_of_input_signalled &&
-                     state->state != APTA_FEATURE_FINAL) &&
-                   evidence_end < state->refreshed_evidence_end +
-                                      APTA_INTERNAL_S6_REFRESH_MIN_NEW_BINS) {
+            state->refreshed_after_end_of_input = 0u;
+        }
+        if (!apta_internal_s6_evidence_requires_refresh(
+                evidence_end,
+                state->refreshed_evidence_end,
+                session->end_of_input_signalled,
+                state->refreshed_after_end_of_input)) {
             state->refresh_pending = 0u;
             return APTA_STATUS_OK;
         }
@@ -820,6 +823,8 @@ apta_status_t apta_internal_s6_refresh(
     }
 
     state->refreshed_evidence_end = evidence_end;
+    state->refreshed_after_end_of_input =
+        session->end_of_input_signalled ? 1u : 0u;
     state->refresh_stage = 0u;
     state->refresh_pending = 0u;
     {
