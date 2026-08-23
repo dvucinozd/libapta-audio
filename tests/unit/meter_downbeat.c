@@ -86,6 +86,19 @@ int main(void)
     CHECK(selection.confidence >= 50u);
     CHECK(selection.score > selection.runner_up_score);
 
+    /* A barely stronger three-beat grouping is insufficient to override the
+     * common-time prior. Strong 3/4 above remains detectable. */
+    {
+        uint32_t index;
+        for (index = 0u; index < 24u; ++index) {
+            beats[index] = (index % 3u) == 2u ? 1.1f : 1.0f;
+        }
+    }
+    status = apta_internal_meter_select(beats, 24u, &selection);
+    CHECK(status == APTA_STATUS_OK);
+    CHECK(selection.numerator == 4u);
+    CHECK(selection.confidence < APTA_INTERNAL_METER_TRIPLE_MIN_CONFIDENCE);
+
     fill(beats, 8u, 4u, 0u);
     status = apta_internal_meter_select(beats, 8u, &selection);
     CHECK(status == APTA_STATUS_NOT_AVAILABLE);

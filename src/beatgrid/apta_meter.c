@@ -66,6 +66,24 @@ static void apta_meter_best_phase(
     *score_out = best_score > 0.0f ? best_score : 0.0f;
 }
 
+static uint32_t apta_meter_confidence(
+    float best,
+    float runner_up,
+    uint32_t beat_count)
+{
+    const float separation = best > runner_up ? best - runner_up : 0.0f;
+    uint32_t confidence = 25u;
+
+    confidence += (uint32_t)(best * 45.0f + 0.5f);
+    confidence += (uint32_t)(separation * 30.0f + 0.5f);
+    if (beat_count >= APTA_INTERNAL_METER_STABLE_BEATS) {
+        confidence += 10u;
+    }
+    return confidence > APTA_CONFIDENCE_MAX
+               ? APTA_CONFIDENCE_MAX
+               : confidence;
+}
+
 apta_status_t apta_internal_meter_select(
     const float *beat_strengths,
     uint32_t beat_count,
@@ -77,7 +95,6 @@ apta_status_t apta_internal_meter_select(
     float score4;
     float best;
     float runner_up;
-    float separation;
     uint32_t confidence;
 
     if (beat_strengths == NULL || selection_out == NULL) {
@@ -102,20 +119,23 @@ apta_status_t apta_internal_meter_select(
         best = score3;
         runner_up = score4;
     }
+    confidence = apta_meter_confidence(best, runner_up, beat_count);
+    if (selection_out->numerator == 3u &&
+        confidence < APTA_INTERNAL_METER_TRIPLE_MIN_CONFIDENCE) {
+        /* DJ material is overwhelmingly duple. A weak 3/4 argmax is commonly
+         * one accidental three-beat grouping inside a 4/4 pattern, so require
+         * positive evidence before overriding the domain prior. Confidence
+         * stays conservative because the excluded raw 3/4 score remains the
+         * runner-up when the 4/4 score is recomputed. */
+        selection_out->numerator = 4u;
+        selection_out->downbeat_phase = phase4;
+        best = score4;
+        runner_up = score3;
+        confidence = apta_meter_confidence(best, runner_up, beat_count);
+    }
     selection_out->denominator = 4u;
     selection_out->score = best;
     selection_out->runner_up_score = runner_up;
-
-    separation = best > runner_up ? best - runner_up : 0.0f;
-    confidence = 25u;
-    confidence += (uint32_t)(best * 45.0f + 0.5f);
-    confidence += (uint32_t)(separation * 30.0f + 0.5f);
-    if (beat_count >= APTA_INTERNAL_METER_STABLE_BEATS) {
-        confidence += 10u;
-    }
-    if (confidence > APTA_CONFIDENCE_MAX) {
-        confidence = APTA_CONFIDENCE_MAX;
-    }
     selection_out->confidence = (apta_confidence_value_t)confidence;
     return APTA_STATUS_OK;
 }
