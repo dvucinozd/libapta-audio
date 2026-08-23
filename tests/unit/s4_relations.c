@@ -128,6 +128,27 @@ int main(void)
                -0.10f,
                0.0f));
 
+    /* Close-candidate arbitration is deliberately narrower than metrical
+     * recovery: S4 must already contain the proposal and S6 confidence must
+     * strictly exceed the current local-grid confidence. */
+    CHECK(apta_internal_tempo_ensemble_should_promote_close(
+              1, 70u, 71u,
+              APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE,
+              0.20f, 0.21f));
+    CHECK(!apta_internal_tempo_ensemble_should_promote_close(
+               0, 70u, 90u, 65535u, 0.20f, 0.30f));
+    CHECK(!apta_internal_tempo_ensemble_should_promote_close(
+               1, 70u, 70u, 65535u, 0.20f, 0.30f));
+    CHECK(!apta_internal_tempo_ensemble_should_promote_close(
+               1, 70u, APTA_CONFIDENCE_UNKNOWN,
+               65535u, 0.20f, 0.30f));
+    CHECK(!apta_internal_tempo_ensemble_should_promote_close(
+               1, 70u, 90u,
+               APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE - 1u,
+               0.20f, 0.30f));
+    CHECK(!apta_internal_tempo_ensemble_should_promote_close(
+               1, 70u, 90u, 65535u, 0.20f, 0.20f));
+
     /* Promotion may select a lower-scored S4 candidate, but the published
      * TEMP order remains non-increasing and therefore round-trippable. */
     CHECK(apta_internal_tempo_promotion_score(62312u, 65535u) == 65535u);

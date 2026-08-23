@@ -399,7 +399,7 @@ if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)
         apta.tools.inspect_json
         PROPERTIES
             FIXTURES_REQUIRED apta_cli_container
-            PASS_REGULAR_EXPRESSION "tempo_millibpm")
+            PASS_REGULAR_EXPRESSION "tempo_millibpm.*candidates")
 
     add_test(
         NAME apta.tools.fixture_corrupt

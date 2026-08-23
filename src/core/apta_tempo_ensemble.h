@@ -41,6 +41,32 @@ static inline int apta_internal_tempo_ensemble_should_promote(
     return proposed_grid_fit > selected_grid_fit;
 }
 
+/* A close, non-metrical S6 proposal may arbitrate between candidates S4
+ * already found. Unlike metrical-family recovery, this path may not introduce
+ * an S6-only tempo: the global estimate must have greater confidence than the
+ * current local grid, while the existing score and strict grid-fit gates still
+ * apply. A confidence value of 255 is unknown, not stronger than 100. */
+static inline int apta_internal_tempo_ensemble_should_promote_close(
+    int existing_s4_candidate,
+    apta_confidence_value_t local_confidence,
+    apta_confidence_value_t global_confidence,
+    uint32_t normalized_s4_score,
+    float selected_grid_fit,
+    float proposed_grid_fit)
+{
+    if (!existing_s4_candidate ||
+        local_confidence == APTA_CONFIDENCE_UNKNOWN ||
+        global_confidence == APTA_CONFIDENCE_UNKNOWN ||
+        global_confidence <= local_confidence) {
+        return 0;
+    }
+    if (normalized_s4_score < APTA_INTERNAL_TEMPO_ENDORSE_MIN_SCORE ||
+        proposed_grid_fit <= 0.0f) {
+        return 0;
+    }
+    return proposed_grid_fit > selected_grid_fit;
+}
+
 /* A promoted candidate becomes rank zero. Its serialized score must therefore
  * be no lower than the candidate shifted to rank one. */
 static inline uint16_t apta_internal_tempo_promotion_score(

@@ -4,6 +4,7 @@
 #include "../core/apta_tempo_ensemble.h"
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
+#include "../beatgrid/apta_s6_internal.h"
 
 #include <string.h>
 
@@ -243,8 +244,14 @@ static int apta_s4_ensemble_may_need_work(const apta_session_t *session)
     if (difference / (float)proposed <= APTA_INTERNAL_TEMPO_ENDORSE_TOLERANCE) {
         return 0;
     }
-    return apta_internal_tempo_relation(selected, proposed) !=
-           APTA_TEMPO_RELATION_INDEPENDENT;
+    if (apta_internal_tempo_relation(selected, proposed) !=
+        APTA_TEMPO_RELATION_INDEPENDENT) {
+        return 1;
+    }
+    return session->s6 != NULL &&
+           session->s6->confidence != APTA_CONFIDENCE_UNKNOWN &&
+           session->local_grid_segment.confidence != APTA_CONFIDENCE_UNKNOWN &&
+           session->s6->confidence > session->local_grid_segment.confidence;
 }
 
 static void apta_s4_ensemble_relate_candidates(apta_session_t *session)
@@ -357,32 +364,40 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
         return APTA_STATUS_OK;
     }
 
-    relation = apta_internal_tempo_relation(selected_tempo, proposed_tempo);
-    if (relation == APTA_TEMPO_RELATION_INDEPENDENT) {
-        return APTA_STATUS_OK;
-    }
-
     normalized_score = apta_s4_ensemble_normalized_score(
         session, proposed_lag, proposed_tempo);
     selected_fit = apta_s4_ensemble_best_grid_fit(
         session->onset_flux, span, selected_lag, &selected_phase);
     proposed_fit = apta_s4_ensemble_best_grid_fit(
         session->onset_flux, span, proposed_lag, &proposed_phase);
-    if (!apta_internal_tempo_ensemble_should_promote(
-            relation, normalized_score, selected_fit, proposed_fit)) {
-        return APTA_STATUS_OK;
-    }
-
     for (entry = 0u; entry < session->tempo_candidate_count; ++entry) {
         const uint32_t candidate =
             session->tempo_candidates[entry].tempo_millibpm;
         const uint32_t candidate_difference = candidate > proposed_tempo
                                                   ? candidate - proposed_tempo
                                                   : proposed_tempo - candidate;
-        if (candidate_difference <= 500u) {
+        if ((uint64_t)candidate_difference * 100u <=
+            (uint64_t)proposed_tempo) {
             existing = entry;
             break;
         }
+    }
+
+    relation = apta_internal_tempo_relation(selected_tempo, proposed_tempo);
+    if (relation == APTA_TEMPO_RELATION_INDEPENDENT) {
+        if (!apta_internal_tempo_ensemble_should_promote_close(
+                existing != UINT32_MAX,
+                session->local_grid_segment.confidence,
+                session->s6 != NULL ? session->s6->confidence
+                                    : APTA_CONFIDENCE_UNKNOWN,
+                normalized_score,
+                selected_fit,
+                proposed_fit)) {
+            return APTA_STATUS_OK;
+        }
+    } else if (!apta_internal_tempo_ensemble_should_promote(
+                   relation, normalized_score, selected_fit, proposed_fit)) {
+        return APTA_STATUS_OK;
     }
 
     if (existing != UINT32_MAX) {
@@ -417,8 +432,10 @@ static apta_status_t apta_s4_apply_tempo_grid_ensemble(
     session->tempo_candidates[0] = promoted;
 
     session->tempo_value.tempo_millibpm = promoted.tempo_millibpm;
-    session->tempo_value.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
-    session->local_grid_segment.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+    if (relation != APTA_TEMPO_RELATION_INDEPENDENT) {
+        session->tempo_value.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+        session->local_grid_segment.flags |= APTA_TEMPO_FLAG_OCTAVE_AMBIGUITY;
+    }
     if (promoted.confidence < session->tempo_value.confidence) {
         session->tempo_value.confidence = promoted.confidence;
     }

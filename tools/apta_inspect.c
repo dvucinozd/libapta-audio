@@ -144,12 +144,25 @@ static void print_human(
         apta_tempo_view_init(&tempo);
         status = apta_result_get_tempo(result, NULL, &tempo);
         if (status == APTA_STATUS_OK) {
+            uint32_t index;
             printf("TEMP: bpm=%.3f millibpm=%u state=%s confidence=%u candidates=%u\n",
                    tempo.selected.tempo_millibpm / 1000.0,
                    tempo.selected.tempo_millibpm,
                    apta_tool_feature_state_name(tempo.selected.state),
                    (unsigned)tempo.selected.confidence,
                    tempo.candidate_count);
+            for (index = 0u; index < tempo.candidate_count; ++index) {
+                const apta_tempo_candidate_t *candidate =
+                    &tempo.candidates[index];
+                printf("  candidate[%u]: bpm=%.3f millibpm=%u score=%u "
+                       "confidence=%u relation=%u\n",
+                       index,
+                       candidate->tempo_millibpm / 1000.0,
+                       candidate->tempo_millibpm,
+                       (unsigned)candidate->score,
+                       (unsigned)candidate->confidence,
+                       (unsigned)candidate->relation_to_selected);
+            }
         } else {
             printf("TEMP: unavailable\n");
         }
@@ -414,14 +427,28 @@ static void print_json(
         status = apta_result_get_tempo(result, NULL, &tempo);
         printf("%s\"TEMP\":", first_section ? "" : ",");
         if (status == APTA_STATUS_OK) {
+            uint32_t index;
             printf("{\"tempo_millibpm\":%u,\"state\":",
                    tempo.selected.tempo_millibpm);
             apta_tool_json_string(stdout,
                 apta_tool_feature_state_name(tempo.selected.state),
                 strlen(apta_tool_feature_state_name(tempo.selected.state)));
-            printf(",\"confidence\":%u,\"candidate_count\":%u}",
+            printf(",\"confidence\":%u,\"candidate_count\":%u,"
+                   "\"candidates\":[",
                    (unsigned)tempo.selected.confidence,
                    tempo.candidate_count);
+            for (index = 0u; index < tempo.candidate_count; ++index) {
+                const apta_tempo_candidate_t *candidate =
+                    &tempo.candidates[index];
+                printf("%s{\"tempo_millibpm\":%u,\"score\":%u,"
+                       "\"confidence\":%u,\"relation_to_selected\":%u}",
+                       index == 0u ? "" : ",",
+                       candidate->tempo_millibpm,
+                       (unsigned)candidate->score,
+                       (unsigned)candidate->confidence,
+                       (unsigned)candidate->relation_to_selected);
+            }
+            fputs("]}", stdout);
         } else {
             fputs("null", stdout);
         }
