@@ -189,6 +189,57 @@ the pre-registered APTA 1.1 tempo/grid evaluation protocol and its required
 fresh corpus. Only committed evidence produced under that protocol may close the
 `tempo-grid-fresh-corpus` readiness blocker.
 
+### Targeted 3/4 meter/downbeat development protocol
+
+This protocol is development evidence only and cannot close the final DJ
+acceptance blocker. It creates deterministic, balanced development and holdout
+splits, then allows only the development split to be analyzed while a candidate
+is being designed.
+
+For ASAP v1.2, install `mido==1.3.3` and `numpy==2.3.5` in a local environment
+and run:
+
+```sh
+python3 tools/apta_1_1_asap_meter_validation.py prepare \
+  --asap-root /private/asap-dataset-v1.2 \
+  --output /private/apta-asap-meter
+```
+
+For Ballroom, download the audio and annotation archives from the URLs recorded
+by the official `mirdata` loader, extract them below one source directory, and
+retain the original archives so the preparation step can enforce their MD5s:
+
+```sh
+python3 tools/apta_1_1_ballroom_meter_validation.py prepare \
+  --source /private/ballroom-source \
+  --audio-archive /private/downloads/data1.tar.gz \
+  --annotation-archive /private/downloads/master.zip \
+  --ffmpeg /usr/bin/ffmpeg \
+  --output /private/apta-ballroom-meter
+```
+
+Analyze and score only `development` during candidate work:
+
+```sh
+REV=$(git rev-parse HEAD)
+python3 tools/apta_1_1_ballroom_meter_validation.py run \
+  --prepared /private/apta-ballroom-meter \
+  --analyzer build-qual/tools/apta-analyze \
+  --output /private/apta-ballroom-run \
+  --split development \
+  --source-revision "$REV"
+python3 tools/apta_1_1_ballroom_meter_validation.py evaluate \
+  --prepared /private/apta-ballroom-meter \
+  --split development \
+  --inspector build-qual/tools/apta-inspect \
+  --mapping /private/apta-ballroom-run/mapping.csv \
+  --report /private/apta-ballroom-run/report.json
+```
+
+Do not substitute `holdout` in either command until the candidate and all
+ordinary regressions are frozen. A holdout may be run once for a retain/reject
+decision and must not be used for repeated parameter tuning.
+
 ## 8. Confidence calibration
 
 Confidence fitting is a separate evidence phase. Train on at least 96 rows and

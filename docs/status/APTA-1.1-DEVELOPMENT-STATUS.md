@@ -17,7 +17,7 @@ The reusable 1.1 infrastructure, native meter/key implementation and complete de
 | 4. Streaming container I/O | Complete | Output/input callbacks, bounded serialization, selective parsing, caller scratch and buffer equivalence |
 | 5. Tempo/grid ensemble | Development candidate | Relation-aware recovery plus confidence-gated close-candidate arbitration and dominant S6 segment-family selection implemented; untouched validation remains open |
 | 6. Confidence calibration contract | Complete | Deterministic isotonic fitting/evaluation protocol and data-separation gate; no production calibrated model yet |
-| 7. Native meter/downbeat | Complete implementation | Bounded 3/4 vs 4/4 analysis, exact refined-grid downbeat binding, immutable snapshots and cooperative scheduler integration |
+| 7. Native meter/downbeat | Development candidate | Bounded 3/4 vs 4/4 plumbing is complete, but a frozen real-ballroom development split exposes failed 3/4 tempo/meter recall and low downbeat accuracy; untouched holdout remains closed |
 | 8. Native musical key | Complete implementation | Bounded global major/minor analysis, ranked candidates with strict encoded ordering, immutable snapshots and ESP-IDF packaging |
 | 9. Progressive publication | Complete implementation | Provisional -> stable -> final generations with retained-result immutability verified end to end |
 | 10. ESP32-P4 CI/capacity | Complete CI/layout evidence | ESP-IDF 6.0.2 `esp32p4` firmware build plus deterministic 30-minute bounded-capacity probe |
@@ -58,6 +58,15 @@ The qualification tooling then provides the full private-corpus path:
 8. run the pre-registered acceptance evaluator.
 
 This closes the software-path gap between private source audio and the acceptance evaluator. It does **not** provide the required fresh evidence itself. A 60-track private corpus has now been selected, copied locally and canonicalized, and an independent automated pre-review was completed without reading APTA output. Manual verification against the canonical WAV files remains pending, so no official corpus has been frozen and no fresh acceptance result is claimed. The first separately frozen automated diagnostic run exposed long-form completion and TEMP ordering defects; revision `d53ee8d` fixes both, and a from-scratch rerun completed and parsed all 60 outputs. A subsequent exporter audit fixed the scored period to use the same local grid as the native meter/downbeat result when `LGRD` is present. Development-only S6 candidate arbitration and a conservative weak-3/4 policy then improved automated-reference period and meter counts, but downbeat, beatgrid, key and confidence-safety gates still fail. Because those policies were designed after this corpus was inspected, even their improvements are contaminated development evidence. The dated preparation, corrected metrics and candidate deltas are recorded in [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
+
+A separate targeted protocol now freezes balanced development and untouched
+holdout splits from ASAP and the real-audio Ballroom Rhythm Dataset. The first
+development run shows that the conservative 4/4 prior does not generalize:
+Ballroom 3/4 meter recall is 1/20 while 4/4 is 20/20, and downbeat is 6/40.
+The failure is primarily upstream tempo-family selection: period is within 10%
+on 17/20 common-time tracks and 0/20 triple-meter tracks. The holdouts remain
+unopened. Exact methodology, hashes and the rejected multiband candidate are in
+[`APTA-1.1-METER-DOWNBEAT-VALIDATION.md`](APTA-1.1-METER-DOWNBEAT-VALIDATION.md).
 
 ## ESP32-P4 qualification boundary
 
