@@ -81,7 +81,7 @@ tempo/grid ensemble boundary; see the closing analysis in
 ## What still blocks APTA 1.1 release
 
 - ~~fresh relation-aware tempo/grid corpus qualification~~ — **closed 2026-08-25**: the ensemble passed all five frozen gates on a formal 48-track owner-supplied fresh set (25 -> 29 exact within 1%, zero broken selections, no safety regressions); see [`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md);
-- fitting and untouched-holdout acceptance of a production calibrated confidence model;
+- ~~fitting and untouched-holdout acceptance of a production calibrated confidence model~~ — **closed 2026-08-25**: the `isotonic-pav-clamped-v1` tempo model (ID 1867860160) passed both calibration gates on a 48-row untouched holdout and is integrated as a bounded static lookup publishing an optional BPM quality record; see [`APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md`](APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md);
 - independent manually verified >=48-track final DJ corpus passing frozen key/meter/downbeat/grid and high-confidence safety gates;
 - physical ESP32-P4 memory/timing evidence when hardware is available;
 - final API/ABI/wire freeze, version bump, package evidence, exact release candidate verification, tag and publication.
