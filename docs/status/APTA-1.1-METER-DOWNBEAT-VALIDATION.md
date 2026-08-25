@@ -101,3 +101,90 @@ Only the development partitions may inform that work. Once a candidate is
 frozen and passes all normal tests plus the contaminated development reruns,
 each untouched holdout may be run once. Holdout results then decide whether the
 candidate is retained; they must not become another tuning loop.
+
+## Rejected low-band accent phase candidate — 2026-08-25
+
+An offline prototype on the Ballroom development partition suggested the
+downbeat-phase premise was worth a native candidate: peak-normalized
+bass-weighted accent energy added to broadband beat strengths improved phase
+identification from 25/40 to 31/40 at an accent weight of 0.5, with a plateau
+across 0.2-0.8 rather than a tuned peak.
+
+The native candidate stored a quantized kick-band sum in every onset bin
+behind a new opt-in build flag, filled a parallel bounded low-band rise series
+during the existing S4 evidence refresh, and combined the two channels inside
+the meter selection only. Tempo, grid and waveform paths were byte-identical
+to the default build, verified by a full 114-test pass in both configurations.
+The flag-off configuration also passed with warnings treated as errors.
+
+The frozen development-partition rerun rejected the candidate:
+
+| Metric | Baseline `a72e773` analyzer | Low-accent candidate |
+|---|---:|---:|
+| Meter | 21/40 | 20/40 |
+| Downbeat | 6/40 | 5/40 |
+| Period within 1% | 10/40 | 11/40 |
+| Period within 10% | 17/40 | 17/40 |
+
+Run metadata: source revision
+`0f695dd9a5e8e564a3e2b82bd0073c932ec1be4a`, candidate analyzer SHA-256
+`282364ed9d753ef0454528b2bcef60b9d6523ae173fa481f16bbd17ff9f88894`, manifest
+SHA-256 unchanged (`0dc703b2...`). The holdout split was not opened.
+
+The prototype gain did not transfer. The offline probe sampled STFT spectral
+low-band flux at ground-truth beat times, while the native front end derives
+beat positions from its own grid and its one-pole post-rectification envelope
+is highly correlated with the broadband rise, so the second channel added
+correlated noise instead of independent bar-phase evidence. Two prior accent
+candidates failed the same way, which now indicates the defect is the front
+end's lack of frequency selectivity before rectification rather than the
+combination rule.
+
+The candidate was removed and is not production code. Any successor must first
+demonstrate, offline and on the development partitions only, that its accent
+channel decorrelates from the broadband rise on APTA's own beat lattice — for
+example a resonant bandpass before rectification — before another native
+integration is attempted.
+
+## Rejected resonant-bandpass accent candidate — 2026-08-25
+
+The documented successor condition was met offline: a biquad bandpass applied
+BEFORE rectification (75 Hz, Q 1.0, plateau across 55-95 Hz and Q 0.7-1.5)
+decorrelated from an STFT broadband reference at Pearson 0.25 on APTA's own
+lattice, and combining it with broadband beat strengths improved offline phase
+identification from 16/40 to up to 21/40 with a consistent neighbourhood.
+
+The native candidate stored the quantized bandpass energy in the same opt-in
+low-storage layout, filled the parallel bounded rise series during the S4
+evidence refresh, and combined channels inside meter selection only. Both
+build configurations passed all 114 tests with warnings as errors.
+
+The frozen development-partition rerun rejected the candidate again:
+
+| Metric | Baseline `a72e773` analyzer | Bandpass accent candidate |
+|---|---:|---:|
+| Meter | 21/40 | 20/40 |
+| Downbeat | 6/40 | 5/40 |
+| Period within 1% | 10/40 | 11/40 |
+| Period within 10% | 17/40 | 17/40 |
+
+Run metadata: source revision
+`0f695dd9a5e8e564a3e2b82bd0073c932ec1be4a`, manifest SHA-256 unchanged
+(`0dc703b2...`). The holdout split was not opened.
+
+Post-run diagnosis explains both failures and closes the per-beat accent
+direction. Measured against the native production flux itself — the rectified
+one-pole envelope rise — the pre-rectification bandpass accent correlates at
+Pearson **0.634** (mean over the development partition), not 0.25: the native
+envelope is already dominated by low-frequency energy, so a frequency-selective
+amplitude channel duplicates it. A follow-up offline probe of a spectral-shape
+channel (instantaneous bandpass/broadband energy share sampled at beat
+positions) carried no usable bar-phase evidence either (9-10/40 against a
+10/40 same-proxy reference; 1-2/12 on the period-correct subset).
+
+The candidate was removed and is not production code. The remaining boundary
+is no longer channel combination but evidence resolution: bar-phase decisions
+need a fundamentally different signal than per-beat amplitude samples of the
+existing front end — for example long-window periodicity of a dedicated
+low-band series at the bar period (S6-style comb evidence) evaluated against
+the same development partitions before any native integration.
