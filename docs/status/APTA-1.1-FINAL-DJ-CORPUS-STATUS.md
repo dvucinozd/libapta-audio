@@ -255,3 +255,29 @@ This rerun closes the two software-path failures, not the final DJ acceptance
 blocker. The labels are automated rather than independently verified by human
 review, and the measured accuracy and key/grid safety gates fail by wide
 margins. No acceptance or release claim is made.
+
+## Verification workbench handed to the owner — 2026-08-25
+
+The manual verification prerequisite was prepared as a local-only review
+workbench so the owner's listening pass is confirmation-by-ear rather than
+measurement from scratch:
+
+- all 60 canonical WAVs staged with opaque file names;
+- a self-contained HTML page lists every track sorted by the independent
+  pre-review priority score, prefilled exclusively from Rekordbox and the
+  independent estimator set (five key estimators, separate rhythm estimate) —
+  APTA output is never shown or used;
+- per track: audio player jumping to the provisional downbeat, editable key,
+  BPM, meter, a mark-downbeat-at-playhead control, an explicit Confirmed
+  action (a track counts as verified only after it), and per-track Exclude for
+  ambiguous material; at least 48 verified tracks must remain;
+- export produces `verification.csv` consumed by the freeze step.
+
+While the owner verifies, upstream blockers continued to close: Task-5
+(ensemble fresh-set acceptance) and Task-6 (calibrated confidence acceptance
+and integration) completed on this date. The remaining acceptance sequence is
+unchanged: freeze verified labels and manifest with hashes, record the pre-run
+state in [`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md),
+run anonymous `apta-analyze --features all` once over the exact frozen corpus,
+export FINAL results, execute the frozen evaluator, and publish the verdict —
+positive or negative — bound to exact hashes.

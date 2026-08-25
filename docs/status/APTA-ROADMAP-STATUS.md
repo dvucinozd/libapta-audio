@@ -1,7 +1,7 @@
 # APTA development roadmap status
 
 - **Current completed stage:** S9 — APTA 1.0
-- **Active development line:** `1.1.0`; core DJ-analysis implementation substantially complete, evidence/qualification gates remain
+- **Active development line:** `1.1.0`; tempo/grid ensemble and calibrated confidence accepted and integrated (2026-08-25); remaining evidence gates are the manually verified final DJ corpus, physical ESP32-P4 measurements, and the release freeze
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1

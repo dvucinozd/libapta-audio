@@ -18,9 +18,13 @@ standard and its portable ISO C11 reference implementation.
 
 > **`1.1.0` development branch:** the result model, validated external-result
 > builder, optional `MKEY`/`MTRD`/`CONF` container sections and bounded
-> streaming container I/O are implemented. Musical-key, meter/downbeat and
-> calibrated-quality analysis algorithms, the ESP32-P4 DJ memory profile and
-> release qualification are still in progress. This branch is not a tagged
+> streaming container I/O are implemented, together with native key,
+> meter/downbeat and tempo analysis. The relation-aware tempo/grid ensemble is
+> accepted on a formal fresh validation set and the accepted
+> `isotonic-pav-clamped-v1` BPM confidence calibration (protocol ID 1867860160)
+> is integrated behind `APTA_FEATURE_CALIBRATED_QUALITY`. Remaining before a
+> `v1.1.0` tag: the manually verified final DJ acceptance corpus, physical
+> ESP32-P4 evidence, and the release freeze. This branch is not a tagged
 > 1.1 release.
 
 APTA provides progressive, bounded and portable audio analysis for waveform,

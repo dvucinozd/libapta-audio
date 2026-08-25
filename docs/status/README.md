@@ -5,12 +5,18 @@ whole-project release and validation boundary.
 
 Active post-1.0 development:
 
-- [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md) — exact
-  task-1-through-task-4 implementation boundary, retained verification and the
-  remaining algorithm, embedded-profile and release gates.
+- [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md) — the
+  task-by-task implementation boundary. Tasks 5 (tempo/grid ensemble fresh-set
+  acceptance) and 6 (calibrated confidence acceptance and integration) closed
+  on 2026-08-25; meter/downbeat candidate work is deprioritized upstream at
+  beat-lattice quality per native trace evidence.
+- [`APTA-1.1-METER-DOWNBEAT-VALIDATION.md`](APTA-1.1-METER-DOWNBEAT-VALIDATION.md)
+  — development corpora, three rejected downbeat-phase candidates with root
+  cause, the native meter-trace tool, and the trace analysis that bounds
+  bar-phase accuracy at lattice quality.
 - [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md) —
-  dated 60-track private-corpus preparation snapshot, independent pre-review
-  diagnostics and the remaining manual verification/freeze boundary.
+  dated private-corpus snapshots, automated diagnostic outcomes, and the
+  remaining manual verification/freeze boundary.
 
 Stage S9 — APTA 1.0:
 

@@ -23,7 +23,11 @@ All notable changes to libapta-audio are documented in this file.
   optional quality record for `APTA_FEATURE_BPM` when a host requests
   `APTA_FEATURE_CALIBRATED_QUALITY`; the model can only lower a reported
   confidence, never raise it, and acceptance evidence is frozen in
-  `docs/status/APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md`.
+  `docs/status/APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md`;
+- `apta-meter-trace`, an opt-in development diagnostic tool
+  (`APTA_ENABLE_EXPERIMENTAL_METER_TRACE=ON`) that emits APTA's published
+  lattice and the internal per-beat strength series from real analyzer
+  sessions; it is never built into shipped configurations.
 
 ### Compatibility boundary
 

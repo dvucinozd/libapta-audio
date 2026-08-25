@@ -43,9 +43,14 @@ Quality cannot target `APTA_FEATURE_CALIBRATED_QUALITY` itself. All pointers
 returned by the three accessors belong to the immutable result and remain valid
 until `apta_result_release()`.
 
-These types are storage and interchange contracts. Their presence does not
-mean the native session pipeline already computes key, meter/downbeat or
-calibrated quality; those algorithms are a later 1.1 task.
+These types are storage and interchange contracts. On the current branch the
+native session pipeline computes key, meter/downbeat and tempo, and — when a
+host requests `APTA_FEATURE_CALIBRATED_QUALITY` alongside BPM — publishes one
+BPM quality record from the accepted `isotonic-pav-clamped-v1` calibration
+model (protocol ID 1867860160). The model can only lower a reported
+confidence, never raise it; acceptance evidence and scope are frozen in
+[`../status/APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md`](../status/APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md).
+No calibrated quality is published for any other feature.
 
 ## 2. Validated external-result builder
 
