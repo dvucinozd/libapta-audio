@@ -210,6 +210,32 @@ safety regressions.
 This run also consumes the Ballroom holdout's untouched status: any future
 meter/downbeat holdout evidence must come from different material.
 
+### Formal acceptance set frozen — owner-supplied DJ material — 2026-08-25
+
+A second, formally qualifying fresh set was then frozen from owner-supplied
+material (48 tracks, DJ domain, none present in any prior pool by content
+hash or normalized title):
+
+- track count: **48** (protocol minimum satisfied);
+- audio: 48 kHz stereo signed 16-bit WAV, metadata stripped;
+- reference source: owner's Rekordbox USB export beat grids (PQTZ modal
+  tempo per track), matched to canonical audio by exact content hash;
+- verification procedure: owner approved Rekordbox analysis as the tempo
+  reference; every retained grid is stable (modal share >= 0.70); derivation
+  deterministic; no APTA output was read before freezing;
+- tempo range: 106.0-149.99 BPM (90-119: 5, 120-139: 38, 140-159: 5);
+- reference-labels SHA-256:
+  `f4e3c377553cbd778c18ed2b18b014927003a1464b0ad64b2c171ea44820dec3`;
+- freeze-manifest SHA-256:
+  `a21b3214fd3ba15d8bb5f6a99c8aea3d0fced423b36f795d7cb1a1c1fdec24c3`.
+
+Comparison configuration identical to the diagnostic run: same HEAD binary,
+S4-only mode as baseline versus `--request-global` ensemble mode as candidate,
+one run each, all rows reported.
+
+Closing this run's results section will follow after execution; thresholds
+and gates are already fixed above and are not renegotiable afterwards.
+
 Closing the Task-5 acceptance blocker formally requires one further run on a
 newly frozen set of at least 48 tracks (for example owner-supplied material
 with independently created tempo labels), evaluated against the same gates.
