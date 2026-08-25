@@ -42,10 +42,9 @@ All notable changes to libapta-audio are documented in this file.
 
 ### Not yet included
 
-- production musical-key and meter/downbeat detectors;
-- calibrated confidence models and the tempo/grid ensemble accuracy campaign;
-- the ESP32-P4 bounded DJ profile, 30-minute memory probes and physical-device
-  qualification;
+- the manually verified final DJ acceptance corpus and its frozen evaluator
+  verdict;
+- physical ESP32-P4 memory, timing and coexistence evidence on real hardware;
 - a `v1.1.0` tag or release artifacts.
 
 ## [1.0.1] - 2026-08-04
