@@ -85,6 +85,35 @@ The existing 188 rows may still be run in full because they are useful known
 regressions, but they are development evidence only. Report all rows and do not
 select a subset after seeing the candidate result.
 
+### Current-head historical regression run — 2026-08-25
+
+Source revision `9a878bf3dd241bff53fe84cf45a4beb6f71af349` (native gates: 114
+CTest tests passing in both default and trace-enabled configurations,
+warnings as errors). Corpus executable SHA-256
+`4201ab843842a8a74c286522450de6b444285043e135f62fd658942d96ee892c`.
+
+Full-corpus aggregate (all 188 rows, no subset selection):
+
+| Mode | Within 1% | Octave | Other | Errors >=75 | Octave errors >=75 |
+|---|---:|---:|---:|---:|---:|
+| S4 | 143 (76.1%) | 4 | 41 | 3 | 3 |
+| S4 + S6 endorsement | 166 (88.3%) | 2 | 20 | 4 | 2 |
+| S6 | 164 (87.2%) | 8 | 16 | 4 | 2 |
+
+Row-level comparison against the retained Phase-5 baseline partitions:
+
+- development S4 (140 shared tracks): exact 107 -> 107; no selection fixed or
+  broken; high-confidence octave errors unchanged at 2;
+- development endorsed (140 shared tracks): exact 124 -> 124; one selection
+  fixed and one broken (relation class OTHER), a net zero change;
+- no historical regression gate is triggered.
+
+This satisfies the historical-regression requirement for the accumulated
+`1.1.0` selection changes (dominant S6 tempo family, close-tempo arbitration
+and the common-time prior) against the retained baseline. It does not qualify
+the ensemble: fresh-set acceptance remains open and requires newly acquired
+labelled material frozen before candidate results are inspected.
+
 Required aggregate comparison against the retained Phase-5 baseline:
 
 - S4 exact count and endorsed exact count;
