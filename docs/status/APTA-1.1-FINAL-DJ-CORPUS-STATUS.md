@@ -281,3 +281,54 @@ state in [`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.
 run anonymous `apta-analyze --features all` once over the exact frozen corpus,
 export FINAL results, execute the frozen evaluator, and publish the verdict —
 positive or negative — bound to exact hashes.
+
+## Official acceptance result — REJECTED — 2026-08-25
+
+The owner completed the full listening verification (60/60 confirmed, none
+excluded) and the corpus was frozen the same day. One analyzer pass over the
+exact frozen corpus, FINAL-only export and the unchanged frozen evaluator
+produced the official verdict: **rejected**.
+
+Run evidence (all hashes exact):
+
+- source revision: `82691c631c522773af8401aa3a3ce385034c927d`;
+- analyzer SHA-256:
+  `11e94d89c35ed352b9bb99e5c6bc7d7517d2a5528494a3a2edd0678cabf13fc6`;
+- labels SHA-256:
+  `e7eac4ab8a80019b3da558c347d36242b827e485c7c66dff27c72fa8c25abbb8`;
+- results CSV SHA-256:
+  `8a011cf9c695ed5d2fdb5eeaeff92504d0655827306c16c291fd4d0565ae1c0e`;
+- acceptance report SHA-256:
+  `14006b0f55fe31aec04a8a0407a85c7094f137390d48cee354a50aec338cb22c`;
+- mapping SHA-256:
+  `47f3ff685a4ccfd470ec71310adc9396a9264b50f2885eb203df71be0d0808ae`.
+
+Metrics against human ground truth versus the frozen thresholds:
+
+| Family | Threshold | Measured | Gate |
+|---|---|---|---|
+| Key exact | >= 75% | **25.0%** (15/60) | fail |
+| Meter exact | >= 95% | 96.7% (58/60) | pass |
+| Downbeat phase | >= 90% | **8.3%** (5/60) | fail |
+| Beatgrid | >= 90% | **6.7%** (4/60) | fail |
+| Key high-confidence errors | <= 5% | **16.7%** (10/60) | fail |
+| Grid high-confidence errors | <= 5% | **40.0%** (24/60) | fail |
+| Meter/downbeat high-confidence errors | <= 5% | 0% | pass |
+
+Reading of the verdict:
+
+1. Human verification confirms the earlier diagnostic magnitudes almost
+   exactly, which validates both the labels and the evaluator mechanics; the
+   failure is a real accuracy deficit, not an artifact.
+2. The meter pass carries the pre-recorded reduced evidential weight because
+   the common-time prior was designed on this corpus's automated labels.
+3. The dominant, now formally quantified deficits are key accuracy and the
+   beat-lattice phase problem already bounded by native trace analysis.
+   Neither has ever been improved using this corpus, so these gates carry
+   full evidential weight.
+4. Per the release boundary, closing this blocker requires new candidate work
+   evaluated per its own protocols plus a re-run on a newly verified corpus;
+   thresholds stay frozen.
+
+The final DJ corpus release blocker remains open with a formal failed attempt
+on record.

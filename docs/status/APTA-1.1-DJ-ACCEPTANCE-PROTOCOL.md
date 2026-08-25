@@ -130,3 +130,11 @@ were frozen before any of those runs and are unchanged.
 Analyzer for this run: HEAD binary at source revision `ace15b5` tree,
 one pass over the exact frozen corpus, then FINAL-only export and this
 evaluator with unchanged thresholds.
+
+## Official acceptance run — result — 2026-08-25
+
+Executed as recorded above. Verdict: **rejected** (report JSON
+`14006b0f55fe31aec04a8a0407a85c7094f137390d48cee354a50aec338cb22c`).
+Key 25.0% (fail), meter 96.7% (pass), downbeat phase 8.3% (fail), beatgrid
+6.7% (fail), key high-confidence errors 16.7% (fail), grid high-confidence
+errors 40.0% (fail), meter/downbeat high-confidence errors 0% (pass).
