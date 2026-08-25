@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "../core/apta_result_pool.h"
+#include "../confidence/apta_quality_model.h"
 
 #include <string.h>
 
@@ -59,6 +60,43 @@ static apta_status_t apta_s4_pool_build(
         if ((session->config.requested_features &
              APTA_FEATURE_CONFIDENCE) != 0u) {
             result->info.available_features |= APTA_FEATURE_CONFIDENCE;
+        }
+
+        if ((session->config.requested_features &
+             APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+            layout->quality_record_capacity >= 1u &&
+            session->final_end_frame != APTA_TOTAL_FRAMES_UNKNOWN &&
+            session->final_end_frame != 0u &&
+            result->tempo.selected.confidence <= APTA_CONFIDENCE_MAX) {
+            /* Task-6: publish the accepted BPM calibration as an optional
+             * quality record. The model can only lower a confidence value,
+             * so the safety property of the raw detector is preserved.
+             * Coverage reports how much of the track the tempo evidence
+             * explains, in permille, computed with a bounded divide. */
+            apta_quality_view_t *quality =
+                (apta_quality_view_t *)(void *)(
+                    storage + layout->quality_records_offset);
+            const apta_confidence_value_t raw_confidence =
+                result->tempo.selected.confidence;
+            const uint64_t total = (uint64_t)session->final_end_frame;
+            uint64_t covered = session->greatest_accepted_end;
+
+            if (covered > total) {
+                covered = total;
+            }
+            apta_quality_view_init(quality);
+            quality->feature = APTA_FEATURE_BPM;
+            quality->calibration_model_id =
+                APTA_INTERNAL_BPM_QUALITY_MODEL_ID;
+            quality->confidence =
+                apta_internal_bpm_quality_calibrate(raw_confidence);
+            quality->state = result->tempo.selected.state;
+            quality->evidence_coverage_permille =
+                (uint16_t)((covered * 1000u) / total);
+            result->quality = quality;
+            result->quality_count = 1u;
+            result->info.available_features |=
+                APTA_FEATURE_CALIBRATED_QUALITY;
         }
     }
 

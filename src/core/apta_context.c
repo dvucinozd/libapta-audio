@@ -86,7 +86,10 @@ apta_status_t APTA_CALL apta_context_create(
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_GRID_LOCKING |
         APTA_FEATURE_MUSICAL_KEY |
-        APTA_FEATURE_METER_DOWNBEAT;
+        APTA_FEATURE_METER_DOWNBEAT |
+        /* Task-6: the accepted BPM calibration model publishes an optional
+         * quality record when a host asks for it alongside BPM. */
+        APTA_FEATURE_CALIBRATED_QUALITY;
     apta_context_t *context;
 
     if (context_out == NULL) {

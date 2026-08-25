@@ -59,7 +59,8 @@ int main(void)
            APTA_FEATURE_CONFIDENCE |
            APTA_FEATURE_GRID_LOCKING |
            APTA_FEATURE_MUSICAL_KEY |
-           APTA_FEATURE_METER_DOWNBEAT));
+           APTA_FEATURE_METER_DOWNBEAT |
+           APTA_FEATURE_CALIBRATED_QUALITY));
 
     apta_session_config_init(&session_config);
     session_config.source_sample_rate = 48000u;

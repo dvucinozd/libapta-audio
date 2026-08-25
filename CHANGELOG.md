@@ -17,7 +17,13 @@ All notable changes to libapta-audio are documented in this file.
 - `apta_output_stream_t` and `apta_input_stream_t`, streaming serialization,
   selective streaming parsing and caller-provided bounded scratch storage;
 - LP64, ILP32 and pointer-32/alignment-64 public-layout evidence plus the 1.1
-  exported-symbol and public-header delta manifests.
+  exported-symbol and public-header delta manifests;
+- native BPM confidence calibration (Task 6): the accepted
+  `isotonic-pav-clamped-v1` model (protocol ID 1867860160) publishes an
+  optional quality record for `APTA_FEATURE_BPM` when a host requests
+  `APTA_FEATURE_CALIBRATED_QUALITY`; the model can only lower a reported
+  confidence, never raise it, and acceptance evidence is frozen in
+  `docs/status/APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md`.
 
 ### Compatibility boundary
 

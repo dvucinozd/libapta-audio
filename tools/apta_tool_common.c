@@ -194,7 +194,8 @@ apta_feature_mask_t apta_tool_all_features(void)
            APTA_FEATURE_CONFIDENCE |
            APTA_FEATURE_GRID_LOCKING |
            APTA_FEATURE_MUSICAL_KEY |
-           APTA_FEATURE_METER_DOWNBEAT;
+           APTA_FEATURE_METER_DOWNBEAT |
+           APTA_FEATURE_CALIBRATED_QUALITY;
 }
 
 apta_status_t apta_tool_parse_feature_list(

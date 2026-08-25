@@ -89,6 +89,7 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     uint32_t global_grid_beats;
     uint32_t meter_segments;
     uint32_t key_candidates;
+    uint32_t quality_records;
     size_t slot_offset;
     size_t pool_offset;
     size_t slots_bytes;
@@ -158,6 +159,12 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     key_candidates =
         (config->requested_features & APTA_FEATURE_MUSICAL_KEY) != 0u
             ? APTA_INTERNAL_KEY_CANDIDATE_COUNT
+            : 0u;
+    quality_records =
+        (config->requested_features &
+             APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+            (config->requested_features & APTA_FEATURE_BPM) != 0u
+            ? 1u
             : 0u;
 
     slot_offset = 0u;
@@ -247,6 +254,12 @@ apta_status_t apta_internal_result_pool_calculate_layout(
             &layout_out->key_candidates_offset) ||
         !apta_pool_append_region(
             &slot_offset,
+            alignof(apta_quality_view_t),
+            quality_records,
+            sizeof(apta_quality_view_t),
+            &layout_out->quality_records_offset) ||
+        !apta_pool_append_region(
+            &slot_offset,
             alignof(uint8_t),
             APTA_METADATA_MAX_TOTAL_BYTES,
             sizeof(uint8_t),
@@ -308,6 +321,7 @@ apta_status_t apta_internal_result_pool_calculate_layout(
     layout_out->global_grid_beat_capacity = global_grid_beats;
     layout_out->meter_segment_capacity = meter_segments;
     layout_out->key_candidate_capacity = key_candidates;
+    layout_out->quality_record_capacity = quality_records;
     layout_out->metadata_capacity = APTA_METADATA_MAX_TOTAL_BYTES;
     layout_out->slot_count = APTA_INTERNAL_RESULT_SLOT_COUNT;
     return APTA_STATUS_OK;

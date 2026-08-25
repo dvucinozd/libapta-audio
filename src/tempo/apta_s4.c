@@ -5,6 +5,7 @@
 #include "../core/apta_tempo_ensemble.h"
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
+#include "../confidence/apta_quality_model.h"
 
 #include <math.h>
 #include <stdalign.h>
@@ -1534,6 +1535,11 @@ apta_status_t apta_internal_s4_build_snapshot(
     apta_session_t *session,
     apta_result_t *result)
 {
+    const int completed =
+        session != NULL &&
+        atomic_load_explicit(&session->state, memory_order_acquire) ==
+            APTA_SESSION_COMPLETED;
+
     if (session == NULL || result == NULL) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
@@ -1564,6 +1570,45 @@ apta_status_t apta_internal_s4_build_snapshot(
         result->info.available_features |= APTA_FEATURE_BPM;
         if ((session->config.requested_features & APTA_FEATURE_CONFIDENCE) != 0u) {
             result->info.available_features |= APTA_FEATURE_CONFIDENCE;
+        }
+
+        if ((session->config.requested_features &
+             APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+            session->final_end_frame != APTA_TOTAL_FRAMES_UNKNOWN &&
+            session->final_end_frame != 0u &&
+            result->tempo.selected.confidence <= APTA_CONFIDENCE_MAX) {
+            /* Task-6: publish the accepted BPM calibration as an optional
+             * quality record. The model can only lower a confidence value,
+             * so the safety property of the raw detector is preserved.
+             * Coverage reports how much of the track the tempo evidence
+             * explains, in permille, computed with a bounded divide. */
+            apta_quality_view_t *quality =
+                (apta_quality_view_t *)apta_internal_context_allocate(
+                    session->context,
+                    sizeof(*quality),
+                    alignof(apta_quality_view_t),
+                    APTA_MEMORY_PERSISTENT);
+            const uint64_t total = (uint64_t)session->final_end_frame;
+            uint64_t covered = session->greatest_accepted_end;
+
+            if (covered > total) {
+                covered = total;
+            }
+            apta_quality_view_init(quality);
+            quality->feature = APTA_FEATURE_BPM;
+            quality->calibration_model_id =
+                APTA_INTERNAL_BPM_QUALITY_MODEL_ID;
+            quality->confidence = apta_internal_bpm_quality_calibrate(
+                result->tempo.selected.confidence);
+            quality->state = completed
+                                 ? APTA_FEATURE_FINAL
+                                 : result->tempo.selected.state;
+            quality->evidence_coverage_permille =
+                (uint16_t)((covered * 1000u) / total);
+            result->quality = quality;
+            result->quality_count = 1u;
+            result->info.available_features |=
+                APTA_FEATURE_CALIBRATED_QUALITY;
         }
     }
 

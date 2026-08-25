@@ -25,6 +25,7 @@ typedef struct {
     size_t global_grid_beats_offset;
     size_t meter_segments_offset;
     size_t key_candidates_offset;
+    size_t quality_records_offset;
     size_t metadata_offset;
 
     uint32_t overview_span_capacity;
@@ -39,6 +40,7 @@ typedef struct {
     uint32_t global_grid_beat_capacity;
     uint32_t meter_segment_capacity;
     uint32_t key_candidate_capacity;
+    uint32_t quality_record_capacity;
     uint32_t metadata_capacity;
     uint32_t slot_count;
 } apta_internal_result_pool_layout_t;

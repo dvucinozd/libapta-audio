@@ -363,6 +363,7 @@ set(
         src/key/apta_key_process.c
         src/key/apta_key_snapshot.c
         src/key/apta_key_pool_snapshot.c
+        src/confidence/apta_quality_model.c
         src/core/apta_config.c
         src/core/apta_context.c
         src/core/apta_initializers.c
