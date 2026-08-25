@@ -188,3 +188,43 @@ need a fundamentally different signal than per-beat amplitude samples of the
 existing front end — for example long-window periodicity of a dedicated
 low-band series at the bar period (S6-style comb evidence) evaluated against
 the same development partitions before any native integration.
+
+## Rejected decayed-aggregation (comb) candidate — 2026-08-25
+
+The comb premise was probed offline with both STFT series and faithful native
+emulations. Decayed accumulation (one-pole, two-beat time constant, plateau
+across 1-2.5 beats) of the bandpass accent improved the period-correct subset
+from 2/12 to 4/12 in the native-emulated proxy and to 5/12 in the STFT proxy,
+so the candidate was promoted to a minimal native trial: the same causal leaky
+integration applied to the existing broadband beat strengths inside meter
+collection only, behind an opt-in flag, with no storage or front-end changes.
+All 114 tests passed in the flag configuration with warnings as errors.
+
+The frozen development-partition rerun rejected it:
+
+| Metric | Baseline `a72e773` analyzer | Comb aggregation candidate |
+|---|---:|---:|
+| Meter | 21/40 | 20/40 |
+| 3/4 meter recall | 1/20 | 0/20 |
+| Downbeat | 6/40 | 6/40 |
+| 4/4 downbeat | 4/20 | 3/20 |
+| 3/4 downbeat | 2/20 | 3/20 |
+
+Run metadata: source revision `0f695dd9a5e8e564a3e2b82bd0073c932ec1be4a`,
+candidate analyzer SHA-256
+`18a45ad5039d23b5ac03c564c62cf952298b03ebbf9b2268fece330f5f58a232`, manifest
+SHA-256 unchanged (`0dc703b2...`). The holdout split was not opened.
+
+This third consecutive proxy-to-native transfer failure is itself the finding.
+Each offline probe predicted a gain on the same partitions that the native run
+did not deliver: proxies differ from the pipeline in lattice precision (Q32
+refined periods versus integer bins), joint meter selection with the triple
+prior, confidence gating and exact flux definitions, and those differences are
+the same order as the measured effects.
+
+The candidate was removed and is not production code. Candidate design through
+offline audio proxies is closed for this stage. The required next tool is a
+native meter trace — an opt-in diagnostic dump of APTA's own per-beat lattice,
+exact refined periods and actual internal beat-strength series from real
+analyzer sessions — so future phase candidates are designed against the true
+native evidence rather than reconstructions of it.
