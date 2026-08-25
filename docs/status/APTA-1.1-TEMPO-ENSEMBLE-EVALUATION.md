@@ -175,6 +175,45 @@ S4-only mode (the unchanged Phase-4/1.0.1 production selection); candidate is
 the identical binary in `--request-global` ensemble mode. One run per side;
 results are reported for all rows with no post-hoc subsetting.
 
+## Fresh-set result — 2026-08-25
+
+Both configurations ran once over the exact frozen set, same HEAD binary,
+source revision `96bf8393dd241bff53fe84cf45a4beb6f71af349` predecessor tree at
+`fd67566` plus no code delta (binary `apta-tempo-corpus` SHA-256
+`4201ab843842a8a74c286522450de6b444285043e135f62fd658942d96ee892c`).
+
+| Metric | Baseline (S4-only) | Candidate (ensemble) |
+|---|---:|---:|
+| Exact within 1% | 9/40 | 10/40 |
+| Octave errors | 10 | 10 |
+| Other errors | 21 | 20 |
+| Errors with confidence >=75 | 1 | 1 |
+| Metrical-family errors >=75 | 1 | 1 |
+| Selections fixed / broken | — | 1 / 0 |
+
+Frozen acceptance gates:
+
+- PASS — no exact-accuracy regression (9 -> 10);
+- PASS — no promotion regression (0 broken);
+- PASS — no high-confidence safety regression (1 -> 1);
+- PASS — no metrical safety regression (1 -> 1);
+- PASS — demonstrated benefit (exact count improved).
+
+**Classification: diagnostic evidence, not formal Task-5 acceptance.** The
+frozen protocol requires >=48 fresh labelled tracks; this set provides 40, so
+by its own rule the run cannot close the acceptance blocker regardless of the
+outcome. The result is nevertheless meaningful: on an independent, previously
+untouched, hand-annotated set spanning 60-200 BPM, the accumulated `1.1.0`
+ensemble improved the production selection with zero broken selections and no
+safety regressions.
+
+This run also consumes the Ballroom holdout's untouched status: any future
+meter/downbeat holdout evidence must come from different material.
+
+Closing the Task-5 acceptance blocker formally requires one further run on a
+newly frozen set of at least 48 tracks (for example owner-supplied material
+with independently created tempo labels), evaluated against the same gates.
+
 ## Fresh-set acceptance criteria
 
 Compare the unchanged APTA 1.0.1/Phase-4 production selection and the Task-5
