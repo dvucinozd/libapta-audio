@@ -149,3 +149,19 @@ unopened remainder of the pool, and one evaluation run. Designing the next
 training composition against this failure is acknowledged as development
 informed by a spent holdout; the successor therefore cannot reuse this
 holdout and its evidence value is limited accordingly.
+
+## Candidate 2 — pre-registered before its evaluation — 2026-08-25
+
+Method change (new model ID): the same deterministic isotonic fit over raw
+confidence 0..100, followed by one conservative post-processing step —
+`calibrated[x] = min(isotonic[x], x)`. Rationale recorded before any run:
+recalibration may lower confidence but must never raise it, so the
+high-confidence safety property is preserved by construction while the
+Brier/ECE gains of downward corrections are kept.
+
+Training data: unchanged — the same 328 rows (identical bytes).
+
+Holdout 2: next-48 selection by the same rule and seed over the remaining
+pool after removing Candidate-1 holdout stems (`sha256("apta-task6-holdout-v1:"
++ stem)` ascending, first 48 not previously selected). Frozen before any APTA
+run on those files; acceptance gates unchanged.
