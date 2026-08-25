@@ -110,3 +110,42 @@ Holdout set — frozen before the first APTA touch:
 - reference tempo: median annotated inter-beat interval per track;
 - selection file retained locally with the exact stem list; no outcome row
   has been read or computed at freeze time.
+
+## First candidate result — REJECTED — 2026-08-25
+
+Deterministic isotonic fit over all 328 training rows; model ID
+`1414390750`; holdout `holdout.csv` exactly as frozen (48 rows, one run).
+
+| Metric | Raw | Calibrated |
+|---|---:|---:|
+| Brier score | 0.20780 | **0.16452** |
+| 10-bin ECE | 0.32417 | **0.26750** |
+| High-confidence errors | 0 | **5** |
+| Mean reported confidence | 51.0 | 43.7 |
+| Empirical accuracy | 20.8% | 20.8% |
+
+Gates: Brier not worse PASS; ECE not worse PASS; **high-confidence errors
+not worse FAIL (0 -> 5)**; strict improvement PASS (Brier and ECE); determinism
+PASS; ID disjointness PASS. Verdict per the frozen contract: **rejected**.
+
+Diagnosis (from the same frozen artifacts, no additional runs):
+
+- the holdout's empirical tempo accuracy is 20.8%, far below every training
+  source's base rate (the Rekordbox corpus alone sits near 76%), because the
+  unused-Ballroom pool is out-of-domain relative to DJ material;
+- isotonic regression faithfully reproduces the training domain's
+  confidence-to-correctness relation, which transfers poorly under this base-
+  rate shift: mid-range raw confidences with decent DJ-domain empirical rates
+  are mapped up into the >=75 calibrated band, where five wrong predictions
+  then appear;
+- the detector's own raw confidence was conservative on this domain (zero
+  raw >=75 errors), so the model strictly worsened the safety property while
+  improving average calibration.
+
+This candidate remains documented as a negative result. Per the frozen
+discipline, any successor requires a different model ID (changed training
+composition or policy), a newly selected untouched holdout from the still
+unopened remainder of the pool, and one evaluation run. Designing the next
+training composition against this failure is acknowledged as development
+informed by a spent holdout; the successor therefore cannot reuse this
+holdout and its evidence value is limited accordingly.
