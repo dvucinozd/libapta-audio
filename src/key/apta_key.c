@@ -14,14 +14,19 @@ static const float apta_key_frequencies[APTA_INTERNAL_KEY_BIN_COUNT] = {
     739.9888f, 783.9909f, 830.6094f, 880.0000f, 932.3275f, 987.7666f
 };
 
+/* Temperley/Kostka-Payne pitch-class profiles. Chosen over Krumhansl-Kessler
+ * because the official corpus error taxonomy showed classic KK failure modes:
+ * dominant-for-tonic (fifth) confusions and parallel-mode swaps on minor
+ * material. KP weights de-emphasize the dominant relative to the tonic and
+ * model the harmonic-minor leading tone explicitly. */
 static const float apta_major_profile[APTA_INTERNAL_KEY_PITCH_CLASSES] = {
-    6.35f, 2.23f, 3.48f, 2.33f, 4.38f, 4.09f,
-    2.52f, 5.19f, 2.39f, 3.66f, 2.29f, 2.88f
+    0.748f, 0.060f, 0.488f, 0.082f, 0.674f, 0.460f,
+    0.096f, 0.715f, 0.104f, 0.366f, 0.057f, 0.400f
 };
 
 static const float apta_minor_profile[APTA_INTERNAL_KEY_PITCH_CLASSES] = {
-    6.33f, 2.68f, 3.52f, 5.38f, 2.60f, 3.53f,
-    2.54f, 4.75f, 3.98f, 2.69f, 3.34f, 3.17f
+    0.712f, 0.084f, 0.455f, 0.270f, 0.360f, 0.320f,
+    0.082f, 0.600f, 0.059f, 0.291f, 0.092f, 0.260f
 };
 
 static float apta_key_profile_score(
@@ -213,7 +218,12 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
         if (!isfinite(energy) || energy < 0.0f) {
             energy = 0.0f;
         }
-        analysis->chroma[bin % APTA_INTERNAL_KEY_PITCH_CLASSES] += energy;
+        /* Logarithmic compression: loud frames and resonant partials must not
+         * dominate the accumulated chroma. Linear accumulation let bass-heavy
+         * dominants outweigh tonic harmony and drove fifth and parallel-mode
+         * confusions on the official corpus taxonomy. */
+        analysis->chroma[bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
+            logf(1.0f + energy);
     }
     analysis->completed_windows += 1u;
     apta_key_reset_window(analysis);

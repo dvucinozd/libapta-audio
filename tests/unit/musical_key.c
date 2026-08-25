@@ -25,13 +25,13 @@
     } while (0)
 
 static const float major_profile[12] = {
-    6.35f, 2.23f, 3.48f, 2.33f, 4.38f, 4.09f,
-    2.52f, 5.19f, 2.39f, 3.66f, 2.29f, 2.88f
+    0.748f, 0.060f, 0.488f, 0.082f, 0.674f, 0.460f,
+    0.096f, 0.715f, 0.104f, 0.366f, 0.057f, 0.400f
 };
 
 static const float minor_profile[12] = {
-    6.33f, 2.68f, 3.52f, 5.38f, 2.60f, 3.53f,
-    2.54f, 4.75f, 3.98f, 2.69f, 3.34f, 3.17f
+    0.712f, 0.084f, 0.455f, 0.270f, 0.360f, 0.320f,
+    0.082f, 0.600f, 0.059f, 0.291f, 0.092f, 0.260f
 };
 
 static void rotate_profile(
@@ -75,6 +75,28 @@ static int check_selector(void)
     status = apta_internal_key_select_chroma(
         chroma, 4u, candidates, &view);
     CHECK(status == APTA_STATUS_NOT_AVAILABLE);
+
+    /* Regression: a dominant-heavy C-major chroma (inflated G from bass and
+     * V-harmony) must still resolve to C major, not G major. This was the
+     * fifth-relation failure mode of the Krumhansl-Kessler profile. */
+    memcpy(chroma, major_profile, sizeof(chroma));
+    chroma[7] += 0.6f;
+    status = apta_internal_key_select_chroma(
+        chroma, 8u, candidates, &view);
+    CHECK(status == APTA_STATUS_OK);
+    CHECK(view.tonic == 0u);
+    CHECK(view.mode == APTA_KEY_MODE_MAJOR);
+
+    /* Regression: minor material with a strong fifth must stay minor on the
+     * same tonic rather than flipping to the parallel major. */
+    memcpy(chroma, minor_profile, sizeof(chroma));
+    rotate_profile(chroma, minor_profile, 4u);
+    chroma[11] += 0.3f;
+    status = apta_internal_key_select_chroma(
+        chroma, 8u, candidates, &view);
+    CHECK(status == APTA_STATUS_OK);
+    CHECK(view.tonic == 4u);
+    CHECK(view.mode == APTA_KEY_MODE_MINOR);
     return EXIT_SUCCESS;
 }
 

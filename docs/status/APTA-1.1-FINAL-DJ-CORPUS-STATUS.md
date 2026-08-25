@@ -332,3 +332,34 @@ Reading of the verdict:
 
 The final DJ corpus release blocker remains open with a formal failed attempt
 on record.
+
+## Key-accuracy development iteration 1 — 2026-08-25
+
+The official-run taxonomy against human labels exposed structured failure
+modes absent from the automated-label taxonomy: 15 fifth-relation errors
+(dominant-for-tonic) and 13 parallel-mode swaps (11 of them minor-truth ->
+major-prediction). Two textbook remedies were applied to the native detector:
+
+1. Temperley/Kostka-Payne pitch-class profiles replace Krumhansl-Kessler;
+2. logarithmic compression of window energy before chroma accumulation, so
+   loud frames cannot dominate tonal evidence.
+
+Native gates: 118/118 tests including two new selector regressions
+(dominant-heavy major stays major; strong-fifth minor stays minor).
+
+Classified development rerun over the same frozen corpus (the corpus is now
+informed-by for key design as well):
+
+| Metric | Official run | Development rerun |
+|---|---:|---:|
+| Key exact | 25.0% | **33.3%** |
+| Key high-confidence errors | 16.7% (10) | **0%** |
+| Parallel-mode errors | 13 | 2 |
+| All other families | unchanged | unchanged |
+
+The key high-confidence safety gate now passes. Remaining structure points at
+tuning-offset handling (hard-coded zero cents; a cluster of whole-step errors
+is consistent with detuned source material smearing chroma into neighbouring
+pitch classes). Per protocol discipline this corpus is now spent for key
+candidate design too; formal closure of the key gate requires stabilized
+candidates plus a newly owner-verified corpus.
