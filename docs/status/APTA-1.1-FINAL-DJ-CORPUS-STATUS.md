@@ -363,3 +363,23 @@ is consistent with detuned source material smearing chroma into neighbouring
 pitch classes). Per protocol discipline this corpus is now spent for key
 candidate design too; formal closure of the key gate requires stabilized
 candidates plus a newly owner-verified corpus.
+
+## Key-accuracy iteration 2 probe — profile shape exhausted — 2026-08-25
+
+A faithful Python emulation of the native chroma pipeline (Goertzel
+resonator bank, decimation, one-second windows, log compression) reproduced
+all 60 native selector verdicts exactly, enabling fast offline experiments.
+
+Leave-one-out evaluation of average-chroma templates learned from the
+human-labelled exact rows reached only **21/60 (35.0%)** against the fixed
+KP-profile baseline of 20/60. Conclusion: profile shape is exhausted as an
+improvement axis. The residual errors are dominated by neighbouring-key-signature
+minor confusions (subdominant/iv and natural-minor forms) whose chroma
+evidence genuinely underdetermines the answer at the current extraction
+quality — one-second broadband windows over full mixes.
+
+Closing the key gate therefore requires better tonal evidence, not different
+profiles: candidates worth pre-registering are harmonic-weighted HPCP-style
+chroma, longer adaptive analysis windows, and tuning-offset estimation
+(currently hard-coded to zero cents). Each is a substantial detector rework
+and must be evaluated against a newly owner-verified corpus afterwards.
