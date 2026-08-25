@@ -84,3 +84,29 @@ Until a model passes this protocol, production code must not set
 confidence value. A future integration commit may add the accepted tempo model
 as a bounded static lookup table and publish an optional quality record for
 `APTA_FEATURE_BPM`; that commit requires the full repository CI matrix.
+
+## Task-6 execution record — 2026-08-25
+
+Recorded before any candidate run.
+
+Training rows (all harvested with one HEAD binary in production
+`--request-global` mode, opaque IDs only):
+
+| Source | Rows | Reference |
+|---|---:|---|
+| Historical 188-track Rekordbox corpus (endorsed run of 2026-08-25) | 188 | Rekordbox PQTZ modal tempo |
+| Ballroom development partition | 40 | hand-corrected annotation median interval |
+| ASAP development partition (synthesized performances) | 40 | score-derived annotations |
+| Automated DJ diagnostic corpus (contaminated development evidence) | 60 | Rekordbox provisional BPM |
+
+Total training pool: **328 rows** (>= 96 required).
+
+Holdout set — frozen before the first APTA touch:
+
+- rule: first 48 stems by `sha256("apta-task6-holdout-v1:" + stem)` over
+  Ballroom annotation stems never selected by any prior prepared split
+  (618 eligible, 0 APTA runs ever);
+- canonicalized to 48 kHz stereo s16 WAV from source audio;
+- reference tempo: median annotated inter-beat interval per track;
+- selection file retained locally with the exact stem list; no outcome row
+  has been read or computed at freeze time.
