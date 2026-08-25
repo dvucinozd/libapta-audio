@@ -92,6 +92,22 @@ if(APTA_ENABLE_INTERNAL_PROFILING)
             ${CMAKE_CURRENT_SOURCE_DIR}/../src/core)
 endif()
 
+if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE)
+    # Development diagnostic instrument. It links the library's private meter
+    # header and must be built with the same trace macro as the library, so it
+    # is only defined when explicitly requested.
+    apta_add_tool(apta_meter_trace apta-meter-trace apta_meter_trace.c)
+    target_compile_definitions(
+        apta_meter_trace
+        PRIVATE
+            APTA_INTERNAL_METER_TRACE=1)
+    target_include_directories(
+        apta_meter_trace
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/core
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/beatgrid)
+endif()
+
 apta_add_tool(apta_analyze apta-analyze apta_analyze.c)
 apta_add_tool(apta_inspect apta-inspect apta_inspect.c)
 apta_add_tool(apta_validate apta-validate apta_validate.c)

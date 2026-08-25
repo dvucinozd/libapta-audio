@@ -783,6 +783,17 @@ struct apta_session {
     uint64_t meter_source_s4_serial;
     uint64_t meter_mutation_serial;
     uint64_t meter_published_serial;
+#ifdef APTA_INTERNAL_METER_TRACE
+    /* Opt-in diagnostic capture: the last meter refresh's collected evidence,
+     * for the apta-meter-trace development tool. Never built in production
+     * configurations; adds no allocation and changes no behaviour. */
+#define APTA_INTERNAL_METER_TRACE_BEATS 128u
+    float meter_trace_broad[APTA_INTERNAL_METER_TRACE_BEATS];
+    float meter_trace_accent[APTA_INTERNAL_METER_TRACE_BEATS];
+    uint64_t meter_trace_first_beat_bin;
+    uint32_t meter_trace_beat_count;
+    uint32_t meter_trace_lag;
+#endif
 
     apta_internal_key_analysis_t key_analysis;
     apta_key_view_t key_value;

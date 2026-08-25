@@ -45,4 +45,17 @@ apta_status_t apta_internal_meter_pool_build(
     const apta_session_t *session,
     apta_result_t *result);
 
+#ifdef APTA_INTERNAL_METER_TRACE
+/* Diagnostic trace of the last meter refresh. Returns the collected
+ * broadband (and accent, when stored) per-beat series, the sampling lag and
+ * the first sampled evidence bin. Any output pointer may be NULL. */
+void apta_internal_meter_trace_get(
+    const apta_session_t *session,
+    const float **broad_out,
+    const float **accent_out,
+    uint32_t *beat_count_out,
+    uint32_t *lag_out,
+    uint64_t *first_beat_bin_out);
+#endif
+
 #endif /* APTA_METER_INTERNAL_H */

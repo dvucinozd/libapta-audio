@@ -225,7 +225,34 @@ static uint32_t apta_meter_collect_beats(
     }
     if (first_beat_bin_out != NULL) {
         *first_beat_bin_out = first_beat_bin;
+#ifdef APTA_INTERNAL_METER_TRACE
+        {
+            apta_session_t *trace_session = (apta_session_t *)(void *)session;
+
+            trace_session->meter_trace_first_beat_bin = first_beat_bin;
+        }
+#endif
     }
+#ifdef APTA_INTERNAL_METER_TRACE
+    {
+        /* The collect helper takes a const session; the diagnostic capture
+         * writes only the trace scratch fields, never analysis state. */
+        apta_session_t *trace_session = (apta_session_t *)(void *)session;
+        uint32_t captured = count;
+
+        if (captured > APTA_INTERNAL_METER_TRACE_BEATS) {
+            captured = APTA_INTERNAL_METER_TRACE_BEATS;
+        }
+        memcpy(trace_session->meter_trace_broad,
+               strengths,
+               captured * sizeof(strengths[0]));
+        memcpy(trace_session->meter_trace_accent,
+               strengths,
+               captured * sizeof(strengths[0]));
+        trace_session->meter_trace_beat_count = captured;
+        trace_session->meter_trace_lag = lag;
+    }
+#endif
     return count;
 }
 
@@ -381,6 +408,36 @@ void apta_internal_meter_mark_published(apta_session_t *session)
         session->meter_published_serial = session->meter_mutation_serial;
     }
 }
+
+#ifdef APTA_INTERNAL_METER_TRACE
+void apta_internal_meter_trace_get(
+    const apta_session_t *session,
+    const float **broad_out,
+    const float **accent_out,
+    uint32_t *beat_count_out,
+    uint32_t *lag_out,
+    uint64_t *first_beat_bin_out)
+{
+    if (session == NULL) {
+        return;
+    }
+    if (broad_out != NULL) {
+        *broad_out = session->meter_trace_broad;
+    }
+    if (accent_out != NULL) {
+        *accent_out = session->meter_trace_accent;
+    }
+    if (beat_count_out != NULL) {
+        *beat_count_out = session->meter_trace_beat_count;
+    }
+    if (lag_out != NULL) {
+        *lag_out = session->meter_trace_lag;
+    }
+    if (first_beat_bin_out != NULL) {
+        *first_beat_bin_out = session->meter_trace_first_beat_bin;
+    }
+}
+#endif
 
 apta_status_t apta_internal_meter_build_snapshot(
     const apta_session_t *session,

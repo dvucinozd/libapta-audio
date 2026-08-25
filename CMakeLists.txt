@@ -39,6 +39,15 @@ if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
     add_compile_definitions(APTA_INTERNAL_MULTIBAND_ONSET=1)
 endif()
 
+option(
+    APTA_ENABLE_EXPERIMENTAL_METER_TRACE
+    "Build the apta-meter-trace development diagnostic tool"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE)
+    add_compile_definitions(APTA_INTERNAL_METER_TRACE=1)
+endif()
+
 add_library(apta_headers INTERFACE)
 add_library(apta::headers ALIAS apta_headers)
 

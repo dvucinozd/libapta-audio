@@ -228,3 +228,19 @@ native meter trace — an opt-in diagnostic dump of APTA's own per-beat lattice,
 exact refined periods and actual internal beat-strength series from real
 analyzer sessions — so future phase candidates are designed against the true
 native evidence rather than reconstructions of it.
+
+## Native meter trace tool — 2026-08-25
+
+The required trace capability now exists: `apta-meter-trace`, built only with
+`-DAPTA_ENABLE_EXPERIMENTAL_METER_TRACE=ON`, runs a real pull-mode session and
+emits one NDJSON record with APTA's published Q32 lattice, the meter selection,
+the sampling lag, first beat bin and the actual internal broadband strength
+series the meter stage scored. The default build configuration is unchanged
+and passes all 114 tests; the flag-off build contains none of the capture
+code paths.
+
+Process correction: a batch tracing loop over the prepared Ballroom audio
+directory also reached the 40 holdout tracks before the split boundary was
+noticed. The 40 holdout trace files were deleted unread and no holdout trace
+content was inspected or used; the development-partition traces (40 records)
+are retained as local-only candidate-design evidence.
