@@ -150,6 +150,31 @@ Fewer than 48 fresh labelled tracks is diagnostic evidence only, matching the
 size of the previous hold-out as the minimum comparison floor. More is strongly
 preferred.
 
+### Frozen fresh set — Ballroom holdout, owner-approved — 2026-08-25
+
+Following the trace analysis that deprioritized meter/downbeat work upstream,
+the owner approved spending the previously untouched Ballroom holdout split as
+the Task-5 fresh tempo validation set. Recorded before the first candidate
+run:
+
+- track count: **40** (the protocol minimum comparison floor);
+- manifest SHA-256: `0dc703b20d0603f9e6685bb0cfa83367414a6de92470eb1c4fee5f48097928a7`;
+- reference-labels SHA-256: `5aa77e0b23233a38480d43a77b67f63f2407c91ac444073efce1bf8f0214d323`;
+- freeze date: prepared directory frozen at validation-set creation (2026-08-25 handoff);
+- reference source: Ballroom Rhythm Dataset manually corrected beat/bar
+  annotations (CC BY-NC-SA 4.0); tempo truth derived deterministically as the
+  median annotated inter-beat interval per track at 48 kHz;
+- verification procedure: dataset annotations are hand-corrected beat
+  positions; no APTA output was read during derivation;
+- tempo-range distribution: <90 BPM: 11, 90-119: 8, 120-139: 7, 140-159: 1,
+  160-179: 6, >=180: 7 (broad by design: waltz through fast jive);
+- meter composition: 20 tracks labelled 3/4, 20 labelled 4/4.
+
+Comparison configuration, fixed now: baseline is the same HEAD binary run in
+S4-only mode (the unchanged Phase-4/1.0.1 production selection); candidate is
+the identical binary in `--request-global` ensemble mode. One run per side;
+results are reported for all rows with no post-hoc subsetting.
+
 ## Fresh-set acceptance criteria
 
 Compare the unchanged APTA 1.0.1/Phase-4 production selection and the Task-5
