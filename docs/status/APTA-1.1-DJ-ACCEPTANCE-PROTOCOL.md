@@ -105,3 +105,28 @@ hash, evaluator version, complete machine-readable report and source revision.
 Any threshold or correctness-definition change after seeing fresh validation
 results creates a new protocol revision and requires a new untouched validation
 set.
+
+## Official acceptance run — pre-run record — 2026-08-25
+
+Frozen corpus (owner listening verification, workbench of 2026-08-25):
+
+- labels SHA-256: `e7eac4ab8a80019b3da558c347d36242b827e485c7c66dff27c72fa8c25abbb8`;
+- frozen UTC: `2026-08-25T18:48:18Z`;
+- track count: 60 (all verified, none excluded);
+- reference source: owner listening verification; prefilled aids were
+  Rekordbox plus the independent estimator set only — APTA output was never
+  shown in the workbench;
+- verification procedure: owner confirmed or corrected key, BPM, meter and
+  downbeat by ear for every retained track.
+
+Disclosure recorded before the run: this corpus was previously analyzed with
+automated labels as a diagnostic (2026-08-23). The tempo-family selection
+changes retained on this branch (`c12b303` dominant S6 family choice,
+`1dadfb2` common-time prior) were informed by that diagnostic, so their
+meter/period results here carry reduced evidential weight. Key, downbeat and
+beatgrid accuracy were never improved using this corpus. Thresholds above
+were frozen before any of those runs and are unchanged.
+
+Analyzer for this run: HEAD binary at source revision `ace15b5` tree,
+one pass over the exact frozen corpus, then FINAL-only export and this
+evaluator with unchanged thresholds.
