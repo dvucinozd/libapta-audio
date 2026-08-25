@@ -100,9 +100,9 @@ Do not tune thresholds after examining fresh acceptance results. The old develop
 
 ## Remaining blockers before `v1.1.0`
 
-1. Run the relation-aware tempo/grid candidate on genuinely fresh validation evidence and satisfy the frozen evaluation gates.
+1. ~~Run the relation-aware tempo/grid candidate on genuinely fresh validation evidence and satisfy the frozen evaluation gates.~~ **Closed 2026-08-25** — accepted on a formal 48-track owner-supplied fresh set; all five frozen gates passed (exact within 1% 25 -> 29, zero broken selections, no safety regressions). See [`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md).
 2. Train calibrated confidence on a separate >=96-row training set and pass an untouched >=48-row disjoint holdout; only then integrate a production `APTA_FEATURE_CALIBRATED_QUALITY` model.
-3. Assemble and independently verify the >=48-track final DJ corpus, freeze manifest/labels, run the complete native qualification path and pass every final key/meter/downbeat/grid/high-confidence gate.
+3. Assemble and independently verify the >=48-track final DJ corpus, freeze manifest/labels, run the complete native qualification path and pass every final key/meter/downbeat/grid/high-confidence gate. Note: native trace analysis (2026-08-25) bounds meter/downbeat accuracy upstream at beat-lattice quality, so this gate is now dominated by tempo/grid performance on full-length DJ material and by key accuracy against independently verified labels.
 4. Collect physical ESP32-P4 memory/timing/USB/audio coexistence evidence on real hardware.
 5. Freeze final 1.1 API/ABI/wire documents, deliberately update version metadata, regenerate release/package evidence, rerun the complete exact-candidate matrix, then tag/publish.
 

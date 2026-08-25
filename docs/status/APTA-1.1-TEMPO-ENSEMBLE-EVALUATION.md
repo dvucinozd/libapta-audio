@@ -236,6 +236,40 @@ one run each, all rows reported.
 Closing this run's results section will follow after execution; thresholds
 and gates are already fixed above and are not renegotiable afterwards.
 
+## Formal fresh-set result — 2026-08-25
+
+Both configurations ran once over the exact frozen formal set, same HEAD
+binary (`apta-tempo-corpus` SHA-256
+`4201ab843842a8a74c286522450de6b444285043e135f62fd658942d96ee892c`, source
+revision `2d34cda` tree). Native gates at this revision: 114 CTest tests
+passing with warnings as errors in the default configuration, covering the
+bounded cooperative-refresh and scheduler-step behaviour required by gate 6.
+
+| Metric | Baseline (S4-only) | Candidate (ensemble) |
+|---|---:|---:|
+| Exact within 1% | 25/48 | 29/48 |
+| Octave errors | 2 | 2 |
+| Other errors | 21 | 17 |
+| Errors with confidence >=75 | 5 | 5 |
+| Octave-family errors >=75 | 2 | 2 |
+| Metrical-family errors >=75 | 2 | 2 |
+| Selections fixed / broken | — | 4 / 0 |
+
+Frozen acceptance gates:
+
+- PASS — no exact-accuracy regression (25 -> 29);
+- PASS — no promotion regression (0 broken);
+- PASS — no high-confidence safety regression (5 -> 5);
+- PASS — no metrical safety regression (2 -> 2);
+- PASS — demonstrated benefit (exact count improved by four);
+- PASS — bounded behaviour retained (native bounded-refresh,
+  endorsement and scheduler tests green at this revision).
+
+**VERDICT: the relation-aware tempo/grid ensemble is accepted against its
+frozen fresh-set contract.** The Task-5 fresh-acceptance blocker is closed.
+Remaining Task-5 bookkeeping is limited to keeping the retained historical
+regression record current with any future selection changes.
+
 Closing the Task-5 acceptance blocker formally requires one further run on a
 newly frozen set of at least 48 tracks (for example owner-supplied material
 with independently created tempo labels), evaluated against the same gates.
