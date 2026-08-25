@@ -165,3 +165,34 @@ Holdout 2: next-48 selection by the same rule and seed over the remaining
 pool after removing Candidate-1 holdout stems (`sha256("apta-task6-holdout-v1:"
 + stem)` ascending, first 48 not previously selected). Frozen before any APTA
 run on those files; acceptance gates unchanged.
+
+## Candidate 2 result — ACCEPTED — 2026-08-25
+
+One run over holdout 2 exactly as frozen; same 328 training rows (identical
+bytes); method `isotonic-pav-clamped-v1`; calibration model ID `1867860160`.
+
+| Metric | Raw | Calibrated |
+|---|---:|---:|
+| Brier score | 0.17853 | **0.15237** |
+| 10-bin ECE | 0.28188 | **0.19750** |
+| High-confidence errors | 0 | 0 |
+| Mean reported confidence | 54.4 | 44.2 |
+| Empirical accuracy | 43.75% | 43.75% |
+
+Gates: Brier not worse PASS (improved); ECE not worse PASS (improved);
+high-confidence errors not worse PASS (unchanged at zero); strict improvement
+PASS (two metrics); determinism PASS (pure function of training bytes); ID
+disjointness PASS. **Verdict: accepted.**
+
+This qualifies exactly the frozen model `isotonic-pav-clamped-v1` /
+`1867860160` trained on the recorded 328-row set. Integration may now add it
+as a bounded static lookup table and publish an optional calibrated-quality
+record for `APTA_FEATURE_BPM`, subject to the full repository CI matrix.
+Scope notes for that integration commit:
+
+- the clamp means integration can only lower a reported confidence, never
+  raise it;
+- evidence remains tempo-specific and mixed-domain; the record's coverage and
+  flags must state the BPM scope honestly;
+- holdouts 1 and 2 are spent; any future model change repeats the cycle with
+  fresh untouched material from the remaining pool.
