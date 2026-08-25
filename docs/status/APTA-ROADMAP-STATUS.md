@@ -71,6 +71,13 @@ The detailed current boundary and exact remaining blockers are maintained in
 The current private-corpus preparation and manual-review boundary is recorded in
 [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
 
+Native trace evidence on the Ballroom development partition has since shown
+that meter/downbeat accuracy is bounded upstream by beat-lattice quality (its
+information ceiling is ~9/40 tracks, with production scoring already at that
+ceiling), so downbeat candidate work is deprioritized in favour of the
+tempo/grid ensemble boundary; see the closing analysis in
+[`APTA-1.1-METER-DOWNBEAT-VALIDATION.md`](APTA-1.1-METER-DOWNBEAT-VALIDATION.md).
+
 ## What still blocks APTA 1.1 release
 
 - fresh relation-aware tempo/grid corpus qualification;

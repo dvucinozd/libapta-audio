@@ -244,3 +244,40 @@ directory also reached the 40 holdout tracks before the split boundary was
 noticed. The 40 holdout trace files were deleted unread and no holdout trace
 content was inspected or used; the development-partition traces (40 records)
 are retained as local-only candidate-design evidence.
+
+## Trace analysis closes the meter-front investigation — 2026-08-25
+
+The native traces were analyzed against the development labels to answer,
+finally, whether any scoring rule could recover bar phase from the existing
+broadband per-beat series.
+
+Findings:
+
+- lattice period is within 1% on 10/40 tracks and within 10% on 17/40; the
+  remaining 23/40 sit above a 10% period error (20 of them above 25%), so the
+  lattice does not follow the music at all there;
+- the annotated bar phase maps consistently onto the lattice on only 14/40
+  tracks;
+- the oracle ceiling — period within 1% AND consistent bar phase, i.e. every
+  track where ANY scoring rule could succeed on this evidence — is **9/40**;
+- the production contrast scoring already picks the true phase on 9/40, i.e.
+  it operates at that ceiling; the mean top contrast is statistically the same
+  for tracks it gets right (2.53) and wrong (2.66), so no threshold or rule
+  change can separate them.
+
+Conclusions, now evidence-backed rather than assumed:
+
+1. The broadband per-beat strength series is exhausted as bar-phase evidence.
+   Its information ceiling (~22% of tracks) is far below the >=90% acceptance
+   gate, and current scoring sits at that ceiling.
+2. Downbeat accuracy cannot be improved inside the meter stage. The dominant
+   defect is upstream: beat-period/lattice quality (only 10/40 within 1%),
+   which meter and downbeat scoring inherit.
+3. Meter/downbeat candidate work is therefore deprioritized in favour of the
+   upstream tempo/grid ensemble boundary (Task 5) until a qualifying lattice
+   exists. Any future meter front-end work must introduce genuinely new
+   evidence (for example dedicated low-band storage feeding an S6-style
+   bar-periodicity estimator), not recombine the broadband channel.
+
+This document's scope ends here: further updates on downbeat belong to the
+tempo/grid ensemble evaluation record until its gates close.
