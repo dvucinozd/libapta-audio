@@ -24,3 +24,41 @@ apta_confidence_value_t apta_internal_bpm_quality_calibrate(
     }
     return APTA_INTERNAL_BPM_QUALITY_LUT[raw_confidence];
 }
+
+uint16_t apta_internal_quality_coverage_permille(
+    uint64_t covered,
+    uint64_t total)
+{
+    uint64_t remainder;
+    uint16_t permille;
+    uint16_t place;
+
+    if (total == 0u) {
+        return 0u;
+    }
+    if (covered >= total) {
+        return 1000u;
+    }
+
+    remainder = covered;
+    permille = 0u;
+    for (place = 100u; place != 0u; place /= 10u) {
+        uint64_t accumulator = 0u;
+        uint16_t addend;
+        uint16_t digit = 0u;
+
+        /* Decimal long division computes remainder * 10 without ever
+         * overflowing uint64_t. */
+        for (addend = 0u; addend < 10u; ++addend) {
+            if (remainder != 0u && accumulator >= total - remainder) {
+                accumulator -= total - remainder;
+                ++digit;
+            } else {
+                accumulator += remainder;
+            }
+        }
+        remainder = accumulator;
+        permille = (uint16_t)(permille + digit * place);
+    }
+    return permille;
+}

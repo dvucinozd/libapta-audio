@@ -12,7 +12,10 @@ The tracked evidence JSON must use schema `apta-1.1-esp32-p4-hardware-evidence-1
 - board model/revision, operator and test location;
 - `idf_target=esp32p4`, ESP-IDF `6.0.2`, PSRAM enabled and 48 kHz input;
 - at least 1,800 seconds of continuous execution;
-- all release-target DJ features enabled: waveform overview, BPM, local/global beatgrid, meter/downbeat and musical key;
+- all release-target DJ features enabled: overview/detail/three-band waveform,
+  BPM, local/global beatgrid, dynamic tempo, confidence, grid locking,
+  meter/downbeat, musical key and calibrated BPM quality;
+- 32,768 overview frames per column (the frozen 30-minute P4 profile);
 - actual workspace/result-pool sizes;
 - actual overview-column and resident-beat-record counts;
 - free/minimum-free internal heap and PSRAM measurements;
@@ -28,7 +31,7 @@ The tracked evidence JSON must use schema `apta-1.1-esp32-p4-hardware-evidence-1
 - firmware SHA-256 is valid lowercase hex;
 - ESP-IDF/target/sample-rate/PSRAM values match the frozen target;
 - duration is at least 30 minutes;
-- workspace is at least 932,960 bytes and result pool at least 531,232 bytes;
+- workspace is at least 941,216 bytes and result pool at least 537,104 bytes;
 - overview columns are at most 4,096 and resident beat records at most 9,216;
 - measured minimum free internal heap and PSRAM remain positive and cannot exceed their pre-test values;
 - process p99 cannot exceed the observed maximum;

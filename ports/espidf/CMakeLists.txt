@@ -17,6 +17,7 @@ set(APTA_CORE_SRCS
     "${APTA_ROOT}/src/key/apta_key_process.c"
     "${APTA_ROOT}/src/key/apta_key_snapshot.c"
     "${APTA_ROOT}/src/key/apta_key_pool_snapshot.c"
+    "${APTA_ROOT}/src/confidence/apta_quality_model.c"
     "${APTA_ROOT}/src/core/apta_config.c"
     "${APTA_ROOT}/src/core/apta_context.c"
     "${APTA_ROOT}/src/core/apta_initializers.c"

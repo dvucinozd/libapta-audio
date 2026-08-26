@@ -1,0 +1,15 @@
+{
+  "schema": "apta-1.1-dj-acceptance-provenance-1",
+  "verdict": "rejected",
+  "reviewer_role": "independent musician",
+  "verified_track_count": 60,
+  "excluded_track_count": 0,
+  "verification_csv_sha256": "0b51016bdffbc4da2e97babf7e1f87b22542be5384381d4066a396d68c1bf70a",
+  "labels_sha256": "e7eac4ab8a80019b3da558c347d36242b827e485c7c66dff27c72fa8c25abbb8",
+  "manifest_sha256": "37ee034d23d388fcef643a1c0348f9aa5e790a3bc453ee23a0f363fafe916be3",
+  "results_sha256": "8a011cf9c695ed5d2fdb5eeaeff92504d0655827306c16c291fd4d0565ae1c0e",
+  "report_sha256": "14006b0f55fe31aec04a8a0407a85c7094f137390d48cee354a50aec338cb22c",
+  "result_source_revision": "1dadfb2cd32a61b0393c705e9ca43e3b12603c8f",
+  "result_provenance": "retained deterministic analyzer output for the exact same 60 canonical WAV files; labels were independently verified later and were not inputs to analysis",
+  "privacy": "raw verification export, titles, artists, audio and derived labels remain local; only hashes and aggregate results are tracked"
+}

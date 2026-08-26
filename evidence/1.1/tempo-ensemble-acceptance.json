@@ -1,0 +1,29 @@
+{
+  "schema": "apta-1.1-tempo-ensemble-acceptance-1",
+  "accepted": true,
+  "evaluated_utc": "2026-08-25",
+  "track_count": 48,
+  "reference_labels_sha256": "f4e3c377553cbd778c18ed2b18b014927003a1464b0ad64b2c171ea44820dec3",
+  "freeze_manifest_sha256": "a21b3214fd3ba15d8bb5f6a99c8aea3d0fced423b36f795d7cb1a1c1fdec24c3",
+  "analyzer_sha256": "4201ab843842a8a74c286522450de6b444285043e135f62fd658942d96ee892c",
+  "source_revision": "2d34cda",
+  "metrics": {
+    "baseline_exact_within_1_percent": 25,
+    "candidate_exact_within_1_percent": 29,
+    "baseline_high_confidence_errors": 5,
+    "candidate_high_confidence_errors": 5,
+    "baseline_high_confidence_metrical_errors": 2,
+    "candidate_high_confidence_metrical_errors": 2,
+    "selections_fixed": 4,
+    "selections_broken": 0
+  },
+  "gates": {
+    "exact_accuracy_not_worse": true,
+    "no_promotion_regression": true,
+    "high_confidence_safety_not_worse": true,
+    "metrical_safety_not_worse": true,
+    "demonstrated_benefit": true,
+    "bounded_behavior_retained": true
+  },
+  "privacy": "audio, labels and row-level results remain private; hashes and aggregate metrics are retained"
+}

@@ -1,10 +1,10 @@
 # APTA 1.1 final DJ corpus status
 
-- **Snapshot date:** 2026-08-23
+- **Snapshot date:** 2026-08-25
 - **Development branch:** `1.1.0`
 - **Qualification source revision:** `9fa2a2e48d88a9732a5130db421b6da75805884b`
-- **Current state:** private corpus prepared; manual canonical-WAV verification pending
-- **Acceptance claim:** none; the final DJ acceptance blocker remains open
+- **Current state:** independent musician verification complete; official 60-track attempt rejected
+- **Acceptance claim:** rejected evidence retained; the final DJ acceptance blocker remains open
 
 ## Completed preparation
 
@@ -256,10 +256,10 @@ blocker. The labels are automated rather than independently verified by human
 review, and the measured accuracy and key/grid safety gates fail by wide
 margins. No acceptance or release claim is made.
 
-## Verification workbench handed to the owner — 2026-08-25
+## Verification workbench handed to the independent reviewer — 2026-08-25
 
 The manual verification prerequisite was prepared as a local-only review
-workbench so the owner's listening pass is confirmation-by-ear rather than
+workbench so the musician's listening pass is confirmation-by-ear rather than
 measurement from scratch:
 
 - all 60 canonical WAVs staged with opaque file names;
@@ -273,7 +273,7 @@ measurement from scratch:
   ambiguous material; at least 48 verified tracks must remain;
 - export produces `verification.csv` consumed by the freeze step.
 
-While the owner verifies, upstream blockers continued to close: Task-5
+While the reviewer verified, upstream blockers continued to close: Task-5
 (ensemble fresh-set acceptance) and Task-6 (calibrated confidence acceptance
 and integration) completed on this date. The remaining acceptance sequence is
 unchanged: freeze verified labels and manifest with hashes, record the pre-run
@@ -284,24 +284,26 @@ positive or negative — bound to exact hashes.
 
 ## Official acceptance result — REJECTED — 2026-08-25
 
-The owner completed the full listening verification (60/60 confirmed, none
-excluded) and the corpus was frozen the same day. One analyzer pass over the
-exact frozen corpus, FINAL-only export and the unchanged frozen evaluator
-produced the official verdict: **rejected**.
+An independent musician completed the full listening verification (60/60
+confirmed, none excluded), and the corpus was frozen the same day. The
+recovered export was independently audited on 2026-08-25: all canonical names
+match, and deterministic anonymization reproduces the recorded labels hash.
+The retained analyzer results cover the exact same canonical WAV files; the
+unchanged frozen evaluator reproduces the official verdict: **rejected**.
 
 Run evidence (all hashes exact):
 
-- source revision: `82691c631c522773af8401aa3a3ce385034c927d`;
-- analyzer SHA-256:
-  `11e94d89c35ed352b9bb99e5c6bc7d7517d2a5528494a3a2edd0678cabf13fc6`;
+- result source revision: `1dadfb2cd32a61b0393c705e9ca43e3b12603c8f`;
+- verification CSV SHA-256:
+  `0b51016bdffbc4da2e97babf7e1f87b22542be5384381d4066a396d68c1bf70a`;
 - labels SHA-256:
   `e7eac4ab8a80019b3da558c347d36242b827e485c7c66dff27c72fa8c25abbb8`;
 - results CSV SHA-256:
   `8a011cf9c695ed5d2fdb5eeaeff92504d0655827306c16c291fd4d0565ae1c0e`;
 - acceptance report SHA-256:
   `14006b0f55fe31aec04a8a0407a85c7094f137390d48cee354a50aec338cb22c`;
-- mapping SHA-256:
-  `47f3ff685a4ccfd470ec71310adc9396a9264b50f2885eb203df71be0d0808ae`.
+- regenerated privacy-safe manifest SHA-256:
+  `37ee034d23d388fcef643a1c0348f9aa5e790a3bc453ee23a0f363fafe916be3`.
 
 Metrics against human ground truth versus the frozen thresholds:
 
@@ -317,7 +319,7 @@ Metrics against human ground truth versus the frozen thresholds:
 
 Reading of the verdict:
 
-1. Human verification confirms the earlier diagnostic magnitudes almost
+1. Independent musician verification confirms the earlier diagnostic magnitudes almost
    exactly, which validates both the labels and the evaluator mechanics; the
    failure is a real accuracy deficit, not an artifact.
 2. The meter pass carries the pre-recorded reduced evidential weight because
@@ -362,7 +364,7 @@ tuning-offset handling (hard-coded zero cents; a cluster of whole-step errors
 is consistent with detuned source material smearing chroma into neighbouring
 pitch classes). Per protocol discipline this corpus is now spent for key
 candidate design too; formal closure of the key gate requires stabilized
-candidates plus a newly owner-verified corpus.
+candidates plus a newly independently verified corpus.
 
 ## Key-accuracy iteration 2 probe — profile shape exhausted — 2026-08-25
 
@@ -382,4 +384,4 @@ Closing the key gate therefore requires better tonal evidence, not different
 profiles: candidates worth pre-registering are harmonic-weighted HPCP-style
 chroma, longer adaptive analysis windows, and tuning-offset estimation
 (currently hard-coded to zero cents). Each is a substantial detector rework
-and must be evaluated against a newly owner-verified corpus afterwards.
+and must be evaluated against a newly independently verified corpus afterwards.

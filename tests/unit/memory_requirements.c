@@ -41,6 +41,8 @@ int main(void)
 {
     apta_session_config_t session_config;
     apta_memory_requirements_t requirements;
+    apta_memory_requirements_t bpm_requirements;
+    apta_memory_requirements_t quality_requirements;
     apta_context_config_t context_config;
     apta_context_t *context = NULL;
     apta_session_t *session = NULL;
@@ -64,6 +66,31 @@ int main(void)
     CHECK(requirements.required_alignment != 0u);
     CHECK((requirements.required_alignment &
            (requirements.required_alignment - 1u)) == 0u);
+
+    session_config.requested_features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM;
+    apta_memory_requirements_init(&bpm_requirements);
+    CHECK(apta_query_memory_requirements(
+              &session_config, &bpm_requirements) == APTA_STATUS_OK);
+    session_config.requested_features |= APTA_FEATURE_CALIBRATED_QUALITY;
+    apta_memory_requirements_init(&quality_requirements);
+    CHECK(apta_query_memory_requirements(
+              &session_config, &quality_requirements) == APTA_STATUS_OK);
+    CHECK(quality_requirements.recommended_bytes >
+          bpm_requirements.recommended_bytes);
+
+    session_config.requested_features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_CALIBRATED_QUALITY;
+    apta_memory_requirements_init(&quality_requirements);
+    CHECK(apta_query_memory_requirements(
+              &session_config, &quality_requirements) ==
+          APTA_ERROR_INVALID_ARGUMENT);
+    apta_memory_requirements_init(&quality_requirements);
+    CHECK(apta_query_workspace_requirements(
+              &session_config, &quality_requirements) ==
+          APTA_ERROR_INVALID_ARGUMENT);
+    configure_waveform_session(&session_config);
 
     apta_context_config_init(&context_config);
     context_config.memory_limit_bytes = requirements.minimum_bytes - 1u;

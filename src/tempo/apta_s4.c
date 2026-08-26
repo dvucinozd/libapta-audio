@@ -1591,6 +1591,9 @@ apta_status_t apta_internal_s4_build_snapshot(
             const uint64_t total = (uint64_t)session->final_end_frame;
             uint64_t covered = session->greatest_accepted_end;
 
+            if (quality == NULL) {
+                return APTA_ERROR_OUT_OF_MEMORY;
+            }
             if (covered > total) {
                 covered = total;
             }
@@ -1604,7 +1607,7 @@ apta_status_t apta_internal_s4_build_snapshot(
                                  ? APTA_FEATURE_FINAL
                                  : result->tempo.selected.state;
             quality->evidence_coverage_permille =
-                (uint16_t)((covered * 1000u) / total);
+                apta_internal_quality_coverage_permille(covered, total);
             result->quality = quality;
             result->quality_count = 1u;
             result->info.available_features |=
@@ -1677,10 +1680,13 @@ void apta_internal_s4_cleanup_result(apta_result_t *result)
     apta_internal_context_deallocate(result->context, result->local_grid_coverage);
     apta_internal_context_deallocate(result->context, result->local_grid_segments);
     apta_internal_context_deallocate(result->context, result->local_grid_beats);
+    apta_internal_context_deallocate(result->context, result->quality);
     result->tempo_candidates = NULL;
     result->local_grid_coverage = NULL;
     result->local_grid_segments = NULL;
     result->local_grid_beats = NULL;
+    result->quality = NULL;
+    result->quality_count = 0u;
     result->tempo.candidates = NULL;
     result->tempo.candidate_count = 0u;
     result->local_grid.coverage_ranges = NULL;

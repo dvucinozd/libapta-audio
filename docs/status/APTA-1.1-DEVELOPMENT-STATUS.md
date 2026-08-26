@@ -7,7 +7,7 @@
 
 ## Current boundary
 
-The reusable 1.1 infrastructure, native meter/key implementation and complete desktop qualification path are in place. Remaining blockers are evidence-driven rather than missing core feature plumbing: fresh tempo/grid validation, confidence-model fitting and untouched holdout, independent final DJ corpus acceptance, physical ESP32-P4 measurements, and final release freeze.
+The reusable 1.1 infrastructure, native meter/key implementation and complete desktop qualification path are in place. Tempo/grid and confidence acceptance evidence is retained. The independent 60-track final DJ attempt is formally rejected, leaving algorithmic accuracy, physical ESP32-P4 measurements and final release freeze as the active blockers.
 
 | Work item | Status | Delivered boundary |
 |---|---|---|
@@ -57,7 +57,7 @@ The qualification tooling then provides the full private-corpus path:
 7. export only completed/FINAL native key, meter and selected beatgrid results;
 8. run the pre-registered acceptance evaluator.
 
-This closes the software-path gap between private source audio and the acceptance evaluator. It does **not** provide the required fresh evidence itself. A 60-track private corpus has now been selected, copied locally and canonicalized, and an independent automated pre-review was completed without reading APTA output. Manual verification against the canonical WAV files remains pending, so no official corpus has been frozen and no fresh acceptance result is claimed. The first separately frozen automated diagnostic run exposed long-form completion and TEMP ordering defects; revision `d53ee8d` fixes both, and a from-scratch rerun completed and parsed all 60 outputs. A subsequent exporter audit fixed the scored period to use the same local grid as the native meter/downbeat result when `LGRD` is present. Development-only S6 candidate arbitration and a conservative weak-3/4 policy then improved automated-reference period and meter counts, but downbeat, beatgrid, key and confidence-safety gates still fail. Because those policies were designed after this corpus was inspected, even their improvements are contaminated development evidence. The dated preparation, corrected metrics and candidate deltas are recorded in [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
+This closes the software-path gap between private source audio and the acceptance evaluator. A 60-track private corpus was selected, canonicalized and later verified in full by an independent musician without APTA output in the listening workbench. The recovered 60-row export deterministically reproduces the frozen labels hash. Evaluation of the retained exact-corpus analyzer results formally rejects the candidate: meter passes, while key, downbeat, beatgrid and key/grid confidence-safety gates fail. The dated preparation, reproducible hashes, corrected metrics and candidate deltas are recorded in [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md).
 
 A separate targeted protocol now freezes balanced development and untouched
 holdout splits from ASAP and the real-audio Ballroom Rhythm Dataset. The first
@@ -76,10 +76,10 @@ For 48 kHz / 30 minutes (`86,400,000` source frames), deterministic capacity evi
 - mutable S6 beat capacity: **3,072**;
 - bounded immutable result slots: **2**;
 - resident explicit beat records: **9,216** across mutable S6 + two result slots;
-- minimum static workspace: **932,960 bytes**;
-- recommended static workspace: **991,286 bytes**;
-- bounded result pool: **531,232 bytes**;
-- combined minimum: **1,464,192 bytes**.
+- minimum static workspace: **941,216 bytes**;
+- recommended static workspace: **1,000,058 bytes**;
+- bounded result pool: **537,104 bytes**;
+- combined minimum: **1,478,320 bytes**.
 
 This is firmware-build/layout evidence only. Physical-device latency, actual internal/PSRAM placement, allocator fragmentation, thermals, and USB/audio coexistence remain unverified until a real hardware run satisfies the frozen hardware-evidence contract.
 
@@ -101,8 +101,8 @@ Do not tune thresholds after examining fresh acceptance results. The old develop
 ## Remaining blockers before `v1.1.0`
 
 1. ~~Run the relation-aware tempo/grid candidate on genuinely fresh validation evidence and satisfy the frozen evaluation gates.~~ **Closed 2026-08-25** — accepted on a formal 48-track owner-supplied fresh set; all five frozen gates passed (exact within 1% 25 -> 29, zero broken selections, no safety regressions). See [`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md).
-2. Train calibrated confidence on a separate >=96-row training set and pass an untouched >=48-row disjoint holdout; only then integrate a production `APTA_FEATURE_CALIBRATED_QUALITY` model.
-3. Assemble and independently verify the >=48-track final DJ corpus, freeze manifest/labels, run the complete native qualification path and pass every final key/meter/downbeat/grid/high-confidence gate. Note: native trace analysis (2026-08-25) bounds meter/downbeat accuracy upstream at beat-lattice quality, so this gate is now dominated by tempo/grid performance on full-length DJ material and by key accuracy against independently verified labels.
+2. ~~Train calibrated confidence on a separate >=96-row training set and pass an untouched >=48-row disjoint holdout; only then integrate a production `APTA_FEATURE_CALIBRATED_QUALITY` model.~~ **Closed 2026-08-25** — the accepted model and privacy-safe holdout summary are retained under `evidence/1.1`.
+3. Produce a replacement candidate that passes every final key/meter/downbeat/grid/high-confidence gate, then evaluate it on a newly verified >=48-track corpus. The first independent 60-track attempt is frozen and formally rejected; it cannot be reused as fresh acceptance evidence after candidate tuning.
 4. Collect physical ESP32-P4 memory/timing/USB/audio coexistence evidence on real hardware.
 5. Freeze final 1.1 API/ABI/wire documents, deliberately update version metadata, regenerate release/package evidence, rerun the complete exact-candidate matrix, then tag/publish.
 

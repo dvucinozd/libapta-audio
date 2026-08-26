@@ -323,7 +323,6 @@ static void apta_builder_cleanup_unpublished(apta_result_t *result)
         result->context, result->provenance_storage);
     apta_internal_context_deallocate(result->context, result->key_candidates);
     apta_internal_context_deallocate(result->context, result->meter_segments);
-    apta_internal_context_deallocate(result->context, result->quality);
     apta_internal_waveform_cleanup_result(result);
     apta_internal_context_deallocate(result->context, result);
 }

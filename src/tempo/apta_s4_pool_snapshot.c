@@ -92,7 +92,7 @@ static apta_status_t apta_s4_pool_build(
                 apta_internal_bpm_quality_calibrate(raw_confidence);
             quality->state = result->tempo.selected.state;
             quality->evidence_coverage_permille =
-                (uint16_t)((covered * 1000u) / total);
+                apta_internal_quality_coverage_permille(covered, total);
             result->quality = quality;
             result->quality_count = 1u;
             result->info.available_features |=

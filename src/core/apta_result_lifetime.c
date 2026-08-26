@@ -89,7 +89,6 @@ void apta_internal_result_release(apta_result_t *result)
     apta_internal_context_deallocate(context, result->provenance_storage);
     apta_internal_context_deallocate(context, result->key_candidates);
     apta_internal_context_deallocate(context, result->meter_segments);
-    apta_internal_context_deallocate(context, result->quality);
     apta_internal_waveform_cleanup_result(result);
     (void)atomic_fetch_sub_explicit(
         &context->result_count,

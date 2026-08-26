@@ -1,0 +1,32 @@
+{
+  "schema": "apta-1.1-confidence-calibration-holdout-1",
+  "accepted": true,
+  "evaluated_utc": "2026-08-25",
+  "model": "isotonic-pav-clamped-v1",
+  "calibration_model_id": 1867860160,
+  "training_rows": 328,
+  "holdout_rows": 48,
+  "raw_metrics": {
+    "brier_score": 0.17853,
+    "ece_10_bin": 0.28188,
+    "high_confidence_errors": 0,
+    "mean_confidence": 54.4,
+    "empirical_accuracy": 0.4375
+  },
+  "calibrated_metrics": {
+    "brier_score": 0.15237,
+    "ece_10_bin": 0.1975,
+    "high_confidence_errors": 0,
+    "mean_confidence": 44.2,
+    "empirical_accuracy": 0.4375
+  },
+  "gates": {
+    "brier_not_worse": true,
+    "ece_not_worse": true,
+    "high_confidence_errors_not_worse": true,
+    "strict_improvement": true,
+    "deterministic": true,
+    "id_disjointness": true
+  },
+  "privacy": "training and holdout row data remain private; aggregate metrics and the frozen model identifier are retained"
+}

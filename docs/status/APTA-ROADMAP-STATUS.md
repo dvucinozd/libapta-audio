@@ -1,7 +1,7 @@
 # APTA development roadmap status
 
 - **Current completed stage:** S9 — APTA 1.0
-- **Active development line:** `1.1.0`; tempo/grid ensemble and calibrated confidence accepted and integrated (2026-08-25); remaining evidence gates are the manually verified final DJ corpus, physical ESP32-P4 measurements, and the release freeze
+- **Active development line:** `1.1.0`; tempo/grid ensemble and calibrated confidence accepted and integrated (2026-08-25); the independently verified final DJ attempt is formally rejected, so remaining gates are a passing replacement candidate/corpus, physical ESP32-P4 measurements, and the release freeze
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1
@@ -62,8 +62,8 @@ The `1.1.0` development line now contains:
 The P4 capacity profile covers 86,400,000 frames (30 minutes at 48 kHz), 2,637
 overview columns at 32,768 frames/column, 3,072 mutable S6 beat records and two
 immutable result slots, for 9,216 resident explicit beat records. Its measured
-minimum workspace is 932,960 bytes and bounded result pool is 531,232 bytes,
-1,464,192 bytes combined. This is CI/layout evidence, not physical-device
+minimum workspace is 941,216 bytes and bounded result pool is 537,104 bytes,
+1,478,320 bytes combined. This is CI/layout evidence, not physical-device
 performance evidence.
 
 The detailed current boundary and exact remaining blockers are maintained in
@@ -82,7 +82,7 @@ tempo/grid ensemble boundary; see the closing analysis in
 
 - ~~fresh relation-aware tempo/grid corpus qualification~~ — **closed 2026-08-25**: the ensemble passed all five frozen gates on a formal 48-track owner-supplied fresh set (25 -> 29 exact within 1%, zero broken selections, no safety regressions); see [`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md);
 - ~~fitting and untouched-holdout acceptance of a production calibrated confidence model~~ — **closed 2026-08-25**: the `isotonic-pav-clamped-v1` tempo model (ID 1867860160) passed both calibration gates on a 48-row untouched holdout and is integrated as a bounded static lookup publishing an optional BPM quality record; see [`APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md`](APTA-1.1-CONFIDENCE-CALIBRATION-PROTOCOL.md);
-- independent manually verified >=48-track final DJ corpus passing frozen key/meter/downbeat/grid and high-confidence safety gates — **formal attempt executed 2026-08-25 on the owner-verified 60-track corpus: rejected** (key 25%, downbeat 8.3%, beatgrid 6.7%, grid high-confidence safety 40%; meter passes with reduced evidential weight). The deficit is quantified and dominated by key accuracy and beat-lattice phase; see [`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md) and [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md);
+- independent manually verified >=48-track final DJ corpus passing frozen key/meter/downbeat/grid and high-confidence safety gates — **formal attempt executed 2026-08-25 on the 60-track corpus independently verified by a musician: rejected** (key 25%, downbeat 8.3%, beatgrid 6.7%, grid high-confidence safety 40%; meter passes with reduced evidential weight). The deficit is quantified and dominated by key accuracy and beat-lattice phase; see [`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md) and [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md);
 - physical ESP32-P4 memory/timing evidence when hardware is available;
 - final API/ABI/wire freeze, version bump, package evidence, exact release candidate verification, tag and publication.
 

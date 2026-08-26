@@ -14,17 +14,23 @@ from typing import Any
 SCHEMA = "apta-1.1-esp32-p4-hardware-evidence-1"
 REPORT_SCHEMA = "apta-1.1-esp32-p4-hardware-report-1"
 MIN_DURATION_SECONDS = 1800
-MIN_WORKSPACE_BYTES = 932960
-MIN_RESULT_POOL_BYTES = 531232
+MIN_WORKSPACE_BYTES = 941216
+MIN_RESULT_POOL_BYTES = 537104
 MAX_OVERVIEW_COLUMNS = 4096
 MAX_RESIDENT_BEAT_RECORDS = 9216
 REQUIRED_FEATURES = {
     "waveform_overview",
+    "waveform_detail",
+    "waveform_3band",
     "bpm",
     "local_beatgrid",
     "global_beatgrid",
+    "dynamic_tempo",
+    "confidence",
+    "grid_locking",
     "meter_downbeat",
     "musical_key",
+    "calibrated_quality",
 }
 
 
@@ -79,6 +85,8 @@ def evaluate(value: dict[str, Any], expected_source_revision: str | None = None)
         fail("psram_enabled must be true")
     if value.get("sample_rate_hz") != 48000:
         fail("sample_rate_hz must be 48000")
+    if value.get("overview_frames_per_column") != 32768:
+        fail("overview_frames_per_column must be 32768")
 
     try:
         duration = _positive_int(value.get("duration_seconds"), "duration_seconds", MIN_DURATION_SECONDS)

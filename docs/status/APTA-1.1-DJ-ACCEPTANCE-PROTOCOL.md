@@ -108,15 +108,16 @@ set.
 
 ## Official acceptance run — pre-run record — 2026-08-25
 
-Frozen corpus (owner listening verification, workbench of 2026-08-25):
+Frozen corpus (independent musician listening verification, workbench of
+2026-08-25):
 
 - labels SHA-256: `e7eac4ab8a80019b3da558c347d36242b827e485c7c66dff27c72fa8c25abbb8`;
 - frozen UTC: `2026-08-25T18:48:18Z`;
 - track count: 60 (all verified, none excluded);
-- reference source: owner listening verification; prefilled aids were
+- reference source: independent musician listening verification; prefilled aids were
   Rekordbox plus the independent estimator set only — APTA output was never
   shown in the workbench;
-- verification procedure: owner confirmed or corrected key, BPM, meter and
+- verification procedure: the musician confirmed or corrected key, BPM, meter and
   downbeat by ear for every retained track.
 
 Disclosure recorded before the run: this corpus was previously analyzed with
@@ -127,13 +128,15 @@ meter/period results here carry reduced evidential weight. Key, downbeat and
 beatgrid accuracy were never improved using this corpus. Thresholds above
 were frozen before any of those runs and are unchanged.
 
-Analyzer for this run: HEAD binary at source revision `ace15b5` tree,
-one pass over the exact frozen corpus, then FINAL-only export and this
-evaluator with unchanged thresholds.
+Analyzer results were retained from the deterministic run over the exact same
+60 canonical WAV files at source revision `1dadfb2`. Labels are not analyzer
+inputs. After the independent listening export was recovered, the privacy-safe
+labels were regenerated and the unchanged evaluator was rerun; its labels and
+report hashes reproduce the values recorded below.
 
 ## Official acceptance run — result — 2026-08-25
 
-Executed as recorded above. Verdict: **rejected** (report JSON
+Evaluated as recorded above. Verdict: **rejected** (report JSON
 `14006b0f55fe31aec04a8a0407a85c7094f137390d48cee354a50aec338cb22c`).
 Key 25.0% (fail), meter 96.7% (pass), downbeat phase 8.3% (fail), beatgrid
 6.7% (fail), key high-confidence errors 16.7% (fail), grid high-confidence

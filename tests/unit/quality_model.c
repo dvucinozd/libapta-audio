@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define CHECK(condition)                                                     \
     do {                                                                     \
@@ -42,6 +43,17 @@ int main(void)
     CHECK(apta_internal_bpm_quality_calibrate(50u) == 45u);
     CHECK(apta_internal_bpm_quality_calibrate(75u) == 75u);
     CHECK(apta_internal_bpm_quality_calibrate(100u) == 100u);
+
+    /* Coverage scaling must remain defined across the complete uint64_t
+     * domain, not only for track lengths where covered * 1000 happens to fit. */
+    CHECK(apta_internal_quality_coverage_permille(0u, UINT64_MAX) == 0u);
+    CHECK(apta_internal_quality_coverage_permille(
+              UINT64_MAX / 2u, UINT64_MAX) == 499u);
+    CHECK(apta_internal_quality_coverage_permille(
+              UINT64_MAX - 1u, UINT64_MAX) == 999u);
+    CHECK(apta_internal_quality_coverage_permille(
+              UINT64_MAX, UINT64_MAX) == 1000u);
+    CHECK(apta_internal_quality_coverage_permille(1u, 0u) == 0u);
 
     printf("quality_model: all checks passed\n");
     return EXIT_SUCCESS;

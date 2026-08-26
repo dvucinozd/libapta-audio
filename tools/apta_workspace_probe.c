@@ -8,9 +8,11 @@
 
 #define FULL_FEATURES                                                        \
     (APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_WAVEFORM_DETAIL |         \
+     APTA_FEATURE_WAVEFORM_3BAND | APTA_FEATURE_MUSICAL_KEY |                \
      APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID |                        \
      APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO |             \
-     APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING)
+     APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING |                   \
+     APTA_FEATURE_METER_DOWNBEAT | APTA_FEATURE_CALIBRATED_QUALITY)
 
 typedef struct {
     const char *name;
@@ -21,6 +23,7 @@ typedef struct {
     uint64_t total_frames;
     apta_feature_mask_t features;
     size_t supplied_workspace;
+    uint32_t overview_frames_per_column;
 } probe_row_t;
 
 typedef struct {
@@ -47,6 +50,7 @@ static int query_row(const probe_row_t *row, probe_result_t *result_out)
     config.channel_layout = row->channel_layout;
     config.total_frames = row->total_frames;
     config.requested_features = row->features;
+    config.overview_frames_per_column = row->overview_frames_per_column;
     config.flags = APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS;
 
     apta_memory_requirements_init(&workspace);
@@ -157,14 +161,14 @@ int main(int argc, char **argv)
         {
             "WAVEFORM_8S", "8.0 s / 384,000 frames", 48000u, 1u,
             APTA_CHANNEL_LAYOUT_MONO, 384000u,
-            APTA_FEATURE_WAVEFORM_OVERVIEW, 131072u
+            APTA_FEATURE_WAVEFORM_OVERVIEW, 131072u, 0u
         },
         {
             "PERFORMANCE_LOCAL_6S", "6.0 s / 288,000 frames", 48000u, 1u,
             APTA_CHANNEL_LAYOUT_MONO, 288000u,
             APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
                 APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_CONFIDENCE,
-            262144u
+            262144u, 0u
         },
         {
             "GLOBAL_DYNAMIC_10_9S", "10.92 s / 524,288 frames", 48000u, 1u,
@@ -172,24 +176,29 @@ int main(int argc, char **argv)
             APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM |
                 APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO |
                 APTA_FEATURE_CONFIDENCE,
-            1572864u
+            1572864u, 0u
         }
     };
     static const probe_row_t durations[] = {
         {
             "FULL_30S", "30 s / 1,323,000 frames", 44100u, 2u,
             APTA_CHANNEL_LAYOUT_STEREO, UINT64_C(44100) * 30u,
-            FULL_FEATURES, 0u
+            FULL_FEATURES, 0u, 0u
         },
         {
             "FULL_5MIN", "5 min / 13,230,000 frames", 44100u, 2u,
             APTA_CHANNEL_LAYOUT_STEREO, UINT64_C(44100) * 300u,
-            FULL_FEATURES, 0u
+            FULL_FEATURES, 0u, 0u
         },
         {
             "FULL_12MIN", "12 min / 31,752,000 frames", 44100u, 2u,
             APTA_CHANNEL_LAYOUT_STEREO, UINT64_C(44100) * 720u,
-            FULL_FEATURES, 0u
+            FULL_FEATURES, 0u, 0u
+        },
+        {
+            "FULL_P4_30MIN", "30 min / 86,400,000 frames", 48000u, 2u,
+            APTA_CHANNEL_LAYOUT_STEREO, UINT64_C(48000) * 1800u,
+            FULL_FEATURES, 0u, 32768u
         }
     };
     int markdown = 0;

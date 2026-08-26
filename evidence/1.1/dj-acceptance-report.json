@@ -1,0 +1,46 @@
+{
+  "accepted": false,
+  "conditions": {
+    "beatgrid_accuracy": false,
+    "downbeat_accuracy": false,
+    "downbeat_high_confidence_safety": true,
+    "grid_high_confidence_safety": false,
+    "key_accuracy": false,
+    "key_high_confidence_safety": false,
+    "meter_accuracy": true,
+    "meter_high_confidence_safety": true,
+    "minimum_track_count": true
+  },
+  "evidence_level": "acceptance",
+  "format": "apta-1.1-dj-acceptance-report-1",
+  "metrics": {
+    "beatgrid_accuracy": 0.06666666666666667,
+    "beatgrid_correct": 4,
+    "downbeat_accuracy": 0.08333333333333333,
+    "downbeat_high_confidence_error_rate": 0.0,
+    "downbeat_high_confidence_errors": 0,
+    "downbeat_phase_correct": 5,
+    "grid_high_confidence_error_rate": 0.4,
+    "grid_high_confidence_errors": 24,
+    "key_accuracy": 0.25,
+    "key_exact": 15,
+    "key_high_confidence_error_rate": 0.16666666666666666,
+    "key_high_confidence_errors": 10,
+    "meter_accuracy": 0.9666666666666667,
+    "meter_exact": 58,
+    "meter_high_confidence_error_rate": 0.0,
+    "meter_high_confidence_errors": 0,
+    "tracks": 60
+  },
+  "thresholds": {
+    "beat_period_tolerance": 0.01,
+    "beatgrid_min_accuracy": 0.9,
+    "downbeat_min_accuracy": 0.9,
+    "downbeat_phase_tolerance_beats": 0.1,
+    "high_confidence": 75,
+    "high_confidence_max_error_rate": 0.05,
+    "key_min_accuracy": 0.75,
+    "meter_min_accuracy": 0.95,
+    "minimum_tracks": 48
+  }
+}

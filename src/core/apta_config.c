@@ -129,6 +129,7 @@ static size_t apta_memory_waveform_recommendation(
     size_t s6_snapshots = 0u;
     size_t meter_snapshots = 0u;
     size_t key_snapshots = 0u;
+    size_t quality_snapshots = 0u;
 
     if ((requested_features & APTA_FEATURE_WAVEFORM_DETAIL) != 0u) {
         detail_snapshot =
@@ -155,6 +156,10 @@ static size_t apta_memory_waveform_recommendation(
     }
     if ((requested_features & APTA_FEATURE_MUSICAL_KEY) != 0u) {
         key_snapshots = 2u * APTA_INTERNAL_KEY_CANDIDATE_COUNT * sizeof(apta_key_candidate_t);
+    }
+    if ((requested_features & APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+        (requested_features & APTA_FEATURE_BPM) != 0u) {
+        quality_snapshots = 2u * sizeof(apta_quality_view_t);
     }
     if ((requested_features & APTA_INTERNAL_S6_FEATURES) != 0u) {
         s6_session =
@@ -187,7 +192,8 @@ static size_t apta_memory_waveform_recommendation(
            s6_session +
            s6_snapshots +
            meter_snapshots +
-           key_snapshots;
+           key_snapshots +
+           quality_snapshots;
 }
 
 /* C2: zero means the library default. Otherwise a power of two in range; the
@@ -226,7 +232,8 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_GRID_LOCKING |
         APTA_FEATURE_MUSICAL_KEY |
-        APTA_FEATURE_METER_DOWNBEAT;
+        APTA_FEATURE_METER_DOWNBEAT |
+        APTA_FEATURE_CALIBRATED_QUALITY;
     const apta_feature_mask_t waveform_dependency =
         APTA_FEATURE_WAVEFORM_DETAIL |
         /* C1: bands qualify the overview, so they require it, like DETAIL. */
@@ -238,6 +245,7 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_MUSICAL_KEY |
         APTA_FEATURE_METER_DOWNBEAT |
+        APTA_FEATURE_CALIBRATED_QUALITY |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
     apta_internal_result_pool_layout_t pool_layout;
@@ -305,6 +313,11 @@ apta_status_t APTA_CALL apta_query_memory_requirements_base(
         (config->requested_features & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
         return APTA_ERROR_INVALID_ARGUMENT;
     }
+    if ((config->requested_features &
+         APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+        (config->requested_features & APTA_FEATURE_BPM) == 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
 
     if (config->input_mode == APTA_INPUT_MODE_PULL &&
         (config->requested_features & supported_features) != 0u) {
@@ -353,6 +366,8 @@ apta_status_t APTA_CALL apta_query_workspace_requirements(
     const apta_session_config_t *config,
     apta_memory_requirements_t *requirements_out)
 {
+    apta_memory_requirements_t validation;
+    apta_status_t status;
     size_t required;
 
     if (config == NULL || requirements_out == NULL) {
@@ -377,6 +392,14 @@ apta_status_t APTA_CALL apta_query_workspace_requirements(
            APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING)) != 0u ||
         !apta_internal_source_identity_is_valid(config)) {
         return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Keep the workspace query on the same feature/dependency contract as
+     * session creation and the result-memory query. */
+    apta_memory_requirements_init(&validation);
+    status = apta_query_memory_requirements_base(config, &validation);
+    if (status < 0) {
+        return status;
     }
 
     required = apta_internal_session_workspace_requirement(config);

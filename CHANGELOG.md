@@ -29,6 +29,17 @@ All notable changes to libapta-audio are documented in this file.
   lattice and the internal per-beat strength series from real analyzer
   sessions; it is never built into shipped configurations.
 
+### Fixed
+
+- aligned public memory/workspace queries and static-workspace validation with
+  the calibrated-quality feature and all of its feature dependencies;
+- made calibrated-quality publication transactional under allocation failure,
+  removed result-cleanup leaks/double frees, and made coverage arithmetic safe
+  for the full `uint64_t` frame range;
+- included the calibrated-quality implementation in the ESP-IDF component and
+  corrected the frozen full-feature ESP32-P4 capacity profile;
+- escaped input paths in experimental meter-trace JSON output.
+
 ### Compatibility boundary
 
 - this is development-branch state, not a released 1.1 compatibility claim;
@@ -42,8 +53,8 @@ All notable changes to libapta-audio are documented in this file.
 
 ### Not yet included
 
-- the manually verified final DJ acceptance corpus and its frozen evaluator
-  verdict;
+- a candidate that passes the frozen final DJ evaluator; the independently
+  verified 60-track formal attempt is retained as a rejected result;
 - physical ESP32-P4 memory, timing and coexistence evidence on real hardware;
 - a `v1.1.0` tag or release artifacts.
 

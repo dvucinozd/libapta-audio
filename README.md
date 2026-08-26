@@ -23,8 +23,9 @@ standard and its portable ISO C11 reference implementation.
 > accepted on a formal fresh validation set and the accepted
 > `isotonic-pav-clamped-v1` BPM confidence calibration (protocol ID 1867860160)
 > is integrated behind `APTA_FEATURE_CALIBRATED_QUALITY`. Remaining before a
-> `v1.1.0` tag: the manually verified final DJ acceptance corpus, physical
-> ESP32-P4 evidence, and the release freeze. This branch is not a tagged
+> `v1.1.0` tag: a passing replacement for the formally rejected final DJ
+> acceptance candidate, physical ESP32-P4 evidence, and the release freeze.
+> This branch is not a tagged
 > 1.1 release.
 
 APTA provides progressive, bounded and portable audio analysis for waveform,

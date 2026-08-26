@@ -35,6 +35,33 @@ static int fail_status(const char *operation, apta_status_t status)
     return 1;
 }
 
+static void write_json_string(FILE *stream, const char *value)
+{
+    const unsigned char *cursor = (const unsigned char *)value;
+
+    fputc('"', stream);
+    while (*cursor != 0u) {
+        switch (*cursor) {
+        case '"': fputs("\\\"", stream); break;
+        case '\\': fputs("\\\\", stream); break;
+        case '\b': fputs("\\b", stream); break;
+        case '\f': fputs("\\f", stream); break;
+        case '\n': fputs("\\n", stream); break;
+        case '\r': fputs("\\r", stream); break;
+        case '\t': fputs("\\t", stream); break;
+        default:
+            if (*cursor < 0x20u) {
+                fprintf(stream, "\\u%04x", (unsigned int)*cursor);
+            } else {
+                fputc((int)*cursor, stream);
+            }
+            break;
+        }
+        ++cursor;
+    }
+    fputc('"', stream);
+}
+
 int main(int argc, char **argv)
 {
     const char *input_path = NULL;
@@ -193,15 +220,16 @@ int main(int argc, char **argv)
             fprintf(stderr, "apta-meter-trace: cannot open trace output\n");
             goto cleanup;
         }
+        fputs("{\"track\":", trace);
+        write_json_string(trace, input_path);
         fprintf(trace,
-                "{\"track\":\"%s\",\"frames\":%llu,\"sample_rate\":%u,"
+                ",\"frames\":%llu,\"sample_rate\":%u,"
                 "\"lattice\":{\"anchor_frame\":%llu,"
                 "\"period_whole_frames\":%llu,"
                 "\"period_fraction_q32\":%llu},"
                 "\"meter\":{\"numerator\":%u,\"denominator\":%u,"
                 "\"downbeat_ordinal\":%lld,\"confidence\":%u},"
                 "\"lag_bins\":%u,\"first_beat_bin\":%llu,\"beats\":[",
-                input_path,
                 (unsigned long long)decoder_info.total_frames,
                 decoder_info.sample_rate,
                 (unsigned long long)(grid_view.segment_count > 0u

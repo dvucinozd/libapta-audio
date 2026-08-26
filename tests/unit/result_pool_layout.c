@@ -46,6 +46,8 @@ int main(void)
     apta_memory_requirements_t baseline;
     apta_memory_requirements_t bounded;
     apta_memory_requirements_t repeated;
+    apta_memory_requirements_t bpm_pool;
+    apta_memory_requirements_t quality_pool;
     apta_context_config_t context_config;
     apta_context_t *context = NULL;
     apta_session_t *session = NULL;
@@ -85,6 +87,20 @@ int main(void)
     CHECK(repeated.recommended_bytes == bounded.recommended_bytes);
     CHECK(repeated.required_alignment == bounded.required_alignment);
     CHECK(repeated.flags == bounded.flags);
+
+    config.requested_features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM;
+    apta_memory_requirements_init(&bpm_pool);
+    CHECK(apta_query_memory_requirements(&config, &bpm_pool) ==
+          APTA_STATUS_OK);
+    config.requested_features |= APTA_FEATURE_CALIBRATED_QUALITY;
+    apta_memory_requirements_init(&quality_pool);
+    CHECK(apta_query_memory_requirements(&config, &quality_pool) ==
+          APTA_STATUS_OK);
+    CHECK(quality_pool.minimum_bytes > bpm_pool.minimum_bytes);
+    config.requested_features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_DETAIL;
 
     config.memory_budget_bytes = (uint64_t)required_bytes - 1u;
     apta_memory_requirements_init(&repeated);

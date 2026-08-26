@@ -79,6 +79,7 @@ static int run_case(
         -1, 2, 1u, 0u, 0u, 0u, APTA_WAVEFORM_COLUMN_VALID};
     apta_waveform_span_t span;
     apta_waveform_overview_view_t overview;
+    apta_quality_view_t quality;
     const apta_result_t *result = NULL;
     apta_status_t status;
     int saw_oom = 0;
@@ -155,6 +156,21 @@ static int run_case(
     overview.span_count = 1u;
     overview.spans = &span;
     status = apta_result_builder_set_waveform_overview(builder, &overview);
+    if (status == APTA_ERROR_OUT_OF_MEMORY) {
+        saw_oom = 1;
+        goto cleanup;
+    }
+    if (status != APTA_STATUS_OK) {
+        goto cleanup;
+    }
+
+    apta_quality_view_init(&quality);
+    quality.feature = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    quality.calibration_model_id = 1u;
+    quality.evidence_coverage_permille = 1000u;
+    quality.confidence = 90u;
+    quality.state = APTA_FEATURE_FINAL;
+    status = apta_result_builder_set_quality(builder, &quality);
     if (status == APTA_ERROR_OUT_OF_MEMORY) {
         saw_oom = 1;
         goto cleanup;

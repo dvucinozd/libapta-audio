@@ -26,8 +26,45 @@ static int apta_workspace_sample_format_is_valid(apta_sample_format_t format)
 static int apta_workspace_feature_mask_is_coherent(
     apta_feature_mask_t feature_mask)
 {
-    return (feature_mask & APTA_FEATURE_WAVEFORM_DETAIL) == 0u ||
-           (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) != 0u;
+    const apta_feature_mask_t waveform_dependency =
+        APTA_FEATURE_WAVEFORM_DETAIL |
+        APTA_FEATURE_WAVEFORM_3BAND |
+        APTA_FEATURE_CONFIDENCE |
+        APTA_FEATURE_MUSICAL_KEY |
+        APTA_FEATURE_METER_DOWNBEAT |
+        APTA_FEATURE_CALIBRATED_QUALITY |
+        APTA_INTERNAL_S4_FEATURES |
+        APTA_INTERNAL_S6_FEATURES;
+
+    if ((feature_mask & waveform_dependency) != 0u &&
+        (feature_mask & APTA_FEATURE_WAVEFORM_OVERVIEW) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_LOCAL_BEATGRID) != 0u &&
+        (feature_mask & APTA_FEATURE_BPM) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_GLOBAL_BEATGRID) != 0u &&
+        (feature_mask & APTA_FEATURE_BPM) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_DYNAMIC_TEMPO) != 0u &&
+        (feature_mask & APTA_FEATURE_GLOBAL_BEATGRID) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_GRID_LOCKING) != 0u &&
+        (feature_mask & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_METER_DOWNBEAT) != 0u &&
+        (feature_mask & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+        (feature_mask & APTA_FEATURE_BPM) == 0u) {
+        return 0;
+    }
+    return 1;
 }
 
 static int apta_workspace_config_is_valid(

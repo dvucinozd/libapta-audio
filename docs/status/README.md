@@ -15,8 +15,8 @@ Active post-1.0 development:
   cause, the native meter-trace tool, and the trace analysis that bounds
   bar-phase accuracy at lattice quality.
 - [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md) —
-  dated private-corpus snapshots, automated diagnostic outcomes, and the
-  remaining manual verification/freeze boundary.
+  dated private-corpus snapshots, the independently verified formal rejection,
+  and the remaining accuracy boundary.
 
 Stage S9 — APTA 1.0:
 

@@ -30,6 +30,7 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
         APTA_FEATURE_CONFIDENCE |
         APTA_FEATURE_MUSICAL_KEY |
         APTA_FEATURE_METER_DOWNBEAT |
+        APTA_FEATURE_CALIBRATED_QUALITY |
         APTA_INTERNAL_S4_FEATURES |
         APTA_INTERNAL_S6_FEATURES;
 
@@ -67,6 +68,10 @@ static int apta_session_mask_is_coherent(apta_feature_mask_t feature_mask)
     }
     if ((feature_mask & APTA_FEATURE_METER_DOWNBEAT) != 0u &&
         (feature_mask & APTA_FEATURE_LOCAL_BEATGRID) == 0u) {
+        return 0;
+    }
+    if ((feature_mask & APTA_FEATURE_CALIBRATED_QUALITY) != 0u &&
+        (feature_mask & APTA_FEATURE_BPM) == 0u) {
         return 0;
     }
     return 1;

@@ -6,12 +6,12 @@
   "blockers": [
     {
       "id": "tempo-grid-fresh-corpus",
-      "status": "open",
+      "status": "closed",
       "evidence": ["evidence/1.1/tempo-ensemble-acceptance.json"]
     },
     {
       "id": "confidence-calibration-holdout",
-      "status": "open",
+      "status": "closed",
       "evidence": ["evidence/1.1/confidence-calibration-holdout.json"]
     },
     {

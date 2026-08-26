@@ -270,9 +270,9 @@ frozen fresh-set contract.** The Task-5 fresh-acceptance blocker is closed.
 Remaining Task-5 bookkeeping is limited to keeping the retained historical
 regression record current with any future selection changes.
 
-Closing the Task-5 acceptance blocker formally requires one further run on a
-newly frozen set of at least 48 tracks (for example owner-supplied material
-with independently created tempo labels), evaluated against the same gates.
+No further Task-5 acceptance run is required unless the accepted selection
+policy changes. Any changed candidate requires a newly frozen set of at least
+48 tracks and the same gates.
 
 ## Fresh-set acceptance criteria
 
