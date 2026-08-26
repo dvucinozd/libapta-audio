@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 /build*/
 /Testing/
+
+# Local Codex instructions and skill entrypoints; shared facts belong in docs/.
+AGENTS.md
+SKILL.md
