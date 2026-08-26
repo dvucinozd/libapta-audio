@@ -100,6 +100,28 @@ static int check_selector(void)
     return EXIT_SUCCESS;
 }
 
+#ifdef APTA_INTERNAL_KEY_HPCP
+static int check_harmonic_projection(void)
+{
+    float spectrum[APTA_INTERNAL_KEY_BIN_COUNT] = {0.0f};
+    float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];
+
+    spectrum[0] = 13.0f;
+    spectrum[19] = 11.0f;
+    spectrum[28] = 13.0f;
+    apta_internal_key_harmonic_chroma(spectrum, chroma);
+
+    /* C3 retains its direct evidence and receives bounded support from the
+     * G4 third harmonic and E5 fifth harmonic. The observed G/E bins remain
+     * present as direct pitch evidence; this is a projection, not subtraction. */
+    CHECK(fabsf(chroma[0] - (167.0f / 13.0f)) < 1e-5f);
+    CHECK(fabsf(chroma[4] - 13.0f) < 1e-5f);
+    CHECK(fabsf(chroma[7] - 11.0f) < 1e-5f);
+    CHECK(fabsf(chroma[9] - (13.0f / 11.0f)) < 1e-5f);
+    return EXIT_SUCCESS;
+}
+#endif
+
 static int16_t chord_sample(uint64_t frame)
 {
     const float t = (float)(frame % SAMPLE_RATE) / (float)SAMPLE_RATE;
@@ -286,6 +308,9 @@ static int check_progressive_publication(void)
 int main(void)
 {
     CHECK(check_selector() == EXIT_SUCCESS);
+#ifdef APTA_INTERNAL_KEY_HPCP
+    CHECK(check_harmonic_projection() == EXIT_SUCCESS);
+#endif
     CHECK(check_progressive_publication() == EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }

@@ -544,6 +544,12 @@ typedef struct {
     float q2[APTA_INTERNAL_KEY_TUNING_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
     float chroma[APTA_INTERNAL_KEY_TUNING_VARIANTS]
                 [APTA_INTERNAL_KEY_PITCH_CLASSES];
+#ifdef APTA_INTERNAL_KEY_SPECTRAL_PROFILE
+    /* Opt-in development evidence retaining octave-resolved log energies.
+     * Default builds continue to keep only the folded 12-bin chroma. */
+    float spectral_profile[APTA_INTERNAL_KEY_TUNING_VARIANTS]
+                          [APTA_INTERNAL_KEY_BIN_COUNT];
+#endif
     float decimation_sum;
     uint32_t decimation_count;
     uint32_t window_samples;

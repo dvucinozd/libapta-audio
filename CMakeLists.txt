@@ -58,6 +58,28 @@ if(APTA_ENABLE_EXPERIMENTAL_KEY_TUNING)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP
+    "Build the development harmonic-weighted HPCP key experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP)
+    add_compile_definitions(
+        APTA_INTERNAL_KEY_HPCP=1
+        APTA_INTERNAL_KEY_SPECTRAL_PROFILE=1)
+endif()
+
+option(
+    APTA_ENABLE_EXPERIMENTAL_KEY_TRACE
+    "Build the apta-key-trace development diagnostic tool"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_KEY_TRACE)
+    add_compile_definitions(
+        APTA_INTERNAL_KEY_TRACE=1
+        APTA_INTERNAL_KEY_SPECTRAL_PROFILE=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_METER_TRACE
     "Build the apta-meter-trace development diagnostic tool"
     OFF)

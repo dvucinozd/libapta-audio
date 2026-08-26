@@ -447,3 +447,49 @@ than it repaired. The existing B3 multiband onset experiment likewise produced
 one period fix and one break. Both beat-period directions remain unpromoted;
 the next attempt requires genuinely new onset/temporal evidence rather than
 another rule over the same flux.
+
+## Key-accuracy iteration 4 — harmonic projection — 2026-08-26
+
+The native key trace now retains the already-computed 36 octave-resolved,
+log-compressed Goertzel energies in an opt-in development build. Re-folding
+those exact values reproduced the production selector's 20/60 baseline with
+no discrepancies, establishing that the probe and native pipeline use the
+same evidence.
+
+A bounded harmonic projection treats each bin as a possible fundamental and
+adds support from its third harmonic at +19 semitones with weight 0.10 and its
+fifth harmonic at +28 semitones with weight 0.20. Each fundamental is divided
+by the sum of weights actually available inside the three-octave analysis
+range before folding to 12 pitch classes. The existing Temperley/Kostka-Payne
+selector then scores that projected chroma. The projected verdict may replace
+the baseline only when tonic or mode changes and selector confidence does not
+decrease; scores from the two differently shaped evidence spaces are never
+compared directly.
+
+The complete native 60-track rerun, followed by the standard corpus runner,
+canonical serializer, inspector and frozen evaluator, produced:
+
+| Metric | Folded-chroma baseline | Harmonic projection |
+|---|---:|---:|
+| Key exact | 20/60 (33.3%) | **22/60 (36.7%)** |
+| Key high-confidence errors | 0/60 | **0/60** |
+| Correct verdict fixes / breaks | — | **2 / 0** |
+| Changed key verdicts | — | 5 |
+
+Meter (58/60), downbeat (5/60) and beatgrid (4/60) are unchanged. The
+candidate adds 36 floats, or 144 bytes, to the key-analysis state when enabled.
+It adds no resonators and no extra per-sample spectral work; the bounded
+36-bin projection and one additional 24-key selector pass occur only during a
+key refresh. Default builds retain the existing state layout and behavior.
+
+The implementation and an octave-resolved `apta-key-trace` diagnostic are
+available only through `APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP` and
+`APTA_ENABLE_EXPERIMENTAL_KEY_TRACE`. Both default and opt-in Werror builds
+pass 118/118 tests, and the opt-in ASan/UBSan build passes 114/114 tests.
+
+Disposition: retain as the first safely positive harmonic-evidence candidate,
+but do not enable it by default. A two-track improvement on the spent corpus
+is insufficient to justify a release change, 36.7% remains far below the 75%
+key gate, and no independent key-development transfer set currently exists.
+This rerun is development evidence only and does not alter the frozen official
+rejection or qualify as a new acceptance attempt.

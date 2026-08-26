@@ -109,6 +109,21 @@ if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE)
             ${CMAKE_CURRENT_SOURCE_DIR}/../src/tempo)
 endif()
 
+if(APTA_ENABLE_EXPERIMENTAL_KEY_TRACE)
+    # Development-only octave-resolved key evidence instrument.
+    apta_add_tool(apta_key_trace apta-key-trace apta_key_trace.c)
+    target_compile_definitions(
+        apta_key_trace
+        PRIVATE
+            APTA_INTERNAL_KEY_TRACE=1
+            APTA_INTERNAL_KEY_SPECTRAL_PROFILE=1)
+    target_include_directories(
+        apta_key_trace
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/core
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/key)
+endif()
+
 apta_add_tool(apta_analyze apta-analyze apta_analyze.c)
 apta_add_tool(apta_inspect apta-inspect apta_inspect.c)
 apta_add_tool(apta_validate apta-validate apta_validate.c)

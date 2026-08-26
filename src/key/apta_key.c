@@ -45,6 +45,84 @@ static const float apta_minor_profile[APTA_INTERNAL_KEY_PITCH_CLASSES] = {
     0.082f, 0.600f, 0.059f, 0.291f, 0.092f, 0.260f
 };
 
+#ifdef APTA_INTERNAL_KEY_HPCP
+#define APTA_KEY_HPCP_THIRD_HARMONIC_OFFSET 19u
+#define APTA_KEY_HPCP_FIFTH_HARMONIC_OFFSET 28u
+#define APTA_KEY_HPCP_THIRD_HARMONIC_WEIGHT 0.10f
+#define APTA_KEY_HPCP_FIFTH_HARMONIC_WEIGHT 0.20f
+
+void apta_internal_key_harmonic_chroma(
+    const float spectral_profile[APTA_INTERNAL_KEY_BIN_COUNT],
+    float chroma_out[APTA_INTERNAL_KEY_PITCH_CLASSES])
+{
+    uint32_t fundamental;
+
+    if (spectral_profile == NULL || chroma_out == NULL) {
+        return;
+    }
+    memset(
+        chroma_out,
+        0,
+        sizeof(*chroma_out) * APTA_INTERNAL_KEY_PITCH_CLASSES);
+    for (fundamental = 0u;
+         fundamental < APTA_INTERNAL_KEY_BIN_COUNT;
+         ++fundamental) {
+        float salience = spectral_profile[fundamental];
+        float available_weight = 1.0f;
+
+        if (fundamental + APTA_KEY_HPCP_THIRD_HARMONIC_OFFSET <
+            APTA_INTERNAL_KEY_BIN_COUNT) {
+            salience += APTA_KEY_HPCP_THIRD_HARMONIC_WEIGHT *
+                        spectral_profile[
+                            fundamental +
+                            APTA_KEY_HPCP_THIRD_HARMONIC_OFFSET];
+            available_weight += APTA_KEY_HPCP_THIRD_HARMONIC_WEIGHT;
+        }
+        if (fundamental + APTA_KEY_HPCP_FIFTH_HARMONIC_OFFSET <
+            APTA_INTERNAL_KEY_BIN_COUNT) {
+            salience += APTA_KEY_HPCP_FIFTH_HARMONIC_WEIGHT *
+                        spectral_profile[
+                            fundamental +
+                            APTA_KEY_HPCP_FIFTH_HARMONIC_OFFSET];
+            available_weight += APTA_KEY_HPCP_FIFTH_HARMONIC_WEIGHT;
+        }
+        chroma_out[fundamental % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
+            salience / available_weight;
+    }
+}
+#endif
+
+#ifdef APTA_INTERNAL_KEY_TRACE
+void apta_internal_key_trace_get(
+    const apta_session_t *session,
+    const float **spectral_profile_out,
+    uint32_t *bin_count_out,
+    const float **chroma_out,
+    uint32_t *completed_windows_out)
+{
+    if (spectral_profile_out != NULL) {
+        *spectral_profile_out =
+            session != NULL
+                ? session->key_analysis.spectral_profile
+                      [APTA_INTERNAL_KEY_TUNING_CENTRE]
+                : NULL;
+    }
+    if (bin_count_out != NULL) {
+        *bin_count_out = session != NULL ? APTA_INTERNAL_KEY_BIN_COUNT : 0u;
+    }
+    if (chroma_out != NULL) {
+        *chroma_out =
+            session != NULL
+                ? session->key_analysis.chroma[APTA_INTERNAL_KEY_TUNING_CENTRE]
+                : NULL;
+    }
+    if (completed_windows_out != NULL) {
+        *completed_windows_out =
+            session != NULL ? session->key_analysis.completed_windows : 0u;
+    }
+}
+#endif
+
 static float apta_key_profile_score(
     const float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES],
     uint32_t tonic,
@@ -243,6 +321,7 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
             const float q2 = analysis->q2[variant][bin];
             float energy = q1 * q1 + q2 * q2 -
                            analysis->coefficients[variant][bin] * q1 * q2;
+            float compressed;
             if (!isfinite(energy) || energy < 0.0f) {
                 energy = 0.0f;
             }
@@ -250,9 +329,13 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
              * not dominate the accumulated chroma. Linear accumulation let
              * bass-heavy dominants outweigh tonic harmony and drove fifth and
              * parallel-mode confusions on the official corpus taxonomy. */
+            compressed = logf(1.0f + energy);
             analysis->chroma[variant]
                             [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
-                logf(1.0f + energy);
+                compressed;
+#ifdef APTA_INTERNAL_KEY_SPECTRAL_PROFILE
+            analysis->spectral_profile[variant][bin] += compressed;
+#endif
         }
     }
     analysis->completed_windows += 1u;
@@ -414,6 +497,40 @@ apta_status_t apta_internal_key_refresh(
         }
 #else
         (void)variant;
+#endif
+#ifdef APTA_INTERNAL_KEY_HPCP
+        if (status == APTA_STATUS_OK) {
+            float harmonic_chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];
+            apta_key_candidate_t harmonic_candidates
+                [APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+            apta_key_view_t harmonic_view;
+            apta_status_t harmonic_status;
+
+            apta_internal_key_harmonic_chroma(
+                session->key_analysis.spectral_profile[selected_variant],
+                harmonic_chroma);
+            harmonic_status = apta_internal_key_select_chroma(
+                harmonic_chroma,
+                session->key_analysis.completed_windows,
+                harmonic_candidates,
+                &harmonic_view);
+            /* The harmonic projection changes evidence shape, so its raw
+             * cosine score is not calibrated against the folded chroma score.
+             * Gate on the selector's separation-derived confidence instead.
+             * Same-verdict projections are ignored to keep default score and
+             * publication behavior stable inside this opt-in experiment. */
+            if (harmonic_status == APTA_STATUS_OK &&
+                harmonic_candidates[0].confidence >=
+                    next_candidates[0].confidence &&
+                (harmonic_view.tonic != next_view.tonic ||
+                 harmonic_view.mode != next_view.mode)) {
+                memcpy(next_candidates,
+                       harmonic_candidates,
+                       sizeof(next_candidates));
+                next_view = harmonic_view;
+                status = harmonic_status;
+            }
+        }
 #endif
         if (status == APTA_STATUS_OK) {
             const int8_t tuning = apta_key_tuning_offset(selected_variant);

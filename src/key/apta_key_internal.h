@@ -37,4 +37,19 @@ apta_status_t apta_internal_key_select_chroma(
     apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT],
     apta_key_view_t *view_out);
 
+#ifdef APTA_INTERNAL_KEY_HPCP
+void apta_internal_key_harmonic_chroma(
+    const float spectral_profile[APTA_INTERNAL_KEY_BIN_COUNT],
+    float chroma_out[APTA_INTERNAL_KEY_PITCH_CLASSES]);
+#endif
+
+#ifdef APTA_INTERNAL_KEY_TRACE
+void apta_internal_key_trace_get(
+    const apta_session_t *session,
+    const float **spectral_profile_out,
+    uint32_t *bin_count_out,
+    const float **chroma_out,
+    uint32_t *completed_windows_out);
+#endif
+
 #endif /* APTA_KEY_INTERNAL_H */
