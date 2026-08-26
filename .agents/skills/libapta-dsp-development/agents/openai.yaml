@@ -1,0 +1,4 @@
+interface:
+  display_name: "LIBAPTA DSP Development"
+  short_description: "Run safe DSP experiments and 1.1 acceptance"
+  default_prompt: "Use $libapta-dsp-development to plan and verify the next LIBAPTA DSP or acceptance step."
