@@ -385,3 +385,65 @@ profiles: candidates worth pre-registering are harmonic-weighted HPCP-style
 chroma, longer adaptive analysis windows, and tuning-offset estimation
 (currently hard-coded to zero cents). Each is a substantial detector rework
 and must be evaluated against a newly independently verified corpus afterwards.
+
+## Key-accuracy iteration 3 — tuning and window probes — 2026-08-26
+
+Two extraction changes were tested natively on this now-spent development
+corpus, both behind opt-in build flags during evaluation.
+
+The tuning candidate runs three otherwise identical Goertzel banks at
+-33/0/+33 cents. A side bank may replace the A440 verdict only when it changes
+tonic or mode and does not lower selector confidence; same-verdict side banks
+are ignored so they cannot manufacture a new high-confidence error. The full
+native rerun produced:
+
+| Metric | Fixed A440 baseline | Verdict-gated tuning |
+|---|---:|---:|
+| Key exact | 20/60 (33.3%) | **21/60 (35.0%)** |
+| Key high-confidence errors | 0/60 | **0/60** |
+| Correct verdict fixes / breaks | — | **1 / 0** |
+| Changed key verdicts | — | 9 |
+
+The experiment is retained only under
+`APTA_ENABLE_EXPERIMENTAL_KEY_TUNING`. It adds approximately 960 bytes to the
+session's key-analysis state and triples the per-sample resonator work. A
+one-track gain without independent key-development transfer evidence does not
+justify enabling that cost by default, and 35% remains far below the 75% gate.
+
+A separate four-second-window build tested greater Goertzel frequency
+resolution without extra resonators. It failed the predeclared no-regression
+veto within the first 17 deterministically ordered tracks: one wrong baseline
+verdict was fixed but four correct verdicts broke, taking that prefix from 9/17
+to 6/17. The run was stopped once it could no longer pass the veto, and the
+long-window option and code were removed. This rejects a fixed longer window;
+future work should move to genuinely harmonic-weighted HPCP evidence or an
+adaptive, confidence-gated time aggregation rather than another global window
+constant.
+
+## Three-band downbeat development experiment — 2026-08-26
+
+An opt-in native candidate uses positive low/mid/high rises from the existing
+bounded waveform overview and overrides downbeat phase only when the winning
+phase exceeds the runner-up by at least 25%. On this spent 60-track corpus it
+improves downbeat phase from 5/60 to 7/60 with two fixes, zero breaks, and no
+meter or Q32-lattice changes. Independent transfer checks on the already-open
+Ballroom and ASAP development partitions add one correct downbeat each with no
+regressions. Their untouched holdouts remain unopened.
+
+This is development evidence only. The path remains disabled by default under
+`APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT`, and the result does not alter the
+official rejected acceptance record or qualify a new acceptance run. Its small
+but consistent gain justifies retaining the experiment while the next work
+targets the upstream beat lattice and higher-resolution bar evidence.
+
+## Beat-period development probe — 2026-08-26
+
+The cached native S4 top-3 lag set contains a correct period on 49/60 tracks,
+compared with 40/60 for the current final selector, leaving nine theoretical
+recoveries. Rescoring the exact traced full-band onset flux with
+autocorrelation, harmonic contrast or decisive phase concentration did not
+safely realize that oracle: every useful DJ gate broke more correct selections
+than it repaired. The existing B3 multiband onset experiment likewise produced
+one period fix and one break. Both beat-period directions remain unpromoted;
+the next attempt requires genuinely new onset/temporal evidence rather than
+another rule over the same flux.

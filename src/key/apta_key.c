@@ -14,6 +14,22 @@ static const float apta_key_frequencies[APTA_INTERNAL_KEY_BIN_COUNT] = {
     739.9888f, 783.9909f, 830.6094f, 880.0000f, 932.3275f, 987.7666f
 };
 
+static int8_t apta_key_tuning_offset(uint32_t variant)
+{
+#ifdef APTA_INTERNAL_KEY_TUNING
+    static const int8_t offsets[APTA_INTERNAL_KEY_TUNING_VARIANTS] = {
+        -33, 0, 33
+    };
+
+    return variant < APTA_INTERNAL_KEY_TUNING_VARIANTS
+               ? offsets[variant]
+               : 0;
+#else
+    (void)variant;
+    return 0;
+#endif
+}
+
 /* Temperley/Kostka-Payne pitch-class profiles. Chosen over Krumhansl-Kessler
  * because the official corpus error taxonomy showed classic KK failure modes:
  * dominant-for-tonic (fifth) confusions and parallel-mode swaps on minor
@@ -187,16 +203,24 @@ static void apta_key_initialize(
 {
     const float decimated_rate =
         (float)source_sample_rate / (float)APTA_INTERNAL_KEY_DECIMATION;
+    uint32_t variant;
     uint32_t bin;
 
     memset(analysis, 0, sizeof(*analysis));
     if (decimated_rate <= 2.0f * apta_key_frequencies[APTA_INTERNAL_KEY_BIN_COUNT - 1u]) {
         return;
     }
-    for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
-        analysis->coefficients[bin] =
-            2.0f * cosf(6.28318530718f * apta_key_frequencies[bin] /
-                        decimated_rate);
+    for (variant = 0u;
+         variant < APTA_INTERNAL_KEY_TUNING_VARIANTS;
+         ++variant) {
+        const float tuning_multiplier =
+            powf(2.0f, (float)apta_key_tuning_offset(variant) / 1200.0f);
+
+        for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
+            analysis->coefficients[variant][bin] =
+                2.0f * cosf(6.28318530718f * apta_key_frequencies[bin] *
+                            tuning_multiplier / decimated_rate);
+        }
     }
     analysis->window_target_samples =
         source_sample_rate / APTA_INTERNAL_KEY_DECIMATION;
@@ -208,22 +232,28 @@ static void apta_key_initialize(
 
 static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
 {
+    uint32_t variant;
     uint32_t bin;
 
-    for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
-        const float q1 = analysis->q1[bin];
-        const float q2 = analysis->q2[bin];
-        float energy = q1 * q1 + q2 * q2 -
-                       analysis->coefficients[bin] * q1 * q2;
-        if (!isfinite(energy) || energy < 0.0f) {
-            energy = 0.0f;
+    for (variant = 0u;
+         variant < APTA_INTERNAL_KEY_TUNING_VARIANTS;
+         ++variant) {
+        for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
+            const float q1 = analysis->q1[variant][bin];
+            const float q2 = analysis->q2[variant][bin];
+            float energy = q1 * q1 + q2 * q2 -
+                           analysis->coefficients[variant][bin] * q1 * q2;
+            if (!isfinite(energy) || energy < 0.0f) {
+                energy = 0.0f;
+            }
+            /* Logarithmic compression: loud frames and resonant partials must
+             * not dominate the accumulated chroma. Linear accumulation let
+             * bass-heavy dominants outweigh tonic harmony and drove fifth and
+             * parallel-mode confusions on the official corpus taxonomy. */
+            analysis->chroma[variant]
+                            [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
+                logf(1.0f + energy);
         }
-        /* Logarithmic compression: loud frames and resonant partials must not
-         * dominate the accumulated chroma. Linear accumulation let bass-heavy
-         * dominants outweigh tonic harmony and drove fifth and parallel-mode
-         * confusions on the official corpus taxonomy. */
-        analysis->chroma[bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
-            logf(1.0f + energy);
     }
     analysis->completed_windows += 1u;
     apta_key_reset_window(analysis);
@@ -236,6 +266,7 @@ void apta_internal_key_feed_sample(
 {
     apta_internal_key_analysis_t *analysis;
     float decimated_sample;
+    uint32_t variant;
     uint32_t bin;
 
     if (session == NULL ||
@@ -272,12 +303,17 @@ void apta_internal_key_feed_sample(
     analysis->decimation_sum = 0.0f;
     analysis->decimation_count = 0u;
 
-    for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
-        const float q0 = decimated_sample +
-                         analysis->coefficients[bin] * analysis->q1[bin] -
-                         analysis->q2[bin];
-        analysis->q2[bin] = analysis->q1[bin];
-        analysis->q1[bin] = q0;
+    for (variant = 0u;
+         variant < APTA_INTERNAL_KEY_TUNING_VARIANTS;
+         ++variant) {
+        for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
+            const float q0 = decimated_sample +
+                             analysis->coefficients[variant][bin] *
+                                 analysis->q1[variant][bin] -
+                             analysis->q2[variant][bin];
+            analysis->q2[variant][bin] = analysis->q1[variant][bin];
+            analysis->q1[variant][bin] = q0;
+        }
     }
     analysis->window_samples += 1u;
     if (analysis->window_samples >= analysis->window_target_samples) {
@@ -325,11 +361,72 @@ apta_status_t apta_internal_key_refresh(
     }
     *completed_steps_out = 1u;
 
-    status = apta_internal_key_select_chroma(
-        session->key_analysis.chroma,
-        session->key_analysis.completed_windows,
-        next_candidates,
-        &next_view);
+    {
+        uint32_t selected_variant = APTA_INTERNAL_KEY_TUNING_CENTRE;
+#ifdef APTA_INTERNAL_KEY_TUNING
+        apta_confidence_value_t centre_confidence = 0u;
+        uint8_t centre_tonic = 0u;
+        apta_key_mode_t centre_mode = APTA_KEY_MODE_UNKNOWN;
+#endif
+        uint32_t variant;
+
+        status = apta_internal_key_select_chroma(
+            session->key_analysis.chroma[selected_variant],
+            session->key_analysis.completed_windows,
+            next_candidates,
+            &next_view);
+#ifdef APTA_INTERNAL_KEY_TUNING
+        if (status == APTA_STATUS_OK) {
+            centre_confidence = next_candidates[0].confidence;
+            centre_tonic = next_view.tonic;
+            centre_mode = next_view.mode;
+        }
+        for (variant = 0u;
+             variant < APTA_INTERNAL_KEY_TUNING_VARIANTS;
+             ++variant) {
+            apta_key_candidate_t trial_candidates
+                [APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+            apta_key_view_t trial_view;
+            apta_status_t trial_status;
+
+            if (variant == APTA_INTERNAL_KEY_TUNING_CENTRE) {
+                continue;
+            }
+            trial_status = apta_internal_key_select_chroma(
+                session->key_analysis.chroma[variant],
+                session->key_analysis.completed_windows,
+                trial_candidates,
+                &trial_view);
+            if (trial_status == APTA_STATUS_OK &&
+                trial_candidates[0].confidence >= centre_confidence &&
+                (status != APTA_STATUS_OK ||
+                 trial_view.tonic != centre_tonic ||
+                 trial_view.mode != centre_mode) &&
+                (status != APTA_STATUS_OK ||
+                 trial_candidates[0].score > next_candidates[0].score)) {
+                memcpy(next_candidates,
+                       trial_candidates,
+                       sizeof(next_candidates));
+                next_view = trial_view;
+                selected_variant = variant;
+                status = trial_status;
+            }
+        }
+#else
+        (void)variant;
+#endif
+        if (status == APTA_STATUS_OK) {
+            const int8_t tuning = apta_key_tuning_offset(selected_variant);
+            uint32_t candidate;
+
+            next_view.tuning_offset_cents = tuning;
+            for (candidate = 0u;
+                 candidate < APTA_INTERNAL_KEY_CANDIDATE_COUNT;
+                 ++candidate) {
+                next_candidates[candidate].tuning_offset_cents = tuning;
+            }
+        }
+    }
     session->key_analysis.selected_windows =
         session->key_analysis.completed_windows;
     if (status == APTA_STATUS_NOT_AVAILABLE) {
@@ -347,6 +444,8 @@ apta_status_t apta_internal_key_refresh(
     changed = !session->has_key ||
               session->key_value.mode != next_view.mode ||
               session->key_value.tonic != next_view.tonic ||
+              session->key_value.tuning_offset_cents !=
+                  next_view.tuning_offset_cents ||
               session->key_value.state != next_view.state ||
               session->key_value.confidence != next_view.confidence ||
               session->key_candidates[0].score != next_candidates[0].score;

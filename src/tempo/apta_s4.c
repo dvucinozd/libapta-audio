@@ -6,11 +6,62 @@
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
 #include "../confidence/apta_quality_model.h"
+#include "apta_s4_internal.h"
 
 #include <math.h>
 #include <stdalign.h>
 #include <stdint.h>
 #include <string.h>
+
+#ifdef APTA_INTERNAL_METER_TRACE
+void apta_internal_s4_trace_get(
+    const apta_session_t *session,
+    const float **flux_out,
+    uint32_t *flux_count_out,
+    uint64_t *evidence_first_bin_out,
+    const uint32_t **candidate_lags_out,
+    const float **candidate_lag_offsets_out,
+    uint32_t *candidate_count_out,
+    uint32_t *selected_phase_out)
+{
+    uint64_t count = 0u;
+
+    if (session != NULL &&
+        session->s4_refresh_evidence_end >= session->s4_refresh_evidence_first) {
+        count = session->s4_refresh_evidence_end -
+                session->s4_refresh_evidence_first;
+        if (count > session->onset_flux_capacity) {
+            count = 0u;
+        }
+    }
+    if (flux_out != NULL) {
+        *flux_out = session != NULL ? session->onset_flux : NULL;
+    }
+    if (flux_count_out != NULL) {
+        *flux_count_out = (uint32_t)count;
+    }
+    if (evidence_first_bin_out != NULL) {
+        *evidence_first_bin_out =
+            session != NULL ? session->s4_refresh_evidence_first : 0u;
+    }
+    if (candidate_lags_out != NULL) {
+        *candidate_lags_out =
+            session != NULL ? session->s4_cached_lags : NULL;
+    }
+    if (candidate_lag_offsets_out != NULL) {
+        *candidate_lag_offsets_out =
+            session != NULL ? session->s4_cached_lag_offsets : NULL;
+    }
+    if (candidate_count_out != NULL) {
+        *candidate_count_out = session != NULL
+                                   ? APTA_INTERNAL_MAX_TEMPO_CANDIDATES
+                                   : 0u;
+    }
+    if (selected_phase_out != NULL) {
+        *selected_phase_out = session != NULL ? session->s4_cached_phase : 0u;
+    }
+}
+#endif
 
 #ifdef APTA_INTERNAL_PROFILE_S4
 static uint64_t apta_s4_profile_now(const apta_session_t *session)

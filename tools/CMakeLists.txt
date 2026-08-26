@@ -105,7 +105,8 @@ if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE)
         apta_meter_trace
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/../src/core
-            ${CMAKE_CURRENT_SOURCE_DIR}/../src/beatgrid)
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/beatgrid
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/tempo)
 endif()
 
 apta_add_tool(apta_analyze apta-analyze apta_analyze.c)

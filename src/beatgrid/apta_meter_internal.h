@@ -10,6 +10,43 @@
 #define APTA_INTERNAL_METER_MAX_BEATS 128u
 #define APTA_INTERNAL_METER_TRIPLE_MIN_CONFIDENCE 50u
 
+#ifdef APTA_INTERNAL_3BAND_DOWNBEAT
+#define APTA_INTERNAL_METER_3BAND_MAX_BEATS 128u
+#define APTA_INTERNAL_METER_3BAND_MIN_SEPARATION 0.25f
+
+static inline int apta_internal_meter_three_band_choose_phase(
+    const float scores[4],
+    uint32_t meter,
+    uint32_t *phase_out)
+{
+    uint32_t best = 0u;
+    uint32_t runner_up;
+    uint32_t phase;
+
+    if (scores == NULL || phase_out == NULL || meter < 3u || meter > 4u) {
+        return 0;
+    }
+    for (phase = 1u; phase < meter; ++phase) {
+        if (scores[phase] > scores[best]) {
+            best = phase;
+        }
+    }
+    runner_up = best == 0u ? 1u : 0u;
+    for (phase = 0u; phase < meter; ++phase) {
+        if (phase != best && scores[phase] > scores[runner_up]) {
+            runner_up = phase;
+        }
+    }
+    if (scores[best] <= 1e-12f ||
+        (scores[best] - scores[runner_up]) / scores[best] <
+            APTA_INTERNAL_METER_3BAND_MIN_SEPARATION) {
+        return 0;
+    }
+    *phase_out = best;
+    return 1;
+}
+#endif
+
 typedef struct {
     uint16_t numerator;
     uint16_t denominator;

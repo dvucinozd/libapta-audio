@@ -40,6 +40,24 @@ if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
+    "Build the development three-band downbeat phase experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT)
+    add_compile_definitions(APTA_INTERNAL_3BAND_DOWNBEAT=1)
+endif()
+
+option(
+    APTA_ENABLE_EXPERIMENTAL_KEY_TUNING
+    "Build the development three-bank key-tuning experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_KEY_TUNING)
+    add_compile_definitions(APTA_INTERNAL_KEY_TUNING=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_METER_TRACE
     "Build the apta-meter-trace development diagnostic tool"
     OFF)

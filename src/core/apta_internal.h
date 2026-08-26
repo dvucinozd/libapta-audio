@@ -325,6 +325,13 @@ typedef struct {
 #define APTA_INTERNAL_KEY_DECIMATION 4u
 #define APTA_INTERNAL_KEY_STABLE_WINDOWS 4u
 #define APTA_INTERNAL_KEY_PUBLISH_INTERVAL 4u
+#ifdef APTA_INTERNAL_KEY_TUNING
+#define APTA_INTERNAL_KEY_TUNING_VARIANTS 3u
+#define APTA_INTERNAL_KEY_TUNING_CENTRE 1u
+#else
+#define APTA_INTERNAL_KEY_TUNING_VARIANTS 1u
+#define APTA_INTERNAL_KEY_TUNING_CENTRE 0u
+#endif
 #define APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE 8388608.0f
 
 /* C1: three-band split corners, in hertz. Derived into one-pole coefficients
@@ -531,10 +538,12 @@ _Static_assert(sizeof(apta_internal_onset_bin_t) <= 16u,
 typedef struct apta_internal_result_pool_control
     apta_internal_result_pool_control_t;
 typedef struct {
-    float coefficients[APTA_INTERNAL_KEY_BIN_COUNT];
-    float q1[APTA_INTERNAL_KEY_BIN_COUNT];
-    float q2[APTA_INTERNAL_KEY_BIN_COUNT];
-    float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];
+    float coefficients[APTA_INTERNAL_KEY_TUNING_VARIANTS]
+                      [APTA_INTERNAL_KEY_BIN_COUNT];
+    float q1[APTA_INTERNAL_KEY_TUNING_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
+    float q2[APTA_INTERNAL_KEY_TUNING_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
+    float chroma[APTA_INTERNAL_KEY_TUNING_VARIANTS]
+                [APTA_INTERNAL_KEY_PITCH_CLASSES];
     float decimation_sum;
     uint32_t decimation_count;
     uint32_t window_samples;

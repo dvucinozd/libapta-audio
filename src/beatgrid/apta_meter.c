@@ -8,6 +8,173 @@
 
 #define APTA_METER_EPSILON 1e-12f
 
+#ifdef APTA_INTERNAL_3BAND_DOWNBEAT
+static uint8_t apta_meter_quantize_band(uint32_t sum, uint32_t sample_count)
+{
+    uint32_t mean;
+
+    if (sample_count == 0u) {
+        return 0u;
+    }
+    mean = (uint32_t)((uint64_t)sum * 255u /
+                      ((uint64_t)sample_count *
+                       (uint64_t)APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE));
+    return mean > 255u ? (uint8_t)255u : (uint8_t)mean;
+}
+
+static int apta_meter_overview_bands_at(
+    const apta_session_t *session,
+    uint32_t column_index,
+    uint8_t bands_out[APTA_INTERNAL_BAND_COUNT])
+{
+    uint32_t low = 0u;
+    uint32_t high;
+
+    if (session == NULL || bands_out == NULL ||
+        session->overview_band_sums == NULL ||
+        session->overview_accumulators == NULL) {
+        return 0;
+    }
+    high = session->overview_accumulator_count;
+    while (low < high) {
+        const uint32_t middle = low + (high - low) / 2u;
+        const uint32_t observed =
+            session->overview_accumulators[middle].column_index;
+
+        if (observed < column_index) {
+            low = middle + 1u;
+        } else {
+            high = middle;
+        }
+    }
+    if (low >= session->overview_accumulator_count ||
+        session->overview_accumulators[low].column_index != column_index ||
+        session->overview_accumulators[low].sample_count == 0u) {
+        return 0;
+    }
+    {
+        const apta_internal_waveform_accumulator_t *accumulator =
+            &session->overview_accumulators[low];
+        const size_t base = (size_t)low * APTA_INTERNAL_BAND_COUNT;
+        uint32_t band;
+
+        for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+            bands_out[band] = apta_meter_quantize_band(
+                session->overview_band_sums[base + band],
+                accumulator->sample_count);
+        }
+    }
+    return 1;
+}
+
+static float apta_meter_three_band_rise_near(
+    const apta_session_t *session,
+    apta_source_frame_t frame)
+{
+    uint32_t centre;
+    uint32_t first;
+    uint32_t end;
+    uint32_t maximum_rise[APTA_INTERNAL_BAND_COUNT] = {0u, 0u, 0u};
+    uint32_t column;
+    uint32_t band;
+    uint64_t quotient;
+    uint32_t remainder;
+
+    if (session == NULL || session->overview_frames_per_column == 0u) {
+        return 0.0f;
+    }
+    quotient = frame / session->overview_frames_per_column;
+    remainder = (uint32_t)(frame % session->overview_frames_per_column);
+    if (remainder >= session->overview_frames_per_column / 2u) {
+        quotient += 1u;
+    }
+    if (quotient > UINT32_MAX) {
+        return 0.0f;
+    }
+    centre = (uint32_t)quotient;
+    first = centre > 0u ? centre - 1u : 0u;
+    end = centre < UINT32_MAX ? centre + 1u : centre;
+    for (column = first; column <= end; ++column) {
+        uint8_t current[APTA_INTERNAL_BAND_COUNT];
+        uint8_t previous[APTA_INTERNAL_BAND_COUNT];
+
+        if (column == 0u ||
+            !apta_meter_overview_bands_at(session, column, current) ||
+            !apta_meter_overview_bands_at(session, column - 1u, previous)) {
+            if (column == UINT32_MAX) {
+                break;
+            }
+            continue;
+        }
+        for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+            const uint32_t rise = current[band] > previous[band]
+                                      ? (uint32_t)(current[band] - previous[band])
+                                      : 0u;
+            if (rise > maximum_rise[band]) {
+                maximum_rise[band] = rise;
+            }
+        }
+        if (column == UINT32_MAX) {
+            break;
+        }
+    }
+    return (float)(maximum_rise[0] + maximum_rise[1] + maximum_rise[2]);
+}
+
+static int apta_meter_three_band_phase(
+    const apta_session_t *session,
+    uint32_t meter,
+    apta_beat_ordinal_t last_ordinal,
+    uint32_t *phase_out)
+{
+    float sums[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    uint32_t counts[4] = {0u, 0u, 0u, 0u};
+    apta_beat_ordinal_t first_ordinal;
+    apta_beat_ordinal_t ordinal;
+    uint32_t phase;
+
+    if (session == NULL || phase_out == NULL || meter < 3u || meter > 4u ||
+        session->overview_band_sums == NULL) {
+        return 0;
+    }
+    first_ordinal =
+        last_ordinal > INT64_MIN +
+                           (apta_beat_ordinal_t)(
+                               APTA_INTERNAL_METER_3BAND_MAX_BEATS - 1u)
+            ? last_ordinal -
+                  (apta_beat_ordinal_t)(
+                      APTA_INTERNAL_METER_3BAND_MAX_BEATS - 1u)
+            : INT64_MIN;
+    for (ordinal = first_ordinal; ordinal <= last_ordinal; ++ordinal) {
+        apta_fractional_frame_t position;
+        apta_beat_ordinal_t remainder;
+
+        if (apta_internal_grid_segment_position_at_ordinal(
+                &session->local_grid_segment, ordinal, &position) &&
+            position.whole_frame < session->greatest_accepted_end) {
+            remainder = ordinal % (apta_beat_ordinal_t)meter;
+            if (remainder < 0) {
+                remainder += (apta_beat_ordinal_t)meter;
+            }
+            phase = (uint32_t)remainder;
+            sums[phase] += apta_meter_three_band_rise_near(
+                session, position.whole_frame);
+            counts[phase] += 1u;
+        }
+        if (ordinal == last_ordinal) {
+            break;
+        }
+    }
+    for (phase = 0u; phase < meter; ++phase) {
+        if (counts[phase] != 0u) {
+            sums[phase] /= (float)counts[phase];
+        }
+    }
+    return apta_internal_meter_three_band_choose_phase(
+        sums, meter, phase_out);
+}
+#endif
+
 static float apta_meter_phase_score(
     const float *beat_strengths,
     uint32_t beat_count,
@@ -343,6 +510,32 @@ apta_status_t apta_internal_meter_refresh(
     first_ordinal = apta_meter_ordinal_at_bin(session, first_beat_bin, lag);
     index = selection.downbeat_phase;
     downbeat_ordinal = first_ordinal + (apta_beat_ordinal_t)index;
+#ifdef APTA_INTERNAL_3BAND_DOWNBEAT
+    if (beat_count != 0u) {
+        const apta_beat_ordinal_t last_ordinal =
+            first_ordinal + (apta_beat_ordinal_t)(beat_count - 1u);
+        uint32_t three_band_phase;
+
+        if (apta_meter_three_band_phase(
+                session,
+                selection.numerator,
+                last_ordinal,
+                &three_band_phase)) {
+            apta_beat_ordinal_t first_phase =
+                first_ordinal % (apta_beat_ordinal_t)selection.numerator;
+            apta_beat_ordinal_t delta;
+
+            if (first_phase < 0) {
+                first_phase += (apta_beat_ordinal_t)selection.numerator;
+            }
+            delta = (apta_beat_ordinal_t)three_band_phase - first_phase;
+            if (delta < 0) {
+                delta += (apta_beat_ordinal_t)selection.numerator;
+            }
+            downbeat_ordinal = first_ordinal + delta;
+        }
+    }
+#endif
     if (!apta_internal_grid_segment_position_at_ordinal(
             &session->local_grid_segment,
             downbeat_ordinal,

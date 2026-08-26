@@ -103,6 +103,20 @@ int main(void)
     status = apta_internal_meter_select(beats, 8u, &selection);
     CHECK(status == APTA_STATUS_NOT_AVAILABLE);
 
+#ifdef APTA_INTERNAL_3BAND_DOWNBEAT
+    {
+        const float decisive[4] = {4.0f, 5.0f, 8.0f, 4.0f};
+        const float ambiguous[4] = {4.0f, 5.0f, 6.0f, 4.0f};
+        uint32_t phase = UINT32_MAX;
+
+        CHECK(apta_internal_meter_three_band_choose_phase(
+            decisive, 4u, &phase));
+        CHECK(phase == 2u);
+        CHECK(!apta_internal_meter_three_band_choose_phase(
+            ambiguous, 4u, &phase));
+    }
+#endif
+
     CHECK(check_fractional_downbeat_binding() == EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }

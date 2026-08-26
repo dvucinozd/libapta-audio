@@ -169,6 +169,10 @@ static int read_key(
     CHECK(view_out->state == expected_state);
     CHECK(view_out->candidate_count == APTA_INTERNAL_KEY_CANDIDATE_COUNT);
     CHECK(view_out->candidates != NULL);
+    /* The synthetic fixture is exactly A440. The experimental tuning bank
+     * must therefore retain the centre hypothesis at every publication. */
+    CHECK(view_out->tuning_offset_cents == 0);
+    CHECK(view_out->candidates[0].tuning_offset_cents == 0);
     CHECK(view_out->candidates[0].score >= view_out->candidates[1].score);
     CHECK(view_out->candidates[1].score >= view_out->candidates[2].score);
     CHECK(apta_result_get_feature_state(

@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include "../../src/beatgrid/apta_meter_internal.h"
+#include "../../src/tempo/apta_s4_internal.h"
 #include <apta/desktop/apta_decoder.h>
 
 #define APTA_TRACE_MAX_ITERATIONS 1000000u
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
     const char *output_path = NULL;
     const apta_feature_mask_t features =
         APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_WAVEFORM_3BAND |
         APTA_FEATURE_BPM |
         APTA_FEATURE_LOCAL_BEATGRID |
         APTA_FEATURE_METER_DOWNBEAT;
@@ -83,11 +85,20 @@ int main(int argc, char **argv)
     FILE *trace = NULL;
     const float *broad = NULL;
     const float *accent = NULL;
+    const float *flux = NULL;
+    const uint32_t *candidate_lags = NULL;
+    const float *candidate_lag_offsets = NULL;
     uint32_t beat_count = 0u;
     uint32_t lag = 0u;
+    uint32_t flux_count = 0u;
+    uint32_t candidate_count = 0u;
+    uint32_t selected_phase = 0u;
     uint64_t first_beat_bin = 0u;
+    uint64_t evidence_first_bin = 0u;
     int meter_view_available = 0;
+    int overview_available = 0;
     apta_meter_view_t meter_view;
+    apta_waveform_overview_view_t overview;
     apta_status_t status;
     uint32_t iteration;
     uint32_t would_block_count = 0u;
@@ -192,6 +203,15 @@ int main(int argc, char **argv)
 
     apta_internal_meter_trace_get(
         session, &broad, &accent, &beat_count, &lag, &first_beat_bin);
+    apta_internal_s4_trace_get(
+        session,
+        &flux,
+        &flux_count,
+        &evidence_first_bin,
+        &candidate_lags,
+        &candidate_lag_offsets,
+        &candidate_count,
+        &selected_phase);
 
     {
         const apta_frame_range_t full_range = {
@@ -214,6 +234,13 @@ int main(int argc, char **argv)
             meter_view.segment_count > 0u) {
             meter_view_available = 1u;
         }
+        overview_available = 0u;
+        apta_waveform_overview_view_init(&overview);
+        if (apta_result_get_waveform_overview(result, 0u, &overview) ==
+                APTA_STATUS_OK &&
+            overview.span_count > 0u) {
+            overview_available = 1u;
+        }
 
         trace = fopen(output_path, "w");
         if (trace == NULL) {
@@ -229,7 +256,9 @@ int main(int argc, char **argv)
                 "\"period_fraction_q32\":%llu},"
                 "\"meter\":{\"numerator\":%u,\"denominator\":%u,"
                 "\"downbeat_ordinal\":%lld,\"confidence\":%u},"
-                "\"lag_bins\":%u,\"first_beat_bin\":%llu,\"beats\":[",
+                "\"lag_bins\":%u,\"first_beat_bin\":%llu,"
+                "\"onset_evidence_first_bin\":%llu,"
+                "\"selected_phase_bin\":%u,\"tempo_candidates\":[",
                 (unsigned long long)decoder_info.total_frames,
                 decoder_info.sample_rate,
                 (unsigned long long)(grid_view.segment_count > 0u
@@ -259,7 +288,59 @@ int main(int argc, char **argv)
                                    ? meter_view.segments[0].confidence
                                    : 0u),
                 lag,
-                (unsigned long long)first_beat_bin);
+                (unsigned long long)first_beat_bin,
+                (unsigned long long)evidence_first_bin,
+                selected_phase);
+        for (index = 0u; index < candidate_count; ++index) {
+            fprintf(trace,
+                    "%s{\"lag_bins\":%u,\"lag_offset_bins\":%.9g}",
+                    index > 0u ? "," : "",
+                    candidate_lags != NULL ? candidate_lags[index] : 0u,
+                    candidate_lag_offsets != NULL
+                        ? (double)candidate_lag_offsets[index]
+                        : 0.0);
+        }
+        fputs("],\"onset_flux\":[", trace);
+        for (index = 0u; index < flux_count; ++index) {
+            fprintf(trace, "%s%.9g", index > 0u ? "," : "", (double)flux[index]);
+        }
+        fprintf(trace,
+                "],\"overview_3band\":{\"frames_per_column\":%u,"
+                "\"origin_frame\":%llu,\"spans\":[",
+                overview_available ? overview.level.frames_per_column : 0u,
+                (unsigned long long)(overview_available
+                                         ? overview.level.origin_frame
+                                         : 0u));
+        if (overview_available) {
+            uint32_t span_index;
+
+            for (span_index = 0u;
+                 span_index < overview.span_count;
+                 ++span_index) {
+                const apta_waveform_span_t *span = &overview.spans[span_index];
+                uint32_t column_index;
+
+                fprintf(trace,
+                        "%s{\"first_column_index\":%u,\"bands\":[",
+                        span_index > 0u ? "," : "",
+                        span->first_column_index);
+                for (column_index = 0u;
+                     column_index < span->column_count;
+                     ++column_index) {
+                    const apta_waveform_column_t *column =
+                        &span->columns[column_index];
+
+                    fprintf(trace,
+                            "%s%u,%u,%u",
+                            column_index > 0u ? "," : "",
+                            (unsigned int)column->low,
+                            (unsigned int)column->mid,
+                            (unsigned int)column->high);
+                }
+                fputs("]}", trace);
+            }
+        }
+        fputs("]},\"beats\":[", trace);
         for (index = 0u; index < beat_count; ++index) {
             fprintf(trace, "%s%.9g", index > 0u ? "," : "", (double)broad[index]);
         }

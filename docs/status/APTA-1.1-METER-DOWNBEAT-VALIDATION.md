@@ -281,3 +281,71 @@ Conclusions, now evidence-backed rather than assumed:
 
 This document's scope ends here: further updates on downbeat belong to the
 tempo/grid ensemble evaluation record until its gates close.
+
+## Native three-band overview phase experiment — 2026-08-26
+
+The trace tool was extended, still behind
+`APTA_ENABLE_EXPERIMENTAL_METER_TRACE`, to capture the full native S4 onset
+flux, the three cached tempo candidates and refined offsets, the selected S4
+phase, and the already bounded 3-band waveform overview. This made it possible
+to design against the exact production lattice and feature storage rather than
+an STFT or integer-bin proxy.
+
+A conservative follow-up samples the maximum positive low/mid/high overview
+rise within one overview column of each locally representable grid beat. It
+replaces the existing downbeat phase only when the best meter phase is at least
+25% above the runner-up. The fixed threshold is the first tested boundary with
+zero development regressions across all three available, already-open data
+sets. The implementation is opt-in through
+`APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT`; default builds and clients that do
+not request `APTA_FEATURE_WAVEFORM_3BAND` retain the existing behavior.
+
+Native reruns produced:
+
+| Development evidence | Baseline downbeat | Candidate downbeat | Fixes | Breaks |
+|---|---:|---:|---:|---:|
+| Human-verified DJ corpus, now spent for development | 5/60 | 7/60 | 2 | 0 |
+| Ballroom development partition | 7/40 | 8/40 | 1 | 0 |
+| ASAP development partition | 1/40 | 2/40 | 1 | 0 |
+
+The candidate changed no meter numerator and no Q32 lattice on any of the 140
+tracks. Its opt-in build passes 118/118 tests with package-archive generation
+excluded from that invocation; the dedicated phase-gate unit test also passes
+with warnings treated as errors. Neither 40-track holdout was opened.
+
+Disposition: retain as a bounded experimental path and diagnostic reference,
+not as a production/default improvement. Four additional correct phases over
+140 development tracks confirms that the stored 3-band overview carries some
+independent bar evidence, but the absolute accuracy remains far below the 90%
+release gate. The primary downbeat boundary remains a substantially better
+beat-period/lattice front end plus higher-resolution bar evidence; threshold
+tuning inside this candidate is closed.
+
+## Beat-period trace probes — 2026-08-26
+
+The existing opt-in B3 multiband-onset path was rerun natively over the spent
+60-track DJ corpus. It left period accuracy at 40/60 by exchanging one fix for
+one break; downbeat moved 5/60 to 6/60 and full beatgrid 4/60 to 5/60. This is
+not a qualifying period gain, so B3 remains experimental and is not enabled by
+default.
+
+The expanded trace also exposes all three refined S4 lag candidates. Against
+the same development labels, the final production selector has 40/60 correct
+periods while at least one cached S4 candidate is correct on 49/60: nine period
+errors are therefore theoretically recoverable without widening the candidate
+set. The corresponding top-3 oracle is 16/40 on Ballroom development and only
+2/40 on ASAP development.
+
+Simple selection rules over the exact native flux were rejected offline before
+integration. Raw autocorrelation, harmonic contrast and phase concentration
+all lost DJ accuracy. A gated phase-concentration rule gained one Ballroom
+period with zero breaks, but on the DJ development corpus it broke between
+three and nine already-correct rank-0 selections across the tested decisive
+gates. No native beat-period candidate was promoted from this probe.
+
+The next beatgrid front end must therefore add independent onset evidence or a
+new temporal representation that can identify the correct cached lag; merely
+rescoring the same full-band flux is exhausted. Any successor must first show
+zero-break transfer on both already-open development domains before native
+integration, and neither untouched meter/downbeat holdout may be used for that
+design loop.
