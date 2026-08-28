@@ -242,6 +242,76 @@ def _causal_harmonic_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
     return result.astype(np.float64)
 
 
+def _sequential_i3_local_contrast(energy: np.ndarray) -> np.ndarray:
+    history = np.zeros((16, 4), dtype=np.float32)
+    history_sum = np.zeros(4, dtype=np.float32)
+    floor_epsilon = np.float32(1.0) / np.float32(255.0)
+    result = np.zeros(len(energy), dtype=np.float32)
+    history_count = 0
+    cursor = 0
+
+    for index, row in enumerate(energy):
+        current = np.asarray(row, dtype=np.float32)
+        count = np.float32(history_count)
+        channel_contrast = np.zeros(4, dtype=np.float32)
+        for channel in range(4):
+            floor = (
+                np.float32(history_sum[channel] / count)
+                if history_count > 0
+                else np.float32(0.0)
+            )
+            excess = np.maximum(
+                np.float32(current[channel] - floor), np.float32(0.0)
+            )
+            denominator = np.float32(
+                np.float32(current[channel] + floor) + floor_epsilon
+            )
+            channel_contrast[channel] = np.float32(excess / denominator)
+        band_mean = np.float32(
+            np.float32(
+                np.float32(channel_contrast[0] + channel_contrast[1]) +
+                channel_contrast[2]
+            ) / np.float32(3.0)
+        )
+        result[index] = np.float32(
+            np.float32(0.5) * channel_contrast[3] +
+            np.float32(0.5) * band_mean
+        )
+
+        if history_count == 16:
+            for channel in range(4):
+                history_sum[channel] = np.float32(
+                    history_sum[channel] - history[cursor, channel]
+                )
+        for channel in range(4):
+            history_sum[channel] = np.float32(
+                history_sum[channel] + current[channel]
+            )
+        history[cursor] = current
+        cursor = (cursor + 1) % 16
+        history_count = min(history_count + 1, 16)
+    return result
+
+
+def _centered_curvature_local_contrast(energy: np.ndarray) -> np.ndarray:
+    contrast = _sequential_i3_local_contrast(energy)
+    result = np.zeros(len(contrast), dtype=np.float32)
+    for index, current in enumerate(contrast):
+        previous = contrast[index - 1] if index > 0 else np.float32(0.0)
+        following = (
+            contrast[index + 1]
+            if index + 1 < len(contrast)
+            else np.float32(0.0)
+        )
+        neighbour_mean = np.float32(
+            np.float32(0.5) * np.float32(previous + following)
+        )
+        result[index] = np.maximum(
+            np.float32(current - neighbour_mean), np.float32(0.0)
+        )
+    return result.astype(np.float64)
+
+
 def _adaptive_whitened_flux(energy: np.ndarray) -> np.ndarray:
     floors = np.column_stack(
         [_rolling_mean(energy[:, column], 16) for column in range(4)]
@@ -264,6 +334,8 @@ FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
         _causal_mean_fusion_local_contrast,
     "causal_harmonic_fusion_local_contrast_16":
         _causal_harmonic_fusion_local_contrast,
+    "centered_curvature_local_contrast_16":
+        _centered_curvature_local_contrast,
     "adaptive_whitened_flux_16": _adaptive_whitened_flux,
 }
 

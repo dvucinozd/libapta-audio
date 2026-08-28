@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 6
 
-- **Status:** pre-registered oracle candidate, not implemented
+- **Status:** rejected by the pre-implementation oracle gate
 - **Frozen baseline revision:** `2d176c3627b2de396f510a5d9037207cba5247c6`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -50,3 +50,29 @@ I1 through I5. The default build remains unchanged.
    high-confidence safety regression.
 
 No rejection opens a formal holdout or creates acceptance evidence.
+
+## Oracle outcome
+
+The exact centered-curvature formula produced:
+
+| Corpus | Metric | Baseline | I6 oracle | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 2 | 2 | 2 | 0 |
+| ASAP development | top-1 phase | 1 | 1 | 0 | 0 | 0 |
+| ASAP development | top-3 period | 3 | 4 | 2 | 1 | +1 |
+| Ballroom development | top-1 period | 10 | 6 | 1 | 5 | -4 |
+| Ballroom development | top-1 phase | 11 | 3 | 0 | 8 | -8 |
+| Ballroom development | top-3 period | 17 | 13 | 2 | 6 | -4 |
+
+ASAP has no positive net top-1 period transfer and two breaks. Ballroom has
+strongly negative period and phase transfer. I6 therefore fails every frozen
+oracle promotion condition and is rejected before implementation or native
+corpus execution. No formula variant was tested.
+
+Privacy-safe report SHA-256 values are:
+
+- ASAP development: `0657e8f0b1c3227cbb8bd40faabb8940e3c92bcf342897f4625517e436a89210`;
+- Ballroom development: `8f4cd4d9dde7013ceddbbe6d3aa502e3611866fc8d2e597d1a4253b4f48913b2`.
+
+The spent DJ corpus and all formal holdouts remain unopened. This result is
+development evidence only and makes no acceptance claim.
