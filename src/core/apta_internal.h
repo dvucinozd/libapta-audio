@@ -498,6 +498,8 @@ typedef struct {
     } sums;
     uint16_t sample_count;
     uint8_t occupied;
+    /* I8 reuses this byte as an opt-in S4 peak-magnitude accumulator. S6 and
+     * all default builds continue to leave it zero. */
     uint8_t reserved8;
 #else
     uint32_t sum_absolute;

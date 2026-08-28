@@ -57,6 +57,9 @@ int main(void)
     bin->sums.multiband.band_sums[1] = 8160u;
     bin->sums.multiband.band_sums[2] = 4080u;
     bin->sums.multiband.broadband_sum = 28560u;
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I8
+    bin->reserved8 = 191u;
+#endif
     session->s4_refresh_evidence_first = 7u;
     session->s4_refresh_evidence_end = 8u;
 
@@ -66,6 +69,16 @@ int main(void)
     CHECK(fabsf(bands[1] - 0.125f) < 1.0e-6f);
     CHECK(fabsf(bands[2] - 0.0625f) < 1.0e-6f);
     CHECK(fabsf(broadband - 0.4375f) < 1.0e-6f);
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I8
+    {
+        float peak = 0.0f;
+
+        CHECK(apta_internal_s4_trace_peak_at(session, 0u, &peak));
+        CHECK(fabsf(peak - 191.0f / 255.0f) < 1.0e-6f);
+        CHECK(!apta_internal_s4_trace_peak_at(session, 1u, &peak));
+        CHECK(!apta_internal_s4_trace_peak_at(session, 0u, NULL));
+    }
+#endif
     CHECK(!apta_internal_s4_trace_energy_at(
               session, 1u, bands, &broadband));
     CHECK(!apta_internal_s4_trace_energy_at(

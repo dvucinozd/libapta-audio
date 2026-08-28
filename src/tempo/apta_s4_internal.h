@@ -26,6 +26,13 @@ int apta_internal_s4_trace_energy_at(
     uint32_t offset,
     float bands_out[APTA_INTERNAL_BAND_COUNT],
     float *broadband_out);
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I8
+/* Read the normalized within-bin broadband peak captured by I8. */
+int apta_internal_s4_trace_peak_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *peak_out);
+#endif
 #endif
 #endif
 

@@ -111,6 +111,27 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8
+    "Build the APTA 1.1 WP1 within-bin peak trace experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
+    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8 requires "
+            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+    endif()
+    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
+       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 OR
+       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3 OR
+       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4)
+        message(FATAL_ERROR
+            "transient-lattice iterations 1, 2, 3, 4 and 8 are mutually exclusive")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I8=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
     "Build the development three-band downbeat phase experiment"
     OFF)

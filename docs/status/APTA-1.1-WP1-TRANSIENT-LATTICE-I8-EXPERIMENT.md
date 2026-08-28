@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 8
 
-- **Status:** pre-registered; no I8 trace, oracle or analyzer result collected
+- **Status:** rejected by the external-development oracle gate
 - **Frozen baseline revision:** `c9a10700681e0bc2667567444822c536a33e0f9f`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -88,3 +88,57 @@ Any failed stage rejects I8 without changing thresholds, trying a neighboring
 formula, opening an ASAP/Ballroom formal holdout, consuming a fresh acceptance
 corpus or making an acceptance claim. Passing all stages retains an opt-in WP1
 candidate; it does not by itself complete WP1 or authorize release promotion.
+
+## Trace-instrumentation checkpoint
+
+The trace-only I8 implementation preserves the 16-byte onset bin and adds no
+persistent field or allocation. The current multiband baseline and I8 workspace
+probe reports are byte-identical, SHA-256
+`4fc4f275a57ec9bffa4f89a041dd0376c2b911921abf1784a1bccf6622ae2699`.
+The current full-feature P4 30-minute query remains 942,288 workspace bytes and
+537,104 result-pool bytes.
+
+The default analyzer remains byte-identical to the WP0 artifact, SHA-256
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`.
+Dependency and mutual-exclusion configurations reject invalid I8 combinations.
+The I8 Werror matrix excluding the separately exercised source-archive gate
+passes 124/124; the I8 ASan/UBSan matrix passes 120/120. Synthetic peak,
+trace-energy and transient-ring tests pass, as do all S6, ABI and default-layout
+tests.
+
+The I8 trace executable SHA-256 is
+`b4b7b2a84a2b7ac993ef0f934fc5a48aa11649425587d8ffe86a0cf85aeaffb0`.
+All 40 ASAP and 40 Ballroom development traces have exact label coverage,
+finite four-channel energy/flux geometry, finite aligned peak arrays in
+`[0, 1]`, opaque track IDs and exact captured top-three candidate reproduction.
+A repeated real trace is byte-identical, SHA-256
+`624046cab7e0a75e311db3dee0907cebe161851efcb5f485ddcc2eb6774a00c0`.
+
+## Oracle outcome
+
+The exact frozen peak-sharpness multiplication produced:
+
+| Corpus | Metric | Baseline | I8 | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 0 | 0 | 2 | -2 |
+| ASAP development | top-1 phase | 1 | 0 | 0 | 1 | -1 |
+| ASAP development | joint top-1 period+phase | 0 | 0 | 0 | 0 | 0 |
+| ASAP development | top-3 period | 3 | 3 | 1 | 1 | 0 |
+| Ballroom development | top-1 period | 10 | 9 | 1 | 2 | -1 |
+| Ballroom development | top-1 phase | 11 | 10 | 1 | 2 | -1 |
+| Ballroom development | joint top-1 period+phase | 7 | 7 | 2 | 2 | 0 |
+| Ballroom development | top-3 period | 17 | 17 | 0 | 0 | 0 |
+
+Two executions per corpus produced byte-identical reports:
+
+- ASAP development SHA-256:
+  `33c6fc834d8cbbd71bc821feb90d695439a5ab9b4ab29c4eabb652a24a9ff34a`;
+- Ballroom development SHA-256:
+  `24a3280d8adec894cf55d1a23585dcbeae9ea308ac316f362fd3ac59ddfa752b`.
+
+Both top-1 period transfers are negative and both corpora exceed the frozen
+maximum of one period break. I8 is therefore rejected before the spent-DJ
+trace stage, analyzer novelty implementation or native corpus execution. No
+neighboring peak formula was tested. ASAP/Ballroom formal holdouts and the
+fresh acceptance corpus remain unopened, and this result makes no acceptance
+claim.

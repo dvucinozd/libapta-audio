@@ -216,6 +216,37 @@ int apta_internal_s4_trace_energy_at(
          (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
     return 1;
 }
+
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I8
+int apta_internal_s4_trace_peak_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *peak_out)
+{
+    const apta_internal_onset_bin_t *bin;
+    uint64_t count;
+    uint64_t bin_index;
+
+    if (session == NULL || peak_out == NULL ||
+        session->s4_refresh_evidence_end <
+            session->s4_refresh_evidence_first) {
+        return 0;
+    }
+    count = session->s4_refresh_evidence_end -
+            session->s4_refresh_evidence_first;
+    if ((uint64_t)offset >= count) {
+        return 0;
+    }
+    bin_index = session->s4_refresh_evidence_first + offset;
+    bin = apta_s4_const_bin(session, bin_index);
+    if (bin == NULL || bin->sample_count == 0u) {
+        return 0;
+    }
+    *peak_out = (float)bin->reserved8 /
+                (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE;
+    return 1;
+}
+#endif
 #endif
 
 static uint32_t apta_s4_expected_bin_samples(
@@ -1012,6 +1043,15 @@ apta_status_t apta_internal_s4_process_sample(
 #ifdef APTA_INTERNAL_MULTIBAND_ONSET
     const float sample = bands[0] + bands[1] + bands[2];
     const float broadband_magnitude = fminf(fabsf(sample), 1.0f);
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I8
+    const uint8_t peak_q8 = (uint8_t)(
+        broadband_magnitude *
+        (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+
+    if (peak_q8 > bin->reserved8) {
+        bin->reserved8 = peak_q8;
+    }
+#endif
 
     for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
         const float magnitude = fminf(fabsf(bands[band]), 1.0f);

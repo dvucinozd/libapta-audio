@@ -327,6 +327,23 @@ int main(int argc, char **argv)
 #else
         fputs("],\"onset_band_stride\":0,\"onset_band_energy\":[", trace);
 #endif
+#if defined(APTA_INTERNAL_MULTIBAND_ONSET) && \
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I8)
+        fputs("],\"onset_peak_magnitude\":[", trace);
+        for (index = 0u; index < flux_count; ++index) {
+            float peak;
+
+            if (!apta_internal_s4_trace_peak_at(session, index, &peak)) {
+                fputs("apta-meter-trace: incomplete onset peak snapshot\n",
+                      stderr);
+                goto cleanup;
+            }
+            fprintf(trace,
+                    "%s%.9g",
+                    index > 0u ? "," : "",
+                    (double)peak);
+        }
+#endif
         fprintf(trace,
                 "],\"overview_3band\":{\"frames_per_column\":%u,"
                 "\"origin_frame\":%llu,\"spans\":[",

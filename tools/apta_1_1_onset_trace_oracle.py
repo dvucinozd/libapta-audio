@@ -33,6 +33,7 @@ PRIOR_WIDTH = 0.55
 QUANTIZATION_FLOOR = 1.0 / 255.0
 PHASE_TOLERANCE_BEATS = 0.10
 PERIOD_TOLERANCE = 0.01
+I8_FORMULA_NAME = "peak_sharpness_multiband_i8"
 
 
 def _sha256(path: Path) -> str:
@@ -322,6 +323,15 @@ def _adaptive_whitened_flux(energy: np.ndarray) -> np.ndarray:
     )
 
 
+def _peak_sharpness_multiband(
+    energy: np.ndarray, peak: np.ndarray
+) -> np.ndarray:
+    broadband = energy[:, 3]
+    excess = np.maximum(peak - broadband, 0.0)
+    sharpness = excess / (peak + broadband + QUANTIZATION_FLOOR)
+    return _baseline_band_flux(energy) * sharpness
+
+
 FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
     "captured_multiband": None,
     "reconstructed_multiband": _baseline_band_flux,
@@ -432,7 +442,12 @@ def _load_trace(path: Path) -> tuple[dict[str, object], np.ndarray]:
     return trace, energy
 
 
-def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
+def evaluate(
+    labels_path: Path,
+    traces: Path,
+    corpus: str,
+    include_i8_peak: bool = False,
+) -> dict[str, object]:
     labels_raw = json.loads(labels_path.read_text(encoding="utf-8"))
     labels = {
         str(row["track"]): row
@@ -448,17 +463,30 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
     if {path.stem for path in paths} != set(labels):
         raise ValueError("trace coverage does not exactly match development IDs")
 
+    formula_names = [*FORMULAS, *PHASE_ONLY_FORMULAS]
+    if include_i8_peak:
+        formula_names.append(I8_FORMULA_NAME)
     per_formula: dict[str, list[dict[str, object]]] = {
-        name: [] for name in (*FORMULAS, *PHASE_ONLY_FORMULAS)
+        name: [] for name in formula_names
     }
     reconstructed_differences = 0
     captured_candidate_set_matches = 0
     hybrid_candidate_order_matches = 0
+    i8_peak_trace_tracks = 0
     for path in paths:
         track = path.stem
         label = labels[track]
         trace, energy = _load_trace(path)
         captured = np.asarray(trace["onset_flux"], dtype=np.float64)
+        peak = np.asarray(
+            trace.get("onset_peak_magnitude", []), dtype=np.float64
+        )
+        if include_i8_peak:
+            if len(peak) != len(captured) or not np.all(np.isfinite(peak)):
+                raise ValueError(f"{path.name}: invalid I8 peak trace geometry")
+            if np.any(peak < 0.0) or np.any(peak > 1.0):
+                raise ValueError(f"{path.name}: I8 peak trace outside [0, 1]")
+            i8_peak_trace_tracks += 1
         reconstructed = _baseline_band_flux(energy)
         if not np.allclose(captured, reconstructed, rtol=2.0e-5, atol=2.0e-7):
             reconstructed_differences += 1
@@ -469,9 +497,16 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
             **FORMULAS,
             **PHASE_ONLY_FORMULAS,
         }
+        if include_i8_peak:
+            formulas[I8_FORMULA_NAME] = None
         for name, formula in formulas.items():
             phase_only = name in PHASE_ONLY_FORMULAS
-            phase_novelty = captured if formula is None else formula(energy)
+            if name == I8_FORMULA_NAME:
+                phase_novelty = _peak_sharpness_multiband(energy, peak)
+            else:
+                phase_novelty = (
+                    captured if formula is None else formula(energy)
+                )
             candidate_novelty = captured if phase_only else phase_novelty
             candidates = _candidate_lags(
                 candidate_novelty, int(trace["sample_rate"])
@@ -600,6 +635,7 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
             "reconstructed_baseline_difference_tracks": reconstructed_differences,
             "captured_top3_candidate_set_matches": captured_candidate_set_matches,
             "hybrid_candidate_order_matches": hybrid_candidate_order_matches,
+            "i8_peak_trace_tracks": i8_peak_trace_tracks,
         },
         "formulas": summaries,
     }
@@ -610,10 +646,20 @@ def main() -> int:
     parser.add_argument("--labels", type=Path, required=True)
     parser.add_argument("--traces", type=Path, required=True)
     parser.add_argument("--corpus", required=True)
+    parser.add_argument(
+        "--i8-peak",
+        action="store_true",
+        help="require I8 peak arrays and evaluate the frozen I8 formula",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
-        report = evaluate(args.labels, args.traces, args.corpus)
+        report = evaluate(
+            args.labels,
+            args.traces,
+            args.corpus,
+            include_i8_peak=args.i8_peak,
+        )
         encoded = json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n"
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(encoded, encoding="utf-8")

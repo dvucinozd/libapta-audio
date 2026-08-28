@@ -117,7 +117,8 @@ endif()
 if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
    APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 OR
    APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3 OR
-   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4)
+   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4 OR
+   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
     apta_add_c_test(
         apta_transient_lattice
         apta.experimental.transient_lattice
@@ -128,6 +129,19 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
         PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
     if(UNIX)
         target_link_libraries(apta_transient_lattice PRIVATE m)
+    endif()
+endif()
+if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
+    apta_add_c_test(
+        apta_transient_peak
+        apta.experimental.transient_peak
+        unit/transient_peak.c)
+    target_link_libraries(apta_transient_peak PRIVATE apta_c11_atomics)
+    target_include_directories(
+        apta_transient_peak
+        PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+    if(UNIX)
+        target_link_libraries(apta_transient_peak PRIVATE m)
     endif()
 endif()
 if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE AND
