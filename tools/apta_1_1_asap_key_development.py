@@ -20,7 +20,7 @@ except ImportError as exc:  # pragma: no cover - environment diagnostic
 
 
 FORMAT = "apta-1.1-asap-key-development-1"
-MIDO_VERSION = "1.3.2"
+MIDO_VERSION = "1.3.3"
 MIN_TRACKS = 24
 TONICS = {
     "C": 0,
