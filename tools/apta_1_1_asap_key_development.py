@@ -182,12 +182,17 @@ def freeze(
         mode: sum(row["key_mode"] == mode for row in included)
         for mode in ("major", "minor")
     }
+    viability_reasons = []
     if len(included) < MIN_TRACKS:
-        raise FreezeError(
-            f"only {len(included)} eligible tracks, require {MIN_TRACKS}"
-        )
+        viability_reasons.append("insufficient_track_count")
     if modes["major"] == 0 or modes["minor"] == 0:
-        raise FreezeError("eligible set must contain both major and minor")
+        viability_reasons.append("missing_mode_coverage")
+    exclusion_reason_counts: dict[str, int] = {}
+    for row in excluded:
+        reason = row["reason"]
+        exclusion_reason_counts[reason] = (
+            exclusion_reason_counts.get(reason, 0) + 1
+        )
 
     labels_out.parent.mkdir(parents=True, exist_ok=True)
     with labels_out.open("w", encoding="utf-8", newline="") as stream:
@@ -216,6 +221,9 @@ def freeze(
         "development_input_count": len(development_ids),
         "included_count": len(included),
         "mode_counts": modes,
+        "viable": not viability_reasons,
+        "viability_reasons": viability_reasons,
+        "exclusion_reason_counts": exclusion_reason_counts,
         "included_track_ids": [str(row["track"]) for row in included],
         "excluded": excluded,
     }
@@ -242,7 +250,7 @@ def main() -> int:
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         parser.exit(1, f"error: {exc}\n")
     print(json.dumps(report, sort_keys=True, separators=(",", ":")))
-    return 0
+    return 0 if report["viable"] else 2
 
 
 if __name__ == "__main__":
