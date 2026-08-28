@@ -80,6 +80,10 @@ Verification and exit:
 
 ## Work package 1 — new transient/onset evidence
 
+**Status:** active. Transient-lattice iteration 1 at
+`2dc7b2c5272f394df0d37a1206538fe1003fc0e7` is rejected; a separately named
+iteration is required before WP1 can pass.
+
 **Hypothesis:** the existing single-step broadband/per-band rise loses transient
 shape and local contrast. A bounded multi-timescale onset representation can
 separate true periodic attacks from filter tails and sustained energy, exposing
