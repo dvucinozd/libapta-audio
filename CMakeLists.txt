@@ -72,6 +72,25 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3
+    "Build the APTA 1.1 WP1 sixteen-bin local-contrast experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3)
+    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3 requires "
+            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+    endif()
+    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
+       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2)
+        message(FATAL_ERROR
+            "transient-lattice iterations 1, 2 and 3 are mutually exclusive")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I3=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
     "Build the development three-band downbeat phase experiment"
     OFF)

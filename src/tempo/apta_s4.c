@@ -6,7 +6,8 @@
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
 #if defined(APTA_INTERNAL_TRANSIENT_LATTICE) || \
-    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I2)
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I2) || \
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3)
 #include "../core/apta_transient_lattice.h"
 #endif
 #include "../confidence/apta_quality_model.h"
@@ -251,7 +252,8 @@ static int apta_s4_bin_complete(
 
 /* A3/B3: recover normalized mean magnitude from the integer accumulator. */
 #ifdef APTA_INTERNAL_MULTIBAND_ONSET
-#ifndef APTA_INTERNAL_TRANSIENT_LATTICE_I2
+#if !defined(APTA_INTERNAL_TRANSIENT_LATTICE_I2) && \
+    !defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3)
 static float apta_s4_band_energy(
     const apta_session_t *session,
     uint64_t bin_index,
@@ -347,6 +349,54 @@ static APTA_S4_TRANSIENT_I2_NOINLINE void apta_s4_fill_transient_i2_flux(
     for (index = evidence_first; index < evidence_end; ++index) {
         session->onset_flux[(uint32_t)(index - evidence_first)] =
             apta_s4_transient_i2_flux(session, index, &state);
+    }
+}
+#elif defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3)
+#if defined(_MSC_VER)
+#define APTA_S4_TRANSIENT_I3_NOINLINE __declspec(noinline)
+#elif defined(__GNUC__) || defined(__clang__)
+#define APTA_S4_TRANSIENT_I3_NOINLINE __attribute__((noinline))
+#else
+#define APTA_S4_TRANSIENT_I3_NOINLINE
+#endif
+
+static float apta_s4_transient_i3_flux(
+    const apta_session_t *session,
+    uint64_t bin_index,
+    apta_internal_transient_i3_state_t *state)
+{
+    const apta_internal_onset_bin_t *bin =
+        apta_s4_const_bin(session, bin_index);
+    apta_internal_transient_frame_t frame;
+    uint32_t band;
+
+    if (bin == NULL || bin->sample_count == 0u) {
+        return 0.0f;
+    }
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        frame.bands[band] =
+            (float)bin->sums.multiband.band_sums[band] /
+            ((float)bin->sample_count *
+             (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+    }
+    frame.broadband =
+        (float)bin->sums.multiband.broadband_sum /
+        ((float)bin->sample_count *
+         (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+    return apta_internal_transient_i3_process(state, &frame);
+}
+
+static APTA_S4_TRANSIENT_I3_NOINLINE void apta_s4_fill_transient_i3_flux(
+    apta_session_t *session,
+    uint64_t evidence_first,
+    uint64_t evidence_end)
+{
+    apta_internal_transient_i3_state_t state = {0};
+    uint64_t index;
+
+    for (index = evidence_first; index < evidence_end; ++index) {
+        session->onset_flux[(uint32_t)(index - evidence_first)] =
+            apta_s4_transient_i3_flux(session, index, &state);
     }
 }
 #else
@@ -1111,6 +1161,8 @@ apta_status_t apta_internal_s4_refresh(
     APTA_S4_PROFILE_BEGIN(session);
 #ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I2
     apta_s4_fill_transient_i2_flux(session, evidence_first, evidence_end);
+#elif defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3)
+    apta_s4_fill_transient_i3_flux(session, evidence_first, evidence_end);
 #else
     for (index = evidence_first; index < evidence_end; ++index) {
         session->onset_flux[(uint32_t)(index - evidence_first)] =

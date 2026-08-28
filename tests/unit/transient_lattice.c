@@ -128,7 +128,8 @@ int main(void)
     /* Silence and the body of a sustained tone carry no novelty. */
     CHECK(session->onset_flux[20u] == 0.0f);
     CHECK(session->onset_flux[64u] > 0.0f);
-#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I2
+#if defined(APTA_INTERNAL_TRANSIENT_LATTICE_I2) || \
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3)
     CHECK(session->onset_flux[65u] > 0.0f);
     CHECK(session->onset_flux[65u] < session->onset_flux[64u]);
     CHECK(session->onset_flux[68u] < session->onset_flux[65u]);

@@ -245,4 +245,72 @@ static inline float apta_internal_transient_i2_process(
 }
 #endif
 
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I3
+#define APTA_INTERNAL_TRANSIENT_I3_DENOMINATOR_FLOOR (1.0f / 255.0f)
+
+typedef struct {
+    apta_internal_transient_frame_t
+        frames[APTA_INTERNAL_TRANSIENT_SLOW_BINS];
+    apta_internal_transient_frame_t sum;
+    uint32_t count;
+    uint32_t cursor;
+} apta_internal_transient_i3_state_t;
+
+_Static_assert(sizeof(apta_internal_transient_i3_state_t) <= 288u,
+               "WP1 I3 rolling local-contrast state must remain bounded");
+
+static inline float apta_internal_transient_i3_contrast(
+    float current,
+    float floor)
+{
+    const float excess = apta_internal_transient_positive(current - floor);
+
+    return excess /
+           (current + floor +
+            APTA_INTERNAL_TRANSIENT_I3_DENOMINATOR_FLOOR);
+}
+
+static inline float apta_internal_transient_i3_process(
+    apta_internal_transient_i3_state_t *state,
+    const apta_internal_transient_frame_t *current)
+{
+    const float count = (float)state->count;
+    const float broadband_floor =
+        state->count > 0u ? state->sum.broadband / count : 0.0f;
+    float band_contrast = 0.0f;
+    float novelty;
+    uint32_t band;
+
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        const float floor =
+            state->count > 0u ? state->sum.bands[band] / count : 0.0f;
+        band_contrast += apta_internal_transient_i3_contrast(
+            current->bands[band], floor);
+    }
+    novelty =
+        0.50f * apta_internal_transient_i3_contrast(
+                    current->broadband, broadband_floor) +
+        0.50f * band_contrast / (float)APTA_INTERNAL_BAND_COUNT;
+
+    if (state->count == APTA_INTERNAL_TRANSIENT_SLOW_BINS) {
+        for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+            state->sum.bands[band] -=
+                state->frames[state->cursor].bands[band];
+        }
+        state->sum.broadband -= state->frames[state->cursor].broadband;
+    }
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        state->sum.bands[band] += current->bands[band];
+    }
+    state->sum.broadband += current->broadband;
+    state->frames[state->cursor] = *current;
+    state->cursor =
+        (state->cursor + 1u) % APTA_INTERNAL_TRANSIENT_SLOW_BINS;
+    if (state->count < APTA_INTERNAL_TRANSIENT_SLOW_BINS) {
+        state->count += 1u;
+    }
+    return novelty;
+}
+#endif
+
 #endif /* APTA_TRANSIENT_LATTICE_H */
