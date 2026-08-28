@@ -1,6 +1,6 @@
 # APTA 1.1 WP2 temporal tracker iteration 1
 
-- **Status:** pre-registered; no WP2-I1 oracle or implementation result collected
+- **Status:** rejected by the external-development oracle gate
 - **Frozen baseline revision:** `37afcdd2c4c201f1091a624479ddb421651b18ba`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -106,3 +106,34 @@ Any failed stage rejects WP2-I1 without changing the frozen formula, opening an
 ASAP/Ballroom formal holdout, consuming a fresh acceptance corpus or making an
 acceptance claim. Passing all stages retains an opt-in candidate; it does not
 by itself authorize a formal holdout or release promotion.
+
+## Oracle outcome
+
+The offline implementation reproduced the ordered full-window production
+candidate list on all 80 traces, and every temporal decision selected one of
+those unchanged top-three candidates. The selector promoted rank 1 or 2 on
+21/40 tracks in each corpus.
+
+| Corpus | Metric | Baseline | WP2-I1 | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 2 | 1 | 1 | 0 |
+| ASAP development | top-1 phase | 1 | 2 | 1 | 0 | +1 |
+| ASAP development | joint top-1 period+phase | 0 | 1 | 1 | 0 | +1 |
+| Ballroom development | top-1 period | 10 | 10 | 3 | 3 | 0 |
+| Ballroom development | top-1 phase | 11 | 10 | 2 | 3 | -1 |
+| Ballroom development | joint top-1 period+phase | 7 | 6 | 2 | 3 | -1 |
+
+Two executions per corpus produced byte-identical reports:
+
+- ASAP development SHA-256:
+  `744db229c7b5c4c3f69d68c1b7b3355ee54c7cbaefb8b518b27ab26a80cb3326`;
+- Ballroom development SHA-256:
+  `81afec81ff6a304204f0eb51a178d3a5af3c9524fc4a7786100a19de4c223b96`.
+
+Top-1 period transfer is neutral rather than positive on both corpora,
+Ballroom has three period breaks, and Ballroom phase/joint transfer is
+negative. WP2-I1 therefore fails frozen gate 2 and is rejected before the
+spent-DJ oracle, native implementation or resource measurement. No alternate
+window, transition weight or terminal rule was tested. Formal holdouts and the
+fresh acceptance corpus remain unopened, and this result makes no acceptance
+claim.
