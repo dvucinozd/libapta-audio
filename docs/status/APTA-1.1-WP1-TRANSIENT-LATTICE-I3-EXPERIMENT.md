@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 3
 
-- **Status:** implementation verified, pre-corpus
+- **Status:** rejected after open-development and spent-corpus evaluation
 - **Frozen baseline revision:** `672939ac56a2e01997afd3723373894737881b88`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -90,3 +90,45 @@ evidence-bin and refresh-scan counts. Median results are:
 
 Both frozen CPU gates pass with substantial margin. I3 is now frozen for exact
 revision-bound spent-set and open-development evaluation.
+
+## Frozen evaluation outcome
+
+The exact candidate revision was
+`1814a2a382ae0ddce04468efedf91d22bf9a7b2c`. Each open-development run
+completed all 40 tracks with no execution failure. Relative to the
+multiband-only baseline:
+
+| Corpus | Metric | Baseline | I3 | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | meter | 19 | 23 | 7 | 3 | +4 |
+| ASAP development | downbeat | 3 | 5 | 4 | 2 | +2 |
+| ASAP development | period <=1% | 1 | 3 | 2 | 0 | +2 |
+| ASAP development | period <=10% | 3 | 9 | 6 | 0 | +6 |
+| Ballroom development | meter | 21 | 23 | 4 | 2 | +2 |
+| Ballroom development | downbeat | 6 | 7 | 5 | 4 | +1 |
+| Ballroom development | period <=1% | 8 | 18 | 10 | 0 | +10 |
+| Ballroom development | period <=10% | 17 | 24 | 7 | 0 | +7 |
+
+This positive transfer permitted evaluation on the already-spent 60-track DJ
+development corpus. Both exact runs completed 60/60 with zero execution
+failures. Key remained 20/60 and meter improved from 58/60 to 59/60. Beatgrid
+remained 5/60 with five fixes and five breaks, while downbeat fell from 6/60
+to 5/60 with five fixes and six breaks. The candidate therefore has zero net
+beatgrid fixes, negative-one net downbeat fixes and more than the permitted one
+break. It fails the frozen retain gate and is rejected.
+
+The comparison confirms zero persistent-workspace, recommended-workspace and
+result-pool delta; analyzer and static-library binaries shrink by 4,040 and
+608 bytes respectively. These resource results do not override the period and
+phase veto.
+
+Privacy-safe evidence SHA-256 values are:
+
+- ASAP baseline report: `f1ff378cb9f03d0bff071d33fa099b34bbdb8e4476e41d683ec9116fcdb64a60`;
+- ASAP I3 report: `3cf307ee919ac5704cf8aa56e36eb0cdd4d7703f54aecd8e00946cf7c6eec381`;
+- Ballroom baseline report: `abc9f8d79acadaa0221c5529ed65380be34d6781ee98505ae5f5d330b48967d2`;
+- Ballroom I3 report: `f5112245a4e7c8b04739ec0444aac0deecf1a6681bc144c89665228f11ae0b13`;
+- spent DJ comparison: `0801f51e4ceb8a7bb71fc6011f8ecbbc6c0a45cce27269b8baccc440e74565a9`.
+
+This is development evidence only and makes no acceptance claim. No ASAP,
+Ballroom or DJ formal holdout was opened.
