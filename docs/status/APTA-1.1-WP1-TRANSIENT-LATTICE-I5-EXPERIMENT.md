@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 5
 
-- **Status:** pre-registered oracle candidate, not implemented
+- **Status:** rejected by the pre-implementation oracle gate
 - **Frozen baseline revision:** `b56965f04ce9f06280d32d9a26b61e9bf006853e`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -58,3 +58,30 @@ I1 through I4. The default build remains unchanged.
    high-confidence safety regression.
 
 No rejection opens a formal holdout or creates acceptance evidence.
+
+## Oracle outcome
+
+The exact sequential-float32 oracle retained I4's production agreement at
+maximum absolute difference `1.79077144224e-8`. The newly frozen harmonic
+consensus produced:
+
+| Corpus | Metric | Baseline | I5 oracle | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 3 | 3 | 2 | +1 |
+| ASAP development | top-1 phase | 1 | 2 | 1 | 0 | +1 |
+| ASAP development | top-3 period | 3 | 5 | 3 | 1 | +2 |
+| Ballroom development | top-1 period | 10 | 12 | 3 | 1 | +2 |
+| Ballroom development | top-1 phase | 11 | 12 | 2 | 1 | +1 |
+| Ballroom development | top-3 period | 17 | 18 | 2 | 1 | +1 |
+
+ASAP top-1 period has two breaks, exceeding the frozen maximum of one. I5 is
+therefore rejected before implementation, native corpus execution or resource
+measurement. No formula variant was tested.
+
+Privacy-safe report SHA-256 values are:
+
+- ASAP development: `107a2517f947bb30f32d42fe03b2a345f5c7472a88e701f482b66673d3e685c1`;
+- Ballroom development: `81d0121e1107b0a1ab1c031846e53d5cb595a01dea9949a83cf59ffb36e92ca1`.
+
+The spent DJ corpus and all formal holdouts remain unopened. This result is
+development evidence only and makes no acceptance claim.

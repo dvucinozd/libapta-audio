@@ -106,14 +106,17 @@ def _equal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
     return 0.5 * baseline + 0.5 * local_contrast
 
 
-def _causal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
+def _causal_normalized_baseline_local_contrast(
+    energy: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
     history = np.zeros((16, 4), dtype=np.float32)
     history_sum = np.zeros(4, dtype=np.float32)
     previous = np.zeros(4, dtype=np.float32)
     baseline_sum = np.float32(0.0)
     contrast_sum = np.float32(0.0)
     floor_epsilon = np.float32(1.0) / np.float32(255.0)
-    result = np.zeros(len(energy), dtype=np.float32)
+    baseline_normalized = np.zeros(len(energy), dtype=np.float32)
+    contrast_normalized = np.zeros(len(energy), dtype=np.float32)
     history_count = 0
     cursor = 0
     have_previous = False
@@ -198,23 +201,44 @@ def _causal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
         causal_count = np.float32(index + 1)
         baseline_mean = np.float32(baseline_sum / causal_count)
         contrast_mean = np.float32(contrast_sum / causal_count)
-        baseline_normalized = (
+        baseline_value = (
             np.float32(baseline / baseline_mean)
             if baseline_mean > np.float32(0.0)
             else np.float32(0.0)
         )
-        contrast_normalized = (
+        contrast_value = (
             np.float32(local_contrast / contrast_mean)
             if contrast_mean > np.float32(0.0)
             else np.float32(0.0)
         )
-        result[index] = np.float32(
-            np.float32(0.5) * baseline_normalized +
-            np.float32(0.5) * contrast_normalized
-        )
+        baseline_normalized[index] = baseline_value
+        contrast_normalized[index] = contrast_value
         previous = current.copy()
         have_previous = True
 
+    return baseline_normalized, contrast_normalized
+
+
+def _causal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
+    baseline, contrast = _causal_normalized_baseline_local_contrast(energy)
+    result = np.asarray(
+        np.float32(0.5) * baseline + np.float32(0.5) * contrast,
+        dtype=np.float32,
+    )
+    return result.astype(np.float64)
+
+
+def _causal_harmonic_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
+    baseline, contrast = _causal_normalized_baseline_local_contrast(energy)
+    result = np.zeros(len(energy), dtype=np.float32)
+    for index in range(len(result)):
+        denominator = np.float32(baseline[index] + contrast[index])
+        if denominator > np.float32(0.0):
+            result[index] = np.float32(
+                np.float32(
+                    np.float32(2.0) * baseline[index] * contrast[index]
+                ) / denominator
+            )
     return result.astype(np.float64)
 
 
@@ -238,6 +262,8 @@ FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
         _equal_mean_fusion_local_contrast,
     "causal_mean_fusion_local_contrast_16":
         _causal_mean_fusion_local_contrast,
+    "causal_harmonic_fusion_local_contrast_16":
+        _causal_harmonic_fusion_local_contrast,
     "adaptive_whitened_flux_16": _adaptive_whitened_flux,
 }
 
