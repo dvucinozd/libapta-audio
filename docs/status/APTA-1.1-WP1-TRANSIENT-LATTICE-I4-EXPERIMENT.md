@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 4
 
-- **Status:** implementation verified, pre-corpus archive gate pending
+- **Status:** rejected after open-development evaluation
 - **Frozen baseline revision:** `814840ee0157c0c364be2960c7ffa5765720dede`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -109,3 +109,42 @@ evidence-bin and refresh-scan counts. Median results are:
 Both CPU gates pass. Exact corpus execution remains forbidden until this
 implementation is committed as one revision-bound candidate and the
 source-archive gate passes on that stable source tree.
+
+## Frozen evaluation outcome
+
+The exact candidate revision was
+`a80f15f5c9b1c0e6748c194a595763fbf3173dea`. A clean detached worktree at
+that revision passed the isolated deterministic package-archive gate 1/1.
+Both generated binary packages were byte-identical at SHA-256
+`67c14a041c2316782e49f10e068af9026f3be788c3401609a983e490d2d7cdea`;
+both source packages were byte-identical at SHA-256
+`461eb22016ed9aa6efdde484b5172316fdc43489a7a435ef2b9bdd2e61edfcdf`.
+
+Each open-development run completed all 40 tracks with no execution failure.
+Relative to the exact multiband-only baseline:
+
+| Corpus | Metric | Baseline | I4 | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | meter | 19 | 16 | 1 | 4 | -3 |
+| ASAP development | downbeat | 3 | 3 | 2 | 2 | 0 |
+| ASAP development | period <=1% | 1 | 1 | 0 | 0 | 0 |
+| ASAP development | period <=10% | 3 | 6 | 3 | 0 | +3 |
+| Ballroom development | meter | 21 | 20 | 1 | 2 | -1 |
+| Ballroom development | downbeat | 6 | 6 | 3 | 3 | 0 |
+| Ballroom development | period <=1% | 8 | 12 | 5 | 1 | +4 |
+| Ballroom development | period <=10% | 17 | 21 | 4 | 0 | +4 |
+
+The causal fusion improves the period candidate but regresses meter on both
+independent open-development partitions. That is negative external transfer
+under the frozen gate, so I4 is rejected before the spent DJ corpus. The spent
+DJ corpus and all ASAP, Ballroom and DJ formal holdouts remain unopened for
+this iteration.
+
+Privacy-safe report SHA-256 values are:
+
+- ASAP baseline report: `f1ff378cb9f03d0bff071d33fa099b34bbdb8e4476e41d683ec9116fcdb64a60`;
+- ASAP I4 report: `f4fcf6b83188dc56e99d5270e31b72f399d53442307a244213c98ba23eddc86f`;
+- Ballroom baseline report: `abc9f8d79acadaa0221c5529ed65380be34d6781ee98505ae5f5d330b48967d2`;
+- Ballroom I4 report: `32e19c4b036fa5637c7c51bb7373c6aafbf40c9b900db6716bef2f70ab72bf54`.
+
+This is development evidence only and makes no acceptance claim.
