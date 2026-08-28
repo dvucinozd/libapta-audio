@@ -137,4 +137,112 @@ static inline float apta_internal_transient_novelty(
     return broadband_rise + 0.25f * band_factor * local_evidence;
 }
 
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I2
+#define APTA_INTERNAL_TRANSIENT_I2_DENOMINATOR_FLOOR (1.0f / 255.0f)
+
+typedef struct {
+    apta_internal_transient_frame_t
+        frames[APTA_INTERNAL_TRANSIENT_SLOW_BINS];
+    float fast_sum[APTA_INTERNAL_BAND_COUNT];
+    float slow_sum[APTA_INTERNAL_BAND_COUNT];
+    apta_internal_transient_frame_t previous;
+    float previous_raw;
+    uint32_t count;
+    uint32_t cursor;
+    uint32_t have_previous;
+} apta_internal_transient_i2_state_t;
+
+_Static_assert(sizeof(apta_internal_transient_i2_state_t) <= 320u,
+               "WP1 I2 rolling transient state must remain bounded");
+
+static inline float apta_internal_transient_i2_contrast(
+    float current,
+    float reference)
+{
+    const float rise = apta_internal_transient_positive(current - reference);
+
+    return rise /
+           (current + reference +
+            APTA_INTERNAL_TRANSIENT_I2_DENOMINATOR_FLOOR);
+}
+
+static inline float apta_internal_transient_i2_process(
+    apta_internal_transient_i2_state_t *state,
+    const apta_internal_transient_frame_t *current)
+{
+    const uint32_t fast_count =
+        state->count < APTA_INTERNAL_TRANSIENT_FAST_BINS
+            ? state->count
+            : APTA_INTERNAL_TRANSIENT_FAST_BINS;
+    const float broadband_previous =
+        state->have_previous ? state->previous.broadband : 0.0f;
+    const float broadband = apta_internal_transient_i2_contrast(
+        current->broadband,
+        broadband_previous);
+    float band_evidence = 0.0f;
+    float raw;
+    float peak;
+    float novelty;
+    uint32_t leaving_fast = 0u;
+    uint32_t band;
+
+    if (fast_count == APTA_INTERNAL_TRANSIENT_FAST_BINS) {
+        leaving_fast =
+            (state->cursor + APTA_INTERNAL_TRANSIENT_SLOW_BINS -
+             APTA_INTERNAL_TRANSIENT_FAST_BINS) %
+            APTA_INTERNAL_TRANSIENT_SLOW_BINS;
+    }
+
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        const float previous = state->have_previous
+                                   ? state->previous.bands[band]
+                                   : 0.0f;
+        const float fast_floor = fast_count > 0u
+                                     ? state->fast_sum[band] /
+                                           (float)fast_count
+                                     : 0.0f;
+        const float slow_floor = state->count > 0u
+                                     ? state->slow_sum[band] /
+                                           (float)state->count
+                                     : 0.0f;
+
+        band_evidence +=
+            0.50f * apta_internal_transient_i2_contrast(
+                        current->bands[band], previous) +
+            0.25f * apta_internal_transient_i2_contrast(
+                        current->bands[band], fast_floor) +
+            0.25f * apta_internal_transient_i2_contrast(
+                        current->bands[band], slow_floor);
+    }
+    band_evidence /= (float)APTA_INTERNAL_BAND_COUNT;
+    raw = 0.50f * broadband + 0.50f * band_evidence;
+    peak = apta_internal_transient_positive(
+        raw - 0.50f * state->previous_raw);
+    novelty = 0.75f * raw + 0.25f * peak;
+
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        if (fast_count == APTA_INTERNAL_TRANSIENT_FAST_BINS) {
+            state->fast_sum[band] -=
+                state->frames[leaving_fast].bands[band];
+        }
+        if (state->count == APTA_INTERNAL_TRANSIENT_SLOW_BINS) {
+            state->slow_sum[band] -=
+                state->frames[state->cursor].bands[band];
+        }
+        state->fast_sum[band] += current->bands[band];
+        state->slow_sum[band] += current->bands[band];
+    }
+    state->frames[state->cursor] = *current;
+    state->cursor =
+        (state->cursor + 1u) % APTA_INTERNAL_TRANSIENT_SLOW_BINS;
+    if (state->count < APTA_INTERNAL_TRANSIENT_SLOW_BINS) {
+        state->count += 1u;
+    }
+    state->previous = *current;
+    state->previous_raw = raw;
+    state->have_previous = 1u;
+    return novelty;
+}
+#endif
+
 #endif /* APTA_TRANSIENT_LATTICE_H */

@@ -97,7 +97,7 @@ int main(void)
     set_bin(session, first + 40u, 0.20f, 0.0f, 0.0f);
 
     /* Sustained tone: only its leading edge is novel. */
-    for (index = first + 64u; index <= first + 70u; ++index) {
+    for (index = first + 64u; index <= first + 84u; ++index) {
         set_bin(session, index, 0.0f, 0.18f, 0.0f);
     }
 
@@ -128,8 +128,16 @@ int main(void)
     /* Silence and the body of a sustained tone carry no novelty. */
     CHECK(session->onset_flux[20u] == 0.0f);
     CHECK(session->onset_flux[64u] > 0.0f);
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I2
+    CHECK(session->onset_flux[65u] > 0.0f);
+    CHECK(session->onset_flux[65u] < session->onset_flux[64u]);
+    CHECK(session->onset_flux[68u] < session->onset_flux[65u]);
+    CHECK(session->onset_flux[80u] == 0.0f);
+    CHECK(session->onset_flux[84u] == 0.0f);
+#else
     CHECK(session->onset_flux[65u] == 0.0f);
     CHECK(session->onset_flux[70u] == 0.0f);
+#endif
 
     CHECK(session->onset_flux[96u] > 0.0f);
     CHECK(session->onset_flux[101u] > 0.0f);

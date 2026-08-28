@@ -5,7 +5,8 @@
 #include "../core/apta_tempo_ensemble.h"
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
-#ifdef APTA_INTERNAL_TRANSIENT_LATTICE
+#if defined(APTA_INTERNAL_TRANSIENT_LATTICE) || \
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I2)
 #include "../core/apta_transient_lattice.h"
 #endif
 #include "../confidence/apta_quality_model.h"
@@ -208,6 +209,7 @@ static int apta_s4_bin_complete(
 
 /* A3/B3: recover normalized mean magnitude from the integer accumulator. */
 #ifdef APTA_INTERNAL_MULTIBAND_ONSET
+#ifndef APTA_INTERNAL_TRANSIENT_LATTICE_I2
 static float apta_s4_band_energy(
     const apta_session_t *session,
     uint64_t bin_index,
@@ -236,6 +238,7 @@ static float apta_s4_broadband_energy(
                       (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE)
                : 0.0f;
 }
+#endif
 #else
 static float apta_s4_energy(
     const apta_session_t *session,
@@ -252,6 +255,59 @@ static float apta_s4_energy(
 }
 #endif
 
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I2
+#if defined(_MSC_VER)
+#define APTA_S4_TRANSIENT_I2_NOINLINE __declspec(noinline)
+#elif defined(__GNUC__) || defined(__clang__)
+#define APTA_S4_TRANSIENT_I2_NOINLINE __attribute__((noinline))
+#else
+#define APTA_S4_TRANSIENT_I2_NOINLINE
+#endif
+
+static float apta_s4_transient_i2_flux(
+    const apta_session_t *session,
+    uint64_t bin_index,
+    apta_internal_transient_i2_state_t *state)
+{
+    const apta_internal_onset_bin_t *bin =
+        apta_s4_const_bin(session, bin_index);
+    apta_internal_transient_frame_t frame;
+    uint32_t band;
+
+    if (bin == NULL || bin->sample_count == 0u) {
+        return 0.0f;
+    }
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        frame.bands[band] =
+            (float)bin->sums.multiband.band_sums[band] /
+            ((float)bin->sample_count *
+             (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+    }
+    frame.broadband =
+        (float)bin->sums.multiband.broadband_sum /
+        ((float)bin->sample_count *
+         (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+    return apta_internal_transient_i2_process(state, &frame);
+}
+
+/* Keep the 312-byte rolling state out of apta_internal_s4_refresh() itself.
+ * Most refresh calls reuse cached evidence; making their stack frame carry
+ * candidate-only scan state caused measurable whole-path overhead even when
+ * no flux was filled. */
+static APTA_S4_TRANSIENT_I2_NOINLINE void apta_s4_fill_transient_i2_flux(
+    apta_session_t *session,
+    uint64_t evidence_first,
+    uint64_t evidence_end)
+{
+    apta_internal_transient_i2_state_t state = {0};
+    uint64_t index;
+
+    for (index = evidence_first; index < evidence_end; ++index) {
+        session->onset_flux[(uint32_t)(index - evidence_first)] =
+            apta_s4_transient_i2_flux(session, index, &state);
+    }
+}
+#else
 /* A1: the single definition of the flux computation. Called once per bin by
  * the fill loop in apta_internal_s4_refresh(); the lag and phase loops read
  * session->onset_flux instead of calling this. */
@@ -337,6 +393,7 @@ static float apta_s4_flux_uncached(
     return current > previous ? current - previous : 0.0f;
 #endif
 }
+#endif
 
 /*
  * Grid fit: does the selected grid actually explain the onsets?
@@ -1010,10 +1067,14 @@ apta_status_t apta_internal_s4_refresh(
     session->s4_profile.evidence_bins_scanned += run_count;
 #endif
     APTA_S4_PROFILE_BEGIN(session);
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I2
+    apta_s4_fill_transient_i2_flux(session, evidence_first, evidence_end);
+#else
     for (index = evidence_first; index < evidence_end; ++index) {
         session->onset_flux[(uint32_t)(index - evidence_first)] =
             (float)apta_s4_flux_uncached(session, index, evidence_first);
     }
+#endif
     APTA_S4_PROFILE_ADD(session, flux_ns);
     session->s4_refresh_evidence_first = evidence_first;
     session->s4_refresh_evidence_end = evidence_end;

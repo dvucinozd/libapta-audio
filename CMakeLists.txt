@@ -54,6 +54,24 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2
+    "Build the APTA 1.1 WP1 normalized rolling transient experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2)
+    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 requires "
+            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+    endif()
+    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE)
+        message(FATAL_ERROR
+            "transient-lattice iterations 1 and 2 are mutually exclusive")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I2=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
     "Build the development three-band downbeat phase experiment"
     OFF)

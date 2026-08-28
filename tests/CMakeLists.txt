@@ -114,7 +114,8 @@ if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
         target_link_libraries(apta_multiband_onset PRIVATE m)
     endif()
 endif()
-if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE)
+if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
+   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2)
     apta_add_c_test(
         apta_transient_lattice
         apta.experimental.transient_lattice
