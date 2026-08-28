@@ -80,12 +80,14 @@ Verification and exit:
 
 ## Work package 1 — new transient/onset evidence
 
-**Status:** active. Transient-lattice iterations 1 through 7 are rejected. The
+**Status:** closed without promotion. Transient-lattice iterations 1 through 8
+are rejected. The
 privacy-safe spent-DJ trace diagnostic at revision
 `fb6c2e13bfe5a2ff9b71fe3c96dd4d30f05a955e` shows useful causal-harmonic phase
-evidence but does not authorize promotion. I8 is pre-registered to add a new
-within-bin peak-to-mean statistic without growing the onset-bin allocation;
-WP1 remains open until that staged candidate passes or is rejected.
+evidence but does not authorize promotion. I8's new within-bin peak-to-mean
+statistic also failed external transfer. The frozen production multiband onset
+path is retained; its spent-DJ top-three period ceiling is 49/60, so WP2 may
+begin without an onset change. Formal holdouts remain unopened.
 
 **Hypothesis:** the existing single-step broadband/per-band rise loses transient
 shape and local contrast. A bounded multi-timescale onset representation can
@@ -114,6 +116,10 @@ Initial retain/reject criterion:
   either independent development partition.
 
 ## Work package 2 — temporal beat-lattice tracker
+
+**Status:** active. WP1 closed without promotion; WP2 starts from the frozen
+production multiband onset candidates at revision
+`c7497a28ced0f44791aba3e2803c923db691ec2f`.
 
 **Hypothesis:** one global autocorrelation/phase choice cannot represent tracks
 whose transient reliability changes over time. Tracking a small bounded family
