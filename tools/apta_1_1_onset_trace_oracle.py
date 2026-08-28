@@ -93,6 +93,34 @@ def _local_contrast(energy: np.ndarray) -> np.ndarray:
     return 0.5 * contrast[:, 3] + 0.5 * contrast[:, :3].mean(axis=1)
 
 
+def _unit_mean(values: np.ndarray) -> np.ndarray:
+    mean = float(values.mean())
+    if mean <= np.finfo(np.float64).eps:
+        return np.zeros_like(values)
+    return values / mean
+
+
+def _causal_unit_mean(values: np.ndarray) -> np.ndarray:
+    counts = np.arange(1, len(values) + 1, dtype=np.float64)
+    means = np.cumsum(values, dtype=np.float64) / counts
+    result = np.zeros_like(values)
+    usable = means > np.finfo(np.float64).eps
+    result[usable] = values[usable] / means[usable]
+    return result
+
+
+def _equal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
+    baseline = _unit_mean(_baseline_band_flux(energy))
+    local_contrast = _unit_mean(_local_contrast(energy))
+    return 0.5 * baseline + 0.5 * local_contrast
+
+
+def _causal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
+    baseline = _causal_unit_mean(_baseline_band_flux(energy))
+    local_contrast = _causal_unit_mean(_local_contrast(energy))
+    return 0.5 * baseline + 0.5 * local_contrast
+
+
 def _adaptive_whitened_flux(energy: np.ndarray) -> np.ndarray:
     floors = np.column_stack(
         [_rolling_mean(energy[:, column], 16) for column in range(4)]
@@ -109,6 +137,10 @@ FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
     "broadband_rise": _broadband_rise,
     "log_band_flux": _log_band_flux,
     "local_contrast_16": _local_contrast,
+    "equal_mean_fusion_local_contrast_16":
+        _equal_mean_fusion_local_contrast,
+    "causal_mean_fusion_local_contrast_16":
+        _causal_mean_fusion_local_contrast,
     "adaptive_whitened_flux_16": _adaptive_whitened_flux,
 }
 
