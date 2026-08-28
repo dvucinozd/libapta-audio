@@ -27,6 +27,7 @@ except ImportError as exc:  # pragma: no cover - environment diagnostic
 from apta_1_1_onset_trace_oracle import (  # noqa: E402
     BIN_FRAMES,
     FORMULAS,
+    PHASE_ONLY_FORMULAS,
     PERIOD_TOLERANCE,
     PHASE_TOLERANCE_BEATS,
     _baseline_band_flux,
@@ -209,10 +210,11 @@ def evaluate(
         manifest_path, labels_path, traces
     )
     per_formula: dict[str, list[dict[str, object]]] = {
-        name: [] for name in FORMULAS
+        name: [] for name in (*FORMULAS, *PHASE_ONLY_FORMULAS)
     }
     reconstructed_differences = 0
     captured_candidate_set_matches = 0
+    hybrid_candidate_order_matches = 0
     for path in paths:
         track = path.stem
         label = labels[track]
@@ -230,12 +232,20 @@ def evaluate(
         truth_period = _truth_period_bins(label)
         beats = _truth_beats(label, first_bin, len(captured))
 
-        for name, formula in FORMULAS.items():
-            novelty = captured if formula is None else formula(energy)
-            candidates = _candidate_lags(novelty, int(trace["sample_rate"]))
+        formulas = {
+            **FORMULAS,
+            **PHASE_ONLY_FORMULAS,
+        }
+        for name, formula in formulas.items():
+            phase_only = name in PHASE_ONLY_FORMULAS
+            phase_novelty = captured if formula is None else formula(energy)
+            candidate_novelty = captured if phase_only else phase_novelty
+            candidates = _candidate_lags(
+                candidate_novelty, int(trace["sample_rate"])
+            )
             rows = []
             for lag, score in candidates:
-                phase = _selected_phase(novelty, lag)
+                phase = _selected_phase(phase_novelty, lag)
                 rows.append(
                     {
                         "lag": lag,
@@ -255,6 +265,12 @@ def evaluate(
                 }
                 if traced == {int(row["lag"]) for row in rows}:
                     captured_candidate_set_matches += 1
+            elif phase_only:
+                baseline_candidates = _candidate_lags(
+                    captured, int(trace["sample_rate"])
+                )
+                if candidates == baseline_candidates:
+                    hybrid_candidate_order_matches += 1
 
     verdicts, summaries = _verdicts(per_formula)
     baseline = verdicts["captured_multiband"]
@@ -309,6 +325,9 @@ def evaluate(
             ),
             "captured_top3_candidate_set_matches": (
                 captured_candidate_set_matches
+            ),
+            "hybrid_candidate_order_matches": (
+                hybrid_candidate_order_matches
             ),
         },
         "formulas": summaries,

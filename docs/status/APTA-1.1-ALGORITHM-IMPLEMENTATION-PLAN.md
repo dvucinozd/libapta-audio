@@ -80,7 +80,7 @@ Verification and exit:
 
 ## Work package 1 — new transient/onset evidence
 
-**Status:** active. Transient-lattice iterations 1 through 6 are rejected. The
+**Status:** active. Transient-lattice iterations 1 through 7 are rejected. The
 privacy-safe spent-DJ trace diagnostic at revision
 `fb6c2e13bfe5a2ff9b71fe3c96dd4d30f05a955e` shows useful causal-harmonic phase
 evidence but does not authorize promotion. A separately named and

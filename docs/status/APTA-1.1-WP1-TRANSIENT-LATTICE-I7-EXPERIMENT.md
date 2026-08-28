@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 7
 
-- **Status:** pre-registered; no I7 oracle or analyzer result collected
+- **Status:** rejected by the external-development oracle gate
 - **Frozen baseline revision:** `56824862e784890a3f5619b78f5526e95796ae60`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -76,3 +76,33 @@ Any rejected stage closes I7 without opening an ASAP/Ballroom formal holdout,
 using a fresh acceptance corpus or making an acceptance claim. Passing I7
 retains an opt-in WP1 candidate; it does not by itself complete WP1 or authorize
 release promotion.
+
+## Oracle outcome
+
+The frozen hybrid preserved the captured candidate lag, score and ordering on
+all 40 ASAP and all 40 Ballroom development traces. As required by
+construction, top-1 and top-three period counts are unchanged.
+
+| Corpus | Metric | Baseline | I7 hybrid | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 2 | 0 | 0 | 0 |
+| ASAP development | top-1 phase | 1 | 1 | 0 | 0 | 0 |
+| ASAP development | joint top-1 period+phase | 0 | 0 | 0 | 0 | 0 |
+| ASAP development | top-3 period | 3 | 3 | 0 | 0 | 0 |
+| Ballroom development | top-1 period | 10 | 10 | 0 | 0 | 0 |
+| Ballroom development | top-1 phase | 11 | 12 | 1 | 0 | +1 |
+| Ballroom development | joint top-1 period+phase | 7 | 8 | 1 | 0 | +1 |
+| Ballroom development | top-3 period | 17 | 17 | 0 | 0 | 0 |
+
+Two executions per corpus produced byte-identical reports:
+
+- ASAP development SHA-256:
+  `daee6e3f2d2b37cf61b9ea3efadefecbc62931ac6a48b3de75365a95e0bb2cdb`;
+- Ballroom development SHA-256:
+  `3bbacfec40882f219729c43d079cf958dd36661d8dea2a050bbe74b9a4b2c5bf`.
+
+ASAP joint transfer is neutral rather than positive, violating frozen gate 2.
+I7 is therefore rejected before analyzer implementation, resource measurement,
+native corpus execution or the spent-DJ trace stage. The I7 formula was the
+only phase-routing variant tested. No formal holdout or fresh acceptance corpus
+was opened, and this result makes no acceptance claim.

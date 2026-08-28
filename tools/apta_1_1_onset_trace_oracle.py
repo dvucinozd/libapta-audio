@@ -339,6 +339,11 @@ FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
     "adaptive_whitened_flux_16": _adaptive_whitened_flux,
 }
 
+PHASE_ONLY_FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray]] = {
+    "baseline_lags_causal_harmonic_phase_16":
+        _causal_harmonic_fusion_local_contrast,
+}
+
 
 def _tempo_prior(tempo_millibpm: float) -> float:
     logarithm = math.log(tempo_millibpm / PRIOR_CENTRE_MILLIBPM) / PRIOR_WIDTH
@@ -444,10 +449,11 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
         raise ValueError("trace coverage does not exactly match development IDs")
 
     per_formula: dict[str, list[dict[str, object]]] = {
-        name: [] for name in FORMULAS
+        name: [] for name in (*FORMULAS, *PHASE_ONLY_FORMULAS)
     }
     reconstructed_differences = 0
     captured_candidate_set_matches = 0
+    hybrid_candidate_order_matches = 0
     for path in paths:
         track = path.stem
         label = labels[track]
@@ -459,12 +465,20 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
         first_bin = int(trace["onset_evidence_first_bin"])
         truth_period = _truth_period_bins(label, first_bin, len(captured))
 
-        for name, formula in FORMULAS.items():
-            novelty = captured if formula is None else formula(energy)
-            candidates = _candidate_lags(novelty, int(trace["sample_rate"]))
+        formulas = {
+            **FORMULAS,
+            **PHASE_ONLY_FORMULAS,
+        }
+        for name, formula in formulas.items():
+            phase_only = name in PHASE_ONLY_FORMULAS
+            phase_novelty = captured if formula is None else formula(energy)
+            candidate_novelty = captured if phase_only else phase_novelty
+            candidates = _candidate_lags(
+                candidate_novelty, int(trace["sample_rate"])
+            )
             rows = []
             for lag, score in candidates:
-                phase = _selected_phase(novelty, lag)
+                phase = _selected_phase(phase_novelty, lag)
                 period_error = abs(lag - truth_period) / truth_period
                 phase_error = _phase_error_beats(label, first_bin, lag, phase)
                 rows.append(
@@ -486,6 +500,12 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
                 computed = {int(row["lag"]) for row in rows}
                 if traced == computed:
                     captured_candidate_set_matches += 1
+            elif phase_only:
+                baseline_candidates = _candidate_lags(
+                    captured, int(trace["sample_rate"])
+                )
+                if candidates == baseline_candidates:
+                    hybrid_candidate_order_matches += 1
 
     verdicts: dict[str, dict[str, dict[str, bool]]] = {}
     summaries: dict[str, object] = {}
@@ -579,6 +599,7 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
         "validation": {
             "reconstructed_baseline_difference_tracks": reconstructed_differences,
             "captured_top3_candidate_set_matches": captured_candidate_set_matches,
+            "hybrid_candidate_order_matches": hybrid_candidate_order_matches,
         },
         "formulas": summaries,
     }
