@@ -1,8 +1,9 @@
 # APTA 1.1 WP0 Development Harness
 
-**Status:** in progress  
-**Qualification date:** 2026-08-28  
-**Analyzer source revision:** `551c1ea85cc782f5258d05882ec16f0c6d052495`
+- **Status:** complete
+- **Qualification date:** 2026-08-28
+- **DSP comparison baseline:** `551c1ea85cc782f5258d05882ec16f0c6d052495`
+- **Harness qualification revision:** `a7ed0de6666dbff8a3eb0ac047a2cb26098a11b0`
 
 ## Scope and evidence boundary
 
@@ -58,7 +59,7 @@ profile and Linux/GCC build artifacts as follows:
 | minimum workspace | 941,216 B | 943,680 B | +2,464 B |
 | recommended workspace | 1,000,058 B | 1,002,676 B | +2,618 B |
 | result pool | 537,104 B | 537,104 B | 0 B |
-| `apta-analyze` binary | 217,088 B | 221,592 B | +4,504 B |
+| `apta-analyze` binary | 217,224 B | 225,824 B | +8,600 B |
 | `libapta.a` archive | 480,126 B | 488,630 B | +8,504 B |
 
 Binary and archive sizes are toolchain/platform observations, not portable ABI
@@ -95,9 +96,39 @@ diagnostically but fails the no-regression veto: ASAP downbeat and strict period
 accuracy regress, and Ballroom strict period accuracy regresses. It is not a
 promotion candidate for default behavior.
 
+The four exact development reports were reproduced at the harness qualification
+revision. Their SHA-256 values are:
+
+- ASAP default:
+  `a75d3aa0e66e8af7092b4e6c9c773b1d189dae44678292c98d8301d9c281a673`;
+- ASAP all-current-experiments:
+  `213fb3e62fb80394e0e9aaba9158eac087d72065f56bf07bd48301461ee6c16f`;
+- Ballroom default:
+  `169719e5bdef260ea1695629c4d5a3259dcc86acd3ab8ab78ed751e7100c0ffc`;
+- Ballroom all-current-experiments:
+  `d79fd943ad7873908635b87c9ca4bcd9b3e6398c8be67a5ec9a5b31d6f6cac71`.
+
+## Deterministic replay
+
+Two independent default-analyzer runs processed all 60 spent-corpus tracks at
+the harness qualification revision with `SOURCE_DATE_EPOCH=1767225600`. Both
+runs used analyzer SHA-256
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`
+and manifest SHA-256
+`27e017ca5e609e70a29bacf0df1a613a8fc87be33d1701924c0fc5d388034521`.
+All 60 opaque track IDs matched and all 60 per-track container SHA-256 values
+were byte-identical. Run-metadata hashes are intentionally not compared because
+their private mapping files encode different ignored output directories.
+
+`apta-analyze` now accepts a non-negative numeric `SOURCE_DATE_EPOCH` as the
+META creation timestamp and rejects invalid or empty values. Its dedicated
+reproducibility test runs the analyzer twice, requires byte-identical containers,
+checks the timestamp through `apta-inspect`, and verifies invalid-input failure.
+
 ## WP0 exit
 
-The paired DJ comparison and both open development-corpus runs are complete.
-Independent repeat runs are the remaining WP0 check. Once their per-track
-output hashes match, WP0 closes and WP1 starts from this frozen baseline with
-the opt-in transient-lattice slice.
+The paired DJ comparison, both open development-corpus comparisons, complete
+software test matrix and independent deterministic replay are complete. WP0 is
+closed. Formal holdouts remain unopened, the all-current-experiments build is
+not promoted, and WP1 starts from this frozen baseline with the opt-in
+transient-lattice slice.

@@ -54,6 +54,9 @@ These values are comparison aids, not acceptance claims.
 
 ## Work package 0 — freeze the development harness
 
+**Status:** complete at `a7ed0de6666dbff8a3eb0ac047a2cb26098a11b0`; see
+`APTA-1.1-WP0-DEVELOPMENT-HARNESS.md`.
+
 **Purpose:** make every later candidate directly comparable.
 
 Implementation:
@@ -283,5 +286,5 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate next implementation task is WP0, followed by the first
+The immediate next implementation task is the first
 `APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE` onset-evidence slice from WP1.
