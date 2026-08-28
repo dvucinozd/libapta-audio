@@ -100,15 +100,6 @@ def _unit_mean(values: np.ndarray) -> np.ndarray:
     return values / mean
 
 
-def _causal_unit_mean(values: np.ndarray) -> np.ndarray:
-    counts = np.arange(1, len(values) + 1, dtype=np.float64)
-    means = np.cumsum(values, dtype=np.float64) / counts
-    result = np.zeros_like(values)
-    usable = means > np.finfo(np.float64).eps
-    result[usable] = values[usable] / means[usable]
-    return result
-
-
 def _equal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
     baseline = _unit_mean(_baseline_band_flux(energy))
     local_contrast = _unit_mean(_local_contrast(energy))
@@ -116,9 +107,115 @@ def _equal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
 
 
 def _causal_mean_fusion_local_contrast(energy: np.ndarray) -> np.ndarray:
-    baseline = _causal_unit_mean(_baseline_band_flux(energy))
-    local_contrast = _causal_unit_mean(_local_contrast(energy))
-    return 0.5 * baseline + 0.5 * local_contrast
+    history = np.zeros((16, 4), dtype=np.float32)
+    history_sum = np.zeros(4, dtype=np.float32)
+    previous = np.zeros(4, dtype=np.float32)
+    baseline_sum = np.float32(0.0)
+    contrast_sum = np.float32(0.0)
+    floor_epsilon = np.float32(1.0) / np.float32(255.0)
+    result = np.zeros(len(energy), dtype=np.float32)
+    history_count = 0
+    cursor = 0
+    have_previous = False
+
+    def contrast(current: np.float32, floor: np.float32) -> np.float32:
+        excess = np.maximum(
+            np.float32(current - floor), np.float32(0.0)
+        )
+        denominator = np.float32(
+            np.float32(current + floor) + floor_epsilon
+        )
+        return np.float32(excess / denominator)
+
+    for index, row in enumerate(energy):
+        current = np.asarray(row, dtype=np.float32)
+        current_total = np.float32(0.0)
+        previous_total = np.float32(0.0)
+        band_rise = np.float32(0.0)
+        for band in range(3):
+            prior = previous[band] if have_previous else np.float32(0.0)
+            current_total = np.float32(current_total + current[band])
+            previous_total = np.float32(previous_total + prior)
+            band_rise = np.float32(
+                band_rise +
+                np.maximum(
+                    np.float32(current[band] - prior), np.float32(0.0)
+                )
+            )
+        broadband_previous = (
+            previous[3] if have_previous else np.float32(0.0)
+        )
+        broadband_rise = np.maximum(
+            np.float32(current[3] - broadband_previous), np.float32(0.0)
+        )
+        baseline = np.float32(
+            broadband_rise +
+            (
+                np.float32(0.25) * band_rise
+                if current_total > previous_total
+                else np.float32(0.0)
+            )
+        )
+
+        count = np.float32(history_count)
+        broadband_floor = (
+            np.float32(history_sum[3] / count)
+            if history_count > 0
+            else np.float32(0.0)
+        )
+        band_contrast = np.float32(0.0)
+        for band in range(3):
+            band_floor = (
+                np.float32(history_sum[band] / count)
+                if history_count > 0
+                else np.float32(0.0)
+            )
+            band_contrast = np.float32(
+                band_contrast + contrast(current[band], band_floor)
+            )
+        local_contrast = np.float32(
+            np.float32(0.5) * contrast(current[3], broadband_floor) +
+            np.float32(0.5) * np.float32(
+                band_contrast / np.float32(3.0)
+            )
+        )
+
+        if history_count == 16:
+            for column in range(4):
+                history_sum[column] = np.float32(
+                    history_sum[column] - history[cursor, column]
+                )
+        for column in range(4):
+            history_sum[column] = np.float32(
+                history_sum[column] + current[column]
+            )
+        history[cursor] = current
+        cursor = (cursor + 1) % 16
+        history_count = min(history_count + 1, 16)
+
+        baseline_sum = np.float32(baseline_sum + baseline)
+        contrast_sum = np.float32(contrast_sum + local_contrast)
+        causal_count = np.float32(index + 1)
+        baseline_mean = np.float32(baseline_sum / causal_count)
+        contrast_mean = np.float32(contrast_sum / causal_count)
+        baseline_normalized = (
+            np.float32(baseline / baseline_mean)
+            if baseline_mean > np.float32(0.0)
+            else np.float32(0.0)
+        )
+        contrast_normalized = (
+            np.float32(local_contrast / contrast_mean)
+            if contrast_mean > np.float32(0.0)
+            else np.float32(0.0)
+        )
+        result[index] = np.float32(
+            np.float32(0.5) * baseline_normalized +
+            np.float32(0.5) * contrast_normalized
+        )
+        previous = current.copy()
+        have_previous = True
+
+    return result.astype(np.float64)
 
 
 def _adaptive_whitened_flux(energy: np.ndarray) -> np.ndarray:

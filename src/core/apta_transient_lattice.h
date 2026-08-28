@@ -245,7 +245,8 @@ static inline float apta_internal_transient_i2_process(
 }
 #endif
 
-#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I3
+#if defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3) || \
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I4)
 #define APTA_INTERNAL_TRANSIENT_I3_DENOMINATOR_FLOOR (1.0f / 255.0f)
 
 typedef struct {
@@ -310,6 +311,78 @@ static inline float apta_internal_transient_i3_process(
         state->count += 1u;
     }
     return novelty;
+}
+#endif
+
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I4
+typedef struct {
+    apta_internal_transient_i3_state_t local_contrast;
+    apta_internal_transient_frame_t previous;
+    float baseline_sum;
+    float local_contrast_sum;
+    uint32_t count;
+    uint32_t have_previous;
+} apta_internal_transient_i4_state_t;
+
+_Static_assert(sizeof(apta_internal_transient_i4_state_t) <= 320u,
+               "WP1 I4 causal fusion state must remain bounded");
+
+static inline float apta_internal_transient_i4_baseline(
+    const apta_internal_transient_i4_state_t *state,
+    const apta_internal_transient_frame_t *current)
+{
+    float current_total = 0.0f;
+    float previous_total = 0.0f;
+    float band_rise = 0.0f;
+    float broadband_previous = 0.0f;
+    uint32_t band;
+
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        const float previous = state->have_previous
+                                   ? state->previous.bands[band]
+                                   : 0.0f;
+
+        current_total += current->bands[band];
+        previous_total += previous;
+        band_rise += apta_internal_transient_positive(
+            current->bands[band] - previous);
+    }
+    if (state->have_previous) {
+        broadband_previous = state->previous.broadband;
+    }
+    return apta_internal_transient_positive(
+               current->broadband - broadband_previous) +
+           (current_total > previous_total ? 0.25f * band_rise : 0.0f);
+}
+
+static inline float apta_internal_transient_i4_process(
+    apta_internal_transient_i4_state_t *state,
+    const apta_internal_transient_frame_t *current)
+{
+    const float baseline =
+        apta_internal_transient_i4_baseline(state, current);
+    const float local_contrast = apta_internal_transient_i3_process(
+        &state->local_contrast, current);
+    float baseline_mean;
+    float local_contrast_mean;
+    float baseline_normalized = 0.0f;
+    float local_contrast_normalized = 0.0f;
+
+    state->baseline_sum += baseline;
+    state->local_contrast_sum += local_contrast;
+    state->count += 1u;
+    baseline_mean = state->baseline_sum / (float)state->count;
+    local_contrast_mean = state->local_contrast_sum / (float)state->count;
+    if (baseline_mean > 0.0f) {
+        baseline_normalized = baseline / baseline_mean;
+    }
+    if (local_contrast_mean > 0.0f) {
+        local_contrast_normalized = local_contrast / local_contrast_mean;
+    }
+    state->previous = *current;
+    state->have_previous = 1u;
+    return 0.50f * baseline_normalized +
+           0.50f * local_contrast_normalized;
 }
 #endif
 

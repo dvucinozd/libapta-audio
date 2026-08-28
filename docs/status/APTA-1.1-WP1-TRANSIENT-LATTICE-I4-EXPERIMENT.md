@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 transient-lattice iteration 4
 
-- **Status:** pre-registered oracle candidate, not implemented
+- **Status:** implementation verified, pre-corpus archive gate pending
 - **Frozen baseline revision:** `814840ee0157c0c364be2960c7ffa5765720dede`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -26,14 +26,14 @@ sixteen-bin local contrast. Including the current bin, define:
 ```text
 b_mean[i] = sum(b[0..i]) / (i + 1)
 c_mean[i] = sum(c[0..i]) / (i + 1)
-b_norm[i] = b[i] / b_mean[i] when b_mean[i] > float64 epsilon, else 0
-c_norm[i] = c[i] / c_mean[i] when c_mean[i] > float64 epsilon, else 0
+b_norm[i] = b[i] / b_mean[i] when b_mean[i] > 0, else 0
+c_norm[i] = c[i] / c_mean[i] when c_mean[i] > 0, else 0
 novelty[i] = 0.50 * b_norm[i] + 0.50 * c_norm[i]
 ```
 
-Production uses the corresponding float32 arithmetic and a positive-mean
-test; the diagnostic epsilon only avoids division by numerical zero. The
-weights, causal mean and I3 history are frozen before any I4 analyzer run.
+Production and the deployable oracle use the corresponding sequential float32
+arithmetic and a positive-mean test. The weights, causal mean and I3 history
+are frozen before any I4 analyzer run.
 
 The opt-in flag will be
 `APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4=ON`. It must require
@@ -77,3 +77,35 @@ the already-spent 60-track DJ run. Retain only with at least five net
 period/phase fixes, at most one spent-set break and no high-confidence safety
 regression. Any failure rejects I4 without opening a formal holdout or making
 an acceptance claim.
+
+## Pre-corpus implementation checkpoint
+
+The default Werror matrix excluding the separately exercised source-archive
+test passes 120/120. The I4 Werror matrix excluding that same test passes
+122/122, and the I4 ASan/UBSan matrix passes 118/118. Dependency and mutual
+exclusion configurations reject invalid I4 flag combinations. The default
+analyzer is byte-identical to WP0, SHA-256
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`.
+
+The one-pass implementation keeps a bounded 320-byte-or-smaller stack state
+inside the no-inline S4 flux-fill helper and adds no persistent allocation. On
+a real 4,096-bin development trace, all production values are finite and the
+maximum absolute difference from the exact sequential-float32 oracle is
+`1.79077144224e-8`; no bin exceeds the frozen `5e-7` tolerance.
+
+Against multiband-only, full P4 30-minute workspace remains 941,248 bytes,
+recommended workspace 1,000,092 bytes and result pool 537,104 bytes.
+`apta-analyze` grows from 221,320 to 221,376 bytes (+56), while `libapta.a`
+shrinks from 483,118 to 483,102 bytes (-16).
+
+Three alternating 120-second cost-probe runs per build have identical
+evidence-bin and refresh-scan counts. Median results are:
+
+| Path | Total baseline | Total I4 | Total delta | S4 flux baseline | S4 flux I4 | Flux delta |
+|---|---:|---:|---:|---:|---:|---:|
+| BPM | 1,239.667 ms | 1,277.899 ms | +3.08% | 51,984 us | 46,162 us | -11.20% |
+| full | 1,383.865 ms | 1,412.552 ms | +2.07% | 43,932 us | 38,214 us | -13.02% |
+
+Both CPU gates pass. Exact corpus execution remains forbidden until this
+implementation is committed as one revision-bound candidate and the
+source-archive gate passes on that stable source tree.

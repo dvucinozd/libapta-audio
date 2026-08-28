@@ -129,7 +129,8 @@ int main(void)
     CHECK(session->onset_flux[20u] == 0.0f);
     CHECK(session->onset_flux[64u] > 0.0f);
 #if defined(APTA_INTERNAL_TRANSIENT_LATTICE_I2) || \
-    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3)
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I3) || \
+    defined(APTA_INTERNAL_TRANSIENT_LATTICE_I4)
     CHECK(session->onset_flux[65u] > 0.0f);
     CHECK(session->onset_flux[65u] < session->onset_flux[64u]);
     CHECK(session->onset_flux[68u] < session->onset_flux[65u]);
@@ -154,7 +155,14 @@ int main(void)
     rollover_flux = session->onset_flux[9u];
     reference_flux = session->onset_flux[40u];
     CHECK(rollover_flux > 0.0f);
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE_I4
+    /* Causal mean normalization intentionally gives a later isolated impulse
+     * more weight after a longer quiet prefix. Ring rollover must not suppress
+     * either impulse, but equality is not an I4 invariant. */
+    CHECK(reference_flux > rollover_flux);
+#else
     CHECK(fabsf(rollover_flux - reference_flux) < 1.0e-6f);
+#endif
 
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     apta_context_destroy(context);
