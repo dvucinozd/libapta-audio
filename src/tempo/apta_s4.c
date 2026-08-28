@@ -174,6 +174,48 @@ static const apta_internal_onset_bin_t *apta_s4_const_bin(
     return bin->occupied && bin->bin_index == bin_index ? bin : NULL;
 }
 
+#if defined(APTA_INTERNAL_METER_TRACE) && \
+    defined(APTA_INTERNAL_MULTIBAND_ONSET)
+int apta_internal_s4_trace_energy_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float bands_out[APTA_INTERNAL_BAND_COUNT],
+    float *broadband_out)
+{
+    const apta_internal_onset_bin_t *bin;
+    uint64_t count;
+    uint64_t bin_index;
+    uint32_t band;
+
+    if (session == NULL || bands_out == NULL || broadband_out == NULL ||
+        session->s4_refresh_evidence_end <
+            session->s4_refresh_evidence_first) {
+        return 0;
+    }
+    count = session->s4_refresh_evidence_end -
+            session->s4_refresh_evidence_first;
+    if ((uint64_t)offset >= count) {
+        return 0;
+    }
+    bin_index = session->s4_refresh_evidence_first + offset;
+    bin = apta_s4_const_bin(session, bin_index);
+    if (bin == NULL || bin->sample_count == 0u) {
+        return 0;
+    }
+    for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+        bands_out[band] =
+            (float)bin->sums.multiband.band_sums[band] /
+            ((float)bin->sample_count *
+             (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+    }
+    *broadband_out =
+        (float)bin->sums.multiband.broadband_sum /
+        ((float)bin->sample_count *
+         (float)APTA_INTERNAL_S4_BAND_MAGNITUDE_SCALE);
+    return 1;
+}
+#endif
+
 static uint32_t apta_s4_expected_bin_samples(
     const apta_session_t *session,
     uint64_t bin_index)

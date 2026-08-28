@@ -304,6 +304,29 @@ int main(int argc, char **argv)
         for (index = 0u; index < flux_count; ++index) {
             fprintf(trace, "%s%.9g", index > 0u ? "," : "", (double)flux[index]);
         }
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+        fputs("],\"onset_band_stride\":4,\"onset_band_energy\":[", trace);
+        for (index = 0u; index < flux_count; ++index) {
+            float bands[APTA_INTERNAL_BAND_COUNT];
+            float broadband_energy;
+
+            if (!apta_internal_s4_trace_energy_at(
+                    session, index, bands, &broadband_energy)) {
+                fputs("apta-meter-trace: incomplete onset energy snapshot\n",
+                      stderr);
+                goto cleanup;
+            }
+            fprintf(trace,
+                    "%s%.9g,%.9g,%.9g,%.9g",
+                    index > 0u ? "," : "",
+                    (double)bands[0],
+                    (double)bands[1],
+                    (double)bands[2],
+                    (double)broadband_energy);
+        }
+#else
+        fputs("],\"onset_band_stride\":0,\"onset_band_energy\":[", trace);
+#endif
         fprintf(trace,
                 "],\"overview_3band\":{\"frames_per_column\":%u,"
                 "\"origin_frame\":%llu,\"spans\":[",

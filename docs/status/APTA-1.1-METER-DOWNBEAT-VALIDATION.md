@@ -239,6 +239,15 @@ series the meter stage scored. The default build configuration is unchanged
 and passes all 114 tests; the flag-off build contains none of the capture
 code paths.
 
+For WP1 failure analysis, the same opt-in tool now also emits the exact
+normalized low/mid/high/broadband onset-bin energy snapshot aligned one-to-one
+with `onset_flux` (`onset_band_stride=4`). This is raw development evidence,
+not another candidate formula: it permits offline novelty and lag/phase oracle
+analysis without reconstructing filterbank values from overview columns. The
+accessor is available only when both meter trace and multiband onset flags are
+enabled, has focused normalization/bounds coverage and does not change the
+default analyzer binary.
+
 Process correction: a batch tracing loop over the prepared Ballroom audio
 directory also reached the 40 holdout tracks before the split boundary was
 noticed. The 40 holdout trace files were deleted unread and no holdout trace

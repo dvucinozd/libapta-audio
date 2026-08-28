@@ -128,6 +128,22 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
         target_link_libraries(apta_transient_lattice PRIVATE m)
     endif()
 endif()
+if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE AND
+   APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+    apta_add_c_test(
+        apta_s4_trace_energy
+        apta.experimental.s4_trace_energy
+        unit/s4_trace_energy.c)
+    target_link_libraries(apta_s4_trace_energy PRIVATE apta_c11_atomics)
+    target_include_directories(
+        apta_s4_trace_energy
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/core
+            ${CMAKE_SOURCE_DIR}/src/tempo)
+    if(UNIX)
+        target_link_libraries(apta_s4_trace_energy PRIVATE m)
+    endif()
+endif()
 apta_add_c_test(apta_waveform_priority apta.waveform.priority unit/waveform_priority.c)
 apta_add_c_test(apta_scheduler_deadline apta.scheduler.deadline unit/scheduler_deadline.c)
 apta_add_c_test(apta_scheduler_process_deadline apta.scheduler.process_deadline unit/scheduler_process_deadline.c)

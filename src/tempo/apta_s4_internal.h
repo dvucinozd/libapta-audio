@@ -17,6 +17,16 @@ void apta_internal_s4_trace_get(
     const float **candidate_lag_offsets_out,
     uint32_t *candidate_count_out,
     uint32_t *selected_phase_out);
+
+#ifdef APTA_INTERNAL_MULTIBAND_ONSET
+/* Read one privacy-safe low/mid/high/broadband energy row from the immutable
+ * evidence snapshot used by the last completed S4 refresh. */
+int apta_internal_s4_trace_energy_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float bands_out[APTA_INTERNAL_BAND_COUNT],
+    float *broadband_out);
+#endif
 #endif
 
 #endif /* APTA_S4_INTERNAL_H */
