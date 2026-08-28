@@ -152,8 +152,11 @@ new onset evidence, return to work package 1 rather than adding selector rules.
 
 ## Work package 3 — meter and downbeat on the stabilized lattice
 
-**Status:** active. WP3 starts from the unchanged production period and beat
-phase at revision `dfc1d1916fcf63ccdc19f893864f1d57696a0081`.
+**Status:** closed without default promotion. The bounded three-band phase path
+adds four correct downbeats with zero breaks across 140 already-open tracks but
+remains far below the 80% external-development target because the upstream
+lattice did not qualify. Production meter/downbeat remains unchanged and both
+formal holdouts remain unopened.
 
 **Hypothesis:** once beat period and phase are reliable, bar phase can be chosen
 from the temporal pattern of low/mid/high accents rather than from a single
@@ -180,6 +183,9 @@ Exit criterion:
   caused by the bar-phase path.
 
 ## Work package 4 — adaptive harmonic key evidence
+
+**Status:** active. WP4 starts from the retained production key path and the
+existing opt-in harmonic projection development candidate.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
