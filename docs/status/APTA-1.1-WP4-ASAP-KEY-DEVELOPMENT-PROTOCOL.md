@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 ASAP key-development protocol
 
-- **Status:** pre-registered; no key-signature values or analyzer results read
+- **Status:** frozen derivation completed; dataset nonviable
 - **Frozen baseline revision:** `0d5be302e5d1ed0799a3f4649d333e50d0738699`
 - **Evidence class:** independent development only
 - **ASAP rhythm split:** reuse frozen development IDs only
@@ -77,3 +77,25 @@ runtime versions.
 Failure closes the candidate or dataset stage without changing label rules,
 opening the ASAP key holdout, consuming a fresh DJ acceptance corpus or making
 an acceptance claim.
+
+## Frozen derivation outcome
+
+The committed labeler ran twice under Python 3.12.3 and mido 1.3.3. It verified
+all 40 development audio hashes and source paths, accessed no holdout source,
+and produced byte-identical artifacts:
+
+- labels CSV SHA-256:
+  `23e1a0197f22aa79d876cc91a5597e8a06e3e5f6d507afff495ac239db2103a9`;
+- manifest SHA-256:
+  `a12cd1f32b793fd55872ec90cf1b36cfefb221e9cfee5c59f7af2f47c94ec1f9`;
+- derivation tool SHA-256:
+  `bf89f672de404c34eca13ff5dbd215101e83147270b707465484c86546d861ce`;
+- frozen source-set SHA-256:
+  `c39aac520c3791e7f06d2aa39cd8096360ed4e014d0c1ee6c75484242c92eda4`.
+
+Only 6/40 MIDI files have an active signature at the prepared window start;
+all six are major. The other 34 have no active MIDI key-signature event. The
+dataset therefore fails both the minimum 24-track count and two-mode coverage
+gates. No APTA analyzer was run and no key candidate was evaluated. The label
+rules remain frozen; missing MIDI events will not be inferred from notes or
+filled manually.
