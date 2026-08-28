@@ -25,3 +25,7 @@ The current tool targets include:
 Run each executable with `--help` for the exact options compiled by the current
 source revision. Platform adapters own file and decoder integration; the
 portable core itself does not open files or decode codecs.
+
+For byte-reproducible `apta-analyze` output, set `SOURCE_DATE_EPOCH` to a
+non-negative Unix timestamp. It becomes the META creation time; malformed or
+empty values are rejected.

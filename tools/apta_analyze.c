@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "apta_tool_common.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,41 @@ static int fail_status(const char *operation, apta_status_t status)
     return 1;
 }
 
+static int read_creation_unix_time(uint64_t *value_out)
+{
+    const char *epoch = getenv("SOURCE_DATE_EPOCH");
+    const char *cursor;
+    char *end = NULL;
+    unsigned long long value;
+
+    if (value_out == NULL) {
+        return 0;
+    }
+    if (epoch == NULL) {
+        time_t now = time(NULL);
+        if (now == (time_t)-1) {
+            return 0;
+        }
+        *value_out = (uint64_t)now;
+        return 1;
+    }
+    if (epoch[0] == '\0') {
+        return 0;
+    }
+    for (cursor = epoch; *cursor != '\0'; ++cursor) {
+        if (*cursor < '0' || *cursor > '9') {
+            return 0;
+        }
+    }
+    errno = 0;
+    value = strtoull(epoch, &end, 10);
+    if (errno == ERANGE || end == epoch || *end != '\0') {
+        return 0;
+    }
+    *value_out = (uint64_t)value;
+    return 1;
+}
+
 int main(int argc, char **argv)
 {
     const char *input_path = NULL;
@@ -58,6 +94,7 @@ int main(int argc, char **argv)
     uint8_t *serialized = NULL;
     size_t written = 0u;
     size_t input_path_size;
+    uint64_t creation_unix_time;
     int index;
     int exit_code = 1;
 
@@ -118,6 +155,10 @@ int main(int argc, char **argv)
         print_usage(stderr);
         return 2;
     }
+    if (!read_creation_unix_time(&creation_unix_time)) {
+        fputs("apta-analyze: invalid SOURCE_DATE_EPOCH\n", stderr);
+        return 2;
+    }
 
     apta_decoder_init(&decoder);
     apta_decoder_info_init(&decoder_info);
@@ -170,7 +211,7 @@ int main(int argc, char **argv)
     metadata.backend_name.size = 13u;
     metadata.backend_version.data = "1";
     metadata.backend_version.size = 1u;
-    metadata.creation_unix_time = (uint64_t)time(NULL);
+    metadata.creation_unix_time = creation_unix_time;
     if (input_path_size <= APTA_METADATA_MAX_SOURCE_ID_BYTES) {
         metadata.application_source_id_kind = APTA_METADATA_SOURCE_ID_TEXT;
         metadata.application_source_id.data = (const uint8_t *)input_path;

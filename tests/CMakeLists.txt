@@ -321,6 +321,11 @@ if(Python3_Interpreter_FOUND)
         COMMAND
             ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/unit/rekordbox_tempo_corpus.py)
+    add_test(
+        NAME apta.tools.dj_candidate_comparison
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/unit/apta_1_1_compare_dj_candidates.py)
 endif()
 
 if(TARGET apta_decoder_wav)
@@ -403,6 +408,18 @@ if(TARGET apta_analyze AND TARGET apta_inspect AND TARGET apta_validate)
             FIXTURES_REQUIRED apta_cli_wav
             FIXTURES_SETUP apta_cli_container
             PASS_REGULAR_EXPRESSION "analyzed")
+
+    add_test(
+        NAME apta.tools.analyze_reproducibility
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/unit/apta_analyze_reproducibility.py
+            $<TARGET_FILE:apta_analyze>
+            $<TARGET_FILE:apta_inspect>
+            ${APTA_CLI_WAV})
+    set_tests_properties(
+        apta.tools.analyze_reproducibility
+        PROPERTIES FIXTURES_REQUIRED apta_cli_wav)
 
     add_test(
         NAME apta.tools.validate_strict

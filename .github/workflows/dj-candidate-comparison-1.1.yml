@@ -1,0 +1,32 @@
+name: APTA 1.1 DJ candidate comparison
+
+on:
+  push:
+    paths:
+      - "tools/apta_1_1_compare_dj_candidates.py"
+      - "tools/apta_1_1_dj_acceptance_eval.py"
+      - "tests/unit/apta_1_1_compare_dj_candidates.py"
+      - ".github/workflows/dj-candidate-comparison-1.1.yml"
+  pull_request:
+    paths:
+      - "tools/apta_1_1_compare_dj_candidates.py"
+      - "tools/apta_1_1_dj_acceptance_eval.py"
+      - "tests/unit/apta_1_1_compare_dj_candidates.py"
+      - ".github/workflows/dj-candidate-comparison-1.1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  comparison-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compile Python sources
+        run: |
+          python3 -m py_compile \
+            tools/apta_1_1_dj_acceptance_eval.py \
+            tools/apta_1_1_compare_dj_candidates.py \
+            tests/unit/apta_1_1_compare_dj_candidates.py
+      - name: Run comparison tests
+        run: python3 -m unittest tests/unit/apta_1_1_compare_dj_candidates.py

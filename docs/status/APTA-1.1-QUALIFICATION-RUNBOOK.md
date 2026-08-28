@@ -121,6 +121,7 @@ remain below the current working directory; the private corpus itself may live
 elsewhere.
 
 ```sh
+SOURCE_DATE_EPOCH="$FROZEN_EPOCH" \
 python3 tools/apta_1_1_analyze_frozen_corpus.py \
   --corpus-root /private/apta-canonical \
   --staging-labels /private/staging_labels.csv \
@@ -136,6 +137,11 @@ The runner always requests `--features all`. Each output is named by opaque
 track ID. `run.json` binds the run to exact source revision, analyzer SHA-256,
 frozen manifest SHA-256, feature set, per-track `.apta` SHA-256 and mapping
 SHA-256.
+
+Set `SOURCE_DATE_EPOCH` to one frozen non-negative Unix timestamp for every
+baseline and candidate run. `apta-analyze` records that value in META instead
+of wall-clock time, making complete container hashes reproducible. An invalid
+or empty value is rejected rather than silently falling back to the clock.
 
 An interrupted run can continue with `--resume`. Existing outputs are reused
 only when the run header matches and each stored `.apta` hash still matches the
@@ -158,6 +164,41 @@ The exporter requires exact manifest ID coverage, a completed session, FINAL
 FINAL `GGRD` only when no local grid is available. This keeps the exported
 period and downbeat on one grid. Missing or provisional native results fail the
 export.
+
+### Development candidate comparison (not acceptance)
+
+Before opening a holdout, compare two exported result sets against the same
+frozen labels. The comparison tool reports fixes, breaks, changed verdicts,
+exact accuracy, high-confidence errors, execution failures and an optional
+exact resource delta for key, meter, downbeat and beatgrid. Missing result rows
+remain in the denominator and count as execution failures; malformed, duplicate
+or out-of-manifest rows are rejected.
+
+```sh
+python3 tools/apta_1_1_compare_dj_candidates.py \
+  --manifest qualification/manifest.json \
+  --labels qualification/labels.csv \
+  --baseline-results qualification/baseline-results.csv \
+  --candidate-results qualification/candidate-results.csv \
+  --baseline-name default \
+  --candidate-name all-current-experiments \
+  --baseline-revision "$BASELINE_REV" \
+  --candidate-revision "$CANDIDATE_REV" \
+  --candidate-flag APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON \
+  --candidate-flag APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT=ON \
+  --candidate-flag APTA_ENABLE_EXPERIMENTAL_KEY_TUNING=ON \
+  --candidate-flag APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP=ON \
+  --evidence-level development \
+  --corpus-status spent \
+  --output qualification/candidate-comparison.json
+```
+
+Both revisions must be full 40-character Git SHAs. Flags are sorted and
+deduplicated in the deterministic JSON report. `--baseline-resources` and
+`--candidate-resources` may name JSON objects with identical numeric keys; when
+present, the report includes the exact candidate-minus-baseline delta. The
+report always carries `acceptance_claim: false`, including when
+`--evidence-level holdout` is used.
 
 ## 6. Run final DJ acceptance scoring
 
