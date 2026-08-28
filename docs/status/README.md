@@ -5,6 +5,9 @@ whole-project release and validation boundary.
 
 Active post-1.0 development:
 
+- [`APTA-1.1-ALGORITHM-IMPLEMENTATION-PLAN.md`](APTA-1.1-ALGORITHM-IMPLEMENTATION-PLAN.md)
+  — ordered implementation plan for the remaining beat-lattice, downbeat, key,
+  acceptance, physical-hardware and release-freeze work.
 - [`APTA-1.1-DEVELOPMENT-STATUS.md`](APTA-1.1-DEVELOPMENT-STATUS.md) — the
   task-by-task implementation boundary. Tasks 5 (tempo/grid ensemble fresh-set
   acceptance) and 6 (calibrated confidence acceptance and integration) closed
