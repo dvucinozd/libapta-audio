@@ -184,8 +184,10 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** active. WP4 starts from the retained production key path and the
-existing opt-in harmonic projection development candidate.
+**Status:** closed without default promotion. The harmonic projection remains
+an opt-in diagnostic; two pre-registered ASAP key-label derivations were
+nonviable before analyzer evaluation, so independent transfer was not
+established. See `APTA-1.1-WP4-CLOSURE.md`.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
@@ -308,5 +310,8 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate next implementation task is the first
-`APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE` onset-evidence slice from WP1.
+The immediate next task is WP5 integration audit. Because WP1 through WP4
+promoted no new algorithm path, WP5 must prove that the only auditable release
+candidate is the unchanged retained production algorithm, inventory and keep
+all experimental flags disabled, and determine readiness without opening a
+formal holdout or new acceptance corpus.

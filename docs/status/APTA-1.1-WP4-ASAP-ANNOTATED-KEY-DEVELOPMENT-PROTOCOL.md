@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 ASAP annotated-key development protocol
 
-- **Status:** pre-registered; label values not inspected
+- **Status:** frozen derivation completed; dataset nonviable
 - **Frozen baseline revision:** `af7398e19d448a9f9617df0f128196fa1e86ee54`
 - **Evidence class:** independent development only
 - **Annotation source:** ASAP `perf_key_signatures`
@@ -90,3 +90,25 @@ derivation-tool hash and Python runtime.
 Failure closes D2 or the candidate without changing these rules, opening any
 ASAP holdout key evidence, consuming a fresh DJ acceptance corpus or making an
 acceptance claim.
+
+## Frozen derivation outcome
+
+The committed labeler ran twice from revision `2fd4887` under Python 3.11.2.
+Both runs verified all 40 development audio hashes, required the frozen ASAP
+revision and produced byte-identical artifacts:
+
+- labels CSV SHA-256:
+  `55d00dfeea78a7e477e6c16e769649ff9d1fb9655ee694e086efe6df072cbf5c`;
+- manifest SHA-256:
+  `98e1b98af870e57c7b1d1359c999297b578ce3c3278c28aa97f6bbbd11997e86`;
+- derivation tool SHA-256:
+  `4fbfc13a4ea68916c2495d8e402fd8954dfcc6e89d3bbd086b63bc86712725a2`;
+- ASAP annotations SHA-256:
+  `02e4b80f0a78150d1bd0fc21c9cee72ed65a61710c1b1f84368c52216b3e0ff7`.
+
+All 40 selected `perf_key_signatures` mappings contain non-string values and
+therefore violate the pre-registered token grammar. The derivation includes
+0/40 tracks and fails both the minimum track-count and mode-coverage gates. No
+APTA analyzer was run. The parser will not be revised after observing this
+shape, and another interpretation of these same selected annotation values is
+not an independent development set.
