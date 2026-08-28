@@ -1,6 +1,6 @@
 # APTA 1.1 WP2 temporal tracker iteration 2
 
-- **Status:** pre-registered; no WP2-I2 oracle or implementation result collected
+- **Status:** rejected by the external-development oracle gate
 - **Frozen baseline revision:** `ec8f2c6947319257aead025b1a5bb7e120883229`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
@@ -77,3 +77,31 @@ fallback based on labels or fitted constant.
 Any failure rejects WP2-I2 without changing the majority rule, opening an
 ASAP/Ballroom formal holdout, consuming a fresh acceptance corpus or making an
 acceptance claim.
+
+## Oracle outcome
+
+The strict-majority implementation reproduced the ordered full-window
+production candidates on all 80 traces and selected only from those candidates.
+It preserved rank zero on 21/40 ASAP tracks and 30/40 Ballroom tracks.
+
+| Corpus | Metric | Baseline | WP2-I2 | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 1 | 0 | 1 | -1 |
+| ASAP development | top-1 phase | 1 | 0 | 0 | 1 | -1 |
+| ASAP development | joint top-1 period+phase | 0 | 0 | 0 | 0 | 0 |
+| Ballroom development | top-1 period | 10 | 10 | 2 | 2 | 0 |
+| Ballroom development | top-1 phase | 11 | 9 | 0 | 2 | -2 |
+| Ballroom development | joint top-1 period+phase | 7 | 7 | 1 | 1 | 0 |
+
+Two executions per corpus produced byte-identical reports:
+
+- ASAP development SHA-256:
+  `aa6449684c716ffceaa2b85618c7e3d4dd96f28a9ea17b8dfb6e3d3e9092b848`;
+- Ballroom development SHA-256:
+  `bf39c2dfb839a2a5dad7b77c77759c767be56102e4b4de089ce3af3819cd14be`.
+
+ASAP period transfer is negative, Ballroom has two period breaks, and phase
+transfer is negative on both corpora. WP2-I2 fails frozen gate 2 and is rejected
+before the spent-DJ oracle, native implementation or resource measurement. No
+other vote threshold or weighted vote was tested. Formal holdouts and the fresh
+acceptance corpus remain unopened; this result makes no acceptance claim.

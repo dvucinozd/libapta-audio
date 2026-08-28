@@ -153,6 +153,35 @@ def _select_temporal_rank(novelty: np.ndarray, sample_rate: int) -> tuple[
     return best_rank, full_states
 
 
+def _select_majority_rank(novelty: np.ndarray, sample_rate: int) -> tuple[
+    int, list[dict[str, float | int]]
+]:
+    if len(novelty) != TRACE_BINS:
+        raise ValueError(
+            f"temporal oracle requires {TRACE_BINS} bins, got {len(novelty)}"
+        )
+    full_states = _state_rows(novelty, 0, sample_rate)
+    votes = [0, 0, 0]
+    for start in WINDOW_STARTS:
+        local_winner = _state_rows(
+            novelty[start:start + WINDOW_BINS], start, sample_rate
+        )[0]
+        local_lag = int(local_winner["lag"])
+        best_rank = 0
+        best_distance = math.inf
+        for rank, full_state in enumerate(full_states):
+            distance = abs(
+                math.log2(local_lag / int(full_state["lag"]))
+            )
+            if distance < best_distance:
+                best_distance = distance
+                best_rank = rank
+        votes[best_rank] += 1
+    majority = [rank for rank, count in enumerate(votes) if count >= 4]
+    selected_rank = majority[0] if len(majority) == 1 else 0
+    return selected_rank, full_states
+
+
 def _metric_row(
     label: dict[str, object],
     first_bin: int,
@@ -200,7 +229,12 @@ def _summarize(
     return summary
 
 
-def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
+def evaluate(
+    labels_path: Path,
+    traces: Path,
+    corpus: str,
+    selector: str = "viterbi",
+) -> dict[str, object]:
     labels_raw = json.loads(labels_path.read_text(encoding="utf-8"))
     labels = {
         str(row["track"]): row
@@ -224,9 +258,16 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
         trace, _energy = _load_trace(path)
         novelty = np.asarray(trace["onset_flux"], dtype=np.float64)
         sample_rate = int(trace["sample_rate"])
-        selected_rank, full_states = _select_temporal_rank(
-            novelty, sample_rate
-        )
+        if selector == "viterbi":
+            selected_rank, full_states = _select_temporal_rank(
+                novelty, sample_rate
+            )
+        elif selector == "majority":
+            selected_rank, full_states = _select_majority_rank(
+                novelty, sample_rate
+            )
+        else:
+            raise ValueError(f"unsupported selector: {selector}")
         traced = [
             int(row["lag_bins"])
             for row in trace.get("tempo_candidates", [])
@@ -264,6 +305,7 @@ def evaluate(labels_path: Path, traces: Path, corpus: str) -> dict[str, object]:
         "acceptance_claim": False,
         "evidence_level": "development",
         "corpus": corpus,
+        "selector": selector,
         "track_count": len(labels),
         "inputs": {
             "labels_sha256": _sha256(labels_path),
@@ -296,10 +338,17 @@ def main() -> int:
     parser.add_argument("--labels", type=Path, required=True)
     parser.add_argument("--traces", type=Path, required=True)
     parser.add_argument("--corpus", required=True)
+    parser.add_argument(
+        "--selector",
+        choices=("viterbi", "majority"),
+        default="viterbi",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
-        report = evaluate(args.labels, args.traces, args.corpus)
+        report = evaluate(
+            args.labels, args.traces, args.corpus, selector=args.selector
+        )
         encoded = json.dumps(
             report, sort_keys=True, separators=(",", ":")
         ) + "\n"
