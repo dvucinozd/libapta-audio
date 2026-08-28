@@ -81,7 +81,8 @@ Verification and exit:
 ## Work package 1 — new transient/onset evidence
 
 **Status:** active. Transient-lattice iteration 1 at
-`2dc7b2c5272f394df0d37a1206538fe1003fc0e7` is rejected; a separately named
+`2dc7b2c5272f394df0d37a1206538fe1003fc0e7` and normalized rolling iteration 2
+at `ae5b54ed402480302eeb881a962583d062816620` are rejected; a separately named
 iteration is required before WP1 can pass.
 
 **Hypothesis:** the existing single-step broadband/per-band rise loses transient

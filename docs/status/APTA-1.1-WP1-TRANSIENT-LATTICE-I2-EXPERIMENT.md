@@ -1,7 +1,8 @@
 # APTA 1.1 WP1 transient-lattice iteration 2
 
-- **Status:** implementation verified, pre-corpus
+- **Status:** rejected by open-development transfer veto
 - **Frozen baseline revision:** `d79feebec66b0d91cc1255cd9117284e3555d840`
+- **Implementation revision:** `ae5b54ed402480302eeb881a962583d062816620`
 - **Evidence class:** diagnostic/development only
 - **Formal holdouts:** unopened
 
@@ -94,3 +95,35 @@ Both frozen CPU gates pass. An earlier equivalent inlined placement exceeded
 the full-path gate because its rolling state enlarged every refresh stack
 frame; moving the unchanged formula into a dedicated fill helper removed that
 gated-call overhead before any corpus observation.
+
+## Open-development results and decision
+
+The exact baseline and I2 analyzers ran only the open 40-track ASAP and
+Ballroom development partitions at implementation revision
+`ae5b54ed402480302eeb881a962583d062816620`, with
+`SOURCE_DATE_EPOCH=1767225600`. Formal holdouts remained unopened.
+
+| Corpus | Metric | Baseline | I2 | Fixes | Breaks |
+|---|---|---:|---:|---:|---:|
+| ASAP | downbeat | 3/40 | 2/40 | 1 | 2 |
+| ASAP | period <=1% | 1/40 | 1/40 | 0 | 0 |
+| ASAP | period <=10% | 3/40 | 5/40 | 3 | 1 |
+| ASAP | meter | 19/40 | 19/40 | 2 | 2 |
+| Ballroom | downbeat | 6/40 | 7/40 | 5 | 4 |
+| Ballroom | period <=1% | 8/40 | 9/40 | 4 | 3 |
+| Ballroom | period <=10% | 17/40 | 16/40 | 0 | 1 |
+| Ballroom | meter | 21/40 | 22/40 | 1 | 0 |
+
+The ASAP baseline/candidate report SHA-256 values are respectively
+`f1ff378cb9f03d0bff071d33fa099b34bbdb8e4476e41d683ec9116fcdb64a60`
+and `99401ac7c04e710b9b403c413e182c5bae75533ec56c43356daf8a6b24cae087`.
+The Ballroom values are
+`abc9f8d79acadaa0221c5529ed65380be34d6781ee98505ae5f5d330b48967d2`
+and `4ccb43d90ed4e2281094eb384559442bd4fddff53dcb9d5bf616a4f7bf93515b`.
+
+Iteration 2 is rejected immediately because ASAP downbeat transfer is
+negative. The concurrent spent-set jobs were interrupted before completion and
+their partial ignored outputs were not exported or evaluated. This follows the
+pre-registered stop condition: a failed independent development partition does
+not consume more development compute, open a holdout or create an acceptance
+claim. The opt-in I2 implementation remains reproducible diagnostic evidence.
