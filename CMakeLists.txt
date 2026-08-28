@@ -40,6 +40,20 @@ if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE
+    "Build the APTA 1.1 WP1 bounded transient-lattice novelty experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE)
+    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE requires "
+            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
     "Build the development three-band downbeat phase experiment"
     OFF)

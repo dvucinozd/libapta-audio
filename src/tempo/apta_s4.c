@@ -5,6 +5,9 @@
 #include "../core/apta_tempo_ensemble.h"
 #include "../core/apta_tempo_prior.h"
 #include "../core/apta_tempo_relation.h"
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE
+#include "../core/apta_transient_lattice.h"
+#endif
 #include "../confidence/apta_quality_model.h"
 #include "apta_s4_internal.h"
 
@@ -258,6 +261,34 @@ static float apta_s4_flux_uncached(
     uint64_t evidence_first)
 {
 #ifdef APTA_INTERNAL_MULTIBAND_ONSET
+#ifdef APTA_INTERNAL_TRANSIENT_LATTICE
+    apta_internal_transient_frame_t
+        history[APTA_INTERNAL_TRANSIENT_HISTORY_BINS];
+    uint64_t history_first =
+        bin_index > APTA_INTERNAL_TRANSIENT_SLOW_BINS
+            ? bin_index - APTA_INTERNAL_TRANSIENT_SLOW_BINS
+            : 0u;
+    uint32_t history_count = 0u;
+    uint64_t history_index;
+
+    if (history_first < evidence_first) {
+        history_first = evidence_first;
+    }
+    for (history_index = history_first;
+         history_index <= bin_index;
+         ++history_index) {
+        uint32_t band;
+
+        for (band = 0u; band < APTA_INTERNAL_BAND_COUNT; ++band) {
+            history[history_count].bands[band] =
+                apta_s4_band_energy(session, history_index, band);
+        }
+        history[history_count].broadband =
+            apta_s4_broadband_energy(session, history_index);
+        history_count += 1u;
+    }
+    return apta_internal_transient_novelty(history, history_count);
+#else
     static const float weights[APTA_INTERNAL_BAND_COUNT] = {
         APTA_INTERNAL_ONSET_WEIGHT_LOW,
         APTA_INTERNAL_ONSET_WEIGHT_MID,
@@ -297,6 +328,7 @@ static float apta_s4_flux_uncached(
            (current_total > previous_total
                 ? APTA_INTERNAL_ONSET_MULTIBAND_MIX * novelty
                 : 0.0f);
+#endif
 #else
     float current = apta_s4_energy(session, bin_index);
     float previous = bin_index > evidence_first
