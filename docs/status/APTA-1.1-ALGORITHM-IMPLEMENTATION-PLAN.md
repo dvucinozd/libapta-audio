@@ -83,8 +83,9 @@ Verification and exit:
 **Status:** active. Transient-lattice iterations 1 through 7 are rejected. The
 privacy-safe spent-DJ trace diagnostic at revision
 `fb6c2e13bfe5a2ff9b71fe3c96dd4d30f05a955e` shows useful causal-harmonic phase
-evidence but does not authorize promotion. A separately named and
-pre-registered iteration is required before WP1 can pass.
+evidence but does not authorize promotion. I8 is pre-registered to add a new
+within-bin peak-to-mean statistic without growing the onset-bin allocation;
+WP1 remains open until that staged candidate passes or is rejected.
 
 **Hypothesis:** the existing single-step broadband/per-band rise loses transient
 shape and local contrast. A bounded multi-timescale onset representation can
