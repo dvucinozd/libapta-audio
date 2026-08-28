@@ -117,9 +117,9 @@ Initial retain/reject criterion:
 
 ## Work package 2 — temporal beat-lattice tracker
 
-**Status:** active. WP1 closed without promotion; WP2 starts from the frozen
-production multiband onset candidates at revision
-`c7497a28ced0f44791aba3e2803c923db691ec2f`.
+**Status:** closed without promotion. Both the unweighted continuity path and
+strict-majority selector failed external-development transfer. Production
+retains the frozen full-window S4 rank zero; formal holdouts remain unopened.
 
 **Hypothesis:** one global autocorrelation/phase choice cannot represent tracks
 whose transient reliability changes over time. Tracking a small bounded family
@@ -151,6 +151,9 @@ If the top-three oracle itself remains below the development target after the
 new onset evidence, return to work package 1 rather than adding selector rules.
 
 ## Work package 3 — meter and downbeat on the stabilized lattice
+
+**Status:** active. WP3 starts from the unchanged production period and beat
+phase at revision `dfc1d1916fcf63ccdc19f893864f1d57696a0081`.
 
 **Hypothesis:** once beat period and phase are reliable, bar phase can be chosen
 from the temporal pattern of low/mid/high accents rather than from a single
