@@ -63,6 +63,12 @@ published candidate record are not synthesized. Promotion moves that complete
 record to rank zero while preserving the remaining relative order and existing
 serialization invariants.
 
+For that terminal comparison, translate each full-window phase by the smallest
+non-negative integer multiple of its lag that places a predicted beat on or
+after the final local-window start (bin 3072). Compare that absolute beat with
+the nearest continued beat of the seventh-window state. This is only a change
+of phase origin; it does not alter either candidate lag or phase.
+
 ## Staged oracle and retain/reject gates
 
 1. Implement only a privacy-safe offline oracle over captured production
