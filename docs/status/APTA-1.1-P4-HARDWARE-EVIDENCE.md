@@ -18,8 +18,12 @@ The tracked evidence JSON must use schema `apta-1.1-esp32-p4-hardware-evidence-1
 - 32,768 overview frames per column (the frozen 30-minute P4 profile);
 - actual workspace/result-pool sizes;
 - actual overview-column and resident-beat-record counts;
-- free/minimum-free internal heap and PSRAM measurements;
-- process-call p99 and maximum latency observations;
+- free-before, minimum-free and free-after internal heap and PSRAM
+  measurements;
+- exactly 86,400,000 accepted and processed mono PCM16 frames, 172,800,000
+  input bytes, a positive callback count and explicit USB stream
+  started/completed state;
+- positive process-call count and average/p99/maximum latency observations;
 - allocation-failure, deadline-miss and input-drop counters;
 - an explicit USB/audio coexistence result and completed-run flag.
 
@@ -34,7 +38,12 @@ The tracked evidence JSON must use schema `apta-1.1-esp32-p4-hardware-evidence-1
 - workspace is at least 941,216 bytes and result pool at least 537,104 bytes;
 - overview columns are at most 4,096 and resident beat records at most 9,216;
 - measured minimum free internal heap and PSRAM remain positive and cannot exceed their pre-test values;
-- process p99 cannot exceed the observed maximum;
+- measured minimum free heap cannot exceed the corresponding post-test free
+  value;
+- accepted and processed frame counts are exactly 86,400,000, input bytes are
+  exactly 172,800,000 and both USB stream-state flags are true;
+- process-call count and input-callback count are positive, and average and
+  p99 process latency cannot exceed the observed maximum;
 - all required DJ features are present;
 - allocation failures, deadline misses and input drops are exactly zero;
 - USB/audio coexistence and the complete test run are explicitly marked passed.

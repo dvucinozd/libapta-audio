@@ -1,0 +1,13 @@
+menu "APTA cooperative scheduler"
+
+    config APTA_P4_HARDWARE_EVIDENCE
+        bool "Build the APTA 1.1 physical USB/audio evidence harness"
+        depends on IDF_TARGET_ESP32P4 && SPIRAM
+        default n
+        help
+            Replace the generated-click diagnostic with the fail-closed,
+            30-minute, 48 kHz USB UAC input harness. This option is for the
+            pre-registered physical WP8 run only and requires the board's
+            separate USB-OTG connector; USB Serial/JTAG is not audio input.
+
+endmenu

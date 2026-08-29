@@ -141,3 +141,42 @@ This eight-second generated-click sweep remains a diagnostic example, not the
 APTA 1.1 physical evidence run. It does not provide a real USB/audio source,
 1,800 seconds of continuous input, failure/drop counters or the complete
 evidence JSON required by `docs/status/APTA-1.1-P4-HARDWARE-EVIDENCE.md`.
+
+## APTA 1.1 P4 USB/audio evidence harness
+
+The opt-in WP8 profile replaces the generated-click example with a fail-closed
+USB Audio Class device. The P4 exposes one 48 kHz mono PCM16 speaker endpoint;
+audio sent by the USB host is the analyzer input. There is no generated,
+silence or file fallback.
+
+Build the harness from a clean, committed checkout with exact ESP-IDF 6.0.2:
+
+```bash
+idf.py -B build-wp8-uac \
+  -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.p4.defaults;sdkconfig.wp8.defaults" \
+  set-target esp32p4 build
+```
+
+The tracked `dependencies.lock` pins `espressif/usb_device_uac` 1.3.1,
+`espressif/tinyusb` 0.19.0~3 and their resolved component hashes. Verify the
+image reports ESP32-P4 revisions v1.0-v1.99 before flashing normally:
+
+```bash
+python -m esptool --chip esp32p4 image-info \
+  build-wp8-uac/apta_cooperative_scheduler.bin
+idf.py -B build-wp8-uac -p PORT flash monitor
+```
+
+`PORT` is the USB Serial/JTAG control connection. Audio must use the board's
+separate USB-OTG connector, which must enumerate on the host as
+`APTA 1.1 P4 Evidence Input`. Merely seeing the serial port or the firmware
+`ready` message is not USB/audio evidence.
+
+The 30-minute clock starts on the first accepted UAC frame. A paused stream,
+disconnect, malformed block, bounded-queue overflow, partial APTA push,
+allocation failure or process call above 21,334 microseconds permanently fails
+the run. A complete run consumes exactly 86,400,000 source frames and emits one
+machine-readable `APTA_P4_EVIDENCE` record with stream accounting, all failure
+counters, process timing and before/minimum/after heap measurements. Preserve
+the complete serial log; the final tracked evidence JSON also binds the exact
+committed source revision, firmware SHA-256 and physical board metadata.

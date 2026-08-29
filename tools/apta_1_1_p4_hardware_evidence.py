@@ -14,6 +14,8 @@ from typing import Any
 SCHEMA = "apta-1.1-esp32-p4-hardware-evidence-1"
 REPORT_SCHEMA = "apta-1.1-esp32-p4-hardware-report-1"
 MIN_DURATION_SECONDS = 1800
+EXPECTED_INPUT_FRAMES = 48_000 * MIN_DURATION_SECONDS
+EXPECTED_INPUT_BYTES = EXPECTED_INPUT_FRAMES * 2
 MIN_WORKSPACE_BYTES = 941216
 MIN_RESULT_POOL_BYTES = 537104
 MAX_OVERVIEW_COLUMNS = 4096
@@ -96,14 +98,26 @@ def evaluate(value: dict[str, Any], expected_source_revision: str | None = None)
         resident_beats = _positive_int(value.get("resident_beat_records"), "resident_beat_records")
         internal_before = _positive_int(value.get("internal_heap_free_before_bytes"), "internal_heap_free_before_bytes")
         internal_min = _positive_int(value.get("internal_heap_min_free_bytes"), "internal_heap_min_free_bytes")
+        internal_after = _positive_int(value.get("internal_heap_free_after_bytes"), "internal_heap_free_after_bytes")
         psram_before = _positive_int(value.get("psram_free_before_bytes"), "psram_free_before_bytes")
         psram_min = _positive_int(value.get("psram_min_free_bytes"), "psram_min_free_bytes")
+        psram_after = _positive_int(value.get("psram_free_after_bytes"), "psram_free_after_bytes")
+        wall_duration = _positive_int(value.get("wall_duration_us"), "wall_duration_us")
+        input_frames = _positive_int(value.get("input_frames"), "input_frames")
+        input_bytes = _positive_int(value.get("input_bytes"), "input_bytes")
+        input_callbacks = _positive_int(value.get("input_callbacks"), "input_callbacks")
+        processed_frames = _positive_int(value.get("processed_frames"), "processed_frames")
+        process_calls = _positive_int(value.get("process_calls"), "process_calls")
+        process_average = _positive_int(value.get("process_call_average_us"), "process_call_average_us")
         process_p99 = _positive_int(value.get("process_call_p99_us"), "process_call_p99_us")
         process_max = _positive_int(value.get("process_call_max_us"), "process_call_max_us")
     except EvidenceError as exc:
         fail(str(exc))
         duration = workspace = result_pool = overview_columns = resident_beats = 0
-        internal_before = internal_min = psram_before = psram_min = 0
+        internal_before = internal_min = internal_after = 0
+        psram_before = psram_min = psram_after = 0
+        wall_duration = input_frames = input_bytes = input_callbacks = 0
+        processed_frames = process_calls = process_average = 0
         process_p99 = process_max = 0
 
     if overview_columns > MAX_OVERVIEW_COLUMNS:
@@ -112,8 +126,20 @@ def evaluate(value: dict[str, Any], expected_source_revision: str | None = None)
         fail(f"resident_beat_records exceeds {MAX_RESIDENT_BEAT_RECORDS}")
     if internal_min > internal_before:
         fail("internal_heap_min_free_bytes exceeds pre-test free heap")
+    if internal_min > internal_after:
+        fail("internal_heap_min_free_bytes exceeds post-test free heap")
     if psram_min > psram_before:
         fail("psram_min_free_bytes exceeds pre-test free PSRAM")
+    if psram_min > psram_after:
+        fail("psram_min_free_bytes exceeds post-test free PSRAM")
+    if input_frames != EXPECTED_INPUT_FRAMES:
+        fail(f"input_frames must equal {EXPECTED_INPUT_FRAMES}")
+    if processed_frames != EXPECTED_INPUT_FRAMES:
+        fail(f"processed_frames must equal {EXPECTED_INPUT_FRAMES}")
+    if input_bytes != EXPECTED_INPUT_BYTES:
+        fail(f"input_bytes must equal {EXPECTED_INPUT_BYTES}")
+    if process_average > process_max:
+        fail("process_call_average_us exceeds process_call_max_us")
     if process_p99 > process_max:
         fail("process_call_p99_us exceeds process_call_max_us")
 
@@ -133,6 +159,10 @@ def evaluate(value: dict[str, Any], expected_source_revision: str | None = None)
 
     if value.get("usb_audio_coexistence_passed") is not True:
         fail("usb_audio_coexistence_passed must be true")
+    if value.get("usb_stream_started") is not True:
+        fail("usb_stream_started must be true")
+    if value.get("usb_stream_completed") is not True:
+        fail("usb_stream_completed must be true")
     if value.get("test_completed") is not True:
         fail("test_completed must be true")
 
@@ -144,8 +174,17 @@ def evaluate(value: dict[str, Any], expected_source_revision: str | None = None)
         "result_pool_bytes": result_pool,
         "overview_columns": overview_columns,
         "resident_beat_records": resident_beats,
+        "wall_duration_us": wall_duration,
         "internal_heap_min_free_bytes": internal_min,
+        "internal_heap_free_after_bytes": internal_after,
         "psram_min_free_bytes": psram_min,
+        "psram_free_after_bytes": psram_after,
+        "input_frames": input_frames,
+        "input_bytes": input_bytes,
+        "input_callbacks": input_callbacks,
+        "processed_frames": processed_frames,
+        "process_calls": process_calls,
+        "process_call_average_us": process_average,
         "process_call_p99_us": process_p99,
         "process_call_max_us": process_max,
         "qualified_feature_count": len(feature_set & REQUIRED_FEATURES),

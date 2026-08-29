@@ -30,20 +30,31 @@ class P4HardwareEvidenceTests(unittest.TestCase):
             "sample_rate_hz": 48000,
             "overview_frames_per_column": 32768,
             "duration_seconds": 1800,
+            "wall_duration_us": 1_799_990_000,
             "workspace_bytes": hw.MIN_WORKSPACE_BYTES,
             "result_pool_bytes": hw.MIN_RESULT_POOL_BYTES,
             "overview_columns": 2637,
             "resident_beat_records": 9216,
             "internal_heap_free_before_bytes": 300000,
             "internal_heap_min_free_bytes": 120000,
+            "internal_heap_free_after_bytes": 250000,
             "psram_free_before_bytes": 6000000,
             "psram_min_free_bytes": 3000000,
+            "psram_free_after_bytes": 5000000,
+            "input_frames": hw.EXPECTED_INPUT_FRAMES,
+            "input_bytes": hw.EXPECTED_INPUT_BYTES,
+            "input_callbacks": 180000,
+            "processed_frames": hw.EXPECTED_INPUT_FRAMES,
+            "process_calls": 180100,
+            "process_call_average_us": 800,
             "process_call_p99_us": 1000,
             "process_call_max_us": 1800,
             "features": sorted(hw.REQUIRED_FEATURES),
             "allocation_failure_count": 0,
             "process_deadline_miss_count": 0,
             "input_drop_count": 0,
+            "usb_stream_started": True,
+            "usb_stream_completed": True,
             "usb_audio_coexistence_passed": True,
             "test_completed": True,
         }
@@ -84,6 +95,29 @@ class P4HardwareEvidenceTests(unittest.TestCase):
         self.assertEqual(hw.evaluate(evidence)["status"], "fail")
         evidence = self.valid()
         evidence["usb_audio_coexistence_passed"] = False
+        self.assertEqual(hw.evaluate(evidence)["status"], "fail")
+
+    def test_rejects_incomplete_usb_stream_accounting(self) -> None:
+        for name, value in (
+            ("input_frames", hw.EXPECTED_INPUT_FRAMES - 1),
+            ("processed_frames", hw.EXPECTED_INPUT_FRAMES - 1),
+            ("input_bytes", hw.EXPECTED_INPUT_BYTES - 2),
+            ("usb_stream_started", False),
+            ("usb_stream_completed", False),
+        ):
+            evidence = self.valid()
+            evidence[name] = value
+            self.assertEqual(hw.evaluate(evidence)["status"], "fail", name)
+
+    def test_rejects_invalid_post_test_heap_or_process_timing(self) -> None:
+        evidence = self.valid()
+        evidence["internal_heap_free_after_bytes"] = 100000
+        self.assertEqual(hw.evaluate(evidence)["status"], "fail")
+        evidence = self.valid()
+        evidence["psram_free_after_bytes"] = 2000000
+        self.assertEqual(hw.evaluate(evidence)["status"], "fail")
+        evidence = self.valid()
+        evidence["process_call_average_us"] = 1801
         self.assertEqual(hw.evaluate(evidence)["status"], "fail")
 
     def test_rejects_capacity_overflow(self) -> None:

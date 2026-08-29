@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
+#include "sdkconfig.h"
+
+#if !CONFIG_APTA_P4_HARDWARE_EVIDENCE
+
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
@@ -410,3 +414,5 @@ cleanup:
              (unsigned)uxTaskGetStackHighWaterMark(NULL));
     vTaskDelete(NULL);
 }
+
+#endif /* !CONFIG_APTA_P4_HARDWARE_EVIDENCE */
