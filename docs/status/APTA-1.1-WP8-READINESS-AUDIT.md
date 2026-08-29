@@ -1,6 +1,6 @@
 # APTA 1.1 WP8 readiness audit
 
-- **Status:** in progress; candidate device connected, physical run pending
+- **Status:** in progress; v1.3 compatibility correction pre-registered
 - **Audited source revision:** `0fe1c22e44e759db3675a289e859b14a085c31e0`
 - **Audit date:** 2026-08-29
 - **Acceptance claim:** false
@@ -9,12 +9,39 @@
 ## Environment result
 
 The Windows host has a working ESP-IDF 6.0.2 installation, including the
-ESP32-P4 GCC 15.2.0 toolchain and esptool. On 2026-08-29 a candidate Espressif
-USB serial/JTAG device enumerated as `USB\VID_303A&PID_1001&MI_00` on `COM4`.
-Its chip revision, board model, PSRAM geometry and compatibility with the
-required v3.1-v3.99 image have not yet been read, so enumeration alone is not
-physical qualification evidence. The previously measured board was ESP32-P4
-revision 1.3; ESP-IDF 6.0.2 images cannot be flashed to that older revision.
+ESP32-P4 GCC 15.2.0 toolchain and esptool. On 2026-08-29 an Espressif USB
+serial/JTAG device enumerated as `USB\VID_303A&PID_1001&MI_00` on `COM4`.
+The ESP-IDF 6.0.2 environment's esptool identified it without flashing as an
+ESP32-P4 revision v1.3, dual-core plus LP core, 400 MHz, 40 MHz crystal and USB
+Serial/JTAG mode. Device-unique identifiers are intentionally not tracked.
+The earlier 6.0.2 build accepts only v3.1-v3.99 because the project left the
+new IDF 6 P4 revision selector at its default. Local ESP-IDF 6.0.2 Kconfig and
+target sources confirm supported, mutually exclusive build paths for revisions
+below v3.0 and revisions v3.0 or newer. The connected v1.3 board can therefore
+run a normally validated IDF 6.0.2 image once the project selects the early-P4
+path; no forced flash is required.
+
+## Pre-registered revision correction
+
+Before changing project configuration or flashing, freeze this correction:
+
+- add `CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y` to `sdkconfig.p4.defaults`;
+- select `CONFIG_ESP32P4_REV_MIN_100=y`, the narrowest available Kconfig
+  minimum not newer than the connected v1.3 chip;
+- let Kconfig derive `CONFIG_ESP32P4_REV_MIN_FULL=100` and both maximum values
+  as 199; do not copy hidden derived symbols into the defaults file;
+- build from a fresh dedicated directory with exact ESP-IDF 6.0.2 and both
+  project defaults files;
+- require `esptool image-info` and the generated `sdkconfig` to agree on
+  ESP32-P4 revisions v1.0-v1.99 before a normal, non-forced flash to COM4;
+- stop without flashing if the clean build fails, metadata remains on the 3.x
+  path, normal esptool compatibility rejects the image or COM4 no longer
+  identifies as the already-read ESP32-P4 v1.3 device.
+
+The first boot is diagnostic only. It may establish that the exact project
+build starts and that its bounded feature sweep runs on real P4 silicon. It
+cannot close WP8 because the example still uses eight seconds of generated
+click PCM instead of the required real USB/audio path and 1,800-second run.
 
 The first exact local build, at revision
 `966798f8771764801524f875d11eae081be95fcf`, exposed the fail-closed
@@ -81,9 +108,10 @@ at least 1,800 continuous seconds and every counter/measurement required by
 
 ## Current decision
 
-WP8 remains open but is software-prepared and now has a candidate device on
-`COM4`. The next non-destructive hardware step is to identify its chip revision
-and PSRAM before any flash. The physical release gate still requires a
-compatible v3.1-or-newer board, the exact frozen firmware, its intended real
-USB/audio input path and the complete 1,800-second evidence run. WP6 and WP7
-remain independently gated by the failed WP5 algorithm-entry decision.
+WP8 remains open but software-prepared. The connected COM4 device is a usable
+v1.3 hardware target after the pre-registered IDF 6 early-revision correction.
+The immediate physical step is the clean metadata-verified build, normal flash
+and diagnostic boot. The release gate still requires the exact frozen
+firmware, its intended real USB/audio input path and the complete 1,800-second
+evidence run. WP6 and WP7 remain independently gated by the failed WP5
+algorithm-entry decision.

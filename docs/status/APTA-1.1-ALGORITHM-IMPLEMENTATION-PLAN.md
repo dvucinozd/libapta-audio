@@ -81,11 +81,12 @@ Verification and exit:
 ## Work package 1 — new transient/onset evidence
 
 **Status:** reopened for one pre-registered new-information candidate.
-Transient-lattice iterations 1 through 8 are rejected. I9 is frozen at
-`1f0e956c4fc5a9188f6fa6598a44eac051ec9cd1` as a bounded 512-point streaming
-spectral-flux trace; it adds frequency-selective change evidence unavailable to
-the amplitude-history iterations and must pass its external oracle before any
-analyzer formula is implemented. The
+Transient-lattice iterations 1 through 8 and spectral-flux I9 are rejected.
+I10 is pre-registered at
+`APTA-1.1-WP1-COMPLEX-DEVIATION-I10-EXPERIMENT.md` as a bounded complex-phase
+prediction-error trace. It tests phase evolution unavailable to every prior
+amplitude and spectral-power iteration and must pass its external oracle before
+any analyzer formula is implemented. The
 privacy-safe spent-DJ trace diagnostic at revision
 `fb6c2e13bfe5a2ff9b71fe3c96dd4d30f05a955e` shows useful causal-harmonic phase
 evidence but does not authorize promotion. I8's new within-bin peak-to-mean
@@ -281,12 +282,15 @@ Any failed gate rejects the candidate. Do not tune against that corpus.
 
 ## Work package 8 — physical ESP32-P4 evidence (parallel track)
 
-**Status:** in progress; software-prepared, physical run unavailable. The
+**Status:** in progress; software-prepared, v1.3 compatibility correction
+pre-registered. The
 2026-08-29 readiness remediation is complete at
 `0fe1c22e44e759db3675a289e859b14a085c31e0`: the exact ESP-IDF 6.0.2 image,
 PSRAM/32,768-frame profile, 12-feature example and 12-feature capacity probe all
-verify. No compatible board is connected, and no physical claim has been made.
-Exact results are frozen in `APTA-1.1-WP8-READINESS-AUDIT.md`.
+verify. The board on COM4 was identified as ESP32-P4 v1.3. Local ESP-IDF 6.0.2
+sources confirm its supported early-revision build path; the exact correction,
+normal-flash stop conditions and diagnostic-only claim boundary are frozen in
+`APTA-1.1-WP8-READINESS-AUDIT.md`. No physical claim has been made.
 
 This work can start as soon as hardware is available and should run in parallel
 with algorithm development, then be repeated for the exact integrated
@@ -329,8 +333,8 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate next task is WP8 physical ESP32-P4 availability and evidence
-preparation, which is legal in parallel with renewed algorithm development.
+The immediate tasks are the pre-registered I10 trace experiment and the
+pre-registered ESP32-P4 v1.3 compatibility build/diagnostic run in parallel.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable
