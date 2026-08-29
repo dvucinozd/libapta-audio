@@ -81,7 +81,7 @@ jobs:
           -w /project/examples/espidf/cooperative_scheduler
           ${IDF_IMAGE}
           idf.py -B build-idf60-esp32p4
-          -DSDKCONFIG_DEFAULTS="sdkconfig.defaults"
+          -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.p4.defaults"
           set-target esp32p4 build size-components
       - name: Verify firmware artifact
         run: test -s examples/espidf/cooperative_scheduler/build-idf60-esp32p4/apta_cooperative_scheduler.bin

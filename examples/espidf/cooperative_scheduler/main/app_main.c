@@ -207,7 +207,11 @@ static void run_feature_sweep(apta_context_t *context)
     const apta_feature_mask_t glo = loc | APTA_FEATURE_GLOBAL_BEATGRID;
     const apta_feature_mask_t dyn = glo | APTA_FEATURE_DYNAMIC_TEMPO;
     const apta_feature_mask_t all = dyn | APTA_FEATURE_WAVEFORM_DETAIL |
-                                    APTA_FEATURE_GRID_LOCKING;
+                                    APTA_FEATURE_WAVEFORM_3BAND |
+                                    APTA_FEATURE_GRID_LOCKING |
+                                    APTA_FEATURE_MUSICAL_KEY |
+                                    APTA_FEATURE_METER_DOWNBEAT |
+                                    APTA_FEATURE_CALIBRATED_QUALITY;
     const sweep_row_t rows[] = {
         {"overview", ov},
         {"overview+confidence", ovc},
@@ -270,7 +274,10 @@ void app_main(void)
         APTA_FEATURE_GLOBAL_BEATGRID |
         APTA_FEATURE_DYNAMIC_TEMPO |
         APTA_FEATURE_CONFIDENCE |
-        APTA_FEATURE_GRID_LOCKING;
+        APTA_FEATURE_GRID_LOCKING |
+        APTA_FEATURE_MUSICAL_KEY |
+        APTA_FEATURE_METER_DOWNBEAT |
+        APTA_FEATURE_CALIBRATED_QUALITY;
     if (apta_espidf_bind_context_config(&port, &context_config) < 0 ||
         apta_context_create(&context_config, &context) < 0) {
         ESP_LOGE(TAG, "context creation failed");

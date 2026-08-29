@@ -28,6 +28,7 @@ class P4HardwareEvidenceTests(unittest.TestCase):
             "esp_idf_version": "6.0.2",
             "psram_enabled": True,
             "sample_rate_hz": 48000,
+            "overview_frames_per_column": 32768,
             "duration_seconds": 1800,
             "workspace_bytes": hw.MIN_WORKSPACE_BYTES,
             "result_pool_bytes": hw.MIN_RESULT_POOL_BYTES,
@@ -54,6 +55,11 @@ class P4HardwareEvidenceTests(unittest.TestCase):
     def test_rejects_short_run(self) -> None:
         evidence = self.valid()
         evidence["duration_seconds"] = 1799
+        self.assertEqual(hw.evaluate(evidence)["status"], "fail")
+
+    def test_rejects_wrong_overview_profile(self) -> None:
+        evidence = self.valid()
+        evidence["overview_frames_per_column"] = 1024
         self.assertEqual(hw.evaluate(evidence)["status"], "fail")
 
     def test_rejects_source_revision_mismatch(self) -> None:

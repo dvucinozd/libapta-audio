@@ -109,10 +109,17 @@ idf.py -B build-esp32p4 \
   set-target esp32p4 build
 ```
 
+The P4 defaults bind the frozen 30-minute release profile to 32,768 overview
+frames per column. The final feature-sweep row requests all 12 release-target
+families: overview/detail/three-band waveform, BPM, local/global beatgrid,
+dynamic tempo, confidence, grid locking, meter/downbeat, musical key and
+calibrated quality.
+
 ## Per-feature sweep
 
-After the demonstration the example runs the same seven feature sets the host
-cost probe measures, printing the queried workspace requirement beside each:
+After the demonstration the example runs the same seven cumulative feature
+sets the host cost probe measures, printing the queried workspace requirement
+beside each. The final row is the complete 12-family release mask:
 
 ```text
 --- per-feature cost, 8 s @ 48000 Hz, 1024-frame blocks ---
@@ -128,3 +135,8 @@ comparison. Section 31 records the later incremental-evidence cache measurement.
 refresh measurement. The full feature set's current p99 upper bound is 8,200
 microseconds and its worst measured process call is 12,355 microseconds,
 leaving 42.1% of one 1024-frame block period at 48 kHz.
+
+This eight-second generated-click sweep remains a diagnostic example, not the
+APTA 1.1 physical evidence run. It does not provide a real USB/audio source,
+1,800 seconds of continuous input, failure/drop counters or the complete
+evidence JSON required by `docs/status/APTA-1.1-P4-HARDWARE-EVIDENCE.md`.
