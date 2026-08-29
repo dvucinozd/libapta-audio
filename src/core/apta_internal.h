@@ -325,13 +325,8 @@ typedef struct {
 #define APTA_INTERNAL_KEY_DECIMATION 4u
 #define APTA_INTERNAL_KEY_STABLE_WINDOWS 4u
 #define APTA_INTERNAL_KEY_PUBLISH_INTERVAL 4u
-#ifdef APTA_INTERNAL_KEY_TUNING
-#define APTA_INTERNAL_KEY_TUNING_VARIANTS 3u
-#define APTA_INTERNAL_KEY_TUNING_CENTRE 1u
-#else
-#define APTA_INTERNAL_KEY_TUNING_VARIANTS 1u
-#define APTA_INTERNAL_KEY_TUNING_CENTRE 0u
-#endif
+#define APTA_INTERNAL_KEY_EVIDENCE_VARIANTS 1u
+#define APTA_INTERNAL_KEY_BASE_VARIANT 0u
 #define APTA_INTERNAL_SQUARE_MAGNITUDE_SCALE 8388608.0f
 
 /* C1: three-band split corners, in hertz. Derived into one-pole coefficients
@@ -540,16 +535,16 @@ _Static_assert(sizeof(apta_internal_onset_bin_t) <= 16u,
 typedef struct apta_internal_result_pool_control
     apta_internal_result_pool_control_t;
 typedef struct {
-    float coefficients[APTA_INTERNAL_KEY_TUNING_VARIANTS]
+    float coefficients[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS]
                       [APTA_INTERNAL_KEY_BIN_COUNT];
-    float q1[APTA_INTERNAL_KEY_TUNING_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
-    float q2[APTA_INTERNAL_KEY_TUNING_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
-    float chroma[APTA_INTERNAL_KEY_TUNING_VARIANTS]
+    float q1[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
+    float q2[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS][APTA_INTERNAL_KEY_BIN_COUNT];
+    float chroma[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS]
                 [APTA_INTERNAL_KEY_PITCH_CLASSES];
 #ifdef APTA_INTERNAL_KEY_SPECTRAL_PROFILE
     /* Opt-in development evidence retaining octave-resolved log energies.
      * Default builds continue to keep only the folded 12-bin chroma. */
-    float spectral_profile[APTA_INTERNAL_KEY_TUNING_VARIANTS]
+    float spectral_profile[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS]
                           [APTA_INTERNAL_KEY_BIN_COUNT];
 #endif
     float decimation_sum;

@@ -39,76 +39,22 @@ if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
     add_compile_definitions(APTA_INTERNAL_MULTIBAND_ONSET=1)
 endif()
 
-option(
+set(APTA_RETIRED_EXPERIMENT_OPTIONS
     APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE
-    "Build the APTA 1.1 WP1 bounded transient-lattice novelty experiment"
-    OFF)
-
-if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE)
-    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
-        message(FATAL_ERROR
-            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE requires "
-            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
-    endif()
-    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE=1)
-endif()
-
-option(
     APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2
-    "Build the APTA 1.1 WP1 normalized rolling transient experiment"
-    OFF)
-
-if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2)
-    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
-        message(FATAL_ERROR
-            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 requires "
-            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
-    endif()
-    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE)
-        message(FATAL_ERROR
-            "transient-lattice iterations 1 and 2 are mutually exclusive")
-    endif()
-    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I2=1)
-endif()
-
-option(
     APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3
-    "Build the APTA 1.1 WP1 sixteen-bin local-contrast experiment"
-    OFF)
-
-if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3)
-    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
-        message(FATAL_ERROR
-            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3 requires "
-            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
-    endif()
-    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
-       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2)
-        message(FATAL_ERROR
-            "transient-lattice iterations 1, 2 and 3 are mutually exclusive")
-    endif()
-    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I3=1)
-endif()
-
-option(
     APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4
-    "Build the APTA 1.1 WP1 causal baseline/local-contrast fusion experiment"
-    OFF)
-
-if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4)
-    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+    APTA_ENABLE_EXPERIMENTAL_KEY_TUNING)
+foreach(APTA_RETIRED_EXPERIMENT_OPTION IN LISTS APTA_RETIRED_EXPERIMENT_OPTIONS)
+    if(DEFINED ${APTA_RETIRED_EXPERIMENT_OPTION} AND
+       ${APTA_RETIRED_EXPERIMENT_OPTION})
         message(FATAL_ERROR
-            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4 requires "
-            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+            "${APTA_RETIRED_EXPERIMENT_OPTION} was retired after its "
+            "APTA 1.1 development experiment was rejected")
     endif()
-    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
-       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 OR
-       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3)
-        message(FATAL_ERROR
-            "transient-lattice iterations 1, 2, 3 and 4 are mutually exclusive")
-    endif()
-    add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I4=1)
-endif()
+endforeach()
+unset(APTA_RETIRED_EXPERIMENT_OPTION)
+unset(APTA_RETIRED_EXPERIMENT_OPTIONS)
 
 option(
     APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8
@@ -121,13 +67,6 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
             "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8 requires "
             "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
     endif()
-    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
-       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 OR
-       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3 OR
-       APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4)
-        message(FATAL_ERROR
-            "transient-lattice iterations 1, 2, 3, 4 and 8 are mutually exclusive")
-    endif()
     add_compile_definitions(APTA_INTERNAL_TRANSIENT_LATTICE_I8=1)
 endif()
 
@@ -138,15 +77,6 @@ option(
 
 if(APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT)
     add_compile_definitions(APTA_INTERNAL_3BAND_DOWNBEAT=1)
-endif()
-
-option(
-    APTA_ENABLE_EXPERIMENTAL_KEY_TUNING
-    "Build the development three-bank key-tuning experiment"
-    OFF)
-
-if(APTA_ENABLE_EXPERIMENTAL_KEY_TUNING)
-    add_compile_definitions(APTA_INTERNAL_KEY_TUNING=1)
 endif()
 
 option(

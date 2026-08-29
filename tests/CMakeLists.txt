@@ -114,23 +114,6 @@ if(APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
         target_link_libraries(apta_multiband_onset PRIVATE m)
     endif()
 endif()
-if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE OR
-   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I2 OR
-   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I3 OR
-   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I4 OR
-   APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
-    apta_add_c_test(
-        apta_transient_lattice
-        apta.experimental.transient_lattice
-        unit/transient_lattice.c)
-    target_link_libraries(apta_transient_lattice PRIVATE apta_c11_atomics)
-    target_include_directories(
-        apta_transient_lattice
-        PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
-    if(UNIX)
-        target_link_libraries(apta_transient_lattice PRIVATE m)
-    endif()
-endif()
 if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
     apta_add_c_test(
         apta_transient_peak

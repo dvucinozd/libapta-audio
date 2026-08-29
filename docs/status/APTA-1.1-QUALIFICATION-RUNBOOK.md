@@ -181,12 +181,11 @@ python3 tools/apta_1_1_compare_dj_candidates.py \
   --baseline-results qualification/baseline-results.csv \
   --candidate-results qualification/candidate-results.csv \
   --baseline-name default \
-  --candidate-name all-current-experiments \
+  --candidate-name retained-diagnostics \
   --baseline-revision "$BASELINE_REV" \
   --candidate-revision "$CANDIDATE_REV" \
   --candidate-flag APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON \
   --candidate-flag APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT=ON \
-  --candidate-flag APTA_ENABLE_EXPERIMENTAL_KEY_TUNING=ON \
   --candidate-flag APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP=ON \
   --evidence-level development \
   --corpus-status spent \
