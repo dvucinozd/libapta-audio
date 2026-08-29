@@ -52,10 +52,12 @@ must be disjoint and each must contain identical class counts. Canonical audio
 is 48 kHz stereo PCM16 with metadata removed and is renamed to an opaque ID
 derived from the full canonical-WAV SHA-256.
 
-Preparation materializes `development` only. Materializing `holdout` requires
-an explicit one-shot option and a full frozen candidate revision. Merely
-preparing or evaluating development must not read, print or export holdout
-labels. The private selection seal and all canonical audio stay untracked.
+Preparation materializes `development` only. The selection code may parse all
+labels solely to make the frozen class-balanced split, but it emits only a hash
+of the complete selection. It must not print or export holdout labels, fetch
+holdout audio, or create a holdout analysis mapping. Materializing `holdout`
+requires an explicit one-shot option and a full frozen candidate revision. The
+private selection seal and all canonical audio stay untracked.
 
 ## Frozen experiment
 
@@ -99,3 +101,11 @@ is spent and cannot become a tuning set.
 Neither split is final DJ acceptance evidence. Even a retained candidate must
 later join a complete transferable lattice/downbeat candidate, pass WP6, and
 then face a newly verified WP7 corpus under the unchanged frozen evaluator.
+
+## Tooling preflight — 2026-08-30
+
+The first implementation preflight, still before any APTA analyzer execution,
+reproduces all 1,159 eligible rows, the exact 96/48 split, 4/2 rows in every key
+class and complete disjointness. The SHA-256 of the private full-selection seal
+is `1fadadc5e5df343558eeb476aa2346fc688bea6ebbc98a09a996a649be3b0146`.
+This hash freezes membership without publishing source IDs or holdout labels.
