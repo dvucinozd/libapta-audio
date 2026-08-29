@@ -80,14 +80,18 @@ Verification and exit:
 
 ## Work package 1 — new transient/onset evidence
 
-**Status:** closed without promotion. Transient-lattice iterations 1 through 8
-are rejected. The
+**Status:** reopened for one pre-registered new-information candidate.
+Transient-lattice iterations 1 through 8 are rejected. I9 is frozen at
+`1f0e956c4fc5a9188f6fa6598a44eac051ec9cd1` as a bounded 512-point streaming
+spectral-flux trace; it adds frequency-selective change evidence unavailable to
+the amplitude-history iterations and must pass its external oracle before any
+analyzer formula is implemented. The
 privacy-safe spent-DJ trace diagnostic at revision
 `fb6c2e13bfe5a2ff9b71fe3c96dd4d30f05a955e` shows useful causal-harmonic phase
 evidence but does not authorize promotion. I8's new within-bin peak-to-mean
 statistic also failed external transfer. The frozen production multiband onset
-path is retained; its spent-DJ top-three period ceiling is 49/60, so WP2 may
-begin without an onset change. Formal holdouts remain unopened.
+path remains the default. Formal holdouts remain unopened. See
+`APTA-1.1-WP1-SPECTRAL-FLUX-I9-EXPERIMENT.md`.
 
 **Hypothesis:** the existing single-step broadband/per-band rise loses transient
 shape and local contrast. A bounded multi-timescale onset representation can
