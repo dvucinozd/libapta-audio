@@ -187,10 +187,11 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** closed without default promotion. The harmonic projection remains
-an opt-in diagnostic; two pre-registered ASAP key-label derivations were
-nonviable before analyzer evaluation, so independent transfer was not
-established. See `APTA-1.1-WP4-CLOSURE.md`.
+**Status:** reopened for a pre-registered independent-development transfer
+check. The harmonic projection remains opt-in and the two ASAP derivations
+remain nonviable. A new balanced GiantSteps-MTG development/one-shot-holdout
+protocol is frozen before analyzer execution in
+`APTA-1.1-WP4-GIANTSTEPS-KEY-DEVELOPMENT-PROTOCOL.md`.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
@@ -332,8 +333,9 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate implementation task is the instrumented 1,800-second ESP32-P4
-USB/audio harness. Any further WP1 algorithm work first requires a new,
+The immediate parallel tasks are the instrumented 1,800-second ESP32-P4
+USB/audio run and the pre-registered GiantSteps-MTG WP4 transfer check. Any
+further WP1 algorithm work first requires a new,
 failure-driven representation and a separately committed pre-registration; I10
 does not authorize a neighboring complex-deviation rescue.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
