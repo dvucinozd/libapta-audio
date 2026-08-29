@@ -18,8 +18,11 @@
 #     -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.p4.defaults" \
 #     set-target esp32p4 build
 #
-# ESP-IDF 6.0.2 builds P4 firmware requiring chip revision v3.1 or newer. A
-# v1.x board needs 5.5, which supports v0.0 through v1.0.
+# ESP-IDF 6.0.2 has mutually exclusive P4 build paths for revisions below v3.0
+# and revisions v3.0 or newer. This project targets the measured v1.3 board and
+# therefore selects the early-revision path with a v1.0 minimum.
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
+CONFIG_ESP32P4_REV_MIN_100=y
 CONFIG_SPIRAM=y
 CONFIG_SPIRAM_MODE_HEX=y
 CONFIG_SPIRAM_SPEED_20M=y

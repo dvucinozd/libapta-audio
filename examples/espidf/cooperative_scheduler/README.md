@@ -90,10 +90,11 @@ CI verifies the linked firmware artifacts but does not execute them on physical 
 
 ## ESP32-P4
 
-ESP-IDF 6.0.2 builds P4 firmware that requires chip revision v3.1 or newer. A
-v1.x board needs 5.5; the measured revision 1.3 board reports an accepted image
-range of v0.1 through v1.99. Flashing a 6.0.2 image to it would fail the image
-revision check.
+ESP-IDF 6.0.2 has mutually exclusive P4 build paths for revisions below v3.0
+and revisions v3.0 or newer. The P4 defaults select the early-revision path and
+a v1.0 minimum for the measured revision v1.3 board, producing an accepted
+image range of v1.0 through v1.99. A separate defaults profile is required for
+v3.x hardware; one binary cannot support both hardware families.
 
 With the APTA 1.0 API and the Phase 7 cooperative refresh state, the measured
 global-beatgrid configuration queries 603,504 bytes of workspace. It completes
