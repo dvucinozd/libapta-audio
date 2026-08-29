@@ -109,3 +109,5 @@ reproduces all 1,159 eligible rows, the exact 96/48 split, 4/2 rows in every key
 class and complete disjointness. The SHA-256 of the private full-selection seal
 is `1fadadc5e5df343558eeb476aa2346fc688bea6ebbc98a09a996a649be3b0146`.
 This hash freezes membership without publishing source IDs or holdout labels.
+The downloader uses the dataset's published primary and backup URLs through
+curl and rejects every file whose upstream transport MD5 does not match.

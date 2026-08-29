@@ -17,8 +17,6 @@ import os
 import shutil
 import subprocess
 import sys
-import urllib.error
-import urllib.request
 import wave
 from dataclasses import dataclass
 from datetime import datetime
@@ -263,7 +261,7 @@ def _ffmpeg_version(ffmpeg: Path) -> str:
     return lines[0]
 
 
-def _download_audio(row: Candidate, destination: Path) -> None:
+def _download_audio(row: Candidate, destination: Path, curl: Path) -> None:
     if destination.is_file() and md5_file(destination) == row.transport_md5:
         return
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -272,19 +270,39 @@ def _download_audio(row: Candidate, destination: Path) -> None:
     errors: list[str] = []
     for template in (PRIMARY_AUDIO_URL, BACKUP_AUDIO_URL):
         partial.unlink(missing_ok=True)
-        request = urllib.request.Request(
-            template.format(filename=filename),
-            headers={"User-Agent": "APTA-1.1-GiantSteps-validation/1"},
-        )
         try:
-            with urllib.request.urlopen(request, timeout=120) as source, partial.open("wb") as target:
-                shutil.copyfileobj(source, target, 1024 * 1024)
+            subprocess.run(
+                [
+                    str(curl),
+                    "--fail",
+                    "--location",
+                    "--silent",
+                    "--show-error",
+                    "--retry",
+                    "2",
+                    "--retry-all-errors",
+                    "--retry-delay",
+                    "1",
+                    "--connect-timeout",
+                    "20",
+                    "--max-time",
+                    "180",
+                    "--user-agent",
+                    "APTA-1.1-GiantSteps-validation/1",
+                    "--output",
+                    str(partial),
+                    template.format(filename=filename),
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             if md5_file(partial) != row.transport_md5:
                 errors.append("checksum mismatch")
                 continue
             partial.replace(destination)
             return
-        except (OSError, urllib.error.URLError) as exc:
+        except (OSError, subprocess.CalledProcessError) as exc:
             errors.append(type(exc).__name__)
     partial.unlink(missing_ok=True)
     raise ValidationError(
@@ -352,6 +370,7 @@ def prepare(
     output: Path,
     split: str,
     ffmpeg_value: str,
+    curl_value: str,
     frozen_utc: str,
     open_holdout: bool = False,
     candidate_revision: str | None = None,
@@ -370,6 +389,7 @@ def prepare(
         raise ValidationError("prepared output is already finalized")
 
     ffmpeg = _resolve_executable(ffmpeg_value)
+    curl = _resolve_executable(curl_value)
     frozen = _validate_frozen_utc(frozen_utc)
     selected = select_candidates(inventory(mtg_root, original_root))
     seal_hash = selection_sha256(selected)
@@ -382,7 +402,7 @@ def prepare(
         print(f"prepare {index}/{len(rows)} {split}", flush=True)
         source = output / "working" / f"source-{index:03d}.mp3"
         rendered = output / "working" / f"canonical-{index:03d}.wav"
-        _download_audio(row, source)
+        _download_audio(row, source, curl)
         _canonicalize(ffmpeg, source, rendered)
         audio_hash = sha256_file(rendered)
         track = "track-" + audio_hash[:24]
@@ -432,6 +452,13 @@ def prepare(
         "selection_sha256": seal_hash,
         "candidate_revision": frozen_candidate,
         "ffmpeg_version": _ffmpeg_version(ffmpeg),
+        "curl_version": subprocess.run(
+            [str(curl), "--version"],
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        ).stdout.splitlines()[0],
         "sample_rate": SAMPLE_RATE,
         "channels": CHANNELS,
         "sample_width_bytes": SAMPLE_WIDTH,
@@ -789,6 +816,7 @@ def main() -> int:
     prepare_parser.add_argument("--output", type=Path, required=True)
     prepare_parser.add_argument("--split", choices=("development", "holdout"), required=True)
     prepare_parser.add_argument("--ffmpeg", default="ffmpeg")
+    prepare_parser.add_argument("--curl", default="curl")
     prepare_parser.add_argument("--frozen-utc", required=True)
     prepare_parser.add_argument("--open-holdout", action="store_true")
     prepare_parser.add_argument("--candidate-revision")
@@ -818,6 +846,7 @@ def main() -> int:
                 args.output,
                 args.split,
                 args.ffmpeg,
+                args.curl,
                 args.frozen_utc,
                 args.open_holdout,
                 args.candidate_revision,

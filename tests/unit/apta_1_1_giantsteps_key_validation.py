@@ -87,7 +87,15 @@ class GateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             with self.assertRaisesRegex(module.ValidationError, "open-holdout"):
-                module.prepare(root, root, root / "out", "holdout", "ffmpeg", "2026-01-01T00:00:00Z")
+                module.prepare(
+                    root,
+                    root,
+                    root / "out",
+                    "holdout",
+                    "ffmpeg",
+                    "curl",
+                    "2026-01-01T00:00:00Z",
+                )
             with self.assertRaisesRegex(module.ValidationError, "candidate-revision"):
                 module.prepare(
                     root,
@@ -95,6 +103,7 @@ class GateTests(unittest.TestCase):
                     root / "out",
                     "holdout",
                     "ffmpeg",
+                    "curl",
                     "2026-01-01T00:00:00Z",
                     open_holdout=True,
                 )
