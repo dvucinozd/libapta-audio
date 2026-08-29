@@ -149,6 +149,11 @@ static size_t apta_memory_waveform_recommendation(
         s4_session +=
             (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(uint16_t);
 #endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+        s4_session +=
+            sizeof(apta_internal_complex_deviation_i10_state_t) +
+            (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(uint16_t);
+#endif
         s4_snapshots =
             2u * ((size_t)APTA_INTERNAL_MAX_TEMPO_CANDIDATES *
                       sizeof(apta_tempo_candidate_t) +

@@ -35,6 +35,7 @@ PHASE_TOLERANCE_BEATS = 0.10
 PERIOD_TOLERANCE = 0.01
 I8_FORMULA_NAME = "peak_sharpness_multiband_i8"
 I9_FORMULA_NAME = "spectral_flux_max_fusion_i9"
+I10_FORMULA_NAME = "complex_deviation_max_fusion_i10"
 
 
 def _sha256(path: Path) -> str:
@@ -339,6 +340,12 @@ def _spectral_flux_max_fusion(
     return np.maximum(captured, spectral)
 
 
+def _complex_deviation_max_fusion(
+    captured: np.ndarray, deviation: np.ndarray
+) -> np.ndarray:
+    return np.maximum(captured, deviation)
+
+
 FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
     "captured_multiband": None,
     "reconstructed_multiband": _baseline_band_flux,
@@ -455,6 +462,7 @@ def evaluate(
     corpus: str,
     include_i8_peak: bool = False,
     include_i9_spectral: bool = False,
+    include_i10_deviation: bool = False,
 ) -> dict[str, object]:
     labels_raw = json.loads(labels_path.read_text(encoding="utf-8"))
     labels = {
@@ -476,6 +484,8 @@ def evaluate(
         formula_names.append(I8_FORMULA_NAME)
     if include_i9_spectral:
         formula_names.append(I9_FORMULA_NAME)
+    if include_i10_deviation:
+        formula_names.append(I10_FORMULA_NAME)
     per_formula: dict[str, list[dict[str, object]]] = {
         name: [] for name in formula_names
     }
@@ -484,6 +494,7 @@ def evaluate(
     hybrid_candidate_order_matches = 0
     i8_peak_trace_tracks = 0
     i9_spectral_trace_tracks = 0
+    i10_deviation_trace_tracks = 0
     for path in paths:
         track = path.stem
         label = labels[track]
@@ -514,6 +525,22 @@ def evaluate(
                     f"{path.name}: I9 spectral-flux trace outside [0, 1]"
                 )
             i9_spectral_trace_tracks += 1
+        deviation = np.asarray(
+            trace.get("onset_complex_deviation_i10", []), dtype=np.float64
+        )
+        if include_i10_deviation:
+            if (
+                len(deviation) != len(captured)
+                or not np.all(np.isfinite(deviation))
+            ):
+                raise ValueError(
+                    f"{path.name}: invalid I10 complex-deviation trace geometry"
+                )
+            if np.any(deviation < 0.0) or np.any(deviation > 1.0):
+                raise ValueError(
+                    f"{path.name}: I10 complex-deviation trace outside [0, 1]"
+                )
+            i10_deviation_trace_tracks += 1
         reconstructed = _baseline_band_flux(energy)
         if not np.allclose(captured, reconstructed, rtol=2.0e-5, atol=2.0e-7):
             reconstructed_differences += 1
@@ -528,12 +555,18 @@ def evaluate(
             formulas[I8_FORMULA_NAME] = None
         if include_i9_spectral:
             formulas[I9_FORMULA_NAME] = None
+        if include_i10_deviation:
+            formulas[I10_FORMULA_NAME] = None
         for name, formula in formulas.items():
             phase_only = name in PHASE_ONLY_FORMULAS
             if name == I8_FORMULA_NAME:
                 phase_novelty = _peak_sharpness_multiband(energy, peak)
             elif name == I9_FORMULA_NAME:
                 phase_novelty = _spectral_flux_max_fusion(captured, spectral)
+            elif name == I10_FORMULA_NAME:
+                phase_novelty = _complex_deviation_max_fusion(
+                    captured, deviation
+                )
             else:
                 phase_novelty = (
                     captured if formula is None else formula(energy)
@@ -675,6 +708,7 @@ def evaluate(
             "hybrid_candidate_order_matches": hybrid_candidate_order_matches,
             "i8_peak_trace_tracks": i8_peak_trace_tracks,
             "i9_spectral_trace_tracks": i9_spectral_trace_tracks,
+            "i10_deviation_trace_tracks": i10_deviation_trace_tracks,
         },
         "formulas": summaries,
     }
@@ -695,6 +729,11 @@ def main() -> int:
         action="store_true",
         help="require I9 spectral arrays and evaluate the frozen max fusion",
     )
+    parser.add_argument(
+        "--i10-deviation",
+        action="store_true",
+        help="require I10 complex-deviation arrays and evaluate frozen max fusion",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
@@ -704,6 +743,7 @@ def main() -> int:
             args.corpus,
             include_i8_peak=args.i8_peak,
             include_i9_spectral=args.i9_spectral,
+            include_i10_deviation=args.i10_deviation,
         )
         encoded = json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n"
         args.output.parent.mkdir(parents=True, exist_ok=True)

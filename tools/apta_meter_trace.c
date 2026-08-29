@@ -361,6 +361,24 @@ int main(int argc, char **argv)
                     (double)spectral_flux);
         }
 #endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+        fputs("],\"onset_complex_deviation_i10\":[", trace);
+        for (index = 0u; index < flux_count; ++index) {
+            float deviation;
+
+            if (!apta_internal_complex_deviation_i10_trace_at(
+                    session, index, &deviation)) {
+                fputs("apta-meter-trace: incomplete I10 complex-deviation "
+                      "snapshot\n",
+                      stderr);
+                goto cleanup;
+            }
+            fprintf(trace,
+                    "%s%.9g",
+                    index > 0u ? "," : "",
+                    (double)deviation);
+        }
+#endif
         fprintf(trace,
                 "],\"overview_3band\":{\"frames_per_column\":%u,"
                 "\"origin_frame\":%llu,\"spans\":[",

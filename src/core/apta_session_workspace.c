@@ -239,6 +239,16 @@ size_t apta_internal_session_workspace_requirement(
             total,
             apta_workspace_allocation_cost(
                 (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float)));
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                sizeof(apta_internal_complex_deviation_i10_state_t)));
+        total = apta_workspace_add(
+            total,
+            apta_workspace_allocation_cost(
+                (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(uint16_t)));
+#endif
     }
 
     if ((features & APTA_INTERNAL_S6_FEATURES) != 0u) {

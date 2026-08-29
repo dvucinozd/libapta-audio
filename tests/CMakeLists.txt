@@ -142,6 +142,21 @@ if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
         target_link_libraries(apta_spectral_flux_i9 PRIVATE m)
     endif()
 endif()
+if(APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10)
+    apta_add_c_test(
+        apta_complex_deviation_i10
+        apta.experimental.complex_deviation_i10
+        unit/complex_deviation_i10.c)
+    target_link_libraries(apta_complex_deviation_i10 PRIVATE apta_c11_atomics)
+    target_include_directories(
+        apta_complex_deviation_i10
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/core
+            ${CMAKE_SOURCE_DIR}/src/tempo)
+    if(UNIX)
+        target_link_libraries(apta_complex_deviation_i10 PRIVATE m)
+    endif()
+endif()
 if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE AND
    APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
     apta_add_c_test(
@@ -376,6 +391,13 @@ if(Python3_Interpreter_FOUND)
             COMMAND
                 ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/unit/apta_1_1_onset_trace_i9.py)
+    endif()
+    if(APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10)
+        add_test(
+            NAME apta.experimental.complex_deviation_i10_oracle
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/unit/apta_1_1_onset_trace_i10.py)
     endif()
 endif()
 

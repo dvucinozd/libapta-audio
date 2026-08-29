@@ -795,6 +795,8 @@ apta_status_t apta_internal_s4_prepare(apta_session_t *session)
     session->onset_flux_capacity = APTA_INTERNAL_ONSET_BIN_CAPACITY;
 #ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
     return apta_internal_spectral_flux_i9_prepare(session);
+#elif defined(APTA_INTERNAL_COMPLEX_DEVIATION_I10)
+    return apta_internal_complex_deviation_i10_prepare(session);
 #else
     return APTA_STATUS_OK;
 #endif
@@ -842,6 +844,9 @@ apta_status_t apta_internal_s4_process_sample(
         bin->bin_index = (uint32_t)bin_index;
 #ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
         apta_internal_spectral_flux_i9_reset_bin(session, bin_index);
+#endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+        apta_internal_complex_deviation_i10_reset_bin(session, bin_index);
 #endif
     }
     if (bin->sample_count ==
@@ -895,6 +900,16 @@ apta_status_t apta_internal_s4_process_sample(
                 session, source_frame, sample);
         if (spectral_status != APTA_STATUS_OK) {
             return spectral_status;
+        }
+    }
+#endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+    {
+        const apta_status_t deviation_status =
+            apta_internal_complex_deviation_i10_process_sample(
+                session, source_frame, sample);
+        if (deviation_status != APTA_STATUS_OK) {
+            return deviation_status;
         }
     }
 #endif
@@ -1821,6 +1836,9 @@ void apta_internal_s4_cleanup_session(apta_session_t *session)
     session->onset_flux_capacity = 0u;
 #ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
     apta_internal_spectral_flux_i9_cleanup(session);
+#endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+    apta_internal_complex_deviation_i10_cleanup(session);
 #endif
 }
 

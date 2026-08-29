@@ -90,6 +90,26 @@ if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10
+    "Build the APTA 1.1 WP1 complex-phase deviation trace experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10)
+    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10 requires "
+            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+    endif()
+    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8 OR
+       APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10 is mutually "
+            "exclusive with the I8 and I9 onset experiments")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_COMPLEX_DEVIATION_I10=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
     "Build the development three-band downbeat phase experiment"
     OFF)
@@ -511,6 +531,11 @@ if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
     list(APPEND
         APTA_CORE_SOURCES
         src/experimental/apta_spectral_flux_i9.c)
+endif()
+if(APTA_ENABLE_EXPERIMENTAL_COMPLEX_DEVIATION_I10)
+    list(APPEND
+        APTA_CORE_SOURCES
+        src/experimental/apta_complex_deviation_i10.c)
 endif()
 
 add_library(apta_core_objects OBJECT ${APTA_CORE_SOURCES})

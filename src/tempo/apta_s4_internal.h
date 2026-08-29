@@ -40,6 +40,13 @@ int apta_internal_spectral_flux_i9_trace_at(
     uint32_t offset,
     float *flux_out);
 #endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+/* Read the normalized trace-only complex prediction error captured by I10. */
+int apta_internal_complex_deviation_i10_trace_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *deviation_out);
+#endif
 #endif
 #endif
 

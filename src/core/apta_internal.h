@@ -91,6 +91,12 @@ typedef max_align_t apta_internal_max_align_t;
 #define APTA_INTERNAL_I9_SPECTRUM_BINS \
     (APTA_INTERNAL_I9_FFT_SIZE / 2u + 1u)
 #endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+#define APTA_INTERNAL_I10_FFT_SIZE 512u
+#define APTA_INTERNAL_I10_HOP_FRAMES 128u
+#define APTA_INTERNAL_I10_SPECTRUM_BINS \
+    (APTA_INTERNAL_I10_FFT_SIZE / 2u + 1u)
+#endif
 #ifndef APTA_INTERNAL_MIN_TEMPO_BINS
 #define APTA_INTERNAL_MIN_TEMPO_BINS 512u
 #endif
@@ -591,6 +597,27 @@ typedef struct {
 } apta_internal_spectral_flux_i9_state_t;
 #endif
 
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+typedef struct {
+    float samples[APTA_INTERNAL_I10_FFT_SIZE];
+    float window[APTA_INTERNAL_I10_FFT_SIZE];
+    float fft_real[APTA_INTERNAL_I10_FFT_SIZE];
+    float fft_imaginary[APTA_INTERNAL_I10_FFT_SIZE];
+    float previous_real[2][APTA_INTERNAL_I10_SPECTRUM_BINS];
+    float previous_imaginary[2][APTA_INTERNAL_I10_SPECTRUM_BINS];
+    uint16_t *bin_deviation;
+    apta_source_frame_t next_source_frame;
+    uint64_t run_sample_count;
+    uint32_t write_index;
+    uint32_t minimum_spectrum_bin;
+    uint32_t maximum_spectrum_bin;
+    uint8_t has_next_source_frame;
+    uint8_t history_count;
+    uint8_t initialized;
+    uint8_t reserved8;
+} apta_internal_complex_deviation_i10_state_t;
+#endif
+
 struct apta_context {
     apta_allocator_t allocator;
     apta_logger_t logger;
@@ -745,6 +772,11 @@ struct apta_session {
     /* I9 is a trace-only parallel evidence ring. It never changes production
      * onset_flux until the separately frozen oracle gates authorize that step. */
     apta_internal_spectral_flux_i9_state_t spectral_flux_i9;
+#endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+    /* I10 is a trace-only complex phase-prediction residual ring. It never
+     * changes production onset_flux before its frozen external oracle passes. */
+    apta_internal_complex_deviation_i10_state_t *complex_deviation_i10;
 #endif
     /* Incremental longest contiguous run of complete onset bins. Sequential
      * input extends this in O(1), including ordinary ring wrap. Gaps or an
@@ -1036,6 +1068,22 @@ int apta_internal_spectral_flux_i9_trace_at(
     uint32_t offset,
     float *flux_out);
 void apta_internal_spectral_flux_i9_cleanup(apta_session_t *session);
+#endif
+#ifdef APTA_INTERNAL_COMPLEX_DEVIATION_I10
+apta_status_t apta_internal_complex_deviation_i10_prepare(
+    apta_session_t *session);
+void apta_internal_complex_deviation_i10_reset_bin(
+    apta_session_t *session,
+    uint64_t bin_index);
+apta_status_t apta_internal_complex_deviation_i10_process_sample(
+    apta_session_t *session,
+    apta_source_frame_t source_frame,
+    float sample);
+int apta_internal_complex_deviation_i10_trace_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *deviation_out);
+void apta_internal_complex_deviation_i10_cleanup(apta_session_t *session);
 #endif
 apta_status_t apta_internal_s4_refresh(
     apta_session_t *session,
