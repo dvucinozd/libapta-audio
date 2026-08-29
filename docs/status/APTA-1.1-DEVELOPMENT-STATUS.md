@@ -86,7 +86,14 @@ For 48 kHz / 30 minutes (`86,400,000` source frames), deterministic capacity evi
 - bounded result pool: **537,104 bytes**;
 - combined minimum: **1,478,320 bytes**.
 
-This is firmware-build/layout evidence only. Physical-device latency, actual internal/PSRAM placement, allocator fragmentation, thermals, and USB/audio coexistence remain unverified until a real hardware run satisfies the frozen hardware-evidence contract.
+At remediation revision `0fe1c22e44e759db3675a289e859b14a085c31e0`, the
+corrected 12-feature capacity probe preserves every value above and the exact
+ESP-IDF 6.0.2 build produces a 235,024-byte ESP32-P4 v3.1-v3.99 image with
+PSRAM and the required 32,768-frame overview profile. Validator unit tests pass
+8/8. This is firmware-build/layout evidence only. Physical-device latency,
+actual internal/PSRAM placement, allocator fragmentation, thermals, and
+USB/audio coexistence remain unverified until a real hardware run satisfies the
+frozen hardware-evidence contract.
 
 ## Frozen final DJ acceptance contract
 

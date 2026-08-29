@@ -1,7 +1,7 @@
 # APTA 1.1 WP8 readiness audit
 
 - **Status:** in progress; physical run unavailable
-- **Audited source revision:** `966798f8771764801524f875d11eae081be95fcf`
+- **Audited source revision:** `0fe1c22e44e759db3675a289e859b14a085c31e0`
 - **Audit date:** 2026-08-29
 - **Acceptance claim:** false
 - **Tracked physical evidence:** absent
@@ -15,18 +15,16 @@ previously measured board was ESP32-P4 revision 1.3; ESP-IDF 6.0.2 images are
 restricted to chip revisions v3.1 through v3.99, so that older board cannot run
 the required release image even if reconnected.
 
-An exact local build of revision
-`966798f8771764801524f875d11eae081be95fcf` with ESP-IDF 6.0.2 and both
-`sdkconfig.defaults` and `sdkconfig.p4.defaults` succeeds. The generated
-235,040-byte application image has SHA-256
-`09d565b80aa3d9a5089472a9a9bbf36c21194ec59a3939ef727eac91c330596b`,
-declares ESP32-P4 v3.1-v3.99 and has PSRAM enabled. This is build evidence only;
-it was not flashed or executed and cannot close WP8.
+The first exact local build, at revision
+`966798f8771764801524f875d11eae081be95fcf`, exposed the fail-closed
+integration findings below. The remediation boundary was frozen before any
+source change, then implemented at
+`0fe1c22e44e759db3675a289e859b14a085c31e0`.
 
-## Fail-closed integration findings
+## Resolved integration findings
 
-The existing build and example are not yet a faithful implementation of the
-pre-registered physical-evidence contract:
+The audit found these mismatches with the pre-registered physical-evidence
+contract:
 
 1. the P4 CI firmware command does not load `sdkconfig.p4.defaults`, so it does
    not prove the required PSRAM configuration;
@@ -41,19 +39,38 @@ pre-registered physical-evidence contract:
    USB/audio input or coexistence path. It cannot substantiate a 1,800-second
    physical USB/audio claim.
 
-## Frozen remediation boundary
+Revision `0fe1c22e44e759db3675a289e859b14a085c31e0` resolves findings 1
+through 4: CI loads both defaults files, the P4 profile fixes overview columns
+at 32,768 source frames, and both the cooperative full row and deterministic
+capacity probe request all 12 release feature families. Finding 5 is an
+intentional diagnostic boundary and remains open until the physical harness and
+real USB/audio source are present.
 
-Before another build or device attempt:
+## Remediation verification
 
-- make the P4 CI build load both defaults files;
-- bind the P4 defaults explicitly to the 32,768-frame overview profile;
-- make the example's full row request all 12 release feature families;
-- make the 30-minute capacity probe request the same 12 families;
-- recalculate exact workspace/result-pool minimums after that correction and
-  raise validator minima if required, while retaining the existing 1.5 MiB
-  workspace, 2 MiB pool, 4,096-column and 9,216-beat ceilings;
-- rebuild the corrected exact revision under ESP-IDF 6.0.2 and record the image
-  identity and revision bounds.
+The frozen remediation was implemented without changing algorithm thresholds.
+Verification on the exact remediation revision produced:
+
+- hardware-evidence validator unit tests: 8/8 pass, including fail-closed
+  rejection of the wrong overview profile;
+- corrected 12-feature capacity probe: 2,637 overview columns, 3,072 mutable
+  beats, two result slots, 9,216 resident beat records, 941,216-byte minimum
+  workspace, 1,000,058-byte recommended workspace and 537,104-byte pool;
+- no validator threshold increase: all corrected values remain within the
+  frozen 1.5 MiB workspace, 2 MiB pool, 4,096-column and 9,216-beat ceilings;
+- exact ESP-IDF 6.0.2 build: pass, with `sdkconfig.defaults` and
+  `sdkconfig.p4.defaults` both loaded;
+- application image: 235,024 bytes, SHA-256
+  `1b7a06f4c0c76e9cddd6b7a0ba8d7923917ddf7bc3367a1d479f94e2d0b6113b`;
+- image metadata: ESP32-P4, chip revisions v3.1-v3.99, app version
+  `v1.0.1-218-g0fe1c22`, ESP-IDF v6.0.2, valid checksum and validation hash;
+- exact configuration: PSRAM enabled, 8,192-byte main-task stack, overview
+  frames per column 32,768, four detail tiles, 4,096 onset bins and 16,384
+  global bins.
+
+The generated image and ignored build directory are reproducible build
+artifacts, not tracked acceptance evidence. The checkout was clean after the
+build.
 
 No synthetic runner, generated JSON, accelerated PCM feed or eight-second
 feature sweep may be reported as physical evidence. Closing WP8 still requires
@@ -63,7 +80,7 @@ at least 1,800 continuous seconds and every counter/measurement required by
 
 ## Current decision
 
-WP8 remains open. Software preparation can continue without a board, but the
-physical release gate cannot pass until compatible hardware and its intended
-USB/audio input path are available. WP6 and WP7 remain independently gated by
-the failed WP5 algorithm-entry decision.
+WP8 remains open but is software-prepared for the device run. The physical
+release gate cannot pass until a compatible v3.1-or-newer board with PSRAM and
+its intended USB/audio input path are available. WP6 and WP7 remain
+independently gated by the failed WP5 algorithm-entry decision.

@@ -277,11 +277,12 @@ Any failed gate rejects the candidate. Do not tune against that corpus.
 
 ## Work package 8 — physical ESP32-P4 evidence (parallel track)
 
-**Status:** in progress. The 2026-08-29 readiness audit found a usable local
-ESP-IDF 6.0.2 toolchain but no connected board, plus fail-closed mismatches
-between the frozen 12-feature/30-minute contract and the existing CI, P4
-defaults, capacity probe and eight-second cooperative example. Remediation is
-frozen in `APTA-1.1-WP8-READINESS-AUDIT.md`; no physical claim has been made.
+**Status:** in progress; software-prepared, physical run unavailable. The
+2026-08-29 readiness remediation is complete at
+`0fe1c22e44e759db3675a289e859b14a085c31e0`: the exact ESP-IDF 6.0.2 image,
+PSRAM/32,768-frame profile, 12-feature example and 12-feature capacity probe all
+verify. No compatible board is connected, and no physical claim has been made.
+Exact results are frozen in `APTA-1.1-WP8-READINESS-AUDIT.md`.
 
 This work can start as soon as hardware is available and should run in parallel
 with algorithm development, then be repeated for the exact integrated
