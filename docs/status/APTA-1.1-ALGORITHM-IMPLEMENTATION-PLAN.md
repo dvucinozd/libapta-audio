@@ -80,19 +80,17 @@ Verification and exit:
 
 ## Work package 1 — new transient/onset evidence
 
-**Status:** reopened for one pre-registered new-information candidate.
-Transient-lattice iterations 1 through 8 and spectral-flux I9 are rejected.
-I10 is pre-registered at
-`APTA-1.1-WP1-COMPLEX-DEVIATION-I10-EXPERIMENT.md` as a bounded complex-phase
-prediction-error trace. It tests phase evolution unavailable to every prior
-amplitude and spectral-power iteration and must pass its external oracle before
-any analyzer formula is implemented. The
+**Status:** exhausted after ten frozen iterations; no onset candidate retained.
+Transient-lattice iterations 1 through 8, spectral-flux I9 and complex-phase
+deviation I10 are rejected. I10 tested a genuinely new phase-evolution axis but
+its 40.4% median host runtime overhead exceeded the pre-registered 35% ceiling
+before any development corpus trace was captured. The
 privacy-safe spent-DJ trace diagnostic at revision
 `fb6c2e13bfe5a2ff9b71fe3c96dd4d30f05a955e` shows useful causal-harmonic phase
 evidence but does not authorize promotion. I8's new within-bin peak-to-mean
 statistic also failed external transfer. The frozen production multiband onset
 path remains the default. Formal holdouts remain unopened. See
-`APTA-1.1-WP1-SPECTRAL-FLUX-I9-EXPERIMENT.md`.
+`APTA-1.1-WP1-COMPLEX-DEVIATION-I10-EXPERIMENT.md`.
 
 **Hypothesis:** the existing single-step broadband/per-band rise loses transient
 shape and local contrast. A bounded multi-timescale onset representation can
@@ -334,8 +332,10 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate tasks are the pre-registered I10 trace experiment and the
-instrumented 1,800-second ESP32-P4 USB/audio harness in parallel.
+The immediate implementation task is the instrumented 1,800-second ESP32-P4
+USB/audio harness. Any further WP1 algorithm work first requires a new,
+failure-driven representation and a separately committed pre-registration; I10
+does not authorize a neighboring complex-deviation rescue.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

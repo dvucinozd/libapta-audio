@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 complex-deviation iteration 10
 
-- **Status:** pre-registered; implementation not started
+- **Status:** rejected by the frozen stage-2 host-runtime gate
 - **Frozen baseline revision:** `0baeb5a87be51747984e05b41612debbbd87ac47`
 - **Evidence class:** open development only
 - **Acceptance claim:** false
@@ -115,4 +115,41 @@ must later pass the exact physical P4 allocation/deadline contract.
 Any failed stage rejects I10 without changing FFT size, hop, frequency range,
 normalization, quantization, fusion rule or gate. It does not authorize another
 complex-deviation variant, a formal holdout, fresh acceptance corpus or
+acceptance claim.
+
+## Implementation and qualification outcome
+
+Revision `fffae983e639a6a533b3f1c5d6f47e4a009e47fe` implements only the
+pre-registered conditional complex predictor, aligned `uint16_t` trace ring,
+privacy-safe trace output and exact offline `max` oracle. Production novelty,
+lag ranking, phase search, public ABI and serialization remain unchanged.
+
+The stage-2 qualification evidence is:
+
+- Release Werror matrix: 121/121 passed;
+- GNU 13.3 ASan/UBSan matrix: 119/119 passed;
+- I10 dependency and I8/I9 mutual-exclusion configurations: rejected as
+  required;
+- exact multiband onset-bin layout: 16 bytes;
+- default analyzer SHA-256:
+  `0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`,
+  byte-identical to the WP0 and pre-I10 artifact;
+- I10 Release trace executable SHA-256:
+  `0197740b692d024b0b1daeaa80be33f400595b0fd8ce1c039c3d54794471733f`;
+- frozen full P4 30-minute queried workspace: 942,288 -> 962,976 bytes,
+  recommended workspace: 1,001,197 -> 1,023,178 bytes, and result pool
+  unchanged at 537,104 bytes.
+
+The frozen full-path runtime gate used the first ten sorted Ballroom
+development WAVs, identical GNU 13.3 Release trace flags except for I10, and
+three alternating baseline/I10 passes. Baseline wall times were 3.820, 3.903
+and 3.609 seconds; I10 wall times were 5.391, 5.364 and 5.237 seconds. The
+medians are 3.820 and 5.364 seconds, a 40.4% overhead that exceeds the frozen
+35% ceiling.
+
+I10 is therefore rejected at stage 2. The ASAP and Ballroom development traces
+were not captured and their oracle was not run. The spent 60-track DJ trace,
+analyzer fusion, native candidate runs, formal holdouts and fresh acceptance
+corpus remain unopened by I10. No neighboring FFT size, hop, frequency range,
+normalization, quantization or fusion rule was tested, and this result makes no
 acceptance claim.
