@@ -1,7 +1,8 @@
 # APTA 1.1 WP1 spectral-flux iteration 9
 
-- **Status:** pre-registered; implementation not started
+- **Status:** trace-only implementation qualified; external-development oracle pending
 - **Frozen baseline revision:** `1f0e956c4fc5a9188f6fa6598a44eac051ec9cd1`
+- **Trace implementation revision:** `9413aaab3a87726753e7bf217685cb17580fc309`
 - **Evidence class:** open development only
 - **Acceptance claim:** false
 - **Formal holdouts:** unopened
@@ -104,3 +105,43 @@ Any failed stage rejects I9 without changing FFT size, hop, frequency range,
 normalization, quantization, fusion rule or gate. It does not authorize a
 neighboring parameter, an ASAP/Ballroom formal holdout, a fresh acceptance
 corpus or an acceptance claim.
+
+## Trace-instrumentation checkpoint
+
+Revision `9413aaab3a87726753e7bf217685cb17580fc309` implements only the
+pre-registered conditional streaming FFT state, aligned `uint16_t` trace ring,
+privacy-safe trace output and exact offline `max` oracle. Production
+`onset_flux`, analyzer novelty, lag ranking, phase search, public ABI and wire
+output remain unchanged. The conditional state is 9,264 bytes and its 4,096
+value trace ring is 8,192 bytes, for 17,456 bytes of persistent I9 state. A
+compile-time assertion enforces the frozen 24 KiB ceiling.
+
+The current qualification results are:
+
+- I9 Release Werror matrix excluding the separately exercised archive gate:
+  124/124 pass;
+- I9 ASan/UBSan matrix: 108/108 pass;
+- clean sibling-clone binary/source archive reproducibility gate: 1/1 pass;
+- dependency and I8/I9 mutual-exclusion configurations: rejected as required;
+- exact multiband onset-bin layout: 16 bytes;
+- default analyzer SHA-256:
+  `0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`,
+  byte-identical to the WP0 artifact;
+- baseline and I9 trace executable SHA-256 values respectively:
+  `313416ab6cd1fb71c4a04e6a0abc1673bf7c7feaba77a2c5ada206c610cfc5b7`
+  and `c02f6fe044eff853268021ec6fd8beee4d92e12f586a0f9b0efbae40456c56d7`;
+- frozen full P4 30-minute queried workspace: 942,288 -> 951,552 bytes
+  (+9,264), recommended workspace: 1,001,197 -> 1,011,040 bytes
+  (+9,843), result pool unchanged at 537,104 bytes;
+- two repeated real development traces are byte-identical, SHA-256
+  `7b808040e3afc5ec73aae64fc292ee2c5985648ce7d7b0e337ec57d7fb53cb3d`.
+
+The trace-only full-path runtime gate used the first ten sorted Ballroom
+development WAVs, identical Release trace flags except for I9, and three
+alternating baseline/I9 passes. Baseline wall times were 11.041, 9.586 and
+6.118 seconds; I9 times were 9.897, 11.077 and 11.437 seconds. The medians are
+9.586 and 11.077 seconds, a 15.6% overhead below the frozen 35% ceiling.
+
+This is implementation/resource evidence only. No ASAP or Ballroom formal
+holdout, spent DJ trace or fresh acceptance corpus was opened by this
+checkpoint, and it makes no algorithmic or acceptance claim.

@@ -1,6 +1,6 @@
 # APTA 1.1 WP8 readiness audit
 
-- **Status:** in progress; physical run unavailable
+- **Status:** in progress; candidate device connected, physical run pending
 - **Audited source revision:** `0fe1c22e44e759db3675a289e859b14a085c31e0`
 - **Audit date:** 2026-08-29
 - **Acceptance claim:** false
@@ -9,11 +9,12 @@
 ## Environment result
 
 The Windows host has a working ESP-IDF 6.0.2 installation, including the
-ESP32-P4 GCC 15.2.0 toolchain and esptool. No COM port, Espressif USB device,
-USB serial/JTAG bridge or other candidate board is currently enumerated. The
-previously measured board was ESP32-P4 revision 1.3; ESP-IDF 6.0.2 images are
-restricted to chip revisions v3.1 through v3.99, so that older board cannot run
-the required release image even if reconnected.
+ESP32-P4 GCC 15.2.0 toolchain and esptool. On 2026-08-29 a candidate Espressif
+USB serial/JTAG device enumerated as `USB\VID_303A&PID_1001&MI_00` on `COM4`.
+Its chip revision, board model, PSRAM geometry and compatibility with the
+required v3.1-v3.99 image have not yet been read, so enumeration alone is not
+physical qualification evidence. The previously measured board was ESP32-P4
+revision 1.3; ESP-IDF 6.0.2 images cannot be flashed to that older revision.
 
 The first exact local build, at revision
 `966798f8771764801524f875d11eae081be95fcf`, exposed the fail-closed
@@ -80,7 +81,9 @@ at least 1,800 continuous seconds and every counter/measurement required by
 
 ## Current decision
 
-WP8 remains open but is software-prepared for the device run. The physical
-release gate cannot pass until a compatible v3.1-or-newer board with PSRAM and
-its intended USB/audio input path are available. WP6 and WP7 remain
-independently gated by the failed WP5 algorithm-entry decision.
+WP8 remains open but is software-prepared and now has a candidate device on
+`COM4`. The next non-destructive hardware step is to identify its chip revision
+and PSRAM before any flash. The physical release gate still requires a
+compatible v3.1-or-newer board, the exact frozen firmware, its intended real
+USB/audio input path and the complete 1,800-second evidence run. WP6 and WP7
+remain independently gated by the failed WP5 algorithm-entry decision.
