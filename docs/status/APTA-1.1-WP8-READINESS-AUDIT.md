@@ -150,3 +150,47 @@ records every frozen counter and resource field for 1,800 seconds, followed by
 the exact integrated-candidate rerun if its firmware or memory profile changes.
 WP6 and WP7 remain independently gated by the failed WP5 algorithm-entry
 decision.
+
+## Pre-registered qualifying USB/audio harness
+
+Before changing the example again, freeze the only authorized WP8 harness:
+
+- add an opt-in `CONFIG_APTA_P4_HARDWARE_EVIDENCE` firmware path; the default
+  eight-second diagnostic remains unchanged;
+- pin `espressif/usb_device_uac` 1.3.1 and its resolved lockfile dependencies;
+- expose the P4 high-speed USB peripheral as a one-channel, 48 kHz, signed
+  16-bit UAC speaker endpoint with no microphone endpoint;
+- accept PCM only from the UAC output callback. There is no generated-click,
+  silence or file fallback, and the 1,800-second clock starts on the first
+  accepted USB frame;
+- transfer callback data through a bounded 16-block queue into one analyzer
+  task. Every incomplete frame, queue overflow, partial APTA push or source
+  discontinuity increments `input_drop_count` and permanently fails the run;
+- configure exactly 86,400,000 mono source frames, all 12 release-target
+  feature families, 1,024-frame APTA pushes, `maximum_input_frames=1024` and
+  `maximum_steps=8`;
+- count a process deadline miss whenever one measured process call exceeds the
+  1,024-frame real-time interval of 21,334 us. Record the histogram-derived p99
+  and exact maximum separately; do not reinterpret the already-frozen zero-miss
+  gate after seeing the run;
+- allocate the session before accepting USB audio and perform no harness or
+  APTA allocation after the first frame. Any setup allocation failure or APTA
+  out-of-memory status increments `allocation_failure_count` and fails closed;
+- record input frames/bytes/callbacks, process calls, duration, workspace and
+  result-pool bytes, actual overview columns and resident beat records,
+  internal-heap and PSRAM before/minimum/after values, p99/maximum latency,
+  all three failure counters, USB enumeration/streaming state and completed-run
+  state in one machine-readable terminal record;
+- set `usb_audio_coexistence_passed=true` only after all 86,400,000 frames came
+  from a continuously active UAC stream with zero failures and the final APTA
+  result was acquired. A disconnected, paused, underfilled or restarted host
+  stream fails rather than extending or restarting the run.
+
+Build from a new ESP-IDF 6.0.2 directory using both P4 defaults files, require
+the same v1.0-v1.99 image metadata and flash normally to the already-identified
+COM4 target. Stop before flashing on any dependency, build, image-range or
+validator failure. After boot, stop and retain diagnostic logs if the separate
+P4 USB-OTG connector does not enumerate as the frozen UAC endpoint; COM4 alone
+is the USB Serial/JTAG control path and cannot be counted as real USB/audio
+input. The final tracked JSON is created only from a complete physical log plus
+the exact committed source revision and flashed application SHA-256.
