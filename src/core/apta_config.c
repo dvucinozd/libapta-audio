@@ -145,6 +145,10 @@ static size_t apta_memory_waveform_recommendation(
                 sizeof(apta_internal_onset_bin_t) +
             /* A1: precomputed flux array, one float per onset bin. */
             (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(float);
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+        s4_session +=
+            (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(uint16_t);
+#endif
         s4_snapshots =
             2u * ((size_t)APTA_INTERNAL_MAX_TEMPO_CANDIDATES *
                       sizeof(apta_tempo_candidate_t) +

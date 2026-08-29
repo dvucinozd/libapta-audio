@@ -793,7 +793,11 @@ apta_status_t apta_internal_s4_prepare(apta_session_t *session)
     }
     memset(session->onset_flux, 0, bytes);
     session->onset_flux_capacity = APTA_INTERNAL_ONSET_BIN_CAPACITY;
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+    return apta_internal_spectral_flux_i9_prepare(session);
+#else
     return APTA_STATUS_OK;
+#endif
 }
 
 apta_status_t apta_internal_s4_process_sample(
@@ -836,6 +840,9 @@ apta_status_t apta_internal_s4_process_sample(
         memset(bin, 0, sizeof(*bin));
         bin->occupied = 1u;
         bin->bin_index = (uint32_t)bin_index;
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+        apta_internal_spectral_flux_i9_reset_bin(session, bin_index);
+#endif
     }
     if (bin->sample_count ==
 #ifdef APTA_INTERNAL_MULTIBAND_ONSET
@@ -881,6 +888,16 @@ apta_status_t apta_internal_s4_process_sample(
         (uint32_t)(magnitude * APTA_INTERNAL_SAMPLE_MAGNITUDE_SCALE);
 #endif
     bin->sample_count += 1u;
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+    {
+        const apta_status_t spectral_status =
+            apta_internal_spectral_flux_i9_process_sample(
+                session, source_frame, sample);
+        if (spectral_status != APTA_STATUS_OK) {
+            return spectral_status;
+        }
+    }
+#endif
     if (bin->sample_count ==
         apta_s4_expected_bin_samples(session, bin_index)) {
         apta_s4_note_bin_complete(session, bin_index);
@@ -1802,6 +1819,9 @@ void apta_internal_s4_cleanup_session(apta_session_t *session)
     apta_internal_context_deallocate(session->context, session->onset_flux);
     session->onset_flux = NULL;
     session->onset_flux_capacity = 0u;
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+    apta_internal_spectral_flux_i9_cleanup(session);
+#endif
 }
 
 void apta_internal_s4_cleanup_result(apta_result_t *result)

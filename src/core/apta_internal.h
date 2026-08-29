@@ -85,6 +85,12 @@ typedef max_align_t apta_internal_max_align_t;
 #ifndef APTA_INTERNAL_ONSET_BIN_CAPACITY
 #define APTA_INTERNAL_ONSET_BIN_CAPACITY 4096u
 #endif
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+#define APTA_INTERNAL_I9_FFT_SIZE 512u
+#define APTA_INTERNAL_I9_HOP_FRAMES 128u
+#define APTA_INTERNAL_I9_SPECTRUM_BINS \
+    (APTA_INTERNAL_I9_FFT_SIZE / 2u + 1u)
+#endif
 #ifndef APTA_INTERNAL_MIN_TEMPO_BINS
 #define APTA_INTERNAL_MIN_TEMPO_BINS 512u
 #endif
@@ -565,6 +571,26 @@ typedef struct apta_internal_s6_session_state
 typedef struct apta_internal_s6_result_state
     apta_internal_s6_result_state_t;
 
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+typedef struct {
+    float samples[APTA_INTERNAL_I9_FFT_SIZE];
+    float window[APTA_INTERNAL_I9_FFT_SIZE];
+    float fft_real[APTA_INTERNAL_I9_FFT_SIZE];
+    float fft_imag[APTA_INTERNAL_I9_FFT_SIZE];
+    float previous_power[APTA_INTERNAL_I9_SPECTRUM_BINS];
+    uint16_t *bin_flux;
+    apta_source_frame_t next_source_frame;
+    uint64_t run_sample_count;
+    uint32_t write_index;
+    uint32_t minimum_spectrum_bin;
+    uint32_t maximum_spectrum_bin;
+    uint8_t has_next_source_frame;
+    uint8_t has_previous_spectrum;
+    uint8_t initialized;
+    uint8_t reserved8;
+} apta_internal_spectral_flux_i9_state_t;
+#endif
+
 struct apta_context {
     apta_allocator_t allocator;
     apta_logger_t logger;
@@ -715,6 +741,11 @@ struct apta_session {
      * avoiding the modulo keeps a hardware divide out of the lag loop. */
     float *onset_flux;
     uint32_t onset_flux_capacity;
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+    /* I9 is a trace-only parallel evidence ring. It never changes production
+     * onset_flux until the separately frozen oracle gates authorize that step. */
+    apta_internal_spectral_flux_i9_state_t spectral_flux_i9;
+#endif
     /* Incremental longest contiguous run of complete onset bins. Sequential
      * input extends this in O(1), including ordinary ring wrap. Gaps or an
      * unexpected overwrite mark it dirty and the next refresh rebuilds it with
@@ -990,6 +1021,21 @@ apta_status_t apta_internal_s4_process_sample(
     const float bands[APTA_INTERNAL_BAND_COUNT]);
 #else
     float sample);
+#endif
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+apta_status_t apta_internal_spectral_flux_i9_prepare(apta_session_t *session);
+void apta_internal_spectral_flux_i9_reset_bin(
+    apta_session_t *session,
+    uint64_t bin_index);
+apta_status_t apta_internal_spectral_flux_i9_process_sample(
+    apta_session_t *session,
+    apta_source_frame_t source_frame,
+    float sample);
+int apta_internal_spectral_flux_i9_trace_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *flux_out);
+void apta_internal_spectral_flux_i9_cleanup(apta_session_t *session);
 #endif
 apta_status_t apta_internal_s4_refresh(
     apta_session_t *session,

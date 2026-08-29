@@ -344,6 +344,23 @@ int main(int argc, char **argv)
                     (double)peak);
         }
 #endif
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+        fputs("],\"onset_spectral_flux_i9\":[", trace);
+        for (index = 0u; index < flux_count; ++index) {
+            float spectral_flux;
+
+            if (!apta_internal_spectral_flux_i9_trace_at(
+                    session, index, &spectral_flux)) {
+                fputs("apta-meter-trace: incomplete I9 spectral-flux snapshot\n",
+                      stderr);
+                goto cleanup;
+            }
+            fprintf(trace,
+                    "%s%.9g",
+                    index > 0u ? "," : "",
+                    (double)spectral_flux);
+        }
+#endif
         fprintf(trace,
                 "],\"overview_3band\":{\"frames_per_column\":%u,"
                 "\"origin_frame\":%llu,\"spans\":[",

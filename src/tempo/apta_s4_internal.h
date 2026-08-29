@@ -33,6 +33,13 @@ int apta_internal_s4_trace_peak_at(
     uint32_t offset,
     float *peak_out);
 #endif
+#ifdef APTA_INTERNAL_SPECTRAL_FLUX_I9
+/* Read the normalized trace-only spectral flux captured by I9. */
+int apta_internal_spectral_flux_i9_trace_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *flux_out);
+#endif
 #endif
 #endif
 

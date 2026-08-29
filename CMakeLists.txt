@@ -71,6 +71,25 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9
+    "Build the APTA 1.1 WP1 streaming spectral-flux trace experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
+    if(NOT APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9 requires "
+            "APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET=ON")
+    endif()
+    if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9 and "
+            "APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8 are mutually exclusive")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_SPECTRAL_FLUX_I9=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_3BAND_DOWNBEAT
     "Build the development three-band downbeat phase experiment"
     OFF)
@@ -487,6 +506,12 @@ set(
         src/waveform/apta_waveform_scheduler.c
         src/waveform/apta_waveform_snapshot.c
         src/waveform/apta_waveform_snapshot_combined.c)
+
+if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
+    list(APPEND
+        APTA_CORE_SOURCES
+        src/experimental/apta_spectral_flux_i9.c)
+endif()
 
 add_library(apta_core_objects OBJECT ${APTA_CORE_SOURCES})
 add_library(apta_core $<TARGET_OBJECTS:apta_core_objects>)

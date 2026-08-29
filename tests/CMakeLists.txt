@@ -127,6 +127,21 @@ if(APTA_ENABLE_EXPERIMENTAL_TRANSIENT_LATTICE_I8)
         target_link_libraries(apta_transient_peak PRIVATE m)
     endif()
 endif()
+if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
+    apta_add_c_test(
+        apta_spectral_flux_i9
+        apta.experimental.spectral_flux_i9
+        unit/spectral_flux_i9.c)
+    target_link_libraries(apta_spectral_flux_i9 PRIVATE apta_c11_atomics)
+    target_include_directories(
+        apta_spectral_flux_i9
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/core
+            ${CMAKE_SOURCE_DIR}/src/tempo)
+    if(UNIX)
+        target_link_libraries(apta_spectral_flux_i9 PRIVATE m)
+    endif()
+endif()
 if(APTA_ENABLE_EXPERIMENTAL_METER_TRACE AND
    APTA_ENABLE_EXPERIMENTAL_MULTIBAND_ONSET)
     apta_add_c_test(
@@ -355,6 +370,13 @@ if(Python3_Interpreter_FOUND)
         COMMAND
             ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/unit/apta_1_1_compare_dj_candidates.py)
+    if(APTA_ENABLE_EXPERIMENTAL_SPECTRAL_FLUX_I9)
+        add_test(
+            NAME apta.experimental.spectral_flux_i9_oracle
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/unit/apta_1_1_onset_trace_i9.py)
+    endif()
 endif()
 
 if(TARGET apta_decoder_wav)

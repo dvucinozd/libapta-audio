@@ -1,0 +1,358 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "../core/apta_internal.h"
+#include "../core/apta_session_workspace.h"
+
+#include <math.h>
+#include <stdalign.h>
+#include <string.h>
+
+#define APTA_I9_TWO_PI 6.28318530717958647692f
+#define APTA_I9_MIN_FREQUENCY_HZ 40u
+#define APTA_I9_MAX_FREQUENCY_HZ 16000u
+#define APTA_I9_NYQUIST_NUMERATOR 45u
+#define APTA_I9_NYQUIST_DENOMINATOR 100u
+#define APTA_I9_POWER_FLOOR 1.0e-20f
+
+_Static_assert(APTA_INTERNAL_I9_FFT_SIZE == 512u,
+               "the frozen I9 FFT size is 512");
+_Static_assert(APTA_INTERNAL_I9_HOP_FRAMES == 128u,
+               "the frozen I9 hop is 128 source frames");
+_Static_assert((APTA_INTERNAL_I9_FFT_SIZE &
+                (APTA_INTERNAL_I9_FFT_SIZE - 1u)) == 0u,
+               "I9 radix-2 FFT size must be a power of two");
+_Static_assert(
+    sizeof(apta_internal_spectral_flux_i9_state_t) +
+            APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(uint16_t) <=
+        24u * 1024u,
+    "I9 conditional persistent state must fit the frozen 24 KiB ceiling");
+
+static void apta_i9_reset_run(
+    apta_internal_spectral_flux_i9_state_t *state)
+{
+    state->run_sample_count = 0u;
+    state->write_index = 0u;
+    state->has_previous_spectrum = 0u;
+}
+
+static void apta_i9_fft(
+    float real[APTA_INTERNAL_I9_FFT_SIZE],
+    float imaginary[APTA_INTERNAL_I9_FFT_SIZE])
+{
+    uint32_t index;
+    uint32_t reversed = 0u;
+    uint32_t length;
+
+    for (index = 1u; index < APTA_INTERNAL_I9_FFT_SIZE; ++index) {
+        uint32_t bit = APTA_INTERNAL_I9_FFT_SIZE >> 1u;
+
+        while ((reversed & bit) != 0u) {
+            reversed ^= bit;
+            bit >>= 1u;
+        }
+        reversed ^= bit;
+        if (index < reversed) {
+            const float real_swap = real[index];
+            const float imaginary_swap = imaginary[index];
+
+            real[index] = real[reversed];
+            imaginary[index] = imaginary[reversed];
+            real[reversed] = real_swap;
+            imaginary[reversed] = imaginary_swap;
+        }
+    }
+
+    for (length = 2u;
+         length <= APTA_INTERNAL_I9_FFT_SIZE;
+         length <<= 1u) {
+        const float angle = -APTA_I9_TWO_PI / (float)length;
+        const float step_real = cosf(angle);
+        const float step_imaginary = sinf(angle);
+        const uint32_t half = length >> 1u;
+        uint32_t first;
+
+        for (first = 0u;
+             first < APTA_INTERNAL_I9_FFT_SIZE;
+             first += length) {
+            float twiddle_real = 1.0f;
+            float twiddle_imaginary = 0.0f;
+            uint32_t offset;
+
+            for (offset = 0u; offset < half; ++offset) {
+                const uint32_t even = first + offset;
+                const uint32_t odd = even + half;
+                const float odd_real =
+                    real[odd] * twiddle_real -
+                    imaginary[odd] * twiddle_imaginary;
+                const float odd_imaginary =
+                    real[odd] * twiddle_imaginary +
+                    imaginary[odd] * twiddle_real;
+                const float even_real = real[even];
+                const float even_imaginary = imaginary[even];
+                const float next_twiddle_real =
+                    twiddle_real * step_real -
+                    twiddle_imaginary * step_imaginary;
+
+                real[even] = even_real + odd_real;
+                imaginary[even] = even_imaginary + odd_imaginary;
+                real[odd] = even_real - odd_real;
+                imaginary[odd] = even_imaginary - odd_imaginary;
+                twiddle_imaginary =
+                    twiddle_real * step_imaginary +
+                    twiddle_imaginary * step_real;
+                twiddle_real = next_twiddle_real;
+            }
+        }
+    }
+}
+
+static apta_status_t apta_i9_finish_frame(
+    apta_session_t *session,
+    apta_source_frame_t source_frame)
+{
+    apta_internal_spectral_flux_i9_state_t *state =
+        &session->spectral_flux_i9;
+    float power_sum = 0.0f;
+    float flux = 0.0f;
+    apta_source_frame_t centre_frame;
+    uint64_t bin_index;
+    uint32_t slot;
+    uint32_t index;
+
+    for (index = 0u; index < APTA_INTERNAL_I9_FFT_SIZE; ++index) {
+        const uint32_t sample_index =
+            (state->write_index + index) &
+            (APTA_INTERNAL_I9_FFT_SIZE - 1u);
+
+        state->fft_real[index] =
+            state->samples[sample_index] * state->window[index];
+        state->fft_imag[index] = 0.0f;
+    }
+    apta_i9_fft(state->fft_real, state->fft_imag);
+
+    for (index = state->minimum_spectrum_bin;
+         index <= state->maximum_spectrum_bin;
+         ++index) {
+        const float real = state->fft_real[index];
+        const float imaginary = state->fft_imag[index];
+        const float power = real * real + imaginary * imaginary;
+
+        state->fft_real[index] = power;
+        power_sum += power;
+    }
+
+    for (index = state->minimum_spectrum_bin;
+         index <= state->maximum_spectrum_bin;
+         ++index) {
+        const float normalized =
+            state->fft_real[index] / (APTA_I9_POWER_FLOOR + power_sum);
+
+        if (state->has_previous_spectrum &&
+            normalized > state->previous_power[index]) {
+            flux += normalized - state->previous_power[index];
+        }
+        state->previous_power[index] = normalized;
+    }
+
+    if (!state->has_previous_spectrum) {
+        state->has_previous_spectrum = 1u;
+        flux = 0.0f;
+    }
+    if (!isfinite(flux)) {
+        return APTA_ERROR_INTERNAL;
+    }
+    flux = fminf(1.0f, fmaxf(0.0f, flux));
+
+    centre_frame =
+        source_frame - (APTA_INTERNAL_I9_FFT_SIZE / 2u - 1u);
+    bin_index = centre_frame / APTA_INTERNAL_ONSET_FRAMES_PER_BIN;
+    if (bin_index > APTA_INTERNAL_MAX_BIN_INDEX) {
+        return APTA_ERROR_LIMIT_EXCEEDED;
+    }
+    slot = (uint32_t)(bin_index % APTA_INTERNAL_ONSET_BIN_CAPACITY);
+    if (session->onset_bins == NULL ||
+        !session->onset_bins[slot].occupied ||
+        session->onset_bins[slot].bin_index != (uint32_t)bin_index) {
+        return APTA_ERROR_INTERNAL;
+    }
+    {
+        const uint16_t quantized =
+            (uint16_t)floorf(flux * 65535.0f + 0.5f);
+
+        if (quantized > state->bin_flux[slot]) {
+            state->bin_flux[slot] = quantized;
+        }
+    }
+    return APTA_STATUS_OK;
+}
+
+apta_status_t apta_internal_spectral_flux_i9_prepare(apta_session_t *session)
+{
+    apta_internal_spectral_flux_i9_state_t *state;
+    uint64_t upper_frequency;
+    uint32_t sample_rate;
+    uint32_t index;
+    size_t bytes;
+
+    if (session == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    state = &session->spectral_flux_i9;
+    if (state->initialized) {
+        return APTA_STATUS_OK;
+    }
+    sample_rate = session->config.source_sample_rate;
+    if (sample_rate == 0u) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+
+    bytes = (size_t)APTA_INTERNAL_ONSET_BIN_CAPACITY * sizeof(uint16_t);
+    state->bin_flux = (uint16_t *)apta_internal_session_allocate(
+        session,
+        bytes,
+        alignof(uint16_t),
+        APTA_MEMORY_PERSISTENT);
+    if (state->bin_flux == NULL) {
+        return APTA_ERROR_OUT_OF_MEMORY;
+    }
+    memset(state->bin_flux, 0, bytes);
+
+    for (index = 0u; index < APTA_INTERNAL_I9_FFT_SIZE; ++index) {
+        state->window[index] =
+            0.5f - 0.5f * cosf(
+                APTA_I9_TWO_PI * (float)index /
+                (float)APTA_INTERNAL_I9_FFT_SIZE);
+    }
+    state->minimum_spectrum_bin = (uint32_t)(
+        ((uint64_t)APTA_I9_MIN_FREQUENCY_HZ *
+         APTA_INTERNAL_I9_FFT_SIZE + sample_rate - 1u) /
+        sample_rate);
+    if (state->minimum_spectrum_bin == 0u) {
+        state->minimum_spectrum_bin = 1u;
+    }
+    upper_frequency =
+        (uint64_t)sample_rate * APTA_I9_NYQUIST_NUMERATOR /
+        APTA_I9_NYQUIST_DENOMINATOR;
+    if (upper_frequency > APTA_I9_MAX_FREQUENCY_HZ) {
+        upper_frequency = APTA_I9_MAX_FREQUENCY_HZ;
+    }
+    state->maximum_spectrum_bin = (uint32_t)(
+        upper_frequency * APTA_INTERNAL_I9_FFT_SIZE / sample_rate);
+    if (state->maximum_spectrum_bin >= APTA_INTERNAL_I9_SPECTRUM_BINS) {
+        state->maximum_spectrum_bin =
+            APTA_INTERNAL_I9_SPECTRUM_BINS - 1u;
+    }
+    if (state->maximum_spectrum_bin < state->minimum_spectrum_bin) {
+        apta_internal_context_deallocate(session->context, state->bin_flux);
+        state->bin_flux = NULL;
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    apta_i9_reset_run(state);
+    state->initialized = 1u;
+    return APTA_STATUS_OK;
+}
+
+void apta_internal_spectral_flux_i9_reset_bin(
+    apta_session_t *session,
+    uint64_t bin_index)
+{
+    apta_internal_spectral_flux_i9_state_t *state;
+
+    if (session == NULL) {
+        return;
+    }
+    state = &session->spectral_flux_i9;
+    if (!state->initialized || state->bin_flux == NULL) {
+        return;
+    }
+    state->bin_flux[
+        (uint32_t)(bin_index % APTA_INTERNAL_ONSET_BIN_CAPACITY)] = 0u;
+}
+
+apta_status_t apta_internal_spectral_flux_i9_process_sample(
+    apta_session_t *session,
+    apta_source_frame_t source_frame,
+    float sample)
+{
+    apta_internal_spectral_flux_i9_state_t *state;
+
+    if (session == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    state = &session->spectral_flux_i9;
+    if (!state->initialized || state->bin_flux == NULL) {
+        return APTA_ERROR_INTERNAL;
+    }
+    if (!isfinite(sample)) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (state->has_next_source_frame &&
+        source_frame != state->next_source_frame) {
+        apta_i9_reset_run(state);
+    }
+    state->next_source_frame = source_frame + 1u;
+    state->has_next_source_frame = 1u;
+
+    state->samples[state->write_index] =
+        fminf(1.0f, fmaxf(-1.0f, sample));
+    state->write_index =
+        (state->write_index + 1u) & (APTA_INTERNAL_I9_FFT_SIZE - 1u);
+    state->run_sample_count += 1u;
+
+    if (state->run_sample_count < APTA_INTERNAL_I9_FFT_SIZE ||
+        ((state->run_sample_count - APTA_INTERNAL_I9_FFT_SIZE) %
+         APTA_INTERNAL_I9_HOP_FRAMES) != 0u) {
+        return APTA_STATUS_OK;
+    }
+    return apta_i9_finish_frame(session, source_frame);
+}
+
+int apta_internal_spectral_flux_i9_trace_at(
+    const apta_session_t *session,
+    uint32_t offset,
+    float *flux_out)
+{
+    const apta_internal_spectral_flux_i9_state_t *state;
+    const apta_internal_onset_bin_t *bin;
+    uint64_t count;
+    uint64_t bin_index;
+    uint32_t slot;
+
+    if (session == NULL || flux_out == NULL ||
+        session->s4_refresh_evidence_end <
+            session->s4_refresh_evidence_first) {
+        return 0;
+    }
+    state = &session->spectral_flux_i9;
+    if (!state->initialized || state->bin_flux == NULL ||
+        session->onset_bins == NULL) {
+        return 0;
+    }
+    count = session->s4_refresh_evidence_end -
+            session->s4_refresh_evidence_first;
+    if ((uint64_t)offset >= count) {
+        return 0;
+    }
+    bin_index = session->s4_refresh_evidence_first + offset;
+    slot = (uint32_t)(bin_index % APTA_INTERNAL_ONSET_BIN_CAPACITY);
+    bin = &session->onset_bins[slot];
+    if (!bin->occupied || bin->bin_index != (uint32_t)bin_index ||
+        bin->sample_count == 0u) {
+        return 0;
+    }
+    *flux_out = (float)state->bin_flux[slot] / 65535.0f;
+    return 1;
+}
+
+void apta_internal_spectral_flux_i9_cleanup(apta_session_t *session)
+{
+    apta_internal_spectral_flux_i9_state_t *state;
+
+    if (session == NULL) {
+        return;
+    }
+    state = &session->spectral_flux_i9;
+    apta_internal_context_deallocate(session->context, state->bin_flux);
+    state->bin_flux = NULL;
+    state->initialized = 0u;
+    apta_i9_reset_run(state);
+}

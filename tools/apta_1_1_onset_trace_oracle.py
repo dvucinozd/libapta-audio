@@ -34,6 +34,7 @@ QUANTIZATION_FLOOR = 1.0 / 255.0
 PHASE_TOLERANCE_BEATS = 0.10
 PERIOD_TOLERANCE = 0.01
 I8_FORMULA_NAME = "peak_sharpness_multiband_i8"
+I9_FORMULA_NAME = "spectral_flux_max_fusion_i9"
 
 
 def _sha256(path: Path) -> str:
@@ -332,6 +333,12 @@ def _peak_sharpness_multiband(
     return _baseline_band_flux(energy) * sharpness
 
 
+def _spectral_flux_max_fusion(
+    captured: np.ndarray, spectral: np.ndarray
+) -> np.ndarray:
+    return np.maximum(captured, spectral)
+
+
 FORMULAS: dict[str, Callable[[np.ndarray], np.ndarray] | None] = {
     "captured_multiband": None,
     "reconstructed_multiband": _baseline_band_flux,
@@ -447,6 +454,7 @@ def evaluate(
     traces: Path,
     corpus: str,
     include_i8_peak: bool = False,
+    include_i9_spectral: bool = False,
 ) -> dict[str, object]:
     labels_raw = json.loads(labels_path.read_text(encoding="utf-8"))
     labels = {
@@ -466,6 +474,8 @@ def evaluate(
     formula_names = [*FORMULAS, *PHASE_ONLY_FORMULAS]
     if include_i8_peak:
         formula_names.append(I8_FORMULA_NAME)
+    if include_i9_spectral:
+        formula_names.append(I9_FORMULA_NAME)
     per_formula: dict[str, list[dict[str, object]]] = {
         name: [] for name in formula_names
     }
@@ -473,6 +483,7 @@ def evaluate(
     captured_candidate_set_matches = 0
     hybrid_candidate_order_matches = 0
     i8_peak_trace_tracks = 0
+    i9_spectral_trace_tracks = 0
     for path in paths:
         track = path.stem
         label = labels[track]
@@ -487,6 +498,22 @@ def evaluate(
             if np.any(peak < 0.0) or np.any(peak > 1.0):
                 raise ValueError(f"{path.name}: I8 peak trace outside [0, 1]")
             i8_peak_trace_tracks += 1
+        spectral = np.asarray(
+            trace.get("onset_spectral_flux_i9", []), dtype=np.float64
+        )
+        if include_i9_spectral:
+            if (
+                len(spectral) != len(captured)
+                or not np.all(np.isfinite(spectral))
+            ):
+                raise ValueError(
+                    f"{path.name}: invalid I9 spectral-flux trace geometry"
+                )
+            if np.any(spectral < 0.0) or np.any(spectral > 1.0):
+                raise ValueError(
+                    f"{path.name}: I9 spectral-flux trace outside [0, 1]"
+                )
+            i9_spectral_trace_tracks += 1
         reconstructed = _baseline_band_flux(energy)
         if not np.allclose(captured, reconstructed, rtol=2.0e-5, atol=2.0e-7):
             reconstructed_differences += 1
@@ -499,10 +526,14 @@ def evaluate(
         }
         if include_i8_peak:
             formulas[I8_FORMULA_NAME] = None
+        if include_i9_spectral:
+            formulas[I9_FORMULA_NAME] = None
         for name, formula in formulas.items():
             phase_only = name in PHASE_ONLY_FORMULAS
             if name == I8_FORMULA_NAME:
                 phase_novelty = _peak_sharpness_multiband(energy, peak)
+            elif name == I9_FORMULA_NAME:
+                phase_novelty = _spectral_flux_max_fusion(captured, spectral)
             else:
                 phase_novelty = (
                     captured if formula is None else formula(energy)
@@ -554,6 +585,13 @@ def evaluate(
         for track in tracks:
             candidates = track["candidates"]
             if not candidates:
+                formula_verdicts[str(track["track"])] = {
+                    "top1_period": False,
+                    "top1_phase": False,
+                    "top1_period_phase": False,
+                    "top3_period": False,
+                    "top3_period_phase": False,
+                }
                 continue
             first = candidates[0]
             period_ok = float(first["period_error"]) <= PERIOD_TOLERANCE
@@ -636,6 +674,7 @@ def evaluate(
             "captured_top3_candidate_set_matches": captured_candidate_set_matches,
             "hybrid_candidate_order_matches": hybrid_candidate_order_matches,
             "i8_peak_trace_tracks": i8_peak_trace_tracks,
+            "i9_spectral_trace_tracks": i9_spectral_trace_tracks,
         },
         "formulas": summaries,
     }
@@ -651,6 +690,11 @@ def main() -> int:
         action="store_true",
         help="require I8 peak arrays and evaluate the frozen I8 formula",
     )
+    parser.add_argument(
+        "--i9-spectral",
+        action="store_true",
+        help="require I9 spectral arrays and evaluate the frozen max fusion",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
@@ -659,6 +703,7 @@ def main() -> int:
             args.traces,
             args.corpus,
             include_i8_peak=args.i8_peak,
+            include_i9_spectral=args.i9_spectral,
         )
         encoded = json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n"
         args.output.parent.mkdir(parents=True, exist_ok=True)
