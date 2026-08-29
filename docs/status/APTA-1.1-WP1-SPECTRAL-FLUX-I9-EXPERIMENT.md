@@ -1,6 +1,6 @@
 # APTA 1.1 WP1 spectral-flux iteration 9
 
-- **Status:** trace-only implementation qualified; external-development oracle pending
+- **Status:** rejected by the external-development oracle gate
 - **Frozen baseline revision:** `1f0e956c4fc5a9188f6fa6598a44eac051ec9cd1`
 - **Trace implementation revision:** `9413aaab3a87726753e7bf217685cb17580fc309`
 - **Evidence class:** open development only
@@ -145,3 +145,38 @@ alternating baseline/I9 passes. Baseline wall times were 11.041, 9.586 and
 This is implementation/resource evidence only. No ASAP or Ballroom formal
 holdout, spent DJ trace or fresh acceptance corpus was opened by this
 checkpoint, and it makes no algorithmic or acceptance claim.
+
+## External-development oracle outcome
+
+The exact trace implementation captured only the 40 IDs marked `development`
+in each already-open ASAP and Ballroom protocol. Both runs had exact label/ID
+coverage, 40/40 finite aligned I9 arrays in `[0, 1]`, 40/40 captured top-three
+candidate-set matches and 40/40 hybrid candidate-order matches. Two oracle
+executions per corpus were byte-identical:
+
+- ASAP development SHA-256:
+  `d4c269ff0395c8e4a302960efd6be4e2e81f5baf56abe4bd67e8efe8f6854b03`;
+- Ballroom development SHA-256:
+  `16aefb5accebe7c6c3eb2a36a33d2683d78ab96323baa34b8ae5af94ba1bef30`.
+
+The exact frozen `max(production_novelty, spectral_flux)` oracle produced:
+
+| Corpus | Metric | Baseline | I9 | Fixes | Breaks | Net |
+|---|---|---:|---:|---:|---:|---:|
+| ASAP development | top-1 period | 2 | 1 | 1 | 2 | -1 |
+| ASAP development | top-1 phase | 1 | 0 | 0 | 1 | -1 |
+| ASAP development | joint top-1 period+phase | 0 | 0 | 0 | 0 | 0 |
+| ASAP development | top-3 period | 3 | 2 | 1 | 2 | -1 |
+| Ballroom development | top-1 period | 10 | 4 | 0 | 6 | -6 |
+| Ballroom development | top-1 phase | 11 | 4 | 1 | 8 | -7 |
+| Ballroom development | joint top-1 period+phase | 7 | 1 | 0 | 6 | -6 |
+| Ballroom development | top-3 period | 17 | 10 | 0 | 7 | -7 |
+
+Both corpora have negative top-1 period transfer, ASAP exceeds the maximum of
+one period break, Ballroom has six period and joint breaks, and top-three
+period regresses on both corpora. I9 is therefore rejected at frozen stage 3.
+No neighboring FFT size, hop, band, normalization, weighting or fusion rule
+was tested. The spent 60-track DJ trace, analyzer novelty implementation,
+native candidate runs, formal ASAP/Ballroom holdouts and fresh acceptance
+corpus remain unopened by I9. This result is development evidence only and
+makes no acceptance claim.
