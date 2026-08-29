@@ -1,10 +1,10 @@
 # APTA 1.1 WP8 readiness audit
 
-- **Status:** in progress; v1.3 compatibility correction pre-registered
+- **Status:** in progress; v1.3 diagnostic boot passed, qualifying harness open
 - **Audited source revision:** `0fe1c22e44e759db3675a289e859b14a085c31e0`
 - **Audit date:** 2026-08-29
 - **Acceptance claim:** false
-- **Tracked physical evidence:** absent
+- **Tracked qualifying physical evidence:** absent
 
 ## Environment result
 
@@ -42,6 +42,41 @@ The first boot is diagnostic only. It may establish that the exact project
 build starts and that its bounded feature sweep runs on real P4 silicon. It
 cannot close WP8 because the example still uses eight seconds of generated
 click PCM instead of the required real USB/audio path and 1,800-second run.
+
+## Revision-correction diagnostic result
+
+The pre-registered correction was implemented at
+`18ade2ed13da23585d9ee10826056c83e3ded9a1` and pushed before the physical
+run. A clean ESP-IDF 6.0.2 rebuild produced a 233,056-byte application image
+with SHA-256
+`e660c5ed0ccaac10bf66717a5497cfe47ce775f36633cacd5b980b9694e61278`, app
+version `v1.0.1-225-g18ade2e`, valid checksum/validation hash and ESP32-P4
+revision range v1.0-v1.99. The bootloader advertises the same range. The
+generated configuration confirms the early-revision selector, v1.0 minimum,
+PSRAM, the 32,768-frame overview profile, four detail tiles, 4,096 onset bins
+and 16,384 global bins.
+
+A normal `idf.py -B build-wp8-idf60-p4-rev1 -p COM4 flash` completed without
+`--force`; esptool identified the target as revision v1.3 and verified every
+written segment. The physical boot then confirmed:
+
+- ESP-IDF 6.0.2, app revision `18ade2e`, accepted v1.0-v1.99 and actual v1.3;
+- 32 MiB hex PSRAM at 20 MHz and a passing startup memory test;
+- all seven diagnostic feature-sweep rows completed with zero heap delta;
+- the final 12-family row used 580,784 bytes of eight-second workspace across
+  392 process calls, with 3,457 us average, p99 at most 6,000 us and 8,832 us
+  maximum;
+- free heap was unchanged at 34,154,815 bytes, minimum free heap was
+  33,592,143 bytes, largest free block was 33,030,144 bytes and task stack
+  high-water mark was 5,764 words.
+
+The initial standalone tempo demonstration also reported one 52,220 us maximum
+call despite a 1,091 us average and p99 at most 2,600 us. This value is retained
+as diagnostic information and is not reinterpreted as a qualifying deadline
+result. Startup additionally reported a physical 16 MiB flash behind the 2 MiB
+image header and use of the generic driver for the detected BOYA flash. Neither
+warning is a gate in the frozen physical-evidence contract, but both remain
+visible inputs to the final board profile review.
 
 The first exact local build, at revision
 `966798f8771764801524f875d11eae081be95fcf`, exposed the fail-closed
@@ -101,17 +136,17 @@ artifacts, not tracked acceptance evidence. The checkout was clean after the
 build.
 
 No synthetic runner, generated JSON, accelerated PCM feed or eight-second
-feature sweep may be reported as physical evidence. Closing WP8 still requires
-a real ESP32-P4 v3.1-or-newer board with PSRAM, a real 48 kHz USB/audio workload,
-at least 1,800 continuous seconds and every counter/measurement required by
-`APTA-1.1-P4-HARDWARE-EVIDENCE.md`.
+feature sweep may be reported as qualifying physical evidence. Closing WP8
+still requires the connected ESP32-P4 v1.3 board with PSRAM, a real 48 kHz
+USB/audio workload, at least 1,800 continuous seconds and every
+counter/measurement required by `APTA-1.1-P4-HARDWARE-EVIDENCE.md`.
 
 ## Current decision
 
-WP8 remains open but software-prepared. The connected COM4 device is a usable
-v1.3 hardware target after the pre-registered IDF 6 early-revision correction.
-The immediate physical step is the clean metadata-verified build, normal flash
-and diagnostic boot. The release gate still requires the exact frozen
-firmware, its intended real USB/audio input path and the complete 1,800-second
-evidence run. WP6 and WP7 remain independently gated by the failed WP5
-algorithm-entry decision.
+WP8 remains open. The connected COM4 device is now a proven IDF 6.0.2 v1.3
+diagnostic target, and revision compatibility is no longer the blocker. The
+immediate physical work is an instrumented real USB/audio input harness that
+records every frozen counter and resource field for 1,800 seconds, followed by
+the exact integrated-candidate rerun if its firmware or memory profile changes.
+WP6 and WP7 remain independently gated by the failed WP5 algorithm-entry
+decision.

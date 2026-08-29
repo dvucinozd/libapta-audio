@@ -1475,11 +1475,12 @@ accepting a single block. The S6 bin ring is roughly 624 KB of that on its own:
 board, and the example now prints the queried workspace requirement beside each
 row so a shortfall reports a number rather than a failed push.
 
-Two toolchain notes worth keeping. ESP-IDF 6.0.2 builds P4 firmware requiring
-chip revision v3.1 or newer, so a v1.x board needs 5.5, which supports v0.0
-through v1.0. And the sweep needs `vTaskDelay()` rather than `taskYIELD()`
-between blocks: seven sessions back to back never let the idle task run, and the
-task watchdog fires.
+Two toolchain notes worth keeping. ESP-IDF 6.0.2 has mutually exclusive P4
+build paths for revisions below v3.0 and revisions v3.0 or newer. The measured
+v1.3 board requires `CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y`; its project profile
+uses a v1.0 minimum and produces a v1.0-v1.99 image. The sweep also needs
+`vTaskDelay()` rather than `taskYIELD()` between blocks: seven sessions back to
+back never let the idle task run, and the task watchdog fires.
 
 ## 30. Packing the onset bin, and what it does not reach
 

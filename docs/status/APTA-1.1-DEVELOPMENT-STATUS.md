@@ -90,10 +90,13 @@ At remediation revision `0fe1c22e44e759db3675a289e859b14a085c31e0`, the
 corrected 12-feature capacity probe preserves every value above and the exact
 ESP-IDF 6.0.2 build produces a 235,024-byte ESP32-P4 v3.1-v3.99 image with
 PSRAM and the required 32,768-frame overview profile. Validator unit tests pass
-8/8. This is firmware-build/layout evidence only. Physical-device latency,
-actual internal/PSRAM placement, allocator fragmentation, thermals, and
-USB/audio coexistence remain unverified until a real hardware run satisfies the
-frozen hardware-evidence contract.
+8/8. Revision `18ade2ed13da23585d9ee10826056c83e3ded9a1` corrects the P4
+revision profile and produces a normally flashable 233,056-byte v1.0-v1.99
+image. Its diagnostic boot on the physical v1.3 board passed the 32 MiB PSRAM
+test and full eight-second feature sweep with zero heap delta. This remains
+diagnostic rather than qualifying evidence. The real 48 kHz USB/audio path,
+1,800-second counters, thermals and final exact-candidate rerun remain open
+under the frozen hardware-evidence contract.
 
 ## Frozen final DJ acceptance contract
 

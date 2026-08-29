@@ -282,15 +282,16 @@ Any failed gate rejects the candidate. Do not tune against that corpus.
 
 ## Work package 8 — physical ESP32-P4 evidence (parallel track)
 
-**Status:** in progress; software-prepared, v1.3 compatibility correction
-pre-registered. The
+**Status:** in progress; v1.3 diagnostic passed, qualifying harness open. The
 2026-08-29 readiness remediation is complete at
 `0fe1c22e44e759db3675a289e859b14a085c31e0`: the exact ESP-IDF 6.0.2 image,
 PSRAM/32,768-frame profile, 12-feature example and 12-feature capacity probe all
-verify. The board on COM4 was identified as ESP32-P4 v1.3. Local ESP-IDF 6.0.2
-sources confirm its supported early-revision build path; the exact correction,
-normal-flash stop conditions and diagnostic-only claim boundary are frozen in
-`APTA-1.1-WP8-READINESS-AUDIT.md`. No physical claim has been made.
+verify. Revision `18ade2ed13da23585d9ee10826056c83e3ded9a1` selects the
+supported early-P4 path, and its metadata-verified image was normally flashed
+to the v1.3 board on COM4. Boot, 32 MiB PSRAM test and the complete diagnostic
+feature sweep passed. This is physical diagnostic evidence, not the qualifying
+USB/audio run; exact results and the remaining boundary are frozen in
+`APTA-1.1-WP8-READINESS-AUDIT.md`.
 
 This work can start as soon as hardware is available and should run in parallel
 with algorithm development, then be repeated for the exact integrated
@@ -334,7 +335,7 @@ Only after work packages 5 through 8 pass:
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
 The immediate tasks are the pre-registered I10 trace experiment and the
-pre-registered ESP32-P4 v1.3 compatibility build/diagnostic run in parallel.
+instrumented 1,800-second ESP32-P4 USB/audio harness in parallel.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable
