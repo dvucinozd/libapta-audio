@@ -1,7 +1,8 @@
 # APTA 1.1 WP5 integration audit
 
-- **Status:** cleanup boundary frozen; final verification pending
-- **Audited revision:** `cc2aba61e618f8b1c6b244457b98377e3da4cc51`
+- **Status:** closed as a software-qualified baseline; not algorithmically
+  eligible for WP6
+- **Audited revision:** `cfb811a96af4202f266d58fc8a74e484b189cf59`
 - **Integrated algorithm candidate:** retained production defaults
 - **Acceptance claim:** false
 - **Formal holdouts:** unopened
@@ -30,6 +31,7 @@ the known ignored-build traversal bottleneck on WSL/NTFS:
 |---|---:|
 | Release, Werror, default flags | 121/121 pass |
 | Debug, Werror, ASan/UBSan, default flags | 116/116 pass |
+| Release, Werror, retained diagnostics, focused tests | 8/8 pass |
 
 The release matrix includes source/binary packaging, installed conformance,
 versioned interchange, unit/integration, CLI, serialization, compatibility and
@@ -63,6 +65,13 @@ assign them a specific evidence role:
 Historical reports keep their original flag names and results. Operational
 examples must stop presenting retired flags as current candidates.
 
+The cleanup is committed at
+`cfb811a96af4202f266d58fc8a74e484b189cf59`. Configure-time guards now reject
+each retired option when explicitly enabled, including
+`APTA_ENABLE_EXPERIMENTAL_KEY_TUNING`, instead of silently accepting a stale
+experiment request. The retained diagnostics configure and build together and
+their focused onset, trace, meter/downbeat, key and analyzer tests pass 8/8.
+
 After cleanup, require:
 
 - default configure, build and full Werror matrix;
@@ -74,3 +83,26 @@ After cleanup, require:
 These software gates cannot override the algorithm readiness gate. The
 production candidate remains ineligible for WP6 unless the open development
 evidence meets the WP1-WP4 transfer criteria.
+
+## WP5 decision
+
+WP5 is closed as a clean, reproducible integration baseline. Cleanup did not
+change the default analyzer bytes, declared P4 memory profile, public API, ABI,
+wire format or `VERSION`. There is no unresolved software or packaging defect
+in the integrated default path found by this audit.
+
+WP5 is not an algorithm promotion and does not satisfy the WP6 entry gate. The
+already-open development evidence remains far below the frozen transfer
+criteria:
+
+| Evidence family | Retained production result |
+|---|---:|
+| ASAP meter / downbeat / period within 1% | 19/40 / 4/40 / 2/40 |
+| Ballroom meter / downbeat / period within 1% | 21/40 / 6/40 / 10/40 |
+| Spent DJ key / meter / downbeat / beatgrid | 20/60 / 58/60 / 5/60 / 4/60 |
+
+WP1 through WP4 therefore remain closed without promotion, WP6 and WP7 remain
+gated, and the formal ASAP/Ballroom holdouts remain unopened. The next legal
+parallel task is WP8 physical ESP32-P4 availability and evidence preparation;
+algorithm development must produce a genuinely transferable new candidate
+before holdout or final-corpus qualification can begin.

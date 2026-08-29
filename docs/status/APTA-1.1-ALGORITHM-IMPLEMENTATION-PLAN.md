@@ -221,6 +221,14 @@ Retain/reject criterion:
 
 ## Work package 5 — integrated release candidate
 
+**Status:** closed as a software-qualified baseline at
+`cfb811a96af4202f266d58fc8a74e484b189cf59`; not algorithmically eligible for
+WP6. Rejected experimental branches were retired, retained diagnostics pass
+their focused matrix, and the exact default Release, sanitizer, analyzer-hash
+and resource evidence is green. Because WP1 through WP4 promoted no candidate
+and the retained production metrics miss their transfer gates, the formal
+holdouts remain unopened. See `APTA-1.1-WP5-INTEGRATION-AUDIT.md`.
+
 Combine only retained lattice, downbeat and key candidates. Remove superseded
 experimental branches and keep one auditable candidate path.
 
@@ -310,8 +318,9 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate next task is WP5 integration audit. Because WP1 through WP4
-promoted no new algorithm path, WP5 must prove that the only auditable release
-candidate is the unchanged retained production algorithm, inventory and keep
-all experimental flags disabled, and determine readiness without opening a
-formal holdout or new acceptance corpus.
+The immediate next task is WP8 physical ESP32-P4 availability and evidence
+preparation, which is legal in parallel with renewed algorithm development.
+WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
+software-clean but not algorithmically eligible, so neither a formal holdout
+nor a new final acceptance corpus may be opened until a complete transferable
+candidate satisfies the WP1-WP4 development gates.

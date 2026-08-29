@@ -7,7 +7,7 @@
 
 ## Current boundary
 
-The reusable 1.1 infrastructure, native meter/key implementation and complete desktop qualification path are in place. Tempo/grid and confidence acceptance evidence is retained. The independent 60-track final DJ attempt is formally rejected, leaving algorithmic accuracy, physical ESP32-P4 measurements and final release freeze as the active blockers.
+The reusable 1.1 infrastructure, native meter/key implementation and complete desktop qualification path are in place. Tempo/grid and confidence acceptance evidence is retained. WP5 closed at `cfb811a96af4202f266d58fc8a74e484b189cf59` as a software-qualified, byte-stable production baseline after rejected experiments were retired, but it is not algorithmically eligible for WP6. The independent 60-track final DJ attempt is formally rejected, leaving a transferable replacement algorithm, physical ESP32-P4 measurements and final release freeze as the active blockers. Formal ASAP/Ballroom holdouts and a new final corpus remain unopened.
 
 | Work item | Status | Delivered boundary |
 |---|---|---|
@@ -23,6 +23,7 @@ The reusable 1.1 infrastructure, native meter/key implementation and complete de
 | 10. ESP32-P4 CI/capacity | Complete CI/layout evidence | ESP-IDF 6.0.2 `esp32p4` firmware build plus deterministic 30-minute bounded-capacity probe |
 | 11. Final DJ acceptance contract | Complete | Frozen fresh-corpus evaluator and thresholds for key, meter, downbeat, grid and high-confidence safety |
 | 12. Qualification execution path | Complete infrastructure | Canonical WAV preparation, local labeling, privacy-preserving freeze, anonymous native `--features all` analysis, FINAL-only export and frozen acceptance scoring |
+| 13. WP5 integrated baseline | **Software-qualified / algorithm gate failed** | Exact clean Release 121/121, ASan/UBSan 116/116 and retained-diagnostics focused 8/8 pass; default analyzer bytes and P4 capacity are unchanged, but no WP1-WP4 candidate qualified for promotion or WP6 |
 
 The public development guide is [`../api/APTA-API-1.1-DEVELOPMENT.md`](../api/APTA-API-1.1-DEVELOPMENT.md), the DJ wire contract is [`../../specification/APTA-1.1-DJ-SECTIONS.md`](../../specification/APTA-1.1-DJ-SECTIONS.md), streaming behavior is [`../file-format/APTA-STREAMING-IO-1.1.md`](../file-format/APTA-STREAMING-IO-1.1.md), final corpus scoring is frozen in [`APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md`](APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md), and the operational qualification sequence is [`APTA-1.1-QUALIFICATION-RUNBOOK.md`](APTA-1.1-QUALIFICATION-RUNBOOK.md).
 
@@ -106,7 +107,7 @@ Do not tune thresholds after examining fresh acceptance results. The old develop
 
 1. ~~Run the relation-aware tempo/grid candidate on genuinely fresh validation evidence and satisfy the frozen evaluation gates.~~ **Closed 2026-08-25** — accepted on a formal 48-track owner-supplied fresh set; all five frozen gates passed (exact within 1% 25 -> 29, zero broken selections, no safety regressions). See [`APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md`](APTA-1.1-TEMPO-ENSEMBLE-EVALUATION.md).
 2. ~~Train calibrated confidence on a separate >=96-row training set and pass an untouched >=48-row disjoint holdout; only then integrate a production `APTA_FEATURE_CALIBRATED_QUALITY` model.~~ **Closed 2026-08-25** — the accepted model and privacy-safe holdout summary are retained under `evidence/1.1`.
-3. Produce a replacement candidate that passes every final key/meter/downbeat/grid/high-confidence gate, then evaluate it on a newly verified >=48-track corpus. The first independent 60-track attempt is frozen and formally rejected; it cannot be reused as fresh acceptance evidence after candidate tuning.
+3. Produce a transferable replacement candidate that first satisfies the open-development WP1-WP4 gates and one-shot WP6 holdouts, then passes every final key/meter/downbeat/grid/high-confidence gate on a newly verified >=48-track WP7 corpus. WP5 is software-clean but does not authorize either evidence set. The first independent 60-track attempt is frozen and formally rejected; it cannot be reused as fresh acceptance evidence after candidate tuning.
 4. Collect physical ESP32-P4 memory/timing/USB/audio coexistence evidence on real hardware.
 5. Freeze final 1.1 API/ABI/wire documents, deliberately update version metadata, regenerate release/package evidence, rerun the complete exact-candidate matrix, then tag/publish.
 
