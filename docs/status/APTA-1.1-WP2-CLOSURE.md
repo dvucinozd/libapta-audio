@@ -35,3 +35,12 @@ meter and downbeat using accent information conditional on that frozen lattice,
 but it may not rerank tempo candidates, revive a rejected WP1 onset formula or
 add a WP2 selector threshold. WP2 can be reopened only for a pre-registered
 hypothesis with new temporal information not represented by I1 or I2.
+
+## Subsequent reopened evidence
+
+WP2-I3 was pre-registered after this closure to test that permitted new axis.
+It preserves the exact full-window top-three set and scores beat-to-beat onset
+paths within the already-frozen 0.10-beat phase tolerance; it does not add a
+window vote or tune either rejected selector. The frozen oracle-first protocol
+is in `APTA-1.1-WP2-BEAT-PATH-I3.md`. No external-development result, native
+candidate, formal-holdout or acceptance claim exists yet.
