@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 FMAK temporal-profile key protocol
 
-- **Status:** pre-registered; selected audio remains unopened
+- **Status:** first run complete and rejected; development split spent
 - **Evidence class:** independent local development; no acceptance claim
 - **Protocol baseline:** `6370eb2abeb027b9dfdd30aa327e4e13648e5d3c`
 - **Candidate flag:** `APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY=ON`
@@ -115,3 +115,57 @@ Failure of any gate rejects the candidate and keeps the formal holdout closed.
 Passing all development gates makes it only holdout-eligible; it is not an
 acceptance or release result.
 
+## Frozen first-run result — rejected 2026-08-30
+
+The comparison was executed once from clean revision
+`b6cc335e27cf353cf26b9d0d4a83ee4a8118ad6a`. Corpus preparation froze UTC
+`2026-08-30T12:54:58Z` / `SOURCE_DATE_EPOCH=1788094498`, reproduced the
+selection seal above, and produced labels SHA-256
+`e1e0412f965b6cd32fed3bae8b11cc9eab9cf8585fe76b442f56d413034dca0c`
+and manifest SHA-256
+`a61a572975287403b7cbcb12ba95287df5f2ea40a71c34a573bf6802e0d62552`.
+No selected member was excluded or replaced.
+
+Both default and candidate Release warnings-as-errors matrices passed 120/120
+tests, excluding only the deliberate package-archive target. Candidate Debug
+ASan/UBSan passed 116/116. The default analyzer remained byte-identical to the
+previous baseline at SHA-256
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`;
+the candidate analyzer SHA-256 was
+`afc46ff911410618a316362ddaabdab64ae1ebdeff217f28e1d5a130e3578d65`.
+Conditional key state increased by 100 bytes and session workspace by 112
+bytes in every measured profile. Result-pool bytes and resonator count were
+unchanged.
+
+The frozen result was:
+
+| Metric | Production | Temporal profile |
+|---|---:|---:|
+| exact key | 18/96 (18.75%) | 17/96 (17.71%) |
+| major | 1/48 (2.08%) | 1/48 (2.08%) |
+| minor | 17/48 (35.42%) | 16/48 (33.33%) |
+| high-confidence errors | 4 | 0 |
+| fixes / breaks | — | 1 / 2 |
+| changed verdicts | — | 7 |
+| new high-confidence errors | — | 0 |
+
+The candidate passed build, default-byte, resource and confidence-safety
+gates. It failed total accuracy, both per-mode accuracy gates, improvement and
+fixes-greater-than-breaks. `holdout_eligible=false`; the formal 48-track MTG
+holdout was not opened. The lower high-confidence error count is useful safety
+evidence but cannot rescue a candidate that reduced exact accuracy.
+
+Privacy-safe retained artifact hashes are:
+
+- baseline run/report:
+  `5984e78eab8d12e3a7d94d2fdf2ca18597097c9fad51024f0e8a9e8bd7d95517` /
+  `d20227b08e0396cd126a7db512a72b5229207fecd7b75b928e2cf0aeaeb53652`;
+- candidate run/report:
+  `04bac902b3bc4c96d1c7051972f1185b287d92b3f31646736b8e54f1dbe0c52e` /
+  `79d86aff41cb33c14628a5aedef7e599c70e7b9970057a236f95b41b67705070`;
+- comparison:
+  `df51e72b89c1f2fb131b17dd636c93ac6ad818a4823331c631f6dbd8aaca8afc`.
+
+This split is spent. The floor, normalization, profile, confidence and
+selection rules must not be tuned against it, and the rejected option remains
+diagnostic-only.

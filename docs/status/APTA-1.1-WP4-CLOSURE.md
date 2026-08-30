@@ -49,15 +49,19 @@ does not reuse these labels for iterative tuning.
 
 ## Subsequent reopened evidence
 
-WP4 was later reopened twice under new pre-registered evidence. A balanced
+WP4 was later reopened under new pre-registered evidence. A balanced
 GiantSteps-MTG development transfer rejected harmonic-HPCP at 22/96. A separate
 96-track, mode-balanced original GiantSteps development run rejected
 resource-neutral centered correlation at 28/96 with 52 new high-confidence
 errors. Both attempts stopped before the sealed 48-track formal holdout. The
 exact hashes are recorded in
-`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`. A third, bounded temporal
-chord-state candidate has since been pre-registered, before audio use, on a new
-96-track class-balanced FMAK development split. Its one-shot rules are in
-`APTA-1.1-WP4-FMAK-TEMPORAL-CHORD-KEY-PROTOCOL.md`; no result or promotion claim
-exists yet. This historical closure still correctly records why no key path
-entered the existing WP5 baseline.
+`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`. A third bounded temporal
+chord-state candidate reached 38/96 with positive net fixes but failed absolute,
+per-mode and confidence-safety gates. A fourth soft temporal-profile candidate
+used another class-balanced 96-track FMAK selection with zero overlap and
+reduced production from 18/96 to 17/96. Both FMAK splits are spent; their exact
+one-shot results are in
+`APTA-1.1-WP4-FMAK-TEMPORAL-CHORD-KEY-PROTOCOL.md` and
+`APTA-1.1-WP4-FMAK-TEMPORAL-PROFILE-KEY-PROTOCOL.md`. All four attempts stopped
+before the sealed formal holdout, and no key path entered the existing WP5
+baseline.

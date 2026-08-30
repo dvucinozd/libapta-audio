@@ -187,7 +187,7 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** three transfer attempts were rejected 2026-08-30 without opening the
+**Status:** four transfer attempts were rejected 2026-08-30 without opening the
 formal holdout. Harmonic-HPCP moved 21/96 to 22/96 on balanced GiantSteps-MTG
 development evidence. On a separate 48-major/48-minor development split,
 centered correlation moved production from 22/96 to 28/96 with 11 fixes and
@@ -202,6 +202,12 @@ breaks and repaired much of the major-mode collapse. It was nevertheless
 rejected at 41.7% major, 37.5% minor and 36 new high-confidence errors. The
 split is spent, the formal holdout remains unopened, and the immutable result
 is recorded in `APTA-1.1-WP4-FMAK-TEMPORAL-CHORD-KEY-PROTOCOL.md`.
+On a second 96-track class-balanced FMAK selection with zero overlap, soft
+equal-window aggregation of all 24 profile scores reduced production from
+18/96 to 17/96, with one fix, two breaks and zero new high-confidence errors.
+It failed the total, per-mode, improvement and fixes-greater-than-breaks gates;
+that split is also spent and the immutable result is recorded in
+`APTA-1.1-WP4-FMAK-TEMPORAL-PROFILE-KEY-PROTOCOL.md`.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
@@ -346,14 +352,15 @@ Only after work packages 5 through 8 pass:
 The ESP32-P4 control path is available on COM6 through the board's CH340 bridge.
 The exact-head WP8 UAC build, metadata check, normal flash and boot passed on
 the v1.3 target, but Windows did not enumerate the separate frozen USB-OTG UAC
-endpoint, so the 1,800-second evidence clock correctly did not start. All three
+endpoint, so the 1,800-second evidence clock correctly did not start. All four
 key transfer attempts are closed and rejected without opening the formal
 holdout. The FMAK temporal chord-state candidate produced positive net fixes
-but failed the frozen absolute, per-mode and confidence-safety gates, so that
-development split is now spent too. None of the harmonic, centered or temporal
-results authorizes neighboring parameter, confidence or threshold rescues; a
-later candidate requires a new pre-registration and genuinely disjoint
-development evidence.
+but failed the frozen absolute, per-mode and confidence-safety gates; the
+subsequent disjoint soft-profile candidate reduced exact accuracy despite zero
+new high-confidence errors. Both splits are spent. None of the harmonic,
+centered or temporal results authorizes neighboring parameter, confidence or
+threshold rescues; a later candidate requires a new pre-registration and
+genuinely disjoint development evidence.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable
