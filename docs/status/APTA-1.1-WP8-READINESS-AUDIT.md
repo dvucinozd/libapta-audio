@@ -161,10 +161,12 @@ counter/measurement required by `APTA-1.1-P4-HARDWARE-EVIDENCE.md`.
 
 WP8 remains open. The target is now a proven IDF 6.0.2 v1.3 diagnostic board,
 currently reachable through its CH340 bridge on COM6, and revision
-compatibility is no longer the blocker. The
-immediate physical work is an instrumented real USB/audio input harness that
-records every frozen counter and resource field for 1,800 seconds, followed by
-the exact integrated-candidate rerun if its firmware or memory profile changes.
+compatibility is no longer the blocker. The immediate physical blocker is the
+missing Windows enumeration of the board's separate USB-OTG data path. Once
+that path enumerates the frozen UAC endpoint, the next physical work is the
+instrumented real USB/audio input run that records every frozen counter and
+resource field for 1,800 seconds, followed by the exact integrated-candidate
+rerun if its firmware or memory profile changes.
 WP6 and WP7 remain independently gated by the failed WP5 algorithm-entry
 decision.
 
@@ -212,3 +214,29 @@ does not enumerate as the frozen UAC endpoint; the control port alone cannot be
 counted as real USB/audio input. The final tracked JSON is created only from a
 complete physical log plus the exact committed source revision and flashed
 application SHA-256.
+
+## 2026-08-30 exact-head flash diagnostic
+
+The pre-registered harness was built from clean source revision
+`046cb04fa1f9c7792051a16da39bf41e31411da0` with ESP-IDF 6.0.2 in a fresh
+`build-wp8-uac-046cb04` directory. The generated configuration enabled the
+hardware-evidence path, 32 MB PSRAM, 32,768 overview frames per column, mono
+48 kHz PCM16 UAC input and the ESP32-P4 v1.0-v1.99 revision range. The
+258,096-byte application image had SHA-256
+`685ee663842c370659ba23fbe7610271178b1e996a71e4e7884d9e427ffd50f8`;
+`esptool image-info` reported a valid checksum and validation hash, ESP-IDF
+6.0.2 and application version `v1.0.1-238-g046cb04`.
+
+A final read-only COM6 handshake re-identified the target as ESP32-P4 v1.3.
+The normal flash completed without `--force`, and every written region passed
+the flasher's hash verification. The board then booted the exact application,
+passed its 32 MB PSRAM memory test, initialized `usb_device_uac` 1.3.1 and
+reported the fail-closed `apta-wp8: ready` state.
+
+Windows did not enumerate `VID_303A&PID_8000` or the frozen
+`APTA 1.1 P4 Evidence Input` render endpoint. Only the COM6 CH340 control path
+remained visible. The monitor was therefore stopped before sending audio, as
+required by the pre-registered stop condition. This is useful exact-build,
+flash and boot evidence, but it is not a qualifying WP8 run and no physical
+evidence JSON was created. WP8 remains open until the board's separate USB-OTG
+data path is physically present and enumerates the frozen UAC endpoint.
