@@ -31,6 +31,9 @@ WORKSPACE_DELTA_LIMIT = 1024
 RESONATOR_DELTA = 72
 
 Candidate = transport.Candidate
+_TRANSPORT_SELECT_CANDIDATES = transport.select_candidates
+_TRANSPORT_TRACK_COUNT = transport.TRACK_COUNT
+_TRANSPORT_PER_CLASS_QUOTA = transport.PER_CLASS_QUOTA
 
 
 def _stable_key(row: Candidate) -> tuple[str, int]:
@@ -43,13 +46,30 @@ def _stable_key(row: Candidate) -> tuple[str, int]:
 def _spent_selections(
     inventory: list[Candidate],
 ) -> tuple[list[Candidate], list[Candidate]]:
-    first = second._select_prior_candidates(inventory)
-    if transport.selection_sha256(first) != FIRST_SELECTION_SHA256:
-        raise transport.shared.ValidationError("first spent FMAK selection changed")
-    selected_second = second.select_candidates(inventory)
-    if transport.selection_sha256(selected_second) != SECOND_SELECTION_SHA256:
-        raise transport.shared.ValidationError("second spent FMAK selection changed")
-    return first, selected_second
+    # The transport context temporarily installs this module's third-split
+    # selector so its prepare/run/evaluate machinery uses the frozen 72-track
+    # geometry. Restore the original first-split selector while reconstructing
+    # the two spent selections, including its 96-track / four-per-class
+    # geometry; otherwise the patched 72-track / three-per-class globals alter
+    # the supposedly spent selections.
+    saved_selector = transport.select_candidates
+    saved_track_count = transport.TRACK_COUNT
+    saved_per_class_quota = transport.PER_CLASS_QUOTA
+    try:
+        transport.select_candidates = _TRANSPORT_SELECT_CANDIDATES
+        transport.TRACK_COUNT = _TRANSPORT_TRACK_COUNT
+        transport.PER_CLASS_QUOTA = _TRANSPORT_PER_CLASS_QUOTA
+        first = second._select_prior_candidates(inventory)
+        if transport.selection_sha256(first) != FIRST_SELECTION_SHA256:
+            raise transport.shared.ValidationError("first spent FMAK selection changed")
+        selected_second = second.select_candidates(inventory)
+        if transport.selection_sha256(selected_second) != SECOND_SELECTION_SHA256:
+            raise transport.shared.ValidationError("second spent FMAK selection changed")
+        return first, selected_second
+    finally:
+        transport.select_candidates = saved_selector
+        transport.TRACK_COUNT = saved_track_count
+        transport.PER_CLASS_QUOTA = saved_per_class_quota
 
 
 def select_candidates(rows: Iterable[Candidate]) -> list[Candidate]:

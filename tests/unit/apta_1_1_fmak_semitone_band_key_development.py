@@ -70,6 +70,21 @@ class FmakSemitoneBandKeyDevelopmentTests(unittest.TestCase):
         with self.assertRaises(module.transport.shared.ValidationError):
             module.select_candidates(synthetic_inventory()[:-1])
 
+    def test_transport_context_reconstructs_spent_selections(self) -> None:
+        rows = synthetic_inventory()
+        first_seal, second_seal, saved_second_prior = self._patched_seals(rows)
+        saved = (module.FIRST_SELECTION_SHA256, module.SECOND_SELECTION_SHA256)
+        try:
+            module.FIRST_SELECTION_SHA256 = first_seal
+            module.SECOND_SELECTION_SHA256 = second_seal
+            module.second.PRIOR_SELECTION_SHA256 = first_seal
+            with module._configured_transport():
+                selected = module.transport.select_candidates(rows)
+        finally:
+            module.FIRST_SELECTION_SHA256, module.SECOND_SELECTION_SHA256 = saved
+            module.second.PRIOR_SELECTION_SHA256 = saved_second_prior
+        self.assertEqual(len(selected), module.TRACK_COUNT)
+
     def test_comparison_accepts_frozen_resource_shape(self) -> None:
         def report(correct_count: int) -> dict[str, object]:
             tracks = []
