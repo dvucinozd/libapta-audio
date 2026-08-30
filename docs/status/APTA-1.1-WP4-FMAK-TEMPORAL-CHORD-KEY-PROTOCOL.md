@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 FMAK temporal chord-state key protocol
 
-- **Status:** pre-registered; audio unopened and first run not started
+- **Status:** first run complete and rejected; development split spent
 - **Evidence class:** independent local development; no acceptance claim
 - **Protocol baseline:** `a5dc66a81db2e5715fe5f736dac1fbedd9131b1e`
 - **Candidate flag:** `APTA_ENABLE_EXPERIMENTAL_TEMPORAL_CHORD_KEY=ON`
@@ -135,3 +135,52 @@ high-confidence errors. A failed holdout is spent and cannot be tuned against.
 Even a retained key candidate is not final DJ acceptance evidence. It must
 join transferable beat-lattice and downbeat work, pass WP6 integration, and
 then face the newly verified WP7 corpus under its unchanged evaluator.
+
+## Frozen first-run result and decision
+
+The only permitted comparison used exact source revision
+`45c6f373eeb87114de90a58d441c237cbfe33cb1`, frozen UTC
+`2026-08-30T12:07:39Z`, `SOURCE_DATE_EPOCH=1788091659`, selection SHA-256
+`44a78001a6fbdc92975eed0594e5693b8cfc0dbc54c4b31385ec63ec833772cc`
+and prepared-manifest SHA-256
+`2863f83cc003e95d2dc23e440fba1f5935d2ab2cbd3aca41b2ea3a8f29830be7`.
+The complete archive matched the frozen size and MD5 before any selected
+member was extracted. The baseline analyzer SHA-256 was
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`;
+the temporal candidate analyzer SHA-256 was
+`c0bd43036e5c8d9bc4431f4a785d486d45636908896d65662e7af8810ac1dc11`.
+
+| Metric | Production | Temporal candidate | Gate |
+|---|---:|---:|---:|
+| Exact key | 20/96 (20.8%) | 38/96 (39.6%) | >=70% |
+| Major exact | 0/48 (0.0%) | 20/48 (41.7%) | >=60% |
+| Minor exact | 20/48 (41.7%) | 18/48 (37.5%) | >=60% |
+| High-confidence errors | 3 | 37 | no new errors |
+| Fixes / breaks | - | 24 / 6 | fixes > breaks |
+| Changed verdicts | - | 70 | diagnostic |
+
+The candidate demonstrates that bounded temporal chord evidence can repair
+the production major-mode collapse and produces positive net fixes. It still
+misses every absolute accuracy gate and introduces 36 new incorrect keys at
+confidence 75 or above. Its near-saturated score separation is not compatible
+with the existing confidence mapping; recalibrating confidence cannot rescue
+an accuracy candidate that already fails the frozen 70% and per-mode gates.
+
+Both exact Release warnings-as-errors builds passed 120/120 tests with the
+deliberately deferred WP9 archive-packaging test excluded, and the exact
+candidate ASan/UBSan build passed 116/116. Default analyzer bytes remained
+unchanged. The conditional key state grew by 100 bytes, every measured session
+workspace by 112 bytes, result-pool capacity by zero bytes and resonator count
+by zero, satisfying the frozen resource limits.
+
+The privacy-safe aggregate evidence is sealed locally by baseline-report
+SHA-256 `5a5473964f21c9312bc85937853de9c7d67d16e5e1f33a623fb0a79e25797f35`,
+candidate-report SHA-256
+`bf656cd0267feb27b898717b2ea5b4bcd3a36c20d7b0726af44a559bd7ace449`
+and comparison SHA-256
+`6f45b7ec6564e2d69ddbb48902fa4169b7e401882e7130c9d8809e6f0dad2eb2`.
+The frozen comparator sets `holdout_eligible=false`. This 96-track split is
+spent, the temporal path is diagnostic-only, and the 48-track GiantSteps-MTG
+holdout was not opened. Any later key candidate requires a new pre-registration
+and genuinely disjoint development evidence; no weight, threshold, confidence
+or selection rescue may use this result.
