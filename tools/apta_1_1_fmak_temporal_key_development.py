@@ -22,11 +22,16 @@ import apta_1_1_giantsteps_key_validation as shared
 
 FORMAT = "apta-1.1-fmak-temporal-key-development-1"
 REPORT_FORMAT = "apta-1.1-fmak-temporal-key-report-1"
+COMPARISON_FORMAT = "apta-1.1-fmak-temporal-key-comparison-1"
 SELECTION_SEED = "apta-1.1-fmak-temporal-chord-v1"
 METADATA_COUNT = 5489
 ELIGIBLE_COUNT = 695
 PER_CLASS_QUOTA = 4
 TRACK_COUNT = 96
+DEVELOPMENT_ACCURACY_GATE = 0.70
+MODE_ACCURACY_GATE = 0.60
+KEY_STATE_DELTA_LIMIT = 128
+WORKSPACE_DELTA_LIMIT = 128
 METADATA_MD5 = "d80a03bc8659edc60e335bd7f6bdf12a"
 METADATA_SHA256 = "7ec4bd22eb5ff7958fbf9d8c44869f955fc6b50b67896b229665b3b92e80190d"
 ARCHIVE_SIZE = 4_150_442_299
@@ -405,6 +410,172 @@ def evaluate(prepared: Path, inspector: Path, mapping: Path, report: Path) -> di
     return value
 
 
+def _mode_summary(tracks: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for mode in ("major", "minor"):
+        subset = [row for row in tracks if row["expected_mode"] == mode]
+        correct = sum(bool(row["key_correct"]) for row in subset)
+        result[mode] = {
+            "track_count": len(subset),
+            "key_correct": correct,
+            "key_accuracy": correct / len(subset),
+        }
+    return result
+
+
+def _load_report(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise shared.ValidationError("cannot read FMAK temporal-key report") from exc
+    if not isinstance(value, dict) or value.get("format") != REPORT_FORMAT:
+        raise shared.ValidationError(f"report format must be {REPORT_FORMAT}")
+    tracks = value.get("tracks")
+    if not isinstance(tracks, list) or len(tracks) != TRACK_COUNT:
+        raise shared.ValidationError("report must contain 96 track rows")
+    ids: list[str] = []
+    for row in tracks:
+        if not isinstance(row, dict):
+            raise shared.ValidationError("report track row must be an object")
+        track = row.get("track")
+        expected_tonic = row.get("expected_tonic")
+        expected_mode = row.get("expected_mode")
+        tonic = row.get("key_tonic")
+        mode = row.get("key_mode")
+        confidence = row.get("key_confidence")
+        correct = tonic == expected_tonic and mode == expected_mode
+        if not isinstance(track, str) or not track:
+            raise shared.ValidationError("report track ID must be non-empty")
+        if expected_tonic not in range(12) or tonic not in range(12):
+            raise shared.ValidationError("report tonic is outside 0..11")
+        if expected_mode not in {"major", "minor"} or mode not in {"major", "minor"}:
+            raise shared.ValidationError("report mode is unsupported")
+        if not isinstance(confidence, int) or not 0 <= confidence <= 100:
+            raise shared.ValidationError("report confidence is outside 0..100")
+        if row.get("key_correct") is not correct:
+            raise shared.ValidationError("report correctness is inconsistent")
+        ids.append(track)
+    if ids != sorted(ids) or len(ids) != len(set(ids)):
+        raise shared.ValidationError("report track IDs must be sorted and unique")
+    if value.get("by_mode") != _mode_summary(tracks):
+        raise shared.ValidationError("report mode summary is inconsistent")
+    correct = sum(bool(row["key_correct"]) for row in tracks)
+    overall = value.get("overall")
+    if not isinstance(overall, dict) or overall.get("track_count") != TRACK_COUNT:
+        raise shared.ValidationError("report overall summary is invalid")
+    if overall.get("key_correct") != correct or abs(
+        float(overall.get("key_accuracy", -1.0)) - correct / TRACK_COUNT
+    ) > 1e-15:
+        raise shared.ValidationError("report overall accuracy is inconsistent")
+    return value
+
+
+def compare_reports(
+    baseline_path: Path,
+    candidate_path: Path,
+    baseline_revision: str,
+    candidate_revision: str,
+    candidate_flag: str,
+    werror_pass: bool,
+    sanitizer_pass: bool,
+    default_bytes_unchanged: bool,
+    state_delta_bytes: int,
+    workspace_delta_bytes: int,
+    result_pool_delta_bytes: int,
+    resonator_delta: int,
+    output: Path,
+) -> dict[str, Any]:
+    baseline = _load_report(baseline_path)
+    candidate = _load_report(candidate_path)
+    baseline_rows = {row["track"]: row for row in baseline["tracks"]}
+    candidate_rows = {row["track"]: row for row in candidate["tracks"]}
+    if set(baseline_rows) != set(candidate_rows):
+        raise shared.ValidationError("baseline and candidate report IDs differ")
+    fixes: list[str] = []
+    breaks: list[str] = []
+    changed: list[str] = []
+    baseline_high_errors: set[str] = set()
+    candidate_high_errors: set[str] = set()
+    for track in sorted(baseline_rows):
+        base = baseline_rows[track]
+        cand = candidate_rows[track]
+        if (base["key_tonic"], base["key_mode"]) != (
+            cand["key_tonic"],
+            cand["key_mode"],
+        ):
+            changed.append(track)
+        if not base["key_correct"] and cand["key_correct"]:
+            fixes.append(track)
+        if base["key_correct"] and not cand["key_correct"]:
+            breaks.append(track)
+        if not base["key_correct"] and base["key_confidence"] >= shared.HIGH_CONFIDENCE:
+            baseline_high_errors.add(track)
+        if not cand["key_correct"] and cand["key_confidence"] >= shared.HIGH_CONFIDENCE:
+            candidate_high_errors.add(track)
+    baseline_accuracy = float(baseline["overall"]["key_accuracy"])
+    candidate_accuracy = float(candidate["overall"]["key_accuracy"])
+    major_accuracy = float(candidate["by_mode"]["major"]["key_accuracy"])
+    minor_accuracy = float(candidate["by_mode"]["minor"]["key_accuracy"])
+    new_high_errors = sorted(candidate_high_errors - baseline_high_errors)
+    gates = {
+        "development_accuracy_at_least_70_percent": candidate_accuracy
+        >= DEVELOPMENT_ACCURACY_GATE,
+        "major_accuracy_at_least_60_percent": major_accuracy >= MODE_ACCURACY_GATE,
+        "minor_accuracy_at_least_60_percent": minor_accuracy >= MODE_ACCURACY_GATE,
+        "accuracy_improved": candidate_accuracy > baseline_accuracy,
+        "fixes_exceed_breaks": len(fixes) > len(breaks),
+        "no_new_high_confidence_errors": not new_high_errors,
+        "werror_pass": werror_pass,
+        "sanitizer_pass": sanitizer_pass,
+        "default_bytes_unchanged": default_bytes_unchanged,
+        "key_state_delta_within_128_bytes": 0 <= state_delta_bytes <= KEY_STATE_DELTA_LIMIT,
+        "workspace_delta_within_128_bytes": 0
+        <= workspace_delta_bytes
+        <= WORKSPACE_DELTA_LIMIT,
+        "result_pool_unchanged": result_pool_delta_bytes == 0,
+        "no_new_resonators": resonator_delta == 0,
+    }
+    normalized_flag = candidate_flag.strip()
+    if not normalized_flag:
+        raise shared.ValidationError("candidate flag must not be empty")
+    value = {
+        "format": COMPARISON_FORMAT,
+        "split": "development",
+        "evidence_level": "local-research-development",
+        "acceptance_claim": False,
+        "baseline_revision": shared._full_revision(
+            baseline_revision, "baseline revision"
+        ),
+        "candidate_revision": shared._full_revision(
+            candidate_revision, "candidate revision"
+        ),
+        "candidate_flags": [normalized_flag],
+        "track_count": TRACK_COUNT,
+        "baseline_key_accuracy": baseline_accuracy,
+        "candidate_key_accuracy": candidate_accuracy,
+        "candidate_major_accuracy": major_accuracy,
+        "candidate_minor_accuracy": minor_accuracy,
+        "fix_count": len(fixes),
+        "break_count": len(breaks),
+        "changed_verdict_count": len(changed),
+        "new_high_confidence_error_count": len(new_high_errors),
+        "resource_delta": {
+            "key_state_bytes": state_delta_bytes,
+            "workspace_bytes": workspace_delta_bytes,
+            "result_pool_bytes": result_pool_delta_bytes,
+            "resonator_count": resonator_delta,
+        },
+        "fixes": fixes,
+        "breaks": breaks,
+        "changed_verdicts": changed,
+        "new_high_confidence_errors": new_high_errors,
+        "gates": gates,
+        "holdout_eligible": all(gates.values()),
+    }
+    shared._write_json(output, value)
+    return value
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -426,6 +597,20 @@ def main() -> int:
     evaluate_parser.add_argument("--inspector", type=Path, required=True)
     evaluate_parser.add_argument("--mapping", type=Path, required=True)
     evaluate_parser.add_argument("--report", type=Path, required=True)
+    compare_parser = subparsers.add_parser("compare")
+    compare_parser.add_argument("--baseline-report", type=Path, required=True)
+    compare_parser.add_argument("--candidate-report", type=Path, required=True)
+    compare_parser.add_argument("--baseline-revision", required=True)
+    compare_parser.add_argument("--candidate-revision", required=True)
+    compare_parser.add_argument("--candidate-flag", required=True)
+    compare_parser.add_argument("--werror-pass", action="store_true")
+    compare_parser.add_argument("--sanitizer-pass", action="store_true")
+    compare_parser.add_argument("--default-bytes-unchanged", action="store_true")
+    compare_parser.add_argument("--state-delta-bytes", type=int, required=True)
+    compare_parser.add_argument("--workspace-delta-bytes", type=int, required=True)
+    compare_parser.add_argument("--result-pool-delta-bytes", type=int, required=True)
+    compare_parser.add_argument("--resonator-delta", type=int, required=True)
+    compare_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.command == "preflight":
@@ -438,8 +623,24 @@ def main() -> int:
             value = run_analysis(
                 args.prepared, args.analyzer, args.output, args.source_revision
             )
-        else:
+        elif args.command == "evaluate":
             value = evaluate(args.prepared, args.inspector, args.mapping, args.report)
+        else:
+            value = compare_reports(
+                args.baseline_report,
+                args.candidate_report,
+                args.baseline_revision,
+                args.candidate_revision,
+                args.candidate_flag,
+                args.werror_pass,
+                args.sanitizer_pass,
+                args.default_bytes_unchanged,
+                args.state_delta_bytes,
+                args.workspace_delta_bytes,
+                args.result_pool_delta_bytes,
+                args.resonator_delta,
+                args.output,
+            )
     except (OSError, shared.ValidationError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
