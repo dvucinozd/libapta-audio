@@ -86,18 +86,34 @@ def normalize_key(value: str) -> str:
 
 def _clean_exact_checkout(root: Path) -> None:
     shared._require_checkout_revision(root, DATASET_REVISION, "original dataset")
-    try:
-        completed = subprocess.run(
-            ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=no"],
-            check=True,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+    for cached in (False, True):
+        command = [
+            "git",
+            "-c",
+            "core.filemode=false",
+            "-C",
+            str(root),
+            "diff",
+        ]
+        if cached:
+            command.append("--cached")
+        command.extend(
+            ["--quiet", "--ignore-cr-at-eol", "--no-ext-diff", "--ignore-submodules", "--"]
         )
-    except (OSError, subprocess.CalledProcessError) as exc:
-        raise shared.ValidationError("cannot inspect original dataset checkout") from exc
-    if completed.stdout.strip():
-        raise shared.ValidationError("original dataset checkout has tracked modifications")
+        try:
+            completed = subprocess.run(
+                command,
+                check=False,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except OSError as exc:
+            raise shared.ValidationError("cannot inspect original dataset checkout") from exc
+        if completed.returncode == 1:
+            raise shared.ValidationError("original dataset checkout has tracked modifications")
+        if completed.returncode != 0:
+            raise shared.ValidationError("cannot inspect original dataset checkout")
 
 
 def _xlsx_cell_value(

@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -61,6 +63,80 @@ class OriginalKeyDevelopmentTests(unittest.TestCase):
             1,
         )
         self.assertEqual(module.selection_sha256(first), module.selection_sha256(second))
+
+    def test_clean_check_ignores_only_filemode_differences(self) -> None:
+        if os.name == "nt":
+            self.skipTest("filesystem executable-bit semantics require POSIX")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.invalid"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.name", "APTA test"],
+                check=True,
+            )
+            tracked = root / "tracked.txt"
+            tracked.write_text("stable\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-q", "-m", "fixture"],
+                check=True,
+            )
+            revision = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"],
+                check=True,
+                text=True,
+                stdout=subprocess.PIPE,
+            ).stdout.strip()
+            original_revision = module.DATASET_REVISION
+            try:
+                module.DATASET_REVISION = revision
+                tracked.chmod(tracked.stat().st_mode | 0o111)
+                module._clean_exact_checkout(root)
+                tracked.write_text("changed\n", encoding="utf-8")
+                with self.assertRaises(module.shared.ValidationError):
+                    module._clean_exact_checkout(root)
+            finally:
+                module.DATASET_REVISION = original_revision
+
+    def test_clean_check_ignores_worktree_eol_conversion_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.invalid"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.name", "APTA test"],
+                check=True,
+            )
+            tracked = root / "tracked.txt"
+            tracked.write_bytes(b"stable\n")
+            subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-q", "-m", "fixture"],
+                check=True,
+            )
+            revision = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "HEAD"],
+                check=True,
+                text=True,
+                stdout=subprocess.PIPE,
+            ).stdout.strip()
+            original_revision = module.DATASET_REVISION
+            try:
+                module.DATASET_REVISION = revision
+                tracked.write_bytes(b"stable\r\n")
+                module._clean_exact_checkout(root)
+                tracked.write_bytes(b"changed\r\n")
+                with self.assertRaises(module.shared.ValidationError):
+                    module._clean_exact_checkout(root)
+            finally:
+                module.DATASET_REVISION = original_revision
 
     def test_comparison_requires_metric_and_external_gates(self) -> None:
         tracks = []
