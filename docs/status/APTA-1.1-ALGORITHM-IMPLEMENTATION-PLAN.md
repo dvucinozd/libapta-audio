@@ -187,13 +187,15 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** transfer check completed and rejected 2026-08-30. The harmonic
-projection remains opt-in and the two ASAP derivations remain nonviable. On the
-pre-registered balanced GiantSteps-MTG development split, production is 21/96
-and harmonic-HPCP is 22/96, with one fix, zero breaks and zero new
-high-confidence errors. The mandatory 70% gate fails, so the sealed holdout
-remains unopened. Exact privacy-safe hashes and the stop decision are in
-`APTA-1.1-WP4-GIANTSTEPS-KEY-DEVELOPMENT-PROTOCOL.md`.
+**Status:** the harmonic transfer check was rejected 2026-08-30. Production is
+21/96 and harmonic-HPCP is 22/96 on balanced GiantSteps-MTG development
+evidence, with one fix, zero breaks and zero new high-confidence errors. The
+mandatory 70% gate fails, so the sealed holdout remains unopened. The failure
+also exposes a 1/48 versus 20/48 major/minor imbalance and 29 parallel-mode
+errors. A new, separately isolated centered-correlation candidate is
+pre-registered in
+`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`; no result from its new
+48-major/48-minor development split has been inspected.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
@@ -337,11 +339,11 @@ Only after work packages 5 through 8 pass:
 
 The immediate hardware task is the instrumented 1,800-second ESP32-P4
 USB/audio run once the separate USB Serial/JTAG control connection enumerates
-again. The GiantSteps-MTG WP4 transfer check is closed and rejected without
-opening its holdout. Any further WP1, WP3 or WP4 algorithm work first requires
-a new, failure-driven representation, genuinely new development evidence and a
-separately committed pre-registration; I10 and the rejected harmonic result do
-not authorize neighboring parameter or threshold rescues.
+again. The GiantSteps-MTG harmonic transfer check is closed and rejected
+without opening its holdout. WP4 now proceeds only under the separately
+pre-registered centered-correlation protocol and its genuinely new development
+evidence; I10 and the rejected harmonic result do not authorize neighboring
+parameter or threshold rescues.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable
