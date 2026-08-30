@@ -49,6 +49,18 @@ apta_status_t apta_internal_key_select_temporal(
     apta_key_view_t *view_out);
 #endif
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+void apta_internal_key_temporal_profile_add_chroma(
+    apta_internal_key_analysis_t *analysis,
+    const float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES]);
+
+apta_status_t apta_internal_key_select_temporal_profile(
+    const apta_internal_key_analysis_t *analysis,
+    uint32_t completed_windows,
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT],
+    apta_key_view_t *view_out);
+#endif
+
 #ifdef APTA_INTERNAL_KEY_HPCP
 void apta_internal_key_harmonic_chroma(
     const float spectral_profile[APTA_INTERNAL_KEY_BIN_COUNT],

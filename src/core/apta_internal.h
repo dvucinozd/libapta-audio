@@ -566,6 +566,12 @@ typedef struct {
     float temporal_key_support[APTA_INTERNAL_KEY_GLOBAL_STATES];
     float temporal_margin_sum;
 #endif
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+    /* Opt-in development evidence. Each valid window contributes one unit of
+     * normalized soft support across all major/minor key profiles. */
+    float temporal_profile_support[APTA_INTERNAL_KEY_GLOBAL_STATES];
+    uint32_t temporal_profile_windows;
+#endif
     float decimation_sum;
     uint32_t decimation_count;
     uint32_t window_samples;

@@ -302,6 +302,56 @@ static float apta_key_profile_score(
     return dot / sqrtf(chroma_norm * profile_norm);
 }
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+void apta_internal_key_temporal_profile_add_chroma(
+    apta_internal_key_analysis_t *analysis,
+    const float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES])
+{
+    float scores[APTA_INTERNAL_KEY_GLOBAL_STATES];
+    float floor = 1.0f;
+    float evidence_sum = 0.0f;
+    uint32_t tonic;
+    uint32_t pitch;
+    uint32_t state;
+
+    if (analysis == NULL || chroma == NULL ||
+        analysis->temporal_profile_windows == UINT32_MAX) {
+        return;
+    }
+    for (pitch = 0u; pitch < APTA_INTERNAL_KEY_PITCH_CLASSES; ++pitch) {
+        if (!isfinite(chroma[pitch]) || chroma[pitch] < 0.0f) {
+            return;
+        }
+    }
+    for (tonic = 0u; tonic < APTA_INTERNAL_KEY_PITCH_CLASSES; ++tonic) {
+        const float major_score =
+            apta_key_profile_score(chroma, tonic, apta_major_profile);
+        const float minor_score =
+            apta_key_profile_score(chroma, tonic, apta_minor_profile);
+        scores[tonic] = major_score;
+        scores[APTA_INTERNAL_KEY_PITCH_CLASSES + tonic] = minor_score;
+        if (major_score < floor) {
+            floor = major_score;
+        }
+        if (minor_score < floor) {
+            floor = minor_score;
+        }
+    }
+    for (state = 0u; state < APTA_INTERNAL_KEY_GLOBAL_STATES; ++state) {
+        scores[state] = fmaxf(0.0f, scores[state] - floor);
+        evidence_sum += scores[state];
+    }
+    if (!isfinite(evidence_sum) || evidence_sum <= 1e-20f) {
+        return;
+    }
+    for (state = 0u; state < APTA_INTERNAL_KEY_GLOBAL_STATES; ++state) {
+        analysis->temporal_profile_support[state] +=
+            scores[state] / evidence_sum;
+    }
+    analysis->temporal_profile_windows += 1u;
+}
+#endif
+
 static void apta_key_insert_candidate(
     apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT],
     float scores[APTA_INTERNAL_KEY_CANDIDATE_COUNT],
@@ -369,6 +419,92 @@ apta_status_t apta_internal_key_select_temporal(
             analysis->temporal_key_support[
                 APTA_INTERNAL_KEY_PITCH_CLASSES + tonic] /
             analysis->temporal_margin_sum;
+        if (!isfinite(major_score) || !isfinite(minor_score) ||
+            major_score < 0.0f || minor_score < 0.0f) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
+        apta_key_insert_candidate(
+            candidates,
+            scores,
+            (uint8_t)tonic,
+            APTA_KEY_MODE_MAJOR,
+            major_score);
+        apta_key_insert_candidate(
+            candidates,
+            scores,
+            (uint8_t)tonic,
+            APTA_KEY_MODE_MINOR,
+            minor_score);
+    }
+    for (position = 1u;
+         position < APTA_INTERNAL_KEY_CANDIDATE_COUNT;
+         ++position) {
+        if (candidates[position].score >= candidates[position - 1u].score) {
+            candidates[position].score =
+                candidates[position - 1u].score > 0u
+                    ? (uint16_t)(candidates[position - 1u].score - 1u)
+                    : 0u;
+        }
+    }
+    separation = scores[0] > scores[1] ? scores[0] - scores[1] : 0.0f;
+    confidence = 25u +
+                 (completed_windows >= 8u ? 40u : completed_windows * 5u) +
+                 (uint32_t)fminf(35.0f, separation * 350.0f + 0.5f);
+    if (confidence > APTA_CONFIDENCE_MAX) {
+        confidence = APTA_CONFIDENCE_MAX;
+    }
+    candidates[0].confidence = (apta_confidence_value_t)confidence;
+    candidates[1].confidence = confidence > 10u
+                                   ? (apta_confidence_value_t)(confidence - 10u)
+                                   : 0u;
+    candidates[2].confidence = confidence > 20u
+                                   ? (apta_confidence_value_t)(confidence - 20u)
+                                   : 0u;
+    apta_key_view_init(view_out);
+    view_out->mode = candidates[0].mode;
+    view_out->tonic = candidates[0].tonic;
+    view_out->tuning_offset_cents = 0;
+    view_out->confidence = candidates[0].confidence;
+    view_out->state = completed_windows >= APTA_INTERNAL_KEY_STABLE_WINDOWS
+                          ? APTA_FEATURE_STABLE
+                          : APTA_FEATURE_PROVISIONAL;
+    view_out->candidate_count = APTA_INTERNAL_KEY_CANDIDATE_COUNT;
+    view_out->candidates = candidates;
+    return APTA_STATUS_OK;
+}
+#endif
+
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+apta_status_t apta_internal_key_select_temporal_profile(
+    const apta_internal_key_analysis_t *analysis,
+    uint32_t completed_windows,
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT],
+    apta_key_view_t *view_out)
+{
+    float scores[APTA_INTERNAL_KEY_CANDIDATE_COUNT] = {-1.0f, -1.0f, -1.0f};
+    float separation;
+    uint32_t tonic;
+    uint32_t position;
+    uint32_t confidence;
+
+    if (analysis == NULL || candidates == NULL || view_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (completed_windows == 0u || analysis->temporal_profile_windows == 0u) {
+        return APTA_STATUS_NOT_AVAILABLE;
+    }
+    memset(
+        candidates,
+        0,
+        sizeof(*candidates) * APTA_INTERNAL_KEY_CANDIDATE_COUNT);
+    for (tonic = 0u; tonic < APTA_INTERNAL_KEY_PITCH_CLASSES; ++tonic) {
+        const float divisor = (float)analysis->temporal_profile_windows;
+        const float major_score =
+            analysis->temporal_profile_support[tonic] / divisor;
+        const float minor_score =
+            analysis->temporal_profile_support[
+                APTA_INTERNAL_KEY_PITCH_CLASSES + tonic] /
+            divisor;
         if (!isfinite(major_score) || !isfinite(minor_score) ||
             major_score < 0.0f || minor_score < 0.0f) {
             return APTA_ERROR_INVALID_ARGUMENT;
@@ -550,7 +686,8 @@ static void apta_key_initialize(
 
 static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
 {
-#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+#if defined(APTA_INTERNAL_KEY_TEMPORAL_CHORD) || \
+    defined(APTA_INTERNAL_KEY_TEMPORAL_PROFILE)
     float window_chroma[APTA_INTERNAL_KEY_PITCH_CLASSES] = {0.0f};
 #endif
     uint32_t variant;
@@ -576,7 +713,8 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
             analysis->chroma[variant]
                             [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
                 compressed;
-#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+#if defined(APTA_INTERNAL_KEY_TEMPORAL_CHORD) || \
+    defined(APTA_INTERNAL_KEY_TEMPORAL_PROFILE)
             if (variant == APTA_INTERNAL_KEY_BASE_VARIANT) {
                 window_chroma[bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
                     compressed;
@@ -589,6 +727,9 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
     }
 #ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
     apta_internal_key_temporal_vote_chroma(analysis, window_chroma);
+#endif
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+    apta_internal_key_temporal_profile_add_chroma(analysis, window_chroma);
 #endif
     analysis->completed_windows += 1u;
     apta_key_reset_window(analysis);
@@ -697,12 +838,19 @@ apta_status_t apta_internal_key_refresh(
     *completed_steps_out = 1u;
 
     {
-#ifndef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+#if !defined(APTA_INTERNAL_KEY_TEMPORAL_CHORD) && \
+    !defined(APTA_INTERNAL_KEY_TEMPORAL_PROFILE)
         const uint32_t selected_variant = APTA_INTERNAL_KEY_BASE_VARIANT;
 #endif
 
 #ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
         status = apta_internal_key_select_temporal(
+            &session->key_analysis,
+            session->key_analysis.completed_windows,
+            next_candidates,
+            &next_view);
+#elif defined(APTA_INTERNAL_KEY_TEMPORAL_PROFILE)
+        status = apta_internal_key_select_temporal_profile(
             &session->key_analysis,
             session->key_analysis.completed_windows,
             next_candidates,

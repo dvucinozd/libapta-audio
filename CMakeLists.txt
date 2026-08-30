@@ -159,6 +159,23 @@ if(APTA_ENABLE_EXPERIMENTAL_TEMPORAL_CHORD_KEY)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY
+    "Build the development temporal soft-profile key experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY)
+    if(APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP OR
+       APTA_ENABLE_EXPERIMENTAL_CENTERED_KEY_CORRELATION OR
+       APTA_ENABLE_EXPERIMENTAL_TEMPORAL_CHORD_KEY)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY is mutually "
+            "exclusive with the harmonic, centered, and temporal-chord "
+            "key experiments")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_KEY_TEMPORAL_PROFILE=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_KEY_TRACE
     "Build the apta-key-trace development diagnostic tool"
     OFF)

@@ -205,6 +205,63 @@ static int check_temporal_chord_state(void)
 }
 #endif
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+static void add_temporal_profile(
+    apta_internal_key_analysis_t *analysis,
+    const float profile[APTA_INTERNAL_KEY_PITCH_CLASSES],
+    uint32_t tonic,
+    float scale,
+    uint32_t count)
+{
+    float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];
+    uint32_t pitch;
+    uint32_t index;
+
+    rotate_profile(chroma, profile, tonic);
+    for (pitch = 0u; pitch < APTA_INTERNAL_KEY_PITCH_CLASSES; ++pitch) {
+        chroma[pitch] *= scale;
+    }
+    for (index = 0u; index < count; ++index) {
+        apta_internal_key_temporal_profile_add_chroma(analysis, chroma);
+    }
+}
+
+static int check_temporal_profile_state(void)
+{
+    apta_internal_key_analysis_t analysis;
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+    apta_key_view_t view;
+    float invalid[APTA_INTERNAL_KEY_PITCH_CLASSES] = {0.0f};
+    float support_sum = 0.0f;
+    uint32_t state;
+
+    memset(&analysis, 0, sizeof(analysis));
+    CHECK(apta_internal_key_select_temporal_profile(
+              &analysis, 7u, candidates, &view) ==
+          APTA_STATUS_NOT_AVAILABLE);
+    invalid[0] = -1.0f;
+    apta_internal_key_temporal_profile_add_chroma(&analysis, invalid);
+    CHECK(analysis.temporal_profile_windows == 0u);
+
+    /* Equal-window normalization makes the five quiet A-minor windows beat
+     * two arbitrarily loud C-major windows. */
+    add_temporal_profile(&analysis, major_profile, 0u, 1000.0f, 2u);
+    add_temporal_profile(&analysis, minor_profile, 9u, 0.01f, 5u);
+    CHECK(analysis.temporal_profile_windows == 7u);
+    for (state = 0u; state < APTA_INTERNAL_KEY_GLOBAL_STATES; ++state) {
+        support_sum += analysis.temporal_profile_support[state];
+    }
+    CHECK(fabsf(support_sum - 7.0f) < 1e-4f);
+    CHECK(apta_internal_key_select_temporal_profile(
+              &analysis, 7u, candidates, &view) == APTA_STATUS_OK);
+    CHECK(view.tonic == 9u);
+    CHECK(view.mode == APTA_KEY_MODE_MINOR);
+    CHECK(view.state == APTA_FEATURE_STABLE);
+    CHECK(candidates[0].score > candidates[1].score);
+    return EXIT_SUCCESS;
+}
+#endif
+
 #ifdef APTA_INTERNAL_KEY_HPCP
 static int check_harmonic_projection(void)
 {
@@ -421,6 +478,9 @@ int main(void)
 #endif
 #ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
     CHECK(check_temporal_chord_state() == EXIT_SUCCESS);
+#endif
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
+    CHECK(check_temporal_profile_state() == EXIT_SUCCESS);
 #endif
     CHECK(check_progressive_publication() == EXIT_SUCCESS);
     return EXIT_SUCCESS;

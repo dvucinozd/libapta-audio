@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -75,6 +77,62 @@ class FmakTemporalProfileKeyDevelopmentTests(unittest.TestCase):
                 module.select_candidates(rows)
         finally:
             module.PRIOR_SELECTION_SHA256 = original
+
+    def test_comparison_uses_own_format_and_frozen_gates(self) -> None:
+        def report(correct_count: int) -> dict[str, object]:
+            tracks = []
+            for index in range(module.TRACK_COUNT):
+                expected_tonic = index % 12
+                expected_mode = "major" if index < 48 else "minor"
+                correct = index < correct_count
+                tracks.append(
+                    {
+                        "track": f"track-{index:03d}",
+                        "expected_tonic": expected_tonic,
+                        "expected_mode": expected_mode,
+                        "key_tonic": expected_tonic
+                        if correct
+                        else (expected_tonic + 1) % 12,
+                        "key_mode": expected_mode,
+                        "key_confidence": 50,
+                        "key_correct": correct,
+                    }
+                )
+            return {
+                "format": module.REPORT_FORMAT,
+                "overall": {
+                    "track_count": module.TRACK_COUNT,
+                    "key_correct": correct_count,
+                    "key_accuracy": correct_count / module.TRACK_COUNT,
+                },
+                "tracks": tracks,
+                "by_mode": module.prior._mode_summary(tracks),
+            }
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            baseline = root / "baseline.json"
+            candidate = root / "candidate.json"
+            output = root / "comparison.json"
+            baseline.write_text(json.dumps(report(68)), encoding="utf-8")
+            candidate.write_text(json.dumps(report(80)), encoding="utf-8")
+            value = module.compare_reports(
+                baseline,
+                candidate,
+                "1" * 40,
+                "2" * 40,
+                "APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY=ON",
+                True,
+                True,
+                True,
+                100,
+                112,
+                0,
+                0,
+                output,
+            )
+            self.assertEqual(value["format"], module.COMPARISON_FORMAT)
+            self.assertTrue(value["holdout_eligible"])
 
 
 if __name__ == "__main__":

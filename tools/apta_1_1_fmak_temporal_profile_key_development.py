@@ -8,13 +8,16 @@ import argparse
 import hashlib
 import json
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Iterator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import apta_1_1_fmak_temporal_key_development as prior
 
 FORMAT = "apta-1.1-fmak-temporal-profile-key-development-1"
+REPORT_FORMAT = "apta-1.1-fmak-temporal-profile-key-report-1"
+COMPARISON_FORMAT = "apta-1.1-fmak-temporal-profile-key-comparison-1"
 SELECTION_SEED = "apta-1.1-fmak-temporal-profile-v1"
 PRIOR_SELECTION_SHA256 = prior.SELECTION_SHA256
 SELECTION_SHA256 = "1c94629c8513fbab9d97e4c05e1394a9b9e1cd5070e126ddd0a0ce0ab1e89121"
@@ -23,6 +26,7 @@ PER_CLASS_QUOTA = 4
 TRACK_COUNT = 96
 
 Candidate = prior.Candidate
+PRIOR_SELECT_CANDIDATES = prior.select_candidates
 
 
 def _stable_key(row: Candidate) -> tuple[str, int]:
@@ -38,7 +42,7 @@ def select_candidates(rows: Iterable[Candidate]) -> list[Candidate]:
     if len(eligible) != prior.ELIGIBLE_COUNT:
         raise prior.shared.ValidationError("FMAK 000-019 eligible inventory changed")
 
-    prior_selection = prior.select_candidates(inventory)
+    prior_selection = PRIOR_SELECT_CANDIDATES(inventory)
     if prior.selection_sha256(prior_selection) != PRIOR_SELECTION_SHA256:
         raise prior.shared.ValidationError("prior spent FMAK selection changed")
     prior_ids = {row.source_id for row in prior_selection}
@@ -77,7 +81,7 @@ def selection_sha256(rows: Iterable[Candidate]) -> str:
 
 def preflight(metadata: Path) -> dict[str, Any]:
     inventory = prior.inventory(metadata)
-    prior_selection = prior.select_candidates(inventory)
+    prior_selection = PRIOR_SELECT_CANDIDATES(inventory)
     selected = select_candidates(inventory)
     seal = selection_sha256(selected)
     if seal != SELECTION_SHA256:
@@ -113,12 +117,155 @@ def preflight(metadata: Path) -> dict[str, Any]:
     }
 
 
+@contextmanager
+def _configured_prior_protocol() -> Iterator[None]:
+    """Reuse the frozen FMAK transport/evaluator with this protocol identity."""
+    replacements = {
+        "FORMAT": FORMAT,
+        "REPORT_FORMAT": REPORT_FORMAT,
+        "COMPARISON_FORMAT": COMPARISON_FORMAT,
+        "SELECTION_SEED": SELECTION_SEED,
+        "SELECTION_SHA256": SELECTION_SHA256,
+        "select_candidates": select_candidates,
+    }
+    saved = {name: getattr(prior, name) for name in replacements}
+    try:
+        for name, value in replacements.items():
+            setattr(prior, name, value)
+        yield
+    finally:
+        for name, value in saved.items():
+            setattr(prior, name, value)
+
+
+def prepare(
+    metadata: Path,
+    archive: Path,
+    output: Path,
+    ffmpeg: str,
+    frozen_utc: str,
+) -> dict[str, Any]:
+    with _configured_prior_protocol():
+        return prior.prepare(metadata, archive, output, ffmpeg, frozen_utc)
+
+
+def load_prepared(prepared: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    with _configured_prior_protocol():
+        return prior.load_prepared(prepared)
+
+
+def run_analysis(
+    prepared: Path, analyzer: Path, output: Path, source_revision: str
+) -> dict[str, Any]:
+    with _configured_prior_protocol():
+        return prior.run_analysis(prepared, analyzer, output, source_revision)
+
+
+def evaluate(
+    prepared: Path, inspector: Path, mapping: Path, report: Path
+) -> dict[str, Any]:
+    with _configured_prior_protocol():
+        return prior.evaluate(prepared, inspector, mapping, report)
+
+
+def compare_reports(
+    baseline_path: Path,
+    candidate_path: Path,
+    baseline_revision: str,
+    candidate_revision: str,
+    candidate_flag: str,
+    werror_pass: bool,
+    sanitizer_pass: bool,
+    default_bytes_unchanged: bool,
+    state_delta_bytes: int,
+    workspace_delta_bytes: int,
+    result_pool_delta_bytes: int,
+    resonator_delta: int,
+    output: Path,
+) -> dict[str, Any]:
+    with _configured_prior_protocol():
+        return prior.compare_reports(
+            baseline_path,
+            candidate_path,
+            baseline_revision,
+            candidate_revision,
+            candidate_flag,
+            werror_pass,
+            sanitizer_pass,
+            default_bytes_unchanged,
+            state_delta_bytes,
+            workspace_delta_bytes,
+            result_pool_delta_bytes,
+            resonator_delta,
+            output,
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--metadata", type=Path, required=True)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    preflight_parser = subparsers.add_parser("preflight")
+    preflight_parser.add_argument("--metadata", type=Path, required=True)
+    prepare_parser = subparsers.add_parser("prepare")
+    prepare_parser.add_argument("--metadata", type=Path, required=True)
+    prepare_parser.add_argument("--archive", type=Path, required=True)
+    prepare_parser.add_argument("--output", type=Path, required=True)
+    prepare_parser.add_argument("--ffmpeg", default="ffmpeg")
+    prepare_parser.add_argument("--frozen-utc", required=True)
+    run_parser = subparsers.add_parser("run")
+    run_parser.add_argument("--prepared", type=Path, required=True)
+    run_parser.add_argument("--analyzer", type=Path, required=True)
+    run_parser.add_argument("--output", type=Path, required=True)
+    run_parser.add_argument("--source-revision", required=True)
+    evaluate_parser = subparsers.add_parser("evaluate")
+    evaluate_parser.add_argument("--prepared", type=Path, required=True)
+    evaluate_parser.add_argument("--inspector", type=Path, required=True)
+    evaluate_parser.add_argument("--mapping", type=Path, required=True)
+    evaluate_parser.add_argument("--report", type=Path, required=True)
+    compare_parser = subparsers.add_parser("compare")
+    compare_parser.add_argument("--baseline-report", type=Path, required=True)
+    compare_parser.add_argument("--candidate-report", type=Path, required=True)
+    compare_parser.add_argument("--baseline-revision", required=True)
+    compare_parser.add_argument("--candidate-revision", required=True)
+    compare_parser.add_argument("--candidate-flag", required=True)
+    compare_parser.add_argument("--werror-pass", action="store_true")
+    compare_parser.add_argument("--sanitizer-pass", action="store_true")
+    compare_parser.add_argument("--default-bytes-unchanged", action="store_true")
+    compare_parser.add_argument("--state-delta-bytes", type=int, required=True)
+    compare_parser.add_argument("--workspace-delta-bytes", type=int, required=True)
+    compare_parser.add_argument("--result-pool-delta-bytes", type=int, required=True)
+    compare_parser.add_argument("--resonator-delta", type=int, required=True)
+    compare_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
-        value = preflight(args.metadata)
+        if args.command == "preflight":
+            value = preflight(args.metadata)
+        elif args.command == "prepare":
+            value = prepare(
+                args.metadata, args.archive, args.output, args.ffmpeg, args.frozen_utc
+            )
+        elif args.command == "run":
+            value = run_analysis(
+                args.prepared, args.analyzer, args.output, args.source_revision
+            )
+        elif args.command == "evaluate":
+            value = evaluate(args.prepared, args.inspector, args.mapping, args.report)
+        else:
+            value = compare_reports(
+                args.baseline_report,
+                args.candidate_report,
+                args.baseline_revision,
+                args.candidate_revision,
+                args.candidate_flag,
+                args.werror_pass,
+                args.sanitizer_pass,
+                args.default_bytes_unchanged,
+                args.state_delta_bytes,
+                args.workspace_delta_bytes,
+                args.result_pool_delta_bytes,
+                args.resonator_delta,
+                args.output,
+            )
     except (OSError, prior.shared.ValidationError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
