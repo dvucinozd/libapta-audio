@@ -29,6 +29,154 @@ static const float apta_minor_profile[APTA_INTERNAL_KEY_PITCH_CLASSES] = {
     0.082f, 0.600f, 0.059f, 0.291f, 0.092f, 0.260f
 };
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+#define APTA_KEY_CHORD_FIFTH_WEIGHT 0.70f
+#define APTA_KEY_CHORD_TEMPLATE_NORM_SQUARED 2.49f
+
+static float apta_key_chord_score(
+    const float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES],
+    float chroma_norm,
+    uint32_t tonic,
+    apta_key_mode_t mode)
+{
+    const uint32_t third =
+        (tonic + (mode == APTA_KEY_MODE_MAJOR ? 4u : 3u)) %
+        APTA_INTERNAL_KEY_PITCH_CLASSES;
+    const uint32_t fifth = (tonic + 7u) % APTA_INTERNAL_KEY_PITCH_CLASSES;
+    const float dot = chroma[tonic] + chroma[third] +
+                      APTA_KEY_CHORD_FIFTH_WEIGHT * chroma[fifth];
+
+    if (chroma_norm <= 1e-20f) {
+        return 0.0f;
+    }
+    return dot / sqrtf(chroma_norm * APTA_KEY_CHORD_TEMPLATE_NORM_SQUARED);
+}
+
+static float apta_key_chord_compatibility(
+    uint32_t key_tonic,
+    apta_key_mode_t key_mode,
+    uint32_t chord_tonic,
+    apta_key_mode_t chord_mode)
+{
+    const uint32_t degree =
+        (chord_tonic + APTA_INTERNAL_KEY_PITCH_CLASSES - key_tonic) %
+        APTA_INTERNAL_KEY_PITCH_CLASSES;
+
+    if (key_mode == APTA_KEY_MODE_MAJOR) {
+        if (chord_mode == APTA_KEY_MODE_MAJOR) {
+            if (degree == 0u) {
+                return 1.00f;
+            }
+            if (degree == 7u) {
+                return 0.85f;
+            }
+            if (degree == 5u) {
+                return 0.70f;
+            }
+        } else {
+            if (degree == 9u) {
+                return 0.60f;
+            }
+            if (degree == 2u) {
+                return 0.45f;
+            }
+            if (degree == 4u) {
+                return 0.30f;
+            }
+        }
+    } else if (chord_mode == APTA_KEY_MODE_MINOR) {
+        if (degree == 0u) {
+            return 1.00f;
+        }
+        if (degree == 5u) {
+            return 0.70f;
+        }
+    } else {
+        if (degree == 7u) {
+            return 0.85f;
+        }
+        if (degree == 3u) {
+            return 0.60f;
+        }
+        if (degree == 8u) {
+            return 0.45f;
+        }
+        if (degree == 10u) {
+            return 0.30f;
+        }
+    }
+    return 0.0f;
+}
+
+void apta_internal_key_temporal_vote_chroma(
+    apta_internal_key_analysis_t *analysis,
+    const float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES])
+{
+    float chroma_norm = 0.0f;
+    float best_score = -1.0f;
+    float second_score = -1.0f;
+    uint32_t best_tonic = 0u;
+    apta_key_mode_t best_mode = APTA_KEY_MODE_MAJOR;
+    uint32_t tonic;
+    uint32_t pitch;
+
+    if (analysis == NULL || chroma == NULL) {
+        return;
+    }
+    for (pitch = 0u; pitch < APTA_INTERNAL_KEY_PITCH_CLASSES; ++pitch) {
+        if (!isfinite(chroma[pitch]) || chroma[pitch] < 0.0f) {
+            return;
+        }
+        chroma_norm += chroma[pitch] * chroma[pitch];
+    }
+    if (chroma_norm <= 1e-20f) {
+        return;
+    }
+    for (tonic = 0u; tonic < APTA_INTERNAL_KEY_PITCH_CLASSES; ++tonic) {
+        const apta_key_mode_t modes[2] = {
+            APTA_KEY_MODE_MAJOR, APTA_KEY_MODE_MINOR};
+        uint32_t mode_index;
+
+        for (mode_index = 0u; mode_index < 2u; ++mode_index) {
+            const float score = apta_key_chord_score(
+                chroma, chroma_norm, tonic, modes[mode_index]);
+            if (score > best_score) {
+                second_score = best_score;
+                best_score = score;
+                best_tonic = tonic;
+                best_mode = modes[mode_index];
+            } else if (score > second_score) {
+                second_score = score;
+            }
+        }
+    }
+    if (best_score > second_score) {
+        const float margin = best_score - second_score;
+        uint32_t key_tonic;
+
+        for (key_tonic = 0u;
+             key_tonic < APTA_INTERNAL_KEY_PITCH_CLASSES;
+             ++key_tonic) {
+            const float major_weight = apta_key_chord_compatibility(
+                key_tonic,
+                APTA_KEY_MODE_MAJOR,
+                best_tonic,
+                best_mode);
+            const float minor_weight = apta_key_chord_compatibility(
+                key_tonic,
+                APTA_KEY_MODE_MINOR,
+                best_tonic,
+                best_mode);
+            analysis->temporal_key_support[key_tonic] += margin * major_weight;
+            analysis->temporal_key_support[
+                APTA_INTERNAL_KEY_PITCH_CLASSES + key_tonic] +=
+                margin * minor_weight;
+        }
+        analysis->temporal_margin_sum += margin;
+    }
+}
+#endif
+
 #ifdef APTA_INTERNAL_KEY_HPCP
 #define APTA_KEY_HPCP_THIRD_HARMONIC_OFFSET 19u
 #define APTA_KEY_HPCP_FIFTH_HARMONIC_OFFSET 28u
@@ -188,6 +336,94 @@ static void apta_key_insert_candidate(
     scores[position] = score;
 }
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+apta_status_t apta_internal_key_select_temporal(
+    const apta_internal_key_analysis_t *analysis,
+    uint32_t completed_windows,
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT],
+    apta_key_view_t *view_out)
+{
+    float scores[APTA_INTERNAL_KEY_CANDIDATE_COUNT] = {-1.0f, -1.0f, -1.0f};
+    float separation;
+    uint32_t tonic;
+    uint32_t position;
+    uint32_t confidence;
+
+    if (analysis == NULL || candidates == NULL || view_out == NULL) {
+        return APTA_ERROR_INVALID_ARGUMENT;
+    }
+    if (completed_windows == 0u ||
+        !isfinite(analysis->temporal_margin_sum) ||
+        analysis->temporal_margin_sum <= 1e-20f) {
+        return APTA_STATUS_NOT_AVAILABLE;
+    }
+    memset(
+        candidates,
+        0,
+        sizeof(*candidates) * APTA_INTERNAL_KEY_CANDIDATE_COUNT);
+    for (tonic = 0u; tonic < APTA_INTERNAL_KEY_PITCH_CLASSES; ++tonic) {
+        const float major_score =
+            analysis->temporal_key_support[tonic] /
+            analysis->temporal_margin_sum;
+        const float minor_score =
+            analysis->temporal_key_support[
+                APTA_INTERNAL_KEY_PITCH_CLASSES + tonic] /
+            analysis->temporal_margin_sum;
+        if (!isfinite(major_score) || !isfinite(minor_score) ||
+            major_score < 0.0f || minor_score < 0.0f) {
+            return APTA_ERROR_INVALID_ARGUMENT;
+        }
+        apta_key_insert_candidate(
+            candidates,
+            scores,
+            (uint8_t)tonic,
+            APTA_KEY_MODE_MAJOR,
+            major_score);
+        apta_key_insert_candidate(
+            candidates,
+            scores,
+            (uint8_t)tonic,
+            APTA_KEY_MODE_MINOR,
+            minor_score);
+    }
+    for (position = 1u;
+         position < APTA_INTERNAL_KEY_CANDIDATE_COUNT;
+         ++position) {
+        if (candidates[position].score >= candidates[position - 1u].score) {
+            candidates[position].score =
+                candidates[position - 1u].score > 0u
+                    ? (uint16_t)(candidates[position - 1u].score - 1u)
+                    : 0u;
+        }
+    }
+    separation = scores[0] > scores[1] ? scores[0] - scores[1] : 0.0f;
+    confidence = 25u +
+                 (completed_windows >= 8u ? 40u : completed_windows * 5u) +
+                 (uint32_t)fminf(35.0f, separation * 350.0f + 0.5f);
+    if (confidence > APTA_CONFIDENCE_MAX) {
+        confidence = APTA_CONFIDENCE_MAX;
+    }
+    candidates[0].confidence = (apta_confidence_value_t)confidence;
+    candidates[1].confidence = confidence > 10u
+                                   ? (apta_confidence_value_t)(confidence - 10u)
+                                   : 0u;
+    candidates[2].confidence = confidence > 20u
+                                   ? (apta_confidence_value_t)(confidence - 20u)
+                                   : 0u;
+    apta_key_view_init(view_out);
+    view_out->mode = candidates[0].mode;
+    view_out->tonic = candidates[0].tonic;
+    view_out->tuning_offset_cents = 0;
+    view_out->confidence = candidates[0].confidence;
+    view_out->state = completed_windows >= APTA_INTERNAL_KEY_STABLE_WINDOWS
+                          ? APTA_FEATURE_STABLE
+                          : APTA_FEATURE_PROVISIONAL;
+    view_out->candidate_count = APTA_INTERNAL_KEY_CANDIDATE_COUNT;
+    view_out->candidates = candidates;
+    return APTA_STATUS_OK;
+}
+#endif
+
 apta_status_t apta_internal_key_select_chroma(
     const float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES],
     uint32_t completed_windows,
@@ -314,6 +550,9 @@ static void apta_key_initialize(
 
 static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
 {
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+    float window_chroma[APTA_INTERNAL_KEY_PITCH_CLASSES] = {0.0f};
+#endif
     uint32_t variant;
     uint32_t bin;
 
@@ -337,11 +576,20 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
             analysis->chroma[variant]
                             [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
                 compressed;
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+            if (variant == APTA_INTERNAL_KEY_BASE_VARIANT) {
+                window_chroma[bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
+                    compressed;
+            }
+#endif
 #ifdef APTA_INTERNAL_KEY_SPECTRAL_PROFILE
             analysis->spectral_profile[variant][bin] += compressed;
 #endif
         }
     }
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+    apta_internal_key_temporal_vote_chroma(analysis, window_chroma);
+#endif
     analysis->completed_windows += 1u;
     apta_key_reset_window(analysis);
 }
@@ -449,13 +697,23 @@ apta_status_t apta_internal_key_refresh(
     *completed_steps_out = 1u;
 
     {
+#ifndef APTA_INTERNAL_KEY_TEMPORAL_CHORD
         const uint32_t selected_variant = APTA_INTERNAL_KEY_BASE_VARIANT;
+#endif
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+        status = apta_internal_key_select_temporal(
+            &session->key_analysis,
+            session->key_analysis.completed_windows,
+            next_candidates,
+            &next_view);
+#else
         status = apta_internal_key_select_chroma(
             session->key_analysis.chroma[selected_variant],
             session->key_analysis.completed_windows,
             next_candidates,
             &next_view);
+#endif
 #ifdef APTA_INTERNAL_KEY_HPCP
         if (status == APTA_STATUS_OK) {
             float harmonic_chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];

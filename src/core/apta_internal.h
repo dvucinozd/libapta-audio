@@ -334,6 +334,7 @@ typedef struct {
 #define APTA_INTERNAL_KEY_PITCH_CLASSES 12u
 #define APTA_INTERNAL_KEY_BIN_COUNT (APTA_INTERNAL_KEY_OCTAVES * APTA_INTERNAL_KEY_PITCH_CLASSES)
 #define APTA_INTERNAL_KEY_CANDIDATE_COUNT 3u
+#define APTA_INTERNAL_KEY_GLOBAL_STATES 24u
 #define APTA_INTERNAL_KEY_DECIMATION 4u
 #define APTA_INTERNAL_KEY_STABLE_WINDOWS 4u
 #define APTA_INTERNAL_KEY_PUBLISH_INTERVAL 4u
@@ -558,6 +559,12 @@ typedef struct {
      * Default builds continue to keep only the folded 12-bin chroma. */
     float spectral_profile[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS]
                           [APTA_INTERNAL_KEY_BIN_COUNT];
+#endif
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+    /* Opt-in development evidence. One bounded support value per global
+     * major/minor key plus the sum of nonzero local-chord winning margins. */
+    float temporal_key_support[APTA_INTERNAL_KEY_GLOBAL_STATES];
+    float temporal_margin_sum;
 #endif
     float decimation_sum;
     uint32_t decimation_count;

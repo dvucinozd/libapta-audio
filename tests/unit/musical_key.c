@@ -135,6 +135,76 @@ static int check_common_mode_rejection(void)
 }
 #endif
 
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+static void set_triad_chroma(
+    float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES],
+    uint32_t tonic,
+    apta_key_mode_t mode)
+{
+    const uint32_t third =
+        (tonic + (mode == APTA_KEY_MODE_MAJOR ? 4u : 3u)) % 12u;
+    const uint32_t fifth = (tonic + 7u) % 12u;
+
+    memset(chroma, 0, sizeof(float) * APTA_INTERNAL_KEY_PITCH_CLASSES);
+    chroma[tonic] = 1.0f;
+    chroma[third] = 1.0f;
+    chroma[fifth] = 0.7f;
+}
+
+static void add_temporal_chord(
+    apta_internal_key_analysis_t *analysis,
+    uint32_t tonic,
+    apta_key_mode_t mode,
+    uint32_t count)
+{
+    float chroma[APTA_INTERNAL_KEY_PITCH_CLASSES];
+    uint32_t index;
+
+    set_triad_chroma(chroma, tonic, mode);
+    for (index = 0u; index < count; ++index) {
+        apta_internal_key_temporal_vote_chroma(analysis, chroma);
+    }
+}
+
+static int check_temporal_chord_state(void)
+{
+    apta_internal_key_analysis_t analysis;
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+    apta_key_view_t view;
+    float invalid[APTA_INTERNAL_KEY_PITCH_CLASSES] = {0.0f};
+
+    memset(&analysis, 0, sizeof(analysis));
+    CHECK(apta_internal_key_select_temporal(
+              &analysis, 10u, candidates, &view) ==
+          APTA_STATUS_NOT_AVAILABLE);
+    invalid[0] = -1.0f;
+    apta_internal_key_temporal_vote_chroma(&analysis, invalid);
+    CHECK(analysis.temporal_margin_sum == 0.0f);
+
+    add_temporal_chord(&analysis, 0u, APTA_KEY_MODE_MAJOR, 4u);
+    add_temporal_chord(&analysis, 7u, APTA_KEY_MODE_MAJOR, 2u);
+    add_temporal_chord(&analysis, 5u, APTA_KEY_MODE_MAJOR, 2u);
+    add_temporal_chord(&analysis, 9u, APTA_KEY_MODE_MINOR, 2u);
+    CHECK(apta_internal_key_select_temporal(
+              &analysis, 10u, candidates, &view) == APTA_STATUS_OK);
+    CHECK(view.tonic == 0u);
+    CHECK(view.mode == APTA_KEY_MODE_MAJOR);
+    CHECK(view.state == APTA_FEATURE_STABLE);
+    CHECK(candidates[0].score > candidates[1].score);
+
+    memset(&analysis, 0, sizeof(analysis));
+    add_temporal_chord(&analysis, 9u, APTA_KEY_MODE_MINOR, 4u);
+    add_temporal_chord(&analysis, 4u, APTA_KEY_MODE_MAJOR, 2u);
+    add_temporal_chord(&analysis, 2u, APTA_KEY_MODE_MINOR, 2u);
+    add_temporal_chord(&analysis, 0u, APTA_KEY_MODE_MAJOR, 2u);
+    CHECK(apta_internal_key_select_temporal(
+              &analysis, 10u, candidates, &view) == APTA_STATUS_OK);
+    CHECK(view.tonic == 9u);
+    CHECK(view.mode == APTA_KEY_MODE_MINOR);
+    return EXIT_SUCCESS;
+}
+#endif
+
 #ifdef APTA_INTERNAL_KEY_HPCP
 static int check_harmonic_projection(void)
 {
@@ -348,6 +418,9 @@ int main(void)
 #endif
 #ifdef APTA_INTERNAL_KEY_HPCP
     CHECK(check_harmonic_projection() == EXIT_SUCCESS);
+#endif
+#ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
+    CHECK(check_temporal_chord_state() == EXIT_SUCCESS);
 #endif
     CHECK(check_progressive_publication() == EXIT_SUCCESS);
     return EXIT_SUCCESS;
