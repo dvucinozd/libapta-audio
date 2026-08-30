@@ -130,6 +130,20 @@ if(APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_CENTERED_KEY_CORRELATION
+    "Build the development mean-centered key-profile experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_CENTERED_KEY_CORRELATION)
+    if(APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_CENTERED_KEY_CORRELATION is mutually "
+            "exclusive with APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_KEY_CENTERED_CORRELATION=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_KEY_TRACE
     "Build the apta-key-trace development diagnostic tool"
     OFF)

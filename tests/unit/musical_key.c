@@ -100,6 +100,41 @@ static int check_selector(void)
     return EXIT_SUCCESS;
 }
 
+#ifdef APTA_INTERNAL_KEY_CENTERED_CORRELATION
+static int check_common_mode_rejection(void)
+{
+    float chroma[12];
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+    apta_key_view_t view;
+    apta_status_t status;
+    uint32_t pitch;
+
+    /* A constant broadband floor carries no tonal contrast. Raw cosine
+     * similarity incorrectly changes this exact C-major profile to C minor
+     * once the floor reaches 1.0; centered correlation must be invariant. */
+    memcpy(chroma, major_profile, sizeof(chroma));
+    for (pitch = 0u; pitch < 12u; ++pitch) {
+        chroma[pitch] += 1.0f;
+    }
+    status = apta_internal_key_select_chroma(
+        chroma, 8u, candidates, &view);
+    CHECK(status == APTA_STATUS_OK);
+    CHECK(view.tonic == 0u);
+    CHECK(view.mode == APTA_KEY_MODE_MAJOR);
+
+    rotate_profile(chroma, minor_profile, 9u);
+    for (pitch = 0u; pitch < 12u; ++pitch) {
+        chroma[pitch] += 1.0f;
+    }
+    status = apta_internal_key_select_chroma(
+        chroma, 8u, candidates, &view);
+    CHECK(status == APTA_STATUS_OK);
+    CHECK(view.tonic == 9u);
+    CHECK(view.mode == APTA_KEY_MODE_MINOR);
+    return EXIT_SUCCESS;
+}
+#endif
+
 #ifdef APTA_INTERNAL_KEY_HPCP
 static int check_harmonic_projection(void)
 {
@@ -308,6 +343,9 @@ static int check_progressive_publication(void)
 int main(void)
 {
     CHECK(check_selector() == EXIT_SUCCESS);
+#ifdef APTA_INTERNAL_KEY_CENTERED_CORRELATION
+    CHECK(check_common_mode_rejection() == EXIT_SUCCESS);
+#endif
 #ifdef APTA_INTERNAL_KEY_HPCP
     CHECK(check_harmonic_projection() == EXIT_SUCCESS);
 #endif

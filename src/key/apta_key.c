@@ -115,15 +115,38 @@ static float apta_key_profile_score(
     float dot = 0.0f;
     float chroma_norm = 0.0f;
     float profile_norm = 0.0f;
+#ifdef APTA_INTERNAL_KEY_CENTERED_CORRELATION
+    float chroma_mean = 0.0f;
+    float profile_mean = 0.0f;
+#endif
     uint32_t pitch;
 
+#ifdef APTA_INTERNAL_KEY_CENTERED_CORRELATION
     for (pitch = 0u; pitch < APTA_INTERNAL_KEY_PITCH_CLASSES; ++pitch) {
         const uint32_t rotated =
             (pitch + APTA_INTERNAL_KEY_PITCH_CLASSES - tonic) %
             APTA_INTERNAL_KEY_PITCH_CLASSES;
+        chroma_mean += chroma[pitch];
+        profile_mean += profile[rotated];
+    }
+    chroma_mean /= (float)APTA_INTERNAL_KEY_PITCH_CLASSES;
+    profile_mean /= (float)APTA_INTERNAL_KEY_PITCH_CLASSES;
+#endif
+    for (pitch = 0u; pitch < APTA_INTERNAL_KEY_PITCH_CLASSES; ++pitch) {
+        const uint32_t rotated =
+            (pitch + APTA_INTERNAL_KEY_PITCH_CLASSES - tonic) %
+            APTA_INTERNAL_KEY_PITCH_CLASSES;
+#ifdef APTA_INTERNAL_KEY_CENTERED_CORRELATION
+        const float centered_chroma = chroma[pitch] - chroma_mean;
+        const float centered_profile = profile[rotated] - profile_mean;
+        dot += centered_chroma * centered_profile;
+        chroma_norm += centered_chroma * centered_chroma;
+        profile_norm += centered_profile * centered_profile;
+#else
         dot += chroma[pitch] * profile[rotated];
         chroma_norm += chroma[pitch] * chroma[pitch];
         profile_norm += profile[rotated] * profile[rotated];
+#endif
     }
     if (chroma_norm <= 1e-20f || profile_norm <= 1e-20f) {
         return 0.0f;
