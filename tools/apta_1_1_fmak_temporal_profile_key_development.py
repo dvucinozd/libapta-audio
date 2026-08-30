@@ -19,6 +19,7 @@ FORMAT = "apta-1.1-fmak-temporal-profile-key-development-1"
 REPORT_FORMAT = "apta-1.1-fmak-temporal-profile-key-report-1"
 COMPARISON_FORMAT = "apta-1.1-fmak-temporal-profile-key-comparison-1"
 SELECTION_SEED = "apta-1.1-fmak-temporal-profile-v1"
+PRIOR_SELECTION_SEED = prior.SELECTION_SEED
 PRIOR_SELECTION_SHA256 = prior.SELECTION_SHA256
 SELECTION_SHA256 = "1c94629c8513fbab9d97e4c05e1394a9b9e1cd5070e126ddd0a0ce0ab1e89121"
 REMAINING_ELIGIBLE_COUNT = prior.ELIGIBLE_COUNT - prior.TRACK_COUNT
@@ -27,6 +28,15 @@ TRACK_COUNT = 96
 
 Candidate = prior.Candidate
 PRIOR_SELECT_CANDIDATES = prior.select_candidates
+
+
+def _select_prior_candidates(rows: Iterable[Candidate]) -> list[Candidate]:
+    saved_seed = prior.SELECTION_SEED
+    try:
+        prior.SELECTION_SEED = PRIOR_SELECTION_SEED
+        return PRIOR_SELECT_CANDIDATES(rows)
+    finally:
+        prior.SELECTION_SEED = saved_seed
 
 
 def _stable_key(row: Candidate) -> tuple[str, int]:
@@ -42,7 +52,7 @@ def select_candidates(rows: Iterable[Candidate]) -> list[Candidate]:
     if len(eligible) != prior.ELIGIBLE_COUNT:
         raise prior.shared.ValidationError("FMAK 000-019 eligible inventory changed")
 
-    prior_selection = PRIOR_SELECT_CANDIDATES(inventory)
+    prior_selection = _select_prior_candidates(inventory)
     if prior.selection_sha256(prior_selection) != PRIOR_SELECTION_SHA256:
         raise prior.shared.ValidationError("prior spent FMAK selection changed")
     prior_ids = {row.source_id for row in prior_selection}
@@ -81,7 +91,7 @@ def selection_sha256(rows: Iterable[Candidate]) -> str:
 
 def preflight(metadata: Path) -> dict[str, Any]:
     inventory = prior.inventory(metadata)
-    prior_selection = PRIOR_SELECT_CANDIDATES(inventory)
+    prior_selection = _select_prior_candidates(inventory)
     selected = select_candidates(inventory)
     seal = selection_sha256(selected)
     if seal != SELECTION_SHA256:

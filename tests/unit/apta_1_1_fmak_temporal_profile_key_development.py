@@ -134,6 +134,14 @@ class FmakTemporalProfileKeyDevelopmentTests(unittest.TestCase):
             self.assertEqual(value["format"], module.COMPARISON_FORMAT)
             self.assertTrue(value["holdout_eligible"])
 
+    def test_configured_transport_preserves_spent_selection_identity(self) -> None:
+        rows = synthetic_inventory()
+        expected = module._select_prior_candidates(rows)
+        with module._configured_prior_protocol():
+            actual = module._select_prior_candidates(rows)
+        self.assertEqual(actual, expected)
+        self.assertEqual(module.prior.SELECTION_SEED, module.PRIOR_SELECTION_SEED)
+
 
 if __name__ == "__main__":
     unittest.main()
