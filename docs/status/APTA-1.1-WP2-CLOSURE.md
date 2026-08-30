@@ -39,8 +39,11 @@ hypothesis with new temporal information not represented by I1 or I2.
 ## Subsequent reopened evidence
 
 WP2-I3 was pre-registered after this closure to test that permitted new axis.
-It preserves the exact full-window top-three set and scores beat-to-beat onset
-paths within the already-frozen 0.10-beat phase tolerance; it does not add a
-window vote or tune either rejected selector. The frozen oracle-first protocol
-is in `APTA-1.1-WP2-BEAT-PATH-I3.md`. No external-development result, native
-candidate, formal-holdout or acceptance claim exists yet.
+It preserved the exact full-window top-three set and scored beat-to-beat onset
+paths within the already-frozen 0.10-beat phase tolerance; it did not add a
+window vote or tune either rejected selector. The frozen oracle improved
+Ballroom period from 9/40 to 12/40 and joint period/phase from 7/40 to 9/40,
+but ASAP period stayed 2/40, joint stayed 0/40 and phase regressed 1/40 to
+0/40. I3 therefore failed the external-development gate before a spent-DJ run
+or native implementation. Exact hashes and the retained negative result are in
+`APTA-1.1-WP2-BEAT-PATH-I3.md`; formal holdouts remain unopened.

@@ -1,6 +1,6 @@
 # APTA 1.1 WP2 beat-path tracker iteration 3
 
-- **Status:** pre-registered; development traces not yet evaluated by I3
+- **Status:** rejected by the external-development oracle gate
 - **Frozen baseline revision:** `b20df60bde0260a85a99fad7ab5250fb82f509b1`
 - **Evidence class:** diagnostic/development only
 - **Acceptance claim:** false
@@ -92,3 +92,52 @@ Any failed stage rejects I3 without changing the radius, normalization,
 emission, transition, candidate combination, tie rule or gate. It does not
 authorize an adjacent path formula, a formal holdout, a fresh acceptance
 corpus or an acceptance claim.
+
+## Frozen oracle outcome — rejected 2026-08-30
+
+The one permitted external-development run used clean oracle revision
+`a5a88105e3b7dcc07b810137e45bf332b2c37bed`. A preliminary invocation had
+stopped before evaluation or output because the generic trace loader required
+unused band-energy arrays. Revision `a5a8810` narrowed validation to the exact
+I3 inputs, added a minimal-schema regression test and was committed before the
+first result-producing run.
+
+Both corpora reproduced the captured ordered top three on 40/40 tracks and
+selected only from those states. The frozen paired result was:
+
+| Corpus | Metric | Production | I3 | Fixes | Breaks |
+|---|---|---:|---:|---:|---:|
+| ASAP | period | 2/40 | 2/40 | 0 | 0 |
+| ASAP | phase | 1/40 | 0/40 | 0 | 1 |
+| ASAP | joint period/phase | 0/40 | 0/40 | 0 | 0 |
+| Ballroom | period | 9/40 | 12/40 | 4 | 1 |
+| Ballroom | phase | 11/40 | 13/40 | 3 | 1 |
+| Ballroom | joint period/phase | 7/40 | 9/40 | 3 | 1 |
+
+I3 retained rank zero on 29 ASAP and 22 Ballroom tracks, promoted rank one on
+9 and 13, and promoted rank two on 2 and 5 respectively. Ballroom therefore
+shows positive period, phase and joint signal with only one break per metric.
+ASAP has no positive period or joint transfer and loses its sole correct phase.
+It fails the conjunctive external gate and is rejected before the spent-DJ
+trace, native implementation, resource measurement or any formal holdout.
+
+The I3 Ballroom production count is 9/40 rather than the 10/40 recorded by the
+historical I1/I2 reports. Those older documents did not retain their trace-set
+hash, so the exact private-artifact drift cannot be reconstructed. I3's paired
+decision is bound to the exact hashes below and does not reinterpret either
+older result.
+
+Privacy-safe retained bindings are:
+
+- ASAP labels / trace set / report SHA-256:
+  `7f6d5e40c8771df6052fd31f46a0fb0d0e95ab990c8d89f00c4ef1fe41d882c0` /
+  `72089f349db6fef80cd50c30d5a74df17ca75cc9ec4149e576c35f884d048963` /
+  `0154ec618cb6af7d2efa75be38677d5904e921139310654bb5a629e54a70b9e7`;
+- Ballroom labels / trace set / report SHA-256:
+  `5aa77e0b23233a38480d43a77b67f63f2407c91ac444073efce1bf8f0214d323` /
+  `2a1fd33d10a2fb93faf3d82c79a56c12c23d88152bb6728b148ef686f43a47b8` /
+  `b0f4f7636eeaa00c3eb5343566bbb79011b6053d7cbfa619c0013a39c6f23c92`.
+
+No radius, emission, transition, score combination or tie variant was tested.
+The two I3 reports are ignored private artifacts and contain only opaque track
+IDs.

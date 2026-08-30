@@ -120,14 +120,15 @@ Initial retain/reject criterion:
 
 ## Work package 2 — temporal beat-lattice tracker
 
-**Status:** reopened under a third pre-registered temporal hypothesis. Both the
-unweighted continuity path and strict-majority selector failed external-
-development transfer, so production still retains the frozen full-window S4
-rank zero. WP2-I3 keeps the exact ordered top three but tests beat-to-beat
-onset-path continuity within the frozen 0.10-beat phase tolerance. Its oracle
-and synthetic tests are frozen in `APTA-1.1-WP2-BEAT-PATH-I3.md`; no
-development result or promotion claim exists yet, and formal holdouts remain
-unopened.
+**Status:** closed without promotion after three pre-registered temporal
+hypotheses. The unweighted continuity path and strict-majority selector failed
+external-development transfer. WP2-I3 kept the exact ordered top three and
+tested beat-to-beat onset-path continuity within the frozen 0.10-beat phase
+tolerance. It improved Ballroom period 9/40 to 12/40 and joint phase 7/40 to
+9/40, but ASAP period remained 2/40, joint remained 0/40 and phase regressed
+1/40 to 0/40. It was therefore rejected before the spent-DJ trace or native
+implementation. Production retains frozen full-window S4 rank zero, and formal
+holdouts remain unopened; see `APTA-1.1-WP2-BEAT-PATH-I3.md`.
 
 **Hypothesis:** one global autocorrelation/phase choice cannot represent tracks
 whose transient reliability changes over time. Tracking a small bounded family
