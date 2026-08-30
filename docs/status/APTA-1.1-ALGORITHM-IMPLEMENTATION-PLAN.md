@@ -337,14 +337,17 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The ESP32-P4 control path is available again on COM6 through the board's CH340
-bridge and has been re-identified as the same v1.3 P4. The immediate hardware
-task is a clean exact-head WP8 UAC build, metadata check, normal flash and then
-the instrumented 1,800-second USB/audio run. Both GiantSteps key transfer
-attempts are closed and rejected without opening the formal holdout. WP4 now
-requires a newly pre-registered tonal-evidence candidate and genuinely new
-development evidence; the spent harmonic and centered results do not authorize
-neighboring parameter, confidence or threshold rescues.
+The ESP32-P4 control path is available on COM6 through the board's CH340 bridge.
+The exact-head WP8 UAC build, metadata check, normal flash and boot passed on
+the v1.3 target, but Windows did not enumerate the separate frozen USB-OTG UAC
+endpoint, so the 1,800-second evidence clock correctly did not start. Both
+GiantSteps key transfer attempts are closed and rejected without opening the
+formal holdout. WP4 now has a third candidate pre-registered on genuinely new
+FMAK development evidence: a bounded temporal chord-state vote under
+`APTA_ENABLE_EXPERIMENTAL_TEMPORAL_CHORD_KEY`, frozen in
+`APTA-1.1-WP4-FMAK-TEMPORAL-CHORD-KEY-PROTOCOL.md`. The spent harmonic and
+centered results do not authorize neighboring parameter, confidence or
+threshold rescues.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

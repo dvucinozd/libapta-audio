@@ -54,6 +54,10 @@ GiantSteps-MTG development transfer rejected harmonic-HPCP at 22/96. A separate
 96-track, mode-balanced original GiantSteps development run rejected
 resource-neutral centered correlation at 28/96 with 52 new high-confidence
 errors. Both attempts stopped before the sealed 48-track formal holdout. The
-current authoritative decision and exact hashes are recorded in
-`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`; this historical closure
-still correctly records why no key path entered the existing WP5 baseline.
+exact hashes are recorded in
+`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`. A third, bounded temporal
+chord-state candidate has since been pre-registered, before audio use, on a new
+96-track class-balanced FMAK development split. Its one-shot rules are in
+`APTA-1.1-WP4-FMAK-TEMPORAL-CHORD-KEY-PROTOCOL.md`; no result or promotion claim
+exists yet. This historical closure still correctly records why no key path
+entered the existing WP5 baseline.
