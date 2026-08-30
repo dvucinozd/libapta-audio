@@ -187,15 +187,15 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** the harmonic transfer check was rejected 2026-08-30. Production is
-21/96 and harmonic-HPCP is 22/96 on balanced GiantSteps-MTG development
-evidence, with one fix, zero breaks and zero new high-confidence errors. The
-mandatory 70% gate fails, so the sealed holdout remains unopened. The failure
-also exposes a 1/48 versus 20/48 major/minor imbalance and 29 parallel-mode
-errors. A new, separately isolated centered-correlation candidate is
-pre-registered in
-`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`; no result from its new
-48-major/48-minor development split has been inspected.
+**Status:** two transfer attempts were rejected 2026-08-30 without opening the
+formal holdout. Harmonic-HPCP moved 21/96 to 22/96 on balanced GiantSteps-MTG
+development evidence. On a separate 48-major/48-minor development split,
+centered correlation moved production from 22/96 to 28/96 with 11 fixes and
+five breaks and balanced both modes at 14/48, but remained far below 70% and
+introduced 52 new high-confidence errors. That split is spent and the
+centered path is diagnostic-only. The exact hashes, resource-neutral result
+and fail-closed decision are recorded in
+`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
@@ -337,13 +337,14 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate hardware task is the instrumented 1,800-second ESP32-P4
-USB/audio run once the separate USB Serial/JTAG control connection enumerates
-again. The GiantSteps-MTG harmonic transfer check is closed and rejected
-without opening its holdout. WP4 now proceeds only under the separately
-pre-registered centered-correlation protocol and its genuinely new development
-evidence; I10 and the rejected harmonic result do not authorize neighboring
-parameter or threshold rescues.
+The ESP32-P4 control path is available again on COM6 through the board's CH340
+bridge and has been re-identified as the same v1.3 P4. The immediate hardware
+task is a clean exact-head WP8 UAC build, metadata check, normal flash and then
+the instrumented 1,800-second USB/audio run. Both GiantSteps key transfer
+attempts are closed and rejected without opening the formal holdout. WP4 now
+requires a newly pre-registered tonal-evidence candidate and genuinely new
+development evidence; the spent harmonic and centered results do not authorize
+neighboring parameter, confidence or threshold rescues.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

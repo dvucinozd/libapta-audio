@@ -6,6 +6,22 @@
 - **Acceptance claim:** false
 - **Tracked qualifying physical evidence:** absent
 
+## COM6 control-path recovery
+
+On 2026-08-30 the board's UART bridge enumerated as `USB-SERIAL CH340 (COM6)`,
+`USB\VID_1A86&PID_7523`. This is not the earlier native Espressif
+`VID_303A&PID_1001` Serial/JTAG interface, but it is a valid control path to the
+same target. A normal, read-only ESP-IDF 6.0.2 `esptool chip-id` handshake over
+COM6 identified ESP32-P4 revision v1.3, dual core plus LP core, 400 MHz and a
+40 MHz crystal, then hard-reset the board through RTS. No flash write occurred,
+and device-unique identifiers are not retained in this audit.
+
+The changing COM number is therefore a Windows/bridge enumeration detail, not
+evidence that the P4 was physically removed or replaced. Subsequent commands
+must use the currently enumerated control port and re-identify the target before
+writing. The qualifying UAC stream still requires the separate USB-OTG
+connector; COM6 alone is not USB/audio evidence.
+
 ## Environment result
 
 The Windows host has a working ESP-IDF 6.0.2 installation, including the
@@ -143,8 +159,9 @@ counter/measurement required by `APTA-1.1-P4-HARDWARE-EVIDENCE.md`.
 
 ## Current decision
 
-WP8 remains open. The connected COM4 device is now a proven IDF 6.0.2 v1.3
-diagnostic target, and revision compatibility is no longer the blocker. The
+WP8 remains open. The target is now a proven IDF 6.0.2 v1.3 diagnostic board,
+currently reachable through its CH340 bridge on COM6, and revision
+compatibility is no longer the blocker. The
 immediate physical work is an instrumented real USB/audio input harness that
 records every frozen counter and resource field for 1,800 seconds, followed by
 the exact integrated-candidate rerun if its firmware or memory profile changes.
@@ -187,10 +204,11 @@ Before changing the example again, freeze the only authorized WP8 harness:
   stream fails rather than extending or restarting the run.
 
 Build from a new ESP-IDF 6.0.2 directory using both P4 defaults files, require
-the same v1.0-v1.99 image metadata and flash normally to the already-identified
-COM4 target. Stop before flashing on any dependency, build, image-range or
-validator failure. After boot, stop and retain diagnostic logs if the separate
-P4 USB-OTG connector does not enumerate as the frozen UAC endpoint; COM4 alone
-is the USB Serial/JTAG control path and cannot be counted as real USB/audio
-input. The final tracked JSON is created only from a complete physical log plus
-the exact committed source revision and flashed application SHA-256.
+the same v1.0-v1.99 image metadata and flash normally to the currently
+identified control port (`COM6` at the latest verification). Stop before
+flashing on any dependency, build, image-range or validator failure. After
+boot, stop and retain diagnostic logs if the separate P4 USB-OTG connector
+does not enumerate as the frozen UAC endpoint; the control port alone cannot be
+counted as real USB/audio input. The final tracked JSON is created only from a
+complete physical log plus the exact committed source revision and flashed
+application SHA-256.

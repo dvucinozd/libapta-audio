@@ -46,3 +46,14 @@ one-shot boundary.
 No key path is promoted into WP5. WP4 may be reopened only with a genuinely new,
 pre-registered independent key dataset or a new tonal-evidence hypothesis that
 does not reuse these labels for iterative tuning.
+
+## Subsequent reopened evidence
+
+WP4 was later reopened twice under new pre-registered evidence. A balanced
+GiantSteps-MTG development transfer rejected harmonic-HPCP at 22/96. A separate
+96-track, mode-balanced original GiantSteps development run rejected
+resource-neutral centered correlation at 28/96 with 52 new high-confidence
+errors. Both attempts stopped before the sealed 48-track formal holdout. The
+current authoritative decision and exact hashes are recorded in
+`APTA-1.1-WP4-CENTERED-KEY-CORRELATION-PROTOCOL.md`; this historical closure
+still correctly records why no key path entered the existing WP5 baseline.

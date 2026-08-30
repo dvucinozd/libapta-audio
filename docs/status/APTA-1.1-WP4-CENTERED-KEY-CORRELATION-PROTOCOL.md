@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 centered key-correlation development protocol
 
-- **Status:** pre-registered 2026-08-30; no analyzer result inspected
+- **Status:** first frozen run completed and rejected 2026-08-30
 - **Evidence class:** independent local development; no acceptance claim
 - **Protocol baseline:** `36b0aa88556f34a833f2c7208a3d9a510484e05a`
 - **Candidate flag:** `APTA_ENABLE_EXPERIMENTAL_CENTERED_KEY_CORRELATION=ON`
@@ -110,6 +110,50 @@ If all gates pass, freeze the exact revision, flag and formula, then run the
 48-track MTG holdout once. Retention requires at least 70% exact accuracy, at
 least 60% accuracy in each mode, positive transfer over production and zero new
 high-confidence errors. A failed holdout is spent and cannot be tuned against.
+
+## Frozen first-run result and decision
+
+The only permitted run used source revision
+`4584338f3bd5c4c83d701c1459d3748815862a3a`, dataset revision
+`6bcd492c825ac9b8597bc650a5f6fd18b6c43d2b`, selection SHA-256
+`bd8d836e76c12d341f20d4244de75f5c4958ad45aea5197deef37d010c19435e`
+and prepared-manifest SHA-256
+`d9e8952e3027cf500f6dd046bc08e226fc582f16248bf82843cc696b238980d7`.
+The baseline analyzer SHA-256 was
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`;
+the opt-in candidate analyzer SHA-256 was
+`673c30b5ea5eb8139b82925409dbd21f5838799a07eb5828a6d2a6352b0c93ea`.
+
+| Metric | Production | Centered candidate | Gate |
+|---|---:|---:|---:|
+| Exact key | 22/96 (22.9%) | 28/96 (29.2%) | >=70% |
+| Major exact | 3/48 (6.3%) | 14/48 (29.2%) | >=60% |
+| Minor exact | 19/48 (39.6%) | 14/48 (29.2%) | >=60% |
+| High-confidence errors | 1 | 53 | no new errors |
+| Fixes / breaks | - | 11 / 5 | fixes > breaks |
+| Changed verdicts | - | 46 | diagnostic |
+
+Centering therefore removed much of the production minor-mode collapse and
+produced positive net fixes, but it remained far below every absolute accuracy
+gate and introduced 52 new errors at confidence 75 or above. Its score-space
+separation is also incompatible with the production confidence mapping; that
+mapping is not recalibrated because the candidate already fails accuracy by a
+wide margin.
+
+Both exact Release Werror builds passed 120/120 tests with the deliberately
+deferred WP9 archive-packaging test excluded, and the exact candidate
+ASan/UBSan build passed 116/116. Default analyzer bytes were unchanged. The
+baseline and candidate ABI-layout outputs both hashed to
+`8816de1c7e447b706938d47584133d9f55c8c02f0ebca2b965e36e26c6ca29c6`,
+and their workspace-probe outputs both hashed to
+`b9660091feef005cb8539efa2e861dcdfe79f04aeaf595000eeabb1f8a00cc05`;
+key state, result-pool and resonator deltas are zero.
+
+The frozen comparator sets `holdout_eligible=false`. This 96-track development
+split is now spent for candidate selection, the centered path remains opt-in
+diagnostic code only, and the 48-track GiantSteps-MTG holdout was not opened.
+A subsequent key candidate requires a new pre-registration and genuinely new
+development evidence rather than confidence or threshold rescue on this set.
 
 Even a retained key candidate is not final DJ acceptance evidence. It must join
 a transferable lattice/downbeat candidate, pass WP6 integration and then face
