@@ -284,14 +284,14 @@ static int check_harmonic_projection(void)
 }
 #endif
 
-static int16_t chord_sample(uint64_t frame)
+static int16_t chord_sample(uint64_t frame, float frequency_ratio)
 {
     const float t = (float)(frame % SAMPLE_RATE) / (float)SAMPLE_RATE;
     const float two_pi = 6.28318530718f;
     const float sample =
-        0.30f * sinf(two_pi * 261.6256f * t) +
-        0.25f * sinf(two_pi * 329.6276f * t) +
-        0.25f * sinf(two_pi * 391.9954f * t);
+        0.30f * sinf(two_pi * 261.6256f * frequency_ratio * t) +
+        0.25f * sinf(two_pi * 329.6276f * frequency_ratio * t) +
+        0.25f * sinf(two_pi * 391.9954f * frequency_ratio * t);
     float scaled = sample * 30000.0f;
 
     if (scaled > 32767.0f) {
@@ -302,7 +302,11 @@ static int16_t chord_sample(uint64_t frame)
     return (int16_t)scaled;
 }
 
-static int push_range(apta_session_t *session, uint64_t first, uint64_t end)
+static int push_range(
+    apta_session_t *session,
+    uint64_t first,
+    uint64_t end,
+    float frequency_ratio)
 {
     int16_t samples[BLOCK_FRAMES];
     apta_work_budget_t budget;
@@ -322,7 +326,7 @@ static int push_range(apta_session_t *session, uint64_t first, uint64_t end)
             count = BLOCK_FRAMES;
         }
         for (index = 0u; index < count; ++index) {
-            samples[index] = chord_sample(first + index);
+            samples[index] = chord_sample(first + index, frequency_ratio);
         }
 
         apta_pcm_block_init(&block);
@@ -339,6 +343,63 @@ static int push_range(apta_session_t *session, uint64_t first, uint64_t end)
     }
     return EXIT_SUCCESS;
 }
+
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+static int check_detuned_chord(float frequency_ratio)
+{
+    const apta_feature_mask_t features =
+        APTA_FEATURE_WAVEFORM_OVERVIEW |
+        APTA_FEATURE_MUSICAL_KEY;
+    apta_context_config_t context_config;
+    apta_session_config_t session_config;
+    apta_context_t *context = NULL;
+    apta_session_t *session = NULL;
+    const apta_result_t *result = NULL;
+    apta_key_view_t view;
+
+    apta_context_config_init(&context_config);
+    context_config.requested_capabilities = features;
+    CHECK(apta_context_create(&context_config, &context) == APTA_STATUS_OK);
+
+    apta_session_config_init(&session_config);
+    session_config.source_sample_rate = SAMPLE_RATE;
+    session_config.channel_count = 1u;
+    session_config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
+    session_config.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
+    session_config.total_frames = STABLE_END;
+    session_config.requested_features = features;
+    CHECK(apta_session_create(context, &session_config, &session) ==
+          APTA_STATUS_OK);
+
+    CHECK(push_range(session, 0u, STABLE_END, frequency_ratio) == EXIT_SUCCESS);
+    result = apta_session_acquire_result(session);
+    CHECK(result != NULL);
+    apta_key_view_init(&view);
+    CHECK(apta_result_get_key(result, NULL, &view) == APTA_STATUS_OK);
+    CHECK(view.state == APTA_FEATURE_STABLE);
+    if (view.tonic != 0u) {
+        fprintf(stderr,
+                "detuned chord ratio %.8f selected tonic=%u mode=%d\n",
+                (double)frequency_ratio,
+                view.tonic,
+                (int)view.mode);
+    }
+    CHECK(view.tonic == 0u);
+    CHECK(view.tuning_offset_cents == 0);
+
+    apta_result_release(result);
+    CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
+    CHECK(apta_context_destroy(context) == APTA_STATUS_OK);
+    return EXIT_SUCCESS;
+}
+
+static int check_semitone_band_detuning(void)
+{
+    CHECK(check_detuned_chord(0.98093009f) == EXIT_SUCCESS);
+    CHECK(check_detuned_chord(1.01944064f) == EXIT_SUCCESS);
+    return EXIT_SUCCESS;
+}
+#endif
 
 static int read_key(
     const apta_result_t *result,
@@ -405,14 +466,15 @@ static int check_progressive_publication(void)
     CHECK(apta_session_create(context, &session_config, &session) ==
           APTA_STATUS_OK);
 
-    CHECK(push_range(session, 0u, PROVISIONAL_END) == EXIT_SUCCESS);
+    CHECK(push_range(session, 0u, PROVISIONAL_END, 1.0f) == EXIT_SUCCESS);
     provisional = apta_session_acquire_result(session);
     CHECK(provisional != NULL);
     CHECK(read_key(provisional, APTA_FEATURE_PROVISIONAL, &provisional_view) ==
           EXIT_SUCCESS);
     provisional_generation = apta_result_get_generation(provisional);
 
-    CHECK(push_range(session, PROVISIONAL_END, STABLE_END) == EXIT_SUCCESS);
+    CHECK(push_range(session, PROVISIONAL_END, STABLE_END, 1.0f) ==
+          EXIT_SUCCESS);
     stable = apta_session_acquire_result(session);
     CHECK(stable != NULL);
     CHECK(read_key(stable, APTA_FEATURE_STABLE, &stable_view) == EXIT_SUCCESS);
@@ -425,7 +487,7 @@ static int check_progressive_publication(void)
     CHECK(read_key(provisional, APTA_FEATURE_PROVISIONAL, &provisional_view) ==
           EXIT_SUCCESS);
 
-    CHECK(push_range(session, STABLE_END, FINAL_END) == EXIT_SUCCESS);
+    CHECK(push_range(session, STABLE_END, FINAL_END, 1.0f) == EXIT_SUCCESS);
     CHECK(apta_session_signal_end_of_input(session, FINAL_END) ==
           APTA_STATUS_OK);
     apta_work_budget_init(&budget);
@@ -445,6 +507,7 @@ static int check_progressive_publication(void)
     final_result = apta_session_acquire_result(session);
     CHECK(final_result != NULL);
     CHECK(read_key(final_result, APTA_FEATURE_FINAL, &final_view) == EXIT_SUCCESS);
+    CHECK(final_view.tonic == 0u);
     CHECK(apta_result_get_generation(final_result) > stable_generation);
 
     CHECK(apta_result_get_generation(provisional) == provisional_generation);
@@ -481,6 +544,9 @@ int main(void)
 #endif
 #ifdef APTA_INTERNAL_KEY_TEMPORAL_PROFILE
     CHECK(check_temporal_profile_state() == EXIT_SUCCESS);
+#endif
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+    CHECK(check_semitone_band_detuning() == EXIT_SUCCESS);
 #endif
     CHECK(check_progressive_publication() == EXIT_SUCCESS);
     return EXIT_SUCCESS;

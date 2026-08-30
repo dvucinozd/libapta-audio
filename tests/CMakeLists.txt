@@ -263,6 +263,40 @@ target_link_libraries(apta_musical_key PRIVATE apta_c11_atomics)
 target_include_directories(
     apta_musical_key
     PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/key)
+
+# Development measurement instrument, deliberately excluded from the ordinary
+# test/build/install graph. WP4 experiments build it explicitly to compare the
+# private per-sample key front end without decoder or filesystem noise.
+add_executable(
+    apta_key_feed_benchmark
+    EXCLUDE_FROM_ALL
+    bench/key_feed_benchmark.c)
+target_link_libraries(
+    apta_key_feed_benchmark
+    PRIVATE apta::core apta_c11_atomics)
+target_include_directories(
+    apta_key_feed_benchmark
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/key)
+set_target_properties(
+    apta_key_feed_benchmark
+    PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED YES
+        C_EXTENSIONS NO)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(
+        apta_key_feed_benchmark
+        PRIVATE -Wall -Wextra -Wpedantic)
+    target_link_libraries(apta_key_feed_benchmark PRIVATE m)
+    if(APTA_WARNINGS_AS_ERRORS)
+        target_compile_options(apta_key_feed_benchmark PRIVATE -Werror)
+    endif()
+elseif(MSVC)
+    target_compile_options(apta_key_feed_benchmark PRIVATE /W4)
+    if(APTA_WARNINGS_AS_ERRORS)
+        target_compile_options(apta_key_feed_benchmark PRIVATE /WX)
+    endif()
+endif()
 apta_add_c_test(
     apta_dj_sections_roundtrip
     apta.serialization.dj_sections_roundtrip

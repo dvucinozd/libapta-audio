@@ -660,20 +660,44 @@ static void apta_key_initialize(
 {
     const float decimated_rate =
         (float)source_sample_rate / (float)APTA_INTERNAL_KEY_DECIMATION;
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+    /* Fixed -1/3, 0, and +1/3-semitone probes. These are evidence bands,
+     * not tuning hypotheses: the selector still receives one folded chroma
+     * and publishes a zero tuning offset. */
+    static const float probe_ratios[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS] = {
+        0.98093009f,
+        1.0f,
+        1.01944064f
+    };
+#endif
     uint32_t variant;
     uint32_t bin;
 
     memset(analysis, 0, sizeof(*analysis));
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+    if (decimated_rate <=
+        2.0f * apta_key_frequencies[APTA_INTERNAL_KEY_BIN_COUNT - 1u] *
+            probe_ratios[APTA_INTERNAL_KEY_EVIDENCE_VARIANTS - 1u]) {
+        return;
+    }
+#else
     if (decimated_rate <= 2.0f * apta_key_frequencies[APTA_INTERNAL_KEY_BIN_COUNT - 1u]) {
         return;
     }
+#endif
     for (variant = 0u;
          variant < APTA_INTERNAL_KEY_EVIDENCE_VARIANTS;
          ++variant) {
         for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+            analysis->coefficients[variant][bin] =
+                2.0f * cosf(6.28318530718f * apta_key_frequencies[bin] *
+                            probe_ratios[variant] / decimated_rate);
+#else
             analysis->coefficients[variant][bin] =
                 2.0f * cosf(6.28318530718f * apta_key_frequencies[bin] /
                             decimated_rate);
+#endif
         }
     }
     analysis->window_target_samples =
@@ -693,6 +717,27 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
     uint32_t variant;
     uint32_t bin;
 
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+    for (bin = 0u; bin < APTA_INTERNAL_KEY_BIN_COUNT; ++bin) {
+        float band_energy = 0.0f;
+
+        for (variant = 0u;
+             variant < APTA_INTERNAL_KEY_EVIDENCE_VARIANTS;
+             ++variant) {
+            const float q1 = analysis->q1[variant][bin];
+            const float q2 = analysis->q2[variant][bin];
+            float energy = q1 * q1 + q2 * q2 -
+                           analysis->coefficients[variant][bin] * q1 * q2;
+            if (!isfinite(energy) || energy < 0.0f) {
+                energy = 0.0f;
+            }
+            band_energy += logf(1.0f + energy);
+        }
+        analysis->chroma[APTA_INTERNAL_KEY_BASE_VARIANT]
+                        [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
+            band_energy / (float)APTA_INTERNAL_KEY_EVIDENCE_VARIANTS;
+    }
+#else
     for (variant = 0u;
          variant < APTA_INTERNAL_KEY_EVIDENCE_VARIANTS;
          ++variant) {
@@ -725,6 +770,7 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
 #endif
         }
     }
+#endif
 #ifdef APTA_INTERNAL_KEY_TEMPORAL_CHORD
     apta_internal_key_temporal_vote_chroma(analysis, window_chroma);
 #endif

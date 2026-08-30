@@ -176,11 +176,34 @@ if(APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY)
 endif()
 
 option(
+    APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY
+    "Build the development three-probe semitone-band key experiment"
+    OFF)
+
+if(APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY)
+    if(APTA_ENABLE_EXPERIMENTAL_HARMONIC_HPCP OR
+       APTA_ENABLE_EXPERIMENTAL_CENTERED_KEY_CORRELATION OR
+       APTA_ENABLE_EXPERIMENTAL_TEMPORAL_CHORD_KEY OR
+       APTA_ENABLE_EXPERIMENTAL_TEMPORAL_PROFILE_KEY)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY is mutually "
+            "exclusive with the harmonic, centered, temporal-chord, and "
+            "temporal-profile key experiments")
+    endif()
+    add_compile_definitions(APTA_INTERNAL_KEY_SEMITONE_BAND=1)
+endif()
+
+option(
     APTA_ENABLE_EXPERIMENTAL_KEY_TRACE
     "Build the apta-key-trace development diagnostic tool"
     OFF)
 
 if(APTA_ENABLE_EXPERIMENTAL_KEY_TRACE)
+    if(APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY)
+        message(FATAL_ERROR
+            "APTA_ENABLE_EXPERIMENTAL_KEY_TRACE is mutually exclusive with "
+            "APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY")
+    endif()
     add_compile_definitions(
         APTA_INTERNAL_KEY_TRACE=1
         APTA_INTERNAL_KEY_SPECTRAL_PROFILE=1)
