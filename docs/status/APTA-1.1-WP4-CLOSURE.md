@@ -65,3 +65,10 @@ one-shot results are in
 `APTA-1.1-WP4-FMAK-TEMPORAL-PROFILE-KEY-PROTOCOL.md`. All four attempts stopped
 before the sealed formal holdout, and no key path entered the existing WP5
 baseline.
+
+A fifth attempt was subsequently pre-registered against a third disjoint FMAK
+selection. Unlike the rejected rescoring and temporal candidates, it tests new
+front-end evidence by integrating three equal probes across each semitone cell.
+Its selected 72-track audio remains unopened and no result or promotion claim
+exists; the frozen boundary is in
+`APTA-1.1-WP4-FMAK-SEMITONE-BAND-KEY-PROTOCOL.md`.
