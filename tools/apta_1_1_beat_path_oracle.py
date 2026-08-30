@@ -25,7 +25,6 @@ from apta_1_1_onset_trace_oracle import (  # noqa: E402
     PERIOD_TOLERANCE,
     PHASE_TOLERANCE_BEATS,
     _candidate_lags,
-    _load_trace,
     _phase_error_beats,
     _selected_phase,
     _sha256,
@@ -47,6 +46,25 @@ def _trace_set_sha256(paths: list[Path]) -> str:
         digest.update(_sha256(path).encode("ascii"))
         digest.update(b"\n")
     return digest.hexdigest()
+
+
+def _load_beat_path_trace(path: Path) -> tuple[dict[str, object], np.ndarray]:
+    trace = json.loads(path.read_text(encoding="utf-8"))
+    novelty = np.asarray(trace.get("onset_flux", []), dtype=np.float64)
+    if len(novelty) != TRACE_BINS or not np.all(np.isfinite(novelty)):
+        raise ValueError(
+            f"{path.name}: invalid 4,096-bin onset-flux trace geometry"
+        )
+    if np.any(novelty < 0.0):
+        raise ValueError(f"{path.name}: onset flux must be non-negative")
+    try:
+        sample_rate = int(trace["sample_rate"])
+        first_bin = int(trace["onset_evidence_first_bin"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"{path.name}: invalid trace metadata") from exc
+    if sample_rate <= 0 or first_bin < 0:
+        raise ValueError(f"{path.name}: invalid trace metadata")
+    return trace, novelty
 
 
 def _offset_states(radius: int) -> list[int]:
@@ -212,8 +230,7 @@ def evaluate(
     for path in paths:
         track = path.stem
         label = labels[track]
-        trace, _energy = _load_trace(path)
-        novelty = np.asarray(trace["onset_flux"], dtype=np.float64)
+        trace, novelty = _load_beat_path_trace(path)
         selected_rank, states = _select_beat_path_rank(
             novelty, int(trace["sample_rate"])
         )

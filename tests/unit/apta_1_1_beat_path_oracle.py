@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -76,6 +78,20 @@ class BeatPathOracleTests(unittest.TestCase):
         negative[0] = -1.0
         with self.assertRaisesRegex(ValueError, "non-negative"):
             oracle._path_mean(negative, 100, 0)
+
+    def test_loader_requires_only_the_frozen_i3_trace_fields(self) -> None:
+        trace = {
+            "sample_rate": 48000,
+            "onset_evidence_first_bin": 0,
+            "onset_flux": [0.0] * oracle.TRACE_BINS,
+            "tempo_candidates": [],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "track-test.ndjson"
+            path.write_text(json.dumps(trace), encoding="utf-8")
+            loaded, novelty = oracle._load_beat_path_trace(path)
+        self.assertEqual(loaded["sample_rate"], 48000)
+        self.assertEqual(len(novelty), oracle.TRACE_BINS)
 
 
 if __name__ == "__main__":
