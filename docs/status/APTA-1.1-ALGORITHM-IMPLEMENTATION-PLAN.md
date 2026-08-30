@@ -187,10 +187,12 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** reopened for a pre-registered independent-development transfer
-check. The harmonic projection remains opt-in and the two ASAP derivations
-remain nonviable. A new balanced GiantSteps-MTG development/one-shot-holdout
-protocol is frozen before analyzer execution in
+**Status:** transfer check completed and rejected 2026-08-30. The harmonic
+projection remains opt-in and the two ASAP derivations remain nonviable. On the
+pre-registered balanced GiantSteps-MTG development split, production is 21/96
+and harmonic-HPCP is 22/96, with one fix, zero breaks and zero new
+high-confidence errors. The mandatory 70% gate fails, so the sealed holdout
+remains unopened. Exact privacy-safe hashes and the stop decision are in
 `APTA-1.1-WP4-GIANTSTEPS-KEY-DEVELOPMENT-PROTOCOL.md`.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
@@ -333,11 +335,13 @@ Only after work packages 5 through 8 pass:
 | parallel/final | WP8 — P4 hardware | validated exact-candidate physical evidence |
 | last | WP9 — freeze/release | exact release matrix, tag and publication |
 
-The immediate parallel tasks are the instrumented 1,800-second ESP32-P4
-USB/audio run and the pre-registered GiantSteps-MTG WP4 transfer check. Any
-further WP1 algorithm work first requires a new,
-failure-driven representation and a separately committed pre-registration; I10
-does not authorize a neighboring complex-deviation rescue.
+The immediate hardware task is the instrumented 1,800-second ESP32-P4
+USB/audio run once the separate USB Serial/JTAG control connection enumerates
+again. The GiantSteps-MTG WP4 transfer check is closed and rejected without
+opening its holdout. Any further WP1, WP3 or WP4 algorithm work first requires
+a new, failure-driven representation, genuinely new development evidence and a
+separately committed pre-registration; I10 and the rejected harmonic result do
+not authorize neighboring parameter or threshold rescues.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

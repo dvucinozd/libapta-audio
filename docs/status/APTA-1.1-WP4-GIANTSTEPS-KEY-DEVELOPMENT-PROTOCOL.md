@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 GiantSteps-MTG key-development protocol
 
-- **Status:** pre-registered; no APTA result inspected
+- **Status:** completed and rejected 2026-08-30; holdout unopened
 - **Evidence class:** independent development plus sealed one-shot holdout
 - **Acceptance claim:** false
 - **Protocol baseline:** `ace3efae660ec64ded05c23f605d00f02135c355`
@@ -111,3 +111,46 @@ is `1fadadc5e5df343558eeb476aa2346fc688bea6ebbc98a09a996a649be3b0146`.
 This hash freezes membership without publishing source IDs or holdout labels.
 The downloader uses the dataset's published primary and backup URLs through
 curl and rejects every file whose upstream transport MD5 does not match.
+
+## Development result — 2026-08-30
+
+The pre-registered comparison was executed once from clean source revision
+`451482b146105026bab1d2d6d8d8292d701b87b9`. Both analyzers were Release,
+warnings-as-errors builds from that exact revision and used
+`SOURCE_DATE_EPOCH=1788042401`, `--features all`, identical canonical audio and
+identical opaque ordering. The private prepared-manifest SHA-256 is
+`d51c69d55bee7bd5ccbf0ac2e7fe14307115093ddebe9fb4c889a7c93ebc4280`.
+All 96 WAV hashes and 48 kHz stereo PCM16 geometries were revalidated before
+analysis. No holdout directory, mapping, audio or APTA result was created.
+
+The production analyzer SHA-256 is
+`0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a`;
+the harmonic analyzer SHA-256 is
+`93e00a71856908b4dbc463889da8bea9e017c514552a42fe2fec9342c54232ef`.
+The production run/report hashes are
+`64122e1e28ad6cda1b1c2f4c1baa450c60ddd22384a03aa676a9995f75d0363b`
+and `0b39b9e07a6473171de7e620b10555f12a8fe9aff5a8a1cd66829b95c865c043`.
+The harmonic run/report hashes are
+`1c06a0b79640419db5b9b28076a30536265bb905b67c0a7e235d2f4d76d7494d`
+and `6a8b67f42be07698f6ff082f2224480013ecf3182fbbaca1026927a65b19b4a5`.
+The privacy-safe comparison hash is
+`d291b5819b3230d7140a8083581a85b7966afd94846f152092c3de10d62d5606`.
+
+Production is exact on 21/96 tracks (21.875%); harmonic-HPCP is exact on 22/96
+(22.917%). The candidate changes 11 verdicts, produces one fix and zero breaks,
+keeps high-confidence errors at 4/96 and introduces zero new high-confidence
+errors. It therefore passes the improvement, fixes-over-breaks and confidence
+safety checks, but fails the mandatory >=70% independent-development accuracy
+gate by a wide margin. `holdout_eligible` is false.
+
+The baseline key/CLI matrix passed 9/9. The harmonic warnings-as-errors build
+passed 120/120 native, ABI, serialization, package-install and conformance
+tests; only the release source-archive reproducibility test was excluded from
+this DSP run and remains part of the final release matrix. Sanitizer work was
+not opened after the pre-registered accuracy stop condition failed.
+
+The harmonic projection remains disabled and is rejected without threshold,
+profile, weight or confidence retuning. This 96-track development split is now
+spent for this candidate family. Any further WP4 attempt requires a separately
+pre-registered tonal representation and genuinely new development evidence;
+the sealed 48-track holdout remains untouched.
