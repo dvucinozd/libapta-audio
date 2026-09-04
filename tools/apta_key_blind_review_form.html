@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="hr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provjera tonaliteta — 12 snimki</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f6f8; color: #192b3c; font: 17px/1.5 system-ui, sans-serif; }
+    main { max-width: 900px; margin: auto; padding: 28px 20px 110px; }
+    h1 { font-size: 30px; line-height: 1.2; margin-bottom: 12px; }
+    h2 { margin: 0 0 16px; font-size: 23px; }
+    p { margin: 10px 0; }
+    article { background: white; border: 1px solid #d4dce4; border-radius: 14px; padding: 24px; margin: 22px 0; }
+    audio { width: 100%; margin-bottom: 20px; }
+    .fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    label { display: block; font-weight: 600; }
+    select, textarea { display: block; width: 100%; margin-top: 6px; padding: 11px; border: 1px solid #8596a6; border-radius: 7px; font: inherit; color: inherit; background: white; }
+    textarea { min-height: 90px; resize: vertical; }
+    .notes { margin-top: 18px; }
+    .hint { color: #435b70; }
+    .toolbar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #bccad6; padding: 14px 20px; display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    button { background: #145a9c; color: white; border: 0; border-radius: 8px; padding: 13px 22px; font: 600 17px system-ui; cursor: pointer; }
+    button:hover { background: #104778; }
+    :focus-visible { outline: 3px solid #d67900; outline-offset: 3px; }
+    #export { margin-top: 25px; }
+    #export textarea { min-height: 260px; }
+    @media (max-width: 650px) { .fields { grid-template-columns: 1fr; } article { padding: 18px; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Provjera tonaliteta</h1>
+  <p>Poslušaj svaku snimku i odaberi ono što čuješ. Ne moraš upisivati ništa u CSV.</p>
+  <p class="hint">Nemoj tražiti naziv pjesme ili rezultate algoritama. Ako nisi siguran, odaberi „Ne mogu odrediti”. Za promjene tonaliteta navedi vrijeme u bilješkama. Odgovori nisu unaprijed odabrani.</p>
+  <p id="draft" role="status">Na kraju klikni „Spremi odgovore (.txt)” i pošalji spremljenu datoteku.</p>
+  <noscript>Za ovaj obrazac uključi JavaScript u pregledniku. Ništa se ne šalje na internet.</noscript>
+  <form id="review" autocomplete="off"></form>
+  <section id="export" hidden>
+    <h2>Odgovori za slanje</h2>
+    <p>Ako preuzimanje nije uspjelo, kopiraj ovaj tekst i pošalji ga u razgovor.</p>
+    <textarea id="result" aria-label="Tekst odgovora za kopiranje" readonly></textarea>
+  </section>
+</main>
+<footer class="toolbar">
+  <span id="progress" aria-live="polite">0 / 12 snimki s unosom</span>
+  <button id="save" type="button">Spremi odgovore (.txt)</button>
+</footer>
+<script>
+  'use strict';
+  const form = document.getElementById('review');
+  const draft = document.getElementById('draft');
+  const storageKey = 'apta-blind-review-form-v1:' + location.pathname;
+  const options = {
+    tonic: [['', '— Odaberi toniku —'], ['C', 'C'], ['C#', 'C♯ / D♭'], ['D', 'D'], ['Eb', 'D♯ / E♭'], ['E', 'E'], ['F', 'F'], ['F#', 'F♯ / G♭'], ['G', 'G'], ['Ab', 'G♯ / A♭'], ['A', 'A'], ['Bb', 'A♯ / B♭'], ['B', 'H (B u engleskoj oznaci)']],
+    mode: [['', '— Odaberi —'], ['major', 'Dur (major)'], ['minor', 'Mol (minor)'], ['other', 'Drugo / promjenjiv tonalitet'], ['uncertain', 'Ne mogu odrediti']],
+    certainty: [['', '— Odaberi —'], ['low', 'Niska'], ['medium', 'Srednja'], ['high', 'Visoka']]
+  };
+  const labels = { tonic: 'Tonika — osnovni ton', mode: 'Tonalitet', certainty: 'Koliko si siguran?' };
+  for (let i = 1; i <= 12; i++) {
+    const id = 'A' + String(i).padStart(2, '0');
+    const article = document.createElement('article');
+    article.dataset.sample = id;
+    const fields = Object.keys(options).map(field => `<label for="${id}-${field}">${labels[field]}<select id="${id}-${field}" name="${id}-${field}">${options[field].map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}</select></label>`).join('');
+    article.innerHTML = `<h2>${id}</h2><audio controls preload="none" src="${id}.wav" aria-label="Snimka ${id}"></audio><div class="fields">${fields}</div><label class="notes" for="${id}-notes">Bilješke (nije obavezno)<textarea id="${id}-notes" name="${id}-notes" placeholder="Npr. od 0:45 jasnija tonika; kasnije se mijenja…"></textarea></label>`;
+    form.append(article);
+  }
+  const controls = Array.from(form.querySelectorAll('select, textarea'));
+  function data() { return Object.fromEntries(controls.map(el => [el.name, el.value])); }
+  function progress() {
+    const count = Array.from(form.querySelectorAll('article')).filter(el => Array.from(el.querySelectorAll('select, textarea')).some(input => input.value.trim())).length;
+    document.getElementById('progress').textContent = `${count} / 12 snimki s unosom`;
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    for (const el of controls) if (typeof saved[el.name] === 'string') el.value = saved[el.name];
+    if (controls.some(el => el.value)) draft.textContent = 'Vraćen je prethodni unos iz ovog preglednika. Na kraju obavezno spremi .txt datoteku.';
+  } catch (_) { draft.textContent = 'Preglednik ne može čuvati nacrt. Prije zatvaranja obavezno spremi odgovore (.txt).'; }
+  progress();
+  form.addEventListener('submit', event => event.preventDefault());
+  form.addEventListener('input', () => {
+    progress();
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(data()));
+      draft.textContent = 'Nacrt je sačuvan u ovom pregledniku. Za slanje ili sigurnu kopiju klikni „Spremi odgovore (.txt)”.';
+    } catch (_) { draft.textContent = 'Nacrt nije spremljen u pregledniku. Spremi odgovore (.txt) prije zatvaranja.'; }
+  });
+  form.addEventListener('play', event => {
+    if (event.target.tagName === 'AUDIO') for (const audio of form.querySelectorAll('audio')) if (audio !== event.target) audio.pause();
+  }, true);
+  document.getElementById('save').addEventListener('click', () => {
+    const lines = ['SLIJEPA PROVJERA TONALITETA', 'Vrijeme spremanja: ' + new Date().toISOString(), ''];
+    for (const article of form.querySelectorAll('article')) {
+      lines.push(article.dataset.sample);
+      for (const field of Object.keys(options)) {
+        const select = document.getElementById(article.dataset.sample + '-' + field);
+        lines.push(labels[field] + ': ' + (select.value ? select.selectedOptions[0].textContent : '(bez odgovora)'));
+      }
+      lines.push('Bilješke: ' + (document.getElementById(article.dataset.sample + '-notes').value.trim() || '—'), '');
+    }
+    const text = lines.join('\n');
+    document.getElementById('result').value = text;
+    document.getElementById('export').hidden = false;
+    const url = URL.createObjectURL(new Blob(['\uFEFF' + text], { type: 'text/plain;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'odgovori-tonalitet-' + new Date().toISOString().replace(/[:.]/g, '-') + '.txt';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    draft.textContent = 'Odgovori su pripremljeni za preuzimanje. Provjeri spremljenu .txt datoteku; kopija teksta je i na dnu stranice.';
+  });
+</script>
+</body>
+</html>

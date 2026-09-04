@@ -21,7 +21,9 @@ INSTRUCTIONS = """Slijepa provjera tonaliteta
 
 Preslusajte cijelu svaku snimku. Ne trazite naziv pjesme, izvorne oznake ni
 odgovore algoritama. Po mogucnosti koristite instrument za provjeru tonike.
-U answers.csv upisite vlastiti odgovor, bez pogadjanja kada niste sigurni:
+Otvorite index.html u pregledniku i ispunite obrazac bez pogadjanja.
+Kliknite 'Spremi odgovore (.txt)' i posaljite spremljenu datoteku.
+CSV je samo dodatna mogucnost, nije potreban za unos:
 - tonic: C, C#, D, Eb, E, F, F#, G, Ab, A, Bb ili B (enharmonije su dopustene)
 - mode: major, minor, other ili uncertain
 - certainty: low, medium ili high (vlastita sigurnost, nije DSP confidence)
@@ -124,8 +126,7 @@ def main():
         writer.writerow(["sample", "tonic", "mode", "certainty", "notes"])
         writer.writerows([r["sample"], "", "", "", ""] for r in hidden)
     (listener / "README.txt").write_text(INSTRUCTIONS, encoding="utf-8")
-    items = "\n".join(f'<h2>{r["sample"]}</h2><audio controls preload="none" src="{r["sample"]}.wav"></audio>' for r in hidden)
-    (listener / "index.html").write_text('<!doctype html><html lang="hr"><meta charset="utf-8"><title>Slijepa provjera</title><body><h1>Slijepa provjera tonaliteta</h1><pre>' + INSTRUCTIONS + '</pre><p><a href="answers.csv" download>Obrazac za odgovore</a></p>' + items + '</body></html>', encoding="utf-8")
+    shutil.copyfile(Path(__file__).with_name("apta_key_blind_review_form.html"), listener / "index.html")
     summary = dict(audited_tracks=len(rows), metadata_label_matches=len(rows), report_label_matches=len(rows),
                    canonical_hash_matches=len(rows), listener_files_verified=12, acceptance_claim=False,
                    archive_redecode_performed=False, musical_label_truth="awaiting-independent-listening")
