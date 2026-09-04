@@ -29,6 +29,10 @@ static unsigned mode_index(apta_key_mode_t mode)
     return mode == APTA_KEY_MODE_MAJOR ? 0u : 1u;
 }
 
+#ifdef APTA_KEY_EXTRACTION_REFERENCE
+#include "key_extraction_reference.h"
+#endif
+
 static double cosine(const float *chroma, unsigned tonic, unsigned mode)
 {
     double dot = 0.0, cn = 0.0, pn = 0.0;
@@ -92,7 +96,11 @@ static int measure(const char *kind, unsigned condition, unsigned tonic, unsigne
             printf("%s{\"tonic\":%u,\"mode\":%u,\"score\":%u}", p ? "," : "",
                    (unsigned)candidates[p].tonic, mode_index(candidates[p].mode),
                    (unsigned)candidates[p].score);
-        printf("]}");
+        printf("]");
+#ifdef APTA_KEY_EXTRACTION_REFERENCE
+        CHECK(reference_print(kind, chroma, completed) == 0);
+#endif
+        printf("}");
     }
     ++rows;
     return 0;
@@ -138,6 +146,9 @@ static int pcm(void)
             memset(&session, 0, sizeof(session));
             session.config.source_sample_rate = RATE;
             session.config.requested_features = APTA_FEATURE_MUSICAL_KEY;
+#ifdef APTA_KEY_EXTRACTION_REFERENCE
+            reference_reset();
+#endif
             for (window = 0; window < 4; ++window) {
                 static const unsigned degrees[4] = {0u, 5u, 7u, 0u};
                 unsigned root = 48u + tonic + degrees[window];
@@ -158,6 +169,9 @@ static int pcm(void)
                         sample += 0.02 * (2.0 * (double)random / 4294967295.0 - 1.0);
                     }
                     apta_internal_key_feed_sample(&session, (float)sample, absolute);
+#ifdef APTA_KEY_EXTRACTION_REFERENCE
+                    CHECK(reference_feed(&session, (float)sample) == 0);
+#endif
                 }
                 CHECK(session.key_analysis.completed_windows == window + 1u);
                 for (p = 0; p < 12; ++p) {
@@ -179,7 +193,13 @@ int main(int argc, char **argv)
         fputs("usage: apta_key_mode_diagnostic [--json]\n", stderr); return 2;
     }
     emit_json = argc == 2;
-    if (emit_json) printf("{\"format\":\"apta-key-mode-diagnostic-1\",\"acceptance_claim\":false,"
+#ifdef APTA_KEY_EXTRACTION_REFERENCE
+    CHECK(reference_selftest() == 0);
+#define DIAGNOSTIC_FORMAT "apta-key-extraction-reference-1"
+#else
+#define DIAGNOSTIC_FORMAT "apta-key-mode-diagnostic-1"
+#endif
+    if (emit_json) printf("{\"format\":\"" DIAGNOSTIC_FORMAT "\",\"acceptance_claim\":false,"
         "\"mode_encoding\":\"major=0,minor=1\",\"semitone_band\":%s,\"rows\":[\n",
 #ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
         "true"
