@@ -155,3 +155,57 @@ remapping before producing the comparison. Verification: successful complete
 report generation, Python syntax compilation, zero private `track-*` IDs in the
 report and `git diff --check`. No DSP execution, tuning, labels, holdout or
 native code changed; this remains spent diagnostic evidence.
+
+## OpenKeyScan and musical-key-finder triage — 2026-09-04
+
+[OpenKeyScan](https://www.openkeyscan.com/api) desktop 1.0.0.0 was exercised
+through its localhost REST API. Its published
+[analyzer source](https://github.com/rekordcloud/openkeyscan-analyzer) describes
+a CQT/CNN implementation, making this a more independent comparison than the
+Essentia-based browser service. The fixed twelve-track screen agrees with
+listener 1 on 11/12 and with the two-listener consensus on 8/9. The sole miss in
+the consensus subset is A01: OpenKeyScan returns F-sharp minor and both listeners
+return A major. This small, deliberately selected screen supports using the tool
+for automated triage only; it does not estimate population accuracy.
+
+The suggested
+[jackmcarthur/musical-key-finder](https://github.com/jackmcarthur/musical-key-finder)
+was also run at frozen commit `34775ac56df3833fe3d5a21d7ffd1dfbf1d4a460`,
+using its `Tonal_Fragment` class, Librosa 0.11.0 and the README-recommended HPSS
+harmonic input. After enharmonic normalization it agrees with listener 1 on
+5/12 and with the two-listener consensus on 4/9, so stop after the targeted
+screen. The pinned checkout contains no LICENSE file; do not copy or port its
+implementation into LIBAPTA.
+
+OpenKeyScan was then run once over all 72 already-spent development tracks.
+Agreement counts are comparisons, not accuracy, because the FMAK labels are in
+dispute: OpenKeyScan/FMAK 33/72, OpenKeyScan/native APTA 25/72 and
+OpenKeyScan/fixed Essentia 50/72. Automatic agreement topology is: all three
+algorithms 18, OpenKeyScan+Essentia only 32, OpenKeyScan+APTA only 7,
+APTA+Essentia only 0, all different 15. Therefore the smallest useful optional
+follow-up set is the 22 OpenKeyScan/Essentia disagreements, not the remaining
+sixty tracks. Do not automatically relabel even the 50 agreements and do not
+use this spent set to close a release gate.
+
+`tools/apta_key_openkeyscan_development.py` copies one WAV at a time to a unique
+temporary path because OpenKeyScan may write tags according to application
+settings. All 72 canonical full-file hashes remained unchanged; all 72 tagged
+copies changed full-file hash but retained exactly identical PCM geometry and
+SHA-256, then were deleted. Analyzer identity: desktop executable SHA-256
+`236703eae114cf70b3f4b54b53458cb177cbd2db13b892b58dcf822e19db3aed`,
+analyzer executable SHA-256
+`4e3cfcf034ecc9dc494b960413f40844f6a7726ed16406018b287846172efea9`.
+
+Private reports:
+
+- `build/key-label-review/openkeyscan-development/report-private.json`, SHA-256
+  `d1b45badaa03639303a3fa1a3bc6c42f60304fca71c4dd404d7a3edd7eaae66c`;
+- `build/key-label-review/musical-key-finder-screen/report-private.json`, SHA-256
+  `b7c64dc747baecb66f13b4aa94f4ec75eefe9e0d018719cf3669caa7b5987018`;
+- `build/key-label-review/automated-triage-screen/report-private.json`, SHA-256
+  `34ce29a46de709d54dad6c6f73e52c64bba183c7cf36215911676d51cf56a3fe`.
+
+Verification: frozen manifest/baseline/Essentia and listener hashes, complete
+72/72 API coverage, complete PCM/source preservation, exact 12/12 and 9/9
+review coverage, Python syntax compilation and `git diff --check`. No native DSP,
+corpus labels, holdout, acceptance threshold or release state changed.
