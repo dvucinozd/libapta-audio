@@ -238,6 +238,14 @@ from leakage/compression/folding effects. Do not treat this as permission to
 revive rejected centered correlation. Exact scope/results are recorded in
 `APTA-1.1-KEY-MODE-DIAGNOSTIC.md`.
 
+That numerical follow-up is now complete at `f31d0e1`: effective and nominal
+double Fourier references produce zero changed tonic/mode decisions in 576
+PCM rows per build, despite small chroma differences. Arithmetic precision is
+not a sufficient repair for these fixtures. The next candidate must address
+tonal representation/contrast with a separately frozen protocol, not merely
+switch all arithmetic to double or reopen rejected centered correlation. See
+`APTA-1.1-KEY-EXTRACTION-REFERENCE.md` for the measured scope and limitations.
+
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
 can reduce neighbouring-key and relative/parallel-mode errors.

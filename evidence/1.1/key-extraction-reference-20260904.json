@@ -1,0 +1,55 @@
+{
+  "format": "apta-key-extraction-reference-evidence-1",
+  "date": "2026-09-04",
+  "native_source_revision": "f31d0e15d725af3c797233bc67a3963e30071810",
+  "evidence_level": "synthetic-diagnostic",
+  "acceptance_claim": false,
+  "candidate_promoted": false,
+  "native_library_source_changed": false,
+  "new_corpus_access": false,
+  "production_resource_delta_bytes": 0,
+  "host_instrument_definition": "APTA_KEY_EXTRACTION_REFERENCE=1",
+  "candidate_flags": ["APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY=ON"],
+  "original_native_rows_unchanged": true,
+  "old_report_bytes_unchanged": true,
+  "repeat_bytes_identical": true,
+  "band_sanitizer_matches_release": true,
+  "rows_per_build": 720,
+  "pcm_rows_per_build": 576,
+  "default": {
+    "effective_changed_verdicts": 0,
+    "nominal_changed_verdicts": 0,
+    "effective_max_normalized_chroma_error": 0.000108733210848699,
+    "nominal_max_normalized_chroma_error": 0.00214830580735117,
+    "max_normalized_fourier_goertzel_energy_error": 1.07268927533016e-10
+  },
+  "semitone_band": {
+    "effective_changed_verdicts": 0,
+    "nominal_changed_verdicts": 0,
+    "effective_max_normalized_chroma_error": 0.0000918459559442229,
+    "nominal_max_normalized_chroma_error": 0.0014080245466573,
+    "max_normalized_fourier_goertzel_energy_error": 1.5068609838786e-10
+  },
+  "tests": {
+    "default_release_werror": [121, 121],
+    "band_release_werror": [121, 121],
+    "band_asan_ubsan": [116, 116],
+    "original_summary_unit": [6, 6],
+    "reference_summary_unit": [4, 4]
+  },
+  "sha256": {
+    "default_analyzer": "0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a",
+    "band_analyzer": "cd08b5887382142944d8ac3329cdbcf07dfa1fd76f284a1c1a761ac3906c6f2b",
+    "default_instrument": "42a3d6f0c531b4c7a463e1c170689843b4fb20ff00801a8c5f0f857fbe853262",
+    "band_instrument": "9546263398944cc4d60440f47a9ad2ee8baa5ae1ae54d23ed3b919330250d1e3",
+    "default.json": "c40b72930e2326ed7b0e39fe1ffe95244515a8c773dc9eaee86bcf3d5e1f506c",
+    "band.json": "1cd6345441f131f6453781d1054bfd6e7083116a4317d130c923d9b29dfaf434",
+    "summary.json": "cae14ba06eca215645e51ca0f3c3df64d9647d009a8abd1f47b4bab8e4765310"
+  },
+  "conclusion": "Removing extraction rounding did not change any tonic/mode decision in the fixed synthetic matrix; numerical precision alone does not repair its major-mode collapse.",
+  "limitations": [
+    "Same float PCM, 48 kHz and four-second stimuli only.",
+    "Final native selector still receives float chroma.",
+    "No proof for all inputs, all arithmetic bugs, real music or physical P4."
+  ]
+}

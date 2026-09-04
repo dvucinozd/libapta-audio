@@ -39,6 +39,14 @@ these observations; extractor numerical correctness and real-song causality
 remain unproven. No detector was changed or promoted. See
 [`APTA-1.1-KEY-MODE-DIAGNOSTIC.md`](APTA-1.1-KEY-MODE-DIAGNOSTIC.md).
 
+The follow-up independent Fourier/double extraction reference changes no
+tonic/mode decision in 576 PCM rows per build, for either effective-native or
+nominal-double frequencies/averaging. Numerical precision alone therefore does
+not repair the synthetic collapse; representation contrast remains the next
+research boundary. This is not a general proof of extractor correctness or
+real-song causality. See
+[`APTA-1.1-KEY-EXTRACTION-REFERENCE.md`](APTA-1.1-KEY-EXTRACTION-REFERENCE.md).
+
 ## Implemented compatibility guarantees
 
 - Existing `TEMP`, `LGRD`, `GGRD`, `REVN`, waveform and metadata semantics are unchanged by absence of the new optional sections.

@@ -46,3 +46,69 @@ Even agreement cannot prove correctness on arbitrary inputs, sample rates,
 durations, clipping, aliasing or real music. If the higher-precision model
 still collapses major mode, arithmetic alone is not a sufficient repair for
 these stimuli. New representation experiments require separate preregistration.
+
+## Outcome — 2026-09-04
+
+The protocol and instrument were committed before execution at
+`f31d0e15d725af3c797233bc67a3963e30071810`. Each default/band report contains
+720 rows, including 576 PCM rows with both references. Every reference passed
+the energy identity and analytic silence/impulse checks. All original native
+observations and old-format report bytes are unchanged.
+
+| Measure | Default | Semitone-band |
+|---|---:|---:|
+| Effective reference changed tonic/mode | 0/576 | 0/576 |
+| Nominal reference changed tonic/mode | 0/576 | 0/576 |
+| Max effective chroma error / max reference chroma | 0.0001087332 | 0.0000918460 |
+| Max nominal chroma error / max reference chroma | 0.0021483058 | 0.0014080245 |
+| Max Fourier/Goertzel energy discrepancy, normalized by max(1,E) | 1.073e-10 | 1.507e-10 |
+
+The chroma metric is a per-row maximum absolute component difference divided
+by `max(1, maximum reference component)`, then maximized over rows. It is not
+relative error for every individual pitch class; near-zero bins can have much
+larger relative errors. Both references preserve the original four-window
+synthetic results, including clean major default 4/12 and band 0/12. Even the
+nominal double reference still predicts minor for all 36 band major stimuli.
+
+**Conclusion:** finite-precision extraction is not a sufficient explanation or
+repair for the observed synthetic major-mode collapse. The independently
+computed Fourier representation, with the same log compression/probe average/
+octave folding and unchanged selector, exhibits the same decisions. Small
+numerical differences exist, but no tonic/mode verdict changes in this matrix.
+This supports investigating representation contrast and its interaction with
+raw-cosine scoring, not a blanket conversion of production arithmetic to double.
+
+This does not identify which single representation step is responsible,
+establish causality for every real song, prove the absence of all numeric bugs,
+or validate arbitrary sample rates/long-duration accumulation. The input PCM
+is the same native float sequence in both references; the nominal path does
+not reconstruct unquantized source audio. The final selector still uses float
+after one reference-chroma cast. No new detector is proposed or promoted by
+this test, and rejected centered correlation remains rejected.
+
+## Reproduction and verification
+
+Explicitly build `apta_key_extraction_reference` in default and semitone-band
+Release/Werror directories, then run with `--json` into fresh output paths.
+The target adds `APTA_KEY_EXTRACTION_REFERENCE=1` only to the host instrument;
+the library has no new options, state or behavior. Build/run the band target
+under ASan/UBSan as well. Keep `apta_key_mode_diagnostic` reports unchanged.
+
+Use `tools/apta_key_extraction_reference_summary.py` with `--default-report`,
+`--band-report`, `--previous-default`, `--previous-band`,
+`--native-source-revision` and `--output`. It pins the old report hashes,
+checks complete topology and unchanged native fields, validates reference
+metrics, counts every changed verdict and refuses an existing output path.
+The small parser tolerance accounts for nine-significant-digit native JSON
+chroma serialization, not relaxation of the C reference-energy gate.
+
+Verification: default and band Release/Werror each 121/121 CTest; band
+ASan/UBSan 116/116; six original plus four new Python summary tests pass.
+Both new reports repeat byte-identically, and the band sanitizer report is
+byte-identical to band Release. Both analyzer SHA-256 values remain unchanged.
+No source under `src/` or `include/` was edited. Runtime cost of the diagnostic
+is not a proposed P4 algorithm cost; production resource delta is zero.
+
+Reports and logs are local under `build/key-extraction-reference/`. The retained
+aggregate with exact source, executable/report hashes and tests is
+[`../../evidence/1.1/key-extraction-reference-20260904.json`](../../evidence/1.1/key-extraction-reference-20260904.json).

@@ -10,10 +10,10 @@ from pathlib import Path
 import re
 
 
-def load_report(path, band):
+def load_report(path, band, expected_format="apta-key-mode-diagnostic-1"):
     raw = path.read_bytes()
     data = json.loads(raw)
-    if (data.get("format") != "apta-key-mode-diagnostic-1"
+    if (data.get("format") != expected_format
             or data.get("acceptance_claim") is not False
             or data.get("checks_passed") is not True
             or data.get("semitone_band") is not band
