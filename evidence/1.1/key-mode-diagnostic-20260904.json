@@ -1,0 +1,51 @@
+{
+  "format": "apta-key-mode-diagnostic-evidence-1",
+  "date": "2026-09-04",
+  "evidence_level": "synthetic-diagnostic",
+  "acceptance_claim": false,
+  "candidate_promoted": false,
+  "native_source_revision": "b9c50df868b327baf8af362b618e3f9e176d361f",
+  "candidate_flags": ["APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY=ON"],
+  "diagnostic_rows_per_build": 720,
+  "all_native_top_three_reference_checks_pass": true,
+  "default_and_band_repeats_byte_identical": true,
+  "band_sanitizer_matches_release_report": true,
+  "native_library_source_changed": false,
+  "native_resource_delta_bytes": 0,
+  "new_corpus_access": false,
+  "ideal_zero_floor_profiles_correct_per_build": 24,
+  "ideal_zero_floor_triads_correct_per_build": 24,
+  "major_vectors_selecting_minor_at_each_nonzero_floor": {
+    "profiles": 12,
+    "triads": 12,
+    "floors": [1, 4]
+  },
+  "four_window_pcm_matches_per_12_transpositions": {
+    "clean": {"default_major": 4, "default_minor": 11, "band_major": 0, "band_minor": 12},
+    "detuned_plus_one_third_semitone": {"default_major": 0, "default_minor": 6, "band_major": 0, "band_minor": 9},
+    "uniform_noise_0.02": {"default_major": 3, "default_minor": 11, "band_major": 0, "band_minor": 12}
+  },
+  "verification": {
+    "default_release_werror_ctest": {"passed": 121, "total": 121},
+    "band_release_werror_ctest": {"passed": 121, "total": 121},
+    "band_asan_ubsan_ctest": {"passed": 116, "total": 116},
+    "summary_unit_tests": {"passed": 6, "total": 6}
+  },
+  "sha256": {
+    "default_analyzer": "0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a",
+    "band_analyzer": "cd08b5887382142944d8ac3329cdbcf07dfa1fd76f284a1c1a761ac3906c6f2b",
+    "default_diagnostic_executable": "5f41033514c15915245c091c94ac9e012fe0a142d6408ce5ec521637a07c2111",
+    "band_diagnostic_executable": "357ff386288d7a282c03df1cfb0de5fa4d7dd48ff1c18c3e24c5744b357c9c46",
+    "default.json": "fc82ddbf13c04a1d406e40c2e44f48573c820dd4d99454f7123635695b1d586c",
+    "band.json": "eedb1b97e4d975b37b925b649c80596871c7462412d3550de8d2139e862f06f1",
+    "summary.json": "5172a764485e0c37b6164e20f867f4d3bd60071f4ee9a65d9d74af36fcbcdb7b",
+    "default-tests.log": "e74abbeca69e0d8f9851073db15fd4dc61b3e0ee5c2a6afefca427b78a7e2819",
+    "band-tests.log": "97c9953e37a200b641dd40d1ddc76be33949cdbb3ddfb7ebf163390a6b963217",
+    "sanitize-tests.log": "6491f5c501711c67f61f19d6f2a7cdc67b8f7d6db09e653c9daca500d0126c1c"
+  },
+  "limitations": [
+    "Synthetic progression identity is not independently annotated song key.",
+    "Reference validates scoring, not resonator or decimator numerical correctness.",
+    "No new detector, production change, corpus acceptance or physical P4 evidence."
+  ]
+}

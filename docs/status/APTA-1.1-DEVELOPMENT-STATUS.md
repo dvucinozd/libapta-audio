@@ -31,6 +31,14 @@ The ordered engineering sequence for closing the remaining algorithm,
 acceptance, hardware and freeze blockers is
 [`APTA-1.1-ALGORITHM-IMPLEMENTATION-PLAN.md`](APTA-1.1-ALGORITHM-IMPLEMENTATION-PLAN.md).
 
+The 2026-09-04 synthetic key-mode diagnostic confirms correct selector rotation
+and mode identity on all 24 ideal profiles/triads, but reproduces the major-mode
+collapse through native PCM (clean four-chord major progressions: default 4/12,
+semitone-band 0/12). The common-floor/raw-cosine interaction is consistent with
+these observations; extractor numerical correctness and real-song causality
+remain unproven. No detector was changed or promoted. See
+[`APTA-1.1-KEY-MODE-DIAGNOSTIC.md`](APTA-1.1-KEY-MODE-DIAGNOSTIC.md).
+
 ## Implemented compatibility guarantees
 
 - Existing `TEMP`, `LGRD`, `GGRD`, `REVN`, waveform and metadata semantics are unchanged by absence of the new optional sections.

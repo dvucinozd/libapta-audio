@@ -229,6 +229,15 @@ high-confidence error. Total/per-mode/safety gates failed despite full software
 passes; that split is now spent. The pre-registered protocol and immutable
 outcome are in `APTA-1.1-WP4-FMAK-SEMITONE-BAND-KEY-PROTOCOL.md`.
 
+The follow-up synthetic diagnostic at `b9c50df` passes all 24 ideal-profile and
+triad identities but reproduces the mode collapse through the native PCM path.
+Independent score calculations match all native top-three decisions. Before
+another representation experiment, compare extraction with an independent
+high-precision resonator/decimator reference to distinguish numerical defects
+from leakage/compression/folding effects. Do not treat this as permission to
+revive rejected centered correlation. Exact scope/results are recorded in
+`APTA-1.1-KEY-MODE-DIAGNOSTIC.md`.
+
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
 can reduce neighbouring-key and relative/parallel-mode errors.
