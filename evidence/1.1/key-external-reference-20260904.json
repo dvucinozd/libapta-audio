@@ -1,0 +1,23 @@
+{
+  "format": "apta-external-key-reference-evidence-1",
+  "source_revision": "691252de1787ecf82000dc129518d66294f444a7",
+  "evidence_level": "spent-development-external-reference",
+  "acceptance_claim": false,
+  "holdout_eligible": false,
+  "port_investigation_justified": false,
+  "confidence_safety": "not-assessed",
+  "reference": "Essentia 2.1-beta6-dev KeyExtractor defaults, sampleRate=48000",
+  "track_count": 72,
+  "baseline_correct": 14,
+  "reference_correct": 33,
+  "major_correct_of_36": 16,
+  "minor_correct_of_36": 17,
+  "fixes": 23,
+  "breaks": 4,
+  "changed_verdicts": 54,
+  "missing_results": 0,
+  "manifest_sha256": "25e853990cc25dc97929f7767de825e89b9e650c7c1b8d075b6fd98c6d0ef09e",
+  "report_sha256": "fa516407b2abb1dda39803053c497b143ea81152d94e062ceae6142146667eb1",
+  "essentia_extension_sha256": "f657ac41fa01ce61d377df04ca384d1ef319e93123c07963ef18d890807bdba5",
+  "decision": "Stop before C port; absolute total and per-mode screen gates failed. No parameter sweep."
+}
