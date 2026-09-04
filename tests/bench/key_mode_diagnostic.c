@@ -1,0 +1,196 @@
+// SPDX-License-Identifier: Apache-2.0
+/* Synthetic diagnostic only; no algorithm changes or corpus accuracy claim. */
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "apta_key_internal.h"
+
+#if defined(APTA_INTERNAL_KEY_CENTERED_CORRELATION) || defined(APTA_INTERNAL_KEY_HPCP) || \
+    defined(APTA_INTERNAL_KEY_TEMPORAL_CHORD) || defined(APTA_INTERNAL_KEY_TEMPORAL_PROFILE)
+#error "This frozen diagnostic supports only default and semitone-band builds"
+#endif
+
+#define RATE 48000u
+#define CHECK(x) do { if (!(x)) { fprintf(stderr, "diagnostic check failed: %s:%d: %s\n", \
+    __FILE__, __LINE__, #x); return 1; } } while (0)
+
+/* Independent reference copies pinned to the baseline; not selector weights. */
+static const float profiles[2][12] = {
+    {0.748f,0.060f,0.488f,0.082f,0.674f,0.460f,0.096f,0.715f,0.104f,0.366f,0.057f,0.400f},
+    {0.712f,0.084f,0.455f,0.270f,0.360f,0.320f,0.082f,0.600f,0.059f,0.291f,0.092f,0.260f}
+};
+static int emit_json;
+static unsigned rows;
+
+static unsigned mode_index(apta_key_mode_t mode)
+{
+    return mode == APTA_KEY_MODE_MAJOR ? 0u : 1u;
+}
+
+static double cosine(const float *chroma, unsigned tonic, unsigned mode)
+{
+    double dot = 0.0, cn = 0.0, pn = 0.0;
+    unsigned p;
+    for (p = 0; p < 12; ++p) {
+        double a = chroma[p], b = profiles[mode][(p + 12u - tonic) % 12u];
+        dot += a * b; cn += a * a; pn += b * b;
+    }
+    return cn > 0.0 ? dot / sqrt(cn * pn) : 0.0;
+}
+
+static int measure(const char *kind, unsigned condition, unsigned tonic, unsigned mode,
+                   unsigned window, const float *chroma, unsigned completed,
+                   int require_identity)
+{
+    apta_key_candidate_t candidates[APTA_INTERNAL_KEY_CANDIDATE_COUNT];
+    apta_key_view_t view;
+    double scores[24], maximum = -1.0;
+    unsigned p, i;
+    for (p = 0; p < 12; ++p) CHECK(isfinite(chroma[p]) && chroma[p] >= 0.0f);
+    CHECK(apta_internal_key_select_chroma(chroma, completed, candidates, &view) == APTA_STATUS_OK);
+    CHECK(view.mode == APTA_KEY_MODE_MAJOR || view.mode == APTA_KEY_MODE_MINOR);
+    CHECK(view.tonic < 12u && view.candidate_count == 3u);
+    for (i = 0; i < 24; ++i) {
+        scores[i] = cosine(chroma, i % 12u, i / 12u);
+        if (scores[i] > maximum) maximum = scores[i];
+    }
+    /* Compare all native top-three against independent remaining maxima.
+     * Encoded score tie adjustment can subtract up to two uint16 LSBs. */
+    for (i = 0; i < 3; ++i) {
+        unsigned j, selected;
+        double remaining = -1.0;
+        CHECK(candidates[i].tonic < 12u);
+        CHECK(candidates[i].mode == APTA_KEY_MODE_MAJOR || candidates[i].mode == APTA_KEY_MODE_MINOR);
+        selected = mode_index(candidates[i].mode) * 12u + candidates[i].tonic;
+        for (j = 0; j < 24; ++j) {
+            unsigned k; int used = 0;
+            for (k = 0; k < i; ++k)
+                if (j == mode_index(candidates[k].mode) * 12u + candidates[k].tonic) used = 1;
+            if (!used && scores[j] > remaining) remaining = scores[j];
+        }
+        for (j = 0; j < i; ++j)
+            CHECK(selected != mode_index(candidates[j].mode) * 12u + candidates[j].tonic);
+        CHECK(fabs(scores[selected] - remaining) <= 2e-6);
+        CHECK(fabs((double)candidates[i].score / 65535.0 - scores[selected]) < 5e-5);
+        if (i > 0) CHECK(candidates[i].score < candidates[i-1].score);
+    }
+    CHECK(fabs(scores[mode_index(view.mode) * 12u + view.tonic] - maximum) <= 2e-6);
+    if (require_identity) CHECK(view.tonic == tonic && mode_index(view.mode) == mode);
+    if (emit_json) {
+        printf("%s{\"kind\":\"%s\",\"condition\":%u,\"stimulus_tonic\":%u,"
+               "\"stimulus_mode\":%u,\"window\":%u,\"completed_windows\":%u,"
+               "\"selected_tonic\":%u,\"selected_mode\":%u,\"confidence\":%u,\"chroma\":[",
+               rows ? ",\n" : "", kind, condition, tonic, mode, window, completed,
+               (unsigned)view.tonic, mode_index(view.mode), (unsigned)view.confidence);
+        for (p = 0; p < 12; ++p) printf("%s%.9g", p ? "," : "", (double)chroma[p]);
+        printf("],\"reference_scores_major_then_minor\":[");
+        for (p = 0; p < 24; ++p) printf("%s%.17g", p ? "," : "", scores[p]);
+        printf("],\"native_candidates\":[");
+        for (p = 0; p < 3; ++p)
+            printf("%s{\"tonic\":%u,\"mode\":%u,\"score\":%u}", p ? "," : "",
+                   (unsigned)candidates[p].tonic, mode_index(candidates[p].mode),
+                   (unsigned)candidates[p].score);
+        printf("]}");
+    }
+    ++rows;
+    return 0;
+}
+
+static int vectors(void)
+{
+    static const float floors[3] = {0.0f, 1.0f, 4.0f};
+    unsigned mode, tonic, condition, p, kind;
+    float chroma[12] = {0};
+    apta_key_candidate_t candidates[3];
+    apta_key_view_t view;
+    CHECK(apta_internal_key_select_chroma(chroma, 8u, candidates, &view) == APTA_STATUS_NOT_AVAILABLE);
+    chroma[0] = -1.0f;
+    CHECK(apta_internal_key_select_chroma(chroma, 8u, candidates, &view) == APTA_ERROR_INVALID_ARGUMENT);
+    chroma[0] = NAN;
+    CHECK(apta_internal_key_select_chroma(chroma, 8u, candidates, &view) == APTA_ERROR_INVALID_ARGUMENT);
+    chroma[0] = INFINITY;
+    CHECK(apta_internal_key_select_chroma(chroma, 8u, candidates, &view) == APTA_ERROR_INVALID_ARGUMENT);
+    for (kind = 0; kind < 2; ++kind) for (mode = 0; mode < 2; ++mode)
+        for (tonic = 0; tonic < 12; ++tonic) for (condition = 0; condition < 3; ++condition) {
+            for (p = 0; p < 12; ++p) chroma[p] = floors[condition] +
+                (kind == 0 ? profiles[mode][(p + 12u - tonic) % 12u] : 0.0f);
+            if (kind == 1) {
+                chroma[tonic] += 1.0f;
+                chroma[(tonic + (mode ? 3u : 4u)) % 12u] += 1.0f;
+                chroma[(tonic + 7u) % 12u] += 1.0f;
+            }
+            CHECK(measure(kind ? "triad" : "profile", condition, tonic, mode, 0u,
+                          chroma, 8u, kind == 0 && condition == 0) == 0);
+        }
+    return 0;
+}
+
+static int pcm(void)
+{
+    unsigned mode, tonic, condition, window, p;
+    for (mode = 0; mode < 2; ++mode) for (tonic = 0; tonic < 12; ++tonic)
+        for (condition = 0; condition < 3; ++condition) {
+            apta_session_t session;
+            float previous[12] = {0}, delta[12];
+            uint32_t random = 0x243f6a88u;
+            memset(&session, 0, sizeof(session));
+            session.config.source_sample_rate = RATE;
+            session.config.requested_features = APTA_FEATURE_MUSICAL_KEY;
+            for (window = 0; window < 4; ++window) {
+                static const unsigned degrees[4] = {0u, 5u, 7u, 0u};
+                unsigned root = 48u + tonic + degrees[window];
+                unsigned third = (window == 2 || mode == 0) ? 4u : 3u;
+                unsigned notes[3] = {root, root + third, root + 7u};
+                double frequencies[3];
+                uint32_t frame;
+                for (p = 0; p < 3; ++p)
+                    frequencies[p] = 440.0 * pow(2.0, ((double)notes[p] - 69.0 +
+                        (condition == 1 ? 1.0 / 3.0 : 0.0)) / 12.0);
+                for (frame = 0; frame < RATE; ++frame) {
+                    uint64_t absolute = (uint64_t)window * RATE + frame;
+                    double sample = 0.0;
+                    for (p = 0; p < 3; ++p)
+                        sample += 0.15 * sin(6.2831853071795864769 * frequencies[p] * (double)absolute / RATE);
+                    if (condition == 2) {
+                        random ^= random << 13; random ^= random >> 17; random ^= random << 5;
+                        sample += 0.02 * (2.0 * (double)random / 4294967295.0 - 1.0);
+                    }
+                    apta_internal_key_feed_sample(&session, (float)sample, absolute);
+                }
+                CHECK(session.key_analysis.completed_windows == window + 1u);
+                for (p = 0; p < 12; ++p) {
+                    float current = session.key_analysis.chroma[APTA_INTERNAL_KEY_BASE_VARIANT][p];
+                    delta[p] = current - previous[p];
+                    previous[p] = current;
+                }
+                CHECK(measure("pcm_window", condition, tonic, mode, window + 1u, delta, 1u, 0) == 0);
+                CHECK(measure("pcm_cumulative", condition, tonic, mode, window + 1u,
+                              previous, window + 1u, 0) == 0);
+            }
+        }
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc > 2 || (argc == 2 && strcmp(argv[1], "--json") != 0)) {
+        fputs("usage: apta_key_mode_diagnostic [--json]\n", stderr); return 2;
+    }
+    emit_json = argc == 2;
+    if (emit_json) printf("{\"format\":\"apta-key-mode-diagnostic-1\",\"acceptance_claim\":false,"
+        "\"mode_encoding\":\"major=0,minor=1\",\"semitone_band\":%s,\"rows\":[\n",
+#ifdef APTA_INTERNAL_KEY_SEMITONE_BAND
+        "true"
+#else
+        "false"
+#endif
+    );
+    CHECK(vectors() == 0);
+    CHECK(pcm() == 0);
+    CHECK(rows == 720u);
+    if (emit_json) printf("\n],\"row_count\":%u,\"checks_passed\":true}\n", rows);
+    CHECK(!ferror(stdout));
+    return 0;
+}
