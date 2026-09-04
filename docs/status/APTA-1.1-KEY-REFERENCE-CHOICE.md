@@ -40,3 +40,22 @@ If the reference passes this screen, compare the unchanged reference on an
 already-open development corpus before allocating effort to a bounded C port.
 No untouched holdout is authorized by a synthetic pass. No full native matrix
 is needed for this host-only screen.
+
+## Screen result
+
+At clean instrument revision `fc7995944e55ed47a0878a4120a8373cf4bc13b4`,
+installed Essentia `2.1-beta6-dev` with defaults and sampleRate=48000 matched
+12/12 major and 12/12 minor stimuli. The installed snapshot confirms Hann,
+4096 frame/hop, 60 peaks, 12-bin HPCP and bgate. No parameters were tuned.
+The single fixed screen passes; no C port or corpus acceptance is claimed.
+
+Full local report: `build/key-reference-screen/essentia.json`, SHA-256
+`99e733250f604a0eed57317fb743ad7f02e576c940f0c0255bffe14719381a61`.
+It includes all parameters, generated-PCM hashes, per-stimulus results and host
+timings. The 24 extraction calls took about 0.068 seconds total on this host,
+excluding imports/generation: a smoke timing, not a benchmark or P4 prediction.
+
+Decision: retain Essentia as the sole external reference for one comparison on
+already-open real-music development material. Verify that comparison before
+implementing a bounded independent peak-based front end. No more local
+Goertzel/profile variants or full native test reruns are justified by this screen.
