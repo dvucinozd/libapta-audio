@@ -1,6 +1,6 @@
 # APTA 1.1 WP4 FMAK semitone-band key protocol
 
-- **Status:** pre-registered; selected audio remains unopened
+- **Status:** rejected on sealed development evidence; evaluation closed 2026-09-04
 - **Frozen baseline revision:** `202ba177476ab021d1c2599987a5d4cfab503f8b`
 - **Evidence class:** independent local development; no acceptance claim
 - **Candidate flag:** `APTA_ENABLE_EXPERIMENTAL_SEMITONE_BAND_KEY=ON`
@@ -94,3 +94,66 @@ tool and its tests are committed.
 Failure of any stage rejects the candidate and spends the 72-track split. It
 does not authorize probe-offset, probe-count, aggregation, profile, confidence
 or threshold tuning against the result.
+
+## Immutable development outcome — 2026-09-04
+
+The retained preparation and both native runs completed at exact revision
+`e0369e2ce4f0bf44c0b9c14c9ef32f97012d2785`, epoch `1788114602`.
+This continuation verified all 72 output hashes for each run, manifest,
+mapping, source revision and analyzer hashes before scoring with the unchanged
+canonical evaluator. No source audio or analysis outputs were overwritten.
+The protocol was pre-registered before audio access; the 72-track development
+selection is now spent.
+
+| Frozen metric | Default | Semitone-band |
+|---|---:|---:|
+| Exact key | 14/72 (19.44%) | 15/72 (20.83%) |
+| Major | 0/36 (0%) | 0/36 (0%) |
+| Minor | 14/36 (38.89%) | 15/36 (41.67%) |
+| Wrong key at confidence >=75 | 1 | 2 |
+
+There were 3 fixes, 2 breaks, 17 changed verdicts and **1 new high-confidence
+error**. The >=70% total, >=60% major, >=60% minor and no-new-high-confidence-error
+gates all fail. Positive net fixes do not override any failed conjunctive gate.
+The candidate is rejected and is not eligible for formal holdout access.
+Its opt-in implementation remains diagnostic only; production stays unchanged.
+
+### Software and resource evidence
+
+Fresh GNU/WSL default and candidate Release warnings-as-errors matrices each
+passed 118/118, including all three package tests. Candidate ASan/UBSan passed
+115/115 (package tests are not registered in sanitizer mode). The exact native
+tree is unchanged from the analyzed revision; subsequent takeover commits add
+only host diagnostics/tests and status evidence. The freshly rebuilt candidate
+and default analyzers match both retained executable hashes below.
+
+The prior implementation task's retained measurements were also reviewed:
+key-feed median 12.410 -> 19.717 ms (+58.9%, ceiling +210%); 120-second full-path
+median 1.09 -> 1.12 s (+2.8%, ceiling +15%); +72 resonators, +960 bytes key state
+and workspace, +0 result-pool bytes. These runtime figures are retained earlier
+measurements, not a new benchmark from this evaluation. Fresh software passes
+do not repair the algorithmic rejection or constitute physical P4 evidence.
+
+### Reproduction anchors
+
+All hashes below are SHA-256. Private labels, audio, mappings and source IDs
+remain local and ignored. The canonical `evaluate` command produced one report
+per retained run, then `compare` applied the original unchanged gates.
+
+| Artifact | Hash |
+|---|---|
+| Prepared manifest | `25e853990cc25dc97929f7767de825e89b9e650c7c1b8d075b6fd98c6d0ef09e` |
+| Default analyzer | `0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a` |
+| Candidate analyzer | `cd08b5887382142944d8ac3329cdbcf07dfa1fd76f284a1c1a761ac3906c6f2b` |
+| Inspector | `22f8f3e85a177a034157a265e4e9cf6e1ea03151f90310dd854b3fee07d8e084` |
+| `build/takeover-key/default-report.json` | `5053cff8bf3dd8116b936c6b4bc3c3acc2bab4d7e243adf03d7ceec407bffd80` |
+| `build/takeover-key/band-report.json` | `e5cf018e3b755bc83a28eab8cda7ed35226936a00619f5c00dd04103e01a2f19` |
+| `build/takeover-key/comparison-verified.json` | `ea29780f386fbcd29b137cef7aa4143f79a23bbe5ae485e9873e72341295ac7e` |
+| `build/takeover-validation/band-test.log` | `339d23d3c0a197a004e7240b755f34f326b121a88dabfe943d4ab52ab15e21b7` |
+| `build/takeover-validation/default-test.log` | `e6e60160a8c2e1f0df26554fa4059bd2fdb70ea4ca60b25e59b06f7c0a8e3224` |
+| `build/takeover-validation/sanitize-test.log` | `65dbc3645ae17d74b51fe6611ec6d148d13a03aa3d9a142078419bc5a8f63712` |
+
+The provisional `comparison.json` conservatively left Werror unconfirmed while
+full packaging tests were pending. `comparison-verified.json` records the
+subsequent full matrix pass; both comparisons reject the candidate. Neither
+report is an acceptance result. The formal 48-track MTG holdout stays unopened.

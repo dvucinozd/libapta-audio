@@ -130,6 +130,13 @@ tolerance. It improved Ballroom period 9/40 to 12/40 and joint phase 7/40 to
 implementation. Production retains frozen full-window S4 rank zero, and formal
 holdouts remain unopened; see `APTA-1.1-WP2-BEAT-PATH-I3.md`.
 
+The separately frozen 2026-09-04 coverage audit confirms that distinct local
+score peaks do not solve the missing-period problem: ASAP top-three coverage
+remains 2/40 and Ballroom falls from 17/40 to 12/40 with no fixes and five
+breaks. Removing the prior does not improve top-ten coverage either. These
+are cached diagnostic coverage counts, not selected/refined-grid accuracy.
+No native selector changed; see `APTA-1.1-LATTICE-COVERAGE-AUDIT.md`.
+
 **Hypothesis:** one global autocorrelation/phase choice cannot represent tracks
 whose transient reliability changes over time. Tracking a small bounded family
 of lag/phase hypotheses over consecutive windows can recover a stable lattice
@@ -193,9 +200,8 @@ Exit criterion:
 
 ## Work package 4 — adaptive harmonic key evidence
 
-**Status:** four transfer attempts were rejected 2026-08-30 without opening the
-formal holdout. A fifth, genuinely new front-end representation is now
-pre-registered but its selected audio remains unopened. Harmonic-HPCP moved
+**Status:** five transfer attempts are rejected without opening the formal
+holdout; the fifth evaluation closed 2026-09-04. Harmonic-HPCP moved
 21/96 to 22/96 on balanced GiantSteps-MTG
 development evidence. On a separate 48-major/48-minor development split,
 centered correlation moved production from 22/96 to 28/96 with 11 fixes and
@@ -216,10 +222,12 @@ equal-window aggregation of all 24 profile scores reduced production from
 It failed the total, per-mode, improvement and fixes-greater-than-breaks gates;
 that split is also spent and the immutable result is recorded in
 `APTA-1.1-WP4-FMAK-TEMPORAL-PROFILE-KEY-PROTOCOL.md`.
-The next disjoint 72-track FMAK split tests equal three-probe semitone-band
-integration instead of another profile or temporal rule. Its selection, exact
-representation and resource gates are frozen in
-`APTA-1.1-WP4-FMAK-SEMITONE-BAND-KEY-PROTOCOL.md` before audio access.
+The next disjoint 72-track FMAK split tested equal three-probe semitone-band
+integration instead of another profile or temporal rule. Default 14/72 became
+15/72, with major 0/36, minor 15/36, three fixes, two breaks and one new
+high-confidence error. Total/per-mode/safety gates failed despite full software
+passes; that split is now spent. The pre-registered protocol and immutable
+outcome are in `APTA-1.1-WP4-FMAK-SEMITONE-BAND-KEY-PROTOCOL.md`.
 
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
@@ -364,16 +372,18 @@ Only after work packages 5 through 8 pass:
 The ESP32-P4 control path is available on COM6 through the board's CH340 bridge.
 The exact-head WP8 UAC build, metadata check, normal flash and boot passed on
 the v1.3 target, but Windows did not enumerate the separate frozen USB-OTG UAC
-endpoint, so the 1,800-second evidence clock correctly did not start. Four key
+endpoint, so the 1,800-second evidence clock correctly did not start. Five key
 transfer attempts are closed and rejected without opening the formal holdout;
-the fifth semitone-band candidate is pre-registered with audio still unopened.
+the fifth semitone-band candidate failed total/per-mode/safety gates on 72
+development tracks (evaluation closed 2026-09-04).
 The FMAK temporal chord-state candidate produced positive net fixes
 but failed the frozen absolute, per-mode and confidence-safety gates; the
 subsequent disjoint soft-profile candidate reduced exact accuracy despite zero
 new high-confidence errors. Both splits are spent. None of the harmonic,
 centered or temporal results authorizes neighboring parameter, confidence or
-threshold rescues. The new front-end candidate has its own pre-registration and
-genuinely disjoint development evidence and does not reinterpret those results.
+threshold rescues. The semitone-band split is also spent; a future front-end
+candidate needs its own pre-registration and genuinely disjoint development
+evidence, and must not reinterpret any rejected result.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

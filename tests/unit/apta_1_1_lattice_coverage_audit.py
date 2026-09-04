@@ -3,6 +3,8 @@
 """Synthetic-only regressions for candidate coverage and input isolation."""
 
 import json
+import contextlib
+import io
 import sys
 import tempfile
 import unittest
@@ -22,6 +24,37 @@ def labels():
 
 
 class CoverageTests(unittest.TestCase):
+    def test_cli_rejects_dirty_or_mismatched_revision_before_inputs(self):
+        argv = ["audit", "--labels", "absent", "--traces", "absent",
+                "--corpus", "ASAP", "--source-revision", "a" * 40,
+                "--output", "absent-report.json"]
+        for head, dirty in (("b" * 40, ""), ("a" * 40, " M tool.py")):
+            with patch.object(sys, "argv", argv), patch.object(
+                    audit.subprocess, "check_output", side_effect=[head, dirty]), patch.object(
+                    audit, "evaluate") as evaluate, contextlib.redirect_stderr(io.StringIO()) as errors:
+                with self.assertRaises(SystemExit) as stopped:
+                    audit.main()
+                self.assertEqual(stopped.exception.code, 2)
+                self.assertIn("exact clean source revision", errors.getvalue())
+                evaluate.assert_not_called()
+
+    def test_cli_refuses_existing_output_without_evaluating(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "report.json"
+            output.write_text("preserve", encoding="utf-8")
+            argv = ["audit", "--labels", "absent", "--traces", "absent",
+                    "--corpus", "ASAP", "--source-revision", "a" * 40,
+                    "--output", str(output)]
+            with patch.object(sys, "argv", argv), patch.object(
+                    audit.subprocess, "check_output", side_effect=["a" * 40, ""]), patch.object(
+                    audit, "evaluate") as evaluate, contextlib.redirect_stderr(io.StringIO()) as errors:
+                with self.assertRaises(SystemExit) as stopped:
+                    audit.main()
+                self.assertEqual(stopped.exception.code, 2)
+                self.assertIn("refusing to overwrite", errors.getvalue())
+                evaluate.assert_not_called()
+            self.assertEqual(output.read_text(encoding="utf-8"), "preserve")
+
     def test_scan_matches_frozen_top3(self):
         rng = np.random.default_rng(114)
         for rate in (44100, 48000, 96000):

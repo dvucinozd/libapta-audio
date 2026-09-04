@@ -8,6 +8,7 @@ import argparse
 import json
 import math
 import re
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -179,15 +180,23 @@ def main() -> int:
     parser.add_argument("--traces", type=Path, required=True)
     parser.add_argument("--corpus", choices=tuple(PINS), required=True)
     parser.add_argument("--source-revision", required=True)
+    parser.add_argument("--git-executable", default="git",
+                        help="Git executable owning this checkout (git.exe for a Windows worktree under WSL)")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
+        root = Path(__file__).resolve().parents[1]
+        head = subprocess.check_output([args.git_executable, "rev-parse", "HEAD"], cwd=root, text=True).strip()
+        dirty = subprocess.check_output(
+            [args.git_executable, "--no-optional-locks", "status", "--porcelain"], cwd=root, text=True)
+        if head != args.source_revision or dirty.strip():
+            raise ValueError("diagnostic requires its exact clean source revision")
         if args.output.exists():
             raise ValueError("refusing to overwrite existing diagnostic")
         report = evaluate(args.labels, args.traces, args.corpus, args.source_revision)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-    except (OSError, ValueError, KeyError, TypeError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, subprocess.CalledProcessError) as exc:
         parser.exit(2, f"error: {exc}\n")
     print(json.dumps(report["summary"], sort_keys=True))
     return 0
