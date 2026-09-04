@@ -246,24 +246,37 @@ tonal representation/contrast with a separately frozen protocol, not merely
 switch all arithmetic to double or reopen rejected centered correlation. See
 `APTA-1.1-KEY-EXTRACTION-REFERENCE.md` for the measured scope and limitations.
 
+The subsequent source audit, independent blind review and automated-reference
+screen are complete at `c5ef089`; see `APTA-1.1-KEY-BLIND-REVIEW.md`. Both
+listeners agree on the nine selected FMAK disagreements. OpenKeyScan reaches
+8/9 on that consensus subset and agrees with fixed Essentia on 50/72 spent
+tracks; the suggested Librosa/Krumhansl implementation reaches only 4/9 and is
+not worth scaling. The 22 OpenKeyScan/Essentia disagreements are the bounded
+resume set for trace/error-family inspection. They may generate hypotheses but
+must not be treated as ground truth, used to auto-relabel FMAK, or scored as a
+promotion/acceptance set.
+
 **Hypothesis:** the current global folded chroma is underdetermined on full
 mixes. Combining tuning-aware harmonic salience with robust temporal evidence
 can reduce neighbouring-key and relative/parallel-mode errors.
 
 Implementation order:
 
-1. Extend the opt-in key trace with per-window chroma, entropy, tuning choice
+1. Inspect the frozen 22-case OpenKeyScan/Essentia disagreement topology and
+   identify whether any repeatable error family requires new trace evidence;
+   stop if there is no deterministic pattern.
+2. Extend the opt-in key trace with per-window chroma, entropy, tuning choice
    and verdict stability.
-2. Replace fixed global accumulation in an experimental path with bounded
+3. Replace fixed global accumulation in an experimental path with bounded
    per-window normalization and robust/adaptive aggregation.
-3. Improve harmonic salience from the retained octave-resolved spectrum while
+4. Improve harmonic salience from the retained octave-resolved spectrum while
    preventing low-frequency fifths and loud frames from dominating.
-4. Evaluate continuous or finer tuning estimation only if it can reuse bounded
+5. Evaluate continuous or finer tuning estimation only if it can reuse bounded
    evidence at acceptable CPU cost; the existing three-bank experiment remains
    diagnostic until its cost is justified.
-5. Gate a candidate verdict by temporal agreement and calibrated separation;
+6. Gate a candidate verdict by temporal agreement and calibrated separation;
    do not compare raw scores from differently shaped evidence spaces.
-6. Prepare a legally usable independent key-development set before promotion.
+7. Prepare a legally usable independent key-development set before promotion.
 
 Retain/reject criterion:
 
@@ -401,6 +414,10 @@ centered or temporal results authorizes neighboring parameter, confidence or
 threshold rescues. The semitone-band split is also spent; a future front-end
 candidate needs its own pre-registration and genuinely disjoint development
 evidence, and must not reinterpret any rejected result.
+The 2026-09-04 blind-review and automated-triage audit closes the corpus-mapping
+question without changing that boundary. Resume WP4 with the frozen 22-case
+OpenKeyScan/Essentia disagreement topology, then stop or pre-register one new
+representation experiment before changing native DSP.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

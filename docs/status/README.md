@@ -17,6 +17,9 @@ Active post-1.0 development:
   — development corpora, three rejected downbeat-phase candidates with root
   cause, the native meter-trace tool, and the trace analysis that bounds
   bar-phase accuracy at lattice quality.
+- [`APTA-1.1-KEY-BLIND-REVIEW.md`](APTA-1.1-KEY-BLIND-REVIEW.md) — exact source
+  re-decode, two-listener key review, free-service screens, OpenKeyScan
+  automated triage and the fail-closed boundary for the spent FMAK split.
 - [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md) —
   dated private-corpus snapshots, the independently verified formal rejection,
   and the remaining accuracy boundary.
