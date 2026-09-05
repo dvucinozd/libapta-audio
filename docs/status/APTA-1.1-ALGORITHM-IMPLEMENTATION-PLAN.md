@@ -262,11 +262,18 @@ can reduce neighbouring-key and relative/parallel-mode errors.
 
 Implementation order:
 
-1. Inspect the frozen 22-case OpenKeyScan/Essentia disagreement topology and
-   identify whether any repeatable error family requires new trace evidence;
-   stop if there is no deterministic pattern.
-2. Extend the opt-in key trace with per-window chroma, entropy, tuning choice
-   and verdict stability.
+1. **Complete 2026-09-05:** the frozen 22-case topology contains eight same-tonic
+   mode swaps, six fourth/fifth relationships, three relative keys and five
+   other cross-mode differences. Native minor selection is 70/72, including
+   18/19 external-major agreements; only two disputed cases have two-listener
+   consensus. See `APTA-1.1-KEY-BLIND-REVIEW.md` for limits and exact evidence.
+2. **Complete 2026-09-05:** the separately frozen synthetic per-window contrast
+   observer identifies loss after compression/folding: first clean major
+   windows change from raw-folded 12/12 to native 7/12 default and 2/12 band.
+   All original 720 rows per build and production analyzer/object hashes stay
+   identical. See `APTA-1.1-KEY-CONTRAST-TRACE.md`. Next freeze a bounded
+   input-gain sensitivity diagnostic before choosing a normalization/contrast
+   change; no fitted floor, parameter sweep or label rescue is justified.
 3. Replace fixed global accumulation in an experimental path with bounded
    per-window normalization and robust/adaptive aggregation.
 4. Improve harmonic salience from the retained octave-resolved spectrum while
@@ -415,9 +422,13 @@ threshold rescues. The semitone-band split is also spent; a future front-end
 candidate needs its own pre-registration and genuinely disjoint development
 evidence, and must not reinterpret any rejected result.
 The 2026-09-04 blind-review and automated-triage audit closes the corpus-mapping
-question without changing that boundary. Resume WP4 with the frozen 22-case
-OpenKeyScan/Essentia disagreement topology, then stop or pre-register one new
-representation experiment before changing native DSP.
+question without changing that boundary. The 2026-09-05 frozen 22-case topology
+follow-up is now complete and retains a mode/contrast diagnostic hypothesis.
+The subsequent frozen per-window contrast observation is also complete and
+locates synthetic loss after compression/folding with additional accumulation
+loss. Resume with the bounded input-gain diagnostic described above; a native
+representation change still needs its own preregistration and independent
+development evidence. Automated agreements are not corrected truth.
 WP6 and WP7 remain gated: WP5 proved the unchanged production baseline is
 software-clean but not algorithmically eligible, so neither a formal holdout
 nor a new final acceptance corpus may be opened until a complete transferable

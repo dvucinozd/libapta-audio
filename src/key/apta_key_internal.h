@@ -76,4 +76,10 @@ void apta_internal_key_trace_get(
     uint32_t *completed_windows_out);
 #endif
 
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+/* Implemented only by the explicit-build synthetic diagnostic executable. */
+void apta_key_contrast_observe_energy(
+    uint32_t variant, uint32_t bin, float energy, float compressed);
+#endif
+
 #endif /* APTA_KEY_INTERNAL_H */

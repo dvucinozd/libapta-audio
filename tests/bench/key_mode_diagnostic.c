@@ -33,6 +33,10 @@ static unsigned mode_index(apta_key_mode_t mode)
 #include "key_extraction_reference.h"
 #endif
 
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+#include "key_contrast_trace.h"
+#endif
+
 static double cosine(const float *chroma, unsigned tonic, unsigned mode)
 {
     double dot = 0.0, cn = 0.0, pn = 0.0;
@@ -100,6 +104,9 @@ static int measure(const char *kind, unsigned condition, unsigned tonic, unsigne
 #ifdef APTA_KEY_EXTRACTION_REFERENCE
         CHECK(reference_print(kind, chroma, completed) == 0);
 #endif
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+        if (strcmp(kind, "pcm_cumulative") == 0) contrast_print();
+#endif
         printf("}");
     }
     ++rows;
@@ -149,6 +156,9 @@ static int pcm(void)
 #ifdef APTA_KEY_EXTRACTION_REFERENCE
             reference_reset();
 #endif
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+            contrast_reset();
+#endif
             for (window = 0; window < 4; ++window) {
                 static const unsigned degrees[4] = {0u, 5u, 7u, 0u};
                 unsigned root = 48u + tonic + degrees[window];
@@ -174,6 +184,9 @@ static int pcm(void)
 #endif
                 }
                 CHECK(session.key_analysis.completed_windows == window + 1u);
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+                CHECK(contrast_finish(session.key_analysis.chroma[APTA_INTERNAL_KEY_BASE_VARIANT]) == 0);
+#endif
                 for (p = 0; p < 12; ++p) {
                     float current = session.key_analysis.chroma[APTA_INTERNAL_KEY_BASE_VARIANT][p];
                     delta[p] = current - previous[p];
@@ -182,6 +195,9 @@ static int pcm(void)
                 CHECK(measure("pcm_window", condition, tonic, mode, window + 1u, delta, 1u, 0) == 0);
                 CHECK(measure("pcm_cumulative", condition, tonic, mode, window + 1u,
                               previous, window + 1u, 0) == 0);
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+                contrast_next_window();
+#endif
             }
         }
     return 0;
@@ -196,6 +212,8 @@ int main(int argc, char **argv)
 #ifdef APTA_KEY_EXTRACTION_REFERENCE
     CHECK(reference_selftest() == 0);
 #define DIAGNOSTIC_FORMAT "apta-key-extraction-reference-1"
+#elif defined(APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC)
+#define DIAGNOSTIC_FORMAT "apta-key-contrast-diagnostic-1"
 #else
 #define DIAGNOSTIC_FORMAT "apta-key-mode-diagnostic-1"
 #endif
@@ -210,7 +228,13 @@ int main(int argc, char **argv)
     CHECK(vectors() == 0);
     CHECK(pcm() == 0);
     CHECK(rows == 720u);
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+    if (emit_json) printf("\n],\"row_count\":%u,\"checks_passed\":true,"
+                         "\"observer_scratch_bytes\":%lu,\"session_bytes\":%lu}\n",
+                         rows, (unsigned long)sizeof(contrast), (unsigned long)sizeof(apta_session_t));
+#else
     if (emit_json) printf("\n],\"row_count\":%u,\"checks_passed\":true}\n", rows);
+#endif
     CHECK(!ferror(stdout));
     return 0;
 }

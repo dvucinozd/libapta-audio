@@ -1,0 +1,990 @@
+{
+  "acceptance_claim": false,
+  "candidate_flags": [],
+  "candidate_promoted": false,
+  "confidence_safety": "not-assessed",
+  "evidence_level": "spent-report-only-diagnostic",
+  "fixes_breaks": "not-assessed-no-candidate-or-adjudicated-truth",
+  "format": "apta-key-disagreement-topology-1",
+  "holdout_eligible": false,
+  "native_resource_delta_bytes": 0,
+  "new_audio_access": false,
+  "provenance": {
+    "input_hashes": {
+      "baseline": "5053cff8bf3dd8116b936c6b4bc3c3acc2bab4d7e243adf03d7ceec407bffd80",
+      "coordinator": "90d2b860fea3a694c15334356d1293731a8a0a9bc1506b228bdd7e4e8a349ed3",
+      "essentia": "fa516407b2abb1dda39803053c497b143ea81152d94e062ceae6142146667eb1",
+      "openkeyscan": "d1b45badaa03639303a3fa1a3bc6c42f60304fca71c4dd404d7a3edd7eaae66c",
+      "review": "34ce29a46de709d54dad6c6f73e52c64bba183c7cf36215911676d51cf56a3fe"
+    },
+    "protocol_sha256": "1df2fe7b9bf346cdebf73b97d13c4579c98957cfa1227fa9d3038d8afc58dca7",
+    "source_revision": "d60e0cd61dacf48d5f251a1b0c403dff443fbeb9",
+    "source_worktree_clean": false,
+    "tests_sha256": "231cbbc09c1283183d692cee8b53b30d4c723122fdfee0058e5247bb741570e3",
+    "tool_sha256": "a330ed3999e8aaa116ecb7a9629dde03efa3bd6cc1c39eab8dbd7e1c96bc72f1"
+  },
+  "summary": {
+    "all_72": {
+      "count": 72,
+      "modes": {
+        "essentia": {
+          "major": 37,
+          "minor": 35
+        },
+        "native": {
+          "major": 2,
+          "minor": 70
+        },
+        "openkeyscan": {
+          "major": 21,
+          "minor": 51
+        }
+      },
+      "pairs": {
+        "native_to_essentia": {
+          "families": {
+            "exact": 18,
+            "other_cross_mode": 13,
+            "other_same_mode_tonic": 6,
+            "parallel_mode": 22,
+            "relative_major_minor": 2,
+            "same_mode_fourth_fifth": 11
+          },
+          "mode_pairs": {
+            "major->major": 1,
+            "major->minor": 1,
+            "minor->major": 36,
+            "minor->minor": 34
+          },
+          "tonic_delta_mod12": {
+            "0": 40,
+            "1": 1,
+            "10": 0,
+            "11": 1,
+            "2": 4,
+            "3": 1,
+            "4": 0,
+            "5": 3,
+            "6": 0,
+            "7": 20,
+            "8": 0,
+            "9": 2
+          }
+        },
+        "native_to_openkeyscan": {
+          "families": {
+            "exact": 25,
+            "other_cross_mode": 8,
+            "other_same_mode_tonic": 15,
+            "parallel_mode": 12,
+            "relative_major_minor": 1,
+            "same_mode_fourth_fifth": 11
+          },
+          "mode_pairs": {
+            "major->major": 1,
+            "major->minor": 1,
+            "minor->major": 20,
+            "minor->minor": 50
+          },
+          "tonic_delta_mod12": {
+            "0": 37,
+            "1": 1,
+            "10": 0,
+            "11": 1,
+            "2": 7,
+            "3": 0,
+            "4": 2,
+            "5": 3,
+            "6": 1,
+            "7": 16,
+            "8": 0,
+            "9": 4
+          }
+        },
+        "openkeyscan_to_essentia": {
+          "families": {
+            "exact": 50,
+            "other_cross_mode": 5,
+            "other_same_mode_tonic": 0,
+            "parallel_mode": 8,
+            "relative_major_minor": 3,
+            "same_mode_fourth_fifth": 6
+          },
+          "mode_pairs": {
+            "major->major": 21,
+            "minor->major": 16,
+            "minor->minor": 35
+          },
+          "tonic_delta_mod12": {
+            "0": 58,
+            "1": 1,
+            "10": 3,
+            "11": 0,
+            "2": 0,
+            "3": 3,
+            "4": 0,
+            "5": 6,
+            "6": 0,
+            "7": 1,
+            "8": 0,
+            "9": 0
+          }
+        }
+      },
+      "review_overlap": {
+        "consensus": {
+          "agreements": {
+            "essentia": 7,
+            "native": 5,
+            "openkeyscan": 8
+          },
+          "count": 9
+        },
+        "listener1": {
+          "agreements": {
+            "essentia": 9,
+            "native": 5,
+            "openkeyscan": 11
+          },
+          "count": 12
+        }
+      }
+    },
+    "disagreement_families": {
+      "other_cross_mode": {
+        "count": 5,
+        "modes": {
+          "essentia": {
+            "major": 5,
+            "minor": 0
+          },
+          "native": {
+            "major": 0,
+            "minor": 5
+          },
+          "openkeyscan": {
+            "major": 0,
+            "minor": 5
+          }
+        },
+        "pairs": {
+          "native_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 2,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 3,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 5
+            },
+            "tonic_delta_mod12": {
+              "0": 3,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 2,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "native_to_openkeyscan": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 4,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 1
+            },
+            "mode_pairs": {
+              "minor->minor": 5
+            },
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 2,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 1,
+              "7": 1,
+              "8": 0,
+              "9": 1
+            }
+          },
+          "openkeyscan_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 5,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 5
+            },
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 1,
+              "10": 3,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 1,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          }
+        },
+        "review_overlap": {
+          "consensus": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 1
+          },
+          "listener1": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 1
+          }
+        }
+      },
+      "other_same_mode_tonic": {
+        "count": 0,
+        "modes": {
+          "essentia": {
+            "major": 0,
+            "minor": 0
+          },
+          "native": {
+            "major": 0,
+            "minor": 0
+          },
+          "openkeyscan": {
+            "major": 0,
+            "minor": 0
+          }
+        },
+        "pairs": {
+          "native_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {},
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "native_to_openkeyscan": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {},
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "openkeyscan_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {},
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          }
+        },
+        "review_overlap": {
+          "consensus": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 0
+          },
+          "listener1": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 0
+          }
+        }
+      },
+      "parallel_mode": {
+        "count": 8,
+        "modes": {
+          "essentia": {
+            "major": 8,
+            "minor": 0
+          },
+          "native": {
+            "major": 0,
+            "minor": 8
+          },
+          "openkeyscan": {
+            "major": 0,
+            "minor": 8
+          }
+        },
+        "pairs": {
+          "native_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 3,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 5,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 8
+            },
+            "tonic_delta_mod12": {
+              "0": 5,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 1,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 2,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "native_to_openkeyscan": {
+            "families": {
+              "exact": 5,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 1,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 2
+            },
+            "mode_pairs": {
+              "minor->minor": 8
+            },
+            "tonic_delta_mod12": {
+              "0": 5,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 1,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 2,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "openkeyscan_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 8,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 8
+            },
+            "tonic_delta_mod12": {
+              "0": 8,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          }
+        },
+        "review_overlap": {
+          "consensus": {
+            "agreements": {
+              "essentia": 0,
+              "native": 1,
+              "openkeyscan": 1
+            },
+            "count": 1
+          },
+          "listener1": {
+            "agreements": {
+              "essentia": 0,
+              "native": 1,
+              "openkeyscan": 2
+            },
+            "count": 2
+          }
+        }
+      },
+      "relative_major_minor": {
+        "count": 3,
+        "modes": {
+          "essentia": {
+            "major": 3,
+            "minor": 0
+          },
+          "native": {
+            "major": 0,
+            "minor": 3
+          },
+          "openkeyscan": {
+            "major": 0,
+            "minor": 3
+          }
+        },
+        "pairs": {
+          "native_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 2,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 1,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 3
+            },
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 1,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 2,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "native_to_openkeyscan": {
+            "families": {
+              "exact": 1,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 2,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->minor": 3
+            },
+            "tonic_delta_mod12": {
+              "0": 1,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 2,
+              "5": 0,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "openkeyscan_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 3,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 3
+            },
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 3,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 0,
+              "8": 0,
+              "9": 0
+            }
+          }
+        },
+        "review_overlap": {
+          "consensus": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 0
+          },
+          "listener1": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 0
+          }
+        }
+      },
+      "same_mode_fourth_fifth": {
+        "count": 6,
+        "modes": {
+          "essentia": {
+            "major": 2,
+            "minor": 4
+          },
+          "native": {
+            "major": 0,
+            "minor": 6
+          },
+          "openkeyscan": {
+            "major": 2,
+            "minor": 4
+          }
+        },
+        "pairs": {
+          "native_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 1,
+              "parallel_mode": 2,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 3
+            },
+            "mode_pairs": {
+              "minor->major": 2,
+              "minor->minor": 4
+            },
+            "tonic_delta_mod12": {
+              "0": 2,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 1,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 3,
+              "8": 0,
+              "9": 0
+            }
+          },
+          "native_to_openkeyscan": {
+            "families": {
+              "exact": 1,
+              "other_cross_mode": 2,
+              "other_same_mode_tonic": 3,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 0
+            },
+            "mode_pairs": {
+              "minor->major": 2,
+              "minor->minor": 4
+            },
+            "tonic_delta_mod12": {
+              "0": 1,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 2,
+              "3": 0,
+              "4": 0,
+              "5": 0,
+              "6": 0,
+              "7": 2,
+              "8": 0,
+              "9": 1
+            }
+          },
+          "openkeyscan_to_essentia": {
+            "families": {
+              "exact": 0,
+              "other_cross_mode": 0,
+              "other_same_mode_tonic": 0,
+              "parallel_mode": 0,
+              "relative_major_minor": 0,
+              "same_mode_fourth_fifth": 6
+            },
+            "mode_pairs": {
+              "major->major": 2,
+              "minor->minor": 4
+            },
+            "tonic_delta_mod12": {
+              "0": 0,
+              "1": 0,
+              "10": 0,
+              "11": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0,
+              "5": 5,
+              "6": 0,
+              "7": 1,
+              "8": 0,
+              "9": 0
+            }
+          }
+        },
+        "review_overlap": {
+          "consensus": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 0
+          },
+          "listener1": {
+            "agreements": {
+              "essentia": 0,
+              "native": 0,
+              "openkeyscan": 0
+            },
+            "count": 0
+          }
+        }
+      }
+    },
+    "external_agreement_50": {
+      "count": 50,
+      "modes": {
+        "essentia": {
+          "major": 19,
+          "minor": 31
+        },
+        "native": {
+          "major": 2,
+          "minor": 48
+        },
+        "openkeyscan": {
+          "major": 19,
+          "minor": 31
+        }
+      },
+      "pairs": {
+        "native_to_essentia": {
+          "families": {
+            "exact": 18,
+            "other_cross_mode": 6,
+            "other_same_mode_tonic": 5,
+            "parallel_mode": 12,
+            "relative_major_minor": 1,
+            "same_mode_fourth_fifth": 8
+          },
+          "mode_pairs": {
+            "major->major": 1,
+            "major->minor": 1,
+            "minor->major": 18,
+            "minor->minor": 30
+          },
+          "tonic_delta_mod12": {
+            "0": 30,
+            "1": 1,
+            "10": 0,
+            "11": 1,
+            "2": 2,
+            "3": 0,
+            "4": 0,
+            "5": 3,
+            "6": 0,
+            "7": 11,
+            "8": 0,
+            "9": 2
+          }
+        },
+        "native_to_openkeyscan": {
+          "families": {
+            "exact": 18,
+            "other_cross_mode": 6,
+            "other_same_mode_tonic": 5,
+            "parallel_mode": 12,
+            "relative_major_minor": 1,
+            "same_mode_fourth_fifth": 8
+          },
+          "mode_pairs": {
+            "major->major": 1,
+            "major->minor": 1,
+            "minor->major": 18,
+            "minor->minor": 30
+          },
+          "tonic_delta_mod12": {
+            "0": 30,
+            "1": 1,
+            "10": 0,
+            "11": 1,
+            "2": 2,
+            "3": 0,
+            "4": 0,
+            "5": 3,
+            "6": 0,
+            "7": 11,
+            "8": 0,
+            "9": 2
+          }
+        },
+        "openkeyscan_to_essentia": {
+          "families": {
+            "exact": 50,
+            "other_cross_mode": 0,
+            "other_same_mode_tonic": 0,
+            "parallel_mode": 0,
+            "relative_major_minor": 0,
+            "same_mode_fourth_fifth": 0
+          },
+          "mode_pairs": {
+            "major->major": 19,
+            "minor->minor": 31
+          },
+          "tonic_delta_mod12": {
+            "0": 50,
+            "1": 0,
+            "10": 0,
+            "11": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 0,
+            "8": 0,
+            "9": 0
+          }
+        }
+      },
+      "review_overlap": {
+        "consensus": {
+          "agreements": {
+            "essentia": 7,
+            "native": 4,
+            "openkeyscan": 7
+          },
+          "count": 7
+        },
+        "listener1": {
+          "agreements": {
+            "essentia": 9,
+            "native": 4,
+            "openkeyscan": 9
+          },
+          "count": 9
+        }
+      }
+    },
+    "external_disagreement_22": {
+      "count": 22,
+      "modes": {
+        "essentia": {
+          "major": 18,
+          "minor": 4
+        },
+        "native": {
+          "major": 0,
+          "minor": 22
+        },
+        "openkeyscan": {
+          "major": 2,
+          "minor": 20
+        }
+      },
+      "pairs": {
+        "native_to_essentia": {
+          "families": {
+            "exact": 0,
+            "other_cross_mode": 7,
+            "other_same_mode_tonic": 1,
+            "parallel_mode": 10,
+            "relative_major_minor": 1,
+            "same_mode_fourth_fifth": 3
+          },
+          "mode_pairs": {
+            "minor->major": 18,
+            "minor->minor": 4
+          },
+          "tonic_delta_mod12": {
+            "0": 10,
+            "1": 0,
+            "10": 0,
+            "11": 0,
+            "2": 2,
+            "3": 1,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 9,
+            "8": 0,
+            "9": 0
+          }
+        },
+        "native_to_openkeyscan": {
+          "families": {
+            "exact": 7,
+            "other_cross_mode": 2,
+            "other_same_mode_tonic": 10,
+            "parallel_mode": 0,
+            "relative_major_minor": 0,
+            "same_mode_fourth_fifth": 3
+          },
+          "mode_pairs": {
+            "minor->major": 2,
+            "minor->minor": 20
+          },
+          "tonic_delta_mod12": {
+            "0": 7,
+            "1": 0,
+            "10": 0,
+            "11": 0,
+            "2": 5,
+            "3": 0,
+            "4": 2,
+            "5": 0,
+            "6": 1,
+            "7": 5,
+            "8": 0,
+            "9": 2
+          }
+        },
+        "openkeyscan_to_essentia": {
+          "families": {
+            "exact": 0,
+            "other_cross_mode": 5,
+            "other_same_mode_tonic": 0,
+            "parallel_mode": 8,
+            "relative_major_minor": 3,
+            "same_mode_fourth_fifth": 6
+          },
+          "mode_pairs": {
+            "major->major": 2,
+            "minor->major": 16,
+            "minor->minor": 4
+          },
+          "tonic_delta_mod12": {
+            "0": 8,
+            "1": 1,
+            "10": 3,
+            "11": 0,
+            "2": 0,
+            "3": 3,
+            "4": 0,
+            "5": 6,
+            "6": 0,
+            "7": 1,
+            "8": 0,
+            "9": 0
+          }
+        }
+      },
+      "review_overlap": {
+        "consensus": {
+          "agreements": {
+            "essentia": 0,
+            "native": 1,
+            "openkeyscan": 1
+          },
+          "count": 2
+        },
+        "listener1": {
+          "agreements": {
+            "essentia": 0,
+            "native": 1,
+            "openkeyscan": 2
+          },
+          "count": 3
+        }
+      }
+    }
+  }
+}

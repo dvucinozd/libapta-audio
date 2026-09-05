@@ -209,3 +209,91 @@ Verification: frozen manifest/baseline/Essentia and listener hashes, complete
 72/72 API coverage, complete PCM/source preservation, exact 12/12 and 9/9
 review coverage, Python syntax compilation and `git diff --check`. No native DSP,
 corpus labels, holdout, acceptance threshold or release state changed.
+
+## Frozen 22-case topology — 2026-09-05
+
+The report-only procedure in
+[`APTA-1.1-KEY-DISAGREEMENT-TOPOLOGY.md`](APTA-1.1-KEY-DISAGREEMENT-TOPOLOGY.md)
+was recorded before execution. Five pinned reports passed full SHA-256 checks,
+72/72 unique identity and retained-verdict checks, and the twelve-review /
+nine-consensus mapping checks. No audio or detector was run. Source baseline
+is `d60e0cd61dacf48d5f251a1b0c403dff443fbeb9`; the diagnostic tool and documents
+were uncommitted and the unrelated local `output/` remained present, so this
+is explicitly dirty-worktree diagnostic evidence, not clean qualification.
+
+| OpenKeyScan / Essentia relationship | Cases / 22 |
+|---|---:|
+| Same tonic, opposite mode | 8 |
+| Same mode, fourth/fifth tonic relationship | 6 |
+| Relative major/minor | 3 |
+| Other tonic and mode differences | 5 |
+| Other same-mode tonic differences | 0 |
+
+Sixteen disagreements are OpenKeyScan minor / Essentia major; four are both
+minor and two both major. All eight same-tonic mode disagreements point from
+OpenKeyScan minor to Essentia major. Relative-key ambiguity is therefore a
+minority of this fixed subset, not a general explanation of its disagreements.
+These relationships do not identify the correct detector or prove modulation.
+
+Native APTA selects minor on all 22 disagreements and 48/50 external agreements:
+70/72 minor overall. In contrast, OpenKeyScan returns 51/72 minor and Essentia
+35/72. Even where both external tools agree on major (19 tracks), native APTA
+returns minor on 18, including 12 with the very same tonic. This is a repeated
+native mode asymmetry outside the deliberately disputed subset as well. It
+supports investigating representation/score contrast; automated agreement
+alone does not establish native error or replacement ground truth.
+
+Only three of the 22 cases were in listener 1's packet and only two have both
+listeners. On those two, native APTA and OpenKeyScan each agree on one, Essentia
+on neither, and one is missed by all three algorithms. The remaining twenty
+have no two-listener consensus in the retained packet. Conversely, seven of
+the 50 external agreements have both listeners, and all seven agree with both
+external tools. These intentionally selected counts cannot justify blanket
+relabeling, general accuracy, or choosing an automatic tie-breaker.
+
+### Decision and next boundary
+
+The 22-case topology task is complete. Retain the mode/tonal-contrast hypothesis
+for a separately frozen trace diagnostic, not a detector override. Prior
+synthetic evidence already reproduces major-to-minor collapse and the double
+extraction reference does not fix it; this report adds real-song verdict
+topology but no acoustic evidence establishing the cause.
+
+The existing `tools/apta_key_trace.c` writes final accumulated spectral/chroma
+vectors only. The specific missing observation is per-window energy before
+`log1p`, after compression and octave folding, and after cumulative addition
+in `apta_key_finish_window`, together with unquantized major/minor score
+margins. A proposed follow-up should stream these observations to host-only
+diagnostics with bounded scratch, preserve production bytes and every default
+decision, and first verify them on the fixed synthetic progressions. It should
+measure where contrast changes, without subtracting a fitted floor, rescoring
+the corpus, copying an external detector, or choosing thresholds from disputed
+labels. Only after a causal diagnostic supports one representation change
+should that change receive its own preregistration and independent development
+evidence. This step implements none of that follow-up and opens no holdout.
+
+### Reproduction and evidence
+
+From the DSP worktree at the recorded baseline, with the new host tool present:
+
+```powershell
+python -m unittest discover -s tools -p test_apta_key_disagreement_topology.py -v
+python tools/apta_key_disagreement_topology.py --output build/key-disagreement-topology-20260905/new-private.json
+```
+
+The output must be new and under ignored `build/`. Standard output contains
+only the public aggregate report. The private output includes opaque per-track
+joins and must stay local. The tool intentionally requires the frozen baseline
+HEAD; moving the source requires an explicit protocol/provenance update.
+
+All 10 host tests pass, including exhaustive symmetry/transposition checks of
+all 576 key pairs, invalid input and review-mapping rejection, and output
+overwrite protection. The replay is byte-identical. Private report:
+`build/key-disagreement-topology-20260905/report-private.json`, SHA-256
+`c5fcc12ff5abccc287234d028a6b9a880c0af49823c086c8f24c000e4ebf0ff2`.
+The public aggregate is
+[`../../evidence/1.1/key-disagreement-topology-20260905.json`](../../evidence/1.1/key-disagreement-topology-20260905.json),
+with exact input/tool/test/protocol hashes. Native flags, CPU/RAM, APIs, wire
+format, labels and release state are unchanged. Fixes/breaks and confidence
+safety are unassessed because this is neither a candidate comparison nor an
+adjudicated accuracy run. No native rebuild or P4 qualification was performed.

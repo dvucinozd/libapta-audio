@@ -58,6 +58,27 @@ a native candidate or create acceptance evidence. Exact hashes, analyzer
 identity and source-preservation checks are in
 [`APTA-1.1-KEY-BLIND-REVIEW.md`](APTA-1.1-KEY-BLIND-REVIEW.md).
 
+The 2026-09-05 report-only topology follow-up is complete: the 22 disagreements
+contain eight same-tonic mode swaps, six same-mode fourth/fifth relationships,
+three relative keys and five other cross-mode differences. Native APTA returns
+minor on 70/72 tracks, including 18/19 cases where both external references
+agree on major. Only two of the 22 have retained two-listener consensus, so
+this is a diagnostic mode-asymmetry observation, not corrected truth. It
+motivated the separately frozen contrast trace below before selecting a new
+representation experiment. No candidate or holdout is promoted;
+see the final section of `APTA-1.1-KEY-BLIND-REVIEW.md` and
+[`APTA-1.1-KEY-DISAGREEMENT-TOPOLOGY.md`](APTA-1.1-KEY-DISAGREEMENT-TOPOLOGY.md).
+
+That contrast trace is now complete on the fixed synthetic progressions. On
+clean first major-chord windows the raw-folded counterfactual matches 12/12 in
+both builds, while the unchanged compressed native result matches 7/12 default
+and 2/12 band; four-window cumulative results remain 4/12 and 0/12. All original
+720 diagnostic rows per build and production analyzer/key object hashes are
+unchanged. This localizes an observed compression/contrast loss on synthetic
+stimuli, not a real-song fix. The next bounded diagnostic is gain sensitivity
+before selecting one new normalization/contrast experiment. See
+[`APTA-1.1-KEY-CONTRAST-TRACE.md`](APTA-1.1-KEY-CONTRAST-TRACE.md).
+
 ## Implemented compatibility guarantees
 
 - Existing `TEMP`, `LGRD`, `GGRD`, `REVN`, waveform and metadata semantics are unchanged by absence of the new optional sections.

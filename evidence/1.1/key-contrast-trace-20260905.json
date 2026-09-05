@@ -1,0 +1,431 @@
+{
+  "acceptance_claim": false,
+  "builds": {
+    "band": {
+      "baseline_report_sha256": "eedb1b97e4d975b37b925b649c80596871c7462412d3550de8d2139e862f06f1",
+      "observed_windows": 288,
+      "observer_scratch_bytes": 1124,
+      "original_720_rows_unchanged": true,
+      "report_sha256": "72c305af710f37b78cabb79377403453c286336b320815cbc7840b352c2381ce",
+      "session_bytes": 12784
+    },
+    "default": {
+      "baseline_report_sha256": "fc82ddbf13c04a1d406e40c2e44f48573c820dd4d99454f7123635695b1d586c",
+      "observed_windows": 288,
+      "observer_scratch_bytes": 476,
+      "original_720_rows_unchanged": true,
+      "report_sha256": "384bfcda5634861d122b3ff0f9c1f0262560364239d72de953ba653e7651f6d6",
+      "session_bytes": 11824
+    }
+  },
+  "candidate_promoted": false,
+  "clean_first_and_final_windows": {
+    "band": [
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.03735973882213281,
+            "normalized_entropy": 0.8904473609926088
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 5.374874266231326e-06,
+            "normalized_entropy": 0.3139293932587882
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 2,
+            "mean_major_margin": -0.011191615120026524,
+            "mean_min_over_mean": 0.601149619695159,
+            "mean_normalized_entropy": 0.9854012416191559,
+            "mean_stimulus_major_margin": -0.00636767504252389,
+            "selected_major": 2
+          },
+          "native_cumulative": {
+            "matches_progression_key": 2,
+            "mean_major_margin": -0.011191615120026524,
+            "mean_min_over_mean": 0.601149619695159,
+            "mean_normalized_entropy": 0.9854012416191559,
+            "mean_stimulus_major_margin": -0.00636767504252389,
+            "selected_major": 2
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": 0.03921499850621416,
+            "mean_min_over_mean": 0.0008206181368128791,
+            "mean_normalized_entropy": 0.45211722901980256,
+            "mean_stimulus_major_margin": 0.03921499850621416,
+            "selected_major": 12
+          }
+        },
+        "stimulus_mode": 0,
+        "window": 1
+      },
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.04110922582878115,
+            "normalized_entropy": 0.867908541935558
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 5.790410787847887e-06,
+            "normalized_entropy": 0.31419124013702665
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 1,
+            "mean_major_margin": -0.011130388842366223,
+            "mean_min_over_mean": 0.6329073501857408,
+            "mean_normalized_entropy": 0.9845814540521891,
+            "mean_stimulus_major_margin": -0.006456996687225991,
+            "selected_major": 1
+          },
+          "native_cumulative": {
+            "matches_progression_key": 0,
+            "mean_major_margin": -0.014215388088662823,
+            "mean_min_over_mean": 0.7566941009825842,
+            "mean_normalized_entropy": 0.99413346274186,
+            "mean_stimulus_major_margin": -0.013004858664761679,
+            "selected_major": 0
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": 0.039224463564602075,
+            "mean_min_over_mean": 0.0007750530139941921,
+            "mean_normalized_entropy": 0.45277706925819855,
+            "mean_stimulus_major_margin": 0.039224463564602075,
+            "selected_major": 12
+          }
+        },
+        "stimulus_mode": 0,
+        "window": 4
+      },
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.044793571892557955,
+            "normalized_entropy": 0.8916332023210666
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 6.9325396839332145e-06,
+            "normalized_entropy": 0.314229271337928
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 8,
+            "mean_major_margin": -0.023460315550303413,
+            "mean_min_over_mean": 0.5757264055438543,
+            "mean_normalized_entropy": 0.9849530254616704,
+            "mean_stimulus_major_margin": -0.04982925072944555,
+            "selected_major": 0
+          },
+          "native_cumulative": {
+            "matches_progression_key": 8,
+            "mean_major_margin": -0.023460315550303413,
+            "mean_min_over_mean": 0.5757264055438543,
+            "mean_normalized_entropy": 0.9849530254616704,
+            "mean_stimulus_major_margin": -0.04982925072944555,
+            "selected_major": 0
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": -0.051354215904723034,
+            "mean_min_over_mean": 0.0007145230063630709,
+            "mean_normalized_entropy": 0.45254261125039524,
+            "mean_stimulus_major_margin": -0.1440369121141324,
+            "selected_major": 0
+          }
+        },
+        "stimulus_mode": 1,
+        "window": 1
+      },
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.043219605385246766,
+            "normalized_entropy": 0.8713888207847358
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 6.040336260167175e-06,
+            "normalized_entropy": 0.31439803507145936
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 10,
+            "mean_major_margin": -0.030235839884030835,
+            "mean_min_over_mean": 0.5831689628596861,
+            "mean_normalized_entropy": 0.9848706771261352,
+            "mean_stimulus_major_margin": -0.0499143304137212,
+            "selected_major": 2
+          },
+          "native_cumulative": {
+            "matches_progression_key": 12,
+            "mean_major_margin": -0.02606355577108141,
+            "mean_min_over_mean": 0.7214994028753497,
+            "mean_normalized_entropy": 0.9934622769976768,
+            "mean_stimulus_major_margin": -0.03509985164217085,
+            "selected_major": 0
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": -0.05119139850841095,
+            "mean_min_over_mean": 0.0008427148916581836,
+            "mean_normalized_entropy": 0.453023348413349,
+            "mean_stimulus_major_margin": -0.14402774373059404,
+            "selected_major": 0
+          }
+        },
+        "stimulus_mode": 1,
+        "window": 4
+      }
+    ],
+    "default": [
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.021508882968276615,
+            "normalized_entropy": 0.8544394916681138
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 1.1282049274150341e-06,
+            "normalized_entropy": 0.3088578575635504
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 7,
+            "mean_major_margin": 0.00024536712144382355,
+            "mean_min_over_mean": 0.43092592014942493,
+            "mean_normalized_entropy": 0.9605719810759251,
+            "mean_stimulus_major_margin": 0.0012551250666862819,
+            "selected_major": 7
+          },
+          "native_cumulative": {
+            "matches_progression_key": 7,
+            "mean_major_margin": 0.00024536712144382355,
+            "mean_min_over_mean": 0.43092592014942493,
+            "mean_normalized_entropy": 0.9605719810759251,
+            "mean_stimulus_major_margin": 0.0012551250666862819,
+            "selected_major": 7
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": 0.03942764803058893,
+            "mean_min_over_mean": 0.0001265399815853984,
+            "mean_normalized_entropy": 0.44521571245402597,
+            "mean_stimulus_major_margin": 0.03942764803058893,
+            "selected_major": 12
+          }
+        },
+        "stimulus_mode": 0,
+        "window": 1
+      },
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.03151196520217036,
+            "normalized_entropy": 0.8287329229991776
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 1.6675553484601519e-06,
+            "normalized_entropy": 0.3089049381616925
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 9,
+            "mean_major_margin": 0.004460461026013468,
+            "mean_min_over_mean": 0.43098034981197125,
+            "mean_normalized_entropy": 0.9574029619217025,
+            "mean_stimulus_major_margin": 0.004962111871857522,
+            "selected_major": 9
+          },
+          "native_cumulative": {
+            "matches_progression_key": 4,
+            "mean_major_margin": -0.007452258260852672,
+            "mean_min_over_mean": 0.5722030858681699,
+            "mean_normalized_entropy": 0.9832283150864164,
+            "mean_stimulus_major_margin": -0.007260144694565272,
+            "selected_major": 4
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": 0.039472659936617666,
+            "mean_min_over_mean": 0.00010190476430617535,
+            "mean_normalized_entropy": 0.4453724625854094,
+            "mean_stimulus_major_margin": 0.039472659936617666,
+            "selected_major": 12
+          }
+        },
+        "stimulus_mode": 0,
+        "window": 4
+      },
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.02944243421254836,
+            "normalized_entropy": 0.8573716055904489
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 1.6246385451798194e-06,
+            "normalized_entropy": 0.30897192567564374
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 9,
+            "mean_major_margin": -0.02634912125417449,
+            "mean_min_over_mean": 0.42405299580878797,
+            "mean_normalized_entropy": 0.9630131023360539,
+            "mean_stimulus_major_margin": -0.07155305755554205,
+            "selected_major": 2
+          },
+          "native_cumulative": {
+            "matches_progression_key": 9,
+            "mean_major_margin": -0.02634912125417449,
+            "mean_min_over_mean": 0.42405299580878797,
+            "mean_normalized_entropy": 0.9630131023360539,
+            "mean_stimulus_major_margin": -0.07155305755554205,
+            "selected_major": 2
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": -0.05114815411377871,
+            "mean_min_over_mean": 0.00010227725181354729,
+            "mean_normalized_entropy": 0.4453730988231484,
+            "mean_stimulus_major_margin": -0.14408133793481123,
+            "selected_major": 0
+          }
+        },
+        "stimulus_mode": 1,
+        "window": 1
+      },
+      {
+        "condition": 0,
+        "count": 12,
+        "octave_resolved": {
+          "compressed_by_variant": {
+            "min_over_mean": 0.03280843705367938,
+            "normalized_entropy": 0.8378689422408169
+          },
+          "raw_energy_by_variant": {
+            "min_over_mean": 1.721188351784932e-06,
+            "normalized_entropy": 0.30894924649493993
+          }
+        },
+        "stages": {
+          "compressed_window": {
+            "matches_progression_key": 9,
+            "mean_major_margin": -0.03418993296892431,
+            "mean_min_over_mean": 0.4486354586270939,
+            "mean_normalized_entropy": 0.9629001809359429,
+            "mean_stimulus_major_margin": -0.07397220379871426,
+            "selected_major": 3
+          },
+          "native_cumulative": {
+            "matches_progression_key": 11,
+            "mean_major_margin": -0.036265769439008465,
+            "mean_min_over_mean": 0.575819542385449,
+            "mean_normalized_entropy": 0.9832571868036019,
+            "mean_stimulus_major_margin": -0.047284302384569356,
+            "selected_major": 1
+          },
+          "raw_folded": {
+            "matches_progression_key": 12,
+            "mean_major_margin": -0.05109393470620816,
+            "mean_min_over_mean": 0.0001112786114079737,
+            "mean_normalized_entropy": 0.44541959393849956,
+            "mean_stimulus_major_margin": -0.14405775190476686,
+            "selected_major": 0
+          }
+        },
+        "stimulus_mode": 1,
+        "window": 4
+      }
+    ]
+  },
+  "confidence_safety": "not-assessed",
+  "corpus_access": false,
+  "date": "2026-09-05",
+  "evidence_level": "synthetic-diagnostic",
+  "fixes_breaks": "not-assessed-no-native-candidate",
+  "format": "apta-key-contrast-trace-evidence-1",
+  "holdout_eligible": false,
+  "instrument_binary_sha256": {
+    "band": "377c1d288324dcbd91024e93dce760f31455827f9444061bd4c25f27897beeb9",
+    "default": "3ffc62a2cb5becadf1882e9e6d32454b8f8a67492863410ec1bdaad7f11b9db9",
+    "sanitize": "b9a300230820cd01fa8dd25400584dbef5f12dcbc7a1a23560765b5c647d2b3c"
+  },
+  "instrument_macro": "APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC=1",
+  "instrument_target": "apta_key_contrast_diagnostic",
+  "limitations": [
+    "Raw folded scores are counterfactual observations, not a proposed linear detector.",
+    "The raw/compressed comparison keeps folding and scoring fixed on synthetic stimuli.",
+    "IV/V window decisions are not global-key accuracy tests.",
+    "These observations do not establish real-song causality or promote a detector."
+  ],
+  "native_resource_delta_bytes": 0,
+  "production_macro_enabled": false,
+  "report_sha256": {
+    "band-build.log": "1bd3f99179c1de5658f5b65b7dc5216f7e201f9aa95dc70279dfb5143781e77d",
+    "band.json": "72c305af710f37b78cabb79377403453c286336b320815cbc7840b352c2381ce",
+    "baseline-binaries.sha256": "287fc20e00fbc2819aefcb70f1722a6a0c2cdfa3781e9f668bb11c03d875c906",
+    "build-identities.txt": "c9bb7c4e0c8b165de832928d3bbc01726e507b7c07419953249efd0813a9554e",
+    "default-build.log": "1bd3f99179c1de5658f5b65b7dc5216f7e201f9aa95dc70279dfb5143781e77d",
+    "default.json": "384bfcda5634861d122b3ff0f9c1f0262560364239d72de953ba653e7651f6d6",
+    "sanitize-build.log": "1bd3f99179c1de5658f5b65b7dc5216f7e201f9aa95dc70279dfb5143781e77d",
+    "sanitize.json": "72c305af710f37b78cabb79377403453c286336b320815cbc7840b352c2381ce",
+    "summary.json": "1d4c05b9f15e7facb653e214fe2924c3f4ad5b5bf2f71f35b991125b1efd49cd"
+  },
+  "session_layout_source_unchanged": true,
+  "source_revision": "d60e0cd61dacf48d5f251a1b0c403dff443fbeb9",
+  "source_sha256": {
+    "docs/status/APTA-1.1-KEY-CONTRAST-TRACE-PROTOCOL.md": "e73c4e37e5ac524bed43b91f62a39a87246290b1954d5ec9b9c9906fc825628c",
+    "src/key/apta_key.c": "ccf45616b7c82455ef69a25c3ca32a5783091519adb307ee19d378c2d34124d9",
+    "src/key/apta_key_internal.h": "b5e420e2e1a403a851b9236300aae1fb2189d4c699d591ef2bcbfb7a9b5e9b46",
+    "tests/CMakeLists.txt": "fac175bfd6e7c6bf19c0f29b3499bed7b8e0c3e7632728e45ad8ddde1b90f3c1",
+    "tests/bench/key_contrast_trace.h": "8de1cc491fb7b116d50ff4871b64adf0e967036b4012e1c0a4ff083d453c41ee",
+    "tests/bench/key_mode_diagnostic.c": "b8a041d1581ae3941345c51d937b4f3b1b5390cb589b6d24a6dd5fd6c2422c1b",
+    "tools/apta_key_contrast_summary.py": "c9efb0fd6c8986466d1c21e8898580da233c07ea21e38cd8c5d430d08756d9c0",
+    "tools/test_apta_key_contrast_summary.py": "fc022a3e057b53f2d23a47aa25bb68cfa2c4932c3bc123aa8654532188d2c2f9"
+  },
+  "source_worktree_clean": false,
+  "unchanged_production_sha256": {
+    "band_analyzer": "cd08b5887382142944d8ac3329cdbcf07dfa1fd76f284a1c1a761ac3906c6f2b",
+    "band_key_object": "73d09a7144bd072af39c82f47f39d8831465c98e6f6943022d78f2a0c2d0b505",
+    "default_analyzer": "0e7999efb61734f656b846d5542617454c5a0789224531c071d0f8555512383a",
+    "default_key_object": "2729a6008ebf58c7ee9778e784e931e7c1caddc0dbe1497b7d40eb8843199d8e"
+  },
+  "verification": {
+    "asan_ubsan_build": "semitone_band",
+    "asan_ubsan_report_byte_identical_to_release": true,
+    "default_and_band_analyzer_and_key_object_hashes_unchanged": true,
+    "native_full_matrix_rerun": false,
+    "original_rows_unchanged_per_build": 720,
+    "production_observer_symbol_absent": true,
+    "release_werror_builds": [
+      "default",
+      "semitone_band"
+    ],
+    "repeat_reports_byte_identical": true,
+    "summary_tests_passed": 8,
+    "window_reconstructions_bit_identical_per_build": 288
+  }
+}

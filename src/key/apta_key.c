@@ -731,7 +731,15 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
             if (!isfinite(energy) || energy < 0.0f) {
                 energy = 0.0f;
             }
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+            {
+                const float compressed = logf(1.0f + energy);
+                band_energy += compressed;
+                apta_key_contrast_observe_energy(variant, bin, energy, compressed);
+            }
+#else
             band_energy += logf(1.0f + energy);
+#endif
         }
         analysis->chroma[APTA_INTERNAL_KEY_BASE_VARIANT]
                         [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
@@ -755,6 +763,9 @@ static void apta_key_finish_window(apta_internal_key_analysis_t *analysis)
              * bass-heavy dominants outweigh tonic harmony and drove fifth and
              * parallel-mode confusions on the official corpus taxonomy. */
             compressed = logf(1.0f + energy);
+#ifdef APTA_INTERNAL_KEY_CONTRAST_DIAGNOSTIC
+            apta_key_contrast_observe_energy(variant, bin, energy, compressed);
+#endif
             analysis->chroma[variant]
                             [bin % APTA_INTERNAL_KEY_PITCH_CLASSES] +=
                 compressed;

@@ -20,6 +20,12 @@ Active post-1.0 development:
 - [`APTA-1.1-KEY-BLIND-REVIEW.md`](APTA-1.1-KEY-BLIND-REVIEW.md) — exact source
   re-decode, two-listener key review, free-service screens, OpenKeyScan
   automated triage and the fail-closed boundary for the spent FMAK split.
+- [`APTA-1.1-KEY-DISAGREEMENT-TOPOLOGY.md`](APTA-1.1-KEY-DISAGREEMENT-TOPOLOGY.md)
+  — frozen report-only 22-case procedure; results and the next contrast-trace
+  boundary are recorded in the final section of the key blind-review report.
+- [`APTA-1.1-KEY-CONTRAST-TRACE.md`](APTA-1.1-KEY-CONTRAST-TRACE.md)
+  — synthetic per-window energy/compression trace, unchanged native decisions,
+  observed major-mode contrast loss and the next gain-sensitivity boundary.
 - [`APTA-1.1-FINAL-DJ-CORPUS-STATUS.md`](APTA-1.1-FINAL-DJ-CORPUS-STATUS.md) —
   dated private-corpus snapshots, the independently verified formal rejection,
   and the remaining accuracy boundary.
