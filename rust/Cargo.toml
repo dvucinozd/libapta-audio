@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "libapta"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.81"
+license = "Apache-2.0"
+description = "In-progress native Rust implementation of APTA audio analysis"
+publish = false
+
+[dependencies]
+libm = { version = "0.2", default-features = false }

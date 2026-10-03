@@ -51,6 +51,12 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
+      - name: Check native Rust migration and C interoperability
+        run: >-
+          python3 rust/check.py
+          --build-root build/rust-verification
+          --c-build build
+
       - name: Configure full shared-library build
         run: >-
           cmake -S . -B build-shared

@@ -208,6 +208,17 @@ Applications include:
 #include <apta/apta.h>
 ```
 
+## Native Rust migration
+
+The `rust-rewrite` development line adds an experimental native Rust crate
+alongside the C reference. It currently supports bounded sequential waveform
+push/pull processing with known or unknown duration, the five PCM representations,
+borrowed WAV decoding, all current container section payloads, cross-feature
+validation, and bounded selective stream I/O. Native result ownership and
+scheduling remain incomplete. It does not yet replace the C API/ABI or complete DSP.
+See the [migration checklist](docs/rust/MIGRATION.md) and
+[Rust build and verification instructions](rust/README.md).
+
 ## Building and testing
 
 Default native build:

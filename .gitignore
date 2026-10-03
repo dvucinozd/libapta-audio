@@ -6,3 +6,6 @@ __pycache__/
 # Local Codex instructions and skill entrypoints; shared facts belong in docs/.
 AGENTS.md
 SKILL.md
+
+# Rust build output (C reference remains available).
+/target/
