@@ -149,7 +149,7 @@ fn native_cli_exports_pass_strict_public_c_validation() {
     wav(&input);
     for music in [false, true] {
         let output = directory.join(if music { "music.apta" } else { "waveform.apta" });
-        let mut args = vec!["analyze".as_ref(), input.as_os_str(), output.as_os_str()];
+        let mut args = vec!["analyze".as_ref(), input.as_os_str(), output.as_os_str(), "--source-identity=sha256:000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f".as_ref()];
         if music {
             args.push("--music".as_ref());
         }
@@ -217,5 +217,67 @@ fn native_all_feature_output_passes_strict_c_reader() {
     .status
     .success());
     assert!(!invalid.exists());
+    fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn native_cli_preserves_supplied_identity_and_rejects_ambiguous_flags() {
+    let directory =
+        std::env::temp_dir().join(format!("apta-native-identity-{}", std::process::id()));
+    fs::create_dir(&directory).unwrap();
+    let input = directory.join("input.wav");
+    wav(&input);
+    let hex = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    for (kind, name) in [(1, "opaque"), (2, "sha256")] {
+        let output = directory.join(format!("{name}.apta"));
+        let flag = format!("--source-identity={name}:{hex}");
+        run(&[
+            "analyze".as_ref(),
+            input.as_os_str(),
+            output.as_os_str(),
+            flag.as_ref(),
+            "--bands".as_ref(),
+        ]);
+        let bytes = fs::read(&output).unwrap();
+        let result = libapta::result::parse(&bytes, Default::default()).unwrap();
+        assert_eq!(result.source.fingerprint_kind, kind);
+        assert_eq!(result.source.fingerprint, core::array::from_fn(|i| i as u8));
+        let inspect = run(&["inspect".as_ref(), output.as_os_str()]);
+        assert!(String::from_utf8_lossy(&inspect.stdout).contains(&format!("{name}:{hex}")));
+        let invalid = directory.join("invalid.apta");
+        assert!(!command(&[
+            "analyze".as_ref(),
+            input.as_os_str(),
+            invalid.as_os_str(),
+            flag.as_ref(),
+            flag.as_ref()
+        ])
+        .status
+        .success());
+        assert!(!invalid.exists());
+        let corpus = directory.join("corpus");
+        assert!(!command(&[
+            "corpus".as_ref(),
+            directory.as_os_str(),
+            corpus.as_os_str(),
+            flag.as_ref()
+        ])
+        .status
+        .success());
+        assert!(!corpus.exists());
+    }
+    for value in ["sha256:ab", "opaque:💥", "unknown:00"] {
+        let flag = format!("--source-identity={value}");
+        let output = directory.join("bad.apta");
+        assert!(!command(&[
+            "analyze".as_ref(),
+            input.as_os_str(),
+            output.as_os_str(),
+            flag.as_ref()
+        ])
+        .status
+        .success());
+        assert!(!output.exists());
+    }
     fs::remove_dir_all(directory).unwrap();
 }

@@ -23,8 +23,11 @@ pub type OwningSparseSession = SparseSession<
 #[derive(Clone, Copy, Debug)]
 pub struct SparseLimits {
     pub maximum_columns: usize,
+    /// Initial capacity; explicit reserve_pending may grow it within the byte limit.
     pub queue_nodes: usize,
+    /// Initial capacity; explicit reserve_pending may grow it within the byte limit.
     pub range_capacity: usize,
+    /// Fixed scheduler request capacity (at most MAX_REQUESTS).
     pub request_capacity: usize,
     pub maximum_working_bytes: usize,
     pub results: NativeLimits,
@@ -41,7 +44,7 @@ impl Default for SparseLimits {
         }
     }
 }
-/// One writer, fixed caller limits, independently retained heap generations.
+/// One writer, explicit resource limits, independently retained heap generations.
 /// Mutable storage is allocated before construction/attachment commits. After
 /// a failed mirror, refresh before any further mutation. C intermediate stage
 /// generations, allocator classes and callback ABI are not emulated.
@@ -50,6 +53,7 @@ pub struct OwnedSparseSession {
     scheduler: Scheduler<'static, Vec<RequestSlot>>,
     limits: SparseLimits,
     working_bytes: usize,
+    pending_bytes: usize,
     music_bytes: usize,
     bands_enabled: bool,
     detail_enabled: bool,
@@ -71,19 +75,29 @@ fn sum(parts: &[usize]) -> Result<usize, Error> {
 }
 impl OwnedSparseSession {
     pub fn new(config: SessionConfig, limits: SparseLimits) -> Result<Self, Error> {
-        Self::build(config, limits, None, None)
+        Self::build(config, limits, Default::default(), None, None)
     }
     pub(crate) fn new_in_context(
         config: SessionConfig,
         limits: SparseLimits,
+        identity: libapta::session::SourceIdentity,
         context: crate::RuntimeContext,
         resource: crate::context::Resource,
     ) -> Result<Self, Error> {
-        Self::build(config, limits, Some(context), Some(resource))
+        Self::build(config, limits, identity, Some(context), Some(resource))
+    }
+    /// Fix host identity before the initial immutable generation is published.
+    pub fn new_with_identity(
+        config: SessionConfig,
+        limits: SparseLimits,
+        identity: libapta::session::SourceIdentity,
+    ) -> Result<Self, Error> {
+        Self::build(config, limits, identity, None, None)
     }
     fn build(
         config: SessionConfig,
         limits: SparseLimits,
+        identity: libapta::session::SourceIdentity,
         context: Option<crate::RuntimeContext>,
         resource: Option<crate::context::Resource>,
     ) -> Result<Self, Error> {
@@ -141,12 +155,18 @@ impl OwnedSparseSession {
         if actual > limits.maximum_working_bytes {
             return Err(Error::LimitExceeded);
         }
+        let pending_bytes = sum(&[
+            bytes::<FrameRange>(storage.ranges.capacity())?,
+            bytes::<QueuedBlock>(storage.nodes.capacity())?,
+            bytes::<NormalizedSample>(storage.pcm.capacity())?,
+        ])?;
         let scheduler = Scheduler::with_storage(
             Some(config.total_frames),
             result::WAVEFORM_OVERVIEW,
             requests,
         )?;
         let mut session = SparseSession::with_storage(config, storage)?;
+        session.set_source_identity(identity)?;
         let mut initial = HeapResult::copy_snapshot(&session.snapshot_graph(1)?, limits.results)?;
         if let Some(context) = &context {
             initial.attach_context(context)?;
@@ -156,6 +176,7 @@ impl OwnedSparseSession {
             scheduler,
             limits,
             working_bytes: actual,
+            pending_bytes,
             music_bytes: 0,
             bands_enabled: false,
             detail_enabled: false,
@@ -185,6 +206,60 @@ impl OwnedSparseSession {
     pub fn working_bytes(&self) -> usize {
         self.working_bytes
     }
+    /// Explicitly grow pending storage. Push retains fixed-capacity backpressure
+    /// until the caller reserves more. No generation or scheduler state changes.
+    /// The working-byte ceiling includes actual replacement Vec capacities;
+    /// transient coexistence with old arrays is not a peak-memory guarantee.
+    pub fn reserve_pending(
+        &mut self,
+        queue_nodes: usize,
+        range_capacity: usize,
+    ) -> Result<(), Error> {
+        self.ensure_clean()?;
+        if !matches!(
+            self.session.state(),
+            SessionState::Created | SessionState::Running
+        ) {
+            return Err(Error::InvalidState);
+        }
+        let nodes = queue_nodes.max(self.limits.queue_nodes);
+        let ranges = range_capacity.max(self.limits.range_capacity);
+        if nodes == self.limits.queue_nodes && ranges == self.limits.range_capacity {
+            return Ok(());
+        }
+        let pcm_count = nodes.checked_mul(NODE_FRAMES).ok_or(Error::LimitExceeded)?;
+        let minimum = sum(&[
+            bytes::<FrameRange>(ranges)?,
+            bytes::<QueuedBlock>(nodes)?,
+            bytes::<NormalizedSample>(pcm_count)?,
+        ])?;
+        let base = self.working_bytes - self.pending_bytes;
+        if base.checked_add(minimum).ok_or(Error::LimitExceeded)?
+            > self.limits.maximum_working_bytes
+        {
+            return Err(Error::LimitExceeded);
+        }
+        let new_ranges = array::<FrameRange>(ranges)?;
+        let new_nodes = array::<QueuedBlock>(nodes)?;
+        let new_pcm = array::<NormalizedSample>(pcm_count)?;
+        let actual = sum(&[
+            bytes::<FrameRange>(new_ranges.capacity())?,
+            bytes::<QueuedBlock>(new_nodes.capacity())?,
+            bytes::<NormalizedSample>(new_pcm.capacity())?,
+        ])?;
+        if base.checked_add(actual).ok_or(Error::LimitExceeded)? > self.limits.maximum_working_bytes
+        {
+            return Err(Error::LimitExceeded);
+        }
+        self.session
+            .replace_pending_storage(new_ranges, new_nodes, new_pcm)?;
+        self.pending_bytes = actual;
+        self.working_bytes = base + actual;
+        self.limits.queue_nodes = nodes;
+        self.limits.range_capacity = ranges;
+        Ok(())
+    }
+
     /// Configure explicit requested-capability projection before PCM. Attached
     /// stages may be a superset; the mask controls immutable output and mutations.
     pub fn set_requested_features(&mut self, requested: u64) -> Result<(), Error> {
@@ -390,7 +465,7 @@ impl OwnedSparseSession {
 
     /// Seed only validated overview evidence while Created. Attach features first.
     /// No new generation is published until subsequent input/process/EOF work.
-    /// Native writers currently have no fingerprint, so required identity fails.
+    /// Present identities must match; required identity rejects either missing side.
     pub fn seed_from_result(
         &mut self,
         checkpoint: &HeapResult,
@@ -400,10 +475,10 @@ impl OwnedSparseSession {
         if self.session.state() != SessionState::Created {
             return Err(Error::InvalidState);
         }
-        if require_source_identity {
-            return Err(Error::Conflict);
-        }
         let input = checkpoint.view();
+        self.session
+            .source_identity()
+            .check_seed(input.source, require_source_identity)?;
         self.session.seed_overview(
             input.source,
             input.overview.ok_or(Error::Conflict)?,

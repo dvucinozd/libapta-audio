@@ -395,3 +395,192 @@ fn owning_seed_resume_ignores_checkpoint_detail_bands_and_preserves_old_graph() 
     assert_eq!(view.detail.unwrap().tiles[0].first_frame, 4096);
     assert_eq!(checkpoint.view().overview.unwrap().columns.len(), 16);
 }
+
+#[test]
+fn sparse_reservation_preserves_partial_nodes_and_exact_all_stage_output() {
+    fn exercise(grow: bool) -> Vec<u8> {
+        let mut s = OwnedSparseSession::new(
+            config(16384),
+            SparseLimits {
+                queue_nodes: if grow { 1 } else { 4 },
+                range_capacity: if grow { 1 } else { 8 },
+                ..SparseLimits::default()
+            },
+        )
+        .unwrap();
+        s.enable_three_band().unwrap();
+        s.enable_detail().unwrap();
+        s.enable_default_music().unwrap();
+        s.push_at(8192, PcmView::S16Interleaved(&[12000; 4096]))
+            .unwrap();
+        s.process(
+            WorkBudget {
+                maximum_input_frames: 73,
+                maximum_steps: 1,
+            },
+            &CancellationToken::new(),
+        )
+        .unwrap();
+        let old = s.results().acquire().unwrap();
+        let generation = old.info().generation;
+        if grow {
+            assert_eq!(s.push_at(0, PcmView::S16Interleaved(&[-5000; 4096])), Ok(0));
+            let bytes = s.working_bytes();
+            assert_eq!(s.reserve_pending(usize::MAX, 8), Err(Error::LimitExceeded));
+            assert_eq!(s.working_bytes(), bytes);
+            assert_eq!(s.session().processed_frames(), 73);
+            s.reserve_pending(4, 8).unwrap();
+            assert!(s.working_bytes() > bytes);
+            let bytes = s.working_bytes();
+            s.reserve_pending(1, 1).unwrap();
+            assert_eq!(s.working_bytes(), bytes);
+            assert_eq!(s.results().acquire().unwrap().info().generation, generation);
+        }
+        for (first, sample) in [(0, -5000), (12288, 23000), (4096, 1000)] {
+            assert_eq!(
+                s.push_at(first, PcmView::S16Interleaved(&[sample; 4096])),
+                Ok(4096)
+            );
+        }
+        s.finish_input().unwrap();
+        for _ in 0..20 {
+            run(&mut s);
+            if s.session().state() == SessionState::Complete {
+                break;
+            }
+        }
+        assert_eq!(s.session().processed_frames(), 16384);
+        assert_eq!(s.session().state(), SessionState::Complete);
+        assert_eq!(old.info().generation, generation);
+        assert!(old.view().overview.is_none());
+        assert_eq!(s.reserve_pending(8, 16), Err(Error::InvalidState));
+        let snapshot = s.snapshot().unwrap();
+        let mut tiles = [WaveformTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 0,
+            end_frame: 0,
+            first_column_index: 0,
+            state: FeatureState::Partial,
+            confidence: 0,
+            columns: &[],
+        }; 4];
+        let view =
+            result::from_session_snapshot(&snapshot, &mut tiles, NativeLimits::default()).unwrap();
+        let mut bytes = vec![0; result::serialized_size(&view).unwrap()];
+        result::write(&view, &mut bytes, Default::default()).unwrap();
+        bytes
+    }
+    assert_eq!(exercise(true), exercise(false));
+}
+
+#[test]
+fn sparse_reservation_recovers_fragmented_range_backpressure() {
+    let mut s = OwnedSparseSession::new(
+        config(32768),
+        SparseLimits {
+            queue_nodes: 1,
+            range_capacity: 1,
+            ..SparseLimits::default()
+        },
+    )
+    .unwrap();
+    // Real processing at 64 separated columns, then filling every hole.
+    for index in 0..64 {
+        if index != 0 {
+            s.reserve_pending(1, index + 1).unwrap();
+        }
+        assert_eq!(
+            s.push_at(index as u64 * 512, PcmView::S16Interleaved(&[7000; 256])),
+            Ok(256)
+        );
+        run(&mut s);
+    }
+    assert_eq!(s.session().accepted_ranges().len(), 64);
+    assert_eq!(s.push_at(256, PcmView::S16Interleaved(&[7000; 256])), Ok(0));
+    s.reserve_pending(1, 65).unwrap();
+    for index in 0..64 {
+        assert_eq!(
+            s.push_at(index * 512 + 256, PcmView::S16Interleaved(&[7000; 256])),
+            Ok(256)
+        );
+        run(&mut s);
+    }
+    s.finish_input().unwrap();
+    run(&mut s);
+    assert_eq!(
+        s.session().accepted_ranges(),
+        &[FrameRange {
+            first_frame: 0,
+            end_frame: 32768
+        }]
+    );
+    assert_eq!(s.session().processed_frames(), 32768);
+    assert_eq!(
+        s.results()
+            .acquire()
+            .unwrap()
+            .view()
+            .overview
+            .unwrap()
+            .columns
+            .len(),
+        128
+    );
+}
+
+#[test]
+#[ignore = "requires APTA_C_SPARSE_CAPACITY_ORACLE"]
+fn fragmented_capacity_and_merging_match_public_c_wire() {
+    for count in [63usize, 4096] {
+        let c =
+            std::process::Command::new(std::env::var_os("APTA_C_SPARSE_CAPACITY_ORACLE").unwrap())
+                .arg(count.to_string())
+                .output()
+                .unwrap();
+        assert!(c.status.success(), "{}", String::from_utf8_lossy(&c.stderr));
+        let mut cfg = config(count as u64 * 128);
+        cfg.frames_per_column = 64;
+        let mut s = OwnedSparseSession::new(
+            cfg,
+            SparseLimits {
+                queue_nodes: 1,
+                range_capacity: 8,
+                ..SparseLimits::default()
+            },
+        )
+        .unwrap();
+        for pass in 0..2 {
+            for i in 0..count {
+                if pass == 0 && i >= 8 && i.is_power_of_two() {
+                    s.reserve_pending(1, i * 2).unwrap();
+                }
+                if pass == 1 && i == 0 {
+                    s.reserve_pending(1, count + 1).unwrap();
+                }
+                let pcm: [i16; 64] = core::array::from_fn(|j| {
+                    (((i * 71 + j * 113 + pass * 17000) % 60000) as i32 - 30000) as i16
+                });
+                assert_eq!(
+                    s.push_at((i * 128 + pass * 64) as u64, PcmView::S16Interleaved(&pcm)),
+                    Ok(64)
+                );
+                run(&mut s);
+            }
+            if pass == 0 {
+                assert_eq!(s.session().accepted_ranges().len(), count);
+            }
+        }
+        s.finish_input().unwrap();
+        run(&mut s);
+        assert_eq!(s.session().processed_frames(), count as u64 * 128);
+        assert_eq!(s.session().accepted_ranges().len(), 1);
+        let snapshot = s.snapshot().unwrap();
+        let mut tiles = [];
+        let view =
+            result::from_session_snapshot(&snapshot, &mut tiles, NativeLimits::default()).unwrap();
+        let mut bytes = vec![0; result::serialized_size(&view).unwrap()];
+        result::write(&view, &mut bytes, Default::default()).unwrap();
+        assert_eq!(bytes, c.stdout);
+    }
+}

@@ -197,3 +197,41 @@ fn clock_starts_after_release_and_musical_drain_never_reads_source() {
     assert!(r.view().key.is_none());
     assert!(r.view().detail.is_some());
 }
+
+#[test]
+fn source_identity_survives_unknown_eof_and_retained_initial_graph() {
+    let identity = SourceIdentity::new(2, [0x5a; 32]).unwrap();
+    for known in [false, true] {
+        let w = GrowingSession::new_with_identity(
+            SessionConfig {
+                sample_rate: 48000,
+                channel_count: 1,
+                total_frames: if known { 513 } else { TOTAL_FRAMES_UNKNOWN },
+                frames_per_column: 64,
+            },
+            GrowingLimits::default(),
+            identity,
+        )
+        .unwrap();
+        let old = w.results().acquire().unwrap();
+        let mut pull = GrowingPullSession::new(w, source()).unwrap();
+        for _ in 0..8 {
+            pull.process(WorkBudget::default(), &CancellationToken::new())
+                .unwrap();
+            if pull.state() == PullState::Complete {
+                break;
+            }
+        }
+        assert_eq!(pull.state(), PullState::Complete);
+        let complete = pull.results().acquire().unwrap();
+        assert_eq!(complete.source().total_frames, Some(513));
+        assert_eq!(
+            old.source().total_frames,
+            if known { Some(513) } else { None }
+        );
+        assert_eq!(complete.source().fingerprint, [0x5a; 32]);
+        assert_eq!(old.source().fingerprint_kind, 2);
+        drop(pull);
+        assert_eq!(complete.view().overview.unwrap().columns.len(), 9);
+    }
+}

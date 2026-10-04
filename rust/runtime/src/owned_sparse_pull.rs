@@ -57,6 +57,16 @@ impl<S: PullSource> OwnedScheduledPullSession<S> {
         }
         self.session.apply_grid_revision(id)
     }
+    pub fn reserve_pending(
+        &mut self,
+        queue_nodes: usize,
+        range_capacity: usize,
+    ) -> Result<(), Error> {
+        if let Some(error) = self.failure {
+            return Err(error);
+        }
+        self.session.reserve_pending(queue_nodes, range_capacity)
+    }
     pub fn refresh(&mut self) -> Result<bool, Error> {
         self.session.refresh()
     }
@@ -175,7 +185,13 @@ impl<S: PullSource> OwnedScheduledPullSession<S> {
                     let status = if valid {
                         self.session
                             .push_at(block.first_frame(), block.pcm())
-                            .map(|_| false)
+                            .and_then(|count| {
+                                if count == 0 {
+                                    Err(Error::BufferTooSmall)
+                                } else {
+                                    Ok(false)
+                                }
+                            })
                     } else {
                         Err(Error::Source)
                     };
@@ -186,7 +202,10 @@ impl<S: PullSource> OwnedScheduledPullSession<S> {
         };
         match accepted {
             Ok(would_block) => self.process_owned(budget, cancellation, would_block, clock),
-            Err(error @ (Error::ResultSlotsExhausted | Error::LimitExceeded)) => Err(error),
+            Err(
+                error
+                @ (Error::ResultSlotsExhausted | Error::LimitExceeded | Error::BufferTooSmall),
+            ) => Err(error),
             Err(_) => {
                 self.failure = Some(Error::Source);
                 Err(Error::Source)

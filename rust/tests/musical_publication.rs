@@ -709,6 +709,9 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
             262148, 262160, 262656, 262152, 524288, 524292, 524304, 524800, 524296,
         ])
         .chain([1024, 1026, 2048, 2050, 4096, 4098, 8194, 16386, 32770])
+        // Variable-tempo ensemble proposals under projection, retained slots,
+        // cooperative timing, unknown EOF and all-stage drain exhaustion.
+        .chain([32768, 32769, 32771, 32774, 32786, 33282, 2129922, 98304])
     {
         let count: usize = if profile & (8192 | 16384) != 0 {
             256 * 16400 + 17

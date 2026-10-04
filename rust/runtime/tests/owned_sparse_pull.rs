@@ -377,3 +377,43 @@ fn owning_scheduled_source_and_waveform_traces_match_public_c() {
         assert_eq!(actual, expected, "scenario {id}");
     }
 }
+
+#[test]
+fn scheduled_range_backpressure_releases_and_recovers_after_reservation() {
+    let w = OwnedSparseSession::new(
+        SessionConfig {
+            sample_rate: 48000,
+            channel_count: 1,
+            total_frames: 513,
+            frames_per_column: 64,
+        },
+        SparseLimits {
+            queue_nodes: 1,
+            range_capacity: 1,
+            ..SparseLimits::default()
+        },
+    )
+    .unwrap();
+    let src = source();
+    let reads = src.reads.clone();
+    let releases = src.releases.clone();
+    let mut pull = OwnedScheduledPullSession::new(w, src).unwrap();
+    let budget = WorkBudget {
+        maximum_input_frames: 128,
+        maximum_steps: 1,
+    };
+    let token = CancellationToken::new();
+    pull.process(budget, &token).unwrap();
+    assert_eq!(pull.session().session().processed_frames(), 128);
+    assert_eq!(pull.process(budget, &token), Err(Error::BufferTooSmall));
+    assert_eq!((reads.get(), releases.get()), (2, 2));
+    assert_eq!(pull.failure(), None);
+    assert_eq!(pull.session().session().processed_frames(), 128);
+    pull.reserve_pending(1, 2).unwrap();
+    for _ in 0..8 {
+        pull.process(budget, &token).unwrap();
+    }
+    assert_eq!(pull.session().session().state(), SessionState::Complete);
+    assert_eq!(pull.session().session().processed_frames(), 513);
+    assert_eq!((reads.get(), releases.get()), (6, 6));
+}

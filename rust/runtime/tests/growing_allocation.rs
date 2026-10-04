@@ -146,4 +146,45 @@ fn growing_array_failures_preserve_preflight_and_retry_committed_snapshots() {
             s.enable_detail().unwrap();
         }
     }
+    // Every replacement allocation fails before any sparse capacity/work commit.
+    for failure in 1..=3 {
+        let mut s = OwnedSparseSession::new(
+            c,
+            SparseLimits {
+                queue_nodes: 1,
+                range_capacity: 1,
+                ..SparseLimits::default()
+            },
+        )
+        .unwrap();
+        s.push_at(0, PcmView::S16Interleaved(&[100; 256])).unwrap();
+        s.process(
+            WorkBudget {
+                maximum_input_frames: 17,
+                maximum_steps: 1,
+            },
+            &CancellationToken::new(),
+        )
+        .unwrap();
+        let bytes = s.working_bytes();
+        let old = s.results().acquire().unwrap();
+        FAIL_AFTER.store(failure, Ordering::Relaxed);
+        let result = s.reserve_pending(2, 2);
+        assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+        assert_eq!(result, Err(Error::LimitExceeded));
+        assert_eq!(s.working_bytes(), bytes);
+        assert_eq!(s.session().processed_frames(), 17);
+        assert_eq!(s.session().queued_frames(), 239);
+        assert_eq!(s.results().acquire().unwrap().info(), old.info());
+        assert_eq!(s.refresh(), Ok(false));
+        s.reserve_pending(2, 2).unwrap();
+        assert_eq!(
+            s.push_at(256, PcmView::S16Interleaved(&[200; 257])),
+            Ok(257)
+        );
+        s.finish_input().unwrap();
+        s.process(WorkBudget::default(), &CancellationToken::new())
+            .unwrap();
+        assert_eq!(s.session().processed_frames(), 513);
+    }
 }

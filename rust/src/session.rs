@@ -12,6 +12,40 @@ use crate::{Error, WaveformColumn};
 /// This matches the C source-frame sentinel; it is never a valid actual length.
 pub const TOTAL_FRAMES_UNKNOWN: u64 = u64::MAX;
 
+/// Validated, host-supplied source identity. Kind 1 is application opaque;
+/// kind 2 is SHA-256 of exact source-object bytes. No audio hashing is implied.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct SourceIdentity {
+    kind: u32,
+    bytes: [u8; 32],
+}
+impl SourceIdentity {
+    pub fn new(kind: u32, bytes: [u8; 32]) -> Result<Self, Error> {
+        if kind > 2 || (kind == 0 && bytes != [0; 32]) {
+            return Err(Error::InvalidArgument);
+        }
+        Ok(Self { kind, bytes })
+    }
+    pub fn kind(self) -> u32 {
+        self.kind
+    }
+    pub fn bytes(self) -> [u8; 32] {
+        self.bytes
+    }
+    /// Compare identity only; callers separately validate source geometry/data.
+    pub fn check_seed(self, source: crate::SourceInfo, required: bool) -> Result<(), Error> {
+        if (required && (self.kind == 0 || source.fingerprint_kind == 0))
+            || (self.kind != 0
+                && source.fingerprint_kind != 0
+                && (self.kind != source.fingerprint_kind || self.bytes != source.fingerprint))
+        {
+            Err(Error::Conflict)
+        } else {
+            Ok(())
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct SessionConfig {
     pub sample_rate: u32,
@@ -78,6 +112,7 @@ pub struct Session<
     detail: Option<crate::detail_analysis::DetailCache<'a, T>>,
     bands: Option<crate::band::OverviewBands<S>>,
     config: SessionConfig,
+    identity: SourceIdentity,
     initially_unknown: bool,
     queue: Q,
     output: O,
@@ -145,6 +180,7 @@ where
             bands: None,
             initially_unknown: config.total_frames == TOTAL_FRAMES_UNKNOWN,
             config,
+            identity: SourceIdentity::default(),
             queue,
             output,
             head: 0,
@@ -156,6 +192,18 @@ where
             accumulator: WaveformAccumulator::default(),
             state: SessionState::Created,
         })
+    }
+
+    /// Set host identity before input. Existing snapshots remain immutable.
+    pub fn set_source_identity(&mut self, identity: SourceIdentity) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 {
+            return Err(Error::InvalidState);
+        }
+        self.identity = identity;
+        Ok(())
+    }
+    pub fn source_identity(&self) -> SourceIdentity {
+        self.identity
     }
 
     /// Replace the queue while preserving FIFO order, including a wrapped tail.
@@ -883,8 +931,8 @@ where
                     channel_count: self.config.channel_count,
                     channel_layout: self.config.channel_count,
                     total_frames: self.total_frames(),
-                    fingerprint_kind: 0,
-                    fingerprint: [0; 32],
+                    fingerprint_kind: self.identity.kind(),
+                    fingerprint: self.identity.bytes(),
                 },
                 info: NativeResultInfo {
                     generation,

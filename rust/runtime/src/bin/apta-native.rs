@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
 };
 const MAX_INPUT: u64 = 256 * 1024 * 1024;
-const USAGE: &str = "usage: apta-native analyze INPUT.wav OUTPUT.apta [--music] [--bands] [--detail]\n       apta-native inspect INPUT.apta\n       apta-native validate INPUT.apta [--permissive]\n       apta-native corpus INPUT_DIRECTORY OUTPUT_DIRECTORY [--music] [--bands] [--detail]\n       apta-native version\nOutput files/directories must not exist. Corpus is local WAV batch conversion, not frozen qualification.";
+const USAGE: &str = "usage: apta-native analyze INPUT.wav OUTPUT.apta [--music] [--bands] [--detail] [--source-identity=KIND:HEX]\n       apta-native inspect INPUT.apta\n       apta-native validate INPUT.apta [--permissive]\n       apta-native corpus INPUT_DIRECTORY OUTPUT_DIRECTORY [--music] [--bands] [--detail]\n       apta-native version\nIdentity KIND is opaque or sha256; HEX is a host-supplied 64-digit hexadecimal identity.\nOutput files/directories must not exist. Corpus is local WAV batch conversion, not frozen qualification.";
 fn read(path: &Path) -> Result<Vec<u8>, Box<dyn Error>> {
     let mut input = Vec::new();
     fs::File::open(path)?
@@ -28,10 +28,34 @@ struct Features {
     music: bool,
     bands: bool,
     detail: bool,
+    identity: Option<SourceIdentity>,
 }
-fn features(flags: &[OsString]) -> Result<Features, Box<dyn Error>> {
+fn features(flags: &[OsString], allow_identity: bool) -> Result<Features, Box<dyn Error>> {
     let mut out = Features::default();
     for flag in flags {
+        if let Some(value) = flag
+            .to_str()
+            .and_then(|s| s.strip_prefix("--source-identity="))
+        {
+            if !allow_identity || out.identity.is_some() {
+                return Err(USAGE.into());
+            }
+            let (kind, hex) = value.split_once(':').ok_or(USAGE)?;
+            let kind = match kind {
+                "opaque" => 1,
+                "sha256" => 2,
+                _ => return Err(USAGE.into()),
+            };
+            if hex.len() != 64 || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
+                return Err("identity needs exactly 64 hexadecimal digits".into());
+            }
+            let mut bytes = [0; 32];
+            for (index, byte) in bytes.iter_mut().enumerate() {
+                *byte = u8::from_str_radix(&hex[index * 2..index * 2 + 2], 16)?;
+            }
+            out.identity = Some(SourceIdentity::new(kind, bytes)?);
+            continue;
+        }
         let selected = match flag.to_str() {
             Some("--music") => &mut out.music,
             Some("--bands") => &mut out.bands,
@@ -53,7 +77,7 @@ fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dy
     }
     let source = wav.source();
     let context = RuntimeContext::new(ContextLimits::default());
-    let mut s = context.create_session(
+    let mut s = context.create_session_with_identity(
         SessionConfig {
             sample_rate: source.sample_rate,
             channel_count: source.channel_count,
@@ -61,6 +85,7 @@ fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dy
             frames_per_column: 32768,
         },
         GrowingLimits::default(),
+        features.identity.unwrap_or_default(),
     )?;
     if features.bands {
         s.enable_three_band()?;
@@ -129,6 +154,20 @@ fn inspect(path: &Path) -> Result<(), Box<dyn Error>> {
         "source: {} Hz, {} channels, {:?} frames",
         r.source.sample_rate, r.source.channel_count, r.source.total_frames
     );
+    if r.source.fingerprint_kind != 0 {
+        print!(
+            "source identity: {}:",
+            if r.source.fingerprint_kind == 1 {
+                "opaque"
+            } else {
+                "sha256"
+            }
+        );
+        for byte in r.source.fingerprint {
+            print!("{byte:02x}");
+        }
+        println!();
+    }
     println!(
         "features: {:#x}, partial: {}",
         r.available_features,
@@ -249,10 +288,10 @@ fn run(args: &[OsString]) -> Result<(), Box<dyn Error>> {
             Ok(())
         }
         [command, input, output, flags @ ..] if command == "analyze" => {
-            analyze(Path::new(input), Path::new(output), features(flags)?)
+            analyze(Path::new(input), Path::new(output), features(flags, true)?)
         }
         [command, input, output, flags @ ..] if command == "corpus" => {
-            corpus(Path::new(input), Path::new(output), features(flags)?)
+            corpus(Path::new(input), Path::new(output), features(flags, false)?)
         }
         _ => Err(USAGE.into()),
     }

@@ -357,7 +357,7 @@ strict validation (or `--permissive`) and deterministic local WAV batch conversi
 Inputs are bounded at 256 MiB. Output files/directories must not exist; batch
 failures retain successful outputs and return failure. These additive commands do
 not replace C tool names/options, all feature-selection modes, JSON exports,
-fingerprinting/metadata or frozen privacy/qualification corpus interfaces.
+automatic fingerprint computation, metadata or frozen privacy/qualification corpus interfaces.
 Final verification and precise remaining gates are in the migration document.
 
 ### Owning waveform features and sequential sources
@@ -389,8 +389,8 @@ This native retry policy does not emulate C custom-allocator failure ordering.
 
 Both owning push and pull expose `process_with_clock`; the pull deadline starts
 after source release. Heap-copy/allocation and source callback time are outside
-that cooperative processing budget. Owning sparse scheduling, capability
-projection/mutations and the C source callback ABI remain separate work.
+that cooperative processing budget. Owning sparse scheduling and capability
+projection/mutations are described below; the C source callback ABI remains open.
 
 The additive desktop commands accept independently combinable `--music`,
 `--bands` and `--detail` flags for `analyze` and `corpus`. Detail exports the
@@ -401,11 +401,14 @@ These options do not establish full C command-line or frozen corpus parity.
 
 `libapta-runtime::OwnedSparseSession` owns the existing sparse engine and
 scheduler. Configure a known source with `SparseLimits`, then attach bands,
-detail and/or default music before input or seeding. Queue nodes, accepted-range
-slots and request slots are fixed caller limits; overview storage covers the
-configured source. Construction and feature attachment preflight all fallible
-arrays and actual Vec-capacity bytes. This API does not dynamically grow sparse
-range/node tables.
+detail and/or default music before input or seeding. Overview storage covers the
+configured source. Queue nodes and accepted-range slots start at the configured
+capacities; `reserve_pending(queue_nodes, range_capacity)` explicitly grows them
+while Created/Running. Push keeps fixed-capacity backpressure until reservation.
+Request slots remain fixed. Construction, attachment and growth preflight all
+fallible arrays and actual Vec-capacity bytes under `maximum_working_bytes`.
+Growth preserves partially processed nodes, PCM, ranges and scheduler state;
+it publishes no generation. The byte limit excludes transient replacement copies.
 
 Use `push_at`, `request_region`, `cancel_region_request`, `request_progress`,
 `set_focus` and `next_pcm_request`. Processing shares its budget across waveform,
@@ -417,8 +420,9 @@ create this writer with the same committed-result quotas and lifetime rules.
 
 `seed_from_result` accepts a retained HeapResult while Created, after feature
 attachment. It copies overview evidence only, imports no musical state or detail,
-and leaves band filters fresh. It publishes no generation itself. Native writers
-currently have no fingerprint, so requiring source identity fails explicitly.
+and leaves band filters fresh. It publishes no generation itself. Supplied source
+identities must match when both sides have one; required identity rejects either
+missing side. Geometry and source-length checks remain independent.
 
 `OwnedScheduledPullSession` owns a configured Created sparse writer and source.
 It drains accepted PCM and retries pending mirrors before reading. Each call
@@ -428,6 +432,8 @@ and clock initialization. WouldBlock retries; malformed blocks, source errors
 and premature source EOF are terminal. Automatic reads use overview demand;
 public `next_pcm_request` can instead expose detail replay. Reaching a selected
 range with no missing PCM may finish with unrelated holes still visible.
+Range-table exhaustion returns retryable `BufferTooSmall` after releasing the
+unaccepted block; call `reserve_pending` and retry. No source failure is recorded.
 
 Both owning writers and their pull adapters expose `set_tempo_focus`,
 `lock_grid_range` and `apply_grid_revision`. Failed lock publication restores the
@@ -450,3 +456,24 @@ custom allocators or ABI ownership. Portable key score 55734 versus host-C 55735
 remains unresolved. AArch64 core and i686/MSVC workspace cross-compilation are
 compile evidence only; platform execution, linking/packaging and hardware gates
 remain separate.
+
+### Source identity and explicit sparse growth acceptance
+
+`session::SourceIdentity::new(kind, bytes)` validates an optional 32-byte identity:
+0 requires zero bytes, 1 is application opaque, and 2 denotes SHA-256 of exact
+source-object bytes. The host supplies the identity; the library does not compute
+or verify a hash. Core sessions accept it before input/seeding. Owning writers
+use `new_with_identity`; RuntimeContext provides `create_session_with_identity`
+and `create_sparse_session_with_identity`. Identity is fixed before the initial
+immutable generation, persists through unknown EOF, and is preserved on wire.
+Configure writers before wrapping either owning pull adapter.
+
+For a single file, `apta-native analyze` accepts
+`--source-identity=opaque:HEX` or `--source-identity=sha256:HEX`, with exactly 64
+hexadecimal digits. `inspect` displays it. Duplicate/malformed identity flags fail
+before creating output. `corpus` rejects a shared supplied identity; assign
+per-file identities through individual analyze calls. This is identity transport,
+not automatic fingerprinting or full C tool parity.
+
+See [capacity and identity acceptance](../docs/rust/MIGRATION.md#sparse-capacity-source-identity-and-consumer-continuation--2026-10-04)
+for exact C comparisons, allocation/concurrency evidence and remaining gates.

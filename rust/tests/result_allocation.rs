@@ -429,6 +429,7 @@ fn native_copy_allocates_nothing(r: ResultInput<'_>) {
 }
 
 fn publication_allocates_nothing() {
+    sparse_storage_replacement_allocates_nothing();
     sparse_publication_allocates_nothing();
     detail_publication_allocates_nothing();
     detail_replay_allocates_nothing(false);
@@ -1352,5 +1353,78 @@ fn detail_replay_allocates_nothing(seed: bool) {
         assert_eq!(owned.overview().unwrap().columns, s.columns());
         assert_eq!(s.processed_frames(), 110);
     }
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
+}
+
+fn sparse_storage_replacement_allocates_nothing() {
+    use libapta::{session::*, sparse::*, waveform::*, *};
+    let mut accumulators = [SparseAccumulator::default(); 2];
+    let mut ranges = [FrameRange::default(); 1];
+    let mut nodes = [QueuedBlock::default(); 1];
+    let mut pcm = [NormalizedSample::default(); NODE_FRAMES];
+    let mut spans = [WaveformSpan::default(); 2];
+    let mut columns = [WaveformColumn::default(); 2];
+    let mut new_ranges = [FrameRange::default(); 2];
+    let mut new_nodes = [QueuedBlock::default(); 2];
+    let mut new_pcm = [NormalizedSample::default(); NODE_FRAMES * 2];
+    let mut bad_ranges = [];
+    let mut bad_nodes = [];
+    let mut bad_pcm = [];
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let mut session = SparseSession::new(
+        SessionConfig {
+            sample_rate: 8000,
+            channel_count: 1,
+            total_frames: 128,
+            frames_per_column: 64,
+        },
+        Workspace {
+            accumulators: &mut accumulators,
+            ranges: &mut ranges,
+            nodes: &mut nodes,
+            pcm: &mut pcm,
+            snapshot_spans: &mut spans,
+            snapshot_columns: &mut columns,
+        },
+    )
+    .unwrap();
+    session
+        .set_source_identity(SourceIdentity::new(1, [9; 32]).unwrap())
+        .unwrap();
+    session
+        .push_at(0, PcmView::S16Interleaved(&[1000; 64]))
+        .unwrap();
+    session
+        .process(
+            WorkBudget {
+                maximum_input_frames: 17,
+                maximum_steps: 1,
+            },
+            &CancellationToken::new(),
+        )
+        .unwrap();
+    assert!(matches!(
+        session.replace_pending_storage(&mut bad_ranges, &mut bad_nodes, &mut bad_pcm),
+        Err(Error::BufferTooSmall)
+    ));
+    assert_eq!(session.queued_frames(), 47);
+    session
+        .replace_pending_storage(&mut new_ranges, &mut new_nodes, &mut new_pcm)
+        .unwrap();
+    assert_eq!(
+        session.set_source_identity(SourceIdentity::default()),
+        Err(Error::InvalidState)
+    );
+    session
+        .push_at(64, PcmView::S16Interleaved(&[-1000; 64]))
+        .unwrap();
+    session.finish_input().unwrap();
+    session
+        .process(WorkBudget::default(), &CancellationToken::new())
+        .unwrap();
+    assert_eq!(session.processed_frames(), 128);
+    let snapshot = session.snapshot_graph(1).unwrap();
+    assert_eq!(snapshot.view().source.fingerprint, [9; 32]);
+    assert_eq!(snapshot.view().overview.unwrap().columns.len(), 2);
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 }

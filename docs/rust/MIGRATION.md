@@ -1513,3 +1513,144 @@ DSP accuracy and physical P4 qualification remain separate. Portable libm's
 selected-key score **55734 versus host C 55735** is still unresolved; the explicit
 std KeyMath backend matches accepted host fixtures only. No deployment, service
 change or hardware operation occurred.
+
+## Sparse capacity, source identity and consumer continuation — 2026-10-04
+
+This continuation preserves the preceding sparse/runtime/music contracts. C
+algorithms, public headers, ABI and container format are unchanged. Work used
+one implementation agent with two build/test jobs. The starting checkout was
+verified clean at the supplied published checkpoint before the combined baseline.
+
+### Integrated behavior
+
+- `SparseSession::replace_pending_storage` transactionally replaces caller-owned
+  or owning range/node/PCM arrays in the existing core engine. Dimensions are
+  checked before copying; occupied node indices, partial processing positions,
+  serials and PCM stay intact, and new nodes start empty. Core stays safe,
+  allocator-free and `no_std`.
+- `OwnedSparseSession::reserve_pending` explicitly grows those arrays while
+  Created/Running. It preserves default fixed-capacity push backpressure until
+  the caller reserves more. All three replacements allocate before commit;
+  minimum and actual Vec-capacity bytes are checked against the aggregate
+  working limit. It does not shrink, publish, mutate scheduler progress, or grow
+  request slots. Transient copies are outside the committed working-byte limit.
+  A dirty mirror still blocks reservation and other mutations.
+- Scheduled pull exposes the same reservation. A zero accepted block now reports
+  retryable BufferTooSmall instead of silent zero-progress success. The block
+  releases once; no source failure is recorded. Reservation permits retry at the
+  same unaccepted offset. Accepted work/mirror retries still precede new reads.
+- Validated `session::SourceIdentity` represents absent, application-opaque or
+  SHA-256 source-object identity. Core sessions configure it before input/seed;
+  owning writers and RuntimeContext accept it at construction, before publishing
+  the initial immutable graph. Identity is fixed for an owning writer, survives
+  unknown EOF, and travels through trusted snapshots, retained heap graphs and
+  wire output. The host supplies bytes; no hashing or digest verification occurs.
+- Owning seed now enforces the C identity policy: present identities must match
+  kind and all 32 bytes; required identity rejects either missing side. A missing
+  identity is otherwise permitted. Seed remains overview-only, Created-only,
+  transactional, and does not publish or import provenance/music/detail/history.
+- `apta-native analyze` accepts one `--source-identity=opaque:HEX` or
+  `--source-identity=sha256:HEX` (64 hexadecimal digits), and inspect displays it.
+  Invalid/duplicate flags fail before output creation. Corpus rejects this
+  per-file option. Existing output-preservation and feature-combination rules
+  remain intact. Automatic hashing, metadata and complete C tool parity remain open.
+
+### Exact reference and failure evidence
+
+- `source_identity_oracle.c` uses actual public C processing to create checkpoints,
+  then seeds and resumes another writer. The runtime matrix covers 72 combinations
+  of known/unknown checkpoint duration, absent/opaque/SHA-256 identities, equal/
+  unequal bytes and required/optional policy. Statuses and successful complete
+  containers compare exactly. Native intermediate heap generations are not C
+  bounded-slot generations and are excluded; wire output is not normalized.
+- `sparse_capacity_oracle.c` processes 63 and 4,096 disjoint fragments, then fills
+  every hole. The larger case processes 524,288 frames, grows through the default
+  4,096-range boundary to 4,097 slots, merges to one range and compares the complete
+  final container exactly with public nonbounded C. This is real capacity/work
+  evidence, not near-u64 coordinate validation or maximum-address-space acceptance.
+- Eight variable-tempo lifecycle profiles extend the existing exact public C
+  generation/capability matrix to 91 profiles: projections, retained slots,
+  cooperative timing, unknown EOF and all-stage drain exhaustion. These exercise
+  ensemble proposal/lifecycle combinations; they do not claim every possible
+  promotion signal or original tempo accuracy qualification.
+- Allocation injection fails each of the three pending-array replacements before
+  commit, then retries with partially processed PCM. Native tests compare the
+  complete all-stage/band/detail output with a preallocated writer, exercise
+  fragmented backpressure, no-op/overflow/terminal reservations and pull recovery.
+  Identity survives unknown pull EOF and retained results. Repeated synchronized
+  sparse creation/context-close races verify registration and resource release.
+  These are native std concurrency/resource contracts, not C callback/ABI ones.
+
+Release integration exposed a one-bit coefficient discrepancy in the existing
+std KeyMath test after code-layout changes (coefficient 27: -0.74939865 versus
+C -0.7493987). The configured callback was eligible for LLVM constant folding.
+`KeyAnalysis::new_with_math` now keeps callback dispatch opaque at construction,
+so the selected runtime backend performs the operation. No coefficient, score,
+fixture or tolerance was changed. The focused release audit matches raw C
+coefficients/chroma/scores exactly and still reports portable scores
+[55734, 55374, 54150] versus C [55735, 55374, 54150]. This is host/compiler fixture
+evidence, not a universal floating-point guarantee.
+
+Evidence root: `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
+
+- `continuation-owning-next-baseline-20261004T171443.log`: unchanged passing
+  combined baseline, before behavior edits.
+- `continuation-owning-next-combined-check.log`: **123/123 C tests**, **269 ordinary
+  Rust tests and 49 explicitly enabled external-C groups** in each debug/release
+  profile. All 34 runner WAV example/CLI cases and the two all-feature CLI cases
+  pass strict C reading. The existing two CLI export tests additionally carry
+  supplied SHA-256 identities. Formatting, all-target Clippy, no-default-features
+  and isolated allocation counters pass. Borrowed sparse replacement and identity
+  setup/processing/snapshot add zero allocations to the core instrumentation.
+- `continuation-owning-next-asan-check.log`: **56 runtime tests**, including
+  **12 external-C groups**, pass host AddressSanitizer/leak checking. Uses
+  `RUSTC_BOOTSTRAP=1 RUSTFLAGS=-Zsanitizer=address ASAN_OPTIONS=detect_leaks=1`
+  and the x86_64 Linux target; C and std are not rebuilt with instrumentation.
+- `continuation-owning-capacity-check.log`, `continuation-owning-ensemble-check.log`,
+  `continuation-owning-pull-growth-check.log` and
+  `continuation-owning-key-dispatch-check.log` retain focused passing evidence.
+  The earlier `continuation-owning-identity-check.log` covers 36 known-duration
+  cases; the final combined run covers all 72. Growth allocation and complete
+  output comparisons also pass in the final combined run.
+- `continuation-owning-next-integration-check.log` and `...integration-check2.log`
+  deliberately preserve the release-only coefficient failure before the callback
+  dispatch correction. Earlier compile/test attempts remain preserved too.
+- `continuation-owning-next-aarch64-check.log`: portable core/no-default-features
+  compilation. `continuation-owning-next-ilp32-compile.log` and
+  `continuation-owning-next-msvc-compile.log`: all-target workspace compilation.
+  These are compilation evidence, not linking or execution.
+
+Actual platform linking was attempted, without changing the host:
+
+- `cc -m32 -x c -o /home/shome/.local/share/libapta-audio/rust-rewrite/ilp32-link-probe -`
+  with stdin `int main(void) { return 0; }` fails because Scrt1.o, crti.o and
+  32-bit libgcc are missing (`continuation-owning-ilp32-link-probe.log`). Remedy:
+  a provisioned 32-bit libc/GCC multilib toolchain, then actual Rust/C execution.
+- `cargo build -p libapta-runtime --bin apta-native --target x86_64-pc-windows-msvc
+  --locked` fails because `link.exe` is absent
+  (`continuation-owning-msvc-link-attempt.log`). Remedy: a usable MSVC linker and
+  Windows SDK/import libraries in a Windows build/test environment, followed by
+  actual executable acceptance. Installed Wine alone does not supply that toolchain.
+
+`git diff --check` and the shared knowledge notebook validator pass. Source
+handoffs: [runtime sparse owner](../../rust/runtime/src/owned_sparse.rs),
+[source identity tests](../../rust/runtime/tests/source_identity.rs),
+[capacity oracle](../../rust/tests/fixtures/sparse_capacity_oracle.c), and
+[native usage](../../rust/README.md#source-identity-and-explicit-sparse-growth-acceptance).
+
+### Remaining dependency gates
+
+Continue broader all-stage failure/replay/capability and ensemble-promotion
+matrices. Explicit range/node reservation is implemented; automatic growth policy,
+fixed request-table expansion and unknown sparse duration remain separate work.
+Fingerprint transport and seed identity are implemented; automatic source hashing
+and metadata/tool parity remain open. No maximum-duration sparse heap or embedded
+stack qualification follows from the 4,096-fragment fixture.
+
+Full C custom allocation classes/layout/failure ordering, concurrent C ownership,
+separately reviewed unsafe ABI, CMake/pkg-config static/shared packaging and frozen
+consumers remain open. Platform linking/execution, Rust ESP-IDF integration and
+snapshot stack sizing remain separate gates. Portable key score **55734 versus
+host C 55735** remains unresolved; explicit std KeyMath matches accepted host
+fixtures only. Original DSP accuracy and physical P4 qualification are unchanged.
+No deployment, host-service change or hardware operation occurred.

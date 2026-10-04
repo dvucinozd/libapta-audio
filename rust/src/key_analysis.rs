@@ -60,6 +60,11 @@ impl KeyAnalysis {
         if rate == 0 || rate > 768000 {
             return Err(Error::InvalidArgument);
         }
+        // Preserve the selected runtime backend. Inlining a known std callback
+        // lets LLVM constant-fold cos with arithmetic that can differ by one
+        // bit from the host C libm. Keep callback dispatch opaque at construction;
+        // do not change coefficients, quantization or portable libm results.
+        let math = core::hint::black_box(math);
         let decimated = rate as f32 / 4.0;
         let mut coefficients = [0.0; 36];
         let target = if decimated > 2.0 * FREQUENCIES[35] {

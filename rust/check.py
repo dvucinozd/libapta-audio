@@ -72,7 +72,7 @@ def main():
          "-I", ROOT / "include", ROOT / "rust/tests/fixtures/seed_oracle.c",
          c_build / "libapta.a", "-lm", "-o", seed_oracle])
     analysis_oracles = {}
-    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle", "key_math", "musical_failure", "context_lifetime"):
+    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle", "key_math", "musical_failure", "context_lifetime", "source_identity", "sparse_capacity"):
         executable = build / f"{name.replace('_', '-')}-oracle"
         run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
              "-I", ROOT / "include", "-I", ROOT / "src/core",

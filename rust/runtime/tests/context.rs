@@ -165,3 +165,52 @@ fn context_busy_lifetime_matches_public_c() {
     trace.push_str("closed\n");
     assert_eq!(trace.as_bytes(), output.stdout);
 }
+
+#[test]
+fn sparse_identity_registration_and_close_race_leave_no_resources() {
+    use libapta_runtime::SparseLimits;
+    use std::sync::{Arc, Barrier};
+    for _ in 0..32 {
+        let context = RuntimeContext::new(ContextLimits::default());
+        let other = context.clone();
+        let start = Arc::new(Barrier::new(2));
+        let ready = start.clone();
+        let closer = std::thread::spawn(move || {
+            ready.wait();
+            other.close()
+        });
+        let mut c = config();
+        c.total_frames = 256;
+        start.wait();
+        let writer = context.create_sparse_session_with_identity(
+            c,
+            SparseLimits::default(),
+            SourceIdentity::new(1, [7; 32]).unwrap(),
+        );
+        match writer {
+            Ok(writer) => {
+                assert_eq!(closer.join().unwrap(), Err(Error::Busy));
+                let result = writer.results().acquire().unwrap();
+                drop(writer);
+                assert_eq!(context.close(), Err(Error::Busy));
+                std::thread::spawn(move || {
+                    assert_eq!(result.source().fingerprint, [7; 32]);
+                    drop(result);
+                })
+                .join()
+                .unwrap();
+                context.close().unwrap();
+            }
+            Err(Error::InvalidState) => {
+                closer.join().unwrap().unwrap();
+            }
+            Err(e) => panic!("{e:?}"),
+        }
+        let usage = context.usage().unwrap();
+        assert_eq!(
+            (usage.sessions, usage.results, usage.retained_bytes),
+            (0, 0, 0)
+        );
+        assert!(usage.closed);
+    }
+}

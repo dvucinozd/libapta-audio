@@ -66,6 +66,7 @@ pub struct SparseSession<
     detail: Option<crate::detail_analysis::DetailCache<'a, T>>,
     bands: Option<crate::band::OverviewBands<S>>,
     config: SessionConfig,
+    identity: crate::session::SourceIdentity,
     workspace: SparseStorage<A, R, N, P, V, C>,
     logical_columns: usize,
     range_count: usize,
@@ -152,6 +153,7 @@ where
             detail: None,
             bands: None,
             config,
+            identity: crate::session::SourceIdentity::default(),
             workspace,
             logical_columns: n,
             range_count: 0,
@@ -164,6 +166,52 @@ where
             eof: false,
             state: SessionState::Created,
         })
+    }
+
+    /// Configure identity before input or seed installation.
+    pub fn set_source_identity(
+        &mut self,
+        identity: crate::session::SourceIdentity,
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.range_count != 0 {
+            return Err(Error::InvalidState);
+        }
+        self.identity = identity;
+        Ok(())
+    }
+    pub fn source_identity(&self) -> crate::session::SourceIdentity {
+        self.identity
+    }
+
+    /// Grow queue/range storage without changing accepted work or node indices.
+    /// All dimensions are checked before copying or replacing any storage.
+    /// New nodes are empty; queued partial nodes keep their PCM and serials.
+    pub fn replace_pending_storage(
+        &mut self,
+        mut ranges: R,
+        mut nodes: N,
+        mut pcm: P,
+    ) -> Result<(R, N, P), Error> {
+        let samples = nodes
+            .len()
+            .checked_mul(NODE_FRAMES)
+            .ok_or(Error::LimitExceeded)?;
+        if ranges.len() < self.workspace.ranges.len()
+            || nodes.len() < self.workspace.nodes.len()
+            || pcm.len() < samples
+        {
+            return Err(Error::BufferTooSmall);
+        }
+        ranges[..self.range_count].copy_from_slice(self.accepted_ranges());
+        nodes.fill(QueuedBlock::default());
+        nodes[..self.workspace.nodes.len()].copy_from_slice(&self.workspace.nodes);
+        let old_samples = self.workspace.nodes.len() * NODE_FRAMES;
+        pcm[..old_samples].copy_from_slice(&self.workspace.pcm[..old_samples]);
+        Ok((
+            core::mem::replace(&mut self.workspace.ranges, ranges),
+            core::mem::replace(&mut self.workspace.nodes, nodes),
+            core::mem::replace(&mut self.workspace.pcm, pcm),
+        ))
     }
 
     /// Enable three-band overview while Created, before input or seeding.
@@ -645,6 +693,7 @@ where
         if self.state != SessionState::Created {
             return Err(Error::InvalidState);
         }
+        self.identity.check_seed(source, false)?;
         if source.sample_rate != self.config.sample_rate
             || source.channel_count != self.config.channel_count
             || (source.channel_layout != 0 && source.channel_layout != self.config.channel_count)
@@ -1143,8 +1192,8 @@ where
                     channel_count: self.config.channel_count,
                     channel_layout: self.config.channel_count,
                     total_frames: Some(self.config.total_frames),
-                    fingerprint_kind: 0,
-                    fingerprint: [0; 32],
+                    fingerprint_kind: self.identity.kind(),
+                    fingerprint: self.identity.bytes(),
                 },
                 info: NativeResultInfo {
                     generation,

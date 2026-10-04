@@ -85,11 +85,20 @@ pub struct GrowingSession {
 }
 impl GrowingSession {
     pub fn new(config: SessionConfig, limits: GrowingLimits) -> Result<Self, Error> {
-        Self::build(config, limits, None, None)
+        Self::build(config, limits, Default::default(), None, None)
+    }
+    /// Fix host identity before the initial immutable generation is published.
+    pub fn new_with_identity(
+        config: SessionConfig,
+        limits: GrowingLimits,
+        identity: libapta::session::SourceIdentity,
+    ) -> Result<Self, Error> {
+        Self::build(config, limits, identity, None, None)
     }
     fn build(
         config: SessionConfig,
         limits: GrowingLimits,
+        identity: libapta::session::SourceIdentity,
         context: Option<crate::RuntimeContext>,
         context_resource: Option<crate::context::Resource>,
     ) -> Result<Self, Error> {
@@ -119,7 +128,8 @@ impl GrowingSession {
         }
         let allocated_queue = q.capacity();
         let allocated_columns = o.capacity();
-        let session = Session::with_storage(config, q, o)?;
+        let mut session = Session::with_storage(config, q, o)?;
+        session.set_source_identity(identity)?;
         let mut initial = Self::snapshot(&session, 1, limits.results)?;
         if let Some(context) = &context {
             initial.attach_context(context)?;
@@ -147,10 +157,11 @@ impl GrowingSession {
     pub(crate) fn new_in_context(
         config: SessionConfig,
         limits: GrowingLimits,
+        identity: libapta::session::SourceIdentity,
         context: crate::RuntimeContext,
         resource: crate::context::Resource,
     ) -> Result<Self, Error> {
-        Self::build(config, limits, Some(context), Some(resource))
+        Self::build(config, limits, identity, Some(context), Some(resource))
     }
     pub fn session(&self) -> &OwningSession {
         &self.session
