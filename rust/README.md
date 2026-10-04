@@ -306,7 +306,7 @@ Evidence and current totals are recorded in
 [MIGRATION.md](../docs/rust/MIGRATION.md#musical-lifecycle-and-runtime-continuation--2026-10-04).
 Full request-mask combinations, all-stage publication-failure traces, integrated
 musical detail replay, near-limit coordinates, C allocation/workspace layout,
-dynamically growing session storage/context contracts, C ABI/packaging and
+full C allocation/context contracts, C ABI/packaging and
 platform gates remain open.
 
 ### Owning sessions, context lifetime and native desktop commands
@@ -317,16 +317,17 @@ known duration reserves its overview at creation. `GrowingLimits` bounds queue
 frames, output columns, actual mutable Vec capacities and each retained graph.
 `enable_default_music()` allocates all five musical arrays before attaching any
 stage. Native fixed ring/beat/segment caps retain the default reference policy.
-Owning band/detail and sparse/pull workspaces remain pending.
+Owning band/detail and sequential pull are supported below; owning sparse
+scheduling remains pending.
 
 Core `Session::new` remains caller-backed. `Session::with_storage` also accepts
 owning array storage; `replace_queue` preserves a wrapped FIFO and
 `replace_output` preserves complete columns, a partial accumulator and analysis
 history. These operations allocate nothing. Attached bands must already cover
 the replacement output; detail retains its coordinate ceiling.
-`Session::snapshot(generation)` borrows an opaque trusted overview/musical graph;
+`Session::snapshot(generation)` exposes an opaque trusted overview/detail/musical graph;
 `copy_to` and `result::from_session_snapshot` preserve session validation. Metadata
-and eager detail still use their separate copy interfaces. Arbitrary external
+still uses separate copy interfaces. Arbitrary external
 builders and `HeapResult::view()` keep strict external conversion rules.
 
 `RuntimeContext::create_session` tracks writers and retained heap graphs.
@@ -358,3 +359,40 @@ failures retain successful outputs and return failure. These additive commands d
 not replace C tool names/options, all feature-selection modes, JSON exports,
 fingerprinting/metadata or frozen privacy/qualification corpus interfaces.
 Final verification and precise remaining gates are in the migration document.
+
+### Owning waveform features and sequential sources
+
+`GrowingSession::enable_three_band()` and `enable_detail()` attach owning
+workspaces before input. Band sums grow with unknown-duration overview storage;
+queue, output and band replacements all allocate before committing growth.
+Working limits account for actual capacities of bands, the four-tile detail cache
+and musical arrays as well as queue/output arrays. Detail retains the reference
+four-tile eviction policy: it does not preserve the entire track's detail in the
+latest result. Previously acquired heap graphs retain their independent copies.
+
+Actual `SessionSnapshot` graphs now include detail in fixed inline scratch
+(four descriptors and at most 256 columns), alongside borrowed overview/music.
+They remain allocator-free and trusted only through the actual-session path.
+Metadata still uses separate interfaces. Generic externally supplied graphs
+retain external validation; the portable key discrepancy described above remains.
+
+`GrowingPullSession::new(writer, source)` accepts a Created owning writer with
+features already attached and an existing `PullSource`. It reads at most 256
+frames and performs one processing step per call. Known lengths finish without
+an extra source read; unknown lengths resolve on EOF. WouldBlock is retryable;
+source errors, malformed blocks and cancellation are terminal. Blocks release
+exactly once before processing. Result-limit failures retain committed PCM and
+old generations; `refresh()` or the next `process()` retries the mirror before
+reading more data. Queued accepted PCM drains before another read. A failed
+working allocation can rerequest the same absolute offset, since no PCM committed.
+This native retry policy does not emulate C custom-allocator failure ordering.
+
+Both owning push and pull expose `process_with_clock`; the pull deadline starts
+after source release. Heap-copy/allocation and source callback time are outside
+that cooperative processing budget. Owning sparse scheduling, capability
+projection/mutations and the C source callback ABI remain separate work.
+
+The additive desktop commands accept independently combinable `--music`,
+`--bands` and `--detail` flags for `analyze` and `corpus`. Detail exports the
+resident cache only. Duplicate/unknown flags fail before output creation.
+These options do not establish full C command-line or frozen corpus parity.

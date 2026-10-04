@@ -97,6 +97,7 @@ def main():
     run(["cargo", "fmt", "--all", "--", "--check"], env=env)
     run(["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"], env=env)
     run(["cargo", "test", "--workspace", "--locked"], env=env)
+    # Includes owning-waveform band/detail C comparisons and strict all-feature CLI checks.
     run(["cargo", "test", "--workspace", "--locked", "--", "--ignored"], env=env)
     run(["cargo", "check", "--workspace", "--lib", "--no-default-features", "--locked"], env=env)
     run(["cargo", "test", "--workspace", "--release", "--locked"], env=env)

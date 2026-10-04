@@ -167,3 +167,55 @@ fn native_cli_exports_pass_strict_public_c_validation() {
     }
     fs::remove_dir_all(directory).unwrap();
 }
+
+#[test]
+#[ignore = "requires APTA_C_VALIDATOR"]
+fn native_all_feature_output_passes_strict_c_reader() {
+    let directory =
+        std::env::temp_dir().join(format!("apta-native-all-features-{}", std::process::id()));
+    fs::create_dir(&directory).unwrap();
+    let input = directory.join("input.wav");
+    wav(&input);
+    for music in [false, true] {
+        let output = directory.join(if music { "music.apta" } else { "waveform.apta" });
+        let mut args = vec![
+            "analyze".as_ref(),
+            input.as_os_str(),
+            output.as_os_str(),
+            "--bands".as_ref(),
+            "--detail".as_ref(),
+        ];
+        if music {
+            args.push("--music".as_ref());
+        }
+        run(&args);
+        let data = fs::read(&output).unwrap();
+        let parsed = libapta::result::parse(&data, Default::default()).unwrap();
+        assert_eq!(parsed.available_features & 7, 7);
+        assert_eq!(parsed.waveform.tile_count(), 4);
+        let check = Command::new(std::env::var_os("APTA_C_VALIDATOR").unwrap())
+            .arg(&output)
+            .arg("--strict")
+            .output()
+            .unwrap();
+        assert!(
+            check.status.success(),
+            "{}",
+            String::from_utf8_lossy(&check.stderr)
+        );
+        assert!(!command(&args).status.success());
+        assert_eq!(fs::read(&output).unwrap(), data);
+    }
+    let invalid = directory.join("invalid.apta");
+    assert!(!command(&[
+        "analyze".as_ref(),
+        input.as_os_str(),
+        invalid.as_os_str(),
+        "--bands".as_ref(),
+        "--bands".as_ref()
+    ])
+    .status
+    .success());
+    assert!(!invalid.exists());
+    fs::remove_dir_all(directory).unwrap();
+}

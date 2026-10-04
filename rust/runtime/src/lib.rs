@@ -113,3 +113,6 @@ impl<'a> ConcurrentResults<'a> {
         work
     }
 }
+
+mod growing_pull;
+pub use growing_pull::GrowingPullSession;

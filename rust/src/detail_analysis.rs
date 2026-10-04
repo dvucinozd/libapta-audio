@@ -30,8 +30,9 @@ impl Default for DetailTile {
         }
     }
 }
-pub struct DetailCache<'a> {
-    tiles: &'a mut [DetailTile],
+pub struct DetailCache<'a, T = &'a mut [DetailTile]> {
+    tiles: T,
+    lifetime: core::marker::PhantomData<&'a mut [DetailTile]>,
     access: u64,
     mutation: u64,
     eof: Option<u64>,
@@ -39,13 +40,18 @@ pub struct DetailCache<'a> {
 }
 impl<'a> DetailCache<'a> {
     pub fn new(tiles: &'a mut [DetailTile]) -> Result<Self, Error> {
-        if tiles.len() < TILE_COUNT {
+        Self::with_storage(tiles)
+    }
+}
+impl<'a, T: AsRef<[DetailTile]> + AsMut<[DetailTile]>> DetailCache<'a, T> {
+    pub fn with_storage(mut tiles: T) -> Result<Self, Error> {
+        if tiles.as_ref().len() < TILE_COUNT {
             return Err(Error::BufferTooSmall);
         }
-        let tiles = &mut tiles[..TILE_COUNT];
-        tiles.fill(DetailTile::default());
+        tiles.as_mut()[..TILE_COUNT].fill(DetailTile::default());
         Ok(Self {
             tiles,
+            lifetime: core::marker::PhantomData,
             access: 0,
             mutation: 0,
             eof: None,
@@ -76,14 +82,18 @@ impl<'a> DetailCache<'a> {
         }
         let index = tile64 as u32;
         let column = ((frame % TILE_FRAMES) / FRAMES_PER_COLUMN) as usize;
-        let existing = self.tiles.iter().position(|t| t.index == Some(index));
+        let existing = self.tiles.as_ref()[..TILE_COUNT]
+            .iter()
+            .position(|t| t.index == Some(index));
         let slot = if let Some(slot) = existing {
             slot
-        } else if let Some(slot) = self.tiles.iter().position(|t| t.index.is_none()) {
+        } else if let Some(slot) = self.tiles.as_ref()[..TILE_COUNT]
+            .iter()
+            .position(|t| t.index.is_none())
+        {
             slot
         } else {
-            let unprotected = self
-                .tiles
+            let unprotected = self.tiles.as_ref()[..TILE_COUNT]
                 .iter()
                 .enumerate()
                 .filter(|(_, t)| !protected(t.index.unwrap()))
@@ -94,7 +104,7 @@ impl<'a> DetailCache<'a> {
             } else if !protected(index) {
                 return Ok(false);
             } else {
-                self.tiles
+                self.tiles.as_ref()[..TILE_COUNT]
                     .iter()
                     .enumerate()
                     .min_by_key(|(_, t)| t.access)
@@ -104,7 +114,7 @@ impl<'a> DetailCache<'a> {
         };
         // Validate accumulator overflow before touching access order or evicting.
         let mut value = if existing.is_some() {
-            self.tiles[slot].accumulators[column]
+            self.tiles.as_ref()[..TILE_COUNT][slot].accumulators[column]
         } else {
             WaveformAccumulator::default()
         };
@@ -112,15 +122,15 @@ impl<'a> DetailCache<'a> {
         value.push_normalized(sample.value, sample.value <= -1.0 || sample.value >= 1.0)?;
         self.access = self.access.wrapping_add(1);
         if existing.is_none() {
-            if self.tiles[slot].run_count != 0 {
+            if self.tiles.as_ref()[..TILE_COUNT][slot].run_count != 0 {
                 self.mutation = self.mutation.wrapping_add(1)
             }
-            self.tiles[slot] = DetailTile {
+            self.tiles.as_mut()[..TILE_COUNT][slot] = DetailTile {
                 index: Some(index),
                 ..DetailTile::default()
             };
         }
-        let tile = &mut self.tiles[slot];
+        let tile = &mut self.tiles.as_mut()[..TILE_COUNT][slot];
         tile.access = self.access;
         tile.accumulators[column] = value;
         self.greatest_sample_end = self.greatest_sample_end.max(frame + 1);
@@ -135,7 +145,10 @@ impl<'a> DetailCache<'a> {
             return Err(Error::InvalidArgument);
         }
         self.eof = eof;
-        for tile in self.tiles.iter_mut().filter(|t| t.index.is_some()) {
+        for tile in self.tiles.as_mut()[..TILE_COUNT]
+            .iter_mut()
+            .filter(|t| t.index.is_some())
+        {
             let base = u64::from(tile.index.unwrap()) * TILE_FRAMES;
             for (column, value) in tile.accumulators.iter().enumerate() {
                 let first = base + column as u64 * FRAMES_PER_COLUMN;
@@ -184,7 +197,7 @@ impl<'a> DetailCache<'a> {
         if tile > u64::from(u32::MAX) {
             return false;
         }
-        self.tiles
+        self.tiles.as_ref()[..TILE_COUNT]
             .iter()
             .find(|t| t.index == Some(tile as u32))
             .map_or(true, |t| {
@@ -229,14 +242,14 @@ impl<'a> DetailCache<'a> {
         (first..=last).all(|global| {
             let tile = global / COLUMNS_PER_TILE as u64;
             tile <= u64::from(u32::MAX)
-                && self.tiles.iter().any(|t| {
+                && self.tiles.as_ref()[..TILE_COUNT].iter().any(|t| {
                     t.index == Some(tile as u32)
                         && t.complete[(global % COLUMNS_PER_TILE as u64) as usize]
                 })
         })
     }
     pub fn range_has_output(&self, range: FrameRange) -> bool {
-        self.tiles.iter().any(|tile| {
+        self.tiles.as_ref()[..TILE_COUNT].iter().any(|tile| {
             if tile.index.is_none() || tile.run_count == 0 {
                 return false;
             }
@@ -268,8 +281,7 @@ impl<'a> DetailCache<'a> {
         let mut slots = [0usize; TILE_COUNT];
         let mut n = 0;
         let mut total = 0;
-        for (i, t) in self
-            .tiles
+        for (i, t) in self.tiles.as_ref()[..TILE_COUNT]
             .iter()
             .enumerate()
             .filter(|(_, t)| t.run_count != 0)
@@ -281,10 +293,10 @@ impl<'a> DetailCache<'a> {
         if tiles.len() < n || columns.len() < total {
             return Err(Error::BufferTooSmall);
         }
-        slots[..n].sort_unstable_by_key(|i| self.tiles[*i].index);
+        slots[..n].sort_unstable_by_key(|i| self.tiles.as_ref()[..TILE_COUNT][*i].index);
         let mut offset = 0;
         for (output, slot) in slots[..n].iter().enumerate() {
-            let tile = &self.tiles[*slot];
+            let tile = &self.tiles.as_ref()[..TILE_COUNT][*slot];
             let index = tile.index.unwrap();
             let base = u64::from(index) * TILE_FRAMES;
             let first = base + tile.run_first as u64 * FRAMES_PER_COLUMN;

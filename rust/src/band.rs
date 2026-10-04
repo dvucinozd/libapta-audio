@@ -91,8 +91,8 @@ impl BandSums {
 
 /// Optional caller-owned overview band storage. Filter history follows processing
 /// order, rather than source order, when sparse requests seek between ranges.
-pub(crate) struct OverviewBands<'a> {
-    pub(crate) sums: &'a mut [BandSums],
+pub(crate) struct OverviewBands<S> {
+    pub(crate) sums: S,
     pub(crate) filter: BandFilter,
 }
 

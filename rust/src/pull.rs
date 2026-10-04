@@ -24,10 +24,10 @@ impl<'a> PullBlock<'a> {
             release,
         }
     }
-    pub(crate) fn first_frame(&self) -> u64 {
+    pub fn first_frame(&self) -> u64 {
         self.first_frame
     }
-    pub(crate) fn pcm(&self) -> PcmView<'_> {
+    pub fn pcm(&self) -> PcmView<'_> {
         self.pcm
     }
 }

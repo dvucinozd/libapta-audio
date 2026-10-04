@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-//! Borrowed, trusted overview/musical graph from an actual sequential session.
-//! Metadata and eager detail require their separate explicit copy interfaces.
+//! Trusted overview/detail/musical graph from an actual sequential session.
+//! Detail uses fixed inline scratch; metadata retains its separate interfaces.
 use crate::{
     owned_result::{self, OwnedResult, Requirements, Storage},
     *,
@@ -11,6 +11,10 @@ use crate::{
 /// passing `view()` to an external builder retains that builder's strict rules.
 pub struct SessionSnapshot<'a> {
     pub(crate) header: NativeResultInput<'a>,
+    pub(crate) detail_tiles: [NativeTile; crate::detail_analysis::TILE_COUNT],
+    pub(crate) detail_columns: [WaveformColumn;
+        crate::detail_analysis::TILE_COUNT * crate::detail_analysis::COLUMNS_PER_TILE],
+    pub(crate) detail_counts: Option<(usize, usize)>,
     pub(crate) span: [WaveformSpan; 1],
     pub(crate) local: Option<LocalGrid>,
     pub(crate) local_coverage: [FrameRange; 1],
@@ -22,6 +26,13 @@ pub struct SessionSnapshot<'a> {
 impl SessionSnapshot<'_> {
     pub fn view(&self) -> NativeResultInput<'_> {
         NativeResultInput {
+            detail: self.header.detail.map(|_| {
+                let (tiles, columns) = self.detail_counts.unwrap();
+                NativeDetail {
+                    tiles: &self.detail_tiles[..tiles],
+                    columns: &self.detail_columns[..columns],
+                }
+            }),
             overview: self.header.overview.map(|w| NativeOverview {
                 spans: &self.span,
                 ..w

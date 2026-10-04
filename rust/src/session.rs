@@ -68,13 +68,15 @@ pub struct Session<
     G = &'a mut [crate::analysis::OnsetBin],
     H = &'a mut [f32],
     E = &'a mut [crate::Beat],
+    S = &'a mut [crate::band::BandSums],
+    T = &'a mut [crate::detail_analysis::DetailTile],
 > {
     analysis: Option<crate::analysis::Analysis<'a, B, F>>,
     global: Option<crate::global_analysis::GlobalAnalysis<'a, G, H, E>>,
     key: Option<crate::key_analysis::KeyAnalysis>,
     quality_enabled: bool,
-    detail: Option<crate::detail_analysis::DetailCache<'a>>,
-    bands: Option<crate::band::OverviewBands<'a>>,
+    detail: Option<crate::detail_analysis::DetailCache<'a, T>>,
+    bands: Option<crate::band::OverviewBands<S>>,
     config: SessionConfig,
     queue: Q,
     output: O,
@@ -98,7 +100,7 @@ impl<'a> Session<'a> {
     }
 }
 
-impl<'a, Q, O, B, F, G, H, E> Session<'a, Q, O, B, F, G, H, E>
+impl<'a, Q, O, B, F, G, H, E, S, T> Session<'a, Q, O, B, F, G, H, E, S, T>
 where
     Q: AsRef<[NormalizedSample]> + AsMut<[NormalizedSample]>,
     O: AsRef<[WaveformColumn]> + AsMut<[WaveformColumn]>,
@@ -107,6 +109,8 @@ where
     G: AsRef<[crate::analysis::OnsetBin]> + AsMut<[crate::analysis::OnsetBin]>,
     H: AsRef<[f32]> + AsMut<[f32]>,
     E: AsRef<[crate::Beat]> + AsMut<[crate::Beat]>,
+    S: AsRef<[crate::band::BandSums]> + AsMut<[crate::band::BandSums]>,
+    T: AsRef<[crate::detail_analysis::DetailTile]> + AsMut<[crate::detail_analysis::DetailTile]>,
 {
     /// Use caller-defined owning or borrowed storage. Core never allocates;
     /// storage must expose the same array between mutations of this session.
@@ -185,7 +189,7 @@ where
         if self
             .bands
             .as_ref()
-            .is_some_and(|b| b.sums.len() < output.as_ref().len())
+            .is_some_and(|b| b.sums.as_ref().len() < output.as_ref().len())
         {
             return Err(Error::BufferTooSmall);
         }
@@ -377,27 +381,34 @@ where
     }
     /// Enable three-band overview while Created, before input or seeding.
     /// Storage must cover every possible logical overview column.
-    pub fn enable_three_band(
-        &mut self,
-        sums: &'a mut [crate::band::BandSums],
-    ) -> Result<(), Error> {
+    pub fn enable_three_band(&mut self, mut sums: S) -> Result<(), Error> {
         if self.state != SessionState::Created || self.accepted != 0 || self.bands.is_some() {
             return Err(Error::InvalidState);
         }
-        if sums.len() < self.output.as_ref().len() {
+        if sums.as_ref().len() < self.output.as_ref().len() {
             return Err(Error::BufferTooSmall);
         }
         let filter = crate::band::BandFilter::new(self.config.sample_rate)?;
-        sums[..self.output.as_ref().len()].fill(crate::band::BandSums::default());
+        sums.as_mut()[..self.output.as_ref().len()].fill(crate::band::BandSums::default());
         self.bands = Some(crate::band::OverviewBands { sums, filter });
         Ok(())
     }
 
+    /// Grow band storage before growing output. Preserve every accumulated sum
+    /// and the continuous filter history; initialize the new tail to zero.
+    pub fn replace_band_storage(&mut self, mut sums: S) -> Result<S, Error> {
+        let bands = self.bands.as_mut().ok_or(Error::InvalidState)?;
+        let len = bands.sums.as_ref().len();
+        if sums.as_ref().len() < len {
+            return Err(Error::BufferTooSmall);
+        }
+        sums.as_mut()[..len].copy_from_slice(bands.sums.as_ref());
+        sums.as_mut()[len..].fill(crate::band::BandSums::default());
+        Ok(core::mem::replace(&mut bands.sums, sums))
+    }
+
     /// Attach an eager detail cache before input. Storage remains caller-owned.
-    pub fn enable_detail(
-        &mut self,
-        tiles: &'a mut [crate::detail_analysis::DetailTile],
-    ) -> Result<(), Error> {
+    pub fn enable_detail(&mut self, tiles: T) -> Result<(), Error> {
         if self.state != SessionState::Created || self.accepted != 0 || self.detail.is_some() {
             return Err(Error::InvalidState);
         }
@@ -408,7 +419,7 @@ where
         {
             return Err(Error::LimitExceeded);
         }
-        self.detail = Some(crate::detail_analysis::DetailCache::new(tiles)?);
+        self.detail = Some(crate::detail_analysis::DetailCache::with_storage(tiles)?);
         Ok(())
     }
 
@@ -737,7 +748,7 @@ where
                 self.accumulator
                     .push_normalized(sample.value, sample.clipped)?;
                 if let Some(bands) = &mut self.bands {
-                    bands.sums[self.written].add(bands.filter.split(sample.value)?)?;
+                    bands.sums.as_mut()[self.written].add(bands.filter.split(sample.value)?)?;
                 }
                 self.head = (self.head + 1) % self.queue.as_ref().len();
                 self.queued -= 1;
@@ -787,8 +798,8 @@ where
     fn publish_column(&mut self) {
         let mut column = self.accumulator.column();
         if let Some(bands) = &self.bands {
-            column =
-                bands.sums[self.written].apply_complete(column, self.accumulator.sample_count());
+            column = bands.sums.as_ref()[self.written]
+                .apply_complete(column, self.accumulator.sample_count());
         }
         self.output.as_mut()[self.written] = column;
         self.written += 1;
@@ -807,8 +818,8 @@ where
         ]
     }
 
-    /// Borrow an actual overview/musical graph without allocation or a result
-    /// pool. Detail and metadata use separate caller-copy interfaces.
+    /// Snapshot an actual overview/detail/musical graph without allocation or a
+    /// result pool. Detail uses fixed inline storage; metadata remains separate.
     pub fn snapshot(
         &self,
         generation: u64,
@@ -823,6 +834,25 @@ where
             .min(self.config.total_frames);
         let local = self.local_grid();
         let global = self.global_grid();
+        let mut detail_tiles = [NativeTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 0,
+            end_frame: 0,
+            first_column_index: 0,
+            state: FeatureState::Partial,
+            confidence: 0,
+            data_column_offset: 0,
+            column_count: 0,
+        }; crate::detail_analysis::TILE_COUNT];
+        let mut detail_columns = [WaveformColumn::default();
+            crate::detail_analysis::TILE_COUNT * crate::detail_analysis::COLUMNS_PER_TILE];
+        let detail = self.copy_detail_into(&mut detail_tiles, &mut detail_columns)?;
+        let detail_counts = detail.map(|d| (d.tiles.len(), d.columns.len()));
+        let detail_header = detail.map(|_| NativeDetail {
+            tiles: &[],
+            columns: &[],
+        });
         Ok(crate::session_snapshot::SessionSnapshot {
             header: NativeResultInput {
                 source: SourceInfo {
@@ -863,7 +893,7 @@ where
                     spans: &[],
                     columns: self.columns(),
                 }),
-                detail: None,
+                detail: detail_header,
                 tempo: self.tempo(),
                 key: self.key(),
                 meter: self.meter(),
@@ -872,6 +902,9 @@ where
                 global_grid: None,
                 quality: &[],
             },
+            detail_tiles,
+            detail_columns,
+            detail_counts,
             span: [WaveformSpan {
                 first_frame: 0,
                 end_frame: end,

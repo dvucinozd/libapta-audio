@@ -1285,3 +1285,103 @@ Evidence root: `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
 Resume from this section and the current source/checklist, inspecting Git live.
 Run the final combined command with two jobs before new behavior. Preserve C and
 all accepted native differences; do not infer complete replacement from counts.
+
+## Owning waveform, detail and source continuation — 2026-10-04
+
+This continuation adds owning waveform features, sequential sources and their
+native desktop consumer. It preserves the previous lifecycle/numerical contracts;
+C algorithms, public headers, ABI, format and installed product are unchanged.
+
+### Integrated behavior
+
+- `Session` accepts owning or borrowed band/detail storage within its existing
+  generic storage architecture. `DetailCache::new` retains its borrowed API;
+  `with_storage` supports owning arrays and uses exactly the reference four
+  tiles even when extra storage is supplied. Core stays safe, allocator-free
+  and `no_std`.
+- Band storage replacement preserves accumulated partial/completed sums and
+  continuous filter history, zeroing the new tail. `GrowingSession` allocates
+  queue/output/band replacements before committing any of them and counts their
+  actual Vec capacities together with detail and all musical workspaces.
+  Allocation failure before acceptance leaves PCM, capacities and stages intact.
+- Actual `SessionSnapshot` includes eager detail using fixed inline scratch for
+  four tile descriptors and 256 columns. Trusted heap copies and serialization
+  include that graph. Metadata ownership remains separate. Snapshot stack size
+  is consequently larger, including for callers without detail enabled; embedded
+  stack sizing remains part of platform qualification.
+- Owning detail follows the four-tile reference eviction policy. The current
+  graph holds resident runs only; older acquired graphs retain evicted data.
+  Tests cover partial EOF, growth during partial overview accumulation, continued
+  filter history, cache eviction, retained generations and known/unknown duration.
+- `GrowingPullSession` owns a configured Created writer and `PullSource`. It
+  accepts at most one block/256 frames and processes one step per call. Known
+  EOF requires no extra read; unknown EOF resolves the length. WouldBlock retries;
+  malformed blocks/source errors/cancellation are terminal. Every acquired block
+  releases once before processing. Mirror/resource-limit errors retry the mirror
+  first and drain already accepted PCM before another source read. Failed working
+  allocation can rerequest the same absolute offset; this is native retry behavior,
+  not C custom-allocator failure compatibility. No mutable writer escapes the
+  adapter. Sources are recovered with `into_inner`.
+- Owning push/pull expose cooperative clocks through core processing. Pull starts
+  its deadline after read/release. Source callbacks and allocation/heap publication
+  are outside the processing deadline. Musical draining does not read more PCM.
+- `apta-native analyze` and `corpus` accept independently combinable `--bands`,
+  `--detail` and `--music`. Detail exports resident cache tiles rather than complete
+  track detail. Duplicate/unknown flags fail before creating output; create-new
+  protection and retained successful corpus outputs remain in force.
+
+### Acceptance boundary and evidence
+
+Evidence root: `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
+The unchanged starting suite is `continuation-next-baseline.log`; the intermediate
+integration run is `continuation-next-integration-check.log`.
+
+- `continuation-next-combined-check.log`: **123/123 C tests**, **250 ordinary
+  Rust tests and 43 explicitly enabled external-C groups** in each debug/release
+  profile. Formatting, all-target Clippy, no-default-features and isolated
+  allocation instrumentation pass. The existing 34 strict WAV example/CLI cases
+  pass, plus two new band/detail CLI combinations checked by the C reader.
+- `continuation-next-asan-check.log`: **31 runtime tests**, including six
+  explicitly enabled external-C groups, pass host AddressSanitizer/leak checks.
+  This uses `RUSTC_BOOTSTRAP=1 RUSTFLAGS=-Zsanitizer=address`, targeting
+  `x86_64-unknown-linux-gnu`, with two build/test jobs and all runtime ignored
+  groups enabled. It does not instrument the C reference or rebuild std.
+- `continuation-next-aarch64-check.log`: portable `libapta --lib
+  --no-default-features --target aarch64-unknown-linux-gnu` compilation passes.
+- `git diff --check` and knowledge notebook validation pass. Earlier evidence
+  remains preserved. The failed new silence assertion is retained in the first
+  final-run attempt log; the complete runner was rerun after correcting it.
+
+Existing unchanged public C band/detail oracles are reused by runtime ignored
+tests and enabled in both profiles by `rust/check.py`. Known/unknown growing
+bands compare every quantized column field exactly against both C publication
+profiles; the documented bounded-C missing band capability remains unchanged.
+Eager detail compares exact public C tile coordinates, states and columns before
+and after EOF. Two new all-feature CLI outputs pass the strict C reader, including
+music with bands/detail. These are content/interchange comparisons, not C heap
+intermediate-generation or custom-allocator equivalence.
+
+The isolated allocation test injects failure into each of queue/output/band growth
+and band/detail attachment, in addition to previous snapshot/music injections.
+Owning pull tests verify committed-snapshot retry without rereading/releasing PCM,
+terminal malformed blocks/cancellation, WouldBlock, known/unknown EOF and no reads
+while draining. Clocked owning processing compares core callback counts and exact
+processed columns, including mirror failure without repeated processing. Silence
+intentionally produces no selected key; a mistaken new test expectation was fixed
+without changing its signal or algorithm (`continuation-next-combined-attempt1.log`).
+
+### Remaining dependency gates
+
+Continue with public C all-stage failure/replay and capability/mutation matrices,
+near-limit sparse coordinates and ensemble variants. Owning sparse scheduling,
+requested-capability projection and musical mutation APIs remain open. Owning
+sequential source acceptance does not qualify scheduled sparse pull or C callback
+ABI. Broader portable/backend numerical qualification remains open: the portable
+55734 versus host-C 55735 selected-key score remains explicitly unresolved.
+
+Full C context/custom allocator classes, workspace layout/failure ordering,
+concurrent ABI acquire/release, separately reviewed unsafe boundary, CMake/pkg-config
+static/shared packaging and frozen consumers remain open. Native tool options are
+additive; complete C options/JSON/metadata/fingerprint and frozen corpus interfaces
+remain open. Windows/MSVC, ILP32, ESP-IDF, original accuracy and physical P4 gates
+remain separate. No deployment, host-service change or hardware operation occurred.

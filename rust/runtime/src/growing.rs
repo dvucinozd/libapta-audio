@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-//! Owning, fallibly growing sequential waveform/key sessions. Processing is the
+//! Owning, fallibly growing sequential waveform/detail/musical sessions. Processing is the
 //! existing portable Session; allocation and concurrent retention live here.
 use crate::{HeapResult, HeapResults};
 use libapta::{
@@ -15,7 +15,7 @@ use libapta::{
 pub struct GrowingLimits {
     pub maximum_queue_frames: usize,
     pub maximum_columns: usize,
-    /// Queue and mutable column Vec capacities, excluding controls and snapshots.
+    /// All attached working Vec capacities, excluding controls and snapshots.
     pub maximum_working_bytes: usize,
     pub results: NativeLimits,
 }
@@ -56,11 +56,12 @@ pub type OwningSession = Session<
     Vec<libapta::analysis::OnsetBin>,
     Vec<f32>,
     Vec<Beat>,
+    Vec<libapta::band::BandSums>,
+    Vec<libapta::detail_analysis::DetailTile>,
 >;
 
 /// One owning writer with independently retained heap generations. Supports
-/// waveform, key and all default musical stages. Owning band/detail workspaces
-/// remain a separate gate. This does not emulate C's bounded-slot generations.
+/// waveform, three-band overview, eager detail and all default musical stages. This does not emulate C's bounded-slot generations.
 /// After snapshot failure, retry `refresh` before further mutations. PCM already
 /// processed remains committed and old acquired generations remain unchanged.
 pub struct GrowingSession {
@@ -73,6 +74,9 @@ pub struct GrowingSession {
     results: HeapResults,
     dirty: bool,
     music_bytes: usize,
+    band_capacity: Option<usize>,
+    band_bytes: usize,
+    detail_bytes: usize,
     music_enabled: bool,
     key_enabled: bool,
     context: Option<crate::RuntimeContext>,
@@ -129,6 +133,9 @@ impl GrowingSession {
             results: HeapResults::new(initial),
             dirty: false,
             music_bytes: 0,
+            band_capacity: None,
+            band_bytes: 0,
+            detail_bytes: 0,
             music_enabled: false,
             key_enabled: false,
             context,
@@ -146,8 +153,74 @@ impl GrowingSession {
     pub fn session(&self) -> &OwningSession {
         &self.session
     }
+    pub(crate) fn maximum_queue_frames(&self) -> usize {
+        self.limits.maximum_queue_frames
+    }
     pub fn results(&self) -> HeapResults {
         self.results.clone()
+    }
+    /// Attach owning three-band accumulators before input. Unknown-duration
+    /// storage grows together with overview columns, preserving filter history.
+    pub fn enable_three_band(&mut self) -> Result<(), Error> {
+        self.ensure_clean()?;
+        if self.band_capacity.is_some() || self.session.state() != SessionState::Created {
+            return Err(Error::InvalidState);
+        }
+        let bytes = self
+            .column_capacity
+            .checked_mul(core::mem::size_of::<libapta::band::BandSums>())
+            .ok_or(Error::LimitExceeded)?;
+        let base = working_bytes(self.allocated_queue, self.allocated_columns)?
+            .checked_add(self.music_bytes)
+            .and_then(|n| n.checked_add(self.detail_bytes))
+            .ok_or(Error::LimitExceeded)?;
+        if base.checked_add(bytes).ok_or(Error::LimitExceeded)? > self.limits.maximum_working_bytes
+        {
+            return Err(Error::LimitExceeded);
+        }
+        let sums = array::<libapta::band::BandSums>(self.column_capacity)?;
+        let actual = sums
+            .capacity()
+            .checked_mul(core::mem::size_of::<libapta::band::BandSums>())
+            .ok_or(Error::LimitExceeded)?;
+        if base.checked_add(actual).ok_or(Error::LimitExceeded)? > self.limits.maximum_working_bytes
+        {
+            return Err(Error::LimitExceeded);
+        }
+        self.session.enable_three_band(sums)?;
+        self.band_capacity = Some(self.column_capacity);
+        self.band_bytes = actual;
+        Ok(())
+    }
+    /// Own the reference four-tile eager detail cache. Evicted tiles remain
+    /// available through independently retained heap generations.
+    pub fn enable_detail(&mut self) -> Result<(), Error> {
+        self.ensure_clean()?;
+        if self.detail_bytes != 0 || self.session.state() != SessionState::Created {
+            return Err(Error::InvalidState);
+        }
+        use libapta::detail_analysis::{DetailTile, TILE_COUNT};
+        let base = working_bytes(self.allocated_queue, self.allocated_columns)?
+            .checked_add(self.music_bytes)
+            .and_then(|n| n.checked_add(self.band_bytes))
+            .ok_or(Error::LimitExceeded)?;
+        let fits = |count: usize| {
+            count
+                .checked_mul(core::mem::size_of::<DetailTile>())
+                .and_then(|n| base.checked_add(n))
+                .is_some_and(|n| n <= self.limits.maximum_working_bytes)
+        };
+        if !fits(TILE_COUNT) {
+            return Err(Error::LimitExceeded);
+        }
+        let tiles = array::<DetailTile>(TILE_COUNT)?;
+        if !fits(tiles.capacity()) {
+            return Err(Error::LimitExceeded);
+        }
+        let bytes = tiles.capacity() * core::mem::size_of::<DetailTile>();
+        self.session.enable_detail(tiles)?;
+        self.detail_bytes = bytes;
+        Ok(())
     }
     pub fn enable_key(&mut self) -> Result<(), Error> {
         self.ensure_clean()?;
@@ -168,7 +241,10 @@ impl GrowingSession {
             return Err(Error::InvalidState);
         }
         use libapta::{analysis, global_analysis};
-        let minimum = working_bytes(self.allocated_queue, self.allocated_columns)?;
+        let minimum = working_bytes(self.allocated_queue, self.allocated_columns)?
+            .checked_add(self.band_bytes)
+            .and_then(|n| n.checked_add(self.detail_bytes))
+            .ok_or(Error::LimitExceeded)?;
         let bytes = (analysis::BIN_CAPACITY + global_analysis::BIN_CAPACITY)
             .checked_mul(core::mem::size_of::<analysis::OnsetBin>() + core::mem::size_of::<f32>())
             .and_then(|n| n.checked_add(global_analysis::MAX_BEATS * core::mem::size_of::<Beat>()))
@@ -230,10 +306,28 @@ impl GrowingSession {
     fn reserve(&mut self, queue: usize, columns: usize) -> Result<(), Error> {
         let queue = queue.max(self.queue_capacity);
         let columns = columns.max(self.column_capacity);
+        if self.detail_bytes != 0
+            && (columns as u64)
+                .checked_mul(u64::from(self.session.config().frames_per_column))
+                .map_or(true, |n| {
+                    n.div_ceil(libapta::detail_analysis::FRAMES_PER_COLUMN) > u64::from(u32::MAX)
+                })
+        {
+            return Err(Error::LimitExceeded);
+        }
+        let band_bytes = if self.band_capacity.is_some() {
+            columns
+                .checked_mul(core::mem::size_of::<libapta::band::BandSums>())
+                .ok_or(Error::LimitExceeded)?
+        } else {
+            0
+        };
         if queue > self.limits.maximum_queue_frames
             || columns > self.limits.maximum_columns
             || working_bytes(queue, columns)?
                 .checked_add(self.music_bytes)
+                .and_then(|n| n.checked_add(self.detail_bytes))
+                .and_then(|n| n.checked_add(band_bytes))
                 .ok_or(Error::LimitExceeded)?
                 > self.limits.maximum_working_bytes
         {
@@ -249,14 +343,33 @@ impl GrowingSession {
         } else {
             None
         };
+        let bands = if self.band_capacity.is_some_and(|n| columns > n) {
+            Some(array::<libapta::band::BandSums>(columns)?)
+        } else {
+            None
+        };
+        let actual_bands = match &bands {
+            Some(b) => b
+                .capacity()
+                .checked_mul(core::mem::size_of::<libapta::band::BandSums>())
+                .ok_or(Error::LimitExceeded)?,
+            None => self.band_bytes,
+        };
         let actual_q = q.as_ref().map_or(self.allocated_queue, Vec::capacity);
         let actual_o = o.as_ref().map_or(self.allocated_columns, Vec::capacity);
         if working_bytes(actual_q, actual_o)?
             .checked_add(self.music_bytes)
+            .and_then(|n| n.checked_add(self.detail_bytes))
+            .and_then(|n| n.checked_add(actual_bands))
             .ok_or(Error::LimitExceeded)?
             > self.limits.maximum_working_bytes
         {
             return Err(Error::LimitExceeded);
+        }
+        if let Some(bands) = bands {
+            self.session.replace_band_storage(bands)?;
+            self.band_capacity = Some(columns);
+            self.band_bytes = actual_bands;
         }
         self.allocated_queue = actual_q;
         self.allocated_columns = actual_o;
@@ -331,13 +444,37 @@ impl GrowingSession {
         budget: WorkBudget,
         cancel: &CancellationToken,
     ) -> Result<Progress, Error> {
+        self.process_clock(budget, cancel, None)
+    }
+    /// Cooperative processing clock; allocation/publication time is outside the
+    /// core deadline. A failed mirror retries without repeating clocked work.
+    pub fn process_with_clock(
+        &mut self,
+        budget: WorkBudget,
+        soft_us: u32,
+        clock: &mut dyn FnMut() -> u64,
+        cancel: &CancellationToken,
+    ) -> Result<Progress, Error> {
+        self.process_clock(budget, cancel, Some((soft_us, clock)))
+    }
+    fn process_clock(
+        &mut self,
+        budget: WorkBudget,
+        cancel: &CancellationToken,
+        clock: Option<(u32, &mut dyn FnMut() -> u64)>,
+    ) -> Result<Progress, Error> {
         self.ensure_clean()?;
         let before = (
             self.session.state(),
             self.session.processed_frames(),
             self.session.publication_serials(),
         );
-        let work = self.session.process(budget, cancel);
+        let work = match clock {
+            Some((soft_us, clock)) => self
+                .session
+                .process_with_clock(budget, soft_us, clock, cancel),
+            None => self.session.process(budget, cancel),
+        };
         if before
             != (
                 self.session.state(),

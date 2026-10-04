@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
 };
 const MAX_INPUT: u64 = 256 * 1024 * 1024;
-const USAGE: &str = "usage: apta-native analyze INPUT.wav OUTPUT.apta [--music]\n       apta-native inspect INPUT.apta\n       apta-native validate INPUT.apta [--permissive]\n       apta-native corpus INPUT_DIRECTORY OUTPUT_DIRECTORY [--music]\n       apta-native version\nOutput files/directories must not exist. Corpus is local WAV batch conversion, not frozen qualification.";
+const USAGE: &str = "usage: apta-native analyze INPUT.wav OUTPUT.apta [--music] [--bands] [--detail]\n       apta-native inspect INPUT.apta\n       apta-native validate INPUT.apta [--permissive]\n       apta-native corpus INPUT_DIRECTORY OUTPUT_DIRECTORY [--music] [--bands] [--detail]\n       apta-native version\nOutput files/directories must not exist. Corpus is local WAV batch conversion, not frozen qualification.";
 fn read(path: &Path) -> Result<Vec<u8>, Box<dyn Error>> {
     let mut input = Vec::new();
     fs::File::open(path)?
@@ -23,7 +23,29 @@ fn read(path: &Path) -> Result<Vec<u8>, Box<dyn Error>> {
     }
     Ok(input)
 }
-fn analyze(input: &Path, output: &Path, music: bool) -> Result<(), Box<dyn Error>> {
+#[derive(Clone, Copy, Default)]
+struct Features {
+    music: bool,
+    bands: bool,
+    detail: bool,
+}
+fn features(flags: &[OsString]) -> Result<Features, Box<dyn Error>> {
+    let mut out = Features::default();
+    for flag in flags {
+        let selected = match flag.to_str() {
+            Some("--music") => &mut out.music,
+            Some("--bands") => &mut out.bands,
+            Some("--detail") => &mut out.detail,
+            _ => return Err(USAGE.into()),
+        };
+        if *selected {
+            return Err(USAGE.into());
+        }
+        *selected = true;
+    }
+    Ok(out)
+}
+fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dyn Error>> {
     let bytes = read(input)?;
     let wav = Wav::parse(&bytes)?;
     if wav.frame_count() == 0 {
@@ -40,7 +62,13 @@ fn analyze(input: &Path, output: &Path, music: bool) -> Result<(), Box<dyn Error
         },
         GrowingLimits::default(),
     )?;
-    if music {
+    if features.bands {
+        s.enable_three_band()?;
+    }
+    if features.detail {
+        s.enable_detail()?;
+    }
+    if features.music {
         s.enable_default_music()?;
     }
     let mut scratch = vec![0.0; 4096 * usize::from(source.channel_count)];
@@ -63,7 +91,16 @@ fn analyze(input: &Path, output: &Path, music: bool) -> Result<(), Box<dyn Error
     }
     let data = {
         let snapshot = s.session().snapshot(1)?;
-        let mut tiles = [];
+        let mut tiles = [libapta::WaveformTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 0,
+            end_frame: 0,
+            first_column_index: 0,
+            state: libapta::FeatureState::Partial,
+            confidence: 0,
+            columns: &[],
+        }; libapta::detail_analysis::TILE_COUNT];
         let wire = result::from_session_snapshot(&snapshot, &mut tiles, NativeLimits::default())?;
         let size = result::serialized_size(&wire)?;
         let mut data = Vec::new();
@@ -160,7 +197,7 @@ fn inspect(path: &Path) -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 }
-fn corpus(input: &Path, output: &Path, music: bool) -> Result<(), Box<dyn Error>> {
+fn corpus(input: &Path, output: &Path, features: Features) -> Result<(), Box<dyn Error>> {
     let mut files: Vec<PathBuf> = fs::read_dir(input)?
         .map(|e| e.map(|e| e.path()))
         .collect::<Result<_, _>>()?;
@@ -174,7 +211,7 @@ fn corpus(input: &Path, output: &Path, music: bool) -> Result<(), Box<dyn Error>
     for path in &files {
         let name = path.file_name().ok_or("missing WAV filename")?;
         let target = output.join(name).with_extension("apta");
-        if let Err(e) = analyze(path, &target, music) {
+        if let Err(e) = analyze(path, &target, features) {
             eprintln!("{}: {e}", path.display());
             failures += 1;
         }
@@ -211,17 +248,11 @@ fn run(args: &[OsString]) -> Result<(), Box<dyn Error>> {
             println!("valid (permissive)");
             Ok(())
         }
-        [command, input, output] if command == "analyze" => {
-            analyze(Path::new(input), Path::new(output), false)
+        [command, input, output, flags @ ..] if command == "analyze" => {
+            analyze(Path::new(input), Path::new(output), features(flags)?)
         }
-        [command, input, output, flag] if command == "analyze" && flag == "--music" => {
-            analyze(Path::new(input), Path::new(output), true)
-        }
-        [command, input, output] if command == "corpus" => {
-            corpus(Path::new(input), Path::new(output), false)
-        }
-        [command, input, output, flag] if command == "corpus" && flag == "--music" => {
-            corpus(Path::new(input), Path::new(output), true)
+        [command, input, output, flags @ ..] if command == "corpus" => {
+            corpus(Path::new(input), Path::new(output), features(flags)?)
         }
         _ => Err(USAGE.into()),
     }

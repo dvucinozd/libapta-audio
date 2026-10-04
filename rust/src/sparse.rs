@@ -41,7 +41,7 @@ pub struct SparseSession<'a> {
     key: Option<crate::key_analysis::KeyAnalysis>,
     quality_enabled: bool,
     detail: Option<crate::detail_analysis::DetailCache<'a>>,
-    bands: Option<crate::band::OverviewBands<'a>>,
+    bands: Option<crate::band::OverviewBands<&'a mut [crate::band::BandSums]>>,
     config: SessionConfig,
     workspace: Workspace<'a>,
     logical_columns: usize,

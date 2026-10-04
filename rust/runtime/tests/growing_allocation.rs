@@ -75,4 +75,36 @@ fn growing_array_failures_preserve_preflight_and_retry_committed_snapshots() {
         s.enable_default_music().unwrap();
         assert_eq!(s.push_pcm(PcmView::F32Interleaved(&[0.5; 513])), Ok(513));
     }
+    // Queue, overview and band growth all preflight before any mutation.
+    for failure in 1..=3 {
+        let mut s = GrowingSession::new(config(), GrowingLimits::default()).unwrap();
+        s.enable_three_band().unwrap();
+        s.enable_detail().unwrap();
+        FAIL_AFTER.store(failure, Ordering::Relaxed);
+        let result = s.push_pcm(PcmView::F32Interleaved(&[0.5; 513]));
+        assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+        assert_eq!(result, Err(Error::LimitExceeded));
+        assert_eq!(s.session().accepted_frames(), 0);
+        assert_eq!(s.session().input_capacity_frames(), 0);
+        assert_eq!(s.refresh(), Ok(false));
+        assert_eq!(s.push_pcm(PcmView::F32Interleaved(&[0.5; 513])), Ok(513));
+    }
+    for band in [false, true] {
+        let mut c = config();
+        c.total_frames = 513;
+        let mut s = GrowingSession::new(c, GrowingLimits::default()).unwrap();
+        FAIL_AFTER.store(1, Ordering::Relaxed);
+        let result = if band {
+            s.enable_three_band()
+        } else {
+            s.enable_detail()
+        };
+        assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+        assert_eq!(result, Err(Error::LimitExceeded));
+        if band {
+            s.enable_three_band().unwrap();
+        } else {
+            s.enable_detail().unwrap();
+        }
+    }
 }
