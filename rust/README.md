@@ -523,3 +523,23 @@ and the separately tested SSE2 profile are distinct. MSVC still needs Windows
 SDK import libraries and actual execution; the Windows CI job now includes native
 Rust release tests. No Rust C ABI, custom allocator, ESP-IDF or embedded stack
 qualification follows from these desktop checks.
+
+
+### Direct native Rust consumers
+
+Depend on package `libapta` at an immutable Git revision for portable firmware;
+`libapta-runtime` is the separate desktop `std` ownership layer. Native consumers
+need neither C handles nor a C allocator or ESP-IDF runtime. Keep consumer model
+conversion in the consumer repository; the existing C product stays intact.
+
+`GridSegment::beat_at(index)` expands one declared beat with checked ordinal/Q32
+arithmetic, skips a context anchor before applicability, and returns `None` past
+`beat_count`. It rejects inconsistent coverage. It does not resolve hybrid grid
+authority or validate a complete graph. `FractionalFrame::rounded_milliseconds`
+uses the source sample rate, rounds once (nearest, ties upward), and returns a
+checked `u64`; check again when a consumer has a narrower coordinate type.
+
+The experimental Pajoniiir adapter uses caller-owned conversion banks, immutable
+neutral analysis, explicit source/generation checks and the existing Deck and
+waveform consumers. It is not production P4 enablement. See the latest native
+consumer handoff in [MIGRATION.md](../docs/rust/MIGRATION.md).

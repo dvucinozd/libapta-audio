@@ -121,16 +121,19 @@ Neither choice is an accuracy improvement claim.
    tolerances before comparison; waveform integer outputs and container bytes
    are exact. For later float DSP compare intermediate values with explicitly
    justified absolute/relative tolerances plus unchanged discrete selections.
-5. **Consumer/platform replacement:** C ABI, CMake/pkg-config, static/shared
-   distribution, Linux/POSIX and Windows adapters/tools, ESP-IDF component and
-   examples. Run frozen consumers and LP64/ILP32 layouts; verify supported
-   compiler/platform matrix. A host `no_std` build alone is not embedded proof.
+5. **Native consumers first; legacy compatibility separately:** direct Cargo
+   dependency on the portable core for native Rust consumers. Pajoniiir's native
+   P4 architecture does not require ESP-IDF, C allocators, C ABI or C packaging.
+   Keep product adaptation in the consumer. Verify its actual target/toolchain,
+   storage and bounded work; host/no_std compilation is not embedded execution.
+   C ABI, CMake/pkg-config, static/shared distribution, frozen C consumers,
+   LP64/ILP32 layouts and ESP-IDF for actual IDF consumers remain separate gates.
 6. **Separate algorithm improvements and release qualification:** reproduce
    failures, preregister changes, development/holdout separation, all original
    acceptance gates, physical P4 measurements, maintainer decisions and freeze.
    Retire C only after the agreed full replacement matrix passes.
 
-Parallel ownership for initial implementation: lead owns Cargo/root builds,
+Historical parallel ownership for initial implementation (current continuation uses one implementation agent): lead owns Cargo/root builds,
 shared types/public root, integration example/tests and this document; container
 agent owns `rust/src/container.rs` and container tests; DSP agent owns
 `rust/src/waveform.rs` and waveform oracle/tests; runtime agent owns
@@ -145,9 +148,9 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Fixed-width results/errors, `include/apta` | [types.rs](../../rust/src/types.rs) | Native wire and in-memory result graphs implemented; C layout/status boundary pending |
 | Header/directory/CRC, `src/serialization` | [container.rs](../../rust/src/container.rs) | Implemented; 16 container checks + strict C oracle |
 | WOVR reader/writer | [container.rs](../../rust/src/container.rs) | Implemented; exact C golden roundtrip, malformed inputs, strict C reader |
-| META and fingerprints | [meta.rs](../../rust/src/meta.rs), types/container | Deterministic bounded CBOR, recognized-field ownership and writer complete; fingerprint computation pending |
+| META and fingerprints | [meta.rs](../../rust/src/meta.rs), types/container | Deterministic bounded CBOR, recognized-field ownership and writer complete; source identity transport and opt-in CLI source-object SHA-256 implemented; host-supplied identity remains unverified |
 | WDTL/detail interchange | [detail.rs](../../rust/src/detail.rs), container/types | Level-1 payload reader/writer and aggregate result validation implemented; exact C bytes; native eager sequential/sparse detail and sparse request protection/replay integrated |
-| TEMP/LGRD, GGRD/REVN | [tempo.rs](../../rust/src/tempo.rs), [grid.rs](../../rust/src/grid.rs), [result.rs](../../rust/src/result.rs) | Payloads, canonical writing and cross-feature links implemented; exact C roundtrips; native default S4/S6 analysis and explicit revision acceptance integrated; explicit requested-capability path and 53 lifecycle profiles pass; full mask/failure matrix remains |
+| TEMP/LGRD, GGRD/REVN | [tempo.rs](../../rust/src/tempo.rs), [grid.rs](../../rust/src/grid.rs), [result.rs](../../rust/src/result.rs) | Payloads, canonical writing and cross-feature links implemented; exact C roundtrips; native default S4/S6 analysis and explicit revision acceptance integrated; explicit requested-capability path and 91 lifecycle profiles plus four expanded retry traces pass; full mask/failure matrix remains |
 | MKEY/MTRD/CONF + cross-feature checks | [dj.rs](../../rust/src/dj.rs), result/builder | Payloads, limits, grid/quality links and canonical bytes implemented; default native key/meter/calibration integrated; accuracy gates unchanged |
 | Buffer/stream/selective parse APIs | container/result/[stream.rs](../../rust/src/stream.rs)/[stream_write.rs](../../rust/src/stream_write.rs) | Complete known wire section set, bounded callbacks and selective retention; differences documented below; C ABI pending |
 | S16/S24/S32/F32 interleaved/planar PCM | waveform/session | All five formats through typed views/session; exact C comparisons; C block ABI pending |
@@ -162,14 +165,15 @@ explicit. Integrate before independent review; never reset another agent's work.
 | External validated result builder | [builder.rs](../../rust/src/builder.rs), [native_validation.rs](../../rust/src/native_validation.rs), [owned_result.rs](../../rust/src/owned_result.rs) | Encoded subset plus native graph/provenance/session-state validation and deep ownership; C allocator/API boundary pending |
 | S4 onset/BPM/local grid | [analysis.rs](../../rust/src/analysis.rs), session/sparse/publication | Default broadband analysis integrated; exact TEMP/LGRD C comparisons, focus and locking; experimental onset profiles pending |
 | S6 global grid/dynamic tempo/revisions | [global_analysis.rs](../../rust/src/global_analysis.rs), session/sparse/publication | Default windows, dynamic grids, revision identities, locked conflict and explicit acceptance integrated; exact GGRD/REVN comparisons |
-| Musical key/meter/downbeat | [key_analysis.rs](../../rust/src/key_analysis.rs), analysis | Default C profiles integrated; exact MKEY/MTRD comparisons; original accuracy gates remain failed |
+| Musical key/meter/downbeat | [key_analysis.rs](../../rust/src/key_analysis.rs), analysis | Default C profiles integrated; host-math MKEY and MTRD reference checks pass; portable key score rounding boundary remains open; original accuracy gates remain failed |
 | Quality/confidence calibration | analysis/session/sparse/publication | BPM LUT/model 1867860160 integrated; exact CONF comparisons; fresh accuracy qualification remains open |
 | POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed WAV decoder complete initial format slice; four tests; filesystem/callback adapters pending |
 | Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform and default musical desktop modes; eight waveform/nine musical WAV smoke cases and exact C musical bytes; additive native analyze/inspect/validate/version/WAV batch commands; C CLI parity pending |
 | Push/pull/installed/package/ESP examples | examples | Push/WAV-to-container example implemented; others pending |
-| C API/ABI and frozen 1.0 consumers | future FFI | Pending; C remains installed product |
+| Direct native Rust consumers | portable Cargo + consumer-owned adapter | Experimental Pajoniiir PCM/cache to Deck/Sync/Beat Jump/waveform integration; production/embedded gates remain separate |
+| C API/ABI and frozen 1.0 consumers | future FFI | Deferred separate workstream; C remains installed product |
 | CMake/pkg-config/shared/static packages | root build future FFI | Cargo additive only |
-| Linux, Windows/MSVC, ILP32 | platform CI | x86_64 host tests; AArch64 core and i686/MSVC workspace compile checks; Windows/ILP32 linking and execution pending |
+| Linux, Windows/MSVC, ILP32 | platform CI | x86_64 host tests; AArch64 core and i686/MSVC workspace compile checks; actual i686 SSE2 C/Rust execution established; default x87 differs; Windows linking/execution pending SDK environment |
 | ESP-IDF ESP32/S3/P4 | ports future Rust integration | Pending compile and physical measurements |
 | macOS/big-endian | platform matrix | C macOS community only; big-endian unsupported baseline |
 | Conformance/interoperability/fuzz/security/SBOM | tests/tooling | C retained; Rust coverage partial |
@@ -1845,3 +1849,113 @@ Further ensemble/profile coverage, automatic capacity policy/request-table growt
 live owning metadata, full JSON/corpus interfaces, platform execution and embedded
 stack work remain independent engineering tasks. Original DSP accuracy gates and
 physical hardware qualification remain separate from rewrite parity.
+
+## Native Rust consumer integration — 2026-10-04
+
+Native consumers now take priority over legacy ABI emulation. Pajoniiir M1 uses a
+pinned direct Cargo dependency on the allocator-free, unsafe-free `no_std` core;
+its adapter and product policies remain in Pajoniiir. The desktop `std` runtime,
+C allocator/layout/handle emulation, C packaging and ESP-IDF are not prerequisites
+for this consumer. C compatibility remains a separate unfinished workstream;
+no C implementation, public header, ABI or container format changed.
+
+### Portable API and consumer behavior
+
+`GridSegment::beat_at` offers bounded, checked authoritative beat lookup without
+an expanded allocation. It skips phase-continuity anchors before applicability,
+checks ordinal/coordinate overflow and rejects inconsistent declared coverage.
+It delegates position arithmetic to the existing reference-Q32 helper and does
+not resolve hybrid authority. `FractionalFrame::rounded_milliseconds` rounds the
+full Q32 coordinate once with the actual sample rate, nearest/ties upward, into a
+checked u64. Product-specific u32 coordinates remain the consumer's responsibility.
+Five exact integer tests cover rates, half ties, large widths, overflow, context
+anchors and inconsistent counts. No DSP coefficients/backend/selection changed.
+
+The isolated `pajoniiir-apta-adapter` uses the existing Libapta session engine and
+caller-provided conversion storage. A deterministic 8 kHz/320000-frame fixture
+runs in 256-frame/one-step processing budgets, produces 80 beats and BPM x100
+12000, then exercises the existing Deck Beat Jump and Sync controls. Phase comes
+from the actual meter downbeat, not ordinal-zero or assumed 4/4. Preflight errors
+preserve caller output. Retained conversions survive destruction of the original
+session; two distinct banks allow staging without mutating a pinned generation.
+Generation narrowing rejects overflow/zero. Stopped-boundary upgrades require
+matching source identity/geometry, provider and lineage and a newer generation.
+
+Further integrated portions include exact live/local-cache beat comparison,
+required cache source identity and caller parse limits, whole-track waveform
+conversion into the existing RGB565 renderer, and a host WAV-to-analysis/PPM
+example. Missing/non-final grid or meter exposes tempo only; missing tempo stays
+zero. Unsupported sparse coverage, explicit ordinal gaps, hybrid authority and
+multiple segments fail explicitly. Cache/native provider changes establish a new
+pin rather than treating cache-assigned generations as native session identity.
+Key and confidence are not added to a neutral model with no demonstrated consumer.
+
+Pajoniiir's existing ADR-006/M1R-P1-001 production gates are preserved. Neither its
+firmware nor Slint simulator selects this experimental provider. Host tests call
+the actual domain/raster consumers; the host example is not the production media
+worker. See the consumer's adapter README and architecture for its acceptance.
+
+### Preserved contracts and remaining engineering
+
+The combined reference suite continues to cover stage ordering, failed publication
+retry, reservation rollback/partial nodes, source release/recovery, cancellation,
+immutable retention and source/seed identity. Integration required no changes to
+those processing contracts. Unknown-duration sparse ownership still needs its
+own growth/scheduling/seeding/music extension against the existing C EOF probes;
+known-duration acceptance does not close that work.
+
+Remaining native work includes production worker/media integration and generation
+ownership, global/hybrid/cache authority and sparse/detail viewport contracts,
+fuller key/confidence consumers where needed, caller storage budgeting/placement,
+and complete embedded stack/timing qualification. Explicit core/raster storage is
+not proof of internal SRAM/PSRAM placement or DMA/cache safety. Cross-compilation
+is not target execution; no hardware was operated or firmware deployed.
+
+Deferred C work remains exact custom allocator classes/order/reallocation,
+workspace/handle layout and ownership, separately reviewed unsafe ABI exports,
+static/shared/CMake/pkg-config packaging and frozen C consumers. Windows execution
+still requires a suitable SDK/import-library and execution environment. Default
+i686 x87 remains a distinct numerical profile; SSE2 acceptance does not qualify it.
+
+The portable key 55734 versus host C 55735 boundary remains unchanged. No rounding
+patch, hidden math-backend switch, fixture/tolerance change or accuracy claim.
+Original musical/DSP accuracy gates and physical P4 release qualification remain
+independent of all native integration evidence.
+
+### Libapta verification for this continuation
+
+Fresh evidence lives in `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
+No earlier logs were overwritten. `CARGO_BUILD_JOBS=2` and `RUST_TEST_THREADS=2`
+were used with the shared external target directory and one implementation agent.
+
+- `native-consumer-baseline-20261004T165758Z.log`: required combined baseline
+  before behavior/API work, including 123 C tests and the prior 271/55 Rust matrix.
+- `native-consumer-final2-20261004T172109Z.log`: final source passes **123 C tests,
+  276 ordinary Rust tests and 55 external-C groups in each debug/release profile**;
+  **34 WAV interchange cases and two all-feature CLI cases**, allocation
+  instrumentation, formatting, Clippy and no-default-features pass. This rerun
+  includes the context-anchor correction after the first integration checkpoint.
+  Musical lifecycle/retry, 72 identity/seed combinations and the exact
+  4096-fragment/524288-frame capacity comparison are rerun, not assumed.
+- `native-consumer-asan-runtime-20261004T171249Z.log`: **59 runtime tests**,
+  including **13 external-C groups**, pass ASan/leak checking.
+- `native-consumer-asan-core-20261004T171249Z.log`: **39 focused core tests** pass
+  ASan/leak checking, including all five final coordinate tests. External C
+  binaries in these Rust runs are separately compiled reference binaries;
+  instrumenting Rust does not imply instrumented C/std.
+- `native-consumer-ilp32-final-20261004T171249Z.log`: actual i686 SSE2 execution
+  passes the same **276 ordinary / 55 external-C** debug/release matrix.
+  `native-consumer-ilp32-c-*` reruns **123 C tests** for that explicit SSE2 profile.
+- `native-consumer-c-oracle-sanitizers2-20261004T171249Z.log`: allocation/failure/
+  concurrent-retention and both unknown sparse EOF probes pass against the
+  ASan/UBSan C archive. These remain reference contracts, not implemented C ABI.
+- `native-consumer-portable-final-*` reruns AArch64/core, i686/MSVC all-target and
+  RV32/core compilation after the final helper changes.
+- `native-consumer-riscv-stack2-20261004T171249Z.log` reruns the release snapshot
+  probe: **3768-byte object / 3456-byte function frame**, still excluding callers,
+  nested calls and interrupt/runtime costs. It is not a task-stack recommendation.
+
+The reproducible extra/platform scripts are retained alongside these logs with
+stamp `20261004T171249Z`. Consumer evidence is separately owned under
+`/home/shome/.local/share/Pajoniiir-M1/apta-evidence/`; its verification script,
+fixture, rendered artifact and adapter README carry that scope's exact acceptance.

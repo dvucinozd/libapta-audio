@@ -601,3 +601,58 @@ impl GridPayload<'_> {
         })
     }
 }
+
+impl crate::GridSegment {
+    /// Read an authoritative beat inside the segment's applicability range,
+    /// skipping a phase-continuity anchor before that range. The declared count
+    /// bounds iteration; inconsistent geometry and arithmetic overflow fail.
+    pub fn beat_at(&self, index: u32) -> Result<Option<crate::Beat>, Error> {
+        if index >= self.beat_count {
+            return Ok(None);
+        }
+        let period = (u128::from(self.frames_per_beat.whole_frames) << 32)
+            | u128::from(self.frames_per_beat.fraction_q32);
+        if period == 0 || self.applicability_range.first_frame >= self.applicability_range.end_frame
+        {
+            return Err(Error::InvalidArgument);
+        }
+        let anchor = (u128::from(self.anchor_position.whole_frame) << 32)
+            | u128::from(self.anchor_position.fraction_q32);
+        let first = u128::from(self.applicability_range.first_frame) << 32;
+        let skip = first.saturating_sub(anchor).div_ceil(period);
+        let delta = skip
+            .checked_add(u128::from(index))
+            .ok_or(Error::LimitExceeded)?;
+        let ordinal = i128::from(self.anchor_ordinal)
+            .checked_add(i128::try_from(delta).map_err(|_| Error::LimitExceeded)?)
+            .ok_or(Error::LimitExceeded)?;
+        let ordinal = i64::try_from(ordinal).map_err(|_| Error::LimitExceeded)?;
+        let position = segment_position_at_ordinal(self, ordinal).ok_or(Error::LimitExceeded)?;
+        if position.whole_frame < self.applicability_range.first_frame
+            || position.whole_frame >= self.applicability_range.end_frame
+        {
+            return Err(Error::InvalidArgument);
+        }
+        Ok(Some(crate::Beat {
+            position,
+            ordinal,
+            revision: self.revision,
+            flags: self.flags,
+            confidence: self.confidence,
+        }))
+    }
+}
+
+impl crate::FractionalFrame {
+    /// Round a nonnegative Q32 sample coordinate to milliseconds, ties upward.
+    /// Keeps a u64 result for portable consumers; narrower destination models
+    /// must check their own width. Zero sample rate and overflow are errors.
+    pub fn rounded_milliseconds(self, sample_rate: u32) -> Result<u64, Error> {
+        if sample_rate == 0 {
+            return Err(Error::InvalidArgument);
+        }
+        let frames = (u128::from(self.whole_frame) << 32) | u128::from(self.fraction_q32);
+        let divisor = u128::from(sample_rate) << 32;
+        u64::try_from((frames * 1000 + divisor / 2) / divisor).map_err(|_| Error::LimitExceeded)
+    }
+}
