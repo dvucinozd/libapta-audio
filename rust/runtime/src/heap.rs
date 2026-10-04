@@ -67,12 +67,55 @@ pub struct HeapResult {
     text: [Option<Vec<u8>>; 8],
     source_id_bytes: bool,
     retained_bytes: usize,
+    // Drop the accounting lease after every owned payload array is released.
+    context_resource: Option<crate::context::Resource>,
 }
 impl HeapResult {
     pub fn copy_from(result: &OwnedResult<'_>, limits: NativeLimits) -> Result<Self, Error> {
+        Self::copy_view(
+            &result.view(),
+            result.requirements(),
+            result.available_features(),
+            result.changed_features(),
+            limits,
+        )
+    }
+    /// Copy a graph obtainable only from actual native session processing.
+    pub fn copy_snapshot(
+        snapshot: &libapta::session_snapshot::SessionSnapshot<'_>,
+        limits: NativeLimits,
+    ) -> Result<Self, Error> {
+        let available = snapshot.available_features(limits)?;
+        Self::copy_view(
+            &snapshot.view(),
+            snapshot.requirements(limits)?,
+            available,
+            available,
+            limits,
+        )
+    }
+    /// Copy an external native graph with full external validation. This never
+    /// grants the trusted session exceptions carried by `copy_from`.
+    pub fn from_native(input: &NativeResultInput<'_>, limits: NativeLimits) -> Result<Self, Error> {
+        let validation = libapta::native_validation::validate(input, limits)?;
+        let requirements = libapta::owned_result::requirements(input, limits)?;
+        Self::copy_view(
+            input,
+            requirements,
+            validation.available_features,
+            validation.available_features,
+            limits,
+        )
+    }
+    fn copy_view(
+        input: &NativeResultInput<'_>,
+        r: libapta::owned_result::Requirements,
+        available: u64,
+        changed: u64,
+        limits: NativeLimits,
+    ) -> Result<Self, Error> {
         // Validate supplied count/byte limits without reinterpreting trusted
         // session exceptions as external builder inputs. Public graphs are immutable.
-        let r = result.requirements();
         if r.overview_spans > limits.maximum_overview_spans
             || r.overview_columns
                 .checked_add(r.detail_columns)
@@ -99,7 +142,6 @@ impl HeapResult {
         if minimum > limits.maximum_storage_bytes {
             return Err(Error::LimitExceeded);
         }
-        let input = result.view();
         let metadata = input.metadata.unwrap_or_default();
         let mut text = [None, None, None, None, None, None, None, None];
         let fields = [
@@ -154,9 +196,10 @@ impl HeapResult {
             quality: &[],
         };
         let mut result = Self {
+            context_resource: None,
             header,
-            available: result.available_features(),
-            changed: result.changed_features(),
+            available,
+            changed,
             spans: copy(input.overview.map_or(&[], |w| w.spans))?,
             columns: copy(input.overview.map_or(&[], |w| w.columns))?,
             tiles: copy(input.detail.map_or(&[], |d| d.tiles))?,
@@ -200,6 +243,13 @@ impl HeapResult {
         }
         result.retained_bytes = bytes;
         Ok(result)
+    }
+    pub(crate) fn attach_context(&mut self, context: &crate::RuntimeContext) -> Result<(), Error> {
+        if self.context_resource.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.context_resource = Some(context.result(self.retained_bytes)?);
+        Ok(())
     }
     pub fn retained_bytes(&self) -> usize {
         self.retained_bytes

@@ -139,7 +139,10 @@ fn add<T>(bytes: &mut usize, count: usize) -> Result<(), Error> {
         .ok_or(Error::LimitExceeded)?;
     Ok(())
 }
-fn counts(input: &NativeResultInput<'_>, limits: NativeLimits) -> Result<Requirements, Error> {
+pub(crate) fn counts(
+    input: &NativeResultInput<'_>,
+    limits: NativeLimits,
+) -> Result<Requirements, Error> {
     let mut r = Requirements {
         overview_spans: input.overview.map_or(0, |v| v.spans.len()),
         overview_columns: 0,

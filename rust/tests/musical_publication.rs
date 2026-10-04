@@ -424,6 +424,9 @@ fn integrated_all_stage_container_matches_c() {
 
 #[test]
 fn accepted_revision_survives_failed_publication_and_retry() {
+    revision_failure_rows();
+}
+fn revision_failure_rows() -> Vec<Vec<u64>> {
     let pcm: Vec<f32> = (0..640000)
         .map(|i| {
             let period = if i < 320000 { 3840 } else { 6000 };
@@ -437,10 +440,16 @@ fn accepted_revision_survives_failed_publication_and_retry() {
         .collect();
     let mut a = Buffers::new(20);
     let mut b = Buffers::new(20);
-    let pool = ResultPool::new(
+    let pool = ResultPool::new_with_requested_features(
         source(640000),
         [a.storage(), b.storage()],
         NativeLimits::default(),
+        result::WAVEFORM_OVERVIEW
+            | result::BPM
+            | result::LOCAL_BEATGRID
+            | result::GLOBAL_BEATGRID
+            | result::DYNAMIC_TEMPO
+            | result::GRID_LOCKING,
     )
     .unwrap();
     let mut bins = vec![analysis::OnsetBin::default(); analysis::BIN_CAPACITY];
@@ -466,6 +475,7 @@ fn accepted_revision_survives_failed_publication_and_retry() {
     s.enable_global_grid(true, &mut global_bins, &mut global_flux, &mut beats)
         .unwrap();
     let token = CancellationToken::new();
+    let mut rows = vec![lifecycle_row(&pool, 0)];
     let mut first = 0;
     let mut locked = false;
     while first < pcm.len() {
@@ -473,13 +483,16 @@ fn accepted_revision_survives_failed_publication_and_retry() {
         s.push_pcm(PcmView::F32Interleaved(&pcm[first..end]))
             .unwrap();
         first = end;
+        rows.push(lifecycle_row(&pool, 0));
         s.process(WorkBudget::default(), &token).unwrap();
+        rows.push(lifecycle_row(&pool, 0));
         if !locked && first >= 320000 {
             s.lock_grid_range(FrameRange {
                 first_frame: 0,
                 end_frame: 311808,
             })
             .unwrap();
+            rows.push(lifecycle_row(&pool, 0));
             locked = true;
         }
         if s.session()
@@ -498,35 +511,69 @@ fn accepted_revision_survives_failed_publication_and_retry() {
         s.push_pcm(PcmView::F32Interleaved(&pcm[first..end]))
             .unwrap();
         first = end;
+        rows.push(lifecycle_row(&pool, 0));
         match s.process(WorkBudget::default(), &token) {
             Ok(_) | Err(Error::ResultSlotsExhausted) => (),
             Err(e) => panic!("{e:?}"),
         }
+        rows.push(lifecycle_row(&pool, 0));
     }
     let newer = pool.acquire().unwrap();
     let preserved = serialize(&newer);
     let id = s.session().grid_revision().unwrap().revision_id;
     assert_eq!(s.apply_grid_revision(id), Err(Error::ResultSlotsExhausted));
+    rows.push(lifecycle_row(&pool, 0));
     assert_eq!(
         s.session().grid_revision().unwrap().state,
         RevisionState::Applied
     );
     assert_eq!(s.apply_grid_revision(id), Err(Error::InvalidState));
+    rows.push(lifecycle_row(&pool, 0));
     assert_eq!(serialize(&newer), preserved);
     drop(old);
-    s.process(
-        WorkBudget {
-            maximum_steps: 1,
-            maximum_input_frames: 0,
-        },
-        &token,
-    )
-    .unwrap();
+    let budget = WorkBudget {
+        maximum_steps: 1,
+        maximum_input_frames: 0,
+    };
+    assert_eq!(s.process(budget, &token), Err(Error::ResultSlotsExhausted));
+    rows.push(lifecycle_row(&pool, 0));
+    assert_eq!(serialize(&newer), preserved);
+    drop(newer);
+    s.process(budget, &token).unwrap();
     assert_eq!(
         pool.acquire().unwrap().revision().unwrap().state,
         RevisionState::Applied
     );
-    assert_eq!(serialize(&newer), preserved);
+    rows.push(lifecycle_row(&pool, 0));
+    rows
+}
+
+#[test]
+#[ignore = "requires APTA_C_MUSICAL_FAILURE_ORACLE"]
+fn exact_revision_exhaustion_acceptance_and_retry_match_public_c() {
+    let output =
+        std::process::Command::new(std::env::var_os("APTA_C_MUSICAL_FAILURE_ORACLE").unwrap())
+            .output()
+            .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let expected: Vec<Vec<u64>> = String::from_utf8(output.stdout)
+        .unwrap()
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|v| v.parse().unwrap())
+                .collect()
+        })
+        .collect();
+    let actual = revision_failure_rows();
+    assert_eq!(actual.len(), expected.len());
+    for (index, (a, b)) in actual.iter().zip(expected.iter()).enumerate() {
+        assert_eq!(a, b, "row {index}");
+    }
 }
 
 #[test]
@@ -631,6 +678,13 @@ fn lifecycle_row(pool: &ResultPool<'_>, clock_calls: u64) -> Vec<u64> {
         0,
         0,
         0,
+        r.local_grid().map_or(0, |g| u64::from(g.flags)),
+        r.local_grid()
+            .map_or(0, |g| g.applicability_range.first_frame),
+        r.local_grid()
+            .map_or(0, |g| g.applicability_range.end_frame),
+        r.revision().map_or(0, |r| r.state as u64),
+        r.revision().map_or(0, |r| u64::from(r.revision_id)),
     ]
 }
 #[test]
@@ -638,6 +692,7 @@ fn lifecycle_row(pool: &ResultPool<'_>, clock_calls: u64) -> Vec<u64> {
 fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
     let oracle = std::env::var_os("APTA_C_MUSICAL_LIFECYCLE_ORACLE").unwrap();
     for profile in (0..12)
+        .chain([1048577, 1048579])
         .chain(16..20)
         .chain(24..28)
         .chain(32..36)
@@ -646,6 +701,10 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
         .chain(520..524)
         .chain(256..260)
         .chain(288..292)
+        .chain([
+            65536, 65540, 65552, 66048, 65544, 131072, 131076, 131088, 131584, 131080, 262144,
+            262148, 262160, 262656, 262152, 524288, 524292, 524304, 524800, 524296,
+        ])
         .chain([1024, 1026, 2048, 2050, 4096, 4098, 8194, 16386, 32770])
     {
         let count: usize = if profile & (8192 | 16384) != 0 {
@@ -665,6 +724,21 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
                 | result::DYNAMIC_TEMPO
                 | result::MUSICAL_KEY
                 | result::METER_DOWNBEAT
+                | result::CALIBRATED_QUALITY;
+        }
+        if profile & 65536 != 0 {
+            features = result::WAVEFORM_OVERVIEW | result::BPM;
+        }
+        if profile & 131072 != 0 {
+            features = result::WAVEFORM_OVERVIEW | result::MUSICAL_KEY;
+        }
+        if profile & 262144 != 0 {
+            features = result::WAVEFORM_OVERVIEW | result::BPM | result::GLOBAL_BEATGRID;
+        }
+        if profile & 524288 != 0 {
+            features = result::WAVEFORM_OVERVIEW
+                | result::BPM
+                | result::CONFIDENCE
                 | result::CALIBRATED_QUALITY;
         }
         let mut a = Buffers::new(count.div_ceil(32768));
@@ -708,12 +782,25 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
                 &pool,
             )
             .unwrap();
-            s.enable_tempo(&mut bins, &mut flux).unwrap();
-            if profile & 2 != 0 {
-                s.enable_global_grid(true, &mut gb, &mut gf, &mut beats)
-                    .unwrap();
+            if features & result::BPM != 0 {
+                s.enable_tempo(&mut bins, &mut flux).unwrap();
+            }
+            if features & result::GLOBAL_BEATGRID != 0 {
+                s.enable_global_grid(
+                    features & result::DYNAMIC_TEMPO != 0,
+                    &mut gb,
+                    &mut gf,
+                    &mut beats,
+                )
+                .unwrap();
+            }
+            if features & result::MUSICAL_KEY != 0 {
                 s.enable_key().unwrap();
+            }
+            if features & result::METER_DOWNBEAT != 0 {
                 s.enable_meter().unwrap();
+            }
+            if features & result::CALIBRATED_QUALITY != 0 {
                 s.enable_calibrated_quality().unwrap();
             }
             assert_lock_request_preflight(&mut s, profile);
@@ -801,8 +888,26 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
                 }
             }
             if profile & 8 == 0 {
+                if profile & 1048576 != 0 {
+                    retained = Some(pool.acquire().unwrap());
+                }
                 s.finish_input().unwrap();
                 rows.push(lifecycle_row(&pool, clock_calls));
+                if profile & 1048576 != 0 {
+                    let range = FrameRange {
+                        first_frame: count as u64 / 4,
+                        end_frame: count as u64 * 3 / 4,
+                    };
+                    let before = s.session().local_grid();
+                    assert_eq!(s.lock_grid_range(range), Err(Error::ResultSlotsExhausted));
+                    assert_eq!(s.session().local_grid(), before);
+                    rows.push(lifecycle_row(&pool, clock_calls));
+                    drop(retained.take());
+                    s.lock_grid_range(range).unwrap();
+                    rows.push(lifecycle_row(&pool, clock_calls));
+                    s.lock_grid_range(range).unwrap();
+                    rows.push(lifecycle_row(&pool, clock_calls));
+                }
                 for _ in 0..1000 {
                     if profile & (4 | 256) != 0 {
                         s.process_with_clock(
@@ -1120,7 +1225,7 @@ fn scheduled_music_rows(profile: u32, pool: &ResultPool<'_>) -> Vec<Vec<u64>> {
         });
         let mut row = lifecycle_row(pool, clock_calls);
         let src = s.source();
-        row[14..].copy_from_slice(&[
+        row[14..18].copy_from_slice(&[
             src.reads,
             src.releases.get(),
             src.first,

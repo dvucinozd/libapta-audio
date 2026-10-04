@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: Apache-2.0
+//! Isolated fallible-array injection. Arc/Mutex control allocations use the
+//! standard allocator contract and are deliberately excluded from injection.
+use libapta::{session::*, waveform::PcmView, Error};
+use libapta_runtime::{GrowingLimits, GrowingSession};
+use std::{
+    alloc::{GlobalAlloc, Layout, System},
+    sync::atomic::{AtomicUsize, Ordering},
+};
+struct Allocator;
+static FAIL_AFTER: AtomicUsize = AtomicUsize::new(0);
+unsafe impl GlobalAlloc for Allocator {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let left = FAIL_AFTER.load(Ordering::Relaxed);
+        if left != 0 && FAIL_AFTER.fetch_sub(1, Ordering::Relaxed) == 1 {
+            return core::ptr::null_mut();
+        }
+        // SAFETY: Forward the identical allocation layout to System.
+        unsafe { System.alloc(layout) }
+    }
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        // SAFETY: Every non-null pointer was allocated by System with this layout.
+        unsafe { System.dealloc(ptr, layout) }
+    }
+}
+#[global_allocator]
+static ALLOCATOR: Allocator = Allocator;
+fn config() -> SessionConfig {
+    SessionConfig {
+        sample_rate: 8000,
+        channel_count: 1,
+        total_frames: TOTAL_FRAMES_UNKNOWN,
+        frames_per_column: 64,
+    }
+}
+#[test]
+fn growing_array_failures_preserve_preflight_and_retry_committed_snapshots() {
+    // First two allocations are queue/output replacements. Next two are the
+    // immutable provenance arrays, before infallible Arc control allocation.
+    for failure in 1..=4 {
+        let mut s = GrowingSession::new(config(), GrowingLimits::default()).unwrap();
+        let old = s.results().acquire().unwrap();
+        FAIL_AFTER.store(failure, Ordering::Relaxed);
+        let result = s.push_pcm(PcmView::F32Interleaved(&[0.5; 513]));
+        let left = FAIL_AFTER.swap(0, Ordering::Relaxed);
+        assert_eq!(left, 0, "injection must be consumed");
+        assert_eq!(result, Err(Error::LimitExceeded));
+        if failure <= 2 {
+            assert_eq!(s.session().accepted_frames(), 0);
+            assert_eq!(s.session().input_capacity_frames(), 0);
+            assert_eq!(s.refresh(), Ok(false));
+            assert_eq!(s.push_pcm(PcmView::F32Interleaved(&[0.5; 513])), Ok(513));
+        } else {
+            assert_eq!(s.session().accepted_frames(), 513);
+            assert_eq!(s.session().processed_frames(), 0);
+            assert_eq!(s.refresh(), Ok(true));
+        }
+        assert_eq!(old.info().generation, 1);
+        assert!(old.view().overview.is_none());
+        s.finish_input().unwrap();
+        s.process(WorkBudget::default(), &CancellationToken::new())
+            .unwrap();
+        assert_eq!(s.session().processed_frames(), 513);
+        assert_eq!(s.session().columns().len(), 9);
+    }
+    // Every musical workspace allocation must fail before attaching any stage.
+    for failure in 1..=5 {
+        let mut s = GrowingSession::new(config(), GrowingLimits::default()).unwrap();
+        FAIL_AFTER.store(failure, Ordering::Relaxed);
+        let result = s.enable_default_music();
+        let left = FAIL_AFTER.swap(0, Ordering::Relaxed);
+        assert_eq!(left, 0);
+        assert_eq!(result, Err(Error::LimitExceeded));
+        assert_eq!(s.session().publication_serials(), [0; 5]);
+        s.enable_default_music().unwrap();
+        assert_eq!(s.push_pcm(PcmView::F32Interleaved(&[0.5; 513])), Ok(513));
+    }
+}

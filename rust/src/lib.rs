@@ -24,6 +24,7 @@ pub mod pull;
 pub mod result;
 pub mod scheduler;
 pub mod session;
+pub mod session_snapshot;
 pub mod sparse;
 pub mod sparse_pull;
 pub mod stream;

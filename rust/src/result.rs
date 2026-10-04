@@ -569,6 +569,17 @@ pub fn from_session_result<'a>(
     crate::native_validation::validate_session(&input, limits, owned.changed_features())?;
     from_native_validated(&input, tile_views, true)
 }
+/// Convert a graph borrowed directly from actual native session processing.
+/// The opaque snapshot preserves the same trusted rules as owned session results.
+pub fn from_session_snapshot<'a>(
+    snapshot: &'a crate::session_snapshot::SessionSnapshot<'_>,
+    tile_views: &'a mut [WaveformTile<'a>],
+    limits: NativeLimits,
+) -> Result<ResultInput<'a>, Error> {
+    let input = snapshot.view();
+    crate::native_validation::validate_session(&input, limits, 0)?;
+    from_native_validated(&input, tile_views, true)
+}
 fn from_native_validated<'a>(
     input: &NativeResultInput<'a>,
     tile_views: &'a mut [WaveformTile<'a>],

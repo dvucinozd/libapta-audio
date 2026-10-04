@@ -3,6 +3,7 @@
 #include <apta/apta.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define CHECK(x) do { if (!(x)) {fprintf(stderr,"line %d: %s\n",__LINE__,#x);exit(2);} } while (0)
 int main(int argc,char **argv) {
  CHECK(argc==4 || argc==5);
@@ -18,6 +19,7 @@ int main(int argc,char **argv) {
  if(argc==5 && (argv[4][0]=='f' || argv[4][0]=='l' || argv[4][0]=='r')) cc.requested_capabilities|=APTA_FEATURE_GRID_LOCKING;
  apta_context_t *context=NULL;CHECK(apta_context_create(&cc,&context)==0);
  apta_session_config_t config;apta_session_config_init(&config);config.requested_features=cc.requested_capabilities;config.source_sample_rate=rate;config.channel_count=1;config.channel_layout=APTA_CHANNEL_LAYOUT_MONO;config.sample_format=APTA_SAMPLE_F32_NATIVE_INTERLEAVED;config.total_frames=count;config.overview_frames_per_column=32768;
+ if (argc==5 && strcmp(argv[4], "all-unknown")==0) config.total_frames=APTA_TOTAL_FRAMES_UNKNOWN;
  apta_session_t *session=NULL;CHECK(apta_session_create(context,&config,&session)==0);
  if(argc==5 && argv[4][0]=='f') {apta_focus_t focus;apta_focus_init(&focus);focus.feature_mask=APTA_FEATURE_BPM|APTA_FEATURE_LOCAL_BEATGRID|APTA_FEATURE_GRID_LOCKING;focus.playhead_frame=count/2;focus.lookbehind_frames=count/4;focus.lookahead_frames=count/8;CHECK(apta_session_set_focus(session,&focus)==0);}
  apta_work_budget_t budget;apta_work_budget_init(&budget);budget.maximum_steps=steps;

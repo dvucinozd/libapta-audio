@@ -23,7 +23,7 @@ Use an appropriate external build directory on another machine. The combined
 runner requires Python 3, CMake, a C/C++ compiler, Cargo, rustfmt and Clippy. It
 builds/runs the C suite, compiles a test-only public C oracle, runs normal and
 explicit C interoperability tests, tests optimized Rust, then validates eight waveform and nine musical
-synthetic WAV-to-container cases with the strict C reader. `--c-build PATH`
+example cases plus eight waveform and nine musical native CLI cases with the strict C reader. `--c-build PATH`
 reuses a C build directory. It currently targets POSIX static builds; Windows
 and embedded verification remain separate migration work.
 
@@ -39,7 +39,7 @@ APTA_C_CONTAINER_ORACLE=/absolute/path/container-oracle \
 
 The `rust-version` field is the intended minimum (1.81); this initial run used
 1.97.1. Minimum-toolchain, Windows, ILP32 and ESP32 builds still need validation.
-No `unsafe` or allocation occurs in core modules. `libm` is the only dependency,
+No `unsafe` or allocation occurs in core modules. Core storage can also be owned by the separately allocating std runtime. `libm` is the only dependency,
 needed for portable reference quantization. The isolated allocation-counter test
 uses an unsafe allocator shim solely to count calls in the test executable.
 
@@ -308,3 +308,53 @@ Full request-mask combinations, all-stage publication-failure traces, integrated
 musical detail replay, near-limit coordinates, C allocation/workspace layout,
 dynamically growing session storage/context contracts, C ABI/packaging and
 platform gates remain open.
+
+### Owning sessions, context lifetime and native desktop commands
+
+`libapta-runtime::GrowingSession` owns the existing portable session's queue,
+overview, S4/S6 rings and beat arrays. Unknown-duration output grows on demand;
+known duration reserves its overview at creation. `GrowingLimits` bounds queue
+frames, output columns, actual mutable Vec capacities and each retained graph.
+`enable_default_music()` allocates all five musical arrays before attaching any
+stage. Native fixed ring/beat/segment caps retain the default reference policy.
+Owning band/detail and sparse/pull workspaces remain pending.
+
+Core `Session::new` remains caller-backed. `Session::with_storage` also accepts
+owning array storage; `replace_queue` preserves a wrapped FIFO and
+`replace_output` preserves complete columns, a partial accumulator and analysis
+history. These operations allocate nothing. Attached bands must already cover
+the replacement output; detail retains its coordinate ceiling.
+`Session::snapshot(generation)` borrows an opaque trusted overview/musical graph;
+`copy_to` and `result::from_session_snapshot` preserve session validation. Metadata
+and eager detail still use their separate copy interfaces. Arbitrary external
+builders and `HeapResult::view()` keep strict external conversion rules.
+
+`RuntimeContext::create_session` tracks writers and retained heap graphs.
+`close()` returns `Error::Busy` until all writers, channels and acquired graphs
+release their resources. Context quotas count graph headers/actual array
+capacities; mutable workspaces, transient copies and Arc/lock control allocation
+are excluded. A context quota or snapshot allocation failure preserves the old
+published graph. Inspect accepted/processed frames and retry only `refresh()`;
+mutations are blocked until that mirror succeeds. Context ownership is native std
+behavior, not C allocator callbacks/classes, workspace layout or ABI acceptance.
+
+The portable key default still uses `libm`. `KeyMath` allows an explicit fixed
+host backend; owning std sessions use platform `f32` cosine/log/square root.
+A retained diagnostic exposes a one-unit portable MKEY score discrepancy against
+this host's C libm; see the newest migration section. No tolerance hides it.
+
+```bash
+cargo run -p libapta-runtime --bin apta-native -- analyze INPUT.wav OUTPUT.apta --music
+cargo run -p libapta-runtime --bin apta-native -- inspect OUTPUT.apta
+cargo run -p libapta-runtime --bin apta-native -- validate OUTPUT.apta
+cargo run -p libapta-runtime --bin apta-native -- version
+cargo run -p libapta-runtime --bin apta-native -- corpus INPUT_DIRECTORY NEW_OUTPUT_DIRECTORY --music
+```
+
+The native CLI supports waveform/default music, full known-section inspection,
+strict validation (or `--permissive`) and deterministic local WAV batch conversion.
+Inputs are bounded at 256 MiB. Output files/directories must not exist; batch
+failures retain successful outputs and return failure. These additive commands do
+not replace C tool names/options, all feature-selection modes, JSON exports,
+fingerprinting/metadata or frozen privacy/qualification corpus interfaces.
+Final verification and precise remaining gates are in the migration document.

@@ -13,8 +13,28 @@ const MAJOR: [f32; 12] = [
 const MINOR: [f32; 12] = [
     0.712, 0.084, 0.455, 0.270, 0.360, 0.320, 0.082, 0.600, 0.059, 0.291, 0.092, 0.260,
 ];
+/// Explicit numerical backend. Default uses portable libm. A std host can
+/// select its platform f32 operations to compare against that platform's C libm.
+/// Callbacks must be deterministic finite math functions on valid inputs, and
+/// must return promptly. Backend identity stays fixed for the session lifetime.
+#[derive(Clone, Copy)]
+pub struct KeyMath {
+    pub cos: fn(f32) -> f32,
+    pub log: fn(f32) -> f32,
+    pub sqrt: fn(f32) -> f32,
+}
+impl Default for KeyMath {
+    fn default() -> Self {
+        Self {
+            cos: libm::cosf,
+            log: libm::logf,
+            sqrt: libm::sqrtf,
+        }
+    }
+}
 /// Fixed-size state; no source samples or dynamically allocated storage survive.
 pub struct KeyAnalysis {
+    math: KeyMath,
     coefficients: [f32; 36],
     q1: [f32; 36],
     q2: [f32; 36],
@@ -34,6 +54,9 @@ pub struct KeyAnalysis {
 }
 impl KeyAnalysis {
     pub fn new(rate: u32) -> Result<Self, Error> {
+        Self::new_with_math(rate, KeyMath::default())
+    }
+    pub fn new_with_math(rate: u32, math: KeyMath) -> Result<Self, Error> {
         if rate == 0 || rate > 768000 {
             return Err(Error::InvalidArgument);
         }
@@ -41,13 +64,14 @@ impl KeyAnalysis {
         let mut coefficients = [0.0; 36];
         let target = if decimated > 2.0 * FREQUENCIES[35] {
             for (c, f) in coefficients.iter_mut().zip(FREQUENCIES) {
-                *c = 2.0 * libm::cosf(core::f32::consts::TAU * f / decimated);
+                *c = 2.0 * (math.cos)(core::f32::consts::TAU * f / decimated);
             }
             rate / 4
         } else {
             0
         };
         Ok(Self {
+            math,
             coefficients,
             q1: [0.0; 36],
             q2: [0.0; 36],
@@ -109,7 +133,7 @@ impl KeyAnalysis {
                 } else {
                     energy
                 };
-                self.chroma[i % 12] += libm::logf(1.0 + energy);
+                self.chroma[i % 12] += (self.math.log)(1.0 + energy);
             }
             self.windows += 1;
             self.reset_window();
@@ -148,7 +172,7 @@ impl KeyAnalysis {
         let mut candidates = [KeyCandidate::default(); 3];
         for tonic in 0..12 {
             for (mode, profile) in [(1, &MAJOR), (2, &MINOR)] {
-                let score = profile_score(&self.chroma, tonic, profile);
+                let score = profile_score(&self.chroma, tonic, profile, self.math.sqrt);
                 if let Some(position) = scores.iter().position(|s| score > *s) {
                     for i in (position + 1..3).rev() {
                         scores[i] = scores[i - 1];
@@ -202,7 +226,12 @@ impl KeyAnalysis {
         Ok(1)
     }
 }
-fn profile_score(chroma: &[f32; 12], tonic: usize, profile: &[f32; 12]) -> f32 {
+fn profile_score(
+    chroma: &[f32; 12],
+    tonic: usize,
+    profile: &[f32; 12],
+    sqrt: fn(f32) -> f32,
+) -> f32 {
     let mut dot = 0.0;
     let mut a = 0.0;
     let mut b = 0.0;
@@ -215,6 +244,73 @@ fn profile_score(chroma: &[f32; 12], tonic: usize, profile: &[f32; 12]) -> f32 {
     if a <= 1e-20 || b <= 1e-20 {
         0.0
     } else {
-        dot / libm::sqrtf(a * b)
+        dot / sqrt(a * b)
+    }
+}
+
+#[cfg(test)]
+mod numerical_tests {
+    use super::*;
+    extern crate std;
+    #[test]
+    #[ignore = "requires APTA_C_KEY_MATH_ORACLE"]
+    fn platform_key_front_end_arithmetic_matches_compiled_c() {
+        let output =
+            std::process::Command::new(std::env::var_os("APTA_C_KEY_MATH_ORACLE").unwrap())
+                .output()
+                .unwrap();
+        assert!(output.status.success());
+        let mut k = KeyAnalysis::new_with_math(
+            8000,
+            KeyMath {
+                cos: f32::cos,
+                log: f32::ln,
+                sqrt: f32::sqrt,
+            },
+        )
+        .unwrap();
+        for i in 0..320000u64 {
+            let phase = i % 4000;
+            k.push(
+                i,
+                if phase < 64 {
+                    (64 - phase) as f32 / 64.0 * 0.75
+                } else {
+                    0.0
+                },
+            );
+        }
+        let values: std::vec::Vec<_> = output.stdout[..192]
+            .chunks_exact(4)
+            .map(|b| f32::from_ne_bytes(b.try_into().unwrap()))
+            .collect();
+        assert_eq!(values.len(), 48);
+        assert_eq!(k.coefficients.as_slice(), &values[..36], "coefficients");
+        assert_eq!(k.chroma.as_slice(), &values[36..], "chroma");
+        k.refresh(1, true).unwrap();
+        let c_scores: std::vec::Vec<_> = output.stdout[192..]
+            .chunks_exact(2)
+            .map(|b| u16::from_ne_bytes(b.try_into().unwrap()))
+            .collect();
+        assert_eq!(
+            k.candidates.map(|c| c.score).as_slice(),
+            c_scores.as_slice()
+        );
+        if std::env::var_os("APTA_KEY_PORTABLE_AUDIT").is_some() {
+            let mut portable = KeyAnalysis::new(8000).unwrap();
+            for i in 0..320000u64 {
+                let phase = i % 4000;
+                portable.push(
+                    i,
+                    if phase < 64 {
+                        (64 - phase) as f32 / 64.0 * 0.75
+                    } else {
+                        0.0
+                    },
+                );
+            }
+            portable.refresh(1, true).unwrap();
+            std::println!("portable coefficient mismatches: {}, chroma mismatches: {}, portable scores: {:?}, C scores: {:?}", portable.coefficients.iter().zip(&values[..36]).filter(|(a,b)| a.to_bits()!=b.to_bits()).count(), portable.chroma.iter().zip(&values[36..]).filter(|(a,b)| a.to_bits()!=b.to_bits()).count(), portable.candidates.map(|c| c.score), c_scores);
+        }
     }
 }

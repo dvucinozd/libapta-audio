@@ -31,10 +31,11 @@ pub(crate) const EMPTY: GridSegment = GridSegment {
     revision: 0,
 };
 
-pub struct GlobalAnalysis<'a> {
-    bins: &'a mut [OnsetBin],
-    flux: &'a mut [f32],
-    beats: &'a mut [Beat],
+pub struct GlobalAnalysis<'a, B = &'a mut [OnsetBin], F = &'a mut [f32], E = &'a mut [Beat]> {
+    lifetime: core::marker::PhantomData<&'a ()>,
+    bins: B,
+    flux: F,
+    beats: E,
     rate: u32,
     total: Option<u64>,
     dynamic: bool,
@@ -73,19 +74,40 @@ impl<'a> GlobalAnalysis<'a> {
         flux: &'a mut [f32],
         beats: &'a mut [Beat],
     ) -> Result<Self, Error> {
+        Self::with_storage(rate, total, dynamic, bins, flux, beats)
+    }
+}
+impl<'a, B, F, E> GlobalAnalysis<'a, B, F, E>
+where
+    B: AsRef<[OnsetBin]> + AsMut<[OnsetBin]>,
+    F: AsRef<[f32]> + AsMut<[f32]>,
+    E: AsRef<[Beat]> + AsMut<[Beat]>,
+{
+    pub fn with_storage(
+        rate: u32,
+        total: Option<u64>,
+        dynamic: bool,
+        mut bins: B,
+        mut flux: F,
+        mut beats: E,
+    ) -> Result<Self, Error> {
         if rate == 0 || rate > 768000 {
             return Err(Error::InvalidArgument);
         }
-        if bins.len() < BIN_CAPACITY || flux.len() < BIN_CAPACITY || beats.len() < MAX_BEATS {
+        if bins.as_ref().len() < BIN_CAPACITY
+            || flux.as_ref().len() < BIN_CAPACITY
+            || beats.as_ref().len() < MAX_BEATS
+        {
             return Err(Error::BufferTooSmall);
         }
-        bins[..BIN_CAPACITY].fill(OnsetBin::default());
-        flux[..BIN_CAPACITY].fill(0.0);
-        beats[..MAX_BEATS].fill(Beat::default());
+        bins.as_mut()[..BIN_CAPACITY].fill(OnsetBin::default());
+        flux.as_mut()[..BIN_CAPACITY].fill(0.0);
+        beats.as_mut()[..MAX_BEATS].fill(Beat::default());
         Ok(Self {
-            bins: &mut bins[..BIN_CAPACITY],
-            flux: &mut flux[..BIN_CAPACITY],
-            beats: &mut beats[..MAX_BEATS],
+            lifetime: core::marker::PhantomData,
+            bins,
+            flux,
+            beats,
             rate,
             total,
             dynamic,
@@ -129,9 +151,12 @@ impl<'a> GlobalAnalysis<'a> {
             Ok(())
         }
     }
+    pub(crate) fn set_total_frames(&mut self, total: Option<u64>) {
+        self.total = total;
+    }
     pub(crate) fn push(&mut self, frame: u64, sample: f32) {
         let index = (frame / BIN_FRAMES) as u32;
-        let b = &mut self.bins[index as usize % BIN_CAPACITY];
+        let b = &mut self.bins.as_mut()[index as usize % BIN_CAPACITY];
         if !b.occupied || b.index != index {
             *b = OnsetBin {
                 index,
@@ -143,7 +168,7 @@ impl<'a> GlobalAnalysis<'a> {
         b.count += 1;
     }
     fn bin(&self, index: u64) -> Option<&OnsetBin> {
-        let b = &self.bins[index as usize % BIN_CAPACITY];
+        let b = &self.bins.as_ref()[index as usize % BIN_CAPACITY];
         (b.occupied && u64::from(b.index) == index).then_some(b)
     }
     fn complete(&self, index: u64, eof: Option<u64>) -> bool {
@@ -163,7 +188,10 @@ impl<'a> GlobalAnalysis<'a> {
         // Walk only resident identities. Absolute sparse gaps cannot turn this
         // bounded ring into a scan over billions of absent source bins.
         let mut best = (0, 0);
-        for b in self.bins.iter().filter(|b| b.occupied) {
+        for b in self.bins.as_ref()[..BIN_CAPACITY]
+            .iter()
+            .filter(|b| b.occupied)
+        {
             let first = u64::from(b.index);
             if !self.complete(first, eof) || (first != 0 && self.complete(first - 1, eof)) {
                 continue;
@@ -210,7 +238,7 @@ impl<'a> GlobalAnalysis<'a> {
             } else {
                 &self.segments[..self.segment_count]
             },
-            beats: &self.beats[..self.beat_count],
+            beats: &self.beats.as_ref()[..self.beat_count],
         })
     }
     pub fn revision(&self) -> Option<GridRevision> {
@@ -298,7 +326,7 @@ impl<'a> GlobalAnalysis<'a> {
                 let mut previous = 0.0;
                 for i in first..end {
                     let energy = self.energy(i);
-                    self.flux[(i - first) as usize] = (energy - previous).max(0.0);
+                    self.flux.as_mut()[(i - first) as usize] = (energy - previous).max(0.0);
                     previous = energy;
                 }
                 self.first = first;
@@ -318,7 +346,7 @@ impl<'a> GlobalAnalysis<'a> {
             }
             if self.cursor < self.end {
                 let end = (self.cursor + 128).min(self.end);
-                self.flux[(self.cursor - self.first) as usize] = self.energy(self.cursor);
+                self.flux.as_mut()[(self.cursor - self.first) as usize] = self.energy(self.cursor);
                 if let Some((tempo, phase, confidence)) = self.window(self.cursor, end) {
                     self.add_window(self.cursor, end, tempo, phase, confidence);
                 }
@@ -355,7 +383,7 @@ impl<'a> GlobalAnalysis<'a> {
         if end - first < 64 {
             return None;
         }
-        let flux = &self.flux[(first - self.first) as usize..(end - self.first) as usize];
+        let flux = &self.flux.as_ref()[(first - self.first) as usize..(end - self.first) as usize];
         let minimum = (u64::from(self.rate) * 60)
             .div_ceil(300 * BIN_FRAMES)
             .max(1) as u32;
@@ -535,7 +563,7 @@ impl<'a> GlobalAnalysis<'a> {
         for s in &mut self.segments[..self.segment_count] {
             s.revision = id;
         }
-        for b in &mut self.beats[..self.beat_count] {
+        for b in &mut self.beats.as_mut()[..self.beat_count] {
             b.revision = id;
         }
         let conflict = locked.filter(|local| {
@@ -615,7 +643,7 @@ impl<'a> GlobalAnalysis<'a> {
                     self.flags |= 128;
                     break;
                 }
-                self.beats[self.beat_count] = Beat {
+                self.beats.as_mut()[self.beat_count] = Beat {
                     position: FractionalFrame {
                         whole_frame: position >> 32,
                         fraction_q32: position as u32,

@@ -1298,5 +1298,59 @@ fn detail_replay_allocates_nothing(seed: bool) {
             .any(|t| t.tile_index == 0));
         assert_eq!(result.changed_features(), WAVEFORM_DETAIL);
     }
+    {
+        use libapta::session::{Session, SessionConfig, TOTAL_FRAMES_UNKNOWN};
+        use libapta::waveform::NormalizedSample;
+        let cancel = libapta::session::CancellationToken::new();
+        let mut queue = [NormalizedSample::default(); 60];
+        let mut replacement_queue = [NormalizedSample::default(); 120];
+        let mut columns = [WaveformColumn::default(); 4];
+        let mut replacement_columns = [WaveformColumn::default(); 8];
+        let mut bands = [libapta::band::BandSums::default(); 8];
+        let mut s = Session::new(
+            SessionConfig {
+                sample_rate: 48000,
+                channel_count: 1,
+                total_frames: TOTAL_FRAMES_UNKNOWN,
+                frames_per_column: 64,
+            },
+            &mut queue,
+            &mut columns,
+        )
+        .unwrap();
+        s.enable_three_band(&mut bands).unwrap();
+        s.push_interleaved(&[0.5; 60]).unwrap();
+        s.process(
+            WorkBudget {
+                maximum_input_frames: 50,
+                maximum_steps: 0,
+            },
+            &cancel,
+        )
+        .unwrap();
+        s.push_interleaved(&[0.25; 50]).unwrap();
+        let _old_queue = s.replace_queue(&mut replacement_queue).unwrap();
+        let _old_columns = s.replace_output(&mut replacement_columns).unwrap();
+        s.finish_input().unwrap();
+        s.process(WorkBudget::default(), &cancel).unwrap();
+        let snapshot = s.snapshot(2).unwrap();
+        let mut spans = [WaveformSpan::default(); 1];
+        let mut output = [WaveformColumn::default(); 2];
+        let mut text = [0u8; 64];
+        let owned = snapshot
+            .copy_to(
+                owned_result::Storage {
+                    overview_spans: &mut spans,
+                    overview_columns: &mut output,
+                    text_bytes: &mut text,
+                    ..owned_result::Storage::default()
+                },
+                NativeLimits::default(),
+                WAVEFORM_OVERVIEW,
+            )
+            .unwrap();
+        assert_eq!(owned.overview().unwrap().columns, s.columns());
+        assert_eq!(s.processed_frames(), 110);
+    }
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 }

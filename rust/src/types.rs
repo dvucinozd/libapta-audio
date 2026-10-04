@@ -13,6 +13,8 @@ pub enum Error {
     Unsupported,
     NotAvailable,
     Cancelled,
+    /// A live runtime resource prevents logical context closure.
+    Busy,
     /// A stream callback stalled or violated its byte-count contract.
     Source,
     ResultSlotsExhausted,
@@ -31,6 +33,7 @@ impl core::fmt::Display for Error {
             Self::Unsupported => "unsupported feature or version",
             Self::NotAvailable => "result not available",
             Self::Cancelled => "processing cancelled",
+            Self::Busy => "context still owns live resources",
             Self::Source => "source or stream error",
             Self::ResultSlotsExhausted => "retained results occupy all publication slots",
             Self::Conflict => "input conflicts with previously accepted data",

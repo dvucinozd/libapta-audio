@@ -59,16 +59,25 @@ impl CancellationToken {
     }
 }
 
-pub struct Session<'a> {
-    analysis: Option<crate::analysis::Analysis<'a>>,
-    global: Option<crate::global_analysis::GlobalAnalysis<'a>>,
+pub struct Session<
+    'a,
+    Q = &'a mut [NormalizedSample],
+    O = &'a mut [WaveformColumn],
+    B = &'a mut [crate::analysis::OnsetBin],
+    F = &'a mut [f32],
+    G = &'a mut [crate::analysis::OnsetBin],
+    H = &'a mut [f32],
+    E = &'a mut [crate::Beat],
+> {
+    analysis: Option<crate::analysis::Analysis<'a, B, F>>,
+    global: Option<crate::global_analysis::GlobalAnalysis<'a, G, H, E>>,
     key: Option<crate::key_analysis::KeyAnalysis>,
     quality_enabled: bool,
     detail: Option<crate::detail_analysis::DetailCache<'a>>,
     bands: Option<crate::band::OverviewBands<'a>>,
     config: SessionConfig,
-    queue: &'a mut [NormalizedSample],
-    output: &'a mut [WaveformColumn],
+    queue: Q,
+    output: O,
     head: usize,
     queued: usize,
     accepted: u64,
@@ -85,21 +94,38 @@ impl<'a> Session<'a> {
         queue: &'a mut [NormalizedSample],
         output: &'a mut [WaveformColumn],
     ) -> Result<Self, Error> {
+        Self::with_storage(config, queue, output)
+    }
+}
+
+impl<'a, Q, O, B, F, G, H, E> Session<'a, Q, O, B, F, G, H, E>
+where
+    Q: AsRef<[NormalizedSample]> + AsMut<[NormalizedSample]>,
+    O: AsRef<[WaveformColumn]> + AsMut<[WaveformColumn]>,
+    B: AsRef<[crate::analysis::OnsetBin]> + AsMut<[crate::analysis::OnsetBin]>,
+    F: AsRef<[f32]> + AsMut<[f32]>,
+    G: AsRef<[crate::analysis::OnsetBin]> + AsMut<[crate::analysis::OnsetBin]>,
+    H: AsRef<[f32]> + AsMut<[f32]>,
+    E: AsRef<[crate::Beat]> + AsMut<[crate::Beat]>,
+{
+    /// Use caller-defined owning or borrowed storage. Core never allocates;
+    /// storage must expose the same array between mutations of this session.
+    pub fn with_storage(config: SessionConfig, queue: Q, output: O) -> Result<Self, Error> {
         if config.sample_rate == 0
             || !(1..=2).contains(&config.channel_count)
             || !(64..=65536).contains(&config.frames_per_column)
             || !config.frames_per_column.is_power_of_two()
-            || queue.is_empty()
+            || queue.as_ref().is_empty()
         {
             return Err(Error::InvalidArgument);
         }
         let columns = config.total_frames / u64::from(config.frames_per_column)
             + u64::from(config.total_frames % u64::from(config.frames_per_column) != 0);
-        if config.total_frames != TOTAL_FRAMES_UNKNOWN && columns > output.len() as u64 {
+        if config.total_frames != TOTAL_FRAMES_UNKNOWN && columns > output.as_ref().len() as u64 {
             return Err(Error::BufferTooSmall);
         }
         let input_capacity = if config.total_frames == TOTAL_FRAMES_UNKNOWN {
-            (output.len() as u64)
+            (output.as_ref().len() as u64)
                 .saturating_mul(u64::from(config.frames_per_column))
                 .min(TOTAL_FRAMES_UNKNOWN - 1)
         } else {
@@ -124,6 +150,53 @@ impl<'a> Session<'a> {
             accumulator: WaveformAccumulator::default(),
             state: SessionState::Created,
         })
+    }
+
+    /// Replace the queue while preserving FIFO order, including a wrapped tail.
+    /// Failure leaves both the session and replacement storage unchanged.
+    pub fn replace_queue(&mut self, mut queue: Q) -> Result<Q, Error> {
+        if queue.as_ref().len() < self.queued || queue.as_ref().is_empty() {
+            return Err(Error::BufferTooSmall);
+        }
+        for i in 0..self.queued {
+            queue.as_mut()[i] = self.queue.as_ref()[(self.head + i) % self.queue.as_ref().len()];
+        }
+        self.head = 0;
+        Ok(core::mem::replace(&mut self.queue, queue))
+    }
+
+    /// Grow overview capacity without rebuilding analysis, queued PCM, or the
+    /// partial column accumulator. Existing immutable copies are independent.
+    /// Attached bands must already cover the replacement; detail coordinates
+    /// retain their u32 column ceiling. Failure does not write replacement data.
+    pub fn replace_output(&mut self, mut output: O) -> Result<O, Error> {
+        if output.as_ref().len() < self.output.as_ref().len() {
+            return Err(Error::BufferTooSmall);
+        }
+        let capacity = if self.config.total_frames == TOTAL_FRAMES_UNKNOWN {
+            u64::try_from(output.as_ref().len())
+                .map_err(|_| Error::LimitExceeded)?
+                .checked_mul(u64::from(self.config.frames_per_column))
+                .filter(|n| *n < TOTAL_FRAMES_UNKNOWN)
+                .ok_or(Error::LimitExceeded)?
+        } else {
+            self.input_capacity
+        };
+        if self
+            .bands
+            .as_ref()
+            .is_some_and(|b| b.sums.len() < output.as_ref().len())
+        {
+            return Err(Error::BufferTooSmall);
+        }
+        if self.detail.is_some()
+            && capacity.div_ceil(crate::detail_analysis::FRAMES_PER_COLUMN) > u64::from(u32::MAX)
+        {
+            return Err(Error::LimitExceeded);
+        }
+        output.as_mut()[..self.written].copy_from_slice(self.columns());
+        self.input_capacity = capacity;
+        Ok(core::mem::replace(&mut self.output, output))
     }
 
     /// Enable native broadband onset, tempo and local grid before accepting PCM.
@@ -192,11 +265,19 @@ impl<'a> Session<'a> {
         self.analysis.as_ref().map_or(0, |a| a.meter_serial())
     }
     pub fn enable_key(&mut self) -> Result<(), Error> {
+        self.enable_key_with_math(crate::key_analysis::KeyMath::default())
+    }
+    /// Attach a host numerical backend without changing the default portable path.
+    pub fn enable_key_with_math(
+        &mut self,
+        math: crate::key_analysis::KeyMath,
+    ) -> Result<(), Error> {
         if self.state != SessionState::Created || self.accepted != 0 || self.key.is_some() {
             return Err(Error::InvalidState);
         }
-        self.key = Some(crate::key_analysis::KeyAnalysis::new(
+        self.key = Some(crate::key_analysis::KeyAnalysis::new_with_math(
             self.config.sample_rate,
+            math,
         )?);
         Ok(())
     }
@@ -214,14 +295,14 @@ impl<'a> Session<'a> {
     pub fn enable_global_grid(
         &mut self,
         dynamic: bool,
-        bins: &'a mut [crate::analysis::OnsetBin],
-        flux: &'a mut [f32],
-        beats: &'a mut [crate::Beat],
+        bins: G,
+        flux: H,
+        beats: E,
     ) -> Result<(), Error> {
         if self.state != SessionState::Created || self.accepted != 0 || self.global.is_some() {
             return Err(Error::InvalidState);
         }
-        self.global = Some(crate::global_analysis::GlobalAnalysis::new(
+        self.global = Some(crate::global_analysis::GlobalAnalysis::with_storage(
             self.config.sample_rate,
             self.total_frames(),
             dynamic,
@@ -260,15 +341,11 @@ impl<'a> Session<'a> {
     pub(crate) fn global_serial(&self) -> u64 {
         self.global.as_ref().map_or(0, |g| g.mutation_serial())
     }
-    pub fn enable_tempo(
-        &mut self,
-        bins: &'a mut [crate::analysis::OnsetBin],
-        flux: &'a mut [f32],
-    ) -> Result<(), Error> {
+    pub fn enable_tempo(&mut self, bins: B, flux: F) -> Result<(), Error> {
         if self.state != SessionState::Created || self.accepted != 0 || self.analysis.is_some() {
             return Err(Error::InvalidState);
         }
-        self.analysis = Some(crate::analysis::Analysis::new(
+        self.analysis = Some(crate::analysis::Analysis::with_storage(
             self.config.sample_rate,
             bins,
             flux,
@@ -307,11 +384,11 @@ impl<'a> Session<'a> {
         if self.state != SessionState::Created || self.accepted != 0 || self.bands.is_some() {
             return Err(Error::InvalidState);
         }
-        if sums.len() < self.output.len() {
+        if sums.len() < self.output.as_ref().len() {
             return Err(Error::BufferTooSmall);
         }
         let filter = crate::band::BandFilter::new(self.config.sample_rate)?;
-        sums[..self.output.len()].fill(crate::band::BandSums::default());
+        sums[..self.output.as_ref().len()].fill(crate::band::BandSums::default());
         self.bands = Some(crate::band::OverviewBands { sums, filter });
         Ok(())
     }
@@ -361,7 +438,7 @@ impl<'a> Session<'a> {
     pub fn total_frames(&self) -> Option<u64> {
         (self.config.total_frames != TOTAL_FRAMES_UNKNOWN).then_some(self.config.total_frames)
     }
-    /// Maximum accepted frames with the supplied output storage (fixed at creation).
+    /// Maximum accepted frames with the currently attached output storage.
     pub fn input_capacity_frames(&self) -> u64 {
         self.input_capacity
     }
@@ -408,8 +485,8 @@ impl<'a> Session<'a> {
             if let Some(global) = &mut self.global {
                 global.push(self.accepted + frame as u64, sample.value);
             }
-            let index = (self.head + self.queued) % self.queue.len();
-            self.queue[index] = sample;
+            let index = (self.head + self.queued) % self.queue.as_ref().len();
+            self.queue.as_mut()[index] = sample;
             self.queued += 1;
         }
         self.accepted += count as u64;
@@ -432,7 +509,7 @@ impl<'a> Session<'a> {
             return Err(Error::BufferTooSmall);
         }
         let count = supplied
-            .min(self.queue.len() - self.queued)
+            .min(self.queue.as_ref().len() - self.queued)
             .min(usize::try_from(available).unwrap_or(usize::MAX));
         if let Some(analysis) = &self.analysis {
             analysis.preflight(self.accepted, count)?;
@@ -459,7 +536,7 @@ impl<'a> Session<'a> {
         if let Some(detail) = &mut self.detail {
             detail.refresh_completed(Some(self.accepted))?;
         }
-        self.config.total_frames = self.accepted;
+        self.set_publication_total_frames(self.accepted);
         self.state = SessionState::Draining;
         Ok(())
     }
@@ -493,6 +570,10 @@ impl<'a> Session<'a> {
 
     pub(crate) fn set_publication_total_frames(&mut self, total: u64) {
         self.config.total_frames = total;
+        let total = self.total_frames();
+        if let Some(g) = &mut self.global {
+            g.set_total_frames(total);
+        }
     }
 
     pub(crate) fn set_publication_state(&mut self, state: SessionState) {
@@ -649,7 +730,7 @@ impl<'a> Session<'a> {
                 .min(256)
                 .min((frame_limit - progress.consumed_input_frames) as usize);
             for _ in 0..count {
-                let sample = self.queue[self.head];
+                let sample = self.queue.as_ref()[self.head];
                 if let Some(key) = &mut self.key {
                     key.push(self.processed, sample.value);
                 }
@@ -658,7 +739,7 @@ impl<'a> Session<'a> {
                 if let Some(bands) = &mut self.bands {
                     bands.sums[self.written].add(bands.filter.split(sample.value)?)?;
                 }
-                self.head = (self.head + 1) % self.queue.len();
+                self.head = (self.head + 1) % self.queue.as_ref().len();
                 self.queued -= 1;
                 self.processed += 1;
                 if self.processed % u64::from(self.config.frames_per_column) == 0 {
@@ -709,14 +790,107 @@ impl<'a> Session<'a> {
             column =
                 bands.sums[self.written].apply_complete(column, self.accumulator.sample_count());
         }
-        self.output[self.written] = column;
+        self.output.as_mut()[self.written] = column;
         self.written += 1;
         self.accumulator.clear();
     }
 
+    /// Mutation identities for detail, S4, S6, meter and key. These identify
+    /// working changes, not immutable result publication generations.
+    pub fn publication_serials(&self) -> [u64; 5] {
+        [
+            self.detail_mutation_serial(),
+            self.analysis_serial(),
+            self.global_serial(),
+            self.meter_serial(),
+            self.key_serial(),
+        ]
+    }
+
+    /// Borrow an actual overview/musical graph without allocation or a result
+    /// pool. Detail and metadata use separate caller-copy interfaces.
+    pub fn snapshot(
+        &self,
+        generation: u64,
+    ) -> Result<crate::session_snapshot::SessionSnapshot<'_>, Error> {
+        use crate::*;
+        if generation == 0 {
+            return Err(Error::InvalidArgument);
+        }
+        let end = (self.written as u64)
+            .checked_mul(u64::from(self.config.frames_per_column))
+            .ok_or(Error::LimitExceeded)?
+            .min(self.config.total_frames);
+        let local = self.local_grid();
+        let global = self.global_grid();
+        Ok(crate::session_snapshot::SessionSnapshot {
+            header: NativeResultInput {
+                source: SourceInfo {
+                    sample_rate: self.config.sample_rate,
+                    channel_count: self.config.channel_count,
+                    channel_layout: self.config.channel_count,
+                    total_frames: self.total_frames(),
+                    fingerprint_kind: 0,
+                    fingerprint: [0; 32],
+                },
+                info: NativeResultInfo {
+                    generation,
+                    session_state: match self.state {
+                        SessionState::Created => ResultSessionState::Created,
+                        SessionState::Running => ResultSessionState::AcceptingInput,
+                        SessionState::Draining => ResultSessionState::Draining,
+                        SessionState::Complete => ResultSessionState::Completed,
+                        SessionState::Cancelled => ResultSessionState::Cancelled,
+                        SessionState::Failed => ResultSessionState::Failed,
+                    },
+                    ..NativeResultInfo::default()
+                },
+                provenance: Provenance {
+                    origin: ProvenanceOrigin::NativeAnalysis,
+                    source_name: "libapta",
+                    source_version: env!("CARGO_PKG_VERSION"),
+                },
+                metadata: None,
+                overview: (self.written != 0).then_some(NativeOverview {
+                    frames_per_column: self.config.frames_per_column,
+                    origin_frame: 0,
+                    state: if self.state == SessionState::Complete {
+                        FeatureState::Final
+                    } else {
+                        FeatureState::Partial
+                    },
+                    confidence: 255,
+                    spans: &[],
+                    columns: self.columns(),
+                }),
+                detail: None,
+                tempo: self.tempo(),
+                key: self.key(),
+                meter: self.meter(),
+                revision: self.grid_revision(),
+                local_grid: None,
+                global_grid: None,
+                quality: &[],
+            },
+            span: [WaveformSpan {
+                first_frame: 0,
+                end_frame: end,
+                first_column_index: 0,
+                column_count: u32::try_from(self.written).map_err(|_| Error::LimitExceeded)?,
+                data_column_offset: 0,
+            }],
+            local,
+            local_coverage: [local.map_or(FrameRange::default(), |g| g.coverage)],
+            local_segment: local.map(|g| [g.segment]),
+            global,
+            global_coverage: [global.map_or(FrameRange::default(), |g| g.coverage_range)],
+            quality: self.bpm_quality().map(|q| [q]),
+        })
+    }
+
     /// Completed columns. Rust prevents mutating the session while this view is used.
     pub fn columns(&self) -> &[WaveformColumn] {
-        &self.output[..self.written]
+        &self.output.as_ref()[..self.written]
     }
 
     /// Copies a snapshot into independent caller storage; it can outlive this session.

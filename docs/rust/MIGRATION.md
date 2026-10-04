@@ -153,11 +153,11 @@ explicit. Integrate before independent review; never reset another agent's work.
 | S16/S24/S32/F32 interleaved/planar PCM | waveform/session | All five formats through typed views/session; exact C comparisons; C block ABI pending |
 | Quantized mono/stereo overview | waveform | Implemented; 44 exact C oracle cases, ties, overflow, endpoint clipping |
 | Three-band overview/detail | [band.rs](../../rust/src/band.rs), session/sparse | Three-band overview integrated; exact C comparisons; three-band detail remains outside original scope |
-| Push/backpressure/EOF/budgets/cancel | session | Implemented sequential known/unknown duration; fixed output capacity, budget/backpressure/EOF/cancel tests pass |
+| Push/backpressure/EOF/budgets/cancel | session | Implemented sequential known/unknown duration; caller capacity plus safe std unknown-duration output growth; budget/backpressure/EOF/cancel tests pass |
 | Pull/seek/release callbacks | [pull.rs](../../rust/src/pull.rs), [sparse_pull.rs](../../rust/src/sparse_pull.rs) | Sequential known/unknown and scheduled known-duration pull; exactly-once release and absolute-offset seeking; C callback ABI remains pending |
 | Focus/requests/sparse ranges/scheduler | [sparse.rs](../../rust/src/sparse.rs), [scheduler.rs](../../rust/src/scheduler.rs), publication | Known-duration sparse overview/detail request policy, protection and replay integrated; oracle/review/combined acceptance below; musical focus/demand and S4 work/progress mapping integrated; twelve musical C scenarios pass |
-| Context/static workspace/allocation classes | future runtime/FFI | Aggregate default-feature typed-array/retained-byte planning and atomic attachment preflight; C layout/classes pending |
-| Immutable generations/pool/concurrency | session + [runtime](../../rust/runtime/src/lib.rs)/future FFI | Owned graphs, two core slots, unknown-duration sequential publication and safe independent Arc readers; safe standard-heap graph ownership/concurrent readers implemented; growing session/context and C acquire/release pending |
+| Context/static workspace/allocation classes | future runtime/FFI | Aggregate typed planning/atomic attachment and native std context quotas/lifetime; C layout/classes/custom callbacks pending |
+| Immutable generations/pool/concurrency | session + [runtime](../../rust/runtime/src/lib.rs)/future FFI | Owned graphs, two core slots, unknown-duration sequential publication and safe independent Arc readers; safe standard-heap graph ownership/concurrent readers implemented; safe std growing sequential musical sessions/context lifetime implemented; C acquire/release pending |
 | Resume/result seeding | publication/sparse/waveform | Validated owned overview checkpoint, source/fingerprint compatibility, inverse quantization and atomic native preflight; C tail difference documented below |
 | External validated result builder | [builder.rs](../../rust/src/builder.rs), [native_validation.rs](../../rust/src/native_validation.rs), [owned_result.rs](../../rust/src/owned_result.rs) | Encoded subset plus native graph/provenance/session-state validation and deep ownership; C allocator/API boundary pending |
 | S4 onset/BPM/local grid | [analysis.rs](../../rust/src/analysis.rs), session/sparse/publication | Default broadband analysis integrated; exact TEMP/LGRD C comparisons, focus and locking; experimental onset profiles pending |
@@ -165,7 +165,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Musical key/meter/downbeat | [key_analysis.rs](../../rust/src/key_analysis.rs), analysis | Default C profiles integrated; exact MKEY/MTRD comparisons; original accuracy gates remain failed |
 | Quality/confidence calibration | analysis/session/sparse/publication | BPM LUT/model 1867860160 integrated; exact CONF comparisons; fresh accuracy qualification remains open |
 | POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed WAV decoder complete initial format slice; four tests; filesystem/callback adapters pending |
-| Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform and default musical desktop modes; eight waveform/nine musical WAV smoke cases and exact C musical bytes; CLI parity pending |
+| Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform and default musical desktop modes; eight waveform/nine musical WAV smoke cases and exact C musical bytes; additive native analyze/inspect/validate/version/WAV batch commands; C CLI parity pending |
 | Push/pull/installed/package/ESP examples | examples | Push/WAV-to-container example implemented; others pending |
 | C API/ABI and frozen 1.0 consumers | future FFI | Pending; C remains installed product |
 | CMake/pkg-config/shared/static packages | root build future FFI | Cargo additive only |
@@ -1136,3 +1136,152 @@ include overwrite protection and one complete desktop/C byte comparison.
 5. Establish Windows/ILP32/ESP-IDF software/platform acceptance and physical P4
    qualification. A portable AArch64 compile is not platform/hardware acceptance.
    No services, deployment or hardware were operated.
+
+## Owning runtime, late failure ordering and desktop continuation — 2026-10-04
+
+This continuation extends the preceding accepted checkpoint. C algorithms,
+published headers, ABI and container version remain unchanged. Work used one
+implementation agent and two build/test jobs.
+
+### Integrated core and runtime
+
+- Existing `Session`, `Analysis` and `GlobalAnalysis` accept owning array storage
+  through defaulted generic storage types. Borrowed constructors/callers remain
+  intact. Core remains `no_std`, allocation-free and unsafe-free; no replacement
+  session implementation or self-referential owner is introduced.
+- Transactional queue replacement retains FIFO order across ring wrap. Overview
+  growth retains written columns, partial accumulators, queued PCM and musical
+  history. Band capacity/detail coordinates are checked before replacement writes.
+  `SessionSnapshot` is an opaque graph obtained only from actual processing. It
+  supports trusted caller copying and session-to-wire conversion without granting
+  arbitrary external inputs trusted validation exceptions. Detail/metadata use
+  their existing separate interfaces.
+- Safe std `GrowingSession` owns queue/output and all default musical arrays.
+  Unknown duration grows overview online; known duration reserves overview up
+  front. Queue/output replacement allocations and aggregate capacity-byte limits
+  are preflighted before either replacement commits. All five musical arrays
+  allocate before attachment. Ring/beat/segment caps preserve default C policy.
+  Heap snapshots outlive every working array/writer and support Arc readers.
+  Failed snapshots/context quotas preserve latest; `refresh` retries only the
+  mirror, and further mutations are blocked until it succeeds. Accepted PCM and
+  completed processing must be inspected after such an error.
+- `RuntimeContext` serializes registration/closure, tracks owning writers and
+  actual retained heap-graph capacities, and returns Busy until writers, current
+  channels and acquired graphs are released. Graph leases drop after payload
+  arrays. Logical close is permanent across cloned context handles. Quotas cover
+  committed graph headers/arrays, not peak process memory, transient copies,
+  mutable workspaces, or standard Arc/Mutex/RwLock control allocations. This is
+  native context lifetime/accounting, not C allocator/layout/allocation classes.
+
+### Public C contracts established and corrected
+
+The lifecycle oracle now checks **75 profiles**, adding BPM-only, key-only,
+BPM/global without local grids and calibrated BPM without local grids, with
+clock, exhaustion, cancellation and unknown-duration variants. Local flags,
+applicability and revision identities/states join the exact discrete trace.
+Two late Draining profiles establish S4-only/all-stage lock publication
+exhaustion, rollback, successful retry and idempotence.
+
+BPM-only bounded publication omits the local payload but reports the S4
+LOCAL_BEATGRID change bit. Unknown-duration C nonbounded publication retains the
+S4-derived local grid. Explicit requested-mask publication now preserves those
+measured distinctions; ordinary construction still derives native availability.
+This compatibility projection compares known bounded C and unknown nonbounded C;
+it is not a general known-duration C heap-mode emulation.
+
+A new public mutation oracle establishes running locked revision exhaustion.
+Applied working state survives failed acceptance publication; repeated apply
+returns InvalidState. Retry publishes S4 before S6, and a retained newer reader
+can exhaust S6 again after S4 succeeds. The previous native combined retry was
+incorrect. Sequential and sparse publication now acknowledge musical mutation
+serials only for their stage's successful publication. Waveform snapshots retain
+existing detail acknowledgement, including state-only EOF. Old readers remain
+immutable throughout the trace.
+
+Unknown-duration S6 now receives resolved EOF through the same transactional
+source-duration setter used by publication rollback. Its requested range matches
+C's final known length. Reference-derived S4 requested-range rounding and trusted
+meter exceptions remain preserved.
+
+### Numerical backend boundary
+
+The broader runtime fixture exposed a portable key discrepancy: uniform 120 BPM
+impulses, 8 kHz, 320000 frames, amplitude 0.75 produce portable selected score
+**55734** versus host C **55735**. The retained diagnostic reports exact coefficient,
+chroma and candidate comparisons; no tolerance, clamping or changed fixture hides
+this failure. Existing portable default behavior is preserved.
+
+`KeyMath` is an explicit fixed numerical backend. The portable default is libm;
+std owning sessions select platform f32 cosine/log/square root. The unchanged C
+math oracle uses public session processing and test-only internal arithmetic
+observations, then public key access. Platform coefficients, chroma and all three
+encoded candidate scores compare exactly on this host. Complete owning-runtime
+containers compare exactly against public C for known duration, partial unknown
+EOF and changing tempo. This qualifies those host profiles, not universal
+portable libm equivalence or another platform's math backend. Original accuracy,
+rejected optional profiles and spent holdouts remain unchanged.
+
+### Native outside consumer
+
+`rust/runtime/src/bin/apta-native.rs` implements actual native analyze, inspect,
+validate, version and local WAV corpus commands through owning analysis,
+context lifetime and trusted serialization. Waveform and default music are
+supported; strict native/C validation, all recognized section summaries,
+create-new output protection, deterministic WAV ordering and retained successful
+batch outputs are tested. Inputs are limited to 256 MiB. This additive command
+surface is not C tool option/output parity or a replacement for fingerprinting,
+metadata, JSON qualification exports and frozen privacy/corpus tooling. C remains
+installed; CMake/pkg-config/static/shared ABI packaging is unchanged.
+
+### Acceptance and evidence
+
+Evidence root: `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
+
+- `continuation-runtime-baseline.log`: unchanged starting suite.
+- `continuation-runtime-combined-check.log`: final **123/123 C tests**, **244
+  ordinary Rust tests** and **40 explicitly enabled external-C groups** in each
+  debug/release profile; formatting, all-target Clippy, no-default-features and
+  isolated core allocation counters pass. The runner registers all new oracles.
+- Eight waveform/nine musical example cases plus eight waveform/nine musical
+  native CLI cases pass strict C interchange/overwrite protection. Exact complete
+  runtime containers and command tests include batch failure retention and corrupt
+  input rejection. Small retained artifacts: `combined/smoke-native-musical.apta`,
+  `combined/smoke-musical.apta`, `combined/smoke-waveform.apta`.
+- `runtime-allocation-tests.log`: isolated injection into both queue/output
+  replacement allocations, both early snapshot provenance arrays and all five
+  musical workspace allocations. Preflight failures commit no PCM/stages;
+  snapshot failures retain committed accepted PCM and retry only the mirror.
+  Standard Arc/lock control allocation failures are deliberately not injected.
+- `continuation-runtime-asan-check.log`: **22 runtime tests**, including all three
+  runtime external-C groups, pass AddressSanitizer with leak detection using the
+  available compiler's sanitizer flag via `RUSTC_BOOTSTRAP=1`. This instruments
+  native Rust/runtime tests, not the unchanged C reference or a rebuilt std.
+- `continuation-runtime-aarch64-check.log`: portable no-default-features AArch64
+  compilation. `continuation-runtime-key-backends.log` retains the portable
+  discrepancy and exact host backend acceptance. Focused context/revision/CLI
+  traces are in `runtime-context-oracle.log`, `runtime-revision-failure.log` and
+  `runtime-tools-tests.log`. Diff and knowledge notebook validation pass.
+
+### Remaining work and next executable handoff
+
+1. Extend the all-stage publication failure matrix beyond late lock and running
+   S4/S6 revision traces; integrate public C musical/detail replay evidence,
+   near-limit sparse coordinates and ensemble promotion variants. Native all-stage
+   sparse processing is retained, but its complete combined detail matrix is open.
+2. Extend owning sessions into band/detail, sparse/pull and requested-capability
+   mutation paths. Known-duration owning output is preallocated. Establish broader
+   portable numerical/backend acceptance before claiming universal exact scores.
+3. Implement full C context/custom allocators, allocation classes, C workspace
+   layout, allocation failure ordering and concurrent ABI acquire/release. Native
+   standard-heap controls remain subject to the standard allocator contract.
+4. Implement/review the unsafe ABI boundary separately, static/shared
+   CMake/pkg-config packaging and frozen consumers. Finish C-compatible analyzer
+   options, inspection/JSON/metadata/fingerprint and frozen corpus interfaces.
+5. Establish Windows/MSVC, ILP32 and ESP-IDF software acceptance plus unchanged
+   original DSP accuracy and physical P4 gates. AArch64 compilation and host ASan
+   are not those platform or hardware qualifications. No service, deployment or
+   hardware operation occurred.
+
+Resume from this section and the current source/checklist, inspecting Git live.
+Run the final combined command with two jobs before new behavior. Preserve C and
+all accepted native differences; do not infer complete replacement from counts.

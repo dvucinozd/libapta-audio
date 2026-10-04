@@ -508,7 +508,10 @@ impl<'a> ResultPool<'a> {
             if requested & crate::result::BPM == 0 {
                 input.tempo = None;
             }
-            if requested & crate::result::LOCAL_BEATGRID == 0 {
+            // Unknown-duration compatibility follows C's nonbounded S4
+            // snapshot, which retains its derived local grid for BPM-only.
+            if requested & crate::result::LOCAL_BEATGRID == 0 && self.source.total_frames.is_some()
+            {
                 input.local_grid = None;
             }
             if requested & crate::result::GLOBAL_BEATGRID == 0 {
@@ -534,9 +537,8 @@ impl<'a> ResultPool<'a> {
                 if input.tempo.is_none() {
                     changed &= !crate::result::BPM;
                 }
-                if input.local_grid.is_none() {
-                    changed &= !crate::result::LOCAL_BEATGRID;
-                }
+                // C reports the S4 stage mutation (BPM | LOCAL_BEATGRID)
+                // even when the requested mask projects out the grid payload.
                 if input.tempo.is_some() {
                     changed |= requested & crate::result::CONFIDENCE;
                 }
@@ -828,15 +830,27 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
         let quality = self.session.bpm_quality().map(|q| [q]);
         input.quality = quality.as_ref().map_or(&[], |q| q.as_slice());
         input.meter = self.session.meter();
-        self.pool.publish(&input, self.changed)?;
+        let published = self.changed;
+        self.pool.publish(&input, published)?;
         self.pending = false;
         self.changed = 0;
         self.previous_columns = if hide_pending { 0 } else { columns.len() };
+        // Copying a complete graph does not acknowledge unrelated pending
+        // stage mutations. C marks each stage only after its own publication.
+        // Detail is part of the waveform snapshot, including state-only EOF.
         self.previous_detail_serial = self.session.detail_mutation_serial();
-        self.previous_analysis_serial = self.session.analysis_serial();
-        self.previous_global_serial = self.session.global_serial();
-        self.previous_key_serial = self.session.key_serial();
-        self.previous_meter_serial = self.session.meter_serial();
+        if published & (crate::result::BPM | crate::result::LOCAL_BEATGRID) != 0 {
+            self.previous_analysis_serial = self.session.analysis_serial();
+        }
+        if published & crate::result::GLOBAL_BEATGRID != 0 {
+            self.previous_global_serial = self.session.global_serial();
+        }
+        if published & crate::result::MUSICAL_KEY != 0 {
+            self.previous_key_serial = self.session.key_serial();
+        }
+        if published & crate::result::METER_DOWNBEAT != 0 {
+            self.previous_meter_serial = self.session.meter_serial();
+        }
         Ok(())
     }
     pub fn set_tempo_focus(&mut self, focus: crate::Focus) -> Result<(), Error> {
@@ -845,6 +859,7 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
     /// C-compatible acceptance ordering: a failed publication retains the accepted revision.
     pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
         self.session.apply_grid_revision(id)?;
+        let previous = (self.pending, self.changed);
         self.changed = crate::result::LOCAL_BEATGRID
             | crate::result::GLOBAL_BEATGRID
             | crate::result::GRID_LOCKING;
@@ -852,7 +867,13 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
             self.changed |= crate::result::DYNAMIC_TEMPO;
         }
         self.pending = true;
-        self.publish()
+        if let Err(error) = self.publish() {
+            // Applied working state remains. Retry through the separate S4/S6
+            // handlers so failure ordering and stage acknowledgements survive.
+            (self.pending, self.changed) = previous;
+            return Err(error);
+        }
+        Ok(())
     }
     pub fn lock_grid_range(&mut self, range: crate::FrameRange) -> Result<(), Error> {
         self.pool.preflight_lock(range)?;
@@ -1432,15 +1453,27 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         let quality = self.session.bpm_quality().map(|q| [q]);
         input.quality = quality.as_ref().map_or(&[], |q| q.as_slice());
         input.meter = self.session.meter();
-        self.pool.publish(&input, self.changed)?;
+        let published = self.changed;
+        self.pool.publish(&input, published)?;
         self.pending = false;
         self.changed = 0;
         self.previous_columns = if hide_pending { 0 } else { n };
+        // Copying a complete graph does not acknowledge unrelated pending
+        // stage mutations. C marks each stage only after its own publication.
+        // Detail is part of the waveform snapshot, including state-only EOF.
         self.previous_detail_serial = self.session.detail_mutation_serial();
-        self.previous_analysis_serial = self.session.analysis_serial();
-        self.previous_global_serial = self.session.global_serial();
-        self.previous_key_serial = self.session.key_serial();
-        self.previous_meter_serial = self.session.meter_serial();
+        if published & (crate::result::BPM | crate::result::LOCAL_BEATGRID) != 0 {
+            self.previous_analysis_serial = self.session.analysis_serial();
+        }
+        if published & crate::result::GLOBAL_BEATGRID != 0 {
+            self.previous_global_serial = self.session.global_serial();
+        }
+        if published & crate::result::MUSICAL_KEY != 0 {
+            self.previous_key_serial = self.session.key_serial();
+        }
+        if published & crate::result::METER_DOWNBEAT != 0 {
+            self.previous_meter_serial = self.session.meter_serial();
+        }
         Ok(())
     }
     pub fn set_tempo_focus(&mut self, focus: crate::Focus) -> Result<(), Error> {
@@ -1449,6 +1482,7 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
     /// C-compatible acceptance ordering: a failed publication retains the accepted revision.
     pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
         self.session.apply_grid_revision(id)?;
+        let previous = (self.pending, self.changed);
         self.changed = crate::result::LOCAL_BEATGRID
             | crate::result::GLOBAL_BEATGRID
             | crate::result::GRID_LOCKING;
@@ -1456,7 +1490,13 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
             self.changed |= crate::result::DYNAMIC_TEMPO;
         }
         self.pending = true;
-        self.publish()
+        if let Err(error) = self.publish() {
+            // Applied working state remains. Retry through the separate S4/S6
+            // handlers so failure ordering and stage acknowledgements survive.
+            (self.pending, self.changed) = previous;
+            return Err(error);
+        }
+        Ok(())
     }
     pub fn lock_grid_range(&mut self, range: crate::FrameRange) -> Result<(), Error> {
         self.pool.preflight_lock(range)?;

@@ -72,7 +72,7 @@ def main():
          "-I", ROOT / "include", ROOT / "rust/tests/fixtures/seed_oracle.c",
          c_build / "libapta.a", "-lm", "-o", seed_oracle])
     analysis_oracles = {}
-    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle"):
+    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle", "key_math", "musical_failure", "context_lifetime"):
         executable = build / f"{name.replace('_', '-')}-oracle"
         run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
              "-I", ROOT / "include", "-I", ROOT / "src/core",
@@ -103,6 +103,9 @@ def main():
     run(["cargo", "test", "--workspace", "--release", "--locked", "--", "--ignored"], env=env)
     run(["cargo", "build", "--example", "wav_to_apta", "--locked"], env=env)
     executable = build / "cargo-target/debug/examples/wav_to_apta"
+    run(["cargo", "build", "-p", "libapta-runtime", "--bin", "apta-native", "--locked"], env=env)
+    native_cli = build / "cargo-target/debug/apta-native"
+    run([native_cli, "version"], env=env)
     # Original synthetic PCM, no private audio or external corpus involved.
     with tempfile.TemporaryDirectory(prefix="wav-smoke-", dir=build) as temp:
         temp = Path(temp)
@@ -134,6 +137,14 @@ def main():
                 result = subprocess.run([str(executable), str(wav), str(apta)], capture_output=True)
                 if result.returncode == 0 or apta.read_bytes() != before:
                     raise RuntimeError("example overwrote existing output")
+                for mode in ([], ["--music"]):
+                    native_output = wav.with_suffix(".native-music.apta" if mode else ".native.apta")
+                    run([native_cli, "analyze", wav, native_output, *mode], env=env)
+                    run([validator, native_output, "--strict"], env=env)
+                    original = native_output.read_bytes()
+                    overwrite = subprocess.run([str(native_cli), "analyze", str(wav), str(native_output), *mode], capture_output=True)
+                    if overwrite.returncode == 0 or native_output.read_bytes() != original:
+                        raise RuntimeError("native CLI overwrote existing output")
                 musical = wav.with_suffix(".music.apta")
                 run([executable, wav, musical, "--music"], env=env)
                 run([validator, musical, "--strict"], env=env)
@@ -156,10 +167,18 @@ def main():
         reference = subprocess.check_output([analysis_oracles["APTA_C_TEMPO_ANALYSIS_ORACLE"], "8000", "0", str(pcm_path), "all"])
         if musical.read_bytes() != reference:
             raise RuntimeError("musical desktop container differs from unchanged C")
+        native_musical = temp / "native-music.apta"
+        run([native_cli, "analyze", wav, native_musical, "--music"], env=env)
+        run([native_cli, "validate", native_musical], env=env)
+        run([validator, native_musical, "--strict"], env=env)
+        if native_musical.read_bytes() != reference:
+            raise RuntimeError("native runtime desktop container differs from unchanged C")
+        run([native_cli, "inspect", native_musical], env=env)
+        shutil.copyfile(native_musical, build / "smoke-native-musical.apta")
         shutil.copyfile(musical, build / "smoke-musical.apta")
         # Retain one small public result for manual inspection, not a large corpus.
         shutil.copyfile(apta, build / "smoke-waveform.apta")
-    print("Combined Rust/C checks, eight waveform and nine musical WAV interchange cases passed.")
+    print("Combined Rust/C checks, eight waveform/nine musical example and eight waveform/nine musical native CLI interchange cases passed.")
 
 
 if __name__ == "__main__":

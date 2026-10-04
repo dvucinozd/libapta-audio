@@ -4,7 +4,11 @@
 //! occupy explicit independent caller storage or independently owned heap arrays. No session or core pool is shared
 //! across threads, and no core result lease survives a synchronization call.
 #![forbid(unsafe_code)]
+mod context;
+mod growing;
+pub use context::{ContextLimits, ContextUsage, RuntimeContext};
 mod heap;
+pub use growing::{GrowingLimits, GrowingSession, OwningSession};
 pub use heap::{HeapResult, HeapResults};
 use libapta::{
     owned_result::{OwnedResult, Storage},

@@ -32,11 +32,13 @@ static void trace(apta_session_t *s) {
     int has = apta_result_get_tempo(r, NULL, &t) == 0;
     apta_grid_view_t g; apta_grid_view_init(&g); int has_global = apta_result_get_beatgrid(r, APTA_FEATURE_GLOBAL_BEATGRID, NULL, &g) == 0;
     apta_meter_view_t m; apta_meter_view_init(&m); int has_meter = apta_result_get_meter(r, NULL, &m) == 0;
-    printf("%" PRIu64 " %u %" PRIu64 " %" PRIu64 " %u %u %u %" PRIu64 " %" PRId64 " %" PRIu64 " %" PRIu64 " %u %u %u %u %u %" PRIu64 " %u\n", i.generation,
+    apta_grid_view_t lg; apta_grid_view_init(&lg); int has_local = apta_result_get_beatgrid(r, APTA_FEATURE_LOCAL_BEATGRID, NULL, &lg) == 0;
+    apta_grid_revision_view_t rv; apta_grid_revision_view_init(&rv); int has_revision = apta_result_get_grid_revision(r, &rv) == 0;
+    printf("%" PRIu64 " %u %" PRIu64 " %" PRIu64 " %u %u %u %" PRIu64 " %" PRId64 " %" PRIu64 " %" PRIu64 " %u %u %u %u %u %" PRIu64 " %u %u %" PRIu64 " %" PRIu64 " %u %u\n", i.generation,
         i.session_state, i.available_features, i.changed_features,
         has ? t.selected.tempo_millibpm : 0, has ? t.selected.state : 0, clock_calls,
         has_meter ? m.downbeat_frame : 0, has_meter ? m.downbeat_ordinal : 0,
-        has_meter ? m.segments[0].applicability_range.first_frame : 0, has_meter ? m.segments[0].applicability_range.end_frame : 0, has_global ? g.flags : 0, has_global ? g.segment_count : 0, has_global ? g.beat_count : 0, reads, releases, read_first, requested);
+        has_meter ? m.segments[0].applicability_range.first_frame : 0, has_meter ? m.segments[0].applicability_range.end_frame : 0, has_global ? g.flags : 0, has_global ? g.segment_count : 0, has_global ? g.beat_count : 0, reads, releases, read_first, requested, has_local ? lg.flags : 0, has_local ? lg.applicability_range.first_frame : 0, has_local ? lg.applicability_range.end_frame : 0, has_revision ? rv.state : 0, has_revision ? rv.revision_id : 0);
     apta_result_release(r);
 }
 int main(int argc, char **argv) {
@@ -49,6 +51,11 @@ int main(int argc, char **argv) {
     uint64_t features = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID;
     if (profile & 1) features |= APTA_FEATURE_CONFIDENCE | APTA_FEATURE_GRID_LOCKING;
     if (profile & 2) features |= APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO | APTA_FEATURE_MUSICAL_KEY | APTA_FEATURE_METER_DOWNBEAT | APTA_FEATURE_CALIBRATED_QUALITY;
+    /* Capability projections use independent public C sessions. */
+    if (profile & 65536) features = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM;
+    if (profile & 131072) features = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_MUSICAL_KEY;
+    if (profile & 262144) features = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM | APTA_FEATURE_GLOBAL_BEATGRID;
+    if (profile & 524288) features = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM | APTA_FEATURE_CONFIDENCE | APTA_FEATURE_CALIBRATED_QUALITY;
     apta_context_config_t cc; apta_context_config_init(&cc); cc.requested_capabilities = features; cc.clock.monotonic_time_ns = tick;
     apta_context_t *c = NULL; CHECK(apta_context_create(&cc, &c) == 0);
     apta_session_config_t sc; apta_session_config_init(&sc);
@@ -109,7 +116,15 @@ int main(int argc, char **argv) {
         } else CHECK(status >= 0);
         first += n;
     }
+    if (profile & 1048576) retained = apta_session_acquire_result(s);
     CHECK(apta_session_signal_end_of_input(s, input_count) == 0); trace(s);
+    if (profile & 1048576) {
+        lock.first_frame = input_count/4; lock.end_frame = input_count*3/4;
+        CHECK(apta_session_lock_grid_range(s, &lock) == APTA_ERROR_RESULT_SLOTS_EXHAUSTED); trace(s);
+        apta_result_release(retained); retained = NULL;
+        CHECK(apta_session_lock_grid_range(s, &lock) == 0); trace(s);
+        CHECK(apta_session_lock_grid_range(s, &lock) == 0); trace(s);
+    }
     { unsigned complete = 0;
       for (unsigned i = 0; i < 1000; i++) { int status = apta_session_process(s, &budget, NULL); CHECK(status >= 0); trace(s); if (status == APTA_STATUS_END_OF_INPUT) { complete = 1; break; } }
       CHECK(complete);

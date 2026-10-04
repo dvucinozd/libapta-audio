@@ -28,9 +28,10 @@ pub struct OnsetBin {
 }
 
 /// Caller storage holds both the mutable ring and the frozen refresh evidence.
-pub struct Analysis<'a> {
-    bins: &'a mut [OnsetBin],
-    flux: &'a mut [f32],
+pub struct Analysis<'a, B = &'a mut [OnsetBin], F = &'a mut [f32]> {
+    lifetime: core::marker::PhantomData<&'a ()>,
+    bins: B,
+    flux: F,
     rate: u32,
     active: bool,
     first: u64,
@@ -63,17 +64,27 @@ pub struct Analysis<'a> {
 }
 impl<'a> Analysis<'a> {
     pub fn new(rate: u32, bins: &'a mut [OnsetBin], flux: &'a mut [f32]) -> Result<Self, Error> {
+        Self::with_storage(rate, bins, flux)
+    }
+}
+impl<'a, B, F> Analysis<'a, B, F>
+where
+    B: AsRef<[OnsetBin]> + AsMut<[OnsetBin]>,
+    F: AsRef<[f32]> + AsMut<[f32]>,
+{
+    pub fn with_storage(rate: u32, mut bins: B, mut flux: F) -> Result<Self, Error> {
         if rate == 0 || rate > 768000 {
             return Err(Error::InvalidArgument);
         }
-        if bins.len() < BIN_CAPACITY || flux.len() < BIN_CAPACITY {
+        if bins.as_ref().len() < BIN_CAPACITY || flux.as_ref().len() < BIN_CAPACITY {
             return Err(Error::BufferTooSmall);
         }
-        bins[..BIN_CAPACITY].fill(OnsetBin::default());
-        flux[..BIN_CAPACITY].fill(0.0);
+        bins.as_mut()[..BIN_CAPACITY].fill(OnsetBin::default());
+        flux.as_mut()[..BIN_CAPACITY].fill(0.0);
         Ok(Self {
-            bins: &mut bins[..BIN_CAPACITY],
-            flux: &mut flux[..BIN_CAPACITY],
+            lifetime: core::marker::PhantomData,
+            bins,
+            flux,
             rate,
             active: false,
             first: 0,
@@ -119,7 +130,7 @@ impl<'a> Analysis<'a> {
     }
     pub(crate) fn push(&mut self, frame: u64, sample: f32) {
         let index = (frame / BIN_FRAMES) as u32;
-        let bin = &mut self.bins[index as usize % BIN_CAPACITY];
+        let bin = &mut self.bins.as_mut()[index as usize % BIN_CAPACITY];
         if !bin.occupied || bin.index != index {
             *bin = OnsetBin {
                 index,
@@ -293,12 +304,12 @@ impl<'a> Analysis<'a> {
         let mut count = 0;
         for bin in (first..self.end).step_by(lag as usize).take(128) {
             let offset = (bin - self.first) as usize;
-            let mut value = self.flux[offset];
+            let mut value = self.flux.as_ref()[offset];
             if offset > 0 {
-                value = value.max(self.flux[offset - 1]);
+                value = value.max(self.flux.as_ref()[offset - 1]);
             }
             if offset + 1 < (self.end - self.first) as usize {
-                value = value.max(self.flux[offset + 1]);
+                value = value.max(self.flux.as_ref()[offset + 1]);
             }
             strengths[count] = value;
             count += 1;
@@ -353,7 +364,7 @@ impl<'a> Analysis<'a> {
         Ok(1)
     }
     fn bin(&self, index: u64) -> Option<&OnsetBin> {
-        let b = &self.bins[index as usize % BIN_CAPACITY];
+        let b = &self.bins.as_ref()[index as usize % BIN_CAPACITY];
         (b.occupied && u64::from(b.index) == index).then_some(b)
     }
     fn complete(&self, index: u64, eof: Option<u64>) -> bool {
@@ -366,8 +377,7 @@ impl<'a> Analysis<'a> {
                 .is_some_and(|b| u64::from(b.count) == expected)
     }
     fn evidence(&self, eof: Option<u64>) -> Option<(u64, u64)> {
-        let maximum = self
-            .bins
+        let maximum = self.bins.as_ref()[..BIN_CAPACITY]
             .iter()
             .filter(|b| b.occupied && self.complete(u64::from(b.index), eof))
             .map(|b| u64::from(b.index))
@@ -485,7 +495,7 @@ impl<'a> Analysis<'a> {
                 let mut previous = 0.0;
                 for i in first..end {
                     let energy = self.energy(i);
-                    self.flux[(i - first) as usize] = (energy - previous).max(0.0);
+                    self.flux.as_mut()[(i - first) as usize] = (energy - previous).max(0.0);
                     previous = energy;
                 }
                 self.first = first;
@@ -500,7 +510,7 @@ impl<'a> Analysis<'a> {
             if done == steps {
                 return Ok(done);
             }
-            let flux = &self.flux[..(self.end - self.first) as usize];
+            let flux = &self.flux.as_ref()[..(self.end - self.first) as usize];
             if self.next_lag <= self.maximum_lag {
                 let last = (self.next_lag + 3).min(self.maximum_lag);
                 for lag in self.next_lag..=last {
@@ -604,7 +614,7 @@ impl<'a> Analysis<'a> {
         {
             return Ok(0);
         }
-        let flux = &self.flux[..span];
+        let flux = &self.flux.as_ref()[..span];
         let offset = refine(flux, proposed_lag);
         let base = tempo_at_lag(self.rate, proposed_lag);
         let refined = if offset == 0.0 {
@@ -722,7 +732,7 @@ impl<'a> Analysis<'a> {
         if self.lags[0] == 0 || self.scores[0] < 0.05 {
             return Ok(());
         }
-        let flux = &self.flux[..(self.end - self.first) as usize];
+        let flux = &self.flux.as_ref()[..(self.end - self.first) as usize];
         let mut candidates = [TempoCandidate::default(); 3];
         let mut count = 0;
         for i in 0..3 {
