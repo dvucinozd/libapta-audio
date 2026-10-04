@@ -2,7 +2,8 @@
 
 See the [canonical migration checklist](../docs/rust/MIGRATION.md). The C
 implementation remains the installed product and comparison reference. This
-crate performs its own PCM, waveform, WAV and container work; it does not link C.
+crate performs its own PCM, waveform, default musical analysis, WAV and container
+work; it does not link C.
 It is not yet a full API/ABI or conformance replacement.
 
 ## Build and verify
@@ -208,5 +209,42 @@ comes from column flags despite C's bounded-pool mask omission. Exact C comparis
 run in debug and release through the existing seed and detail-pull oracles;
 allocation instrumentation includes feature-enabled seed/resume/replay/retained
 results. Evidence: `/home/shome/.local/share/libapta-audio/rust-rewrite/checkpoint-feature-seeding-combined-check.log`.
-The full core and outside replacement remain unfinished; musical DSP, nonbounded
+The full core and outside replacement remain unfinished; full musical lifecycle/request-mask acceptance, nonbounded
 ownership/concurrency/allocation classes, C ABI, tools and platform gates remain.
+
+
+### Native musical stages
+
+Sequential and sparse sessions and their publication wrappers now expose
+`enable_tempo`, `enable_global_grid`, `enable_key`, `enable_meter` and
+`enable_calibrated_quality`. Attach before input/seeding. Meter and calibrated
+BPM quality require tempo. Default C onset/S4, S6, key, meter and calibration
+algorithms process actual accepted/processed PCM; snapshots and wire sections
+are produced by the integrated session, with cooperative analysis budgets.
+
+S4 needs caller arrays of 4096 `analysis::OnsetBin` and 4096 f32 values. S6 needs
+16384 bin/flux entries and 3072 `Beat` entries. Each enabled immutable slot needs
+three tempo/key candidates, one local coverage/segment, one global coverage/eight
+segments/3072 beats, one meter segment and one quality record. The core allocates
+nothing. The existing workspace planner still covers waveform only; attachment
+preflights working storage and both slots' musical array/count capacities.
+Aggregate byte limits remain checked atomically at publication.
+
+Use `set_tempo_focus` and `lock_grid_range` for direct local-grid control.
+`apply_grid_revision` accepts a Pending S6 conflict into the locked local grid;
+wrong IDs conflict, repeated acceptance is InvalidState. Acceptance persists when
+publication fails and `process` retries it. Serialize retained session results
+with `result::from_session_result`; external builder validation remains strict.
+Known/unknown sequential pull now drains musical work after EOF without rereading
+or releasing blocks again. The two-slot publication pool remains single-threaded.
+
+Exact C evidence covers seven wire section types and a complete integrated
+container, plus focus/locking and pending/applied revisions. Native lifecycle
+checks cover retained results, exhaustion/retry, sparse evidence and one-step
+pull completion. Evidence:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/continuation-combined-check.log`.
+See [MIGRATION.md](../docs/rust/MIGRATION.md#integrated-musical-analysis-continuation--2026-10-04)
+for storage, termination differences, exact acceptance boundaries and next gates.
+Musical request/mask/generation trace parity, feature workspace planning,
+nonbounded/concurrent ownership and the complete C ABI/tools/platform replacement
+remain unfinished. Original algorithm accuracy and hardware gates remain open.

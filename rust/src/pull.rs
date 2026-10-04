@@ -110,6 +110,52 @@ impl<'a, S: PullSource> PullSession<'a, S> {
     pub fn failure(&self) -> Option<Error> {
         self.failure
     }
+    pub fn enable_tempo(
+        &mut self,
+        bins: &'a mut [crate::analysis::OnsetBin],
+        flux: &'a mut [f32],
+    ) -> Result<(), Error> {
+        self.session.enable_tempo(bins, flux)
+    }
+    pub fn enable_global_grid(
+        &mut self,
+        dynamic: bool,
+        bins: &'a mut [crate::analysis::OnsetBin],
+        flux: &'a mut [f32],
+        beats: &'a mut [crate::Beat],
+    ) -> Result<(), Error> {
+        self.session.enable_global_grid(dynamic, bins, flux, beats)
+    }
+    pub fn enable_key(&mut self) -> Result<(), Error> {
+        self.session.enable_key()
+    }
+    pub fn enable_meter(&mut self) -> Result<(), Error> {
+        self.session.enable_meter()
+    }
+    pub fn enable_calibrated_quality(&mut self) -> Result<(), Error> {
+        self.session.enable_calibrated_quality()
+    }
+    pub fn tempo(&self) -> Option<crate::TempoView<'_>> {
+        self.session.tempo()
+    }
+    pub fn local_grid(&self) -> Option<crate::LocalGrid> {
+        self.session.local_grid()
+    }
+    pub fn global_grid(&self) -> Option<crate::GlobalGrid<'_>> {
+        self.session.global_grid()
+    }
+    pub fn grid_revision(&self) -> Option<crate::GridRevision> {
+        self.session.grid_revision()
+    }
+    pub fn key(&self) -> Option<crate::Key<'_>> {
+        self.session.key()
+    }
+    pub fn meter(&self) -> Option<crate::Meter<'_>> {
+        self.session.meter()
+    }
+    pub fn bpm_quality(&self) -> Option<crate::QualityRecord> {
+        self.session.bpm_quality()
+    }
     /// Attach caller-owned three-band storage before the first source read.
     pub fn enable_three_band(
         &mut self,
@@ -204,7 +250,10 @@ impl<'a, S: PullSource> PullSession<'a, S> {
             }
             None => session.process(budget, cancellation),
         };
-        if self.session.state() == SessionState::Complete {
+        if matches!(
+            self.session.state(),
+            SessionState::Complete | SessionState::Draining
+        ) {
             return Ok(PullProgress {
                 processing: process(&mut self.session, budget, clock)?,
                 would_block: false,

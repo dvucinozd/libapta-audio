@@ -60,6 +60,10 @@ impl CancellationToken {
 }
 
 pub struct Session<'a> {
+    analysis: Option<crate::analysis::Analysis<'a>>,
+    global: Option<crate::global_analysis::GlobalAnalysis<'a>>,
+    key: Option<crate::key_analysis::KeyAnalysis>,
+    quality_enabled: bool,
     detail: Option<crate::detail_analysis::DetailCache<'a>>,
     bands: Option<crate::band::OverviewBands<'a>>,
     config: SessionConfig,
@@ -102,6 +106,10 @@ impl<'a> Session<'a> {
             config.total_frames
         };
         Ok(Self {
+            analysis: None,
+            global: None,
+            key: None,
+            quality_enabled: false,
             detail: None,
             bands: None,
             config,
@@ -118,6 +126,178 @@ impl<'a> Session<'a> {
         })
     }
 
+    /// Enable native broadband onset, tempo and local grid before accepting PCM.
+    pub fn enable_calibrated_quality(&mut self) -> Result<(), Error> {
+        if self.state != SessionState::Created
+            || self.accepted != 0
+            || self.analysis.is_none()
+            || self.quality_enabled
+        {
+            return Err(Error::InvalidState);
+        }
+        self.quality_enabled = true;
+        Ok(())
+    }
+    pub fn bpm_quality(&self) -> Option<crate::QualityRecord> {
+        if !self.quality_enabled {
+            return None;
+        }
+        let total = self.total_frames()?;
+        if total == 0 {
+            return None;
+        }
+        let t = self.tempo()?.selected;
+        Some(crate::QualityRecord {
+            feature: crate::result::BPM,
+            calibration_model_id: 1867860160,
+            evidence_coverage_permille: crate::analysis::coverage_permille(self.accepted, total),
+            confidence: crate::analysis::calibrated_bpm_confidence(t.confidence),
+            state: t.state,
+            flags: 0,
+        })
+    }
+    pub fn set_tempo_focus(&mut self, focus: crate::Focus) -> Result<(), Error> {
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .set_focus(focus)
+    }
+    pub fn lock_grid_range(&mut self, range: crate::FrameRange) -> Result<(), Error> {
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .lock_range(range)
+    }
+    pub(crate) fn lock_checkpoint(&self) -> Option<(Option<crate::LocalGrid>, bool, u64)> {
+        self.analysis.as_ref().map(|a| a.lock_checkpoint())
+    }
+    pub(crate) fn restore_lock(&mut self, checkpoint: (Option<crate::LocalGrid>, bool, u64)) {
+        if let Some(a) = &mut self.analysis {
+            a.restore_lock(checkpoint);
+        }
+    }
+    pub fn enable_meter(&mut self) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 {
+            return Err(Error::InvalidState);
+        }
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .enable_meter()
+    }
+    pub fn meter(&self) -> Option<crate::Meter<'_>> {
+        self.analysis.as_ref().and_then(|a| a.meter())
+    }
+    pub(crate) fn meter_serial(&self) -> u64 {
+        self.analysis.as_ref().map_or(0, |a| a.meter_serial())
+    }
+    pub fn enable_key(&mut self) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 || self.key.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.key = Some(crate::key_analysis::KeyAnalysis::new(
+            self.config.sample_rate,
+        )?);
+        Ok(())
+    }
+    pub fn key(&self) -> Option<crate::Key<'_>> {
+        self.key.as_ref().and_then(|k| k.key()).map(|mut k| {
+            if self.state == SessionState::Complete {
+                k.state = crate::FeatureState::Final;
+            }
+            k
+        })
+    }
+    pub(crate) fn key_serial(&self) -> u64 {
+        self.key.as_ref().map_or(0, |k| k.mutation_serial())
+    }
+    pub fn enable_global_grid(
+        &mut self,
+        dynamic: bool,
+        bins: &'a mut [crate::analysis::OnsetBin],
+        flux: &'a mut [f32],
+        beats: &'a mut [crate::Beat],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 || self.global.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.global = Some(crate::global_analysis::GlobalAnalysis::new(
+            self.config.sample_rate,
+            self.total_frames(),
+            dynamic,
+            bins,
+            flux,
+            beats,
+        )?);
+        Ok(())
+    }
+    pub fn global_grid(&self) -> Option<crate::GlobalGrid<'_>> {
+        self.global.as_ref().and_then(|g| g.grid()).map(|mut g| {
+            if self.state == SessionState::Complete {
+                g.state = crate::FeatureState::Final;
+            }
+            g
+        })
+    }
+    /// Accept a pending global proposal into the locked local grid.
+    pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
+        if id == 0 {
+            return Err(Error::InvalidArgument);
+        }
+        let local = self.local_grid().ok_or(Error::InvalidState)?;
+        let global = self.global.as_mut().ok_or(Error::InvalidState)?;
+        let segment = global.revision_segment(id, local.segment)?;
+        let dynamic = global.grid().is_some_and(|g| g.flags & 2 != 0);
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .apply_revision(segment, dynamic)?;
+        global.apply_revision()
+    }
+    pub fn grid_revision(&self) -> Option<crate::GridRevision> {
+        self.global.as_ref().and_then(|g| g.revision())
+    }
+    pub(crate) fn global_serial(&self) -> u64 {
+        self.global.as_ref().map_or(0, |g| g.mutation_serial())
+    }
+    pub fn enable_tempo(
+        &mut self,
+        bins: &'a mut [crate::analysis::OnsetBin],
+        flux: &'a mut [f32],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 || self.analysis.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.analysis = Some(crate::analysis::Analysis::new(
+            self.config.sample_rate,
+            bins,
+            flux,
+        )?);
+        Ok(())
+    }
+    pub fn tempo(&self) -> Option<crate::TempoView<'_>> {
+        self.analysis.as_ref().and_then(|a| a.tempo()).map(|mut t| {
+            if self.state == SessionState::Complete {
+                t.selected.state = crate::FeatureState::Final;
+            }
+            t
+        })
+    }
+    pub fn local_grid(&self) -> Option<crate::LocalGrid> {
+        self.analysis
+            .as_ref()
+            .and_then(|a| a.local_grid())
+            .map(|mut g| {
+                if self.state == SessionState::Complete {
+                    g.state = crate::FeatureState::Final;
+                    g.segment.state = crate::FeatureState::Final;
+                }
+                g
+            })
+    }
+    pub(crate) fn analysis_serial(&self) -> u64 {
+        self.analysis.as_ref().map_or(0, |a| a.mutation_serial())
+    }
     /// Enable three-band overview while Created, before input or seeding.
     /// Storage must cover every possible logical overview column.
     pub fn enable_three_band(
@@ -224,6 +404,12 @@ impl<'a> Session<'a> {
         let count = supplied
             .min(self.queue.len() - self.queued)
             .min(usize::try_from(available).unwrap_or(usize::MAX));
+        if let Some(analysis) = &self.analysis {
+            analysis.preflight(self.accepted, count)?;
+        }
+        if let Some(global) = &self.global {
+            global.preflight(self.accepted, count)?;
+        }
         for index in 0..count {
             samples.sample_frame(index, channels)?;
         }
@@ -231,6 +417,12 @@ impl<'a> Session<'a> {
             let sample = samples.sample_frame(frame, channels)?;
             if let Some(detail) = &mut self.detail {
                 detail.push_normalized(self.accepted + frame as u64, sample, |_| false)?;
+            }
+            if let Some(analysis) = &mut self.analysis {
+                analysis.push(self.accepted + frame as u64, sample.value);
+            }
+            if let Some(global) = &mut self.global {
+                global.push(self.accepted + frame as u64, sample.value);
             }
             let index = (self.head + self.queued) % self.queue.len();
             self.queue[index] = sample;
@@ -293,22 +485,25 @@ impl<'a> Session<'a> {
 
     pub(crate) fn set_publication_state(&mut self, state: SessionState) {
         self.state = state;
+        if let Some(a) = &mut self.analysis {
+            a.set_completed(state == SessionState::Complete);
+        }
+        if let Some(g) = &mut self.global {
+            g.set_completed(state == SessionState::Complete);
+        }
     }
 
     pub(crate) fn ready_to_complete(&self) -> bool {
-        self.state == SessionState::Draining && self.queued == 0
-    }
-
-    pub(crate) fn process_deferred_completion(
-        &mut self,
-        budget: WorkBudget,
-        cancellation: &CancellationToken,
-    ) -> Result<Progress, Error> {
-        self.process_deferred_deadline(
-            budget,
-            cancellation,
-            &mut crate::deadline::Deadline::disabled(),
-        )
+        self.state == SessionState::Draining
+            && self.queued == 0
+            && self.analysis.as_ref().map_or(true, |a| {
+                !a.pending(Some(self.accepted)) && !a.meter_pending()
+            })
+            && self
+                .global
+                .as_ref()
+                .map_or(true, |g| !g.pending(Some(self.accepted)))
+            && self.key.as_ref().map_or(true, |k| !k.pending(true))
     }
 
     pub(crate) fn process_deferred_deadline(
@@ -320,6 +515,79 @@ impl<'a> Session<'a> {
         self.process_inner(budget, cancellation, false, deadline)
     }
 
+    pub(crate) fn process_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() {
+            0
+        } else if self.global.is_some() && steps != u32::MAX && steps > 1 {
+            steps / 2
+        } else {
+            steps
+        };
+        let proposal = self.global.as_ref().and_then(|g| g.proposal());
+        if let Some(analysis) = &mut self.analysis {
+            analysis.set_global_proposal(proposal);
+            let previous = analysis.tempo().map(|t| t.selected);
+            let mut done = analysis.refresh(
+                available,
+                (self.state == SessionState::Draining).then_some(self.accepted),
+                deadline,
+            )?;
+            if analysis.ensemble_pending() && done < steps && !deadline.expired() {
+                done += analysis.ensemble(steps - done, previous)?;
+            }
+            Ok(done)
+        } else {
+            Ok(0)
+        }
+    }
+    pub(crate) fn has_analysis(&self) -> bool {
+        self.analysis.is_some() || self.global.is_some() || self.key.is_some()
+    }
+    pub(crate) fn process_global_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() { 0 } else { steps };
+        let fallback = self.tempo().map(|t| t.selected);
+        let locked = self
+            .local_grid()
+            .filter(|g| g.flags & 256 != 0)
+            .map(|g| g.segment);
+        self.global.as_mut().map_or(Ok(0), |g| {
+            g.refresh(
+                available,
+                (self.state == SessionState::Draining).then_some(self.accepted),
+                fallback,
+                locked,
+                deadline,
+            )
+        })
+    }
+    pub(crate) fn process_key_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() { 0 } else { steps };
+        self.key.as_mut().map_or(Ok(0), |k| {
+            k.refresh(available, self.state == SessionState::Draining)
+        })
+    }
+    pub(crate) fn process_meter_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() { 0 } else { steps };
+        self.analysis
+            .as_mut()
+            .map_or(Ok(0), |a| a.refresh_meter(available))
+    }
     fn process_inner(
         &mut self,
         budget: WorkBudget,
@@ -370,6 +638,9 @@ impl<'a> Session<'a> {
                 .min((frame_limit - progress.consumed_input_frames) as usize);
             for _ in 0..count {
                 let sample = self.queue[self.head];
+                if let Some(key) = &mut self.key {
+                    key.push(self.processed, sample.value);
+                }
                 self.accumulator
                     .push_normalized(sample.value, sample.clipped)?;
                 if let Some(bands) = &mut self.bands {
@@ -388,13 +659,33 @@ impl<'a> Session<'a> {
                 break;
             }
         }
-        deadline.analysis_boundaries();
+        if complete {
+            progress.completed_steps +=
+                self.process_analysis(step_limit - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_global_analysis(step_limit - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_key_analysis(step_limit - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_meter_analysis(step_limit - progress.completed_steps, deadline)?;
+        } else if !self.has_analysis() {
+            deadline.analysis_boundaries();
+        }
         if self.state == SessionState::Draining && self.queued == 0 {
             if self.accumulator.sample_count() != 0 {
                 self.publish_column();
             }
-            if complete {
-                self.state = SessionState::Complete;
+            if complete
+                && self.analysis.as_ref().map_or(true, |a| {
+                    !a.pending(Some(self.accepted)) && !a.meter_pending()
+                })
+                && self
+                    .global
+                    .as_ref()
+                    .map_or(true, |g| !g.pending(Some(self.accepted)))
+                && self.key.as_ref().map_or(true, |k| !k.pending(true))
+            {
+                self.set_publication_state(SessionState::Complete);
             }
         }
         Ok(progress)

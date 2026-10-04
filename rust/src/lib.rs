@@ -5,6 +5,7 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+pub mod analysis;
 pub mod band;
 pub mod builder;
 pub mod container;
@@ -12,7 +13,9 @@ mod deadline;
 pub mod detail;
 pub mod detail_analysis;
 pub mod dj;
+pub mod global_analysis;
 pub mod grid;
+pub mod key_analysis;
 pub mod meta;
 pub mod native_validation;
 pub mod owned_result;

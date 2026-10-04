@@ -36,6 +36,10 @@ pub struct Workspace<'a> {
 }
 
 pub struct SparseSession<'a> {
+    analysis: Option<crate::analysis::Analysis<'a>>,
+    global: Option<crate::global_analysis::GlobalAnalysis<'a>>,
+    key: Option<crate::key_analysis::KeyAnalysis>,
+    quality_enabled: bool,
     detail: Option<crate::detail_analysis::DetailCache<'a>>,
     bands: Option<crate::band::OverviewBands<'a>>,
     config: SessionConfig,
@@ -46,6 +50,8 @@ pub struct SparseSession<'a> {
     processed: u64,
     serial: u64,
     complete_columns: usize,
+    snapshot_span_count: usize,
+    snapshot_column_count: usize,
     eof: bool,
     state: SessionState,
 }
@@ -84,6 +90,10 @@ impl<'a> SparseSession<'a> {
         workspace.accumulators[..n].fill(SparseAccumulator::default());
         workspace.nodes.fill(QueuedBlock::default());
         Ok(Self {
+            analysis: None,
+            global: None,
+            key: None,
+            quality_enabled: false,
             detail: None,
             bands: None,
             config,
@@ -94,6 +104,8 @@ impl<'a> SparseSession<'a> {
             processed: 0,
             serial: 0,
             complete_columns: 0,
+            snapshot_span_count: 0,
+            snapshot_column_count: 0,
             eof: false,
             state: SessionState::Created,
         })
@@ -117,6 +129,180 @@ impl<'a> SparseSession<'a> {
         Ok(())
     }
 
+    pub fn enable_calibrated_quality(&mut self) -> Result<(), Error> {
+        if self.state != SessionState::Created
+            || self.range_count != 0
+            || self.analysis.is_none()
+            || self.quality_enabled
+        {
+            return Err(Error::InvalidState);
+        }
+        self.quality_enabled = true;
+        Ok(())
+    }
+    pub fn bpm_quality(&self) -> Option<crate::QualityRecord> {
+        if !self.quality_enabled {
+            return None;
+        }
+        let total = self.config.total_frames;
+        if total == 0 {
+            return None;
+        }
+        let t = self.tempo()?.selected;
+        Some(crate::QualityRecord {
+            feature: crate::result::BPM,
+            calibration_model_id: 1867860160,
+            evidence_coverage_permille: crate::analysis::coverage_permille(
+                self.accepted_ranges().last().map_or(0, |r| r.end_frame),
+                total,
+            ),
+            confidence: crate::analysis::calibrated_bpm_confidence(t.confidence),
+            state: t.state,
+            flags: 0,
+        })
+    }
+    pub fn set_tempo_focus(&mut self, focus: crate::Focus) -> Result<(), Error> {
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .set_focus(focus)
+    }
+    pub fn lock_grid_range(&mut self, range: crate::FrameRange) -> Result<(), Error> {
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .lock_range(range)
+    }
+    pub(crate) fn lock_checkpoint(&self) -> Option<(Option<crate::LocalGrid>, bool, u64)> {
+        self.analysis.as_ref().map(|a| a.lock_checkpoint())
+    }
+    pub(crate) fn restore_lock(&mut self, checkpoint: (Option<crate::LocalGrid>, bool, u64)) {
+        if let Some(a) = &mut self.analysis {
+            a.restore_lock(checkpoint);
+        }
+    }
+    pub fn enable_meter(&mut self) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.range_count != 0 {
+            return Err(Error::InvalidState);
+        }
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .enable_meter()
+    }
+    pub fn meter(&self) -> Option<crate::Meter<'_>> {
+        self.analysis.as_ref().and_then(|a| a.meter())
+    }
+    pub(crate) fn meter_serial(&self) -> u64 {
+        self.analysis.as_ref().map_or(0, |a| a.meter_serial())
+    }
+    pub fn enable_key(&mut self) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.range_count != 0 || self.key.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.key = Some(crate::key_analysis::KeyAnalysis::new(
+            self.config.sample_rate,
+        )?);
+        Ok(())
+    }
+    pub fn key(&self) -> Option<crate::Key<'_>> {
+        self.key.as_ref().and_then(|k| k.key()).map(|mut k| {
+            if self.state == SessionState::Complete {
+                k.state = crate::FeatureState::Final;
+            }
+            k
+        })
+    }
+    pub(crate) fn key_serial(&self) -> u64 {
+        self.key.as_ref().map_or(0, |k| k.mutation_serial())
+    }
+    pub fn enable_global_grid(
+        &mut self,
+        dynamic: bool,
+        bins: &'a mut [crate::analysis::OnsetBin],
+        flux: &'a mut [f32],
+        beats: &'a mut [crate::Beat],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.range_count != 0 || self.global.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.global = Some(crate::global_analysis::GlobalAnalysis::new(
+            self.config.sample_rate,
+            Some(self.config.total_frames),
+            dynamic,
+            bins,
+            flux,
+            beats,
+        )?);
+        Ok(())
+    }
+    pub fn global_grid(&self) -> Option<crate::GlobalGrid<'_>> {
+        self.global.as_ref().and_then(|g| g.grid()).map(|mut g| {
+            if self.state == SessionState::Complete {
+                g.state = crate::FeatureState::Final;
+            }
+            g
+        })
+    }
+    /// Accept a pending global proposal into the locked local grid.
+    pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
+        if id == 0 {
+            return Err(Error::InvalidArgument);
+        }
+        let local = self.local_grid().ok_or(Error::InvalidState)?;
+        let global = self.global.as_mut().ok_or(Error::InvalidState)?;
+        let segment = global.revision_segment(id, local.segment)?;
+        let dynamic = global.grid().is_some_and(|g| g.flags & 2 != 0);
+        self.analysis
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .apply_revision(segment, dynamic)?;
+        global.apply_revision()
+    }
+    pub fn grid_revision(&self) -> Option<crate::GridRevision> {
+        self.global.as_ref().and_then(|g| g.revision())
+    }
+    pub(crate) fn global_serial(&self) -> u64 {
+        self.global.as_ref().map_or(0, |g| g.mutation_serial())
+    }
+    pub fn enable_tempo(
+        &mut self,
+        bins: &'a mut [crate::analysis::OnsetBin],
+        flux: &'a mut [f32],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.range_count != 0 || self.analysis.is_some() {
+            return Err(Error::InvalidState);
+        }
+        self.analysis = Some(crate::analysis::Analysis::new(
+            self.config.sample_rate,
+            bins,
+            flux,
+        )?);
+        Ok(())
+    }
+    pub fn tempo(&self) -> Option<crate::TempoView<'_>> {
+        self.analysis.as_ref().and_then(|a| a.tempo()).map(|mut t| {
+            if self.state == SessionState::Complete {
+                t.selected.state = FeatureState::Final;
+            }
+            t
+        })
+    }
+    pub fn local_grid(&self) -> Option<crate::LocalGrid> {
+        self.analysis
+            .as_ref()
+            .and_then(|a| a.local_grid())
+            .map(|mut g| {
+                if self.state == SessionState::Complete {
+                    g.state = FeatureState::Final;
+                    g.segment.state = FeatureState::Final;
+                }
+                g
+            })
+    }
+    pub(crate) fn analysis_serial(&self) -> u64 {
+        self.analysis.as_ref().map_or(0, |a| a.mutation_serial())
+    }
     pub fn config(&self) -> SessionConfig {
         self.config
     }
@@ -229,6 +415,12 @@ impl<'a> SparseSession<'a> {
         let Some(slot) = self.workspace.nodes.iter().position(|node| node.len == 0) else {
             return Ok(0);
         };
+        if let Some(analysis) = &self.analysis {
+            analysis.preflight(first_frame, count)?;
+        }
+        if let Some(global) = &self.global {
+            global.preflight(first_frame, count)?;
+        }
         let serial = self.serial.checked_add(1).ok_or(Error::LimitExceeded)?;
         for index in 0..count {
             samples.sample_frame(index, self.config.channel_count)?;
@@ -252,6 +444,22 @@ impl<'a> SparseSession<'a> {
                 }
             }
             detail.refresh_completed(None)?;
+        }
+        if let Some(analysis) = &mut self.analysis {
+            for index in 0..count {
+                analysis.push(
+                    first_frame + index as u64,
+                    self.workspace.pcm[slot * NODE_FRAMES + index].value,
+                );
+            }
+        }
+        if let Some(global) = &mut self.global {
+            for index in 0..count {
+                global.push(
+                    first_frame + index as u64,
+                    self.workspace.pcm[slot * NODE_FRAMES + index].value,
+                );
+            }
         }
         self.insert_range(FrameRange {
             first_frame,
@@ -439,15 +647,31 @@ impl<'a> SparseSession<'a> {
     }
     pub(crate) fn set_publication_state(&mut self, state: SessionState) {
         self.state = state;
+        if let Some(a) = &mut self.analysis {
+            a.set_completed(state == SessionState::Complete);
+        }
+        if let Some(g) = &mut self.global {
+            g.set_completed(state == SessionState::Complete);
+        }
     }
     pub(crate) fn set_publication_eof(&mut self, eof: bool) {
         self.eof = eof;
     }
     pub(crate) fn ready_to_complete(&self) -> bool {
-        self.state == SessionState::Draining && self.queued == 0
+        self.state == SessionState::Draining
+            && self.queued == 0
+            && self.analysis.as_ref().map_or(true, |a| {
+                !a.pending(Some(self.config.total_frames)) && !a.meter_pending()
+            })
+            && self
+                .global
+                .as_ref()
+                .map_or(true, |g| !g.pending(Some(self.config.total_frames)))
+            && self.key.as_ref().map_or(true, |k| !k.pending(true))
     }
     /// Return the initially selected request. The publication layer updates
     /// request states and ages requests only after successful overview output.
+    #[cfg(test)]
     pub(crate) fn process_scheduled_deferred(
         &mut self,
         budget: WorkBudget,
@@ -539,6 +763,79 @@ impl<'a> SparseSession<'a> {
         }
     }
 
+    pub(crate) fn process_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() {
+            0
+        } else if self.global.is_some() && steps != u32::MAX && steps > 1 {
+            steps / 2
+        } else {
+            steps
+        };
+        let proposal = self.global.as_ref().and_then(|g| g.proposal());
+        if let Some(analysis) = &mut self.analysis {
+            analysis.set_global_proposal(proposal);
+            let previous = analysis.tempo().map(|t| t.selected);
+            let mut done = analysis.refresh(
+                available,
+                self.eof.then_some(self.config.total_frames),
+                deadline,
+            )?;
+            if analysis.ensemble_pending() && done < steps && !deadline.expired() {
+                done += analysis.ensemble(steps - done, previous)?;
+            }
+            Ok(done)
+        } else {
+            Ok(0)
+        }
+    }
+    pub(crate) fn has_analysis(&self) -> bool {
+        self.analysis.is_some() || self.global.is_some() || self.key.is_some()
+    }
+    pub(crate) fn process_global_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() { 0 } else { steps };
+        let fallback = self.tempo().map(|t| t.selected);
+        let locked = self
+            .local_grid()
+            .filter(|g| g.flags & 256 != 0)
+            .map(|g| g.segment);
+        self.global.as_mut().map_or(Ok(0), |g| {
+            g.refresh(
+                available,
+                self.eof.then_some(self.config.total_frames),
+                fallback,
+                locked,
+                deadline,
+            )
+        })
+    }
+    pub(crate) fn process_key_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() { 0 } else { steps };
+        self.key
+            .as_mut()
+            .map_or(Ok(0), |k| k.refresh(available, self.eof))
+    }
+    pub(crate) fn process_meter_analysis(
+        &mut self,
+        steps: u32,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<u32, Error> {
+        let available = if deadline.expired() { 0 } else { steps };
+        self.analysis
+            .as_mut()
+            .map_or(Ok(0), |a| a.refresh_meter(available))
+    }
     fn process_inner(
         &mut self,
         budget: WorkBudget,
@@ -604,6 +901,9 @@ impl<'a> SparseSession<'a> {
             for _ in 0..count {
                 let sample = self.workspace.pcm[slot * NODE_FRAMES + node.processed];
                 let frame = node.first_frame + node.processed as u64;
+                if let Some(key) = &mut self.key {
+                    key.push(frame, sample.value);
+                }
                 self.workspace.accumulators
                     [(frame / u64::from(self.config.frames_per_column)) as usize]
                     .value
@@ -626,9 +926,20 @@ impl<'a> SparseSession<'a> {
                 break;
             }
         }
-        deadline.analysis_boundaries();
+        if complete {
+            progress.completed_steps +=
+                self.process_analysis(steps - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_global_analysis(steps - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_key_analysis(steps - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_meter_analysis(steps - progress.completed_steps, deadline)?;
+        } else if !self.has_analysis() {
+            deadline.analysis_boundaries();
+        }
         if complete && self.ready_to_complete() {
-            self.state = SessionState::Complete;
+            self.set_publication_state(SessionState::Complete);
         }
         Ok(progress)
     }
@@ -671,6 +982,15 @@ impl<'a> SparseSession<'a> {
             }
             columns += 1;
         }
+        self.snapshot_span_count = spans;
+        self.snapshot_column_count = columns;
+        self.snapshot_view()
+    }
+    /// Borrow the snapshot prepared by the immediately preceding snapshot call.
+    pub(crate) fn snapshot_view(&self) -> Option<NativeOverview<'_>> {
+        if self.complete_columns == 0 {
+            return None;
+        }
         let state = if self.coverage_complete() {
             if self.state == SessionState::Complete {
                 FeatureState::Final
@@ -685,8 +1005,8 @@ impl<'a> SparseSession<'a> {
             origin_frame: 0,
             state,
             confidence: 255,
-            spans: &self.workspace.snapshot_spans[..spans],
-            columns: &self.workspace.snapshot_columns[..columns],
+            spans: &self.workspace.snapshot_spans[..self.snapshot_span_count],
+            columns: &self.workspace.snapshot_columns[..self.snapshot_column_count],
         })
     }
 }

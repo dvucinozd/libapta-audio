@@ -76,6 +76,7 @@ pub struct ResultPool<'a> {
     column_capacity: [usize; 2],
     span_capacity: [usize; 2],
     detail_capacity: [(usize, usize); 2],
+    music_capacity: [owned_result::Requirements; 2],
 }
 
 pub struct ResultLease<'p, 'a> {
@@ -135,6 +136,23 @@ impl<'a> ResultPool<'a> {
         let detail_capacity = storage
             .each_ref()
             .map(|s| (s.detail_tiles.len(), s.detail_columns.len()));
+        let music_capacity = storage.each_ref().map(|s| owned_result::Requirements {
+            tempo_candidates: s.tempo_candidates.len(),
+            local_grid: owned_result::GridRequirements {
+                coverage_ranges: s.local_grid.coverage_ranges.len(),
+                segments: s.local_grid.segments.len(),
+                beats: s.local_grid.beats.len(),
+            },
+            global_grid: owned_result::GridRequirements {
+                coverage_ranges: s.global_grid.coverage_ranges.len(),
+                segments: s.global_grid.segments.len(),
+                beats: s.global_grid.beats.len(),
+            },
+            key_candidates: s.key_candidates.len(),
+            meter_segments: s.meter_segments.len(),
+            quality: s.quality.len(),
+            ..owned_result::Requirements::default()
+        });
         let [a, b] = storage;
         let input = empty(source);
         let a = owned_result::copy_session(&input, a, limits, 0)?;
@@ -149,7 +167,53 @@ impl<'a> ResultPool<'a> {
             column_capacity,
             span_capacity,
             detail_capacity,
+            music_capacity,
         })
+    }
+    fn ensure_music_capacity(&self, feature: u64) -> Result<(), Error> {
+        use crate::result::*;
+        let limits = self.limits;
+        let limit_ok = match feature {
+            BPM => {
+                limits.maximum_tempo_candidates >= 3
+                    && limits.maximum_grid_coverage_ranges >= 1
+                    && limits.maximum_grid_segments >= 1
+            }
+            GLOBAL_BEATGRID => {
+                limits.maximum_grid_coverage_ranges >= 1
+                    && limits.maximum_grid_segments >= crate::global_analysis::MAX_SEGMENTS
+                    && limits.maximum_grid_beats >= crate::global_analysis::MAX_BEATS
+            }
+            MUSICAL_KEY => limits.maximum_key_candidates >= 3,
+            METER_DOWNBEAT => limits.maximum_meter_segments >= 1,
+            CALIBRATED_QUALITY => limits.maximum_quality_records >= 1,
+            _ => return Err(Error::InvalidArgument),
+        };
+        if !limit_ok {
+            return Err(Error::LimitExceeded);
+        }
+        for capacity in self.music_capacity {
+            let fits = match feature {
+                BPM => {
+                    capacity.tempo_candidates >= 3
+                        && capacity.local_grid.coverage_ranges >= 1
+                        && capacity.local_grid.segments >= 1
+                }
+                GLOBAL_BEATGRID => {
+                    capacity.global_grid.coverage_ranges >= 1
+                        && capacity.global_grid.segments >= crate::global_analysis::MAX_SEGMENTS
+                        && capacity.global_grid.beats >= crate::global_analysis::MAX_BEATS
+                }
+                MUSICAL_KEY => capacity.key_candidates >= 3,
+                METER_DOWNBEAT => capacity.meter_segments >= 1,
+                CALIBRATED_QUALITY => capacity.quality >= 1,
+                _ => false,
+            };
+            if !fits {
+                return Err(Error::BufferTooSmall);
+            }
+        }
+        Ok(())
     }
     pub fn acquire(&self) -> Result<ResultLease<'_, 'a>, Error> {
         let result = self.slots[self.current.get()]
@@ -193,6 +257,10 @@ impl<'a> ResultPool<'a> {
 pub struct PublishedSession<'p, 'work, 'storage> {
     detail_output: Option<(&'work mut [crate::NativeTile], &'work mut [WaveformColumn])>,
     previous_detail_serial: u64,
+    previous_analysis_serial: u64,
+    previous_global_serial: u64,
+    previous_key_serial: u64,
+    previous_meter_serial: u64,
     session: Session<'work>,
     pool: &'p ResultPool<'storage>,
     pending: bool,
@@ -233,6 +301,10 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
         Ok(Self {
             detail_output: None,
             previous_detail_serial: 0,
+            previous_analysis_serial: 0,
+            previous_global_serial: 0,
+            previous_key_serial: 0,
+            previous_meter_serial: 0,
             session,
             pool,
             pending: false,
@@ -384,12 +456,115 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
                 columns,
             })
         };
+        input.tempo = self.session.tempo();
+        let local = self.session.local_grid();
+        let coverage = local.map(|g| [g.coverage]);
+        let segments = local.map(|g| [g.segment]);
+        input.local_grid = local.map(|g| crate::NativeGrid {
+            state: g.state,
+            confidence: g.confidence,
+            flags: g.flags,
+            representation: crate::GridRepresentation::Segments,
+            requested_range: g.requested_range,
+            evidence_range: g.evidence_range,
+            applicability_range: g.applicability_range,
+            coverage_ranges: coverage.as_ref().unwrap(),
+            segments: segments.as_ref().unwrap(),
+            beats: &[],
+        });
+        let global = self.session.global_grid();
+        let global_coverage = global.map(|g| [g.coverage_range]);
+        input.global_grid = global.map(|g| crate::NativeGrid {
+            state: g.state,
+            confidence: g.confidence,
+            flags: g.flags,
+            representation: g.representation,
+            requested_range: g.requested_range,
+            evidence_range: g.evidence_range,
+            applicability_range: g.applicability_range,
+            coverage_ranges: global_coverage.as_ref().unwrap(),
+            segments: g.segments,
+            beats: g.beats,
+        });
+        input.revision = self.session.grid_revision();
+        input.key = self.session.key();
+        let quality = self.session.bpm_quality().map(|q| [q]);
+        input.quality = quality.as_ref().map_or(&[], |q| q.as_slice());
+        input.meter = self.session.meter();
         self.pool.publish(&input, self.changed)?;
         self.pending = false;
         self.changed = 0;
         self.previous_columns = if hide_pending { 0 } else { columns.len() };
         self.previous_detail_serial = self.session.detail_mutation_serial();
+        self.previous_analysis_serial = self.session.analysis_serial();
+        self.previous_global_serial = self.session.global_serial();
+        self.previous_key_serial = self.session.key_serial();
+        self.previous_meter_serial = self.session.meter_serial();
         Ok(())
+    }
+    pub fn set_tempo_focus(&mut self, focus: crate::Focus) -> Result<(), Error> {
+        self.session.set_tempo_focus(focus)
+    }
+    /// C-compatible acceptance ordering: a failed publication retains the accepted revision.
+    pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
+        self.session.apply_grid_revision(id)?;
+        self.changed = crate::result::LOCAL_BEATGRID
+            | crate::result::GLOBAL_BEATGRID
+            | crate::result::GRID_LOCKING;
+        if self.session.global_grid().is_some_and(|g| g.flags & 2 != 0) {
+            self.changed |= crate::result::DYNAMIC_TEMPO;
+        }
+        self.pending = true;
+        self.publish()
+    }
+    pub fn lock_grid_range(&mut self, range: crate::FrameRange) -> Result<(), Error> {
+        let checkpoint = self.session.lock_checkpoint().ok_or(Error::InvalidState)?;
+        self.session.lock_grid_range(range)?;
+        if self.session.analysis_serial() == checkpoint.2 {
+            return Ok(());
+        }
+        let changed = self.changed;
+        self.changed = crate::result::LOCAL_BEATGRID | crate::result::GRID_LOCKING;
+        if let Err(e) = self.publish() {
+            self.session.restore_lock(checkpoint);
+            self.changed = changed;
+            return Err(e);
+        }
+        Ok(())
+    }
+    pub fn enable_calibrated_quality(&mut self) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::CALIBRATED_QUALITY)?;
+        self.session.enable_calibrated_quality()
+    }
+    pub fn enable_meter(&mut self) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::METER_DOWNBEAT)?;
+        self.session.enable_meter()
+    }
+    pub fn enable_key(&mut self) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::MUSICAL_KEY)?;
+        self.session.enable_key()
+    }
+    pub fn enable_global_grid(
+        &mut self,
+        dynamic: bool,
+        bins: &'work mut [crate::analysis::OnsetBin],
+        flux: &'work mut [f32],
+        beats: &'work mut [crate::Beat],
+    ) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::GLOBAL_BEATGRID)?;
+        self.session.enable_global_grid(dynamic, bins, flux, beats)
+    }
+    pub fn enable_tempo(
+        &mut self,
+        bins: &'work mut [crate::analysis::OnsetBin],
+        flux: &'work mut [f32],
+    ) -> Result<(), Error> {
+        self.pool.ensure_music_capacity(crate::result::BPM)?;
+        self.session.enable_tempo(bins, flux)
     }
     pub fn process(
         &mut self,
@@ -434,12 +609,11 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
             return Err(Error::Cancelled);
         }
         let old_state = self.session.state();
-        let progress = match deadline {
-            Some(deadline) => self
-                .session
-                .process_deferred_deadline(budget, cancel, deadline),
-            None => self.session.process_deferred_completion(budget, cancel),
-        };
+        let mut disabled = crate::deadline::Deadline::disabled();
+        let deadline = deadline.unwrap_or(&mut disabled);
+        let mut progress = self
+            .session
+            .process_deferred_deadline(budget, cancel, deadline);
         if progress == Err(Error::Cancelled) && old_state != SessionState::Cancelled {
             self.session.set_publication_state(old_state);
             self.transition(SessionState::Cancelled)?;
@@ -456,6 +630,66 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
                 self.changed |= crate::result::WAVEFORM_DETAIL;
             }
             self.publish()?;
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_analysis(available, deadline)?;
+            }
+            if self.session.analysis_serial() != self.previous_analysis_serial {
+                self.pending = true;
+                self.changed = crate::result::BPM | crate::result::LOCAL_BEATGRID;
+                self.publish()?;
+            }
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_global_analysis(available, deadline)?;
+            }
+            if self.session.global_serial() != self.previous_global_serial {
+                self.pending = true;
+                self.changed = crate::result::GLOBAL_BEATGRID;
+                self.publish()?;
+            }
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_key_analysis(available, deadline)?;
+            }
+            if self.session.key_serial() != self.previous_key_serial {
+                self.pending = true;
+                self.changed = crate::result::MUSICAL_KEY;
+                self.publish()?;
+            }
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_meter_analysis(available, deadline)?;
+            }
+            if self.session.meter_serial() != self.previous_meter_serial {
+                self.pending = true;
+                self.changed = crate::result::METER_DOWNBEAT;
+                self.publish()?;
+            }
         }
         if self.session.ready_to_complete() {
             self.transition(SessionState::Complete)?;
@@ -493,6 +727,10 @@ pub fn plan_sparse(config: SessionConfig, limits: NativeLimits) -> Result<Worksp
 pub struct PublishedSparseSession<'p, 'work, 'storage> {
     detail_output: Option<(&'work mut [crate::NativeTile], &'work mut [WaveformColumn])>,
     previous_detail_serial: u64,
+    previous_analysis_serial: u64,
+    previous_global_serial: u64,
+    previous_key_serial: u64,
+    previous_meter_serial: u64,
     session: crate::sparse::SparseSession<'work>,
     scheduler: crate::scheduler::Scheduler<'work>,
     pool: &'p ResultPool<'storage>,
@@ -548,6 +786,10 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
             scheduler,
             detail_output: None,
             previous_detail_serial: 0,
+            previous_analysis_serial: 0,
+            previous_global_serial: 0,
+            previous_key_serial: 0,
+            previous_meter_serial: 0,
             pool,
             pending: false,
             changed: 0,
@@ -767,6 +1009,9 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
             SessionState::Failed => ResultSessionState::Failed,
         };
         let n = self.session.complete_columns();
+        let _ = self.session.snapshot();
+        let local = self.session.local_grid();
+        let global = self.session.global_grid();
         let mut input = empty(self.pool.source);
         input.info.session_state = state;
         if let Some((tiles, columns)) = &mut self.detail_output {
@@ -778,14 +1023,115 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         input.overview = if hide_pending {
             None
         } else {
-            self.session.snapshot()
+            self.session.snapshot_view()
         };
+        input.tempo = self.session.tempo();
+        let coverage = local.map(|g| [g.coverage]);
+        let segments = local.map(|g| [g.segment]);
+        input.local_grid = local.map(|g| crate::NativeGrid {
+            state: g.state,
+            confidence: g.confidence,
+            flags: g.flags,
+            representation: crate::GridRepresentation::Segments,
+            requested_range: g.requested_range,
+            evidence_range: g.evidence_range,
+            applicability_range: g.applicability_range,
+            coverage_ranges: coverage.as_ref().unwrap(),
+            segments: segments.as_ref().unwrap(),
+            beats: &[],
+        });
+        let global_coverage = global.map(|g| [g.coverage_range]);
+        input.global_grid = global.map(|g| crate::NativeGrid {
+            state: g.state,
+            confidence: g.confidence,
+            flags: g.flags,
+            representation: g.representation,
+            requested_range: g.requested_range,
+            evidence_range: g.evidence_range,
+            applicability_range: g.applicability_range,
+            coverage_ranges: global_coverage.as_ref().unwrap(),
+            segments: g.segments,
+            beats: g.beats,
+        });
+        input.revision = self.session.grid_revision();
+        input.key = self.session.key();
+        let quality = self.session.bpm_quality().map(|q| [q]);
+        input.quality = quality.as_ref().map_or(&[], |q| q.as_slice());
+        input.meter = self.session.meter();
         self.pool.publish(&input, self.changed)?;
         self.pending = false;
         self.changed = 0;
         self.previous_columns = if hide_pending { 0 } else { n };
         self.previous_detail_serial = self.session.detail_mutation_serial();
+        self.previous_analysis_serial = self.session.analysis_serial();
+        self.previous_global_serial = self.session.global_serial();
+        self.previous_key_serial = self.session.key_serial();
+        self.previous_meter_serial = self.session.meter_serial();
         Ok(())
+    }
+    pub fn set_tempo_focus(&mut self, focus: crate::Focus) -> Result<(), Error> {
+        self.session.set_tempo_focus(focus)
+    }
+    /// C-compatible acceptance ordering: a failed publication retains the accepted revision.
+    pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
+        self.session.apply_grid_revision(id)?;
+        self.changed = crate::result::LOCAL_BEATGRID
+            | crate::result::GLOBAL_BEATGRID
+            | crate::result::GRID_LOCKING;
+        if self.session.global_grid().is_some_and(|g| g.flags & 2 != 0) {
+            self.changed |= crate::result::DYNAMIC_TEMPO;
+        }
+        self.pending = true;
+        self.publish()
+    }
+    pub fn lock_grid_range(&mut self, range: crate::FrameRange) -> Result<(), Error> {
+        let checkpoint = self.session.lock_checkpoint().ok_or(Error::InvalidState)?;
+        self.session.lock_grid_range(range)?;
+        if self.session.analysis_serial() == checkpoint.2 {
+            return Ok(());
+        }
+        let changed = self.changed;
+        self.changed = crate::result::LOCAL_BEATGRID | crate::result::GRID_LOCKING;
+        if let Err(e) = self.publish() {
+            self.session.restore_lock(checkpoint);
+            self.changed = changed;
+            return Err(e);
+        }
+        Ok(())
+    }
+    pub fn enable_calibrated_quality(&mut self) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::CALIBRATED_QUALITY)?;
+        self.session.enable_calibrated_quality()
+    }
+    pub fn enable_meter(&mut self) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::METER_DOWNBEAT)?;
+        self.session.enable_meter()
+    }
+    pub fn enable_key(&mut self) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::MUSICAL_KEY)?;
+        self.session.enable_key()
+    }
+    pub fn enable_global_grid(
+        &mut self,
+        dynamic: bool,
+        bins: &'work mut [crate::analysis::OnsetBin],
+        flux: &'work mut [f32],
+        beats: &'work mut [crate::Beat],
+    ) -> Result<(), Error> {
+        self.pool
+            .ensure_music_capacity(crate::result::GLOBAL_BEATGRID)?;
+        self.session.enable_global_grid(dynamic, bins, flux, beats)
+    }
+    pub fn enable_tempo(
+        &mut self,
+        bins: &'work mut [crate::analysis::OnsetBin],
+        flux: &'work mut [f32],
+    ) -> Result<(), Error> {
+        self.pool.ensure_music_capacity(crate::result::BPM)?;
+        self.session.enable_tempo(bins, flux)
     }
     pub fn process(
         &mut self,
@@ -830,17 +1176,13 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
             return Err(Error::Cancelled);
         }
         let old = self.session.state();
-        let work = match deadline {
-            Some(deadline) => {
-                self.session
-                    .process_scheduled_deadline(budget, cancel, &self.scheduler, deadline)
-            }
-            None => self
-                .session
-                .process_scheduled_deferred(budget, cancel, &self.scheduler),
-        };
+        let mut disabled = crate::deadline::Deadline::disabled();
+        let deadline = deadline.unwrap_or(&mut disabled);
+        let work =
+            self.session
+                .process_scheduled_deadline(budget, cancel, &self.scheduler, deadline);
         let choice = work.as_ref().map_or(0, |(_, choice)| *choice);
-        let progress = work.map(|(progress, _)| progress);
+        let mut progress = work.map(|(progress, _)| progress);
         if progress == Err(Error::Cancelled) && old != SessionState::Cancelled {
             self.session.set_publication_state(old);
             self.transition(SessionState::Cancelled)?;
@@ -877,6 +1219,66 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
             }
             // Detail-only publication happens after actual request refresh.
             self.publish()?;
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_analysis(available, deadline)?;
+            }
+            if self.session.analysis_serial() != self.previous_analysis_serial {
+                self.pending = true;
+                self.changed = crate::result::BPM | crate::result::LOCAL_BEATGRID;
+                self.publish()?;
+            }
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_global_analysis(available, deadline)?;
+            }
+            if self.session.global_serial() != self.previous_global_serial {
+                self.pending = true;
+                self.changed = crate::result::GLOBAL_BEATGRID;
+                self.publish()?;
+            }
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_key_analysis(available, deadline)?;
+            }
+            if self.session.key_serial() != self.previous_key_serial {
+                self.pending = true;
+                self.changed = crate::result::MUSICAL_KEY;
+                self.publish()?;
+            }
+        }
+        if self.session.has_analysis() {
+            if let Ok(p) = &mut progress {
+                let available = if budget.maximum_steps == 0 {
+                    u32::MAX
+                } else {
+                    budget.maximum_steps.saturating_sub(p.completed_steps)
+                };
+                p.completed_steps += self.session.process_meter_analysis(available, deadline)?;
+            }
+            if self.session.meter_serial() != self.previous_meter_serial {
+                self.pending = true;
+                self.changed = crate::result::METER_DOWNBEAT;
+                self.publish()?;
+            }
         }
         if self.session.ready_to_complete() {
             self.transition(SessionState::Complete)?;

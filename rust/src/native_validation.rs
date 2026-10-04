@@ -192,7 +192,12 @@ fn waveform(input: &NativeResultInput<'_>, limits: NativeLimits) -> Result<u64, 
     }
     Ok(features)
 }
-fn tempo(t: TempoView<'_>, total: Option<u64>, limits: NativeLimits) -> Result<(), Error> {
+fn tempo(
+    t: TempoView<'_>,
+    total: Option<u64>,
+    limits: NativeLimits,
+    session: bool,
+) -> Result<(), Error> {
     range(t.selected.evidence_range, total)?;
     range(t.selected.applicability_range, total)?;
     check(bpm(t.selected.tempo_millibpm) && confidence(t.selected.confidence))?;
@@ -204,7 +209,12 @@ fn tempo(t: TempoView<'_>, total: Option<u64>, limits: NativeLimits) -> Result<(
             bpm(c.tempo_millibpm)
                 && c.confidence <= 100
                 && c.relation_to_selected <= 8
-                && (i == 0 || c.score < t.candidates[i - 1].score),
+                && (i == 0
+                    || if session {
+                        c.score <= t.candidates[i - 1].score
+                    } else {
+                        c.score < t.candidates[i - 1].score
+                    }),
         )?;
         known_flags(c.flags, 255)?;
         check(
@@ -214,13 +224,14 @@ fn tempo(t: TempoView<'_>, total: Option<u64>, limits: NativeLimits) -> Result<(
         )?;
         found |= c.tempo_millibpm == t.selected.tempo_millibpm;
     }
-    check(found)
+    check(session || found)
 }
 fn native_grid(
     g: NativeGrid<'_>,
     total: Option<u64>,
     limits: NativeLimits,
     local: bool,
+    session: bool,
 ) -> Result<(), Error> {
     for r in [g.requested_range, g.evidence_range, g.applicability_range] {
         range(r, total)?
@@ -291,7 +302,7 @@ fn native_grid(
         }
     }
     check(g.flags & 0x102 == elements & 0x102)?;
-    if (local && elements & 2 != 0) || (!local && elements & 256 != 0) {
+    if (local && !session && elements & 2 != 0) || (!local && elements & 256 != 0) {
         return Err(Error::Unsupported);
     }
     Ok(())
@@ -319,7 +330,7 @@ fn matches_tempo(period: u128, delta: u64, sr: u32, tempo: u32) -> bool {
     };
     n.abs_diff(period * (tempo as u128)) <= period
 }
-fn grid_tempo(g: NativeGrid<'_>, sr: u32, tempo: u32) -> Result<(), Error> {
+fn grid_tempo(g: NativeGrid<'_>, sr: u32, tempo: u32, require_selected: bool) -> Result<(), Error> {
     if g.representation == GridRepresentation::Explicit {
         for p in g.beats.windows(2) {
             check(matches_tempo(
@@ -342,11 +353,11 @@ fn grid_tempo(g: NativeGrid<'_>, sr: u32, tempo: u32) -> Result<(), Error> {
         ))?;
         if s.nominal_tempo_millibpm == tempo {
             found = true
-        } else {
+        } else if require_selected {
             check(g.flags & 2 != 0)?
         }
     }
-    check(found)
+    check(!require_selected || found)
 }
 fn key_value(tonic: u8, mode: u8, tuning: i16) -> bool {
     tonic <= 11 && (mode == 1 || mode == 2) && (-100..=100).contains(&tuning)
@@ -520,12 +531,12 @@ fn validate_inner(
     }
     let mut features = waveform(input, limits)?;
     if let Some(t) = input.tempo {
-        tempo(t, source.total_frames, limits)?;
+        tempo(t, source.total_frames, limits, session)?;
         features |= feature::BPM | feature::CONFIDENCE
     }
     for (g, local) in [(input.local_grid, true), (input.global_grid, false)] {
         if let Some(g) = g {
-            native_grid(g, source.total_frames, limits, local)?;
+            native_grid(g, source.total_frames, limits, local, session)?;
             grid_tempo(
                 g,
                 source.sample_rate,
@@ -534,6 +545,7 @@ fn validate_inner(
                     .ok_or(Error::InvalidArgument)?
                     .selected
                     .tempo_millibpm,
+                !session || local,
             )?;
             features |= if local {
                 feature::LOCAL_BEATGRID
@@ -579,7 +591,8 @@ fn validate_inner(
         };
         for s in m.segments {
             check(
-                (input.local_grid.is_none() && input.global_grid.is_none())
+                session
+                    || (input.local_grid.is_none() && input.global_grid.is_none())
                     || input
                         .local_grid
                         .is_some_and(|g| local.matches(g, s.downbeat_frame, s.downbeat_ordinal))
@@ -624,7 +637,7 @@ fn validate_inner(
                     .map_or(true, |g| g.state == FeatureState::Final)
                 && input
                     .revision
-                    .map_or(true, |r| r.state == RevisionState::Applied)
+                    .map_or(true, |r| session || r.state == RevisionState::Applied)
                 && input.key.map_or(true, |k| k.state == FeatureState::Final)
                 && input.meter.map_or(true, |m| {
                     m.state == FeatureState::Final

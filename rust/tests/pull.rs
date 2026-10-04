@@ -298,3 +298,85 @@ fn cancellation_in_release_stops_processing_after_copy() {
     assert_eq!(releases.get(), 1);
     assert!(pull.columns().is_empty());
 }
+
+#[test]
+fn musical_pull_drains_after_eof_without_rereading_or_releasing_blocks() {
+    use libapta::{analysis, global_analysis, Beat, FeatureState};
+    let pcm: Vec<f32> = (0..320000)
+        .map(|i| {
+            if i % 4000 < 64 {
+                (64 - i % 4000) as f32 / 64.0 * 0.75
+            } else {
+                0.0
+            }
+        })
+        .collect();
+    for total in [pcm.len() as u64, TOTAL_FRAMES_UNKNOWN] {
+        let reads = Cell::new(0);
+        let releases = Cell::new(0);
+        let input = source(&pcm, &reads, || releases.set(releases.get() + 1));
+        let mut queue = vec![NormalizedSample::default(); 256];
+        let mut output = vec![WaveformColumn::default(); 10];
+        let mut bins = vec![analysis::OnsetBin::default(); analysis::BIN_CAPACITY];
+        let mut flux = vec![0.0; bins.len()];
+        let mut global_bins = vec![analysis::OnsetBin::default(); global_analysis::BIN_CAPACITY];
+        let mut global_flux = vec![0.0; global_bins.len()];
+        let mut beats = vec![Beat::default(); global_analysis::MAX_BEATS];
+        let mut pull = PullSession::new(
+            SessionConfig {
+                sample_rate: 8000,
+                channel_count: 1,
+                total_frames: total,
+                frames_per_column: 32768,
+            },
+            &mut queue,
+            &mut output,
+            input,
+        )
+        .unwrap();
+        pull.enable_tempo(&mut bins, &mut flux).unwrap();
+        pull.enable_global_grid(true, &mut global_bins, &mut global_flux, &mut beats)
+            .unwrap();
+        pull.enable_key().unwrap();
+        pull.enable_meter().unwrap();
+        pull.enable_calibrated_quality().unwrap();
+        let token = CancellationToken::new();
+        let mut drain_calls = 0;
+        for _ in 0..10000 {
+            let draining = pull.state() == PullState::Draining;
+            let before = (reads.get(), releases.get());
+            pull.process(
+                WorkBudget {
+                    maximum_steps: 1,
+                    maximum_input_frames: 256,
+                },
+                &token,
+            )
+            .unwrap();
+            if draining {
+                drain_calls += 1;
+                assert_eq!((reads.get(), releases.get()), before);
+            }
+            if pull.state() == PullState::Complete {
+                break;
+            }
+        }
+        assert_eq!(pull.state(), PullState::Complete);
+        assert!(drain_calls > 0);
+        assert_eq!(pull.processed_frames(), pcm.len() as u64);
+        assert_eq!(releases.get(), pcm.len().div_ceil(256));
+        assert_eq!(
+            reads.get(),
+            releases.get() + usize::from(total == TOTAL_FRAMES_UNKNOWN)
+        );
+        assert_eq!(pull.tempo().unwrap().selected.state, FeatureState::Final);
+        assert_eq!(pull.global_grid().unwrap().state, FeatureState::Final);
+        assert_eq!(pull.key().unwrap().state, FeatureState::Final);
+        assert_eq!(pull.meter().unwrap().state, FeatureState::Final);
+        assert_eq!(pull.bpm_quality().unwrap().state, FeatureState::Final);
+        let before = (reads.get(), releases.get());
+        token.cancel();
+        pull.process(WorkBudget::default(), &token).unwrap();
+        assert_eq!((reads.get(), releases.get()), before);
+    }
+}

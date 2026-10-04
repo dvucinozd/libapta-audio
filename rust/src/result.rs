@@ -556,6 +556,24 @@ pub fn from_native<'a>(
     limits: NativeLimits,
 ) -> Result<ResultInput<'a>, Error> {
     crate::native_validation::validate(input, limits)?;
+    from_native_validated(input, tile_views, false)
+}
+/// Convert a trusted immutable session result. C session snapshots permit S4 and
+/// S6 to disagree while external imports require selected-tempo coherence.
+pub fn from_session_result<'a>(
+    owned: &'a crate::owned_result::OwnedResult<'_>,
+    tile_views: &'a mut [WaveformTile<'a>],
+    limits: NativeLimits,
+) -> Result<ResultInput<'a>, Error> {
+    let input = owned.view();
+    crate::native_validation::validate_session(&input, limits, owned.changed_features())?;
+    from_native_validated(&input, tile_views, true)
+}
+fn from_native_validated<'a>(
+    input: &NativeResultInput<'a>,
+    tile_views: &'a mut [WaveformTile<'a>],
+    session: bool,
+) -> Result<ResultInput<'a>, Error> {
     let overview = input.overview.ok_or(Error::NotAvailable)?;
     let logical = if let Some(total) = input.source.total_frames {
         let frames = total
@@ -672,9 +690,19 @@ pub fn from_native<'a>(
         },
         ..Limits::default()
     };
-    crate::builder::validate(&wire, wire_limits).map_err(|error| match error {
-        Error::LimitExceeded => Error::LimitExceeded,
-        _ => Error::Unsupported,
-    })?;
+    if session {
+        sizes(&wire)?;
+        container::waveform_result_size(
+            &wire.source,
+            &wire.overview,
+            wire.tiles,
+            wire.metadata.as_ref(),
+        )?;
+    } else {
+        crate::builder::validate(&wire, wire_limits).map_err(|error| match error {
+            Error::LimitExceeded => Error::LimitExceeded,
+            _ => Error::Unsupported,
+        })?;
+    }
     Ok(wire)
 }

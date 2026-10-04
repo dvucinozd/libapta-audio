@@ -154,4 +154,50 @@ fn entire_session_path_allocates_nothing() {
         assert!(snapshot.iter().all(|column| column.flags & 8 != 0));
         assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
     }
+    let mut bins = vec![libapta::analysis::OnsetBin::default(); libapta::analysis::BIN_CAPACITY];
+    let mut flux = vec![0.0; bins.len()];
+    let mut global_bins =
+        vec![libapta::analysis::OnsetBin::default(); libapta::global_analysis::BIN_CAPACITY];
+    let mut global_flux = vec![0.0; global_bins.len()];
+    let mut beats = vec![libapta::Beat::default(); libapta::global_analysis::MAX_BEATS];
+    let mut queue = vec![NormalizedSample::default(); 4096];
+    let mut columns = vec![WaveformColumn::default(); 10];
+    let samples: Vec<f32> = (0..320000)
+        .map(|i| if i % 4000 < 64 { 0.75 } else { 0.0 })
+        .collect();
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let mut session = Session::new(
+        SessionConfig {
+            sample_rate: 8000,
+            channel_count: 1,
+            total_frames: 320000,
+            frames_per_column: 32768,
+        },
+        &mut queue,
+        &mut columns,
+    )
+    .unwrap();
+    session.enable_tempo(&mut bins, &mut flux).unwrap();
+    session
+        .enable_global_grid(true, &mut global_bins, &mut global_flux, &mut beats)
+        .unwrap();
+    session.enable_key().unwrap();
+    session.enable_meter().unwrap();
+    session.enable_calibrated_quality().unwrap();
+    for block in samples.chunks(4096) {
+        session.push_interleaved(block).unwrap();
+        session
+            .process(WorkBudget::default(), &CancellationToken::new())
+            .unwrap();
+    }
+    session.finish_input().unwrap();
+    session
+        .process(WorkBudget::default(), &CancellationToken::new())
+        .unwrap();
+    assert!(session.tempo().is_some());
+    assert!(session.global_grid().is_some());
+    assert!(session.meter().is_some());
+    assert!(session.key().is_some());
+    assert!(session.bpm_quality().is_some());
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 }
