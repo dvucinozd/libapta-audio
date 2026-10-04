@@ -2188,3 +2188,21 @@ allocation counter. `streaming-asan-20261004T203034Z.log` passes **8 focused tes
 including scanner/decoder cases and the existing full session allocation path.
 Logs are under `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
 Broader i686/Windows/AArch64/runtime sanitizer matrices were not rerun here.
+
+Final consumer continuation passes **400 workspace / 96 focused release tests**,
+**26 adapter tests plus one lifetime doctest under ASan**, formatting/Clippy,
+pinned Rust 1.95 P4 checks, exact prior impulse/silence PPM output and zero measured
+allocations. Consumer source pin remains `a242c4ab1ada6ac2547f63332ef7f7c0f36276fa`.
+External consumer evidence: `verify-consumer.py` stamp `20261004T203840Z`, artifact
+stamp `20261004T203948Z`, native-source probe `20261004T203949Z`, streaming-source
+probe `20261004T204041Z`, under the existing Pajoniiir evidence directory.
+
+P4 diagnostics drove a consumer ownership improvement: synchronous construction,
+borrowed asynchronous open/finish and synchronous extraction avoid moving Session
+through I/O futures. FAT32 open/finish futures fell from 14592/8464 to 2936/504 B;
+corresponding one-poll frames from 18672/12656 to 3136/224 B. Final streaming
+workers including handles are 4256/4280 B (FAT32/exFAT), with 1408/1440 B step
+futures and 1488/1520 B one-poll frames. Nested sector loading separately uses
+1584 B. The adapter README gives explicit caller-bank formulas, object ceilings,
+additional nested frames and exclusions. These remain software diagnostics, not
+complete task-stack/placement/timing or physical P4 acceptance.
