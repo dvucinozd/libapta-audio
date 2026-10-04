@@ -170,7 +170,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed WAV decoder complete initial format slice; four tests; filesystem/callback adapters pending |
 | Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform and default musical desktop modes; eight waveform/nine musical WAV smoke cases and exact C musical bytes; additive native analyze/inspect/validate/version/WAV batch commands; C CLI parity pending |
 | Push/pull/installed/package/ESP examples | examples | Push/WAV-to-container example implemented; others pending |
-| Direct native Rust consumers | portable Cargo + consumer-owned adapter | Experimental Pajoniiir PCM/cache to Deck/Sync/Beat Jump/waveform integration; production/embedded gates remain separate |
+| Direct native Rust consumers | portable Cargo + consumer-owned adapter | Experimental Pajoniiir lease-checked PCM worker, retained Deck generations, continuous multi-segment/global-cache transport and sparse/detail waveform windows; production/embedded gates remain separate |
 | C API/ABI and frozen 1.0 consumers | future FFI | Deferred separate workstream; C remains installed product |
 | CMake/pkg-config/shared/static packages | root build future FFI | Cargo additive only |
 | Linux, Windows/MSVC, ILP32 | platform CI | x86_64 host tests; AArch64 core and i686/MSVC workspace compile checks; actual i686 SSE2 C/Rust execution established; default x87 differs; Windows linking/execution pending SDK environment |
@@ -1959,3 +1959,111 @@ The reproducible extra/platform scripts are retained alongside these logs with
 stamp `20261004T171249Z`. Consumer evidence is separately owned under
 `/home/shome/.local/share/Pajoniiir-M1/apta-evidence/`; its verification script,
 fixture, rendered artifact and adapter README carry that scope's exact acceptance.
+
+
+## Native consumer worker and extended views — 2026-10-04
+
+This continuation extends the owning Pajoniiir adapter without changing Libapta
+algorithms, core APIs, C source/headers/ABI or container bytes. The consumer keeps
+its immutable Cargo pin to the previously published portable source revision;
+this library checkpoint changes documentation only. Portable Libapta remains
+independent of product media identities, Deck controls, rendering and hardware.
+The original collaborator checkout is preserved; the existing isolated consumer
+contribution incorporates inspected foundation advances and stays open for review.
+
+### Newly integrated consumer behavior
+
+- Continuous multiple-segment conversion uses `GridSegment::beat_at`, including
+  context anchors. Full-source segment coverage, final phase, consecutive ordinals
+  across boundaries, exact meter whole-frame/ordinal correspondence and applied
+  revision identity are checked before output mutation. Global precedence remains
+  explicit; unsupported global data never falls back to local interpretation.
+- Identity-checked global segment/explicit caches use caller-owned native segment
+  and beat scratch plus independent conversion banks. Scratch may change on error;
+  converted banks remain transactional and outlive source bytes/scratch. Cache
+  generations remain host-assigned; container v1 has no native generation lineage.
+- An experimental `no_std` worker owns a configured portable Session. Requests
+  carry the originating catalog/media lease, track ID and present source identity.
+  A persistent single lane assigns checked request generations; cancellation,
+  replacement, unmount/reinsert and stale delivery fail closed. Each processing
+  call uses 256 frames/one core step outside audio. Reads/decoding remain caller
+  owned; failures prevent publication and incomplete sessions cannot complete.
+- Retained deck pins hold caller banks and inspect actual Deck state. Both playing
+  and pending transport requests block replacement. Upgrades require the same
+  media/track/source geometry/provider/lineage and a newer generation. A new track
+  requires a new pin. The neutral view itself still cannot enforce ownership if
+  product callers bypass the pin or retain copied views across invalidation.
+- Explicit aligned whole-column sparse overview/detail windows use actual source
+  coordinates and the existing RGB565 renderer. Adjacent detail tiles work; holes,
+  unaligned crops and partial EOF columns are rejected transactionally. No inferred
+  silence, hybrid authority, automatic layer fallback or pixel interpolation.
+- The host WAV example uses the worker/pin path and existing product SHA-256 over
+  exact input bytes. It renders an independent waveform after worker destruction.
+  Its mounted media is a host fixture, not the production USB/filesystem worker.
+
+### Evidence boundaries exposed by real processing
+
+The unchanged real S6 uniform-impulse fixture (8 kHz, 320000 frames, 120 BPM,
+amplitude 0.75) publishes a final global segment ending at frame 262144, with
+timing that does not bind to its local meter. The consumer correctly rejects it.
+Positive single/multiple-segment and explicit global-cache fixtures transport
+actual PCM-derived local timing under an explicitly constructed global profile;
+they do not qualify the rejected S6 result or improve its DSP accuracy. Hybrid
+remains unsupported because the consumed model does not identify override ranges.
+No algorithm correction, output normalization, tolerance change or backend switch.
+
+Real worker PCM exercises Deck Sync/Beat Jump, two retained generations, stale
+requests/catalog leases, cancellation, source failure, pending transport and
+capacity rollback. Test-only allocation counting verifies no allocations during
+worker creation, processing and conversion. Real sparse PCM crosses a detail tile
+boundary and reaches the rasterizer; output survives session/cache destruction.
+See the consumer adapter README for exact acceptance logs and counts.
+
+### Remaining work and independent gates
+
+Production filesystem/Embassy scheduling, Slint selection, storage placement,
+complete nested-call stack/timing, DMA/cache safety and physical P4 execution are
+still required. Caller buffers and portable compilation do not qualify SRAM/PSRAM
+placement or provide a task-stack recommendation. Neither production provider nor
+ADR-006/M1R-P1-001 gates were enabled or weakened.
+
+Unknown-duration sparse ownership still requires expanded compiled-C growth,
+scheduling, seeding and music contracts before implementation. No new acceptance
+is claimed for those profiles, Windows execution, default i686 x87, full platform
+or frozen-tool compatibility. Portable key 55734 versus C 55735 remains the known
+backend parity boundary. Original musical accuracy and physical hardware gates
+remain independent and open.
+
+Legacy allocator classes/order/reallocation, C binary workspace/handle ownership,
+reviewed unsafe ABI exports, C packaging and frozen consumers remain deferred as a
+separate unfinished workstream, not prerequisites for native Rust integration.
+
+### Verification for this continuation
+
+- Fresh unchanged-core combined baseline:
+  `/home/shome/.local/share/libapta-audio/rust-rewrite/native-extended-baseline-20261004T174953Z.log`.
+  **123 C tests; 276 ordinary Rust tests and 55 external-C groups in each
+  debug/release profile; 34 WAV interchange cases and two all-feature CLI cases**.
+  Formatting, Clippy, no-default-features and allocation instrumentation pass.
+  No library source changed after this run; this checkpoint changes documentation.
+  Prior i686/Windows/AArch64/native-runtime ASan matrices were not rerun here.
+- Consumer final-source script `verify-consumer.py`, external evidence root
+  `/home/shome/.local/share/Pajoniiir-M1/apta-evidence/`, stamp `20261004T181337Z`:
+  **382 workspace tests; 78 focused release tests; 8 adapter ASan integration
+  tests plus 1 lifetime compile-fail doctest**. Formatting/Clippy, actual pinned
+  Rust 1.95 P4 library compilation, dependency inspection and optimized object
+  generation pass. The desktop runtime/IDF/RTOS remain outside normal dependencies.
+- `verify-extended-artifacts.py`, stamp `20261004T181426Z`: both host WAV examples
+  reproduce exact PPM bytes after worker optimization (800x128, fixture 120 BPM /
+  80 beats / 4120 green pixels; silence no tempo/grid and an 800-pixel centerline).
+- P4 individual function frames: worker completion **1104 B** and waveform
+  **112 B**, down from **7712 B / 7600 B** when they constructed a full snapshot.
+  Existing typed getters remove unused detail copying without a new core API.
+  Worker push is 1776 B, step 352 B; cache conversion with scratch 2608 B;
+  overview/detail windows 128 B / 48 B. These exclude nested calls, caller
+  placement, interrupts and runtime overhead: **not task-stack recommendations**.
+- The consumer contribution incorporated inspected foundation exFAT advances and
+  the collaborator's own subsequent host-check fix before final verification.
+  The original collaborator checkout was neither switched nor edited. Production
+  firmware/Slint provider selection, C source/ABI/wire and accuracy gates remain
+  unchanged. Shared knowledge validation and both repositories' diff checks pass.

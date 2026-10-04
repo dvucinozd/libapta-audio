@@ -543,3 +543,15 @@ The experimental Pajoniiir adapter uses caller-owned conversion banks, immutable
 neutral analysis, explicit source/generation checks and the existing Deck and
 waveform consumers. It is not production P4 enablement. See the latest native
 consumer handoff in [MIGRATION.md](../docs/rust/MIGRATION.md).
+
+
+### Experimental media-worker consumer continuation
+
+Pajoniiir's separate native adapter now exercises the existing portable APIs
+through a lease-checked worker, retained Deck generations, global segment/explicit
+cache scratch and aligned sparse/detail waveform windows. This adds no product
+coupling or desktop runtime to Libapta. Full contracts, real S6 rejection evidence
+and remaining boundaries are in the [latest migration handoff](../docs/rust/MIGRATION.md#native-consumer-worker-and-extended-views--2026-10-04)
+and the consumer's `firmware-rust/crates/pajoniiir-apta-adapter/README.md`.
+Production worker enablement, hybrid override authority and physical P4/DSP
+qualification remain separate. This continuation changes no portable DSP behavior.
