@@ -22,6 +22,19 @@ fn segment() -> GridSegment {
         revision: 0,
     }
 }
+fn empty_tile() -> NativeTile {
+    NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 0,
+        data_column_offset: 0,
+        column_count: 0,
+    }
+}
 struct Buffers {
     spans: Vec<WaveformSpan>,
     columns: Vec<WaveformColumn>,
@@ -34,10 +47,14 @@ struct Buffers {
     key: Vec<KeyCandidate>,
     meter: Vec<MeterSegment>,
     quality: Vec<QualityRecord>,
+    detail_tiles: Vec<NativeTile>,
+    detail_columns: Vec<WaveformColumn>,
 }
 impl Buffers {
     fn new(columns: usize) -> Self {
         Self {
+            detail_tiles: Vec::new(),
+            detail_columns: Vec::new(),
             spans: vec![WaveformSpan::default(); columns],
             columns: vec![WaveformColumn::default(); columns],
             tempo: vec![TempoCandidate::default(); 3],
@@ -76,6 +93,8 @@ impl Buffers {
     }
     fn storage(&mut self) -> Storage<'_> {
         Storage {
+            detail_tiles: &mut self.detail_tiles,
+            detail_columns: &mut self.detail_columns,
             overview_spans: &mut self.spans,
             overview_columns: &mut self.columns,
             tempo_candidates: &mut self.tempo,
@@ -119,7 +138,16 @@ fn samples() -> Vec<f32> {
         .collect()
 }
 fn serialize(result: &libapta::owned_result::OwnedResult<'_>) -> Vec<u8> {
-    let mut tiles = [];
+    let mut tiles = [WaveformTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 0,
+        columns: &[],
+    }; 4];
     let wire =
         libapta::result::from_session_result(result, &mut tiles, NativeLimits::default()).unwrap();
     let mut bytes = vec![0; libapta::result::serialized_size(&wire).unwrap()];
@@ -424,9 +452,9 @@ fn integrated_all_stage_container_matches_c() {
 
 #[test]
 fn accepted_revision_survives_failed_publication_and_retry() {
-    revision_failure_rows();
+    revision_failure_rows(false, false);
 }
-fn revision_failure_rows() -> Vec<Vec<u64>> {
+fn revision_failure_rows(all: bool, detail: bool) -> Vec<Vec<u64>> {
     let pcm: Vec<f32> = (0..640000)
         .map(|i| {
             let period = if i < 320000 { 3840 } else { 6000 };
@@ -440,16 +468,31 @@ fn revision_failure_rows() -> Vec<Vec<u64>> {
         .collect();
     let mut a = Buffers::new(20);
     let mut b = Buffers::new(20);
+    if detail {
+        for buffers in [&mut a, &mut b] {
+            buffers.detail_tiles = vec![empty_tile(); 4];
+            buffers.detail_columns = vec![WaveformColumn::default(); 256];
+        }
+    }
+    let mut detail_cache = [detail_analysis::DetailTile::default(); 4];
+    let mut detail_tiles = [empty_tile(); 4];
+    let mut detail_columns = [WaveformColumn::default(); 256];
     let pool = ResultPool::new_with_requested_features(
         source(640000),
         [a.storage(), b.storage()],
         NativeLimits::default(),
         result::WAVEFORM_OVERVIEW
+            | if detail { result::WAVEFORM_DETAIL } else { 0 }
             | result::BPM
             | result::LOCAL_BEATGRID
             | result::GLOBAL_BEATGRID
             | result::DYNAMIC_TEMPO
-            | result::GRID_LOCKING,
+            | result::GRID_LOCKING
+            | if all {
+                result::MUSICAL_KEY | result::METER_DOWNBEAT | result::CALIBRATED_QUALITY
+            } else {
+                0
+            },
     )
     .unwrap();
     let mut bins = vec![analysis::OnsetBin::default(); analysis::BIN_CAPACITY];
@@ -471,9 +514,18 @@ fn revision_failure_rows() -> Vec<Vec<u64>> {
         &pool,
     )
     .unwrap();
+    if detail {
+        s.enable_detail(&mut detail_cache, &mut detail_tiles, &mut detail_columns)
+            .unwrap();
+    }
     s.enable_tempo(&mut bins, &mut flux).unwrap();
     s.enable_global_grid(true, &mut global_bins, &mut global_flux, &mut beats)
         .unwrap();
+    if all {
+        s.enable_key().unwrap();
+        s.enable_meter().unwrap();
+        s.enable_calibrated_quality().unwrap();
+    }
     let token = CancellationToken::new();
     let mut rows = vec![lifecycle_row(&pool, 0)];
     let mut first = 0;
@@ -569,10 +621,45 @@ fn exact_revision_exhaustion_acceptance_and_retry_match_public_c() {
                 .collect()
         })
         .collect();
-    let actual = revision_failure_rows();
+    let actual = revision_failure_rows(false, false);
     assert_eq!(actual.len(), expected.len());
     for (index, (a, b)) in actual.iter().zip(expected.iter()).enumerate() {
         assert_eq!(a, b, "row {index}");
+    }
+}
+
+#[test]
+#[ignore = "requires APTA_C_MUSICAL_FAILURE_ORACLE"]
+fn all_musical_stages_preserve_revision_acceptance_after_publication_failure() {
+    for detail in [false, true] {
+        let output =
+            std::process::Command::new(std::env::var_os("APTA_C_MUSICAL_FAILURE_ORACLE").unwrap())
+                .args(if detail {
+                    vec!["all", "detail"]
+                } else {
+                    vec!["all"]
+                })
+                .output()
+                .unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let expected: Vec<Vec<u64>> = String::from_utf8(output.stdout)
+            .unwrap()
+            .lines()
+            .map(|line| {
+                line.split_whitespace()
+                    .map(|v| v.parse().unwrap())
+                    .collect()
+            })
+            .collect();
+        let actual = revision_failure_rows(true, detail);
+        assert_eq!(actual.len(), expected.len());
+        for (index, (a, b)) in actual.iter().zip(&expected).enumerate() {
+            assert_eq!(a, b, "row {index}");
+        }
     }
 }
 
@@ -1271,4 +1358,196 @@ fn assert_lock_request_preflight(s: &mut PublishedSession<'_, '_, '_>, profile: 
             Error::Unsupported
         })
     );
+}
+
+// Sparse counterpart retains the same reference trace and failure sequence.
+fn sparse_revision_failure_rows(all: bool, detail: bool) -> Vec<Vec<u64>> {
+    let pcm: Vec<f32> = (0..640000)
+        .map(|i| {
+            let period = if i < 320000 { 3840 } else { 6000 };
+            let phase = i % period;
+            if phase < 64 {
+                (64 - phase) as f32 / 64.0 * 0.75
+            } else {
+                0.0
+            }
+        })
+        .collect();
+    let mut a = Buffers::new(20);
+    let mut b = Buffers::new(20);
+    if detail {
+        for buffers in [&mut a, &mut b] {
+            buffers.detail_tiles = vec![empty_tile(); 4];
+            buffers.detail_columns = vec![WaveformColumn::default(); 256];
+        }
+    }
+    let mut detail_cache = [detail_analysis::DetailTile::default(); 4];
+    let mut detail_tiles = [empty_tile(); 4];
+    let mut detail_columns = [WaveformColumn::default(); 256];
+    let pool = ResultPool::new_with_requested_features(
+        source(640000),
+        [a.storage(), b.storage()],
+        NativeLimits::default(),
+        result::WAVEFORM_OVERVIEW
+            | if detail { result::WAVEFORM_DETAIL } else { 0 }
+            | result::BPM
+            | result::LOCAL_BEATGRID
+            | result::GLOBAL_BEATGRID
+            | result::DYNAMIC_TEMPO
+            | result::GRID_LOCKING
+            | if all {
+                result::MUSICAL_KEY | result::METER_DOWNBEAT | result::CALIBRATED_QUALITY
+            } else {
+                0
+            },
+    )
+    .unwrap();
+    let mut bins = vec![analysis::OnsetBin::default(); analysis::BIN_CAPACITY];
+    let mut flux = vec![0.0; bins.len()];
+    let mut global_bins = vec![analysis::OnsetBin::default(); global_analysis::BIN_CAPACITY];
+    let mut global_flux = vec![0.0; global_bins.len()];
+    let mut beats = vec![Beat::default(); global_analysis::MAX_BEATS];
+    let mut queue = vec![NormalizedSample::default(); 4096];
+    let mut acc = vec![sparse::SparseAccumulator::default(); 20];
+    let mut ranges = vec![FrameRange::default(); 256];
+    let mut nodes = [sparse::QueuedBlock::default(); 1];
+    let mut spans = vec![WaveformSpan::default(); 20];
+    let mut columns = vec![WaveformColumn::default(); 20];
+    let mut s = PublishedSparseSession::new(
+        SessionConfig {
+            sample_rate: 8000,
+            channel_count: 1,
+            total_frames: 640000,
+            frames_per_column: 32768,
+        },
+        sparse::Workspace {
+            accumulators: &mut acc,
+            ranges: &mut ranges,
+            nodes: &mut nodes,
+            pcm: &mut queue,
+            snapshot_spans: &mut spans,
+            snapshot_columns: &mut columns,
+        },
+        &pool,
+    )
+    .unwrap();
+    if detail {
+        s.enable_detail(&mut detail_cache, &mut detail_tiles, &mut detail_columns)
+            .unwrap();
+    }
+    s.enable_tempo(&mut bins, &mut flux).unwrap();
+    s.enable_global_grid(true, &mut global_bins, &mut global_flux, &mut beats)
+        .unwrap();
+    if all {
+        s.enable_key().unwrap();
+        s.enable_meter().unwrap();
+        s.enable_calibrated_quality().unwrap();
+    }
+    let token = CancellationToken::new();
+    let mut rows = vec![lifecycle_row(&pool, 0)];
+    let mut first = 0;
+    let mut locked = false;
+    while first < pcm.len() {
+        let end = (first + 4096).min(pcm.len());
+        s.push_at(first as u64, PcmView::F32Interleaved(&pcm[first..end]))
+            .unwrap();
+        first = end;
+        rows.push(lifecycle_row(&pool, 0));
+        s.process(WorkBudget::default(), &token).unwrap();
+        rows.push(lifecycle_row(&pool, 0));
+        if !locked && first >= 320000 {
+            s.lock_grid_range(FrameRange {
+                first_frame: 0,
+                end_frame: 311808,
+            })
+            .unwrap();
+            rows.push(lifecycle_row(&pool, 0));
+            locked = true;
+        }
+        if s.session()
+            .grid_revision()
+            .is_some_and(|r| r.state == RevisionState::Pending)
+        {
+            break;
+        }
+    }
+    assert!(first < pcm.len(), "a running pending proposal is required");
+    let old = pool.acquire().unwrap();
+    let generation = pool.generation();
+    while pool.generation() == generation {
+        let end = (first + 4096).min(pcm.len());
+        assert!(end > first);
+        s.push_at(first as u64, PcmView::F32Interleaved(&pcm[first..end]))
+            .unwrap();
+        first = end;
+        rows.push(lifecycle_row(&pool, 0));
+        match s.process(WorkBudget::default(), &token) {
+            Ok(_) | Err(Error::ResultSlotsExhausted) => (),
+            Err(e) => panic!("{e:?}"),
+        }
+        rows.push(lifecycle_row(&pool, 0));
+    }
+    let newer = pool.acquire().unwrap();
+    let preserved = serialize(&newer);
+    let id = s.session().grid_revision().unwrap().revision_id;
+    assert_eq!(s.apply_grid_revision(id), Err(Error::ResultSlotsExhausted));
+    rows.push(lifecycle_row(&pool, 0));
+    assert_eq!(
+        s.session().grid_revision().unwrap().state,
+        RevisionState::Applied
+    );
+    assert_eq!(s.apply_grid_revision(id), Err(Error::InvalidState));
+    rows.push(lifecycle_row(&pool, 0));
+    assert_eq!(serialize(&newer), preserved);
+    drop(old);
+    let budget = WorkBudget {
+        maximum_steps: 1,
+        maximum_input_frames: 0,
+    };
+    assert_eq!(s.process(budget, &token), Err(Error::ResultSlotsExhausted));
+    rows.push(lifecycle_row(&pool, 0));
+    assert_eq!(serialize(&newer), preserved);
+    drop(newer);
+    s.process(budget, &token).unwrap();
+    assert_eq!(
+        pool.acquire().unwrap().revision().unwrap().state,
+        RevisionState::Applied
+    );
+    rows.push(lifecycle_row(&pool, 0));
+    rows
+}
+
+#[test]
+#[ignore = "requires APTA_C_MUSICAL_FAILURE_ORACLE"]
+fn sparse_all_stage_revision_retry_matches_public_c() {
+    for detail in [false, true] {
+        let output =
+            std::process::Command::new(std::env::var_os("APTA_C_MUSICAL_FAILURE_ORACLE").unwrap())
+                .args(if detail {
+                    vec!["all", "detail"]
+                } else {
+                    vec!["all"]
+                })
+                .output()
+                .unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let expected: Vec<Vec<u64>> = String::from_utf8(output.stdout)
+            .unwrap()
+            .lines()
+            .map(|line| {
+                line.split_whitespace()
+                    .map(|v| v.parse().unwrap())
+                    .collect()
+            })
+            .collect();
+        let actual = sparse_revision_failure_rows(true, detail);
+        assert_eq!(actual.len(), expected.len());
+        for (index, (a, b)) in actual.iter().zip(&expected).enumerate() {
+            assert_eq!(a, b, "row {index}");
+        }
+    }
 }

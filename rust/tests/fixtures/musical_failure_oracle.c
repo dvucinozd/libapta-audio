@@ -21,8 +21,9 @@ static void trace(apta_session_t *s) {
         has_meter ? m.segments[0].applicability_range.first_frame : 0, has_meter ? m.segments[0].applicability_range.end_frame : 0, has_global ? g.flags : 0, has_global ? g.segment_count : 0, has_global ? g.beat_count : 0, 0, 0, (uint64_t)0, 0, has_local ? lg.flags : 0, has_local ? lg.applicability_range.first_frame : 0, has_local ? lg.applicability_range.end_frame : 0, has_revision ? rv.state : 0, has_revision ? rv.revision_id : 0);
     apta_result_release(r);
 }
-int main(void) {
-    const uint64_t features = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO | APTA_FEATURE_GRID_LOCKING;
+int main(int argc, char **argv) {
+    (void)argv; const int all = argc > 1; const int detail = argc > 2;
+    const uint64_t features = (detail ? APTA_FEATURE_WAVEFORM_DETAIL : 0) | (all ? APTA_FEATURE_MUSICAL_KEY | APTA_FEATURE_METER_DOWNBEAT | APTA_FEATURE_CALIBRATED_QUALITY : 0) | APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_BPM | APTA_FEATURE_LOCAL_BEATGRID | APTA_FEATURE_GLOBAL_BEATGRID | APTA_FEATURE_DYNAMIC_TEMPO | APTA_FEATURE_GRID_LOCKING;
     apta_context_config_t cc; apta_context_config_init(&cc); cc.requested_capabilities = features;
     apta_context_t *c = NULL; CHECK(apta_context_create(&cc, &c) == 0);
     apta_session_config_t sc; apta_session_config_init(&sc); sc.requested_features = features;

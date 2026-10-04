@@ -4,6 +4,7 @@
 #![forbid(unsafe_code)]
 use libapta::{container, result, session::*, wav::Wav, waveform::PcmView, NativeLimits};
 use libapta_runtime::{ContextLimits, GrowingLimits, RuntimeContext};
+use sha2::{Digest, Sha256};
 use std::{
     error::Error,
     ffi::OsString,
@@ -12,7 +13,7 @@ use std::{
     path::{Path, PathBuf},
 };
 const MAX_INPUT: u64 = 256 * 1024 * 1024;
-const USAGE: &str = "usage: apta-native analyze INPUT.wav OUTPUT.apta [--music] [--bands] [--detail] [--source-identity=KIND:HEX]\n       apta-native inspect INPUT.apta\n       apta-native validate INPUT.apta [--permissive]\n       apta-native corpus INPUT_DIRECTORY OUTPUT_DIRECTORY [--music] [--bands] [--detail]\n       apta-native version\nIdentity KIND is opaque or sha256; HEX is a host-supplied 64-digit hexadecimal identity.\nOutput files/directories must not exist. Corpus is local WAV batch conversion, not frozen qualification.";
+const USAGE: &str = "usage: apta-native analyze INPUT.wav OUTPUT.apta [--music] [--bands] [--detail] [--source-identity=KIND:HEX | --hash-source] [--metadata-cbor=FILE]\n       apta-native inspect INPUT.apta [--json]\n       apta-native verify-source INPUT.apta SOURCE_OBJECT\n       apta-native validate INPUT.apta [--permissive]\n       apta-native corpus INPUT_DIRECTORY OUTPUT_DIRECTORY [--music] [--bands] [--detail] [--hash-source]\n       apta-native version\nIdentity KIND is opaque or sha256; HEX is a host-supplied 64-digit hexadecimal identity.\n--hash-source computes SHA-256 of every input byte, including WAV headers.\nOutput files/directories must not exist. Corpus is local WAV batch conversion, not frozen qualification.";
 fn read(path: &Path) -> Result<Vec<u8>, Box<dyn Error>> {
     let mut input = Vec::new();
     fs::File::open(path)?
@@ -23,21 +24,33 @@ fn read(path: &Path) -> Result<Vec<u8>, Box<dyn Error>> {
     }
     Ok(input)
 }
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Default)]
 struct Features {
     music: bool,
     bands: bool,
     detail: bool,
     identity: Option<SourceIdentity>,
+    hash_source: bool,
+    metadata: Option<PathBuf>,
 }
 fn features(flags: &[OsString], allow_identity: bool) -> Result<Features, Box<dyn Error>> {
     let mut out = Features::default();
     for flag in flags {
         if let Some(value) = flag
             .to_str()
+            .and_then(|s| s.strip_prefix("--metadata-cbor="))
+        {
+            if !allow_identity || out.metadata.is_some() || value.is_empty() {
+                return Err(USAGE.into());
+            }
+            out.metadata = Some(PathBuf::from(value));
+            continue;
+        }
+        if let Some(value) = flag
+            .to_str()
             .and_then(|s| s.strip_prefix("--source-identity="))
         {
-            if !allow_identity || out.identity.is_some() {
+            if !allow_identity || out.identity.is_some() || out.hash_source {
                 return Err(USAGE.into());
             }
             let (kind, hex) = value.split_once(':').ok_or(USAGE)?;
@@ -57,6 +70,7 @@ fn features(flags: &[OsString], allow_identity: bool) -> Result<Features, Box<dy
             continue;
         }
         let selected = match flag.to_str() {
+            Some("--hash-source") if out.identity.is_none() => &mut out.hash_source,
             Some("--music") => &mut out.music,
             Some("--bands") => &mut out.bands,
             Some("--detail") => &mut out.detail,
@@ -69,7 +83,30 @@ fn features(flags: &[OsString], allow_identity: bool) -> Result<Features, Box<dy
     }
     Ok(out)
 }
-fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dyn Error>> {
+fn analyze(input: &Path, output: &Path, features: &Features) -> Result<(), Box<dyn Error>> {
+    let metadata_bytes = if let Some(path) = &features.metadata {
+        let mut bytes = Vec::new();
+        fs::File::open(path)?.take(8193).read_to_end(&mut bytes)?;
+        if bytes.len() > 8192 {
+            return Err("metadata exceeds 8192 bytes".into());
+        }
+        Some(bytes)
+    } else {
+        None
+    };
+    let metadata = metadata_bytes
+        .as_deref()
+        .map(libapta::meta::parse)
+        .transpose()?;
+    if let Some(metadata) = &metadata {
+        let mut canonical = vec![0; libapta::meta::serialized_size(metadata)?];
+        libapta::meta::write(metadata, &mut canonical)?;
+        if Some(canonical.as_slice()) != metadata_bytes.as_deref() {
+            return Err(
+                "metadata must use canonical supported fields; unknown fields would be lost".into(),
+            );
+        }
+    }
     let bytes = read(input)?;
     let wav = Wav::parse(&bytes)?;
     if wav.frame_count() == 0 {
@@ -85,7 +122,11 @@ fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dy
             frames_per_column: 32768,
         },
         GrowingLimits::default(),
-        features.identity.unwrap_or_default(),
+        if features.hash_source {
+            SourceIdentity::new(2, Sha256::digest(&bytes).into())?
+        } else {
+            features.identity.unwrap_or_default()
+        },
     )?;
     if features.bands {
         s.enable_three_band()?;
@@ -126,7 +167,9 @@ fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dy
             confidence: 0,
             columns: &[],
         }; libapta::detail_analysis::TILE_COUNT];
-        let wire = result::from_session_snapshot(&snapshot, &mut tiles, NativeLimits::default())?;
+        let mut wire =
+            result::from_session_snapshot(&snapshot, &mut tiles, NativeLimits::default())?;
+        wire.metadata = metadata;
         let size = result::serialized_size(&wire)?;
         let mut data = Vec::new();
         data.try_reserve_exact(size)?;
@@ -144,6 +187,65 @@ fn analyze(input: &Path, output: &Path, features: Features) -> Result<(), Box<dy
     file.write_all(&data)?;
     file.flush()?;
     println!("{} frames, {} bytes", wav.frame_count(), data.len());
+    Ok(())
+}
+/// Versioned numeric summary; exact frame coordinates stay JSON integers.
+fn inspect_json(path: &Path) -> Result<(), Box<dyn Error>> {
+    let data = read(path)?;
+    let r = result::parse(&data, result::Limits::default())?;
+    let c = container::Container::parse(&data, container::ParseOptions::default())?;
+    let total = r
+        .source
+        .total_frames
+        .map_or_else(|| "null".to_owned(), |n| n.to_string());
+    let fingerprint: String = r
+        .source
+        .fingerprint
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    print!("{{\"schema_version\":1,\"source\":{{\"sample_rate\":{},\"channel_count\":{},\"total_frames\":{},\"fingerprint_kind\":{},\"fingerprint_hex\":\"{}\"}},\"available_features\":{},\"partial\":{},\"sections\":[",
+        r.source.sample_rate, r.source.channel_count, total, r.source.fingerprint_kind, fingerprint, r.available_features, c.flags & 1 != 0);
+    for i in 0..c.section_count() {
+        let section = c.section(i).unwrap();
+        if i != 0 {
+            print!(",");
+        }
+        // Numeric bytes avoid treating an untrusted FourCC as JSON text.
+        print!(
+            "{{\"fourcc_bytes\":{:?},\"version\":{},\"payload_bytes\":{}}}",
+            section.fourcc,
+            section.version,
+            section.payload.len()
+        );
+    }
+    let overview = r.waveform.overview;
+    print!("],\"overview\":{{\"frames_per_column\":{},\"spans\":{},\"columns\":{}}},\"detail_tiles\":{},\"tempo_millibpm\":",
+        overview.frames_per_column, overview.span_count(), overview.column_count(), r.waveform.tile_count());
+    if let Some(t) = r.tempo {
+        print!("{}", t.selected().tempo_millibpm);
+    } else {
+        print!("null");
+    }
+    print!(",\"key\":");
+    if let Some(k) = r.key {
+        let mut candidates = [libapta::KeyCandidate::default(); 24];
+        let key = k.copy_into(&mut candidates)?;
+        print!("{{\"tonic\":{},\"mode\":{},\"confidence\":{},\"state\":{},\"first_frame\":{},\"end_frame\":{},\"candidates\":[", key.tonic, key.mode, key.confidence, key.state as u8, key.first_frame, key.end_frame);
+        for (i, candidate) in key.candidates.iter().enumerate() {
+            if i != 0 {
+                print!(",");
+            }
+            print!(
+                "{{\"tonic\":{},\"mode\":{},\"score\":{},\"confidence\":{}}}",
+                candidate.tonic, candidate.mode, candidate.score, candidate.confidence
+            );
+        }
+        print!("]}}");
+    } else {
+        print!("null");
+    }
+    println!("}}");
     Ok(())
 }
 fn inspect(path: &Path) -> Result<(), Box<dyn Error>> {
@@ -236,6 +338,20 @@ fn inspect(path: &Path) -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 }
+/// Compare the exact source object, without decoding or normalizing its PCM.
+fn verify_source(result_path: &Path, source_path: &Path) -> Result<(), Box<dyn Error>> {
+    let bytes = read(result_path)?;
+    let r = result::parse(&bytes, result::Limits::default())?;
+    if r.source.fingerprint_kind != 2 {
+        return Err("result does not carry a SHA-256 source-object identity".into());
+    }
+    let actual: [u8; 32] = Sha256::digest(read(source_path)?).into();
+    if actual != r.source.fingerprint {
+        return Err("source-object SHA-256 mismatch".into());
+    }
+    println!("verified SHA-256 source-object identity");
+    Ok(())
+}
 fn corpus(input: &Path, output: &Path, features: Features) -> Result<(), Box<dyn Error>> {
     let mut files: Vec<PathBuf> = fs::read_dir(input)?
         .map(|e| e.map(|e| e.path()))
@@ -250,7 +366,7 @@ fn corpus(input: &Path, output: &Path, features: Features) -> Result<(), Box<dyn
     for path in &files {
         let name = path.file_name().ok_or("missing WAV filename")?;
         let target = output.join(name).with_extension("apta");
-        if let Err(e) = analyze(path, &target, features) {
+        if let Err(e) = analyze(path, &target, &features) {
             eprintln!("{}: {e}", path.display());
             failures += 1;
         }
@@ -274,6 +390,12 @@ fn run(args: &[OsString]) -> Result<(), Box<dyn Error>> {
             println!("{USAGE}");
             Ok(())
         }
+        [command, input, source] if command == "verify-source" => {
+            verify_source(Path::new(input), Path::new(source))
+        }
+        [command, input, flag] if command == "inspect" && flag == "--json" => {
+            inspect_json(Path::new(input))
+        }
         [command, input] if command == "inspect" => inspect(Path::new(input)),
         [command, input] if command == "validate" => {
             result::parse(&read(Path::new(input))?, result::Limits::default())?;
@@ -288,7 +410,7 @@ fn run(args: &[OsString]) -> Result<(), Box<dyn Error>> {
             Ok(())
         }
         [command, input, output, flags @ ..] if command == "analyze" => {
-            analyze(Path::new(input), Path::new(output), features(flags, true)?)
+            analyze(Path::new(input), Path::new(output), &features(flags, true)?)
         }
         [command, input, output, flags @ ..] if command == "corpus" => {
             corpus(Path::new(input), Path::new(output), features(flags, false)?)

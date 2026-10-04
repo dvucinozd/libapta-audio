@@ -584,3 +584,40 @@ fn fragmented_capacity_and_merging_match_public_c_wire() {
         assert_eq!(bytes, c.stdout);
     }
 }
+
+#[test]
+#[ignore = "requires APTA_C_UNKNOWN_SPARSE_ORACLE"]
+fn known_sparse_final_wire_matches_unknown_origin_c_with_and_without_holes() {
+    // Establish the final overview contract without claiming native unknown
+    // sparse construction, growth, scheduling or intermediate generations.
+    for holes in [false, true] {
+        let out =
+            std::process::Command::new(std::env::var_os("APTA_C_UNKNOWN_SPARSE_ORACLE").unwrap())
+                .arg(if holes { "1" } else { "0" })
+                .output()
+                .unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let mut c = config(320);
+        c.frames_per_column = 64;
+        let mut s = OwnedSparseSession::new(c, SparseLimits::default()).unwrap();
+        let offsets = [128u64, 0, 256, 64, 192];
+        for &first in &offsets[..if holes { 3 } else { 5 }] {
+            let pcm: [i16; 64] =
+                core::array::from_fn(|i| ((first + i as u64) as i32 * 71 - 12000) as i16);
+            assert_eq!(s.push_at(first, PcmView::S16Interleaved(&pcm)), Ok(64));
+            run(&mut s);
+        }
+        s.finish_input().unwrap();
+        run(&mut s);
+        let snapshot = s.snapshot().unwrap();
+        let view =
+            result::from_session_snapshot(&snapshot, &mut [], NativeLimits::default()).unwrap();
+        let mut bytes = vec![0; result::serialized_size(&view).unwrap()];
+        result::write(&view, &mut bytes, Default::default()).unwrap();
+        assert_eq!(bytes, out.stdout);
+    }
+}

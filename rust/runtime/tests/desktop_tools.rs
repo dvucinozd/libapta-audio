@@ -176,12 +176,17 @@ fn native_all_feature_output_passes_strict_c_reader() {
     fs::create_dir(&directory).unwrap();
     let input = directory.join("input.wav");
     wav(&input);
+    let metadata = directory.join("metadata.cbor");
+    fs::write(&metadata, b"\xa1\x07\x64test").unwrap();
+    let metadata_flag = format!("--metadata-cbor={}", metadata.display());
     for music in [false, true] {
         let output = directory.join(if music { "music.apta" } else { "waveform.apta" });
         let mut args = vec![
             "analyze".as_ref(),
             input.as_os_str(),
             output.as_os_str(),
+            "--hash-source".as_ref(),
+            metadata_flag.as_ref(),
             "--bands".as_ref(),
             "--detail".as_ref(),
         ];
@@ -191,6 +196,7 @@ fn native_all_feature_output_passes_strict_c_reader() {
         run(&args);
         let data = fs::read(&output).unwrap();
         let parsed = libapta::result::parse(&data, Default::default()).unwrap();
+        assert_eq!(parsed.waveform.metadata.unwrap().comments, Some("test"));
         assert_eq!(parsed.available_features & 7, 7);
         assert_eq!(parsed.waveform.tile_count(), 4);
         let check = Command::new(std::env::var_os("APTA_C_VALIDATOR").unwrap())
@@ -244,6 +250,13 @@ fn native_cli_preserves_supplied_identity_and_rejects_ambiguous_flags() {
         assert_eq!(result.source.fingerprint, core::array::from_fn(|i| i as u8));
         let inspect = run(&["inspect".as_ref(), output.as_os_str()]);
         assert!(String::from_utf8_lossy(&inspect.stdout).contains(&format!("{name}:{hex}")));
+        assert!(!command(&[
+            "verify-source".as_ref(),
+            output.as_os_str(),
+            input.as_os_str()
+        ])
+        .status
+        .success());
         let invalid = directory.join("invalid.apta");
         assert!(!command(&[
             "analyze".as_ref(),
@@ -279,5 +292,143 @@ fn native_cli_preserves_supplied_identity_and_rejects_ambiguous_flags() {
         .success());
         assert!(!output.exists());
     }
+    fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn source_hash_covers_exact_object_and_verification_rejects_edits() {
+    let directory = std::env::temp_dir().join(format!("apta-native-hash-{}", std::process::id()));
+    fs::create_dir(&directory).unwrap();
+    let input = directory.join("input.wav");
+    let output = directory.join("hashed.apta");
+    wav(&input);
+    run(&[
+        "analyze".as_ref(),
+        input.as_os_str(),
+        output.as_os_str(),
+        "--hash-source".as_ref(),
+    ]);
+    let bytes = fs::read(&output).unwrap();
+    let r = libapta::result::parse(&bytes, Default::default()).unwrap();
+    assert_eq!(r.source.fingerprint_kind, 2);
+    // Independently computed with Python hashlib from the generated RIFF object.
+    let expected = "255ad3c3469184a6321f4f1531e51bd282eac26fb5027bd3f46572a077d41127";
+    let hex: String = r
+        .source
+        .fingerprint
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    assert_eq!(hex, expected);
+    run(&[
+        "verify-source".as_ref(),
+        output.as_os_str(),
+        input.as_os_str(),
+    ]);
+    // A benign RIFF JUNK chunk changes identity while leaving decoded PCM intact.
+    let mut edited = fs::read(&input).unwrap();
+    edited.extend_from_slice(b"JUNK\x04\0\0\0test");
+    let size = (edited.len() - 8) as u32;
+    edited[4..8].copy_from_slice(&size.to_le_bytes());
+    let other = directory.join("edited.wav");
+    fs::write(&other, &edited).unwrap();
+    assert!(!command(&[
+        "verify-source".as_ref(),
+        output.as_os_str(),
+        other.as_os_str()
+    ])
+    .status
+    .success());
+    let other_result = directory.join("edited.apta");
+    run(&[
+        "analyze".as_ref(),
+        other.as_os_str(),
+        other_result.as_os_str(),
+        "--hash-source".as_ref(),
+    ]);
+    let other_bytes = fs::read(&other_result).unwrap();
+    let other_parsed = libapta::result::parse(&other_bytes, Default::default()).unwrap();
+    assert_ne!(other_parsed.source.fingerprint, r.source.fingerprint);
+    assert_eq!(
+        other_parsed.waveform.overview.column_count(),
+        r.waveform.overview.column_count()
+    );
+    let inspect = run(&["inspect".as_ref(), output.as_os_str()]);
+    assert!(String::from_utf8_lossy(&inspect.stdout).contains(expected));
+    for flags in [
+        vec!["--hash-source", "--hash-source"],
+        vec!["--hash-source", "--source-identity=opaque:0000000000000000000000000000000000000000000000000000000000000000"],
+        vec!["--source-identity=opaque:0000000000000000000000000000000000000000000000000000000000000000", "--hash-source"],
+    ] {
+        let invalid = directory.join("invalid.apta");
+        let mut args = vec!["analyze".as_ref(), input.as_os_str(), invalid.as_os_str()];
+        args.extend(flags.iter().map(std::ffi::OsStr::new));
+        assert!(!command(&args).status.success());
+        assert!(!invalid.exists());
+    }
+    let batch = directory.join("batch");
+    run(&[
+        "corpus".as_ref(),
+        directory.as_os_str(),
+        batch.as_os_str(),
+        "--hash-source".as_ref(),
+    ]);
+    assert_eq!(fs::read(batch.join("input.apta")).unwrap(), bytes);
+    assert_eq!(fs::read(batch.join("edited.apta")).unwrap(), other_bytes);
+    fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn metadata_rejects_unknown_malformed_and_duplicate_input_before_output() {
+    let directory = std::env::temp_dir().join(format!("apta-native-meta-{}", std::process::id()));
+    fs::create_dir(&directory).unwrap();
+    let input = directory.join("input.wav");
+    wav(&input);
+    let meta = directory.join("metadata.cbor");
+    let flag = format!("--metadata-cbor={}", meta.display());
+    let output = directory.join("out.apta");
+    for bytes in [
+        &b"invalid"[..],
+        &b"\xa1\x08\x01"[..],
+        &b"\xa1\x07\x78\x04test"[..],
+    ] {
+        fs::write(&meta, bytes).unwrap();
+        assert!(!command(&[
+            "analyze".as_ref(),
+            input.as_os_str(),
+            output.as_os_str(),
+            flag.as_ref()
+        ])
+        .status
+        .success());
+        assert!(!output.exists());
+    }
+    fs::write(&meta, b"\xa1\x07\x64test").unwrap();
+    assert!(!command(&[
+        "analyze".as_ref(),
+        input.as_os_str(),
+        output.as_os_str(),
+        flag.as_ref(),
+        flag.as_ref()
+    ])
+    .status
+    .success());
+    assert!(!output.exists());
+    run(&[
+        "analyze".as_ref(),
+        input.as_os_str(),
+        output.as_os_str(),
+        flag.as_ref(),
+    ]);
+    let bytes = fs::read(&output).unwrap();
+    assert_eq!(
+        libapta::result::parse(&bytes, Default::default())
+            .unwrap()
+            .waveform
+            .metadata
+            .unwrap()
+            .comments,
+        Some("test")
+    );
     fs::remove_dir_all(directory).unwrap();
 }

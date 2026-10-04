@@ -1014,7 +1014,16 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
         }
         let overview_changed = self.session.columns().len() != self.previous_columns;
         let detail_changed = self.session.detail_mutation_serial() != self.previous_detail_serial;
-        if self.pending || overview_changed || detail_changed {
+        // A failed musical publication retries in its own stage, after earlier
+        // stages. Publishing it here would let a pending key consume the only
+        // free slot before an accepted S4/S6 revision can be published.
+        let waveform_pending = self.pending
+            && self.changed & !(crate::result::WAVEFORM_OVERVIEW | crate::result::WAVEFORM_DETAIL)
+                == 0;
+        if waveform_pending || overview_changed || detail_changed {
+            if !waveform_pending {
+                self.changed = 0;
+            }
             self.pending = true;
             if overview_changed {
                 self.changed = crate::result::WAVEFORM_OVERVIEW;
@@ -1676,7 +1685,13 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         if let Some(detail) = self.session.detail_cache() {
             self.scheduler.refresh_detail(detail);
         }
-        if !overview_publication && (self.pending || detail_changed) {
+        let waveform_pending = self.pending
+            && self.changed & !(crate::result::WAVEFORM_OVERVIEW | crate::result::WAVEFORM_DETAIL)
+                == 0;
+        if !overview_publication && (waveform_pending || detail_changed) {
+            if !waveform_pending {
+                self.changed = 0;
+            }
             self.pending = true;
             if detail_changed {
                 self.changed |= crate::result::WAVEFORM_DETAIL;

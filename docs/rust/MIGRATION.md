@@ -1654,3 +1654,194 @@ snapshot stack sizing remain separate gates. Portable key score **55734 versus
 host C 55735** remains unresolved; explicit std KeyMath matches accepted host
 fixtures only. Original DSP accuracy and physical P4 qualification are unchanged.
 No deployment, host-service change or hardware operation occurred.
+
+## Publication retry, numerical boundary and desktop/platform continuation — 2026-10-04
+
+One implementation agent, two build/test jobs. The clean supplied checkpoint was
+verified live before the dated combined baseline. C algorithms, public headers,
+ABI, container format and the portable backend remain unchanged.
+
+### Integrated behavior and exact contracts
+
+- Bounded sequential and sparse publication now retries musical failures in their
+  own stages. Previously a failed key publication could consume the newly free
+  slot before S4 retried an accepted revision. The public-C regression reproduced
+  generation 130 with native changed mask 512 versus C 280. Both wrappers now
+  match the entire trace. Fresh waveform/detail publications also clear unrelated
+  pending musical mask bits; the unacknowledged stage serial remains retryable.
+  Four new reference traces cover both wrappers with all musical stages, with
+  and without detail. Retained wire graphs stay immutable, revision acceptance
+  survives failed publication, and owning mirror-only retry is unchanged.
+- The new public allocation oracle records each allocation's size/alignment/class
+  and exhaustively injects failure at all 49 allocation calls in its successful
+  all-feature lifecycle. Calls 11, 12 and 24 are recoverable in that fixture and
+  still reach END_OF_INPUT; the other 46 return OUT_OF_MEMORY. Every case releases
+  all allocations. The class union is LARGE|PERSISTENT, not a universal promise
+  that other profiles never request FAST/TEMPORARY/DMA. Invalid allocator pairs
+  fail before callbacks. The x86_64 workspace profile reports minimum 591392,
+  recommended 628370, alignment 16; minimum-minus-one fails before allocation,
+  exact minimum creates successfully. These are measured C layouts, not Rust
+  layouts. A synchronized reader acquires across 128 publications with a custom
+  allocator, checks immutable/monotonic generations and releases before session
+  destruction. An independently retained result is released on another thread
+  after session destruction; context destruction stays Busy until release.
+- The initially-unknown public-C sparse oracle establishes out-of-order push,
+  complete versus gapped EOF, rejection below the highest accepted offset,
+  idempotent repeated EOF, conflicting changed EOF and initial-result retention.
+  Bounded-result-slot construction rejects unknown duration. The two final
+  containers match the existing known-duration native owning sparse engine
+  byte-for-byte. **Native unknown sparse construction/growth/scheduling and its
+  intermediate publications remain unimplemented**; final overview equivalence
+  does not establish those contracts or musical unknown-origin equivalence.
+- Native `--hash-source` computes SHA-256 over the exact byte buffer analyzed,
+  including RIFF headers/chunks. Hashing is opt-in, conflicts with supplied
+  identity and works per file in corpus. `verify-source` requires SHA-256 identity
+  and rejects absent/opaque/mismatching objects. No implicit verification is added
+  to host-supplied identity. RustCrypto `sha2` is confined to the std runtime;
+  portable core dependencies and allocator/unsafe prohibitions are unchanged.
+- `--metadata-cbor=FILE` accepts at most 8192 bytes of canonical CBOR containing
+  the seven supported typed META fields. Re-encoding must reproduce the input,
+  so unknown fields cannot silently disappear. Validation precedes analysis and
+  output creation. Metadata is export-only, not live-session mutation; corpus
+  rejects the per-file option. All-feature/hash/metadata exports pass strict C
+  reading. `inspect --json` emits schema version 1 with exact numeric source,
+  feature/section, overview/detail, tempo and selected-key/candidate fields.
+  Numeric FourCC byte arrays avoid escaping untrusted section names. This summary
+  is not a frozen corpus interface or a full graph export.
+
+### Portable numerical gate: diagnosed, not corrected
+
+The unchanged public C key fixture still uses 8000 Hz, 320000 frames, uniform
+120 BPM impulses of amplitude 0.75. The extended oracle returns coefficients plus
+1250 snapshots (every 256 source frames) of both Goertzel arrays and chroma.
+Eight combinations isolate runtime/portable cosine, logarithm and square root.
+Debug and release establish:
+
+- Earliest coefficient divergence is index 27, argument bits `3ffa3924`:
+  portable `bf3fd897`, host C `bf3fd898`. The existing opaque callback dispatch
+  remains necessary to prevent the separate release constant-folding discrepancy.
+- Portable state first differs in the sampled frame-256 Goertzel trace; chroma
+  first differs at sampled frame 8192 (after the first 8000-frame window).
+- Host cosine alone removes all sampled Goertzel differences and restores the
+  selected quantized score, but portable log still leaves a one-bit chroma
+  difference. Host cosine+log makes every sampled intermediate bit-identical;
+  changing sqrt alone has no effect on this fixture.
+- Final score bits are portable `3f59b759`, host `3f59b75b`. The actual
+  `score*65535+0.5` values are 55734.996 and 55735.004, producing selected scores
+  55734 and 55735. Remaining candidate scores are 55374 and 54150.
+- `python3 rust/tests/fixtures/key_rounding.py` independently evaluates cosine
+  with 90-digit Decimal arithmetic and 100 Taylor terms. At that argument the
+  portable coefficient is the nearer float32 value (absolute errors about
+  2.90714e-8 versus 3.05333e-8). Runtime host `cosf` selects the other neighbor.
+  Thus treating the host value as a portable accuracy correction would be wrong;
+  universal portable/platform-libm identity is not established. No output
+  normalization, special-case coefficient, tolerance change or backend replacement.
+
+Run the compiled audit after the combined runner builds its oracle:
+
+```bash
+export CARGO_TARGET_DIR=/home/shome/.local/share/libapta-audio/rust-rewrite/combined/cargo-target
+export CARGO_BUILD_JOBS=2 RUST_TEST_THREADS=2
+export APTA_C_KEY_MATH_ORACLE=/home/shome/.local/share/libapta-audio/rust-rewrite/combined/key-math-oracle
+cargo test -p libapta --lib trace_portable -- --ignored --nocapture
+cargo test -p libapta --release --lib trace_portable -- --ignored --nocapture
+```
+
+### Platform evidence and prerequisites
+
+The missing ILP32 startup/libgcc prerequisite was resolved without privileged
+installation or host changes. Ubuntu packages were downloaded and extracted under
+`/home/shome/.local/share/libapta-audio/rust-rewrite/ilp32-toolchain/`:
+`libc6-i386`, `libc6-dev-i386`, `lib32gcc-s1`, `lib32gcc-13-dev`, `libc6-dev`,
+`linux-libc-dev`, `lib32stdc++6`, `lib32stdc++-13-dev`. Local `cc-i686`/`cxx-i686`
+wrappers use that sysroot/startup/library path and explicit local ELF interpreter
+and rpath. They do not install files into `/lib` or change loader services.
+
+Default `-m32` C links and executes its 121-test configuration; ordinary Rust
+binaries also link and execute. However default GCC x87 excess precision differs
+from Rust's SSE arithmetic: the key oracle already differs at coefficient 4.
+That default-profile parity failure is preserved. A separate C build under
+`c-ilp32-sse2`, with `-msse2 -mfpmath=sse` for both C and C++, tests the same
+arithmetic profile as Rust and enables examples for the 123-test configuration.
+It does not silently replace or qualify the default x87 profile.
+
+Reproduction scripts and all generated binaries stay in the evidence root:
+`run-ilp32-20261004T154451Z.py` (default-profile failure) and
+`run-ilp32-sse2-20261004T154451Z.py` (explicit SSE2 profile). For native checks:
+
+```bash
+export CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_LINKER=/home/shome/.local/share/libapta-audio/rust-rewrite/ilp32-toolchain/cc-i686
+cargo test --workspace --target i686-unknown-linux-gnu --locked
+cargo test --workspace --target i686-unknown-linux-gnu --release --locked
+```
+
+Rust's bundled `rust-lld` removes the missing-linker obstacle for MSVC, but actual
+linking still fails on absent Windows SDK import libraries: `kernel32.lib`,
+`ntdll.lib`, `userenv.lib`, `ws2_32.lib`, `dbghelp.lib`. The smallest remaining
+remedy is a provisioned Windows SDK/MSVC build-and-execution environment. The
+existing Windows CI job now runs native Rust release tests when that workflow
+runs; adding the step is not evidence that it has executed. No Windows acceptance
+is claimed from `cargo check` or Wine availability.
+
+The RV32IMAF-C release diagnostic measures `SessionSnapshot` at **3768 bytes**
+and LLVM reports **3456 bytes** for the probe's snapshot function stack frame.
+This excludes caller result placement, nested calls, interrupts and RTOS use; it
+is not a safe task-stack recommendation. The probe source/object and reproducible
+`run-diagnostics-fixed-20261004T154451Z.py` stay in the evidence directory.
+No ESP-IDF Rust toolchain/integration or complete embedded snapshot-stack
+qualification was established. Existing C ESP-IDF support is not a Rust firmware artifact.
+Physical P4 operation, deployment and host-service changes were not performed.
+
+### Verification and remaining work
+
+All evidence is under `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
+The dated `continuation-deep-*20261004T154451Z.log` files retain the baseline,
+failed probes, exact arithmetic audit, integration passes and final checks.
+- `continuation-deep-baseline-20261004T154451Z.log`: combined baseline before edits.
+- `continuation-deep-final-20261004T154451Z.log`: **123 C tests, 271 ordinary
+  Rust tests and 55 external-C groups per debug/release profile**. All 34 runner
+  WAV interchange cases and two all-feature CLI cases pass; the latter now include
+  computed SHA-256 and META. JSON is parsed with Python's JSON reader. Formatting,
+  Clippy, no-default-features and isolated allocation instrumentation pass.
+- `continuation-deep-asan-runtime-20261004T154451Z.log`: **59 runtime tests**,
+  including **13 external-C groups**, pass AddressSanitizer/leak checks.
+- `continuation-deep-asan-core-20261004T154451Z.log`: **34 focused core tests**
+  (library numerical tests, musical publication and reference contracts) pass
+  AddressSanitizer/leak checks. Rust uses `RUSTC_BOOTSTRAP=1`,
+  `RUSTFLAGS=-Zsanitizer=address`, x86_64 target and `ASAN_OPTIONS=detect_leaks=1`.
+  These logs do not imply that the external C oracle archive or std was instrumented.
+- `continuation-deep-{aarch64,ilp32-compile,msvc-compile,riscv-compile}-20261004T154451Z.log`:
+  required AArch64/no-default-features and i686/MSVC all-target compilation, plus
+  portable RV32IMAF-C compilation. None substitutes for platform execution.
+- `continuation-deep-ilp32-final-20261004T154451Z.log`: final-source **271 ordinary
+  Rust tests and 55 external-C groups in both debug/release**, linked/executed as
+  i686 binaries against the separately compiled SSE2 C oracle archive. Its C suite
+  passes **123/123** (`continuation-deep-ilp32-sse2-tests-20261004T154451Z.log`).
+  The default x87 failure remains in `continuation-deep-ilp32-parity-20261004T154451Z.log`;
+  SSE2 success is not default-x87 parity.
+- `continuation-deep-detail-retry2-20261004T154451Z.log`: all ten focused musical
+  tests pass, including the original 91 lifecycle profiles and four new retry
+  traces. Final combined verification reruns 72 source/seed combinations and the
+  exact 4096-fragment/524288-frame capacity case in both profiles.
+- `continuation-deep-c-oracle-sanitizers2-20261004T154451Z.log`: both new C oracles
+  pass with the GCC ASan/UBSan reference archive, including all 49 injected
+  failures, concurrent custom allocation and both unknown sparse cases.
+- `continuation-deep-riscv-stack2-20261004T154451Z.log`: final release-object
+  layout and LLVM stack-size diagnostic described above. The first diagnostic's
+  section-name extraction warning is preserved; the corrected script extracts
+  the actual `SNAPSHOT_BYTES` section and reproduces the measurement.
+- `continuation-deep-workflow-pins-20261004T154451Z.log`: the five previously
+  documented unpinned actions in three unchanged research workflows remain; no
+  new action dependency was added. Notebook validation and `git diff --check` pass.
+
+Continue native unknown-duration sparse ownership only after extending the new
+public reference contract through growth, scheduling, seeding and music. Extend
+custom allocation coverage into memory budgets, reallocation callbacks, static
+workspace processing and source failure ordering before implementing a separately
+reviewed unsafe C boundary. The reference-only allocation tests do not establish
+native custom allocator, C ownership or ABI parity. Complete C ABI/static/shared
+packaging and frozen consumers remain open; keep the installed C product intact.
+Further ensemble/profile coverage, automatic capacity policy/request-table growth,
+live owning metadata, full JSON/corpus interfaces, platform execution and embedded
+stack work remain independent engineering tasks. Original DSP accuracy gates and
+physical hardware qualification remain separate from rewrite parity.

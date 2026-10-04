@@ -113,6 +113,13 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build-windows -C Release --output-on-failure
 
+      - name: Link and execute native Rust on MSVC
+        env:
+          CARGO_BUILD_JOBS: "2"
+          RUST_TEST_THREADS: "2"
+          CARGO_TARGET_DIR: build-windows/rust-target
+        run: cargo test --workspace --release --locked
+
       - name: Configure shared-library ABI build
         run: >-
           cmake -S . -B build-windows-shared

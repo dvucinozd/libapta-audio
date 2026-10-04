@@ -318,4 +318,95 @@ mod numerical_tests {
             std::println!("portable coefficient mismatches: {}, chroma mismatches: {}, portable scores: {:?}, C scores: {:?}", portable.coefficients.iter().zip(&values[..36]).filter(|(a,b)| a.to_bits()!=b.to_bits()).count(), portable.chroma.iter().zip(&values[36..]).filter(|(a,b)| a.to_bits()!=b.to_bits()).count(), portable.candidates.map(|c| c.score), c_scores);
         }
     }
+    #[test]
+    #[ignore = "requires APTA_C_KEY_MATH_ORACLE"]
+    fn trace_portable_backend_boundary_against_compiled_c() {
+        let output =
+            std::process::Command::new(std::env::var_os("APTA_C_KEY_MATH_ORACLE").unwrap())
+                .arg("trace")
+                .output()
+                .unwrap();
+        assert!(output.status.success());
+        assert_eq!(output.stdout.len(), (36 + 1250 * 84) * 4 + 6);
+        let values: std::vec::Vec<_> = output.stdout[..output.stdout.len() - 6]
+            .chunks_exact(4)
+            .map(|b| f32::from_ne_bytes(b.try_into().unwrap()))
+            .collect();
+        // All eight combinations isolate cos, log and sqrt. No production backend
+        // or accepted tolerance changes: host arithmetic is checked bit for bit.
+        for mask in 0..8 {
+            let math = KeyMath {
+                cos: if mask & 1 != 0 { f32::cos } else { libm::cosf },
+                log: if mask & 2 != 0 { f32::ln } else { libm::logf },
+                sqrt: if mask & 4 != 0 {
+                    f32::sqrt
+                } else {
+                    libm::sqrtf
+                },
+            };
+            let mut k = KeyAnalysis::new_with_math(8000, math).unwrap();
+            for (i, (native, c)) in k.coefficients.iter().zip(&values[..36]).enumerate() {
+                if native.to_bits() != c.to_bits() {
+                    std::println!(
+                        "backend {mask} coefficient {i}: portable={:08x} C={:08x}",
+                        native.to_bits(),
+                        c.to_bits()
+                    );
+                }
+                if mask == 7 {
+                    assert_eq!(native.to_bits(), c.to_bits());
+                }
+            }
+            let mut first_q = None;
+            let mut first_chroma = None;
+            for block in 0..1250 {
+                for i in block * 256..(block + 1) * 256 {
+                    let phase = i % 4000;
+                    k.push(
+                        i as u64,
+                        if phase < 64 {
+                            (64 - phase) as f32 / 64.0 * 0.75
+                        } else {
+                            0.0
+                        },
+                    );
+                }
+                let c = &values[36 + block * 84..36 + (block + 1) * 84];
+                for (i, (native, reference)) in
+                    k.q1.iter().chain(&k.q2).chain(&k.chroma).zip(c).enumerate()
+                {
+                    if native.to_bits() != reference.to_bits() {
+                        let first = if i < 72 {
+                            &mut first_q
+                        } else {
+                            &mut first_chroma
+                        };
+                        if first.is_none() {
+                            *first =
+                                Some(((block + 1) * 256, i, native.to_bits(), reference.to_bits()));
+                        }
+                    }
+                    if mask == 7 {
+                        assert_eq!(
+                            native.to_bits(),
+                            reference.to_bits(),
+                            "block {block} field {i}"
+                        );
+                    }
+                }
+            }
+            k.refresh(1, true).unwrap();
+            let top = k.candidates[0];
+            let profile = if top.mode == 1 { &MAJOR } else { &MINOR };
+            let score = profile_score(&k.chroma, top.tonic as usize, profile, math.sqrt);
+            std::println!("backend {mask} first q={first_q:?}, first chroma={first_chroma:?}, score_bits={:08x}, scaled={:?}, candidates={:?}", score.to_bits(), score*65535.0+0.5, k.candidates.map(|c| c.score));
+            if mask == 7 {
+                let expected: std::vec::Vec<_> = output.stdout[output.stdout.len() - 6..]
+                    .chunks_exact(2)
+                    .map(|b| u16::from_ne_bytes(b.try_into().unwrap()))
+                    .collect();
+                assert_eq!(k.candidates.map(|c| c.score).as_slice(), expected);
+            }
+        }
+    }
 }

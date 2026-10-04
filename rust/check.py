@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Combined native/C checks; generated data stays in the supplied build root."""
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
@@ -72,12 +73,12 @@ def main():
          "-I", ROOT / "include", ROOT / "rust/tests/fixtures/seed_oracle.c",
          c_build / "libapta.a", "-lm", "-o", seed_oracle])
     analysis_oracles = {}
-    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle", "key_math", "musical_failure", "context_lifetime", "source_identity", "sparse_capacity"):
+    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle", "key_math", "musical_failure", "context_lifetime", "source_identity", "sparse_capacity", "allocation_contract", "unknown_sparse"):
         executable = build / f"{name.replace('_', '-')}-oracle"
         run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
              "-I", ROOT / "include", "-I", ROOT / "src/core",
              ROOT / f"rust/tests/fixtures/{name}_oracle.c",
-             c_build / "libapta.a", "-lm", "-o", executable])
+             c_build / "libapta.a", "-lm", "-pthread", "-o", executable])
         analysis_oracles[f"APTA_C_{name.upper()}_ORACLE"] = str(executable)
     env = os.environ.copy()
     env.update(analysis_oracles)
@@ -175,6 +176,11 @@ def main():
         if native_musical.read_bytes() != reference:
             raise RuntimeError("native runtime desktop container differs from unchanged C")
         run([native_cli, "inspect", native_musical], env=env)
+        inspected = json.loads(subprocess.check_output([native_cli, "inspect", native_musical, "--json"]))
+        if (inspected["schema_version"] != 1 or inspected["source"]["total_frames"] != 320000
+                or inspected["key"] is None or inspected["tempo_millibpm"] is None):
+            raise RuntimeError("native JSON inspection lost musical/source fields")
+
         shutil.copyfile(native_musical, build / "smoke-native-musical.apta")
         shutil.copyfile(musical, build / "smoke-musical.apta")
         # Retain one small public result for manual inspection, not a large corpus.

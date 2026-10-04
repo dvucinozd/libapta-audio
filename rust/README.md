@@ -39,7 +39,7 @@ APTA_C_CONTAINER_ORACLE=/absolute/path/container-oracle \
 
 The `rust-version` field is the intended minimum (1.81); this initial run used
 1.97.1. Minimum-toolchain, Windows, ILP32 and ESP32 builds still need validation.
-No `unsafe` or allocation occurs in core modules. Core storage can also be owned by the separately allocating std runtime. `libm` is the only dependency,
+No `unsafe` or allocation occurs in core modules. Core storage can also be owned by the separately allocating std runtime. `libm` is the only portable-core dependency,
 needed for portable reference quantization. The isolated allocation-counter test
 uses an unsafe allocator shim solely to count calls in the test executable.
 
@@ -356,8 +356,7 @@ The native CLI supports waveform/default music, full known-section inspection,
 strict validation (or `--permissive`) and deterministic local WAV batch conversion.
 Inputs are bounded at 256 MiB. Output files/directories must not exist; batch
 failures retain successful outputs and return failure. These additive commands do
-not replace C tool names/options, all feature-selection modes, JSON exports,
-automatic fingerprint computation, metadata or frozen privacy/qualification corpus interfaces.
+not replace C tool names/options, all feature-selection modes or frozen privacy/qualification corpus interfaces. Source hashing, typed metadata input and a native JSON summary are described below.
 Final verification and precise remaining gates are in the migration document.
 
 ### Owning waveform features and sequential sources
@@ -473,7 +472,54 @@ For a single file, `apta-native analyze` accepts
 hexadecimal digits. `inspect` displays it. Duplicate/malformed identity flags fail
 before creating output. `corpus` rejects a shared supplied identity; assign
 per-file identities through individual analyze calls. This is identity transport,
-not automatic fingerprinting or full C tool parity.
+not hash verification. Use `--hash-source` and `verify-source` below for actual source-object hashing; full C tool parity remains open.
 
 See [capacity and identity acceptance](../docs/rust/MIGRATION.md#sparse-capacity-source-identity-and-consumer-continuation--2026-10-04)
 for exact C comparisons, allocation/concurrency evidence and remaining gates.
+
+
+### Source hashing, metadata and JSON inspection
+
+```bash
+apta-native analyze input.wav output.apta --music --bands --detail --hash-source
+apta-native verify-source output.apta input.wav
+apta-native inspect output.apta --json
+apta-native corpus input-directory output-directory --hash-source
+apta-native analyze input.wav output.apta --metadata-cbor=metadata.cbor
+```
+
+`--hash-source` uses SHA-256 of the exact bytes read for analysis, including WAV
+headers and metadata, without rereading the source. It is opt-in and conflicts
+with supplied identity. Corpus hashes each file independently. `verify-source`
+requires SHA-256 identity and compares the full source object; absent, opaque or
+mismatching identities fail. The 256 MiB input limit still applies. The std runtime
+adds RustCrypto `sha2`; the portable core remains unchanged and allocator-free.
+
+Metadata input is a canonical META CBOR payload, at most 8192 bytes, containing
+only the seven typed fields supported by `libapta::Metadata`. Unknown fields,
+noncanonical input, duplicate options and malformed payloads fail before output
+creation. Metadata is attached to the exported container, not to live owning
+session generations. This per-file option is rejected by corpus. `inspect` shows
+its typed fields. `inspect --json` produces schema version 1: source/identity,
+feature mask, partial flag, numeric FourCC bytes, overview/detail counts, selected
+tempo and key/candidates. It is a summary, not a full graph or frozen corpus export.
+
+### Publication retry and platform boundaries
+
+Failed musical publications retry in waveform → S4 → S6 → meter → key order.
+A pending key cannot consume a newly free bounded slot before an accepted grid
+revision. Exact public-C failure traces cover both sequential and sparse wrappers;
+owning mirror-only retry behavior is unchanged.
+
+The numerical audit now records coefficients and 1250 intermediate Goertzel/chroma
+snapshots for all eight cos/log/sqrt backend combinations. Portable coefficient
+27 is `bf3fd897`, versus this host C's `bf3fd898`; the resulting selected score
+remains 55734 versus 55735. No correction or tolerance change is applied.
+Run `python3 rust/tests/fixtures/key_rounding.py` for the independent rounding
+check and consult the latest migration handoff for compiled-C audit commands.
+
+User-local i686 linking/execution is now available; default GCC x87 arithmetic
+and the separately tested SSE2 profile are distinct. MSVC still needs Windows
+SDK import libraries and actual execution; the Windows CI job now includes native
+Rust release tests. No Rust C ABI, custom allocator, ESP-IDF or embedded stack
+qualification follows from these desktop checks.
