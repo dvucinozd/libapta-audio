@@ -36,6 +36,8 @@ pub struct Workspace<'a> {
 }
 
 pub struct SparseSession<'a> {
+    detail: Option<crate::detail_analysis::DetailCache<'a>>,
+    bands: Option<crate::band::OverviewBands<'a>>,
     config: SessionConfig,
     workspace: Workspace<'a>,
     logical_columns: usize,
@@ -82,6 +84,8 @@ impl<'a> SparseSession<'a> {
         workspace.accumulators[..n].fill(SparseAccumulator::default());
         workspace.nodes.fill(QueuedBlock::default());
         Ok(Self {
+            detail: None,
+            bands: None,
             config,
             workspace,
             logical_columns: n,
@@ -95,8 +99,66 @@ impl<'a> SparseSession<'a> {
         })
     }
 
+    /// Enable three-band overview while Created, before input or seeding.
+    /// Storage must cover every possible logical overview column.
+    pub fn enable_three_band(
+        &mut self,
+        sums: &'a mut [crate::band::BandSums],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.range_count != 0 || self.bands.is_some() {
+            return Err(Error::InvalidState);
+        }
+        if sums.len() < self.logical_columns {
+            return Err(Error::BufferTooSmall);
+        }
+        let filter = crate::band::BandFilter::new(self.config.sample_rate)?;
+        sums[..self.logical_columns].fill(crate::band::BandSums::default());
+        self.bands = Some(crate::band::OverviewBands { sums, filter });
+        Ok(())
+    }
+
     pub fn config(&self) -> SessionConfig {
         self.config
+    }
+    /// Enable eager detail accumulation before input acceptance. A published
+    /// scheduled session adds focus protection and aligned replay policy.
+    pub fn enable_detail(
+        &mut self,
+        tiles: &'a mut [crate::detail_analysis::DetailTile],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.detail.is_some() || self.range_count != 0 {
+            return Err(Error::InvalidState);
+        }
+        if self
+            .config
+            .total_frames
+            .div_ceil(crate::detail_analysis::FRAMES_PER_COLUMN)
+            > u64::from(u32::MAX)
+        {
+            return Err(Error::LimitExceeded);
+        }
+        self.detail = Some(crate::detail_analysis::DetailCache::new(tiles)?);
+        Ok(())
+    }
+    pub fn detail_mutation_serial(&self) -> u64 {
+        self.detail.as_ref().map_or(0, |d| d.mutation_serial())
+    }
+    pub fn copy_detail_into<'b>(
+        &self,
+        tiles: &'b mut [crate::NativeTile],
+        columns: &'b mut [WaveformColumn],
+    ) -> Result<Option<crate::NativeDetail<'b>>, Error> {
+        match &self.detail {
+            None => Ok(None),
+            Some(detail) => {
+                let output = detail.snapshot_with_eof(
+                    tiles,
+                    columns,
+                    self.eof.then_some(self.config.total_frames),
+                )?;
+                Ok((!output.tiles.is_empty()).then_some(output))
+            }
+        }
     }
     pub fn state(&self) -> SessionState {
         self.state
@@ -120,7 +182,19 @@ impl<'a> SparseSession<'a> {
     /// Copies at most 4096 frames, stopping before the first existing range.
     /// Starting inside an existing range is a conflict. A full queue or range
     /// table accepts zero without mutation, including when ranges could merge.
+    pub(crate) fn detail_cache(&self) -> Option<&crate::detail_analysis::DetailCache<'a>> {
+        self.detail.as_ref()
+    }
+
     pub fn push_at(&mut self, first_frame: u64, samples: PcmView<'_>) -> Result<usize, Error> {
+        self.push_at_scheduled(first_frame, samples, None)
+    }
+    pub(crate) fn push_at_scheduled(
+        &mut self,
+        first_frame: u64,
+        samples: PcmView<'_>,
+        scheduler: Option<&mut crate::scheduler::Scheduler<'_>>,
+    ) -> Result<usize, Error> {
         if self.state == SessionState::Cancelled {
             return Err(Error::Cancelled);
         }
@@ -143,7 +217,7 @@ impl<'a> SparseSession<'a> {
                 continue;
             }
             if range.first_frame <= first_frame {
-                return Err(Error::Conflict);
+                return self.accept_detail_replay(first_frame, samples, scheduler);
             }
             count =
                 count.min(usize::try_from(range.first_frame - first_frame).unwrap_or(usize::MAX));
@@ -163,6 +237,22 @@ impl<'a> SparseSession<'a> {
             self.workspace.pcm[slot * NODE_FRAMES + index] =
                 samples.sample_frame(index, self.config.channel_count)?;
         }
+        if let Some(detail) = &mut self.detail {
+            for index in 0..count {
+                if !detail.push_normalized(
+                    first_frame + index as u64,
+                    self.workspace.pcm[slot * NODE_FRAMES + index],
+                    |tile| {
+                        scheduler
+                            .as_ref()
+                            .is_some_and(|s| s.detail_tile_protected(tile))
+                    },
+                )? {
+                    break;
+                }
+            }
+            detail.refresh_completed(None)?;
+        }
         self.insert_range(FrameRange {
             first_frame,
             end_frame: first_frame + count as u64,
@@ -177,6 +267,54 @@ impl<'a> SparseSession<'a> {
         self.serial = serial;
         self.queued += count;
         self.state = SessionState::Running;
+        Ok(count)
+    }
+
+    fn accept_detail_replay(
+        &mut self,
+        first: u64,
+        pcm: PcmView<'_>,
+        scheduler: Option<&mut crate::scheduler::Scheduler<'_>>,
+    ) -> Result<usize, Error> {
+        let count = pcm.frame_count(self.config.channel_count)?;
+        let end = first
+            .checked_add(count as u64)
+            .ok_or(Error::InvalidArgument)?;
+        if first % crate::detail_analysis::FRAMES_PER_COLUMN != 0
+            || (end % crate::detail_analysis::FRAMES_PER_COLUMN != 0
+                && end != self.config.total_frames)
+        {
+            return Err(Error::Conflict);
+        }
+        let Some(cache) = &mut self.detail else {
+            return Err(Error::Conflict);
+        };
+        let Some(scheduler) = scheduler else {
+            return Err(Error::Conflict);
+        };
+        // Nonfinite PCM rejection is an explicitly atomic native policy. C
+        // substitutes zero; replay's base selector does not age requests.
+        for index in 0..count {
+            pcm.sample_frame(index, self.config.channel_count)?;
+        }
+        let demand = scheduler.detail_replay_request(cache).map_err(|error| {
+            if error == Error::NotAvailable {
+                Error::Conflict
+            } else {
+                error
+            }
+        })?;
+        if first != demand.range.first_frame || count == 0 || end > demand.range.end_frame {
+            return Err(Error::Conflict);
+        }
+        for index in 0..count {
+            cache.push_normalized(
+                first + index as u64,
+                pcm.sample_frame(index, self.config.channel_count)?,
+                |tile| scheduler.detail_tile_protected(tile),
+            )?;
+        }
+        cache.refresh_completed(None)?;
         Ok(count)
     }
 
@@ -207,6 +345,8 @@ impl<'a> SparseSession<'a> {
         if self.state != SessionState::Created {
             return Err(Error::InvalidState);
         }
+        // C seeds only overview evidence. Attached band sums/filter and detail
+        // cache remain fresh; published checkpoint bands and tiles are ignored.
         if self
             .range_count
             .checked_add(overview.spans.len())
@@ -421,6 +561,9 @@ impl<'a> SparseSession<'a> {
             return Err(Error::Cancelled);
         }
         self.refresh_complete();
+        if let Some(detail) = &mut self.detail {
+            detail.refresh_completed(self.eof.then_some(self.config.total_frames))?;
+        }
         let frames = if budget.maximum_input_frames == 0 {
             u32::MAX
         } else {
@@ -465,6 +608,10 @@ impl<'a> SparseSession<'a> {
                     [(frame / u64::from(self.config.frames_per_column)) as usize]
                     .value
                     .push_normalized(sample.value, sample.clipped)?;
+                if let Some(bands) = &mut self.bands {
+                    let index = (frame / u64::from(self.config.frames_per_column)) as usize;
+                    bands.sums[index].add(bands.filter.split(sample.value)?)?;
+                }
                 node.processed += 1;
             }
             if node.processed == node.len {
@@ -479,6 +626,7 @@ impl<'a> SparseSession<'a> {
                 break;
             }
         }
+        deadline.analysis_boundaries();
         if complete && self.ready_to_complete() {
             self.state = SessionState::Complete;
         }
@@ -501,7 +649,11 @@ impl<'a> SparseSession<'a> {
             if !column.complete {
                 continue;
             }
-            self.workspace.snapshot_columns[columns] = column.value.column();
+            let mut value = column.value.column();
+            if let Some(bands) = &self.bands {
+                value = bands.sums[index].apply_complete(value, column.value.sample_count());
+            }
+            self.workspace.snapshot_columns[columns] = value;
             let first = index as u64 * fpc;
             let end = (first + fpc).min(self.config.total_frames);
             if spans != 0 && self.workspace.snapshot_spans[spans - 1].end_frame == first {

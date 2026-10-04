@@ -15,7 +15,7 @@ cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
 cargo check --workspace --lib --no-default-features --locked
 python3 rust/check.py \
-  --build-root /home/shome/.local/share/libapta-audio/rust-rewrite/combined
+  --build-root /home/shome/.local/share/libapta-audio/rust-rewrite/combined --jobs 2
 ```
 
 Use an appropriate external build directory on another machine. The combined
@@ -26,7 +26,7 @@ synthetic WAV-to-container cases with the strict C reader. `--c-build PATH`
 reuses a C build directory. It currently targets POSIX static builds; Windows
 and embedded verification remain separate migration work.
 
-`cargo test` alone deliberately ignores five external-C tests; it does not
+`cargo test` alone deliberately ignores the external-C tests; it does not
 claim C interoperability. To use an existing oracle manually:
 
 ```bash
@@ -63,14 +63,17 @@ implied. Empty input has no serializable waveform and is rejected by the example
 - `session::Session`: known- or unknown-duration sequential push with caller-owned queue and
   output storage. `push_pcm` copies an accepted prefix. Use returned frame count
   to retry the suffix. `process` checks cancellation between steps of at most
-  256 frames; zero budget fields are unlimited. No wall-clock deadline yet.
+  256 frames; zero budget fields are unlimited. `process_with_clock` accepts a
+  caller nanosecond clock and cooperative microsecond deadline; it includes the
+  four C analysis-stage checks even while those stages are disabled.
 - `pull::PullSession` owns one `PullSource` and releases each acquired `PullBlock`
   once through its drop guard. Each call reads/processes at most 256 frames in
   one step within the budget; WouldBlock is retryable, errors terminal. Known
   lengths complete without a final read. Unknown lengths use a one-frame EOF
   probe at capacity; excess data is released and reports `BufferTooSmall`.
-  No source block survives the call. Callbacks must return promptly; seeking,
-  sparse input and the C callback ABI remain pending.
+  No source block survives the call. `process_with_clock` starts the deadline
+  after source read/release, as in C. Callbacks must return promptly; random access
+  uses `ScheduledPullSession`. The C callback ABI remains pending.
 - `columns()` borrows completed columns. `copy_snapshot_into()` copies to
   separate caller storage so snapshots survive subsequent processing and drop.
   A native push may use a different PCM representation each time; a future C
@@ -90,7 +93,8 @@ implied. Empty input has no serializable waveform and is rejected by the example
   are ignored by the typed view; `copy_canonical` preserves their validated bytes.
 - `detail` validates level-1 WDTL (256 frames/column, 64 columns/tile), sparse
   tile coverage, states, confidence and packed ranges. This is interchange;
-  native detail analysis and sparse session scheduling remain pending.
+  native eager detail analysis is also available for sparse sessions; detail
+  request scheduling and replay are available through attached sparse publication.
 - `write_waveform` writes WOVR only; `write_waveform_result` adds optional WDTL
   and META in canonical order. Both use caller buffers, valid only on success.
   `ParseOptions` bounds input, sections, spans, aggregate columns and detail
@@ -155,3 +159,54 @@ Inspect processed-frame counts after such an error. Cancellation and completion 
 session state unchanged when their publication fails. Pool control uses `RefCell`
 and is single-threaded; one pool belongs to one session lifetime. This does not
 implement the C concurrent acquisition, allocator or workspace-layout contracts.
+
+
+### Optional waveform analysis storage
+
+`enable_three_band` attaches caller-owned `band::BandSums` before input to
+`Session`, `PullSession`, `SparseSession` and their publication wrappers. Allocate
+one entry per overview column (sequential sessions require the output capacity).
+The filter follows actual processing order continuously across sparse seeks.
+Quantized columns match C exactly; native available-feature masks derive the
+three-band bit from column flags, unlike the C bounded pool which omits that bit.
+Feature-enabled sparse overview seeding is supported: create the published sparse
+session, attach band and/or detail storage, then call `seed_from_result` while
+Created, before PCM or source processing. For scheduled pull, wrap the seeded
+Created session in `ScheduledPullSession::new` before processing. Repeated seeds
+are allowed while Created. Attaching features after installing a seed is rejected.
+Only overview peaks/RMS/clipping and accepted coverage are reconstructed. Published
+checkpoint band bytes/flags and detail tiles are ignored, matching C: seeded
+columns have zero band bytes with HAS_3BAND when bands are attached, the filter
+starts fresh on new PCM, and detail starts empty. Request/replay can recover detail
+in seeded overview ranges without changing overview/bands or processed-frame counts.
+Seeding itself publishes no generation and copies no lineage or musical state.
+
+`Session` and `PullSession` expose `enable_detail` and `copy_detail_into` for
+eager detail with known or unknown input length. `PublishedSession::enable_detail` and `PublishedSparseSession::enable_detail`
+attach four `DetailTile` cache entries,
+four native tile descriptors and 256 columns of publication scratch. Both result
+slots need four detail descriptors and 256 detail columns in addition to overview
+storage. Attachment checks aggregate column and retained-byte limits. Accepted
+PCM is accumulated eagerly; processing refreshes completed columns and publishes
+immutable copies. Completed sparse sessions may retain Partial detail tiles, as
+in C; external completed-result builder validation remains stricter. Detail
+requests and focus protect resident tiles; public PCM demands prioritize aligned
+detail replay. Replay changes only detail, leaving overview and band history intact.
+The built-in scheduled pull loop uses overview gaps, matching C; its public demand
+query still exposes replay. C's public replay demand uses
+aged/deadline scores while replay acceptance uses raw priority/FIFO; this native
+port preserves that distinction, including possible rejection of the publicly
+selected replay when those orders disagree.
+No implicit allocation occurs in these paths. See the migration checklist for
+exact acceptance evidence and the remaining core work.
+
+
+The feature-enabled seeding milestone is bounded to C-compatible overview resume,
+including immutable publication, replay and scheduled overview-gap reads. Native
+seed preflight remains atomic, seeded tails stay within EOF, and band availability
+comes from column flags despite C's bounded-pool mask omission. Exact C comparisons
+run in debug and release through the existing seed and detail-pull oracles;
+allocation instrumentation includes feature-enabled seed/resume/replay/retained
+results. Evidence: `/home/shome/.local/share/libapta-audio/rust-rewrite/checkpoint-feature-seeding-combined-check.log`.
+The full core and outside replacement remain unfinished; musical DSP, nonbounded
+ownership/concurrency/allocation classes, C ABI, tools and platform gates remain.

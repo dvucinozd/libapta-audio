@@ -110,6 +110,28 @@ impl<'a, S: PullSource> PullSession<'a, S> {
     pub fn failure(&self) -> Option<Error> {
         self.failure
     }
+    /// Attach caller-owned three-band storage before the first source read.
+    pub fn enable_three_band(
+        &mut self,
+        sums: &'a mut [crate::band::BandSums],
+    ) -> Result<(), Error> {
+        self.session.enable_three_band(sums)
+    }
+
+    /// Attach caller-owned eager detail storage before the first source read.
+    pub fn enable_detail(
+        &mut self,
+        tiles: &'a mut [crate::detail_analysis::DetailTile],
+    ) -> Result<(), Error> {
+        self.session.enable_detail(tiles)
+    }
+    pub fn copy_detail_into<'b>(
+        &self,
+        tiles: &'b mut [crate::NativeTile],
+        columns: &'b mut [WaveformColumn],
+    ) -> Result<Option<crate::NativeDetail<'b>>, Error> {
+        self.session.copy_detail_into(tiles, columns)
+    }
     pub fn config(&self) -> SessionConfig {
         self.session.config()
     }
@@ -143,10 +165,28 @@ impl<'a, S: PullSource> PullSession<'a, S> {
         budget: WorkBudget,
         cancellation: &CancellationToken,
     ) -> Result<PullProgress, Error> {
+        self.process_clock(budget, cancellation, None)
+    }
+    /// Exclude source read/release latency from the injected soft deadline.
+    pub fn process_with_clock(
+        &mut self,
+        budget: WorkBudget,
+        soft_us: u32,
+        clock: &mut dyn FnMut() -> u64,
+        cancellation: &CancellationToken,
+    ) -> Result<PullProgress, Error> {
+        self.process_clock(budget, cancellation, Some((soft_us, clock)))
+    }
+    fn process_clock(
+        &mut self,
+        budget: WorkBudget,
+        cancellation: &CancellationToken,
+        clock: Option<(u32, &mut dyn FnMut() -> u64)>,
+    ) -> Result<PullProgress, Error> {
         if let Some(error) = self.failure {
             return Err(error);
         }
-        let result = self.step(budget, cancellation);
+        let result = self.step(budget, cancellation, clock);
         if let Err(error) = result {
             self.failure = Some(error);
         }
@@ -156,18 +196,29 @@ impl<'a, S: PullSource> PullSession<'a, S> {
         &mut self,
         budget: WorkBudget,
         cancellation: &CancellationToken,
+        clock: Option<(u32, &mut dyn FnMut() -> u64)>,
     ) -> Result<PullProgress, Error> {
+        let process = |session: &mut Session<'_>, budget, clock| match clock {
+            Some((soft_us, clock)) => {
+                session.process_with_clock(budget, soft_us, clock, cancellation)
+            }
+            None => session.process(budget, cancellation),
+        };
         if self.session.state() == SessionState::Complete {
-            return Ok(PullProgress::default());
+            return Ok(PullProgress {
+                processing: process(&mut self.session, budget, clock)?,
+                would_block: false,
+            });
         }
         if cancellation.is_cancelled() {
+            process(&mut self.session, budget, clock)?;
             return Err(Error::Cancelled);
         }
         let first = self.session.accepted_frames();
         if self.session.total_frames() == Some(first) {
             self.session.finish_input()?;
             return Ok(PullProgress {
-                processing: self.session.process(budget, cancellation)?,
+                processing: process(&mut self.session, budget, clock)?,
                 would_block: false,
             });
         }
@@ -188,11 +239,12 @@ impl<'a, S: PullSource> PullSession<'a, S> {
         let response = self.source.read_frames(first, maximum);
         if cancellation.is_cancelled() {
             drop(response);
+            process(&mut self.session, budget, clock)?;
             return Err(Error::Cancelled);
         }
         match response? {
             PullRead::WouldBlock => Ok(PullProgress {
-                processing: Progress::default(),
+                processing: process(&mut self.session, budget, clock)?,
                 would_block: true,
             }),
             PullRead::EndOfInput => {
@@ -202,7 +254,7 @@ impl<'a, S: PullSource> PullSession<'a, S> {
                 }
                 self.session.finish_input()?;
                 Ok(PullProgress {
-                    processing: self.session.process(budget, cancellation)?,
+                    processing: process(&mut self.session, budget, clock)?,
                     would_block: false,
                 })
             }
@@ -223,12 +275,13 @@ impl<'a, S: PullSource> PullSession<'a, S> {
                     self.session.finish_input()?;
                 }
                 Ok(PullProgress {
-                    processing: self.session.process(
+                    processing: process(
+                        &mut self.session,
                         WorkBudget {
                             maximum_input_frames: maximum,
                             maximum_steps: 1,
                         },
-                        cancellation,
+                        clock,
                     )?,
                     would_block: false,
                 })

@@ -54,6 +54,20 @@ fn entire_session_path_allocates_nothing() {
     let mut columns = [WaveformColumn::default(); 2];
     let mut snapshot = [WaveformColumn::default(); 2];
     for total_frames in [65, TOTAL_FRAMES_UNKNOWN] {
+        let mut bands = [libapta::band::BandSums::default(); 2];
+        let mut cache = [libapta::detail_analysis::DetailTile::default(); 4];
+        let mut detail_tiles = [libapta::NativeTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 0,
+            end_frame: 0,
+            first_column_index: 0,
+            state: libapta::FeatureState::Partial,
+            confidence: 0,
+            data_column_offset: 0,
+            column_count: 0,
+        }; 4];
+        let mut detail_columns = [WaveformColumn::default(); 256];
         let before = ALLOCATIONS.load(Ordering::Relaxed);
         let mut session = Session::new(
             SessionConfig {
@@ -66,18 +80,44 @@ fn entire_session_path_allocates_nothing() {
             &mut columns,
         )
         .unwrap();
+        session.enable_three_band(&mut bands).unwrap();
+        session.enable_detail(&mut cache).unwrap();
         session.push_interleaved(&[0.2; 65]).unwrap();
         session.finish_input().unwrap();
         session
             .process(WorkBudget::default(), &CancellationToken::new())
             .unwrap();
         session.copy_snapshot_into(&mut snapshot).unwrap();
+        assert_eq!(
+            session
+                .copy_detail_into(&mut detail_tiles, &mut detail_columns)
+                .unwrap()
+                .unwrap()
+                .tiles[0]
+                .end_frame,
+            65
+        );
+        assert!(snapshot.iter().all(|column| column.flags & 8 != 0));
         assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
     }
     for total_frames in [65, TOTAL_FRAMES_UNKNOWN] {
         let mut queue = [NormalizedSample::default(); 17];
         let mut columns = [WaveformColumn::default(); 2];
         let mut snapshot = [WaveformColumn::default(); 2];
+        let mut bands = [libapta::band::BandSums::default(); 2];
+        let mut cache = [libapta::detail_analysis::DetailTile::default(); 4];
+        let mut detail_tiles = [libapta::NativeTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 0,
+            end_frame: 0,
+            first_column_index: 0,
+            state: libapta::FeatureState::Partial,
+            confidence: 0,
+            data_column_offset: 0,
+            column_count: 0,
+        }; 4];
+        let mut detail_columns = [WaveformColumn::default(); 256];
         let before = ALLOCATIONS.load(Ordering::Relaxed);
         let input = Source {
             samples: [0.25; 65],
@@ -95,12 +135,23 @@ fn entire_session_path_allocates_nothing() {
             input,
         )
         .unwrap();
+        pull.enable_three_band(&mut bands).unwrap();
+        pull.enable_detail(&mut cache).unwrap();
         while pull.state() != PullState::Complete {
             pull.process(WorkBudget::default(), &CancellationToken::new())
                 .unwrap();
         }
         pull.copy_snapshot_into(&mut snapshot).unwrap();
+        assert_eq!(
+            pull.copy_detail_into(&mut detail_tiles, &mut detail_columns)
+                .unwrap()
+                .unwrap()
+                .tiles[0]
+                .end_frame,
+            65
+        );
         let _source = pull.into_inner();
+        assert!(snapshot.iter().all(|column| column.flags & 8 != 0));
         assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
     }
 }

@@ -75,6 +75,7 @@ pub struct ResultPool<'a> {
     limits: NativeLimits,
     column_capacity: [usize; 2],
     span_capacity: [usize; 2],
+    detail_capacity: [(usize, usize); 2],
 }
 
 pub struct ResultLease<'p, 'a> {
@@ -131,6 +132,9 @@ impl<'a> ResultPool<'a> {
             storage[0].overview_spans.len(),
             storage[1].overview_spans.len(),
         ];
+        let detail_capacity = storage
+            .each_ref()
+            .map(|s| (s.detail_tiles.len(), s.detail_columns.len()));
         let [a, b] = storage;
         let input = empty(source);
         let a = owned_result::copy_session(&input, a, limits, 0)?;
@@ -144,6 +148,7 @@ impl<'a> ResultPool<'a> {
             limits,
             column_capacity,
             span_capacity,
+            detail_capacity,
         })
     }
     pub fn acquire(&self) -> Result<ResultLease<'_, 'a>, Error> {
@@ -186,6 +191,8 @@ impl<'a> ResultPool<'a> {
 /// further queued PCM and publishes the accumulated snapshot once a slot is free.
 /// Query `session().processed_frames()` when observing an error after work.
 pub struct PublishedSession<'p, 'work, 'storage> {
+    detail_output: Option<(&'work mut [crate::NativeTile], &'work mut [WaveformColumn])>,
+    previous_detail_serial: u64,
     session: Session<'work>,
     pool: &'p ResultPool<'storage>,
     pending: bool,
@@ -224,6 +231,8 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
             return Err(Error::InvalidState);
         }
         Ok(Self {
+            detail_output: None,
+            previous_detail_serial: 0,
             session,
             pool,
             pending: false,
@@ -234,6 +243,50 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
     }
     pub fn session(&self) -> &Session<'work> {
         &self.session
+    }
+    /// Attach optional caller-owned three-band overview storage before input.
+    pub fn enable_three_band(
+        &mut self,
+        sums: &'work mut [crate::band::BandSums],
+    ) -> Result<(), Error> {
+        self.session.enable_three_band(sums)
+    }
+    /// Attach caller-owned eager detail and immutable publication storage.
+    pub fn enable_detail(
+        &mut self,
+        cache: &'work mut [crate::detail_analysis::DetailTile],
+        tiles: &'work mut [crate::NativeTile],
+        columns: &'work mut [WaveformColumn],
+    ) -> Result<(), Error> {
+        let plan = plan(self.session.config(), self.pool.limits)?;
+        let required_columns = plan
+            .columns_per_slot
+            .checked_add(256)
+            .ok_or(Error::LimitExceeded)?;
+        let required_bytes = plan
+            .retained_bytes_per_slot
+            .checked_add(4 * core::mem::size_of::<crate::NativeTile>())
+            .and_then(|b| b.checked_add(256 * core::mem::size_of::<WaveformColumn>()))
+            .ok_or(Error::LimitExceeded)?;
+        if self.pool.limits.maximum_detail_tiles < 4
+            || self.pool.limits.maximum_waveform_columns < required_columns
+            || self.pool.limits.maximum_storage_bytes < required_bytes
+        {
+            return Err(Error::LimitExceeded);
+        }
+        if tiles.len() < 4
+            || columns.len() < 256
+            || self
+                .pool
+                .detail_capacity
+                .iter()
+                .any(|(t, c)| *t < 4 || *c < 256)
+        {
+            return Err(Error::BufferTooSmall);
+        }
+        self.session.enable_detail(cache)?;
+        self.detail_output = Some((tiles, columns));
+        Ok(())
     }
     pub fn publication_pending(&self) -> bool {
         self.pending
@@ -309,6 +362,9 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
         }];
         let mut input = empty(self.pool.source);
         input.info.session_state = state;
+        if let Some((tiles, columns)) = &mut self.detail_output {
+            input.detail = self.session.copy_detail_into(tiles, columns)?;
+        }
         let hide_pending = self.pending && self.changed == 0;
         input.overview = if columns.is_empty() || hide_pending {
             None
@@ -332,6 +388,7 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
         self.pending = false;
         self.changed = 0;
         self.previous_columns = if hide_pending { 0 } else { columns.len() };
+        self.previous_detail_serial = self.session.detail_mutation_serial();
         Ok(())
     }
     pub fn process(
@@ -378,7 +435,9 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
         }
         let old_state = self.session.state();
         let progress = match deadline {
-            Some(deadline) => self.session.process_deferred_deadline(budget, cancel, deadline),
+            Some(deadline) => self
+                .session
+                .process_deferred_deadline(budget, cancel, deadline),
             None => self.session.process_deferred_completion(budget, cancel),
         };
         if progress == Err(Error::Cancelled) && old_state != SessionState::Cancelled {
@@ -386,9 +445,16 @@ impl<'p, 'work, 'storage> PublishedSession<'p, 'work, 'storage> {
             self.transition(SessionState::Cancelled)?;
             return Err(Error::Cancelled);
         }
-        if self.pending || self.session.columns().len() != self.previous_columns {
+        let overview_changed = self.session.columns().len() != self.previous_columns;
+        let detail_changed = self.session.detail_mutation_serial() != self.previous_detail_serial;
+        if self.pending || overview_changed || detail_changed {
             self.pending = true;
-            self.changed = crate::result::WAVEFORM_OVERVIEW;
+            if overview_changed {
+                self.changed = crate::result::WAVEFORM_OVERVIEW;
+            }
+            if detail_changed && !overview_changed {
+                self.changed |= crate::result::WAVEFORM_DETAIL;
+            }
             self.publish()?;
         }
         if self.session.ready_to_complete() {
@@ -425,6 +491,8 @@ pub fn plan_sparse(config: SessionConfig, limits: NativeLimits) -> Result<Worksp
 /// Accepted ranges remain reserved after processing; result spans contain only
 /// complete columns. EOF may complete a session whose overview still has holes.
 pub struct PublishedSparseSession<'p, 'work, 'storage> {
+    detail_output: Option<(&'work mut [crate::NativeTile], &'work mut [WaveformColumn])>,
+    previous_detail_serial: u64,
     session: crate::sparse::SparseSession<'work>,
     scheduler: crate::scheduler::Scheduler<'work>,
     pool: &'p ResultPool<'storage>,
@@ -478,6 +546,8 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         Ok(Self {
             session,
             scheduler,
+            detail_output: None,
+            previous_detail_serial: 0,
             pool,
             pending: false,
             changed: 0,
@@ -490,6 +560,9 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
     }
     /// Resume from validated owned overview data while still Created. Seeding
     /// does not publish, copy lineage, or retain a borrow of the checkpoint.
+    /// Attach optional band/detail storage before seeding. Only overview peaks,
+    /// RMS, clipping and accepted coverage are restored: band sums/filter history
+    /// and detail cache stay fresh even if the checkpoint publishes those outputs.
     /// Range storage is conservatively preflighted for all incoming spans.
     pub fn seed_from_result(
         &mut self,
@@ -540,8 +613,67 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         self.scheduler.set_focus(focus)
     }
     pub fn next_pcm_request(&mut self) -> Result<PcmDemand, Error> {
+        if let Some(detail) = self.session.detail_cache() {
+            match self.scheduler.next_detail_request(detail) {
+                Ok(demand) => return Ok(demand),
+                Err(Error::NotAvailable) => {}
+                Err(error) => return Err(error),
+            }
+        }
+        self.next_overview_pcm_request()
+    }
+    // C's effective pull wrapper uses overview demand, unlike its public
+    // next_pcm_request which prioritizes detail replay. Preserve that distinction.
+    pub(crate) fn next_overview_pcm_request(&mut self) -> Result<PcmDemand, Error> {
         self.scheduler
             .next_pcm_request(self.session.accepted_ranges())
+    }
+    /// Attach eager detail cache and publication scratch while Created.
+    /// Enables detail requests, focus protection and aligned replay demand.
+    /// All four cache tiles and retained snapshots remain caller-owned.
+    pub fn enable_detail(
+        &mut self,
+        cache: &'work mut [crate::detail_analysis::DetailTile],
+        tiles: &'work mut [crate::NativeTile],
+        columns: &'work mut [WaveformColumn],
+    ) -> Result<(), Error> {
+        let plan = plan_sparse(self.session.config(), self.pool.limits)?;
+        let columns_required = plan
+            .columns_per_slot
+            .checked_add(256)
+            .ok_or(Error::LimitExceeded)?;
+        let bytes_required = plan
+            .retained_bytes_per_slot
+            .checked_add(4 * core::mem::size_of::<crate::NativeTile>())
+            .and_then(|bytes| bytes.checked_add(256 * core::mem::size_of::<WaveformColumn>()))
+            .ok_or(Error::LimitExceeded)?;
+        if self.pool.limits.maximum_detail_tiles < 4
+            || self.pool.limits.maximum_waveform_columns < columns_required
+            || self.pool.limits.maximum_storage_bytes < bytes_required
+        {
+            return Err(Error::LimitExceeded);
+        }
+        if tiles.len() < 4
+            || columns.len() < 256
+            || self
+                .pool
+                .detail_capacity
+                .iter()
+                .any(|(t, c)| *t < 4 || *c < 256)
+        {
+            return Err(Error::BufferTooSmall);
+        }
+        self.session.enable_detail(cache)?;
+        self.scheduler.enable_detail();
+        self.detail_output = Some((tiles, columns));
+        Ok(())
+    }
+    /// Attach optional caller-owned three-band overview storage before input.
+    pub fn enable_three_band(
+        &mut self,
+        sums: &'work mut [crate::band::BandSums],
+    ) -> Result<(), Error> {
+        self.session.enable_three_band(sums)
     }
     pub fn publication_pending(&self) -> bool {
         self.pending
@@ -564,10 +696,18 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         if end > self.session.config().total_frames {
             return Err(Error::Conflict);
         }
+        // Reject invalid floating PCM before the first state publication. The
+        // sparse core also preflights its accepted prefix before working writes.
+        if matches!(pcm, PcmView::F32Interleaved(_) | PcmView::F32Planar(_)) {
+            for index in 0..n {
+                pcm.sample_frame(index, self.session.config().channel_count)?;
+            }
+        }
         if self.session.state() == SessionState::Created {
             self.transition(SessionState::Running)?;
         }
-        self.session.push_at(first, pcm)
+        self.session
+            .push_at_scheduled(first, pcm, Some(&mut self.scheduler))
     }
     pub fn finish_input(&mut self) -> Result<(), Error> {
         if self.ended {
@@ -629,6 +769,9 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         let n = self.session.complete_columns();
         let mut input = empty(self.pool.source);
         input.info.session_state = state;
+        if let Some((tiles, columns)) = &mut self.detail_output {
+            input.detail = self.session.copy_detail_into(tiles, columns)?;
+        }
         // C marks completed accumulators pending after slot exhaustion. A
         // state-only transition before the next process observes no overview.
         let hide_pending = self.pending && self.changed == 0;
@@ -641,6 +784,7 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         self.pending = false;
         self.changed = 0;
         self.previous_columns = if hide_pending { 0 } else { n };
+        self.previous_detail_serial = self.session.detail_mutation_serial();
         Ok(())
     }
     pub fn process(
@@ -687,8 +831,13 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         }
         let old = self.session.state();
         let work = match deadline {
-            Some(deadline) => self.session.process_scheduled_deadline(budget, cancel, &self.scheduler, deadline),
-            None => self.session.process_scheduled_deferred(budget, cancel, &self.scheduler),
+            Some(deadline) => {
+                self.session
+                    .process_scheduled_deadline(budget, cancel, &self.scheduler, deadline)
+            }
+            None => self
+                .session
+                .process_scheduled_deferred(budget, cancel, &self.scheduler),
         };
         let choice = work.as_ref().map_or(0, |(_, choice)| *choice);
         let progress = work.map(|(progress, _)| progress);
@@ -701,9 +850,15 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
         let snapshot = self.session.snapshot();
         self.scheduler
             .refresh_waveform(snapshot.map_or(&[], |v| v.spans), fpc)?;
-        if self.pending || self.session.complete_columns() != self.previous_columns {
+        let detail_changed = self.session.detail_mutation_serial() != self.previous_detail_serial;
+        let overview_changed = self.session.complete_columns() != self.previous_columns;
+        let overview_publication = overview_changed
+            || (self.pending && self.changed & crate::result::WAVEFORM_OVERVIEW != 0);
+        if overview_publication {
             self.pending = true;
             self.changed = crate::result::WAVEFORM_OVERVIEW;
+            // Failed overview publication returns before request aging and
+            // before actual detail coverage refresh, matching the C wrapper.
             self.publish()?;
         }
         if progress
@@ -711,6 +866,17 @@ impl<'p, 'work, 'storage> PublishedSparseSession<'p, 'work, 'storage> {
             .is_ok_and(|p| p.consumed_input_frames != 0)
         {
             self.scheduler.note_choice(choice);
+        }
+        if let Some(detail) = self.session.detail_cache() {
+            self.scheduler.refresh_detail(detail);
+        }
+        if !overview_publication && (self.pending || detail_changed) {
+            self.pending = true;
+            if detail_changed {
+                self.changed |= crate::result::WAVEFORM_DETAIL;
+            }
+            // Detail-only publication happens after actual request refresh.
+            self.publish()?;
         }
         if self.session.ready_to_complete() {
             self.transition(SessionState::Complete)?;

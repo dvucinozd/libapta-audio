@@ -56,7 +56,9 @@ impl<'p, 'work, 'storage, S: PullSource> ScheduledPullSession<'p, 'work, 'storag
     /// Drain already-owned samples before calling the source again. Selection
     /// ages requests before reading, even if the source returns WouldBlock.
     /// A selected range with no missing PCM ends this known-length session;
-    /// unrelated holes remain visible as partial overview coverage.
+    /// unrelated holes remain visible as partial overview coverage. Automatic
+    /// reads use C's internal overview demand, including with detail enabled;
+    /// explicit `next_pcm_request` exposes C's public detail replay demand.
     pub fn process(
         &mut self,
         budget: WorkBudget,
@@ -94,7 +96,7 @@ impl<'p, 'work, 'storage, S: PullSource> ScheduledPullSession<'p, 'work, 'storag
         if self.session.session().queued_frames() != 0 {
             return self.process_owned(budget, cancellation, false, clock);
         }
-        let demand = match self.session.next_pcm_request() {
+        let demand = match self.session.next_overview_pcm_request() {
             Ok(demand) => demand,
             Err(Error::NotAvailable) => {
                 self.session.finish_input()?;
@@ -156,9 +158,15 @@ impl<'p, 'work, 'storage, S: PullSource> ScheduledPullSession<'p, 'work, 'storag
         clock: Option<(u32, &mut dyn FnMut() -> u64)>,
     ) -> Result<PullProgress, Error> {
         let processing = match clock {
-            Some((soft_us, clock)) => self.session.process_with_clock(budget, soft_us, clock, cancellation),
+            Some((soft_us, clock)) => {
+                self.session
+                    .process_with_clock(budget, soft_us, clock, cancellation)
+            }
             None => self.session.process(budget, cancellation),
         }?;
-        Ok(PullProgress { processing, would_block })
+        Ok(PullProgress {
+            processing,
+            would_block,
+        })
     }
 }

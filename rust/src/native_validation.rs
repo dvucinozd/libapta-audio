@@ -610,7 +610,9 @@ fn validate_inner(
             input.overview.map_or(true, |w| {
                 w.state == FeatureState::Final || (session && w.state == FeatureState::Partial)
             }) && input.detail.map_or(true, |d| {
-                d.tiles.iter().all(|t| t.state == FeatureState::Final)
+                d.tiles.iter().all(|t| {
+                    t.state == FeatureState::Final || (session && t.state == FeatureState::Partial)
+                })
             }) && input
                 .tempo
                 .map_or(true, |t| t.selected.state == FeatureState::Final)
@@ -670,6 +672,56 @@ mod session_tests {
             meter: None,
             quality: &[],
         }
+    }
+    #[test]
+    fn trusted_completed_detail_retains_partial_cache_tiles() {
+        let mut input = empty();
+        input.source.total_frames = Some(513);
+        input.info.session_state = ResultSessionState::Completed;
+        let columns = [WaveformColumn {
+            flags: 1,
+            ..WaveformColumn::default()
+        }; 2];
+        let tiles = [NativeTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 256,
+            end_frame: 513,
+            first_column_index: 1,
+            state: FeatureState::Partial,
+            confidence: 255,
+            data_column_offset: 0,
+            column_count: 2,
+        }];
+        input.detail = Some(NativeDetail {
+            tiles: &tiles,
+            columns: &columns,
+        });
+        assert!(
+            validate_session(&input, NativeLimits::default(), feature::WAVEFORM_DETAIL).is_ok()
+        );
+        input.provenance = Provenance {
+            origin: ProvenanceOrigin::ExternalImport,
+            source_name: "fixture",
+            source_version: "1",
+        };
+        assert_eq!(
+            validate(&input, NativeLimits::default()),
+            Err(Error::InvalidArgument)
+        );
+        let stable_tiles = [NativeTile {
+            state: FeatureState::Stable,
+            ..tiles[0]
+        }];
+        input.detail = Some(NativeDetail {
+            tiles: &stable_tiles,
+            columns: &columns,
+        });
+        input.provenance.origin = ProvenanceOrigin::Unspecified;
+        assert_eq!(
+            validate_session(&input, NativeLimits::default(), 0),
+            Err(Error::InvalidArgument)
+        );
     }
     #[test]
     fn trusted_empty_generation_and_external_boundary() {

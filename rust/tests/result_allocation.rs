@@ -430,6 +430,9 @@ fn native_copy_allocates_nothing(r: ResultInput<'_>) {
 
 fn publication_allocates_nothing() {
     sparse_publication_allocates_nothing();
+    detail_publication_allocates_nothing();
+    detail_replay_allocates_nothing(false);
+    detail_replay_allocates_nothing(true);
     seeded_scheduled_pull_allocates_nothing();
     use libapta::{
         owned_result::Storage,
@@ -443,6 +446,24 @@ fn publication_allocates_nothing() {
     let mut columns1 = columns0;
     let mut queue = [NormalizedSample::default(); 128];
     let mut work_columns = [WaveformColumn::default(); 2];
+    let tile = NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 0,
+        data_column_offset: 0,
+        column_count: 0,
+    };
+    let mut dt0 = [tile; 4];
+    let mut dt1 = dt0;
+    let mut dc0 = [WaveformColumn::default(); 256];
+    let mut dc1 = dc0;
+    let mut cache = [libapta::detail_analysis::DetailTile::default(); 4];
+    let mut dt = [tile; 4];
+    let mut dc = [WaveformColumn::default(); 256];
     let before = ALLOCATIONS.load(Ordering::Relaxed);
     let pool = ResultPool::new(
         SourceInfo {
@@ -457,11 +478,15 @@ fn publication_allocates_nothing() {
             Storage {
                 overview_spans: &mut spans0,
                 overview_columns: &mut columns0,
+                detail_tiles: &mut dt0,
+                detail_columns: &mut dc0,
                 ..Default::default()
             },
             Storage {
                 overview_spans: &mut spans1,
                 overview_columns: &mut columns1,
+                detail_tiles: &mut dt1,
+                detail_columns: &mut dc1,
                 ..Default::default()
             },
         ],
@@ -481,6 +506,7 @@ fn publication_allocates_nothing() {
             &pool,
         )
         .unwrap();
+        session.enable_detail(&mut cache, &mut dt, &mut dc).unwrap();
         session
             .push_pcm(PcmView::F32Interleaved(&[0.25; 128]))
             .unwrap();
@@ -490,10 +516,12 @@ fn publication_allocates_nothing() {
         let retained = pool.acquire().unwrap();
         let cloned = retained.clone();
         assert_eq!(retained.overview().unwrap().columns.len(), 2);
+        assert_eq!(retained.detail().unwrap().tiles[0].end_frame, 128);
         assert_eq!(cloned.info().generation, retained.info().generation);
         (retained, cloned)
     };
     assert_eq!(cloned.info().session_state, ResultSessionState::Completed);
+    assert_eq!(cloned.detail().unwrap().columns.len(), 1);
     drop(retained);
     drop(cloned);
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
@@ -519,6 +547,34 @@ fn sparse_publication_allocates_nothing() {
     let mut spans = [WaveformSpan::default(); 3];
     let mut columns = [WaveformColumn::default(); 3];
     let mut requests = [RequestSlot::default(); 2];
+    let mut bands = [libapta::band::BandSums::default(); 3];
+    let mut cache = [libapta::detail_analysis::DetailTile::default(); 4];
+    let mut detail_tiles = [NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 0,
+        data_column_offset: 0,
+        column_count: 0,
+    }; 4];
+    let mut detail_columns = [WaveformColumn::default(); 256];
+    let mut detail_tiles0 = [NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 0,
+        data_column_offset: 0,
+        column_count: 0,
+    }; 4];
+    let mut detail_tiles1 = detail_tiles0;
+    let mut detail_columns0 = [WaveformColumn::default(); 256];
+    let mut detail_columns1 = detail_columns0;
     let config = SessionConfig {
         sample_rate: 48000,
         channel_count: 1,
@@ -539,11 +595,15 @@ fn sparse_publication_allocates_nothing() {
             Storage {
                 overview_spans: &mut spans0,
                 overview_columns: &mut columns0,
+                detail_tiles: &mut detail_tiles0,
+                detail_columns: &mut detail_columns0,
                 ..Default::default()
             },
             Storage {
                 overview_spans: &mut spans1,
                 overview_columns: &mut columns1,
+                detail_tiles: &mut detail_tiles1,
+                detail_columns: &mut detail_columns1,
                 ..Default::default()
             },
         ],
@@ -565,6 +625,10 @@ fn sparse_publication_allocates_nothing() {
             &mut requests,
         )
         .unwrap();
+        session.enable_three_band(&mut bands).unwrap();
+        session
+            .enable_detail(&mut cache, &mut detail_tiles, &mut detail_columns)
+            .unwrap();
         let request = session
             .request_region(RegionRequest {
                 range: FrameRange {
@@ -627,6 +691,14 @@ fn sparse_publication_allocates_nothing() {
         let retained = pool.acquire().unwrap();
         let clone = retained.clone();
         assert_eq!(retained.overview().unwrap().columns.len(), 3);
+        assert!(retained
+            .overview()
+            .unwrap()
+            .columns
+            .iter()
+            .all(|c| c.flags & 8 != 0));
+        assert_eq!(retained.view().detail.unwrap().tiles.len(), 1);
+        assert_eq!(retained.view().detail.unwrap().tiles[0].column_count, 1);
         (retained, clone)
     };
     assert_eq!(retained.info().session_state, ResultSessionState::Completed);
@@ -655,9 +727,10 @@ fn seeded_scheduled_pull_allocates_nothing() {
     }
     impl<F: FnMut()> PullSource for Source<'_, F> {
         fn total_frames(&mut self) -> Option<u64> {
-            Some(128)
+            Some(512)
         }
         fn read_frames(&mut self, first: u64, maximum: u32) -> Result<PullRead<'_>, Error> {
+            assert_eq!(first, 256);
             self.reads.set(self.reads.get() + 1);
             let count = self.samples.len().min(maximum as usize);
             Ok(PullRead::Data(PullBlock::new(
@@ -671,13 +744,13 @@ fn seeded_scheduled_pull_allocates_nothing() {
         sample_rate: 48000,
         channel_count: 1,
         channel_layout: 1,
-        total_frames: Some(128),
+        total_frames: Some(512),
         fingerprint_kind: 0,
         fingerprint: [0; 32],
     };
     let seed_spans = [WaveformSpan {
         first_frame: 0,
-        end_frame: 64,
+        end_frame: 256,
         first_column_index: 0,
         column_count: 1,
         data_column_offset: 0,
@@ -686,8 +759,10 @@ fn seeded_scheduled_pull_allocates_nothing() {
         minimum: -1000,
         maximum: 1000,
         rms: 1000,
-        flags: 1,
-        ..Default::default()
+        flags: 9,
+        low: 12,
+        mid: 23,
+        high: 34,
     }];
     let input = NativeResultInput {
         source: source_info,
@@ -701,7 +776,7 @@ fn seeded_scheduled_pull_allocates_nothing() {
             source_version: "",
         },
         overview: Some(NativeOverview {
-            frames_per_column: 64,
+            frames_per_column: 256,
             origin_frame: 0,
             state: FeatureState::Partial,
             confidence: 255,
@@ -745,7 +820,26 @@ fn seeded_scheduled_pull_allocates_nothing() {
     let mut requests = [RequestSlot::default(); 2];
     let reads = Cell::new(0);
     let releases = Cell::new(0);
-    let samples = [123i16; 64];
+    let samples = [123i16; 256];
+    let tile = NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 255,
+        data_column_offset: 0,
+        column_count: 0,
+    };
+    let mut dt0 = [tile; 4];
+    let mut dt1 = dt0;
+    let mut dc0 = [WaveformColumn::default(); 256];
+    let mut dc1 = dc0;
+    let mut cache = [detail_analysis::DetailTile::default(); 4];
+    let mut dt = [tile; 4];
+    let mut dc = [WaveformColumn::default(); 256];
+    let mut bands = [band::BandSums::default(); 2];
     let before = ALLOCATIONS.load(Ordering::Relaxed);
     let pool = ResultPool::new(
         source_info,
@@ -753,11 +847,15 @@ fn seeded_scheduled_pull_allocates_nothing() {
             Storage {
                 overview_spans: &mut spans0,
                 overview_columns: &mut columns0,
+                detail_tiles: &mut dt0,
+                detail_columns: &mut dc0,
                 ..Default::default()
             },
             Storage {
                 overview_spans: &mut spans1,
                 overview_columns: &mut columns1,
+                detail_tiles: &mut dt1,
+                detail_columns: &mut dc1,
                 ..Default::default()
             },
         ],
@@ -769,8 +867,8 @@ fn seeded_scheduled_pull_allocates_nothing() {
             SessionConfig {
                 sample_rate: 48000,
                 channel_count: 1,
-                total_frames: 128,
-                frames_per_column: 64,
+                total_frames: 512,
+                frames_per_column: 256,
             },
             Workspace {
                 accumulators: &mut acc,
@@ -784,15 +882,30 @@ fn seeded_scheduled_pull_allocates_nothing() {
             &mut requests,
         )
         .unwrap();
+        session.enable_three_band(&mut bands).unwrap();
+        session.enable_detail(&mut cache, &mut dt, &mut dc).unwrap();
         session.seed_from_result(&checkpoint, false).unwrap();
         assert_eq!(pool.generation(), 1);
         assert_eq!(
             session.session().accepted_ranges(),
             &[FrameRange {
                 first_frame: 0,
-                end_frame: 64
+                end_frame: 256
             }]
         );
+        session
+            .request_region(RegionRequest {
+                range: FrameRange {
+                    first_frame: 0,
+                    end_frame: 256,
+                },
+                feature_mask: WAVEFORM_DETAIL,
+                priority: 200,
+                request_id: 0,
+                soft_deadline_monotonic_ns: 0,
+            })
+            .unwrap();
+        assert_eq!(session.next_pcm_request().unwrap().range.first_frame, 0);
         let source = Source {
             samples: &samples,
             reads: &reads,
@@ -805,7 +918,7 @@ fn seeded_scheduled_pull_allocates_nothing() {
                 .unwrap()
                 .processing
                 .consumed_input_frames,
-            64
+            256
         );
         assert_eq!(reads.get(), 1);
         assert_eq!(releases.get(), 1);
@@ -814,11 +927,376 @@ fn seeded_scheduled_pull_allocates_nothing() {
         assert_eq!(releases.get(), 1);
         let retained = pool.acquire().unwrap();
         assert_eq!(retained.overview().unwrap().columns.len(), 2);
+        assert_eq!(retained.detail().unwrap().columns.len(), 1);
+        assert_eq!(
+            retained.detail().unwrap().tiles[0].state,
+            FeatureState::Partial
+        );
         let _source = pull.into_source();
         retained
     };
     assert_eq!(retained.info().session_state, ResultSessionState::Completed);
     assert_eq!(retained.overview().unwrap().state, FeatureState::Final);
     drop(retained);
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
+}
+
+fn detail_publication_allocates_nothing() {
+    use libapta::{
+        detail_analysis::DetailTile,
+        owned_result::Storage,
+        publication::{PublishedSparseSession, ResultPool},
+        session::{CancellationToken, SessionConfig, WorkBudget},
+        sparse::{QueuedBlock, SparseAccumulator, Workspace, NODE_FRAMES},
+        waveform::{NormalizedSample, PcmView},
+    };
+    let tile = NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 255,
+        data_column_offset: 0,
+        column_count: 0,
+    };
+    let mut dt0 = [tile; 4];
+    let mut dt1 = dt0;
+    let mut dc0 = [WaveformColumn::default(); 256];
+    let mut dc1 = dc0;
+    let mut os0 = [WaveformSpan::default(); 9];
+    let mut os1 = os0;
+    let mut oc0 = [WaveformColumn::default(); 9];
+    let mut oc1 = oc0;
+    let mut accumulators = [SparseAccumulator::default(); 9];
+    let mut ranges = [FrameRange::default(); 4];
+    let mut nodes = [QueuedBlock::default(); 2];
+    let mut pcm = [NormalizedSample::default(); 2 * NODE_FRAMES];
+    let mut spans = [WaveformSpan::default(); 9];
+    let mut columns = [WaveformColumn::default(); 9];
+    let mut cache = [DetailTile::default(); 4];
+    let mut dt = [tile; 4];
+    let mut dc = [WaveformColumn::default(); 256];
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let pool = ResultPool::new(
+        SourceInfo {
+            sample_rate: 48000,
+            channel_count: 1,
+            channel_layout: 1,
+            total_frames: Some(513),
+            fingerprint_kind: 0,
+            fingerprint: [0; 32],
+        },
+        [
+            Storage {
+                overview_spans: &mut os0,
+                overview_columns: &mut oc0,
+                detail_tiles: &mut dt0,
+                detail_columns: &mut dc0,
+                ..Default::default()
+            },
+            Storage {
+                overview_spans: &mut os1,
+                overview_columns: &mut oc1,
+                detail_tiles: &mut dt1,
+                detail_columns: &mut dc1,
+                ..Default::default()
+            },
+        ],
+        NativeLimits::default(),
+    )
+    .unwrap();
+    let retained = {
+        let mut session = PublishedSparseSession::new(
+            SessionConfig {
+                sample_rate: 48000,
+                channel_count: 1,
+                total_frames: 513,
+                frames_per_column: 64,
+            },
+            Workspace {
+                accumulators: &mut accumulators,
+                ranges: &mut ranges,
+                nodes: &mut nodes,
+                pcm: &mut pcm,
+                snapshot_spans: &mut spans,
+                snapshot_columns: &mut columns,
+            },
+            &pool,
+        )
+        .unwrap();
+        session.enable_detail(&mut cache, &mut dt, &mut dc).unwrap();
+        session
+            .push_at(256, PcmView::S16Interleaved(&[123; 257]))
+            .unwrap();
+        // Eager detail acceptance is independent of overview's frame budget.
+        session
+            .process(
+                WorkBudget {
+                    maximum_input_frames: 1,
+                    maximum_steps: 1,
+                },
+                &CancellationToken::new(),
+            )
+            .unwrap();
+        let first = pool.acquire().unwrap();
+        assert!(first.overview().is_none());
+        assert_eq!(first.detail().unwrap().tiles[0].first_frame, 256);
+        assert_eq!(first.changed_features(), WAVEFORM_DETAIL);
+        drop(first);
+        session.finish_input().unwrap();
+        session
+            .process(WorkBudget::default(), &CancellationToken::new())
+            .unwrap();
+        let completed = pool.acquire().unwrap();
+        assert_eq!(
+            completed.info().session_state,
+            ResultSessionState::Completed
+        );
+        assert_eq!(
+            completed.detail().unwrap().tiles[0].state,
+            FeatureState::Partial
+        );
+        assert_eq!(completed.detail().unwrap().tiles[0].end_frame, 513);
+        assert_eq!(completed.detail().unwrap().columns.len(), 2);
+        completed
+    };
+    assert_eq!(retained.detail().unwrap().tiles[0].end_frame, 513);
+    drop(retained);
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
+}
+
+fn detail_replay_allocates_nothing(seed: bool) {
+    use libapta::{
+        detail_analysis::DetailTile,
+        owned_result::Storage,
+        publication::{PublishedSparseSession, ResultPool},
+        session::{CancellationToken, SessionConfig, WorkBudget},
+        sparse::{QueuedBlock, SparseAccumulator, Workspace, NODE_FRAMES},
+        waveform::{NormalizedSample, PcmView},
+    };
+    let tile = NativeTile {
+        level_id: 1,
+        tile_index: 0,
+        first_frame: 0,
+        end_frame: 0,
+        first_column_index: 0,
+        state: FeatureState::Partial,
+        confidence: 255,
+        data_column_offset: 0,
+        column_count: 0,
+    };
+    let mut dt0 = [tile; 4];
+    let mut dt1 = dt0;
+    let mut dc0 = [WaveformColumn::default(); 256];
+    let mut dc1 = dc0;
+    let mut os0 = [WaveformSpan::default(); 385];
+    let mut os1 = os0;
+    let mut oc0 = [WaveformColumn::default(); 385];
+    let mut oc1 = oc0;
+    let mut accumulators = [SparseAccumulator::default(); 385];
+    let mut ranges = [FrameRange::default(); 8];
+    let mut nodes = [QueuedBlock::default(); 2];
+    let mut pcm = [NormalizedSample::default(); 2 * NODE_FRAMES];
+    let mut spans = [WaveformSpan::default(); 385];
+    let mut columns = [WaveformColumn::default(); 385];
+    let mut cache = [DetailTile::default(); 4];
+    let mut dt = [tile; 4];
+    let mut dc = [WaveformColumn::default(); 256];
+    let mut requests = [libapta::scheduler::RequestSlot::default(); 2];
+    let mut bands = [libapta::band::BandSums::default(); 385];
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let pool = ResultPool::new(
+        SourceInfo {
+            sample_rate: 48000,
+            channel_count: 1,
+            channel_layout: 1,
+            total_frames: Some(98305),
+            fingerprint_kind: 0,
+            fingerprint: [0; 32],
+        },
+        [
+            Storage {
+                overview_spans: &mut os0,
+                overview_columns: &mut oc0,
+                detail_tiles: &mut dt0,
+                detail_columns: &mut dc0,
+                ..Default::default()
+            },
+            Storage {
+                overview_spans: &mut os1,
+                overview_columns: &mut oc1,
+                detail_tiles: &mut dt1,
+                detail_columns: &mut dc1,
+                ..Default::default()
+            },
+        ],
+        NativeLimits::default(),
+    )
+    .unwrap();
+    {
+        let mut session = PublishedSparseSession::new_scheduled(
+            SessionConfig {
+                sample_rate: 48000,
+                channel_count: 1,
+                total_frames: 98305,
+                frames_per_column: 256,
+            },
+            Workspace {
+                accumulators: &mut accumulators,
+                ranges: &mut ranges,
+                nodes: &mut nodes,
+                pcm: &mut pcm,
+                snapshot_spans: &mut spans,
+                snapshot_columns: &mut columns,
+            },
+            &pool,
+            &mut requests,
+        )
+        .unwrap();
+        session.enable_detail(&mut cache, &mut dt, &mut dc).unwrap();
+        session.enable_three_band(&mut bands).unwrap();
+        let cancel = CancellationToken::new();
+        let seed_spans = [WaveformSpan {
+            first_frame: 0,
+            end_frame: 256,
+            first_column_index: 0,
+            column_count: 1,
+            data_column_offset: 0,
+        }];
+        let seed_columns = [WaveformColumn {
+            minimum: -1000,
+            maximum: 1000,
+            rms: 1000,
+            low: 12,
+            mid: 23,
+            high: 34,
+            flags: 9,
+        }];
+        let input = NativeResultInput {
+            source: SourceInfo {
+                sample_rate: 48000,
+                channel_count: 1,
+                channel_layout: 1,
+                total_frames: Some(98305),
+                fingerprint_kind: 0,
+                fingerprint: [0; 32],
+            },
+            info: NativeResultInfo {
+                session_state: ResultSessionState::AcceptingInput,
+                ..Default::default()
+            },
+            provenance: Provenance {
+                origin: ProvenanceOrigin::ExternalImport,
+                source_name: "seed",
+                source_version: "",
+            },
+            overview: Some(NativeOverview {
+                frames_per_column: 256,
+                origin_frame: 0,
+                state: FeatureState::Partial,
+                confidence: 255,
+                spans: &seed_spans,
+                columns: &seed_columns,
+            }),
+            detail: None,
+            metadata: None,
+            tempo: None,
+            local_grid: None,
+            global_grid: None,
+            revision: None,
+            key: None,
+            meter: None,
+            quality: &[],
+        };
+        let mut os = seed_spans;
+        let mut oc = seed_columns;
+        let mut text = [0; 4];
+        let checkpoint = owned_result::copy(
+            &input,
+            Storage {
+                overview_spans: &mut os,
+                overview_columns: &mut oc,
+                text_bytes: &mut text,
+                ..Default::default()
+            },
+            NativeLimits::default(),
+        )
+        .unwrap();
+        if seed {
+            session.seed_from_result(&checkpoint, false).unwrap();
+        }
+        assert_eq!(pool.generation(), 1);
+        for tile in if seed { 1 } else { 0 }..5 {
+            assert_eq!(
+                session.push_at(tile * 16384, PcmView::S16Interleaved(&[123; 256])),
+                Ok(256)
+            );
+            session.process(WorkBudget::default(), &cancel).unwrap();
+        }
+        let processed = session.session().processed_frames();
+        let mut prior = [WaveformColumn::default(); 5];
+        {
+            let result = pool.acquire().unwrap();
+            prior.copy_from_slice(result.overview().unwrap().columns);
+            assert!(!result
+                .detail()
+                .unwrap()
+                .tiles
+                .iter()
+                .any(|t| t.tile_index == 0));
+        }
+        let request = session
+            .request_region(RegionRequest {
+                range: FrameRange {
+                    first_frame: 0,
+                    end_frame: 256,
+                },
+                feature_mask: WAVEFORM_DETAIL,
+                priority: 200,
+                request_id: 0,
+                soft_deadline_monotonic_ns: 0,
+            })
+            .unwrap();
+        session
+            .set_focus(Focus {
+                feature_mask: WAVEFORM_DETAIL,
+                playhead_frame: 0,
+                lookahead_frames: 256,
+                priority: 100,
+                ..Default::default()
+            })
+            .unwrap();
+        let demand = session.next_pcm_request().unwrap();
+        assert_eq!(
+            demand.range,
+            FrameRange {
+                first_frame: 0,
+                end_frame: 256
+            }
+        );
+        assert_eq!(demand.feature_mask, WAVEFORM_DETAIL);
+        assert_eq!(
+            session.push_at(0, PcmView::S16Interleaved(&[123; 256])),
+            Ok(256)
+        );
+        session.process(WorkBudget::default(), &cancel).unwrap();
+        assert_eq!(session.session().processed_frames(), processed);
+        assert_eq!(session.session().queued_frames(), 0);
+        assert_eq!(
+            session.request_progress(request).unwrap().state,
+            RequestState::Satisfied
+        );
+        let result = pool.acquire().unwrap();
+        assert_eq!(result.overview().unwrap().columns, prior);
+        assert!(result
+            .detail()
+            .unwrap()
+            .tiles
+            .iter()
+            .any(|t| t.tile_index == 0));
+        assert_eq!(result.changed_features(), WAVEFORM_DETAIL);
+    }
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 }

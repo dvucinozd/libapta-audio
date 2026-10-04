@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static unsigned features = 1;
+
 #define CHECK(expression) \
     do { \
         if (!(expression)) { \
@@ -41,6 +43,21 @@ static void snapshot(apta_session_t *session, unsigned event, int status, unsign
             }
         }
     }
+    if (features & APTA_FEATURE_WAVEFORM_DETAIL) {
+        apta_waveform_tile_view_t tile;
+        apta_waveform_tile_view_init(&tile);
+        int found_tile = apta_result_get_waveform_tile(result, 1, 0, &tile);
+        CHECK(found_tile == 0 || found_tile == APTA_STATUS_NOT_AVAILABLE);
+        printf("D %u\n", found_tile == 0 ? tile.column_count : 0);
+        if (found_tile == 0) {
+            printf("T %" PRIu64 " %" PRIu64 " %u %u %u\n", tile.source_range.first_frame,
+                   tile.source_range.end_frame, tile.first_column_index, tile.state, tile.confidence);
+            for (unsigned j = 0; j < tile.column_count; j++) {
+                const apta_waveform_column_t *c = &tile.columns[j];
+                printf("E %d %d %u %u %u %u %u\n", c->minimum, c->maximum, c->rms, c->low, c->mid, c->high, c->flags);
+            }
+        }
+    }
     apta_result_release(result);
 }
 
@@ -54,10 +71,10 @@ static const apta_result_t *checkpoint(apta_context_t *context, unsigned scenari
     source.sample_rate = 48000;
     source.channel_count = 1;
     source.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
-    source.total_frames = scenario == 10 ? APTA_TOTAL_FRAMES_UNKNOWN
+    source.total_frames = scenario == 10 || scenario == 18 ? APTA_TOTAL_FRAMES_UNKNOWN
                           : scenario == 11 ? 2500 : scenario == 13 ? 8192 : 4096;
-    source.fingerprint_kind = APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256;
-    source.fingerprint[0] = 0x41;
+    source.fingerprint_kind = scenario == 19 ? APTA_SOURCE_FINGERPRINT_NONE : APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256;
+    source.fingerprint[0] = scenario == 19 ? 0 : 0x41;
     CHECK(apta_result_builder_set_source_info(builder, &source) == APTA_STATUS_OK);
     apta_result_builder_info_t info;
     apta_result_builder_info_init(&info);
@@ -79,12 +96,12 @@ static const apta_result_t *checkpoint(apta_context_t *context, unsigned scenari
         columns[i].minimum = i == 5 ? INT16_MIN : (int16_t)(-12000 - i * 1000);
         columns[i].maximum = i == 5 ? INT16_MAX : (int16_t)(19000 + i * 1000);
         columns[i].rms = scenario == 13 ? energy[i] : 32000;
-        columns[i].flags = i == 5 ? 5 : 9;
-        if (i != 5) { columns[i].low = 12; columns[i].mid = 23; columns[i].high = 34; }
+        columns[i].flags = scenario == 16 ? 1 : i == 5 ? 5 : 9;
+        if (i != 5 && scenario != 16) { columns[i].low = 12; columns[i].mid = 23; columns[i].high = 34; }
     }
     apta_waveform_span_t span = {0};
-    span.first_column_index = scenario == 11 ? 2 : scenario == 2 && second ? 1 : 0;
-    span.column_count = scenario == 13 ? 8 : scenario == 2 ? 2 : 1;
+    span.first_column_index = scenario == 18 ? 4 : scenario == 11 ? 2 : scenario == 2 && second ? 1 : 0;
+    span.column_count = scenario == 13 ? 8 : scenario == 16 ? 4 : scenario == 2 ? 2 : 1;
     span.source_range.first_frame = (uint64_t)span.first_column_index * 1024;
     span.source_range.end_frame = scenario == 11 ? 2500
                                   : span.source_range.first_frame + span.column_count * 1024;
@@ -97,8 +114,29 @@ static const apta_result_t *checkpoint(apta_context_t *context, unsigned scenari
     overview.state = APTA_FEATURE_PARTIAL;
     overview.confidence = 42;
     overview.span_count = 1;
-    overview.spans = &span;
+    apta_waveform_span_t sparse_spans[2] = {span, span};
+    sparse_spans[1].first_column_index = 3;
+    sparse_spans[1].source_range.first_frame = 3072;
+    sparse_spans[1].source_range.end_frame = 4096;
+    sparse_spans[1].columns = &columns[1];
+    if (scenario == 17) overview.span_count = 2;
+    overview.spans = scenario == 17 ? sparse_spans : &span;
     CHECK(apta_result_builder_set_waveform_overview(builder, &overview) == APTA_STATUS_OK);
+    if (features & APTA_FEATURE_WAVEFORM_DETAIL) {
+        apta_waveform_column_t detail_column = columns[0];
+        detail_column.flags = APTA_WAVEFORM_COLUMN_VALID;
+        detail_column.low = detail_column.mid = detail_column.high = 0;
+        apta_waveform_tile_view_t tile;
+        apta_waveform_tile_view_init(&tile);
+        tile.level_id = 1; tile.tile_index = 0;
+        tile.source_range.first_frame = 0; tile.source_range.end_frame = 256;
+        tile.first_column_index = 0; tile.column_count = 1; tile.columns = &detail_column;
+        tile.state = APTA_FEATURE_PARTIAL; tile.confidence = 42;
+        apta_waveform_detail_input_t detail;
+        apta_waveform_detail_input_init(&detail);
+        detail.tile_count = 1; detail.tiles = &tile;
+        CHECK(apta_result_builder_set_waveform_detail(builder, &detail) == 0);
+    }
     const apta_result_t *result = NULL;
     CHECK(apta_result_builder_finalize(builder, &result) == APTA_STATUS_OK);
     apta_result_builder_destroy(builder);
@@ -108,7 +146,7 @@ static const apta_result_t *checkpoint(apta_context_t *context, unsigned scenari
 static int push(apta_session_t *session, unsigned event, uint64_t first, uint32_t count) {
     int16_t pcm[4096];
     CHECK(count <= 4096);
-    for (unsigned i = 0; i < count; ++i) pcm[i] = 1000;
+    for (unsigned i = 0; i < count; ++i) pcm[i] = event == 9 ? -25000 : event == 11 || event == 14 ? 25000 : 1000;
     apta_pcm_block_t block;
     apta_pcm_block_init(&block);
     block.first_frame = first;
@@ -121,11 +159,13 @@ static int push(apta_session_t *session, unsigned event, uint64_t first, uint32_
 }
 
 int main(int argc, char **argv) {
-    CHECK(argc == 2);
+    CHECK(argc == 2 || argc == 3);
+    if (argc == 3) features = (unsigned)strtoul(argv[2], NULL, 10);
     unsigned scenario = (unsigned)strtoul(argv[1], NULL, 10);
-    CHECK(scenario <= 13);
+    CHECK(scenario <= 19);
     apta_context_config_t cc;
     apta_context_config_init(&cc);
+    cc.requested_capabilities = features;
     apta_context_t *context = NULL;
     CHECK(apta_context_create(&cc, &context) == APTA_STATUS_OK);
     apta_session_config_t config;
@@ -136,7 +176,7 @@ int main(int argc, char **argv) {
     config.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     config.total_frames = scenario == 6 || scenario == 13 ? 8192 : scenario == 11 ? 2500 : 4096;
     config.overview_frames_per_column = scenario == 3 ? 2048 : 1024;
-    config.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    config.requested_features = features;
     config.flags = APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS;
     if (scenario != 8 && scenario != 9) {
         config.source_fingerprint_kind = APTA_SOURCE_FINGERPRINT_APPLICATION_OPAQUE_256;
@@ -144,11 +184,11 @@ int main(int argc, char **argv) {
     }
     // C bounded-slot configuration rejects every additional flag. Exercise
     // strict identity through its supported ordinary publication path.
-    if (scenario == 9) config.flags = APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING;
-    void *workspace = aligned_alloc(64, 262144);
+    if (scenario == 9 || scenario == 19) config.flags = APTA_SESSION_FLAG_REQUIRE_SOURCE_IDENTITY_FOR_SEEDING;
+    void *workspace = aligned_alloc(64, 1048576);
     CHECK(workspace != NULL);
     config.static_workspace = workspace;
-    config.static_workspace_size = 262144;
+    config.static_workspace_size = 1048576;
     apta_session_t *session = NULL;
     CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
     snapshot(session, 0, 0, 0);
@@ -158,7 +198,7 @@ int main(int argc, char **argv) {
     apta_result_release(seed);
     snapshot(session, 2, status, 0);
     if (status != APTA_STATUS_OK) goto cleanup;
-    if (scenario == 1 || scenario == 2) {
+    if (scenario == 1 || scenario == 2 || (scenario == 14 || scenario == 15)) {
         seed = checkpoint(context, scenario, 1);
         status = apta_session_seed_from_result(session, seed);
         apta_result_release(seed);
@@ -168,10 +208,36 @@ int main(int argc, char **argv) {
     apta_work_budget_t budget;
     apta_work_budget_init(&budget);
     snapshot(session, 4, apta_session_process(session, &budget, NULL), 0);
-    if (scenario != 13) {
+    if (scenario != 13 && scenario != 16) {
         uint64_t first = scenario == 11 ? 0 : scenario == 2 ? 3072 : 1024;
-        uint32_t count = scenario == 11 ? 2048 : (uint32_t)(4096 - first);
+        uint32_t count = (scenario == 14 || scenario == 15) ? 1024 : scenario == 11 || scenario == 17 ? 2048 : (uint32_t)(4096 - first);
         CHECK(push(session, 5, first, count) == APTA_STATUS_OK);
+    }
+    if ((scenario == 14 || scenario == 15)) {
+        const apta_result_t *old = apta_session_acquire_result(session);
+        CHECK(old);
+        snapshot(session, 8, apta_session_process(session, &budget, NULL), 0);
+        if (features & APTA_FEATURE_WAVEFORM_DETAIL) {
+            apta_region_request_t request;
+            apta_region_request_init(&request);
+            request.range.first_frame = 0; request.range.end_frame = 1024;
+            request.feature_mask = APTA_FEATURE_WAVEFORM_DETAIL; request.priority = 200;
+            uint32_t id = 0;
+            CHECK(apta_session_request_region(session, &request, &id) == 0);
+            apta_pcm_request_t demand; apta_pcm_request_init(&demand);
+            CHECK(apta_session_next_pcm_request(session, &demand) == 0);
+            printf("Q %" PRIu64 " %" PRIu64 " %" PRIu64 "\n", demand.range.first_frame, demand.range.end_frame, demand.feature_mask);
+            CHECK(push(session, 9, 0, 1024) == 0);
+            snapshot(session, 10, apta_session_process(session, &budget, NULL), 0);
+        }
+        if (scenario == 15) {
+            CHECK(push(session, 11, 3072, 1024) == 0);
+            snapshot(session, 12, apta_session_process(session, &budget, NULL), 0);
+        }
+        apta_result_release(old);
+        snapshot(session, 13, apta_session_process(session, &budget, NULL), 0);
+        if (scenario == 14) CHECK(push(session, 14, 3072, 1024) == 0);
+        CHECK(push(session, 15, 2048, 1024) == 0);
     }
     status = apta_session_signal_end_of_input(session, config.total_frames);
     snapshot(session, 6, status, 0);

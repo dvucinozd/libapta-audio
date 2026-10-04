@@ -21,7 +21,7 @@ static uint32_t bits(float value) {
 }
 
 static void public_result(const float *samples, uint32_t count, uint32_t rate,
-                          uint32_t frames_per_column, int bounded) {
+                          uint32_t frames_per_column, int bounded, int sparse) {
     apta_context_config_t cc;
     apta_context_config_init(&cc);
     cc.requested_capabilities = APTA_FEATURE_WAVEFORM_OVERVIEW | APTA_FEATURE_WAVEFORM_3BAND;
@@ -45,7 +45,27 @@ static void public_result(const float *samples, uint32_t count, uint32_t rate,
     CHECK(apta_session_create(context, &config, &session) == APTA_STATUS_OK);
     apta_work_budget_t budget;
     apta_work_budget_init(&budget);
-    for (uint32_t first = 0; first < count;) {
+    if (sparse) {
+        apta_region_request_t request;
+        apta_region_request_init(&request);
+        request.range.first_frame = 128;
+        request.range.end_frame = count;
+        request.priority = 200;
+        request.feature_mask = APTA_FEATURE_WAVEFORM_OVERVIEW;
+        uint32_t id = 0;
+        CHECK(apta_session_request_region(session, &request, &id) == APTA_STATUS_OK);
+        for (uint32_t i = 0; i < 2; ++i) {
+            apta_pcm_block_t block;
+            apta_pcm_block_init(&block);
+            block.first_frame = i == 0 ? 0 : 128;
+            block.frame_count = i == 0 ? 64 : count - 128;
+            block.data = samples + block.first_frame;
+            uint32_t accepted = 0;
+            CHECK(apta_session_push_pcm(session, &block, &accepted) == APTA_STATUS_OK);
+            CHECK(accepted == block.frame_count);
+        }
+    }
+    for (uint32_t first = 0; !sparse && first < count;) {
         uint32_t n = count - first;
         if (n > 4096) n = 4096;
         apta_pcm_block_t block;
@@ -69,13 +89,15 @@ static void public_result(const float *samples, uint32_t count, uint32_t rate,
     apta_waveform_overview_view_t overview;
     apta_waveform_overview_view_init(&overview);
     CHECK(apta_result_get_waveform_overview(result, 0, &overview) == APTA_STATUS_OK);
-    CHECK(overview.span_count == 1);
+    CHECK(overview.span_count == (sparse ? 2u : 1u));
     printf("P %d %" PRIu64 "\n", bounded, info.available_features);
-    for (uint32_t i = 0; i < overview.spans[0].column_count; ++i) {
-        const apta_waveform_column_t *column = &overview.spans[0].columns[i];
+    for (uint32_t span = 0; span < overview.span_count; ++span) {
+      for (uint32_t i = 0; i < overview.spans[span].column_count; ++i) {
+        const apta_waveform_column_t *column = &overview.spans[span].columns[i];
         printf("C %d %d %u %u %u %u %u\n", column->minimum, column->maximum,
                column->rms, column->low, column->mid, column->high, column->flags);
     }
+      }
     apta_result_release(result);
     CHECK(apta_session_destroy(session) == APTA_STATUS_OK);
     free(workspace);
@@ -83,7 +105,8 @@ static void public_result(const float *samples, uint32_t count, uint32_t rate,
 }
 
 int main(int argc, char **argv) {
-    CHECK(argc == 3);
+    CHECK(argc == 3 || argc == 4);
+    int sparse = argc == 4;
     uint32_t rate = (uint32_t)strtoul(argv[1], NULL, 10);
     uint32_t frames_per_column = (uint32_t)strtoul(argv[2], NULL, 10);
     float *samples = malloc(65536 * sizeof(float));
@@ -99,8 +122,8 @@ int main(int argc, char **argv) {
         printf("F %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
                bits(output[0]), bits(output[1]), bits(output[2]));
     }
-    public_result(samples, (uint32_t)count, rate, frames_per_column, 0);
-    public_result(samples, (uint32_t)count, rate, frames_per_column, 1);
+    public_result(samples, (uint32_t)count, rate, frames_per_column, 0, sparse);
+    public_result(samples, (uint32_t)count, rate, frames_per_column, 1, sparse);
     free(samples);
     return 0;
 }

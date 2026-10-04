@@ -68,11 +68,15 @@ impl BandSums {
     }
 
     /// Add the canonical three band bytes and HAS_3BAND to a completed column.
-    pub fn apply(&self, mut column: WaveformColumn, count: u32) -> Result<WaveformColumn, Error> {
+    pub fn apply(&self, column: WaveformColumn, count: u32) -> Result<WaveformColumn, Error> {
         if !(1..=65536).contains(&count) || column.flags & 1 == 0 || column.minimum > column.maximum
         {
             return Err(Error::InvalidArgument);
         }
+        Ok(self.apply_complete(column, count))
+    }
+
+    pub(crate) fn apply_complete(&self, mut column: WaveformColumn, count: u32) -> WaveformColumn {
         let denominator = u64::from(count) * 32768;
         let values = self
             .sums
@@ -81,8 +85,15 @@ impl BandSums {
         column.mid = values[1];
         column.high = values[2];
         column.flags |= 8;
-        Ok(column)
+        column
     }
+}
+
+/// Optional caller-owned overview band storage. Filter history follows processing
+/// order, rather than source order, when sparse requests seek between ranges.
+pub(crate) struct OverviewBands<'a> {
+    pub(crate) sums: &'a mut [BandSums],
+    pub(crate) filter: BandFilter,
 }
 
 #[cfg(test)]

@@ -60,6 +60,8 @@ impl CancellationToken {
 }
 
 pub struct Session<'a> {
+    detail: Option<crate::detail_analysis::DetailCache<'a>>,
+    bands: Option<crate::band::OverviewBands<'a>>,
     config: SessionConfig,
     queue: &'a mut [NormalizedSample],
     output: &'a mut [WaveformColumn],
@@ -100,6 +102,8 @@ impl<'a> Session<'a> {
             config.total_frames
         };
         Ok(Self {
+            detail: None,
+            bands: None,
             config,
             queue,
             output,
@@ -112,6 +116,62 @@ impl<'a> Session<'a> {
             accumulator: WaveformAccumulator::default(),
             state: SessionState::Created,
         })
+    }
+
+    /// Enable three-band overview while Created, before input or seeding.
+    /// Storage must cover every possible logical overview column.
+    pub fn enable_three_band(
+        &mut self,
+        sums: &'a mut [crate::band::BandSums],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 || self.bands.is_some() {
+            return Err(Error::InvalidState);
+        }
+        if sums.len() < self.output.len() {
+            return Err(Error::BufferTooSmall);
+        }
+        let filter = crate::band::BandFilter::new(self.config.sample_rate)?;
+        sums[..self.output.len()].fill(crate::band::BandSums::default());
+        self.bands = Some(crate::band::OverviewBands { sums, filter });
+        Ok(())
+    }
+
+    /// Attach an eager detail cache before input. Storage remains caller-owned.
+    pub fn enable_detail(
+        &mut self,
+        tiles: &'a mut [crate::detail_analysis::DetailTile],
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 || self.detail.is_some() {
+            return Err(Error::InvalidState);
+        }
+        if self
+            .input_capacity
+            .div_ceil(crate::detail_analysis::FRAMES_PER_COLUMN)
+            > u64::from(u32::MAX)
+        {
+            return Err(Error::LimitExceeded);
+        }
+        self.detail = Some(crate::detail_analysis::DetailCache::new(tiles)?);
+        Ok(())
+    }
+
+    /// Copy currently complete detail runs into independent caller storage.
+    pub fn copy_detail_into<'b>(
+        &self,
+        tiles: &'b mut [crate::NativeTile],
+        columns: &'b mut [WaveformColumn],
+    ) -> Result<Option<crate::NativeDetail<'b>>, Error> {
+        match &self.detail {
+            None => Ok(None),
+            Some(detail) => {
+                let output = detail.snapshot_into(tiles, columns)?;
+                Ok((!output.tiles.is_empty()).then_some(output))
+            }
+        }
+    }
+
+    pub(crate) fn detail_mutation_serial(&self) -> u64 {
+        self.detail.as_ref().map_or(0, |d| d.mutation_serial())
     }
 
     pub fn config(&self) -> SessionConfig {
@@ -169,11 +229,17 @@ impl<'a> Session<'a> {
         }
         for frame in 0..count {
             let sample = samples.sample_frame(frame, channels)?;
+            if let Some(detail) = &mut self.detail {
+                detail.push_normalized(self.accepted + frame as u64, sample, |_| false)?;
+            }
             let index = (self.head + self.queued) % self.queue.len();
             self.queue[index] = sample;
             self.queued += 1;
         }
         self.accepted += count as u64;
+        if let Some(detail) = &mut self.detail {
+            detail.refresh_completed(None)?;
+        }
         if count != 0 {
             self.state = SessionState::Running;
         }
@@ -189,6 +255,9 @@ impl<'a> Session<'a> {
                 && self.accepted != self.config.total_frames)
         {
             return Err(Error::InvalidState);
+        }
+        if let Some(detail) = &mut self.detail {
+            detail.refresh_completed(Some(self.accepted))?;
         }
         self.config.total_frames = self.accepted;
         self.state = SessionState::Draining;
@@ -271,6 +340,11 @@ impl<'a> Session<'a> {
             self.state = SessionState::Cancelled;
             return Err(Error::Cancelled);
         }
+        if self.state == SessionState::Draining {
+            if let Some(detail) = &mut self.detail {
+                detail.refresh_completed(Some(self.accepted))?;
+            }
+        }
         let mut progress = Progress::default();
         let frame_limit = if budget.maximum_input_frames == 0 {
             u32::MAX
@@ -298,6 +372,9 @@ impl<'a> Session<'a> {
                 let sample = self.queue[self.head];
                 self.accumulator
                     .push_normalized(sample.value, sample.clipped)?;
+                if let Some(bands) = &mut self.bands {
+                    bands.sums[self.written].add(bands.filter.split(sample.value)?)?;
+                }
                 self.head = (self.head + 1) % self.queue.len();
                 self.queued -= 1;
                 self.processed += 1;
@@ -311,6 +388,7 @@ impl<'a> Session<'a> {
                 break;
             }
         }
+        deadline.analysis_boundaries();
         if self.state == SessionState::Draining && self.queued == 0 {
             if self.accumulator.sample_count() != 0 {
                 self.publish_column();
@@ -323,7 +401,12 @@ impl<'a> Session<'a> {
     }
 
     fn publish_column(&mut self) {
-        self.output[self.written] = self.accumulator.column();
+        let mut column = self.accumulator.column();
+        if let Some(bands) = &self.bands {
+            column =
+                bands.sums[self.written].apply_complete(column, self.accumulator.sample_count());
+        }
+        self.output[self.written] = column;
         self.written += 1;
         self.accumulator.clear();
     }

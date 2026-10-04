@@ -1,6 +1,6 @@
 # Native Rust migration
 
-Status: implementation in progress; no release, ABI replacement, full profile,
+Status: implementation resumed 2026-10-04; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
@@ -144,16 +144,16 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Header/directory/CRC, `src/serialization` | [container.rs](../../rust/src/container.rs) | Implemented; 16 container checks + strict C oracle |
 | WOVR reader/writer | [container.rs](../../rust/src/container.rs) | Implemented; exact C golden roundtrip, malformed inputs, strict C reader |
 | META and fingerprints | [meta.rs](../../rust/src/meta.rs), types/container | Deterministic bounded CBOR, recognized-field ownership and writer complete; fingerprint computation pending |
-| WDTL/detail interchange | [detail.rs](../../rust/src/detail.rs), container/types | Level-1 payload reader/writer and aggregate result validation implemented; exact C bytes; native detail analysis/scheduling pending |
+| WDTL/detail interchange | [detail.rs](../../rust/src/detail.rs), container/types | Level-1 payload reader/writer and aggregate result validation implemented; exact C bytes; native eager sequential/sparse detail and sparse request protection/replay integrated |
 | TEMP/LGRD, GGRD/REVN | [tempo.rs](../../rust/src/tempo.rs), [grid.rs](../../rust/src/grid.rs), [result.rs](../../rust/src/result.rs) | Payloads, canonical writing and cross-feature links implemented; exact C roundtrips; native DSP pending |
 | MKEY/MTRD/CONF + cross-feature checks | [dj.rs](../../rust/src/dj.rs), result/builder | Payloads, limits, grid/quality links and canonical bytes implemented; native analysis pending |
 | Buffer/stream/selective parse APIs | container/result/[stream.rs](../../rust/src/stream.rs)/[stream_write.rs](../../rust/src/stream_write.rs) | Complete known wire section set, bounded callbacks and selective retention; differences documented below; C ABI pending |
 | S16/S24/S32/F32 interleaved/planar PCM | waveform/session | All five formats through typed views/session; exact C comparisons; C block ABI pending |
 | Quantized mono/stereo overview | waveform | Implemented; 44 exact C oracle cases, ties, overflow, endpoint clipping |
-| Three-band overview/detail | waveform | Pending (three-band detail remains outside original scope) |
+| Three-band overview/detail | [band.rs](../../rust/src/band.rs), session/sparse | Three-band overview integrated; exact C comparisons; three-band detail remains outside original scope |
 | Push/backpressure/EOF/budgets/cancel | session | Implemented sequential known/unknown duration; fixed output capacity, budget/backpressure/EOF/cancel tests pass |
 | Pull/seek/release callbacks | [pull.rs](../../rust/src/pull.rs), [sparse_pull.rs](../../rust/src/sparse_pull.rs) | Sequential known/unknown and scheduled known-duration pull; exactly-once release and absolute-offset seeking; C callback ABI remains pending |
-| Focus/requests/sparse ranges/scheduler | [sparse.rs](../../rust/src/sparse.rs), [scheduler.rs](../../rust/src/scheduler.rs), publication | Known-duration sparse overview and request policy integrated; oracle/review/combined acceptance below; other feature schedulers pending |
+| Focus/requests/sparse ranges/scheduler | [sparse.rs](../../rust/src/sparse.rs), [scheduler.rs](../../rust/src/scheduler.rs), publication | Known-duration sparse overview/detail request policy, protection and replay integrated; oracle/review/combined acceptance below; musical-analysis schedulers pending |
 | Context/static workspace/allocation classes | future runtime/FFI | Caller typed storage and sequential two-slot size plan; full scheduler/platform planner pending |
 | Immutable generations/pool/concurrency | session + future runtime/FFI | Owned graphs and two caller-owned immutable slots; five lifecycle oracle traces and independent review pass; concurrent acquire/release pending |
 | Resume/result seeding | publication/sparse/waveform | Validated owned overview checkpoint, source/fingerprint compatibility, inverse quantization and atomic native preflight; C tail difference documented below |
@@ -534,7 +534,7 @@ native bounded publication limit therefore matches this C profile. Nonbounded
 unknown-duration result publication remains part of later allocator/runtime
 acceptance; existing native sequential pull supports unknown input separately.
 
-### Active continuation: soft processing clock and waveform analysis
+### Historical continuation at pause: soft processing clock and waveform analysis
 
 Clock injection is being added without changing existing frame/step budget
 literals. It must initialize a saturating deadline, treat a zero initial clock
@@ -563,8 +563,9 @@ python3 rust/check.py \
   --c-build /home/shome/.local/share/libapta-audio/rust-rewrite/c-baseline
 ```
 
-Finish soft-clock and native detail/three-band integration, then advance onset/
-tempo/grids/key/meter/confidence in dependency order. Preserve the pending
+Continue from the latest feature-enabled overview seeding acceptance section below.
+This bounded session stops at that milestone. Further onset/tempo/grids/key/meter/
+confidence work needs a new task authorization. Preserve the pending
 nonbounded runtime, C ABI/allocator/concurrency and platform acceptance items. New slices must pass focused
 oracles, independent review and combined checks before acceptance. A safe single-thread RefCell pool
 does not satisfy concurrent C acquire/release; retain that acceptance item until
@@ -575,7 +576,7 @@ host-service change is authorized. Full C ABI/platform replacement remains
 pending; no maintainer approval or completed rewrite is claimed.
 
 
-## Paused checkpoint — 2026-10-03
+## Historical paused checkpoint — 2026-10-03
 
 Paused at the user's explicit request because concurrent agent work was placing
 excessive load on the machine. The persistent goal is **paused**. All three
@@ -661,3 +662,194 @@ After pausing, the user explicitly authorized committing and pushing the current
 checkpoint to `origin/rust-rewrite`. This authorizes checkpoint publication only;
 the implementation goal remains paused and the unfinished clock/DSP work above
 is preserved without a new full verification claim.
+
+
+## Waveform analysis continuation — 2026-10-04
+
+The user resumed implementation, requested core work before the outside layer,
+and authorized bounded parallel workers with lower-cost/low-reasoning settings.
+The historical pause above no longer directs current work. No push or hardware
+operation was performed. C remains the reference and installed product.
+
+### Integrated scope
+
+- Cooperative clocks preserve all four disabled-analysis boundary reads from
+  the effective C wrapper chain, after successful waveform processing and before
+  completion. Twelve public-C traces cover callback count/order, zero and saturated
+  deadlines, chunk limits, source failures/WouldBlock and callback cancellation.
+  Timed sequential pull adds four exact C traces, starting its deadline after
+  source read/release; source callbacks remain outside the cooperative bound.
+- Three-band caller storage attaches while Created to sequential/pull/sparse and
+  published sessions. Persistent filters follow actual processing order across
+  sparse scheduling. Sixty-three signal/rate cases compare float bits and complete
+  quantized columns; a public-C sparse scenario verifies priority reversal,
+  discontinuities, short EOF and retained published columns. Native result masks
+  include three-band when columns carry it; the C bounded pool omits the bit.
+  This explicit native difference does not affect column bytes. Band-enabled
+  checkpoint seeding was Unsupported at this recorded milestone; the later
+  feature-enabled overview seeding section supersedes that limitation.
+- Sequential, pull and sparse sessions eagerly accumulate accepted detail PCM into four caller-owned
+  cache tiles. Publication deep-copies tiles/columns into both preflighted result
+  slots. Detail scratch requires four descriptors and 256 columns; aggregate
+  retained-byte/column limits include worst-case overview plus detail capacity.
+  A public-C trace checks eager detail output while only one overview frame is
+  processed, then partial EOF tile geometry/state/columns. Kernel comparisons
+  separately cover eviction/protection/pinned runs. Trusted native publication
+  permits Completed + Partial detail, while external builder rules stay stricter.
+  Sequential known/unknown-duration detail also matches two public-C traces and
+  retains independent copied snapshots after session destruction. Sequential
+  immutable publication also checks eager/EOF C output, retained-slot exhaustion,
+  EOF rollback/retry and resource admission before accepting input.
+- Attached sparse detail enables request/focus protection and aligned detail replay.
+  Thirteen public-C scheduler traces check cache degradation/eviction, cancellation,
+  partial-column skipping, EOF, priority/deadline/FIFO/aging, mixed-feature progress,
+  retained slots and exact state/feature-mask/generation traces. Sixteen scheduled
+  pull traces verify callbacks, source failures/cancellation, retained slots and
+  detail output. As in C, public demands prioritize detail replay while the built-in
+  pull loop asks for overview gaps. Simultaneous overview/detail publication uses
+  C's overview changed-mask precedence; detail-only publication uses the detail bit.
+  Failure-path comparisons preserve C's ordering of overview publication, aging,
+  detail request refresh and detail-only publication. Effective CMake symbol
+  renaming matters: public detail demand uses aged/deadline scores, but replay
+  acceptance reselects by raw priority/FIFO without aging. This C inconsistency is
+  preserved and directly tested; a public demand can therefore differ from the
+  replay that C will accept. Native invalid-float preflight remains atomic.
+- Combined allocation instrumentation covers band/detail processing, focus and
+  overview requests, retained clones, slot exhaustion/retry, EOF tails and result
+  lifetime beyond the session. A cache-eviction/replay path verifies zero allocation
+  and unchanged overview columns/band history. Sequential band/detail push/pull
+  also allocate nothing.
+- The combined runner now compiles/registers clock, band, detail kernel and public
+  detail-session, scheduler and scheduled-pull oracles. External-C comparisons
+  also run in optimized Rust builds. `--jobs` defaults to two and bounds C build/CTest, Cargo
+  build and Rust test concurrency. Generated evidence stays outside the checkout.
+
+### Remaining core boundary
+
+This is not completed core replacement. Feature-enabled overview seeding is now
+accepted by the later section; restoring band/filter/detail internal state is not
+part of the C seeding contract. Raw sequential sessions support caller-copied detail; sequential
+and sparse publication support immutable slots.
+Standalone `Scheduler::new` stays overview-only; attaching detail through the
+complete sparse session enables the policy with its required cache. Onset/S4, S6/global/dynamic grids, native key/meter and
+calibrated quality are still unported analysis stages. Nonbounded ownership,
+concurrent acquire/release and full workspace/allocation-class contracts remain.
+Only then can the outside C ABI, distribution, CLI and platform layer be replaced.
+
+
+### Integrated verification
+
+The required runner passed on 2026-10-04 with `--jobs 2`, using the unchanged
+`c-baseline` build and external `combined` build root. Evidence:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/waveform-core-combined-check.log`.
+This covers C Release, Rust debug/release and all registered external-C tests,
+formatting, Clippy, no-default-features and eight strict C WAV interchange cases.
+It establishes the integrated scope above, not the remaining core/outside gates.
+
+
+Final integrated totals: **123/123 C tests**, **214 Rust tests** (including
+unit/integration/doctests) and **27 external-C test groups**, in each Rust debug
+and release profile. Format/Clippy/no-default-features, allocation instrumentation
+and all eight WAV interchange cases passed. The final run includes the sequential
+pending-detail-to-overview retry mask regression. `git diff --check` and notebook
+validation also passed; changes remain local and no push was performed.
+
+
+## Feature-enabled overview seeding — 2026-10-04
+
+### Accepted contract and call order
+
+This milestone closes the Unsupported guard for overview seeding with three-band
+and/or detail attached. It does not introduce a richer checkpoint format or restore
+internal analysis from published output. Create `PublishedSparseSession`, attach
+caller-owned band/detail storage and publication scratch/slots, then seed the
+validated `OwnedResult` while Created, before input acceptance. Repeat seeds only
+while Created. A scheduled pull source wraps the seeded Created session before any
+processing. Feature attachment after seeding remains rejected by the existing APIs.
+
+Unchanged compiled public C calls establish that only overview peaks, RMS,
+clipping and accepted ranges are restored. Overview quantization is reconstructed
+using C's arithmetic, rather than copied verbatim. Checkpoint band bytes and flags
+are discarded. With bands attached, seeded columns publish HAS_3BAND with zero band
+bytes; band sums and filter history remain fresh until new overview PCM processing.
+Checkpoint detail tiles are ignored even when attached detail is enabled: the cache
+starts empty. Detail demand/replay can recover seeded regions without adding
+overview samples, processed frames or band history. No checkpoint generation,
+lineage, metadata, tempo/grid/key/meter/confidence evidence is installed. Seeding
+retains Created and the current initial generation; it does not publish.
+
+The oracle also established immediate EOF detail snapshot state: an already
+complete resident run covering the final tile is Final in the Draining publication.
+Native snapshot construction now observes signalled EOF without mutating cached
+completion state, so publication exhaustion/rollback remains transactional. Invalid
+floating PCM is preflighted before the first sparse state publication as well as
+before working accumulation. Native rejects nonfinite PCM; C substitutes zero.
+
+Preserved native/C differences: atomic native seed resource preflight where C may
+partially mutate, clipped native transient seeded tail extents where C can exceed
+EOF, and native band availability derived from column flags where C's bounded pool
+omits the feature bit. Exact trace comparison normalizes only the last mask bit and
+the documented C transient tail range; quantized columns, remaining masks, ranges,
+generations, states and detail output compare exactly. Public replay selection
+keeps aged/deadline ordering, acceptance keeps raw priority/FIFO, and automatic
+scheduled pull keeps overview-gap selection. Overview publication takes precedence
+over a pending detail changed mask.
+
+### Coverage and evidence
+
+- `seed_oracle.rs` / `fixtures/seed_oracle.c`: the original thirteen exact scenarios
+  and native tail exception remain; the new matrix executes **20 scenarios in all
+  four feature combinations (80 exact lifecycle comparisons)**. It covers sparse
+  and full seeds, checkpoints with/without band output, ignored checkpoint detail,
+  short final columns, repeated seeds, source/resolution/identity/EOF rejection,
+  noncontiguous new PCM, fresh filters, detail replay into seeded ranges, retained
+  slots/exhaustion/retry and changed-mask precedence. Opposite-polarity replay and
+  subsequent PCM expose accidental filter mutation. Native tests additionally
+  prove capacity failure atomicity, subsequent usability, nonfinite resume
+  rejection and retained overview/detail after session destruction.
+- `detail_pull_oracle.rs` / `fixtures/detail_pull_oracle.c`: the existing sixteen
+  scenarios remain plus two feature-enabled seeded pull scenarios (prefix and
+  sparse coverage). Public demand selects seeded detail while automatic reads
+  select overview gaps. Exact callback ranges, releases, state/generation/mask
+  traces and quantized overview/detail output compare against unchanged C.
+- The existing isolated `result_allocation` counter includes feature-enabled
+  seeded scheduled pull, overview resume, seeded-region detail replay and retained
+  immutable publication. Its original eviction/replay path still runs separately
+  inside the same test executable. No second allocation counter test was added.
+- Existing seed, band, detail scheduler/pull, immutable-publication and allocation
+  tests remain in the combined runner. No new oracle registration is needed:
+  `rust/check.py` already runs both extended oracles in debug and release.
+
+Baseline evidence:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/checkpoint-feature-seeding-baseline.log`.
+Final required combined command (`--jobs 2`, external `combined` build root and
+unchanged `c-baseline` library):
+`/home/shome/.local/share/libapta-audio/rust-rewrite/checkpoint-feature-seeding-combined-check.log`.
+The final combined runner passed: **123/123 C tests**, **216 Rust tests including
+unit/integration/doctests**, and **28 explicitly enabled external-C test groups**
+in each Rust debug and release profile. All 80 new feature-matrix comparisons
+and the two additional scheduled pull cases run in both profiles. Format,
+all-target Clippy, no-default-features, zero-allocation instrumentation and all
+eight strict C WAV interchange cases passed. `git diff --check` and knowledge
+validation passed. Tests previously accepted by the baseline remain included.
+
+### Exact remaining boundary
+
+Stop at this milestone. It accepts native overview checkpoint resume in
+feature-enabled bounded sparse sessions through processing, detail replay,
+scheduled pull and immutable publication. It does not establish full core or
+outside replacement. Onset/S4, S6/global/dynamic grids, key/meter/calibrated quality,
+nonbounded ownership, concurrent acquisition and workspace/allocation-class
+contracts remain unfinished. C ABI, packaging, CLI and platform replacement follow
+those core gates. C source, headers, container format and published ABI are unchanged;
+no commit, push, issue/PR, deployment, service or hardware operation was performed.
+
+
+### Subsequent publication authorization
+
+After acceptance, the user authorized committing and pushing the preserved
+waveform implementation and feature-enabled overview seeding work to
+`origin/rust-rewrite`. The milestone boundary above describes the completed
+implementation session; the user subsequently requested an unrestricted
+continuation prompt for the remaining rewrite, with core integration before the
+outside layer. Publication does not change the remaining acceptance gates.

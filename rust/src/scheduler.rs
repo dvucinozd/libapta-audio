@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-//! Caller-owned overview request scheduling matching the C reference policy.
+//! Caller-owned waveform request scheduling matching the C reference policy.
 //! Deadlines are ordering hints, never timeouts. Terminal requests retain their
-//! identifiers and slots. Other feature schedulers are not implemented here.
+//! identifiers and slots. Detail policy is enabled by an attached session cache.
 use crate::{
-    result::WAVEFORM_OVERVIEW, Error, Focus, FrameRange, PcmDemand, RegionRequest, RequestProgress,
-    RequestState, WaveformSpan,
+    result::{WAVEFORM_DETAIL, WAVEFORM_OVERVIEW},
+    Error, Focus, FrameRange, PcmDemand, RegionRequest, RequestProgress, RequestState,
+    WaveformSpan,
 };
 pub const MAX_REQUESTS: usize = 16;
 pub const MAX_PCM_REQUEST_FRAMES: u64 = 4096;
@@ -98,7 +99,9 @@ fn overlap(a: FrameRange, b: FrameRange) -> bool {
 }
 impl<'a> Scheduler<'a> {
     /// Initialize at most 16 supplied slots. A smaller slice is a smaller hard cap.
-    /// Only overview work is supported; zero configured features disables demand.
+    /// The standalone policy starts with overview work. A session attaches
+    /// detail capability only after its cache and publication storage validate.
+    /// Zero configured features disables demand.
     pub fn new(
         total_frames: Option<u64>,
         requested_features: u64,
@@ -122,6 +125,121 @@ impl<'a> Scheduler<'a> {
             next_enqueue_serial: 0,
         })
     }
+    pub(crate) fn enable_detail(&mut self) {
+        self.requested_features |= WAVEFORM_DETAIL;
+    }
+    /// A detail focus or active detail request protects overlapping cache tiles.
+    pub(crate) fn detail_tile_protected(&self, tile_index: u32) -> bool {
+        let first = u64::from(tile_index) * crate::detail_analysis::TILE_FRAMES;
+        let tile = FrameRange {
+            first_frame: first,
+            end_frame: first + crate::detail_analysis::TILE_FRAMES,
+        };
+        self.focus_range_for(WAVEFORM_DETAIL)
+            .is_some_and(|(range, _)| overlap(tile, range))
+            || self.slots.iter().any(|slot| {
+                slot.active()
+                    && slot.request.unwrap().feature_mask & WAVEFORM_DETAIL != 0
+                    && overlap(tile, slot.request.unwrap().range)
+            })
+    }
+    /// Detail replay precedes ordinary overview demand. A selected fully cached
+    /// target does not fall back to another detail request or focus.
+    pub(crate) fn next_detail_request(
+        &mut self,
+        cache: &crate::detail_analysis::DetailCache<'_>,
+    ) -> Result<PcmDemand, Error> {
+        if self.requested_features & WAVEFORM_DETAIL == 0 {
+            return Err(Error::NotAvailable);
+        }
+        let mut selected: Option<(RegionRequest, ScheduleScore)> = None;
+        for slot in self.slots.iter().filter(|slot| {
+            slot.active() && slot.request.unwrap().feature_mask & WAVEFORM_DETAIL != 0
+        }) {
+            let score = slot.score();
+            if selected.map_or(true, |(_, best)| score.better_than(&best)) {
+                selected = Some((slot.request.unwrap(), score));
+            }
+        }
+        let (mut target, priority, token) = if let Some((request, score)) = selected {
+            (request.range, score.effective_priority, request.request_id)
+        } else if let Some((range, priority)) = self.focus_range_for(WAVEFORM_DETAIL) {
+            (range, priority, 0)
+        } else {
+            return Err(Error::NotAvailable);
+        };
+        target.end_frame = target
+            .end_frame
+            .min(u64::MAX - (crate::detail_analysis::FRAMES_PER_COLUMN - 1));
+        let range = cache
+            .replay_range(target, self.total_frames.unwrap_or(u64::MAX - 1))
+            .ok_or(Error::NotAvailable)?;
+        self.note_choice(token);
+        Ok(PcmDemand {
+            range,
+            feature_mask: WAVEFORM_DETAIL,
+            priority,
+            request_token: token,
+        })
+    }
+    // CMake renames both symbols in detail_replay.c: replay acceptance calls
+    // its raw-priority base selector, not the public staged/aging demand path.
+    pub(crate) fn detail_replay_request(
+        &self,
+        cache: &crate::detail_analysis::DetailCache<'_>,
+    ) -> Result<PcmDemand, Error> {
+        let mut selected: Option<RegionRequest> = None;
+        for slot in self.slots.iter().filter(|slot| {
+            slot.active() && slot.request.unwrap().feature_mask & WAVEFORM_DETAIL != 0
+        }) {
+            let request = slot.request.unwrap();
+            if selected.map_or(true, |best| request.priority > best.priority) {
+                selected = Some(request);
+            }
+        }
+        let (target, priority, token) = if let Some(request) = selected {
+            (request.range, request.priority, request.request_id)
+        } else if let Some((range, priority)) = self.focus_range_for(WAVEFORM_DETAIL) {
+            (range, priority, 0)
+        } else {
+            return Err(Error::NotAvailable);
+        };
+        let range = cache
+            .replay_range(target, self.total_frames.unwrap_or(u64::MAX - 1))
+            .ok_or(Error::NotAvailable)?;
+        Ok(PcmDemand {
+            range,
+            feature_mask: WAVEFORM_DETAIL,
+            priority,
+            request_token: token,
+        })
+    }
+    pub(crate) fn refresh_detail(&mut self, cache: &crate::detail_analysis::DetailCache<'_>) {
+        for slot in self.slots.iter_mut() {
+            let Some(request) = slot.request else {
+                continue;
+            };
+            if request.feature_mask & WAVEFORM_DETAIL == 0
+                || matches!(slot.state, RequestState::Cancelled | RequestState::Failed)
+            {
+                continue;
+            }
+            let overview_required = request.feature_mask & WAVEFORM_OVERVIEW != 0;
+            let overview_satisfied = !overview_required || slot.state == RequestState::Satisfied;
+            let overview_output = overview_required
+                && matches!(
+                    slot.state,
+                    RequestState::Satisfied | RequestState::PartiallySatisfied
+                );
+            slot.state = if overview_satisfied && cache.range_complete(request.range) {
+                RequestState::Satisfied
+            } else if overview_output || cache.range_has_output(request.range) {
+                RequestState::PartiallySatisfied
+            } else {
+                RequestState::WaitingForPcm
+            };
+        }
+    }
     fn id_exists(&self, id: u32) -> bool {
         self.slots
             .iter()
@@ -131,7 +249,12 @@ impl<'a> Scheduler<'a> {
         if request.range.first_frame >= request.range.end_frame || request.feature_mask == 0 {
             return Err(Error::InvalidArgument);
         }
-        if request.feature_mask & !WAVEFORM_OVERVIEW != 0 {
+        if request.feature_mask & !(WAVEFORM_OVERVIEW | WAVEFORM_DETAIL) != 0 {
+            return Err(Error::Unsupported);
+        }
+        if request.feature_mask & WAVEFORM_DETAIL != 0
+            && self.requested_features & WAVEFORM_DETAIL == 0
+        {
             return Err(Error::Unsupported);
         }
         if request.feature_mask & !self.requested_features != 0 {
@@ -212,18 +335,26 @@ impl<'a> Scheduler<'a> {
         if focus.playhead_frame == u64::MAX {
             return Err(Error::InvalidArgument);
         }
-        if focus.feature_mask & !WAVEFORM_OVERVIEW != 0 {
+        if focus.feature_mask & !(WAVEFORM_OVERVIEW | WAVEFORM_DETAIL) != 0 {
             return Err(Error::Unsupported);
         }
         if self.total_frames.is_some_and(|n| focus.playhead_frame > n) {
             return Err(Error::InvalidArgument);
         }
+        if focus.feature_mask & WAVEFORM_DETAIL != 0
+            && self.requested_features & WAVEFORM_DETAIL == 0
+        {
+            return Err(Error::Unsupported);
+        }
+        if focus.feature_mask & !self.requested_features != 0 {
+            return Err(Error::InvalidState);
+        }
         self.focus = Some(focus);
         Ok(())
     }
-    fn focus_range(&self) -> Option<(FrameRange, u8)> {
+    fn focus_range_for(&self, features: u64) -> Option<(FrameRange, u8)> {
         self.focus
-            .filter(|f| f.feature_mask & WAVEFORM_OVERVIEW != 0)
+            .filter(|f| f.feature_mask & features != 0)
             .map(|f| {
                 (
                     FrameRange {
@@ -252,7 +383,11 @@ impl<'a> Scheduler<'a> {
             return Err(Error::NotAvailable);
         }
         let mut selected: Option<(RegionRequest, ScheduleScore)> = None;
-        for slot in self.slots.iter().filter(|s| s.active()) {
+        for slot in self
+            .slots
+            .iter()
+            .filter(|s| s.active() && s.request.unwrap().feature_mask & WAVEFORM_OVERVIEW != 0)
+        {
             let score = slot.score();
             if selected.map_or(true, |(_, best)| score.better_than(&best)) {
                 selected = Some((slot.request.unwrap(), score));
@@ -260,7 +395,7 @@ impl<'a> Scheduler<'a> {
         }
         let (mut target, priority, token) = if let Some((r, s)) = selected {
             (r.range, s.effective_priority, r.request_id)
-        } else if let Some((r, p)) = self.focus_range() {
+        } else if let Some((r, p)) = self.focus_range_for(WAVEFORM_OVERVIEW) {
             (r, p, 0)
         } else {
             (FrameRange::default(), 32, 0)
@@ -320,7 +455,7 @@ impl<'a> Scheduler<'a> {
     }
     pub(crate) fn score_range(&self, range: FrameRange) -> ScheduleScore {
         let mut best = ScheduleScore::default();
-        if let Some((focus, priority)) = self.focus_range() {
+        if let Some((focus, priority)) = self.focus_range_for(WAVEFORM_OVERVIEW | WAVEFORM_DETAIL) {
             if focus.first_frame < focus.end_frame && overlap(range, focus) {
                 best.effective_priority = priority;
             }
@@ -363,6 +498,8 @@ impl<'a> Scheduler<'a> {
             }
             previous = end;
         }
+        // The effective C process wrapper temporarily treats detail requests
+        // as overview dependencies before applying actual cache coverage.
         for slot in self.slots.iter_mut().filter(|s| s.active()) {
             let r = slot.request.unwrap().range;
             let first = r.first_frame / u64::from(frames_per_column);

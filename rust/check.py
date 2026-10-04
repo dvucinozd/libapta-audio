@@ -22,14 +22,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build-root", type=Path, required=True)
     parser.add_argument("--c-build", type=Path, help="reuse/configure this C build directory")
+    parser.add_argument("--jobs", type=int, default=2, help="maximum concurrent build/test jobs")
     args = parser.parse_args()
+    if args.jobs < 1:
+        parser.error("--jobs must be positive")
     build = args.build_root.resolve()
     build.mkdir(parents=True, exist_ok=True)
     c_build = args.c_build.resolve() if args.c_build else build / "c-reference"
     run(["cmake", "-S", ROOT, "-B", c_build, "-DCMAKE_BUILD_TYPE=Release",
          "-DAPTA_BUILD_TESTS=ON", "-DAPTA_BUILD_EXAMPLES=ON", "-DAPTA_WARNINGS_AS_ERRORS=ON"])
-    run(["cmake", "--build", c_build, "--parallel", "4"])
-    run(["ctest", "--test-dir", c_build, "--output-on-failure", "-j4"])
+    run(["cmake", "--build", c_build, "--parallel", str(args.jobs)])
+    run(["ctest", "--test-dir", c_build, "--output-on-failure", f"-j{args.jobs}"])
     # Oracle is strictly test-only: the Rust library never links this archive.
     oracle = build / "waveform-oracle"
     run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
@@ -68,7 +71,18 @@ def main():
     run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
          "-I", ROOT / "include", ROOT / "rust/tests/fixtures/seed_oracle.c",
          c_build / "libapta.a", "-lm", "-o", seed_oracle])
+    analysis_oracles = {}
+    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull"):
+        executable = build / f"{name.replace('_', '-')}-oracle"
+        run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
+             "-I", ROOT / "include", "-I", ROOT / "src/core",
+             ROOT / f"rust/tests/fixtures/{name}_oracle.c",
+             c_build / "libapta.a", "-lm", "-o", executable])
+        analysis_oracles[f"APTA_C_{name.upper()}_ORACLE"] = str(executable)
     env = os.environ.copy()
+    env.update(analysis_oracles)
+    env["CARGO_BUILD_JOBS"] = str(args.jobs)
+    env["RUST_TEST_THREADS"] = str(args.jobs)
     env["APTA_C_WAVEFORM_ORACLE"] = str(oracle)
     env["APTA_C_VALIDATOR"] = str(validator)
     env["APTA_C_CONTAINER_ORACLE"] = str(container_oracle)
@@ -86,6 +100,7 @@ def main():
     run(["cargo", "test", "--workspace", "--locked", "--", "--ignored"], env=env)
     run(["cargo", "check", "--workspace", "--lib", "--no-default-features", "--locked"], env=env)
     run(["cargo", "test", "--workspace", "--release", "--locked"], env=env)
+    run(["cargo", "test", "--workspace", "--release", "--locked", "--", "--ignored"], env=env)
     run(["cargo", "build", "--example", "wav_to_apta", "--locked"], env=env)
     executable = build / "cargo-target/debug/examples/wav_to_apta"
     # Original synthetic PCM, no private audio or external corpus involved.

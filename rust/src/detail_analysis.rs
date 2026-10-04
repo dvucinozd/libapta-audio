@@ -192,6 +192,30 @@ impl<'a> DetailCache<'a> {
                     == 0
             })
     }
+    /// Find the first consecutive empty columns for C's detail replay demand.
+    /// Partly accumulated columns are deliberately skipped: replaying them would
+    /// count already accepted samples twice. The caller selects the active
+    /// request/focus target and supplies its source bound.
+    pub fn replay_range(&self, target: FrameRange, total_frames: u64) -> Option<FrameRange> {
+        let end = target.end_frame.min(total_frames);
+        if target.first_frame >= end {
+            return None;
+        }
+        let first_column = target.first_frame / FRAMES_PER_COLUMN;
+        let end_column = end.div_ceil(FRAMES_PER_COLUMN);
+        let scan_end =
+            end_column.min(first_column.saturating_add((TILE_COUNT * COLUMNS_PER_TILE + 1) as u64));
+        let first = (first_column..scan_end).find(|c| self.column_is_empty(*c))?;
+        let mut last = first;
+        // C caps each replay demand at its ordinary 4096-frame push limit.
+        while last < end_column && last - first < 16 && self.column_is_empty(last) {
+            last += 1;
+        }
+        Some(FrameRange {
+            first_frame: first.checked_mul(FRAMES_PER_COLUMN)?,
+            end_frame: last.checked_mul(FRAMES_PER_COLUMN)?.min(total_frames),
+        })
+    }
     pub fn range_complete(&self, range: FrameRange) -> bool {
         if range.first_frame >= range.end_frame {
             return false;
@@ -231,6 +255,16 @@ impl<'a> DetailCache<'a> {
         tiles: &'b mut [NativeTile],
         columns: &'b mut [WaveformColumn],
     ) -> Result<NativeDetail<'b>, Error> {
+        self.snapshot_with_eof(tiles, columns, self.eof)
+    }
+    // Publication observes signalled EOF immediately, without completing cached
+    // tail accumulators before processing or mutating cache on a failed publish.
+    pub(crate) fn snapshot_with_eof<'b>(
+        &self,
+        tiles: &'b mut [NativeTile],
+        columns: &'b mut [WaveformColumn],
+        eof: Option<u64>,
+    ) -> Result<NativeDetail<'b>, Error> {
         let mut slots = [0usize; TILE_COUNT];
         let mut n = 0;
         let mut total = 0;
@@ -255,14 +289,14 @@ impl<'a> DetailCache<'a> {
             let base = u64::from(index) * TILE_FRAMES;
             let first = base + tile.run_first as u64 * FRAMES_PER_COLUMN;
             let end = first + tile.run_count as u64 * FRAMES_PER_COLUMN;
-            let end = self.eof.map_or(end, |e| end.min(e));
-            let expected = self.eof.map_or(COLUMNS_PER_TILE, |e| {
+            let end = eof.map_or(end, |e| end.min(e));
+            let expected = eof.map_or(COLUMNS_PER_TILE, |e| {
                 e.saturating_sub(base)
                     .min(TILE_FRAMES)
                     .div_ceil(FRAMES_PER_COLUMN) as usize
             });
             let state = if tile.run_first == 0 && tile.run_count == expected {
-                if self.eof.is_some() {
+                if eof.is_some() {
                     FeatureState::Final
                 } else {
                     FeatureState::Stable
