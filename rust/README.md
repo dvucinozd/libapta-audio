@@ -581,3 +581,10 @@ Pajoniiir's experimental two-pass reader hashes the full object on each pass and
 withholds output until equal hashes and successful close. It uses 4096 byte and
 2048 PCM-byte scratch instead of whole-track retention; core/output banks remain
 additional. No production memory placement or latency qualification is implied.
+
+Pajoniiir now applies explicit streaming object/duration/work limits, checked
+local-tempo caller-array sizing and in-place verified output access. These remain
+consumer policy; no portable API or numerical change is required. Full coroutine
+and Embassy diagnostics expose substantially larger task/nested-stack needs than
+individual step futures. See the [consumer policy continuation](../docs/rust/MIGRATION.md#consumer-policy-and-full-task-storage--2026-10-04)
+for measured storage and remaining ownership/hardware gates.

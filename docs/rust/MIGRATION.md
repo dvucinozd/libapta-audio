@@ -2206,3 +2206,67 @@ futures and 1488/1520 B one-poll frames. Nested sector loading separately uses
 1584 B. The adapter README gives explicit caller-bank formulas, object ceilings,
 additional nested frames and exclusions. These remain software diagnostics, not
 complete task-stack/placement/timing or physical P4 acceptance.
+
+## Consumer policy and full-task storage — 2026-10-04
+
+Pajoniiir's experimental native consumer now enforces explicit per-job object,
+exact duration and per-pass work ceilings. Opened object length is checked before
+reading; complete first-pass close/framing precedes the exact frames/rate duration
+check and source verification. Step exhaustion fails terminally with the handle
+still available for finish/abort. Pending reads resume without recharging a step;
+dropping a pending read remains terminal. Existing unbounded-policy entrypoints
+remain available for callers governing limits externally. Product policy stays
+in Pajoniiir; portable source, the immutable Cargo pin, C implementation, headers,
+ABI, wire format and numerical behavior are unchanged.
+
+A checked target-sized local-tempo storage plan accounts for existing onset/flux,
+queue, native/rendered waveform, TWO beat banks and fixed source/PCM scratch before
+allocating caller banks. The 320000-frame / 17-frame-queue / 1250-column /
+two-128-beat-bank profile is exactly 108772 bytes. Additional features, other
+tracks, filesystem, control, catalog, framebuffers and stack remain additional.
+The host example and actual native FAT32/exFAT fixtures use finite work policies;
+retained beats/columns and consumer output remain exact. The host example applies
+its policy to the opened file, avoiding a separate metadata snapshot.
+
+The adapter can borrow a verified Worker in place after the second close/hash
+acceptance. This preserves all delivery gates while avoiding large Session moves
+through async extraction/error temporaries. Existing consuming extraction still
+returns the original worker on premature use for handle recovery.
+
+Full coroutine/Embassy diagnostics show why one-step frames are insufficient:
+with Rust 1.95 and Embassy executor 0.10.0, the initial FAT32/exFAT complete task
+pools were 13336/13640 bytes and polling frames 33344/33280 bytes before callees.
+Borrowed verified access and separate synchronous construction reduce these to
+9792/10096-byte pools and 21008/21424-byte polling frames. Preparation itself uses
+6976 bytes, so even that identified nested path requires 27984/28400 bytes before
+its own callees/executor/interrupts. This is not a qualified stack size. The future
+lives inside the pool; do not double-count Session/worker/child futures. Arrays +
+pool + diagnostic native backend total 119156/119468 bytes, still excluding other
+owner state and stack. The adapter README owns detailed limits and reproduction.
+
+The complete job also passes an allocation-instrumented host test with every read
+suspending once and cooperative yields between steps, ending at 120 BPM, 80 beats
+and 4120 green pixels. Actual Embassy task pools are compiled, not enabled or
+executed on firmware. External evidence source/lock/object/disassembly and test
+are retained by `verify-task-storage-probe.py`, stamp 20261004T210659Z, in the
+existing Pajoniiir evidence directory. Production executor features, SRAM/PSRAM,
+DMA/cache, full nested stack and timing/coexistence remain unqualified.
+
+Foundation still needs exFAT broker file handles and a uniquely owned analysis
+client with pending completion/resource recovery. No Library/Deck channel is
+borrowed; firmware/Slint selection and ADR-006 remain gated. Unknown-duration
+sparse ownership, broader codec/view profiles, C allocator/layout/unsafe ABI/
+packaging and original DSP acceptance remain independent unfinished work. The
+known S6 rejection and key coefficient boundary are unchanged.
+
+Fresh unchanged-core combined acceptance:
+`consumer-policy-baseline-20261004T211016Z.log` passes **123 C tests**, **279 ordinary
+Rust tests plus 55 external-C groups per debug/release profile**, **34 WAV
+interchange cases** and **two all-feature CLI cases**, formatting, Clippy,
+no-default-features and allocation instrumentation. Core/runtime sanitizer and
+broader i686/Windows/AArch64 matrices were not rerun in this consumer-only change.
+Consumer final-source acceptance **20261004T210742Z** passes **405 workspace / 101
+focused release tests**, **31 adapter tests + one lifetime doctest under ASan**,
+formatting/Clippy and pinned P4 checks. Artifacts **20261004T210932Z** are byte
+identical; native/streaming probes **20261004T210933Z / 20261004T210938Z** pass.
+Shared knowledge validation passes (18 projects, 89 notes, zero broken links).
