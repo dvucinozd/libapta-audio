@@ -2067,3 +2067,75 @@ separate unfinished workstream, not prerequisites for native Rust integration.
   The original collaborator checkout was neither switched nor edited. Production
   firmware/Slint provider selection, C source/ABI/wire and accuracy gates remain
   unchanged. Shared knowledge validation and both repositories' diff checks pass.
+
+## Native catalog filesystem consumer — 2026-10-04
+
+The next integrated consumer portion lives entirely in Pajoniiir. Its immutable
+Cargo pin remains `03b0643aaedc7b362a2556d8bcc563b78ac526ec`; Libapta's core API,
+DSP, math backend, C implementation/ABI and wire format are unchanged. The existing
+borrowed WAV decoder and Session APIs suffice; no second engine or C-shaped layer
+was introduced.
+
+### Newly verified path
+
+Pajoniiir selects from both fixed and storage-backed immutable catalog snapshots,
+reserves its persistent lane generation before I/O, and retains the originating
+lease/path/track ID. Its native `AsyncFileSystem` reads at most 4096 bytes per call
+into explicitly bounded caller whole-object storage. Existing product SHA-256
+hashes every captured byte, including headers/trailing bytes. Full coverage,
+successful file close and WAV validation precede verified job creation. Short
+reads work; invalid counts, premature EOF, handle geometry changes, I/O errors,
+cancellation, replacement and stale media cannot authorize a completion.
+
+The same portable WAV decoder feeds a geometry-matched Session in at most
+256-frame/one-core-step calls. A 17-frame queue deliberately forces partial PCM
+acceptance without losing/repeating samples. Generated native FAT32 fragmented
+and exFAT contiguous/fragmented files reach 80 beats / BPM x100 12000, actual Deck
+Beat Jump/Sync, and exactly 4120 green raster pixels. These are software transport
+and consumer tests of the unchanged deterministic local-analysis fixture, not DSP
+accuracy acceptance. Retained beat/waveform banks survive source/worker/filesystem
+destruction. Allocation instrumentation covers acquisition, hashing, decoding,
+processing and conversion with zero observed allocations.
+
+Pajoniiir also adds explicit EOF-aware overview/detail windows. The only permitted
+short column ends at the trusted source's declared EOF; starts remain aligned,
+coverage must exist, and each source column occupies one display column. This is
+not time-proportional resampling. Strict existing APIs, transactional output,
+unsupported hybrid authority and global-precedence rejection remain intact.
+
+### Acceptance and limits
+
+- Unchanged-library combined run:
+  `native-source-baseline-20261004T185459Z.log`, under the existing Libapta evidence
+  directory, passes **123 C tests, 276 ordinary Rust tests and 55 external-C
+  groups per debug/release**, **34 WAV interchange and two all-feature CLI cases**,
+  formatting, Clippy, allocation instrumentation and no-default-features.
+- Consumer `verify-consumer.py`, stamp **20261004T190329Z**, passes **393 workspace
+  tests including doctests**, **89 focused release tests including doctests**,
+  **19 adapter tests plus one compile-fail doctest under ASan**, formatting,
+  Clippy, pinned Rust 1.95 P4 compilation, dependency inspection and object emission.
+  No new runtime, std/alloc, IDF or RTOS dependency enters the adapter.
+- Consumer external artifact/probe scripts reproduce exact impulse/silence PPM
+  output and instantiate source acquisition with actual FAT32/exFAT generic
+  backends on RV32. Canonical exact final stamps and object/frame measurements
+  are recorded in the consumer README and new external handoff.
+
+This remains an experimental whole-object profile. Caller capacity bounds memory;
+large tracks need a future streaming decoder contract before production use in
+32 MiB PSRAM. Open/close futures must run to completion; backend in-flight I/O
+recovery is not solved by poisoning a cancelled analysis reader. The existing
+USB broker's channel ownership and production Embassy scheduling are unchanged.
+No production firmware/Slint provider selection or ADR-006 gate is enabled.
+Object budgets and individual diagnostic frames do not establish storage placement,
+DMA/cache safety, whole nested-call/task stack, timing or physical P4 acceptance.
+
+The persistent single-lane Requests lifetime and separate retained Deck pins remain
+required. Generation exhaustion is tested to fail without wrapping or replacing
+the preceding request. Unknown-duration sparse ownership still needs expanded
+compiled-C growth/scheduling/seeding/music coverage. Hybrid authority, arbitrary
+waveform resampling and broader production codec/cache policy remain open.
+Legacy custom allocators/layout, reviewed unsafe C ABI exports, packaging and
+frozen C consumers remain a separate unfinished compatibility workstream.
+The portable key 55734/C 55735 boundary and original musical accuracy gates are
+unchanged. i686, Windows/MSVC, AArch64 and native-runtime sanitizer matrices were
+not rerun in this consumer-only continuation; earlier evidence remains dated.

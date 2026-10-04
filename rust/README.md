@@ -555,3 +555,10 @@ and remaining boundaries are in the [latest migration handoff](../docs/rust/MIGR
 and the consumer's `firmware-rust/crates/pajoniiir-apta-adapter/README.md`.
 Production worker enablement, hybrid override authority and physical P4/DSP
 qualification remain separate. This continuation changes no portable DSP behavior.
+
+The subsequent [catalog filesystem continuation](../docs/rust/MIGRATION.md#native-catalog-filesystem-consumer--2026-10-04)
+uses Pajoniiir's existing native async filesystem and identity APIs to acquire a
+bounded whole WAV object, then feeds the existing borrowed decoder/Session into
+retained neutral consumers. Actual FAT32/exFAT host fixtures are covered. This
+requires no portable-core change; whole-file capacity and production scheduling,
+streaming codecs, hardware memory/timing and original DSP gates remain explicit.
