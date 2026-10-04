@@ -130,3 +130,106 @@ fn extensible_guid_and_channel_mask() {
     b[59] = 0;
     assert!(matches!(Wav::parse(&b), Err(Error::Unsupported)));
 }
+
+fn scan(bytes: &[u8], chunk: usize) -> Result<libapta::wav::WavLayout, Error> {
+    let mut scanner = libapta::wav::WavScanner::new(bytes.len() as u64);
+    for b in bytes.chunks(chunk) {
+        scanner.push(b)?;
+    }
+    scanner.finish()
+}
+fn compare_scan(bytes: &[u8]) {
+    let borrowed = Wav::parse(bytes);
+    for chunk in [1, 2, 7, 8, 11, 17, 40, 137, 4096] {
+        let streamed = scan(bytes, chunk);
+        assert_eq!(
+            borrowed.is_ok(),
+            streamed.is_ok(),
+            "chunk {chunk}, bytes {bytes:?}"
+        );
+        if let (Ok(wav), Ok(layout)) = (&borrowed, streamed) {
+            assert_eq!(wav.source(), layout.source());
+            assert_eq!(wav.encoding(), layout.encoding());
+            let raw = &bytes[layout.data_offset() as usize
+                ..(layout.data_offset() + layout.data_bytes()) as usize];
+            let mut a = [42.; 32];
+            let mut b = a;
+            assert_eq!(wav.read_frames(0, &mut a), layout.decode(raw, &mut b));
+            assert_eq!(a, b);
+        }
+    }
+}
+#[test]
+fn streaming_framing_matches_borrowed_for_formats_boundaries_and_mutations() {
+    for (tag, bits) in [(1, 16), (1, 24), (1, 32), (3, 32)] {
+        for channels in [1, 2] {
+            let bytes = riff(tag, bits, channels, &[0; 24]);
+            compare_scan(&bytes);
+            for end in 0..bytes.len() {
+                compare_scan(&bytes[..end]);
+            }
+            for i in 0..bytes.len() {
+                for value in [0, 1, 127, 255] {
+                    let mut b = bytes.clone();
+                    b[i] = value;
+                    compare_scan(&b);
+                }
+            }
+        }
+    }
+}
+#[test]
+fn streaming_data_before_fmt_ancillary_trailers_extensible_and_duplicates() {
+    let base = riff(1, 24, 1, &[0, 0, 128]);
+    let mut b = base[..12].to_vec();
+    b.extend(&base[36..]);
+    b.extend(b"JUNK\x01\0\0\0x\0");
+    b.extend(&base[12..36]);
+    let end = b.len() as u32 - 8;
+    b[4..8].copy_from_slice(&end.to_le_bytes());
+    b.extend(b"unparsed object trailer");
+    compare_scan(&b);
+    for id in [b"data", b"fmt "] {
+        let mut b = base.clone();
+        b.extend(id);
+        b.extend(0u32.to_le_bytes());
+        let end = b.len() as u32 - 8;
+        b[4..8].copy_from_slice(&end.to_le_bytes());
+        compare_scan(&b);
+    }
+    for size in 16..=43 {
+        let mut b = riff(1, 16, 2, &[0; 4]);
+        let extra = [
+            22, 0, 16, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 16, 0, 128, 0, 0, 170, 0, 56, 155, 113, 0,
+            0, 0,
+        ];
+        b.splice(36..36, extra[..size - 16].iter().copied());
+        if size % 2 != 0 {
+            b.insert(20 + size, 0);
+        }
+        b[16..20].copy_from_slice(&(size as u32).to_le_bytes());
+        b[20..22].copy_from_slice(&0xfffeu16.to_le_bytes());
+        let end = b.len() as u32 - 8;
+        b[4..8].copy_from_slice(&end.to_le_bytes());
+        compare_scan(&b);
+    }
+}
+#[test]
+fn streaming_terminal_errors_capacity_and_nonfinite_atomicity() {
+    let b = riff(3, 32, 1, &[0, 0, 0, 63, 0, 0, 128, 127]);
+    let l = scan(&b, 1).unwrap();
+    let mut out = [99.; 2];
+    assert_eq!(l.decode(&b[44..], &mut out), Err(Error::InvalidArgument));
+    assert_eq!(out, [99.; 2]);
+    assert_eq!(l.decode(&b[44..], &mut out[..1]), Ok(1));
+    assert_eq!(out, [0.5, 99.]);
+    assert_eq!(l.decode(&b[44..47], &mut out), Err(Error::InvalidArgument));
+    let mut s = libapta::wav::WavScanner::new(b.len() as u64);
+    assert!(s.push(&[0; 12]).is_err());
+    assert_eq!(s.push(&b), Err(Error::InvalidState));
+    assert!(s.finish().is_err());
+    let mut s = libapta::wav::WavScanner::new(b.len() as u64);
+    s.push(&b).unwrap();
+    assert!(s.push(&[0]).is_err());
+    assert!(s.finish().is_err());
+}

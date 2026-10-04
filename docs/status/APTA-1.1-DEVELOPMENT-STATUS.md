@@ -128,3 +128,13 @@ Pajoniiir application concerns such as scanning, catalog, playlists, USB transac
 The stable authority remains APTA 1.0 / package 1.0.1. The frozen 1.0 normative manifest and existing tags must not be rewritten. `VERSION` remains `1.0.1`; the `1.1.0` branch name is only a development-line name.
 
 `release/1.1-readiness.json` is fail-closed: while any external evidence blocker is open, version/package/tag state must remain at the development boundary. Closing all blockers makes the candidate only `freeze-eligible`; it does not automatically release 1.1.
+
+## Experimental native Rust consumer continuation
+
+The additive Rust rewrite now includes constant-storage WAV framing and block
+PCM decode, consumed directly by Pajoniiir's experimental two-pass hashed source
+adapter. See [the migration record](../rust/MIGRATION.md#bounded-streaming-wav-consumer--2026-10-04)
+for exact scope and dated verification. C remains the installed reference/product;
+its implementation, ABI, headers and container version are unchanged. Native
+consumer software progress does not close the original DSP accuracy, embedded
+hardware/release or deferred C compatibility gates above.

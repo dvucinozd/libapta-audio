@@ -73,60 +73,12 @@ impl<'a> Wav<'a> {
         }
         let fmt = fmt.ok_or(Error::Corrupt)?;
         let data = data.ok_or(Error::Corrupt)?;
-        let mut tag = u16_at(fmt, 0);
-        let channels = u16_at(fmt, 2);
-        let rate = u32_at(fmt, 4);
-        let bits = u16_at(fmt, 14);
-        let align = u16_at(fmt, 12);
-        let mut layout = channels;
-        if tag == 0xfffe {
-            const SUFFIX: [u8; 14] = [0, 0, 0, 0, 16, 0, 128, 0, 0, 170, 0, 56, 155, 113];
-            if fmt.len() < 40 || u16_at(fmt, 16) < 22 || fmt[26..40] != SUFFIX {
-                return Err(Error::Unsupported);
-            }
-            let valid_bits = u16_at(fmt, 18);
-            if valid_bits == 0 || valid_bits > bits {
-                return Err(Error::Corrupt);
-            }
-            let mask = u32_at(fmt, 20);
-            layout = match (channels, mask) {
-                (1, 4) => 1,
-                (2, 3) => 2,
-                _ => 0,
-            };
-            tag = u16_at(fmt, 24);
-        }
-        if !(1..=2).contains(&channels)
-            || rate == 0
-            || rate > 768000
-            || bits == 0
-            || bits % 8 != 0
-            || u32::from(align) != u32::from(channels) * u32::from(bits / 8)
-            || align == 0
-            || data.len() % usize::from(align) != 0
-            || u64::from(u32_at(fmt, 8)) != u64::from(rate) * u64::from(align)
-        {
-            return Err(Error::Corrupt);
-        }
-        let encoding = match (tag, bits) {
-            (1, 16) => Encoding::S16,
-            (1, 24) => Encoding::S24,
-            (1, 32) => Encoding::S32,
-            (3, 32) => Encoding::F32,
-            _ => return Err(Error::Unsupported),
-        };
+        let format = parse_format(fmt, data.len() as u64)?;
         Ok(Self {
             data,
-            source: SourceInfo {
-                sample_rate: rate,
-                channel_count: channels,
-                channel_layout: layout,
-                total_frames: Some((data.len() / usize::from(align)) as u64),
-                fingerprint_kind: 0,
-                fingerprint: [0; 32],
-            },
-            encoding,
-            bytes_per_sample: usize::from(bits / 8),
+            source: format.source,
+            encoding: format.encoding,
+            bytes_per_sample: format.bytes_per_sample,
         })
     }
     pub fn source(&self) -> SourceInfo {
@@ -172,3 +124,72 @@ impl<'a> Wav<'a> {
         Ok(frames)
     }
 }
+
+#[derive(Clone, Copy, Debug)]
+struct Format {
+    source: SourceInfo,
+    encoding: Encoding,
+    bytes_per_sample: usize,
+}
+fn parse_format(fmt: &[u8], data_len: u64) -> Result<Format, Error> {
+    if fmt.len() < 16 {
+        return Err(Error::Corrupt);
+    }
+    let mut tag = u16_at(fmt, 0);
+    let channels = u16_at(fmt, 2);
+    let rate = u32_at(fmt, 4);
+    let bits = u16_at(fmt, 14);
+    let align = u16_at(fmt, 12);
+    let mut layout = channels;
+    if tag == 0xfffe {
+        const SUFFIX: [u8; 14] = [0, 0, 0, 0, 16, 0, 128, 0, 0, 170, 0, 56, 155, 113];
+        if fmt.len() < 40 || u16_at(fmt, 16) < 22 || fmt[26..40] != SUFFIX {
+            return Err(Error::Unsupported);
+        }
+        let valid_bits = u16_at(fmt, 18);
+        if valid_bits == 0 || valid_bits > bits {
+            return Err(Error::Corrupt);
+        }
+        let mask = u32_at(fmt, 20);
+        layout = match (channels, mask) {
+            (1, 4) => 1,
+            (2, 3) => 2,
+            _ => 0,
+        };
+        tag = u16_at(fmt, 24);
+    }
+    if !(1..=2).contains(&channels)
+        || rate == 0
+        || rate > 768000
+        || bits == 0
+        || bits % 8 != 0
+        || u32::from(align) != u32::from(channels) * u32::from(bits / 8)
+        || align == 0
+        || data_len % u64::from(align) != 0
+        || u64::from(u32_at(fmt, 8)) != u64::from(rate) * u64::from(align)
+    {
+        return Err(Error::Corrupt);
+    }
+    let encoding = match (tag, bits) {
+        (1, 16) => Encoding::S16,
+        (1, 24) => Encoding::S24,
+        (1, 32) => Encoding::S32,
+        (3, 32) => Encoding::F32,
+        _ => return Err(Error::Unsupported),
+    };
+    Ok(Format {
+        source: SourceInfo {
+            sample_rate: rate,
+            channel_count: channels,
+            channel_layout: layout,
+            total_frames: Some(data_len / u64::from(align)),
+            fingerprint_kind: 0,
+            fingerprint: [0; 32],
+        },
+        encoding,
+        bytes_per_sample: usize::from(bits / 8),
+    })
+}
+
+mod streaming;
+pub use streaming::{WavLayout, WavScanner};

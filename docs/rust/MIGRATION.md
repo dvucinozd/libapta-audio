@@ -167,7 +167,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | S6 global grid/dynamic tempo/revisions | [global_analysis.rs](../../rust/src/global_analysis.rs), session/sparse/publication | Default windows, dynamic grids, revision identities, locked conflict and explicit acceptance integrated; exact GGRD/REVN comparisons |
 | Musical key/meter/downbeat | [key_analysis.rs](../../rust/src/key_analysis.rs), analysis | Default C profiles integrated; host-math MKEY and MTRD reference checks pass; portable key score rounding boundary remains open; original accuracy gates remain failed |
 | Quality/confidence calibration | analysis/session/sparse/publication | BPM LUT/model 1867860160 integrated; exact CONF comparisons; fresh accuracy qualification remains open |
-| POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed WAV decoder complete initial format slice; four tests; filesystem/callback adapters pending |
+| POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed and constant-storage streaming WAV framing/block decode; filesystem ownership remains consumer-side |
 | Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform and default musical desktop modes; eight waveform/nine musical WAV smoke cases and exact C musical bytes; additive native analyze/inspect/validate/version/WAV batch commands; C CLI parity pending |
 | Push/pull/installed/package/ESP examples | examples | Push/WAV-to-container example implemented; others pending |
 | Direct native Rust consumers | portable Cargo + consumer-owned adapter | Experimental Pajoniiir lease-checked PCM worker, retained Deck generations, continuous multi-segment/global-cache transport and sparse/detail waveform windows; production/embedded gates remain separate |
@@ -2139,3 +2139,52 @@ frozen C consumers remain a separate unfinished compatibility workstream.
 The portable key 55734/C 55735 boundary and original musical accuracy gates are
 unchanged. i686, Windows/MSVC, AArch64 and native-runtime sanitizer matrices were
 not rerun in this consumer-only continuation; earlier evidence remains dated.
+
+## Bounded streaming WAV consumer — 2026-10-04
+
+The portable core now exposes `wav::WavScanner` and `WavLayout` for consumers that
+cannot retain full source objects. Incremental framing accepts the same RIFF,
+format, padding, data-before-format and trailer profiles as borrowed `Wav`.
+It retains constant framing storage (compile-time <=192 B), reports PCM byte
+coordinates only after complete input, and fails terminally on invalid framing.
+Block decode reuses the existing PCM normalization/invalid-float atomicity path;
+no algorithms, C source, public headers, ABI or container format changed.
+
+The Pajoniiir adapter's `streaming` path selects the original catalog identity,
+scans/hashes every byte with <=4096-byte reads, closes, then reopens the copied
+path with matching geometry. It decodes through 4096-byte caller scratch and
+512 f32 samples, retaining partial bytes and partial accepted PCM. A second
+full-object SHA-256 must match and the second file must close successfully before
+any worker/result escapes. Ancillary/trailing changes fail just like PCM changes.
+Each analysis call reads at most once, decodes <=256 frames and runs one core
+step; this bounds work units, not backend latency. No filesystem seek is needed.
+
+The host example and native FAT32/exFAT fixtures exercise this path through actual
+Deck Sync/Beat Jump and RGB565 rendering, including caller-retained output after
+source destruction. The first-pass identity is captured bytes, not proof of
+immutable external storage. Two passes cost extra I/O; caller duration/work and
+core/output capacity limits still apply. This removes whole-object retention,
+not the need for bounded output banks, memory placement and measured scheduling.
+
+A dropped pending read poisons analysis; callers still consume with finish/abort,
+drive open/close to completion and recover backend pending operations/handles/DMA.
+No additional USB client lane or production provider selection is introduced.
+ADR-006 remains gated. C allocator/layout/ABI/packaging, unknown-duration sparse
+ownership, hardware qualification and original DSP accuracy remain separate work.
+The diagnosed portable key boundary and rejected real S6 fixture are unchanged.
+
+Acceptance evidence and final consumer pin are recorded in the continuation
+handoff and consumer README after final-source checks.
+
+Final core checks: `streaming-final-20261004T202709Z.log` passes **123 C tests,
+279 ordinary Rust tests and 55 external-C groups per debug/release profile**,
+34 WAV interchange cases and two all-feature CLI cases, formatting, Clippy,
+no-default-features and allocation instrumentation. The unchanged baseline is
+`streaming-baseline-20261004T201749Z.log` (276 ordinary Rust tests). New scanner
+checks compare format/geometry/decoded samples exactly with borrowed WAV across
+chunk boundaries, mutations, truncation, reordered/duplicate/extensible chunks,
+odd padding and trailers. Scanner/block decoding is included in the isolated
+allocation counter. `streaming-asan-20261004T203034Z.log` passes **8 focused tests**
+including scanner/decoder cases and the existing full session allocation path.
+Logs are under `/home/shome/.local/share/libapta-audio/rust-rewrite/`.
+Broader i686/Windows/AArch64/runtime sanitizer matrices were not rerun here.

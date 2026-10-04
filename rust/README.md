@@ -562,3 +562,22 @@ bounded whole WAV object, then feeds the existing borrowed decoder/Session into
 retained neutral consumers. Actual FAT32/exFAT host fixtures are covered. This
 requires no portable-core change; whole-file capacity and production scheduling,
 streaming codecs, hardware memory/timing and original DSP gates remain explicit.
+
+### Constant-storage WAV framing and block decode
+
+`wav::WavScanner::new(object_bytes)` consumes all object bytes sequentially via
+`push`, retaining only framing and up to 40 format bytes. `finish` returns an
+immutable `WavLayout` with the PCM byte range, geometry and encoding. Data-before-
+format, extensible format, odd padding and opaque trailers follow borrowed `Wav`.
+Framing errors poison the scanner; incomplete or excess input cannot finish.
+Scanner storage is compile-time capped at 192 bytes. Work is linear in each
+supplied slice; choose bounded slices for cooperative scheduling.
+
+`WavLayout::decode` decodes complete frame-aligned byte blocks through the existing
+borrowed decoder. It returns frames fitting output; nonfinite F32 in that prefix
+fails before output changes. Caller owns byte coordinates, partial-frame assembly,
+source identity and I/O. This adds no filesystem, hashing, allocator or DSP engine.
+Pajoniiir's experimental two-pass reader hashes the full object on each pass and
+withholds output until equal hashes and successful close. It uses 4096 byte and
+2048 PCM-byte scratch instead of whole-track retention; core/output banks remain
+additional. No production memory placement or latency qualification is implied.

@@ -47,6 +47,16 @@ impl PullSource for Source {
 
 #[test]
 fn entire_session_path_allocates_nothing() {
+    let bytes = b"RIFF\x28\0\0\0WAVEfmt \x10\0\0\0\x01\0\x01\0\x80\xbb\0\0\0\x77\x01\0\x02\0\x10\0data\x04\0\0\0\0\0\0\0";
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let mut scanner = libapta::wav::WavScanner::new(bytes.len() as u64);
+    for byte in bytes.chunks(1) {
+        scanner.push(byte).unwrap();
+    }
+    let layout = scanner.finish().unwrap();
+    assert_eq!(layout.decode(&bytes[44..], &mut [0.; 2]), Ok(2));
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
+
     let mut queue = [NormalizedSample {
         value: 0.0,
         clipped: false,
