@@ -107,4 +107,43 @@ fn growing_array_failures_preserve_preflight_and_retry_committed_snapshots() {
             s.enable_detail().unwrap();
         }
     }
+    // Sparse construction and every attachment allocation fail before commit.
+    use libapta_runtime::{OwnedSparseSession, SparseLimits};
+    let mut c = config();
+    c.total_frames = 513;
+    for failure in 1..=9 {
+        FAIL_AFTER.store(failure, Ordering::Relaxed);
+        let result = OwnedSparseSession::new(c, SparseLimits::default());
+        assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+        assert!(matches!(result, Err(Error::LimitExceeded)));
+    }
+    for failure in 1..=5 {
+        let mut s = OwnedSparseSession::new(c, SparseLimits::default()).unwrap();
+        let bytes = s.working_bytes();
+        FAIL_AFTER.store(failure, Ordering::Relaxed);
+        let result = s.enable_default_music();
+        assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+        assert_eq!(result, Err(Error::LimitExceeded));
+        assert_eq!(s.working_bytes(), bytes);
+        assert_eq!(s.session().publication_serials(), [0; 5]);
+        s.enable_default_music().unwrap();
+    }
+    for bands in [false, true] {
+        let mut s = OwnedSparseSession::new(c, SparseLimits::default()).unwrap();
+        let bytes = s.working_bytes();
+        FAIL_AFTER.store(1, Ordering::Relaxed);
+        let result = if bands {
+            s.enable_three_band()
+        } else {
+            s.enable_detail()
+        };
+        assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+        assert_eq!(result, Err(Error::LimitExceeded));
+        assert_eq!(s.working_bytes(), bytes);
+        if bands {
+            s.enable_three_band().unwrap();
+        } else {
+            s.enable_detail().unwrap();
+        }
+    }
 }

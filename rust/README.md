@@ -396,3 +396,57 @@ The additive desktop commands accept independently combinable `--music`,
 `--bands` and `--detail` flags for `analyze` and `corpus`. Detail exports the
 resident cache only. Duplicate/unknown flags fail before output creation.
 These options do not establish full C command-line or frozen corpus parity.
+
+### Owning sparse sessions, replay and musical mutations
+
+`libapta-runtime::OwnedSparseSession` owns the existing sparse engine and
+scheduler. Configure a known source with `SparseLimits`, then attach bands,
+detail and/or default music before input or seeding. Queue nodes, accepted-range
+slots and request slots are fixed caller limits; overview storage covers the
+configured source. Construction and feature attachment preflight all fallible
+arrays and actual Vec-capacity bytes. This API does not dynamically grow sparse
+range/node tables.
+
+Use `push_at`, `request_region`, `cancel_region_request`, `request_progress`,
+`set_focus` and `next_pcm_request`. Processing shares its budget across waveform,
+S4, S6, meter and key. Detail replay changes neither overview evidence nor band
+filter history or processed counts. `snapshot()` exposes a trusted actual sparse
+graph; heap results retain independent overview/detail/music arrays. Failed
+mirrors block further mutations until `refresh()` succeeds. A RuntimeContext can
+create this writer with the same committed-result quotas and lifetime rules.
+
+`seed_from_result` accepts a retained HeapResult while Created, after feature
+attachment. It copies overview evidence only, imports no musical state or detail,
+and leaves band filters fresh. It publishes no generation itself. Native writers
+currently have no fingerprint, so requiring source identity fails explicitly.
+
+`OwnedScheduledPullSession` owns a configured Created sparse writer and source.
+It drains accepted PCM and retries pending mirrors before reading. Each call
+reads at most one 4096-frame demand, limited by the input budget, then processes
+within the shared budget. Every acquired block releases once before processing
+and clock initialization. WouldBlock retries; malformed blocks, source errors
+and premature source EOF are terminal. Automatic reads use overview demand;
+public `next_pcm_request` can instead expose detail replay. Reaching a selected
+range with no missing PCM may finish with unrelated holes still visible.
+
+Both owning writers and their pull adapters expose `set_tempo_focus`,
+`lock_grid_range` and `apply_grid_revision`. Failed lock publication restores the
+working lock. Revision acceptance persists after a failed mirror; retry
+`refresh`, not the revision ID. Repeated successful locking is idempotent.
+
+Call `set_requested_features` before attaching features. Its output rules match
+the existing explicit requested-capability profile: bounded C for known input,
+nonbounded C for initially unknown input. Default musical workspaces may be a
+superset, but unrequested payloads are projected out and dynamic S6 follows the
+requested bit. Initially unknown BPM keeps its derived local grid after EOF.
+C's **nonbounded known-duration** BPM-only path also retains that grid; it is
+not the profile emulated by this projection API. Ordinary native publication
+remains content-derived. Snapshot projection shares the existing core rules.
+
+See the [sparse continuation acceptance](../docs/rust/MIGRATION.md#owning-sparse-scheduling-replay-and-mutation-continuation--2026-10-04)
+for exact C content/source comparisons, failure profiles and current totals.
+Native heap publication still does not emulate C intermediate generations,
+custom allocators or ABI ownership. Portable key score 55734 versus host-C 55735
+remains unresolved. AArch64 core and i686/MSVC workspace cross-compilation are
+compile evidence only; platform execution, linking/packaging and hardware gates
+remain separate.

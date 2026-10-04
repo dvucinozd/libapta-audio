@@ -29,7 +29,7 @@ impl Default for GrowingLimits {
         }
     }
 }
-fn array<T: Default + Clone>(count: usize) -> Result<Vec<T>, Error> {
+pub(crate) fn array<T: Default + Clone>(count: usize) -> Result<Vec<T>, Error> {
     let mut v = Vec::new();
     v.try_reserve_exact(count)
         .map_err(|_| Error::LimitExceeded)?;
@@ -73,6 +73,7 @@ pub struct GrowingSession {
     allocated_columns: usize,
     results: HeapResults,
     dirty: bool,
+    requested_features: Option<u64>,
     music_bytes: usize,
     band_capacity: Option<usize>,
     band_bytes: usize,
@@ -132,6 +133,7 @@ impl GrowingSession {
             allocated_columns,
             results: HeapResults::new(initial),
             dirty: false,
+            requested_features: None,
             music_bytes: 0,
             band_capacity: None,
             band_bytes: 0,
@@ -162,6 +164,12 @@ impl GrowingSession {
     /// Attach owning three-band accumulators before input. Unknown-duration
     /// storage grows together with overview columns, preserving filter history.
     pub fn enable_three_band(&mut self) -> Result<(), Error> {
+        if self
+            .requested_features
+            .is_some_and(|r| r & result::WAVEFORM_3BAND == 0)
+        {
+            return Err(Error::InvalidState);
+        }
         self.ensure_clean()?;
         if self.band_capacity.is_some() || self.session.state() != SessionState::Created {
             return Err(Error::InvalidState);
@@ -195,6 +203,12 @@ impl GrowingSession {
     /// Own the reference four-tile eager detail cache. Evicted tiles remain
     /// available through independently retained heap generations.
     pub fn enable_detail(&mut self) -> Result<(), Error> {
+        if self
+            .requested_features
+            .is_some_and(|r| r & result::WAVEFORM_DETAIL == 0)
+        {
+            return Err(Error::InvalidState);
+        }
         self.ensure_clean()?;
         if self.detail_bytes != 0 || self.session.state() != SessionState::Created {
             return Err(Error::InvalidState);
@@ -279,8 +293,13 @@ impl GrowingSession {
             return Err(Error::LimitExceeded);
         }
         self.session.enable_tempo(bins, flux)?;
-        self.session
-            .enable_global_grid(true, global_bins, global_flux, beats)?;
+        self.session.enable_global_grid(
+            self.requested_features
+                .map_or(true, |r| r & result::DYNAMIC_TEMPO != 0),
+            global_bins,
+            global_flux,
+            beats,
+        )?;
         self.session.enable_meter()?;
         self.session
             .enable_key_with_math(libapta::key_analysis::KeyMath {
@@ -292,6 +311,72 @@ impl GrowingSession {
         self.music_bytes = actual;
         self.music_enabled = true;
         self.key_enabled = true;
+        Ok(())
+    }
+    /// Configure explicit requested-capability projection before PCM. Attached
+    /// stages may be a superset; the mask controls immutable output and mutations.
+    pub fn set_requested_features(&mut self, requested: u64) -> Result<(), Error> {
+        self.ensure_clean()?;
+        if self.session.state() != SessionState::Created
+            || self.music_enabled
+            || self.key_enabled
+            || self.band_capacity.is_some()
+            || self.detail_bytes != 0
+        {
+            return Err(Error::InvalidState);
+        }
+        libapta::publication::validate_requested_features(requested)?;
+        if requested & result::WAVEFORM_OVERVIEW == 0 {
+            return Err(Error::Unsupported);
+        }
+        self.requested_features = Some(requested);
+        Ok(())
+    }
+    pub fn set_tempo_focus(&mut self, focus: Focus) -> Result<(), Error> {
+        self.ensure_clean()?;
+        self.session.set_tempo_focus(focus)
+    }
+    /// Working lock and current graph both remain unchanged if publication fails.
+    pub fn lock_grid_range(&mut self, range: FrameRange) -> Result<(), Error> {
+        self.ensure_clean()?;
+        if range.first_frame >= range.end_frame {
+            return Err(Error::InvalidArgument);
+        }
+        let required = result::LOCAL_BEATGRID | result::GRID_LOCKING;
+        if self
+            .requested_features
+            .is_some_and(|r| r & required != required)
+        {
+            return Err(Error::Unsupported);
+        }
+        let generation = self
+            .results
+            .acquire()?
+            .info()
+            .generation
+            .checked_add(1)
+            .ok_or(Error::LimitExceeded)?;
+        let requested = self.requested_features;
+        let limits = self.limits.results;
+        let context = &self.context;
+        let results = &self.results;
+        self.session
+            .publish_grid_lock(range, generation, |snapshot| {
+                let mut result = crate::growing::snapshot_result(snapshot, requested, limits)?;
+                if let Some(context) = context {
+                    result.attach_context(context)?;
+                }
+                results.publish(result)
+            })?;
+        Ok(())
+    }
+    /// Acceptance precedes publication. A failed mirror keeps Applied state and
+    /// blocks further mutations until refresh succeeds; do not reapply the ID.
+    pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
+        self.ensure_clean()?;
+        self.session.apply_grid_revision(id)?;
+        self.dirty = true;
+        self.refresh()?;
         Ok(())
     }
     fn ensure_clean(&self) -> Result<(), Error> {
@@ -499,7 +584,11 @@ impl GrowingSession {
             .generation
             .checked_add(1)
             .ok_or(Error::LimitExceeded)?;
-        let mut result = Self::snapshot(&self.session, generation, self.limits.results)?;
+        let mut result = snapshot_result(
+            self.session.snapshot(generation)?,
+            self.requested_features,
+            self.limits.results,
+        )?;
         if let Some(context) = &self.context {
             result.attach_context(context)?;
         }
@@ -518,4 +607,16 @@ impl GrowingSession {
     ) -> Result<HeapResult, Error> {
         HeapResult::copy_snapshot(&session.snapshot(generation)?, limits)
     }
+}
+
+pub(crate) fn snapshot_result(
+    snapshot: libapta::session_snapshot::SessionSnapshot<'_>,
+    requested: Option<u64>,
+    limits: NativeLimits,
+) -> Result<HeapResult, Error> {
+    let snapshot = match requested {
+        Some(r) => snapshot.with_requested_features(r)?,
+        None => snapshot,
+    };
+    HeapResult::copy_snapshot(&snapshot, limits)
 }

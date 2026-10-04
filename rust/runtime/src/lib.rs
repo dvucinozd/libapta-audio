@@ -116,3 +116,9 @@ impl<'a> ConcurrentResults<'a> {
 
 mod growing_pull;
 pub use growing_pull::GrowingPullSession;
+
+mod owned_sparse;
+pub use owned_sparse::{OwnedSparseSession, OwningSparseSession, SparseLimits};
+
+mod owned_sparse_pull;
+pub use owned_sparse_pull::OwnedScheduledPullSession;

@@ -24,26 +24,49 @@ pub struct QueuedBlock {
     next_serial: u64,
 }
 
-pub struct Workspace<'a> {
-    pub accumulators: &'a mut [SparseAccumulator],
-    pub ranges: &'a mut [FrameRange],
-    pub nodes: &'a mut [QueuedBlock],
-    /// Each node owns a fixed region of [`NODE_FRAMES`] normalized samples.
-    pub pcm: &'a mut [NormalizedSample],
-    /// Conservative capacity: one span for each logical column.
-    pub snapshot_spans: &'a mut [WaveformSpan],
-    pub snapshot_columns: &'a mut [WaveformColumn],
+/// Storage bundle for borrowed or owning sparse arrays. Core never allocates.
+pub struct SparseStorage<A, R, N, P, V, C> {
+    pub accumulators: A,
+    pub ranges: R,
+    pub nodes: N,
+    /// Each node owns a fixed region of NODE_FRAMES normalized samples.
+    pub pcm: P,
+    pub snapshot_spans: V,
+    pub snapshot_columns: C,
 }
+pub type Workspace<'a> = SparseStorage<
+    &'a mut [SparseAccumulator],
+    &'a mut [FrameRange],
+    &'a mut [QueuedBlock],
+    &'a mut [NormalizedSample],
+    &'a mut [WaveformSpan],
+    &'a mut [WaveformColumn],
+>;
 
-pub struct SparseSession<'a> {
-    analysis: Option<crate::analysis::Analysis<'a>>,
-    global: Option<crate::global_analysis::GlobalAnalysis<'a>>,
+pub struct SparseSession<
+    'a,
+    A = &'a mut [SparseAccumulator],
+    R = &'a mut [FrameRange],
+    N = &'a mut [QueuedBlock],
+    P = &'a mut [NormalizedSample],
+    V = &'a mut [WaveformSpan],
+    C = &'a mut [WaveformColumn],
+    B = &'a mut [crate::analysis::OnsetBin],
+    F = &'a mut [f32],
+    G = &'a mut [crate::analysis::OnsetBin],
+    H = &'a mut [f32],
+    E = &'a mut [crate::Beat],
+    S = &'a mut [crate::band::BandSums],
+    T = &'a mut [crate::detail_analysis::DetailTile],
+> {
+    analysis: Option<crate::analysis::Analysis<'a, B, F>>,
+    global: Option<crate::global_analysis::GlobalAnalysis<'a, G, H, E>>,
     key: Option<crate::key_analysis::KeyAnalysis>,
     quality_enabled: bool,
-    detail: Option<crate::detail_analysis::DetailCache<'a>>,
-    bands: Option<crate::band::OverviewBands<&'a mut [crate::band::BandSums]>>,
+    detail: Option<crate::detail_analysis::DetailCache<'a, T>>,
+    bands: Option<crate::band::OverviewBands<S>>,
     config: SessionConfig,
-    workspace: Workspace<'a>,
+    workspace: SparseStorage<A, R, N, P, V, C>,
     logical_columns: usize,
     range_count: usize,
     queued: usize,
@@ -58,6 +81,38 @@ pub struct SparseSession<'a> {
 
 impl<'a> SparseSession<'a> {
     pub fn new(config: SessionConfig, workspace: Workspace<'a>) -> Result<Self, Error> {
+        Self::with_storage(config, workspace)
+    }
+}
+impl<'a, A, R, N, P, V, C, B, F, G, H, E, S, T>
+    SparseSession<'a, A, R, N, P, V, C, B, F, G, H, E, S, T>
+where
+    A: core::ops::DerefMut<Target = [SparseAccumulator]>,
+    R: core::ops::DerefMut<Target = [FrameRange]>,
+    N: core::ops::DerefMut<Target = [QueuedBlock]>,
+    P: core::ops::DerefMut<Target = [NormalizedSample]>,
+    V: core::ops::DerefMut<Target = [WaveformSpan]>,
+    C: core::ops::DerefMut<Target = [WaveformColumn]>,
+    B: core::ops::DerefMut<Target = [crate::analysis::OnsetBin]>
+        + AsRef<[crate::analysis::OnsetBin]>
+        + AsMut<[crate::analysis::OnsetBin]>,
+    F: core::ops::DerefMut<Target = [f32]> + AsRef<[f32]> + AsMut<[f32]>,
+    G: core::ops::DerefMut<Target = [crate::analysis::OnsetBin]>
+        + AsRef<[crate::analysis::OnsetBin]>
+        + AsMut<[crate::analysis::OnsetBin]>,
+    H: core::ops::DerefMut<Target = [f32]> + AsRef<[f32]> + AsMut<[f32]>,
+    E: core::ops::DerefMut<Target = [crate::Beat]> + AsRef<[crate::Beat]> + AsMut<[crate::Beat]>,
+    S: core::ops::DerefMut<Target = [crate::band::BandSums]>
+        + AsRef<[crate::band::BandSums]>
+        + AsMut<[crate::band::BandSums]>,
+    T: core::ops::DerefMut<Target = [crate::detail_analysis::DetailTile]>
+        + AsRef<[crate::detail_analysis::DetailTile]>
+        + AsMut<[crate::detail_analysis::DetailTile]>,
+{
+    pub fn with_storage(
+        config: SessionConfig,
+        mut workspace: SparseStorage<A, R, N, P, V, C>,
+    ) -> Result<Self, Error> {
         if config.sample_rate == 0
             || config.sample_rate > 768000
             || !(1..=2).contains(&config.channel_count)
@@ -113,10 +168,7 @@ impl<'a> SparseSession<'a> {
 
     /// Enable three-band overview while Created, before input or seeding.
     /// Storage must cover every possible logical overview column.
-    pub fn enable_three_band(
-        &mut self,
-        sums: &'a mut [crate::band::BandSums],
-    ) -> Result<(), Error> {
+    pub fn enable_three_band(&mut self, mut sums: S) -> Result<(), Error> {
         if self.state != SessionState::Created || self.range_count != 0 || self.bands.is_some() {
             return Err(Error::InvalidState);
         }
@@ -173,6 +225,25 @@ impl<'a> SparseSession<'a> {
             .ok_or(Error::InvalidState)?
             .lock_range(range)
     }
+    /// Lock transactionally with an owning publication callback. Failure restores
+    /// the working lock; revision acceptance intentionally uses a different path.
+    pub fn publish_grid_lock(
+        &mut self,
+        range: crate::FrameRange,
+        generation: u64,
+        publish: impl FnOnce(crate::session_snapshot::SessionSnapshot<'_>) -> Result<(), Error>,
+    ) -> Result<bool, Error> {
+        let checkpoint = self.lock_checkpoint().ok_or(Error::InvalidState)?;
+        self.lock_grid_range(range)?;
+        if self.analysis_serial() == checkpoint.2 {
+            return Ok(false);
+        }
+        if let Err(error) = self.snapshot_graph(generation).and_then(publish) {
+            self.restore_lock(checkpoint);
+            return Err(error);
+        }
+        Ok(true)
+    }
     pub(crate) fn lock_checkpoint(&self) -> Option<(Option<crate::LocalGrid>, bool, u64)> {
         self.analysis.as_ref().map(|a| a.lock_checkpoint())
     }
@@ -197,11 +268,18 @@ impl<'a> SparseSession<'a> {
         self.analysis.as_ref().map_or(0, |a| a.meter_serial())
     }
     pub fn enable_key(&mut self) -> Result<(), Error> {
+        self.enable_key_with_math(crate::key_analysis::KeyMath::default())
+    }
+    pub fn enable_key_with_math(
+        &mut self,
+        math: crate::key_analysis::KeyMath,
+    ) -> Result<(), Error> {
         if self.state != SessionState::Created || self.range_count != 0 || self.key.is_some() {
             return Err(Error::InvalidState);
         }
-        self.key = Some(crate::key_analysis::KeyAnalysis::new(
+        self.key = Some(crate::key_analysis::KeyAnalysis::new_with_math(
             self.config.sample_rate,
+            math,
         )?);
         Ok(())
     }
@@ -219,14 +297,14 @@ impl<'a> SparseSession<'a> {
     pub fn enable_global_grid(
         &mut self,
         dynamic: bool,
-        bins: &'a mut [crate::analysis::OnsetBin],
-        flux: &'a mut [f32],
-        beats: &'a mut [crate::Beat],
+        bins: G,
+        flux: H,
+        beats: E,
     ) -> Result<(), Error> {
         if self.state != SessionState::Created || self.range_count != 0 || self.global.is_some() {
             return Err(Error::InvalidState);
         }
-        self.global = Some(crate::global_analysis::GlobalAnalysis::new(
+        self.global = Some(crate::global_analysis::GlobalAnalysis::with_storage(
             self.config.sample_rate,
             Some(self.config.total_frames),
             dynamic,
@@ -265,15 +343,11 @@ impl<'a> SparseSession<'a> {
     pub(crate) fn global_serial(&self) -> u64 {
         self.global.as_ref().map_or(0, |g| g.mutation_serial())
     }
-    pub fn enable_tempo(
-        &mut self,
-        bins: &'a mut [crate::analysis::OnsetBin],
-        flux: &'a mut [f32],
-    ) -> Result<(), Error> {
+    pub fn enable_tempo(&mut self, bins: B, flux: F) -> Result<(), Error> {
         if self.state != SessionState::Created || self.range_count != 0 || self.analysis.is_some() {
             return Err(Error::InvalidState);
         }
-        self.analysis = Some(crate::analysis::Analysis::new(
+        self.analysis = Some(crate::analysis::Analysis::with_storage(
             self.config.sample_rate,
             bins,
             flux,
@@ -308,10 +382,7 @@ impl<'a> SparseSession<'a> {
     }
     /// Enable eager detail accumulation before input acceptance. A published
     /// scheduled session adds focus protection and aligned replay policy.
-    pub fn enable_detail(
-        &mut self,
-        tiles: &'a mut [crate::detail_analysis::DetailTile],
-    ) -> Result<(), Error> {
+    pub fn enable_detail(&mut self, tiles: T) -> Result<(), Error> {
         if self.state != SessionState::Created || self.detail.is_some() || self.range_count != 0 {
             return Err(Error::InvalidState);
         }
@@ -323,7 +394,7 @@ impl<'a> SparseSession<'a> {
         {
             return Err(Error::LimitExceeded);
         }
-        self.detail = Some(crate::detail_analysis::DetailCache::new(tiles)?);
+        self.detail = Some(crate::detail_analysis::DetailCache::with_storage(tiles)?);
         Ok(())
     }
     pub fn detail_mutation_serial(&self) -> u64 {
@@ -368,18 +439,27 @@ impl<'a> SparseSession<'a> {
     /// Copies at most 4096 frames, stopping before the first existing range.
     /// Starting inside an existing range is a conflict. A full queue or range
     /// table accepts zero without mutation, including when ranges could merge.
-    pub(crate) fn detail_cache(&self) -> Option<&crate::detail_analysis::DetailCache<'a>> {
+    pub(crate) fn detail_cache(&self) -> Option<&crate::detail_analysis::DetailCache<'a, T>> {
         self.detail.as_ref()
     }
 
     pub fn push_at(&mut self, first_frame: u64, samples: PcmView<'_>) -> Result<usize, Error> {
-        self.push_at_scheduled(first_frame, samples, None)
+        self.push_at_scheduled(
+            first_frame,
+            samples,
+            None::<&mut crate::scheduler::Scheduler<'_>>,
+        )
     }
-    pub(crate) fn push_at_scheduled(
+    pub fn push_at_scheduled(
         &mut self,
         first_frame: u64,
         samples: PcmView<'_>,
-        scheduler: Option<&mut crate::scheduler::Scheduler<'_>>,
+        scheduler: Option<
+            &mut crate::scheduler::Scheduler<
+                '_,
+                impl core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+            >,
+        >,
     ) -> Result<usize, Error> {
         if self.state == SessionState::Cancelled {
             return Err(Error::Cancelled);
@@ -482,7 +562,12 @@ impl<'a> SparseSession<'a> {
         &mut self,
         first: u64,
         pcm: PcmView<'_>,
-        scheduler: Option<&mut crate::scheduler::Scheduler<'_>>,
+        scheduler: Option<
+            &mut crate::scheduler::Scheduler<
+                '_,
+                impl core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+            >,
+        >,
     ) -> Result<usize, Error> {
         let count = pcm.frame_count(self.config.channel_count)?;
         let end = first
@@ -545,6 +630,58 @@ impl<'a> SparseSession<'a> {
             .copy_within(end..self.range_count, first + 1);
         self.range_count = self.range_count - (end - first) + 1;
         self.workspace.ranges[first] = range;
+    }
+
+    /// Validate and copy overview evidence only. No musical state, detail,
+    /// filter history, provenance or publication generation is imported.
+    /// This native source has no fingerprint; callers requiring identity must
+    /// reject an unidentified destination before calling this method.
+    pub fn seed_overview(
+        &mut self,
+        source: crate::SourceInfo,
+        overview: NativeOverview<'_>,
+        limits: crate::NativeLimits,
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created {
+            return Err(Error::InvalidState);
+        }
+        if source.sample_rate != self.config.sample_rate
+            || source.channel_count != self.config.channel_count
+            || (source.channel_layout != 0 && source.channel_layout != self.config.channel_count)
+            || source
+                .total_frames
+                .is_some_and(|n| n != self.config.total_frames)
+            || overview.frames_per_column != self.config.frames_per_column
+            || overview
+                .spans
+                .iter()
+                .any(|s| s.end_frame > self.config.total_frames)
+        {
+            return Err(Error::Conflict);
+        }
+        // Only the externally supplied overview enters validation. In particular,
+        // this never grants trusted musical exceptions to an external graph.
+        let input = crate::NativeResultInput {
+            source,
+            info: crate::NativeResultInfo::default(),
+            provenance: crate::Provenance {
+                origin: crate::ProvenanceOrigin::NativeAnalysis,
+                source_name: "",
+                source_version: "",
+            },
+            overview: Some(overview),
+            detail: None,
+            metadata: None,
+            tempo: None,
+            local_grid: None,
+            global_grid: None,
+            revision: None,
+            key: None,
+            meter: None,
+            quality: &[],
+        };
+        crate::native_validation::validate_session(&input, limits, 0)?;
+        self.install_seed(overview)
     }
 
     /// Install a previously validated owned overview. Preflight all retained
@@ -628,7 +765,7 @@ impl<'a> SparseSession<'a> {
             budget,
             cancellation,
             true,
-            None,
+            None::<&crate::scheduler::Scheduler<'_>>,
             &mut crate::deadline::Deadline::disabled(),
         )
     }
@@ -643,7 +780,13 @@ impl<'a> SparseSession<'a> {
         cancellation: &CancellationToken,
     ) -> Result<Progress, Error> {
         let mut deadline = crate::deadline::Deadline::new(soft_us, clock);
-        self.process_inner(budget, cancellation, true, None, &mut deadline)
+        self.process_inner(
+            budget,
+            cancellation,
+            true,
+            None::<&crate::scheduler::Scheduler<'_>>,
+            &mut deadline,
+        )
     }
     pub(crate) fn set_publication_state(&mut self, state: SessionState) {
         self.state = state;
@@ -676,7 +819,10 @@ impl<'a> SparseSession<'a> {
         &mut self,
         budget: WorkBudget,
         cancellation: &CancellationToken,
-        scheduler: &crate::scheduler::Scheduler<'_>,
+        scheduler: &crate::scheduler::Scheduler<
+            '_,
+            impl core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+        >,
     ) -> Result<(Progress, u32), Error> {
         self.process_scheduled_deadline(
             budget,
@@ -690,7 +836,10 @@ impl<'a> SparseSession<'a> {
         &mut self,
         budget: WorkBudget,
         cancellation: &CancellationToken,
-        scheduler: &crate::scheduler::Scheduler<'_>,
+        scheduler: &crate::scheduler::Scheduler<
+            '_,
+            impl core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+        >,
         deadline: &mut crate::deadline::Deadline<'_>,
     ) -> Result<(Progress, u32), Error> {
         let selected = if !cancellation.is_cancelled()
@@ -713,7 +862,13 @@ impl<'a> SparseSession<'a> {
 
     // Compute ranks before changing ordering keys. PCM stays in its fixed slot;
     // equal scores preserve the ordering left by the previous process call.
-    fn sort_queue(&mut self, scheduler: &crate::scheduler::Scheduler<'_>) -> u32 {
+    fn sort_queue(
+        &mut self,
+        scheduler: &crate::scheduler::Scheduler<
+            '_,
+            impl core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+        >,
+    ) -> u32 {
         let mut selected = 0;
         let mut active = 0;
         for index in 0..self.workspace.nodes.len() {
@@ -841,7 +996,12 @@ impl<'a> SparseSession<'a> {
         budget: WorkBudget,
         cancellation: &CancellationToken,
         complete: bool,
-        scheduler: Option<&crate::scheduler::Scheduler<'_>>,
+        scheduler: Option<
+            &crate::scheduler::Scheduler<
+                '_,
+                impl core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+            >,
+        >,
         deadline: &mut crate::deadline::Deadline<'_>,
     ) -> Result<Progress, Error> {
         if self.state == SessionState::Failed {
@@ -942,6 +1102,197 @@ impl<'a> SparseSession<'a> {
             self.set_publication_state(SessionState::Complete);
         }
         Ok(progress)
+    }
+
+    pub fn snapshot_graph(
+        &mut self,
+        generation: u64,
+    ) -> Result<crate::session_snapshot::SessionSnapshot<'_>, Error> {
+        use crate::*;
+        if generation == 0 {
+            return Err(Error::InvalidArgument);
+        }
+        self.snapshot();
+        let local = self.local_grid();
+        let global = self.global_grid();
+        let mut detail_tiles = [NativeTile {
+            level_id: 1,
+            tile_index: 0,
+            first_frame: 0,
+            end_frame: 0,
+            first_column_index: 0,
+            state: FeatureState::Partial,
+            confidence: 0,
+            data_column_offset: 0,
+            column_count: 0,
+        }; crate::detail_analysis::TILE_COUNT];
+        let mut detail_columns = [WaveformColumn::default();
+            crate::detail_analysis::TILE_COUNT * crate::detail_analysis::COLUMNS_PER_TILE];
+        let detail = self.copy_detail_into(&mut detail_tiles, &mut detail_columns)?;
+        let detail_counts = detail.map(|d| (d.tiles.len(), d.columns.len()));
+        let detail_header = detail.map(|_| NativeDetail {
+            tiles: &[],
+            columns: &[],
+        });
+        Ok(crate::session_snapshot::SessionSnapshot {
+            initially_unknown: false,
+            requested_features: None,
+            header: NativeResultInput {
+                source: SourceInfo {
+                    sample_rate: self.config.sample_rate,
+                    channel_count: self.config.channel_count,
+                    channel_layout: self.config.channel_count,
+                    total_frames: Some(self.config.total_frames),
+                    fingerprint_kind: 0,
+                    fingerprint: [0; 32],
+                },
+                info: NativeResultInfo {
+                    generation,
+                    session_state: match self.state {
+                        SessionState::Created => ResultSessionState::Created,
+                        SessionState::Running => ResultSessionState::AcceptingInput,
+                        SessionState::Draining => ResultSessionState::Draining,
+                        SessionState::Complete => ResultSessionState::Completed,
+                        SessionState::Cancelled => ResultSessionState::Cancelled,
+                        SessionState::Failed => ResultSessionState::Failed,
+                    },
+                    ..NativeResultInfo::default()
+                },
+                provenance: Provenance {
+                    origin: ProvenanceOrigin::NativeAnalysis,
+                    source_name: "libapta",
+                    source_version: env!("CARGO_PKG_VERSION"),
+                },
+                metadata: None,
+                overview: self.snapshot_view(),
+                detail: detail_header,
+                tempo: self.tempo(),
+                key: self.key(),
+                meter: self.meter(),
+                revision: self.grid_revision(),
+                local_grid: None,
+                global_grid: None,
+                quality: &[],
+            },
+            detail_tiles,
+            detail_columns,
+            detail_counts,
+            span: None,
+            local,
+            local_coverage: [local.map_or(FrameRange::default(), |g| g.coverage)],
+            local_segment: local.map(|g| [g.segment]),
+            global,
+            global_coverage: [global.map_or(FrameRange::default(), |g| g.coverage_range)],
+            quality: self.bpm_quality().map(|q| [q]),
+        })
+    }
+
+    /// Native owning publication identity; not the C intermediate stage schedule.
+    pub fn publication_serials(&self) -> [u64; 5] {
+        [
+            self.analysis_serial(),
+            self.global_serial(),
+            self.meter_serial(),
+            self.key_serial(),
+            self.detail_mutation_serial(),
+        ]
+    }
+    /// Enable scheduling only for attached engines and explicitly requested features.
+    pub fn configure_scheduler<
+        RQ: core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+    >(
+        &self,
+        scheduler: &mut crate::scheduler::Scheduler<'_, RQ>,
+        requested: u64,
+    ) {
+        if self.detail.is_some() && requested & crate::result::WAVEFORM_DETAIL != 0 {
+            scheduler.enable_detail();
+        }
+        let mut features = 0;
+        if self.analysis.is_some() {
+            features |=
+                crate::result::BPM | crate::result::LOCAL_BEATGRID | crate::result::GRID_LOCKING;
+        }
+        if self.global.is_some() {
+            features |= crate::result::GLOBAL_BEATGRID | crate::result::DYNAMIC_TEMPO;
+        }
+        if self.key.is_some() {
+            features |= crate::result::MUSICAL_KEY;
+        }
+        if self.quality_enabled {
+            features |= crate::result::CALIBRATED_QUALITY;
+        }
+        if self.analysis.as_ref().is_some_and(|a| a.meter_enabled()) {
+            features |= crate::result::METER_DOWNBEAT;
+        }
+        scheduler.enable_music(features & requested);
+    }
+    /// Public demand includes detail replay; automatic source loops may choose
+    /// the separate overview selector to preserve reference pull behavior.
+    pub fn next_pcm_request<RQ: core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>>(
+        &self,
+        scheduler: &mut crate::scheduler::Scheduler<'_, RQ>,
+    ) -> Result<crate::PcmDemand, Error> {
+        if let Some(cache) = &self.detail {
+            match scheduler.next_detail_request(cache) {
+                Ok(d) => return Ok(d),
+                Err(Error::NotAvailable) => {}
+                Err(e) => return Err(e),
+            }
+        }
+        scheduler.next_pcm_request(self.accepted_ranges())
+    }
+    /// Process actual scheduled PCM and all attached stages with one shared budget.
+    /// Heap mirrors are handled by the std owner after this committed operation.
+    pub fn process_scheduled<RQ: core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>>(
+        &mut self,
+        budget: WorkBudget,
+        cancellation: &CancellationToken,
+        scheduler: &mut crate::scheduler::Scheduler<'_, RQ>,
+    ) -> Result<Progress, Error> {
+        self.process_owned_schedule(
+            budget,
+            cancellation,
+            scheduler,
+            &mut crate::deadline::Deadline::disabled(),
+        )
+    }
+    pub fn process_scheduled_with_clock<
+        RQ: core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>,
+    >(
+        &mut self,
+        budget: WorkBudget,
+        soft_us: u32,
+        clock: &mut dyn FnMut() -> u64,
+        cancellation: &CancellationToken,
+        scheduler: &mut crate::scheduler::Scheduler<'_, RQ>,
+    ) -> Result<Progress, Error> {
+        let mut deadline = crate::deadline::Deadline::new(soft_us, clock);
+        self.process_owned_schedule(budget, cancellation, scheduler, &mut deadline)
+    }
+    fn process_owned_schedule<RQ: core::ops::DerefMut<Target = [crate::scheduler::RequestSlot]>>(
+        &mut self,
+        budget: WorkBudget,
+        cancellation: &CancellationToken,
+        scheduler: &mut crate::scheduler::Scheduler<'_, RQ>,
+        deadline: &mut crate::deadline::Deadline<'_>,
+    ) -> Result<Progress, Error> {
+        let choice = if cancellation.is_cancelled() {
+            0
+        } else {
+            self.sort_queue(scheduler)
+        };
+        let work = self.process_inner(budget, cancellation, true, Some(scheduler), deadline);
+        let fpc = self.config.frames_per_column;
+        let snapshot = self.snapshot();
+        scheduler.refresh_waveform(snapshot.map_or(&[], |s| s.spans), fpc)?;
+        if work.as_ref().is_ok_and(|p| p.consumed_input_frames != 0) {
+            scheduler.note_choice(choice);
+        }
+        if let Some(detail) = &self.detail {
+            scheduler.refresh_detail(detail);
+        }
+        work
     }
 
     /// Packs complete columns into sorted contiguous spans. Incomplete columns

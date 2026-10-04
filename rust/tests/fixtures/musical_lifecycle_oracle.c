@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
         CHECK(apta_session_lock_grid_range(s, &lock) == 0); trace(s);
     }
     { unsigned complete = 0;
-      for (unsigned i = 0; i < 1000; i++) { int status = apta_session_process(s, &budget, NULL); CHECK(status >= 0); trace(s); if (status == APTA_STATUS_END_OF_INPUT) { complete = 1; break; } }
+      for (unsigned i = 0; i < 1000; i++) { const apta_result_t *held = (profile & 2097152) ? apta_session_acquire_result(s) : NULL; int status = apta_session_process(s, &budget, NULL); CHECK(status >= 0 || (held && status == APTA_ERROR_RESULT_SLOTS_EXHAUSTED)); trace(s); if (held) apta_result_release(held); if (status == APTA_STATUS_END_OF_INPUT) { complete = 1; break; } }
       CHECK(complete);
     }
 done:

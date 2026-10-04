@@ -157,7 +157,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Pull/seek/release callbacks | [pull.rs](../../rust/src/pull.rs), [sparse_pull.rs](../../rust/src/sparse_pull.rs) | Sequential known/unknown and scheduled known-duration pull; exactly-once release and absolute-offset seeking; C callback ABI remains pending |
 | Focus/requests/sparse ranges/scheduler | [sparse.rs](../../rust/src/sparse.rs), [scheduler.rs](../../rust/src/scheduler.rs), publication | Known-duration sparse overview/detail request policy, protection and replay integrated; oracle/review/combined acceptance below; musical focus/demand and S4 work/progress mapping integrated; twelve musical C scenarios pass |
 | Context/static workspace/allocation classes | future runtime/FFI | Aggregate typed planning/atomic attachment and native std context quotas/lifetime; C layout/classes/custom callbacks pending |
-| Immutable generations/pool/concurrency | session + [runtime](../../rust/runtime/src/lib.rs)/future FFI | Owned graphs, two core slots, unknown-duration sequential publication and safe independent Arc readers; safe standard-heap graph ownership/concurrent readers implemented; safe std growing sequential musical sessions/context lifetime implemented; C acquire/release pending |
+| Immutable generations/pool/concurrency | session + [runtime](../../rust/runtime/src/lib.rs)/future FFI | Owned graphs, two core slots, unknown-duration sequential publication and safe independent Arc readers; safe standard-heap graph ownership/concurrent readers implemented; safe std growing sequential and owning sparse musical sessions/context lifetime implemented; C acquire/release pending |
 | Resume/result seeding | publication/sparse/waveform | Validated owned overview checkpoint, source/fingerprint compatibility, inverse quantization and atomic native preflight; C tail difference documented below |
 | External validated result builder | [builder.rs](../../rust/src/builder.rs), [native_validation.rs](../../rust/src/native_validation.rs), [owned_result.rs](../../rust/src/owned_result.rs) | Encoded subset plus native graph/provenance/session-state validation and deep ownership; C allocator/API boundary pending |
 | S4 onset/BPM/local grid | [analysis.rs](../../rust/src/analysis.rs), session/sparse/publication | Default broadband analysis integrated; exact TEMP/LGRD C comparisons, focus and locking; experimental onset profiles pending |
@@ -169,7 +169,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Push/pull/installed/package/ESP examples | examples | Push/WAV-to-container example implemented; others pending |
 | C API/ABI and frozen 1.0 consumers | future FFI | Pending; C remains installed product |
 | CMake/pkg-config/shared/static packages | root build future FFI | Cargo additive only |
-| Linux, Windows/MSVC, ILP32 | platform CI | x86_64 host tests + AArch64 compile check; Windows/ILP32 pending |
+| Linux, Windows/MSVC, ILP32 | platform CI | x86_64 host tests; AArch64 core and i686/MSVC workspace compile checks; Windows/ILP32 linking and execution pending |
 | ESP-IDF ESP32/S3/P4 | ports future Rust integration | Pending compile and physical measurements |
 | macOS/big-endian | platform matrix | C macOS community only; big-endian unsupported baseline |
 | Conformance/interoperability/fuzz/security/SBOM | tests/tooling | C retained; Rust coverage partial |
@@ -1385,3 +1385,131 @@ static/shared packaging and frozen consumers remain open. Native tool options ar
 additive; complete C options/JSON/metadata/fingerprint and frozen corpus interfaces
 remain open. Windows/MSVC, ILP32, ESP-IDF, original accuracy and physical P4 gates
 remain separate. No deployment, host-service change or hardware operation occurred.
+
+## Owning sparse scheduling, replay and mutation continuation — 2026-10-04
+
+This continuation extends the owning waveform/source handoff above. C algorithms,
+headers, ABI and container format remain unchanged. All work used one agent and
+two build/test jobs. The native implementation remains additive.
+
+### Integrated behavior
+
+- `SparseSession` accepts generic borrowed or owning arrays through
+  `SparseStorage`/`with_storage`; `Workspace` and `new` preserve the borrowed API.
+  `Scheduler::with_storage` similarly owns or borrows up to sixteen slots.
+  Portable core remains `no_std`, allocator-free and unsafe-free. Generic storage
+  uses the same processing, priority/deadline/FIFO/aging, protection and replay
+  implementations; no second sparse engine was introduced.
+- `SparseSession::snapshot_graph` produces trusted actual sparse overview,
+  resident detail and musical graphs, using the existing inline detail scratch.
+  Sequential and sparse snapshots preserve their different overview spans.
+  The earlier snapshot-stack/embedded qualification boundary remains open.
+- `OwnedSparseSession` owns known-duration sparse storage, scheduling, bands,
+  four-tile detail and default music. Initial allocation and feature attachment
+  preflight minimum and actual Vec-capacity bytes. Queue nodes, range slots and
+  request slots are fixed configured capacities, not dynamically grown tables.
+  Limit/backpressure behavior remains explicit. RuntimeContext accounts for the
+  writer and committed retained graphs; resource leases still drop last.
+- Owning sparse processing supports focus/requests, cancellation, cooperative
+  clocks and shared waveform/S4/S6/meter/key budgets. Immutable retained results
+  survive processing and writer destruction. Mirror failure can follow committed
+  PCM/detail/music; it blocks further mutations until mirror-only refresh succeeds.
+  Scheduler progress is committed with native work, before heap mirroring. This
+  is not C's intermediate bounded-slot generation/failure schedule.
+- Detail replay preserves overview columns, band history, musical evidence and
+  processed-frame counts. Old results preserve evicted tiles. `seed_from_result`
+  copies only validated overview evidence while Created, after feature attachment;
+  it restores no detail, band history, music, provenance or generation. Seed itself
+  publishes nothing. Native writers have no fingerprint; required identity fails.
+- `OwnedScheduledPullSession` drains accepted work and retries mirrors before
+  reading. It performs at most one read of up to 4096 frames per call, bounded by
+  the input budget. Acquired blocks release exactly once before processing and
+  timing. WouldBlock is retryable; source errors, malformed blocks and premature
+  EOF are terminal. Reported source length must match the configured known length.
+  Automatic reads preserve the internal overview selector, while public demand
+  exposes detail replay. A satisfied selected target can finish with other holes.
+- Both owning writers and pull adapters expose tempo focus, grid locking and
+  revision acceptance. Failed lock publication restores the working lock;
+  idempotent locks publish nothing. Failed revision publication retains Applied
+  state, blocks other mutations, and retries only the mirror. C's separate S4/S6
+  intermediate retries remain covered by the existing bounded-publication path.
+- Requested-capability projection is configured before feature attachment and
+  shares payload/capability rules with ResultPool. Default music may attach a
+  superset of stages; output is projected and dynamic S6 follows the requested
+  bit. Unknown-origin BPM retains its derived local grid even after resolving EOF.
+  Ordinary native content-derived masks remain unchanged.
+
+### C-derived boundaries and evidence
+
+The requested projection profile is **bounded known-duration C**, and
+**nonbounded initially unknown C**, as in the preceding lifecycle acceptance.
+A new attempt against nonbounded *known* BPM-only C exposed its extra derived
+LGRD, preserved in `continuation-sparse-projection-oracle.log`. The explicit
+profile comparison uses bounded known C and passes without dropping/normalizing
+wire sections. Native projection does not claim nonbounded-known equivalence.
+`continuation-sparse-projection-profile-check.log` compares eight complete wire
+containers across four masks and known/unknown duration. Payloads and bytes are
+exact; no numerical tolerance was added.
+
+- The lifecycle oracle now covers **83 profiles**, adding eight EOF drain profiles
+  that retain the current result at each call and force successive stage
+  publication failures across base/all and projected feature combinations.
+  Masks, generations, state and musical coordinates match public C exactly.
+  Focused evidence: `continuation-sparse-failure-matrix.log`.
+- `continuation-sparse-oracle-check.log` compares sparse eager detail before/after
+  partial EOF and one integrated all-stage/bands/detail-replay container exactly
+  against public C mutations. This extends replay content acceptance; it does
+  not prove every bounded musical/detail intermediate-generation combination.
+- `continuation-sparse-source-oracle.log` compares five owning scheduled-source
+  scenarios against C: focus movement, WouldBlock/short blocks, queue draining,
+  explicit requests and partial selected-range completion. Every callback count,
+  offset, requested size, status, available mask, span and quantized column is
+  exact. Native heap generation and changed-mask identities are excluded explicitly.
+- `continuation-sparse-coordinate-check.log` adds near-u32/u64-limit public
+  ranges, deadlines, request IDs and invalid PCM coordinates. This is validation
+  and clipping evidence on a small source, not huge-workspace qualification.
+- Isolated allocation injection covers all seven sparse working-array allocations,
+  initial provenance allocations, five musical attachments, bands and detail.
+  Failures leave preflight state intact. Native tests also cover context quota
+  mirror failure, retained threaded readers, source mirror retries, lock rollback,
+  revision acceptance, cancellation, fixed queue/range exhaustion and seed/resume.
+- Optional C profiles were inspected selectively through CMake definitions and
+  the effective wrapper renaming. Default cache experiments remain OFF; no
+  experimental onset/key/meter profile or original DSP accuracy gate is qualified.
+
+All evidence below is under
+`/home/shome/.local/share/libapta-audio/rust-rewrite/`:
+
+- `continuation-sparse-baseline.log`: unchanged combined baseline.
+- `continuation-sparse-integration-check.log`: passing intermediate combined run.
+- `continuation-sparse-combined-check.log`: **123/123 C tests**, **262 ordinary
+  Rust tests and 47 explicitly enabled external-C groups** in each debug/release
+  profile. All 34 existing strict WAV cases and two band/detail CLI combinations
+  pass. Formatting, all-target Clippy, no-default-features and isolated allocation
+  instrumentation pass. `git diff --check` and notebook validation also pass.
+- `continuation-sparse-asan-check.log`: **47 runtime tests**, including **10
+  external-C groups**, pass host AddressSanitizer/leak checks, with `RUSTC_BOOTSTRAP=1`,
+  `RUSTFLAGS=-Zsanitizer=address` and x86_64 target. C/std are not instrumented.
+- `continuation-sparse-aarch64-check.log`: portable core/no-default-features compile.
+- `continuation-sparse-ilp32-compile.log` and `continuation-sparse-msvc-compile.log`:
+  all workspace targets compile for i686 Linux and x86_64 Windows/MSVC. These
+  `cargo check` runs do not link executables, execute tests or qualify the C ABI.
+
+### Remaining dependency gates
+
+Continue the public C failure/mutation/replay matrix beyond these fixtures,
+ensemble-promotion variants, long-coordinate capacity and optional-profile
+qualification. Sparse owning tables currently have fixed capacities; unknown
+sparse duration, dynamic range/node growth and fingerprinted source identity are
+not implemented. Broader cancellation/resource races and C source callbacks remain.
+
+Full C custom allocators, allocation classes, workspace layout/failure ordering,
+concurrent C acquire/release, separately reviewed unsafe ABI, static/shared
+CMake/pkg-config packaging and frozen consumers remain open. Native tool options,
+JSON, metadata/fingerprint and frozen corpus interfaces remain incomplete.
+Windows/MSVC and ILP32 execution/linking, ESP-IDF Rust software integration and
+embedded snapshot-stack sizing remain open despite cross-compilation. Original
+DSP accuracy and physical P4 qualification remain separate. Portable libm's
+selected-key score **55734 versus host C 55735** is still unresolved; the explicit
+std KeyMath backend matches accepted host fixtures only. No deployment, service
+change or hardware operation occurred.

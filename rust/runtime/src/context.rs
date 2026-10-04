@@ -75,6 +75,14 @@ impl RuntimeContext {
         let session = self.register(true, 0)?;
         GrowingSession::new_in_context(config, limits, self.clone(), session)
     }
+    pub fn create_sparse_session(
+        &self,
+        config: SessionConfig,
+        limits: crate::SparseLimits,
+    ) -> Result<crate::OwnedSparseSession, Error> {
+        let resource = self.register(true, 0)?;
+        crate::OwnedSparseSession::new_in_context(config, limits, self.clone(), resource)
+    }
     pub(crate) fn result(&self, bytes: usize) -> Result<Resource, Error> {
         self.register(false, bytes)
     }

@@ -17,9 +17,15 @@ int main(int argc,char **argv) {
  if(argc==5 && argv[4][0]=='m') cc.requested_capabilities=APTA_FEATURE_WAVEFORM_OVERVIEW|APTA_FEATURE_BPM|APTA_FEATURE_LOCAL_BEATGRID|APTA_FEATURE_METER_DOWNBEAT|APTA_FEATURE_CALIBRATED_QUALITY;
  if(argc==5 && argv[4][0]=='a') cc.requested_capabilities=APTA_FEATURE_WAVEFORM_OVERVIEW|APTA_FEATURE_BPM|APTA_FEATURE_LOCAL_BEATGRID|APTA_FEATURE_GLOBAL_BEATGRID|APTA_FEATURE_DYNAMIC_TEMPO|APTA_FEATURE_MUSICAL_KEY|APTA_FEATURE_METER_DOWNBEAT|APTA_FEATURE_CALIBRATED_QUALITY;
  if(argc==5 && (argv[4][0]=='f' || argv[4][0]=='l' || argv[4][0]=='r')) cc.requested_capabilities|=APTA_FEATURE_GRID_LOCKING;
+ if(argc==5 && strcmp(argv[4], "all-replay")==0) cc.requested_capabilities |= APTA_FEATURE_WAVEFORM_DETAIL | APTA_FEATURE_WAVEFORM_3BAND;
+ if(argc==5 && strncmp(argv[4], "project:", 8)==0) cc.requested_capabilities=strtoull(argv[4]+8,NULL,10);
  apta_context_t *context=NULL;CHECK(apta_context_create(&cc,&context)==0);
  apta_session_config_t config;apta_session_config_init(&config);config.requested_features=cc.requested_capabilities;config.source_sample_rate=rate;config.channel_count=1;config.channel_layout=APTA_CHANNEL_LAYOUT_MONO;config.sample_format=APTA_SAMPLE_F32_NATIVE_INTERLEAVED;config.total_frames=count;config.overview_frames_per_column=32768;
- if (argc==5 && strcmp(argv[4], "all-unknown")==0) config.total_frames=APTA_TOTAL_FRAMES_UNKNOWN;
+ if (argc==5 && (strcmp(argv[4], "all-unknown")==0 || strstr(argv[4], ":unknown")!=NULL)) config.total_frames=APTA_TOTAL_FRAMES_UNKNOWN;
+ /* Match the established requested-capability profile: bounded known input,
+    nonbounded unknown input. Nonbounded known C keeps an extra derived LGRD. */
+ void *workspace=NULL;
+ if(argc==5 && strncmp(argv[4], "project:", 8)==0) { workspace=aligned_alloc(64,4*1024*1024);CHECK(workspace);config.static_workspace=workspace;config.static_workspace_size=4*1024*1024;if(config.total_frames!=APTA_TOTAL_FRAMES_UNKNOWN)config.flags=APTA_SESSION_FLAG_BOUNDED_RESULT_SLOTS; }
  apta_session_t *session=NULL;CHECK(apta_session_create(context,&config,&session)==0);
  if(argc==5 && argv[4][0]=='f') {apta_focus_t focus;apta_focus_init(&focus);focus.feature_mask=APTA_FEATURE_BPM|APTA_FEATURE_LOCAL_BEATGRID|APTA_FEATURE_GRID_LOCKING;focus.playhead_frame=count/2;focus.lookbehind_frames=count/4;focus.lookahead_frames=count/8;CHECK(apta_session_set_focus(session,&focus)==0);}
  apta_work_budget_t budget;apta_work_budget_init(&budget);budget.maximum_steps=steps;
@@ -27,10 +33,19 @@ int main(int argc,char **argv) {
  for(unsigned first=0;first<count;) {unsigned n=count-first;if(n>4096)n=4096;apta_pcm_block_t block;apta_pcm_block_init(&block);block.first_frame=first;block.frame_count=n;block.data=pcm+first;unsigned accepted=0;CHECK(apta_session_push_pcm(session,&block,&accepted)==0);CHECK(accepted==n);first+=n;CHECK(apta_session_process(session,&budget,NULL)>=0);
  if(argc==5 && argv[4][0]=='r' && !locked && first>=count/2) {apta_frame_range_t range;apta_frame_range_init(&range);range.first_frame=0;range.end_frame=count/2-8192;CHECK(apta_session_lock_grid_range(session,&range)==0);locked=1;}}
 
+ if(argc==5 && strcmp(argv[4], "all-replay")==0) {
+   apta_region_request_t request; apta_region_request_init(&request); request.range.end_frame=256; request.feature_mask=APTA_FEATURE_WAVEFORM_DETAIL; request.priority=240;
+   unsigned id=0; CHECK(apta_session_request_region(session,&request,&id)==0);
+   apta_pcm_request_t demand; apta_pcm_request_init(&demand); CHECK(apta_session_next_pcm_request(session,&demand)==0); CHECK(demand.range.first_frame==0 && demand.range.end_frame==256);
+   float replay[256]; for(unsigned i=0;i<256;i++) replay[i]=-0.75f;
+   apta_pcm_block_t block; apta_pcm_block_init(&block); block.frame_count=256; block.data=replay;
+   unsigned accepted=0; CHECK(apta_session_push_pcm(session,&block,&accepted)==0 && accepted==256); CHECK(apta_session_process(session,&budget,NULL)>=0);
+   apta_request_progress_t progress; apta_request_progress_init(&progress); CHECK(apta_session_get_request_progress(session,id,&progress)==0 && progress.progress_permille==1000);
+ }
  CHECK(apta_session_signal_end_of_input(session,count)==0);
  int status=0;for(unsigned i=0;i<100000 && status!=APTA_STATUS_END_OF_INPUT;i++) {status=apta_session_process(session,&budget,NULL);CHECK(status>=0);}CHECK(status==APTA_STATUS_END_OF_INPUT);
  if(argc==5 && argv[4][0]=='l') {apta_frame_range_t range;apta_frame_range_init(&range);range.first_frame=count/4;range.end_frame=count*3/4;CHECK(apta_session_lock_grid_range(session,&range)==0);CHECK(apta_session_lock_grid_range(session,&range)==0);}
  if(argc==5 && argv[4][0]=='r') {const apta_result_t *pending=apta_session_acquire_result(session);CHECK(pending!=NULL);apta_grid_revision_view_t revision;apta_grid_revision_view_init(&revision);CHECK(apta_result_get_grid_revision(pending,&revision)==0);CHECK(revision.state==APTA_GRID_REVISION_PENDING);apta_result_release(pending);CHECK(apta_session_apply_grid_revision(session,revision.revision_id+1)==APTA_ERROR_CONFLICT);CHECK(apta_session_apply_grid_revision(session,revision.revision_id)==0);CHECK(apta_session_apply_grid_revision(session,revision.revision_id)==APTA_ERROR_INVALID_STATE);}
  const apta_result_t *result=apta_session_acquire_result(session);CHECK(result!=NULL);uint64_t size=0;CHECK(apta_result_query_serialized_size(result,NULL,&size)==0);void *out=malloc((size_t)size);CHECK(out!=NULL);size_t written=0;CHECK(apta_result_serialize(result,NULL,out,(size_t)size,&written)==0);CHECK(fwrite(out,1,written,stdout)==written);
- free(out);apta_result_release(result);CHECK(apta_session_destroy(session)==0);CHECK(apta_context_destroy(context)==0);free(pcm);return 0;
+ free(out);apta_result_release(result);CHECK(apta_session_destroy(session)==0);CHECK(apta_context_destroy(context)==0);free(pcm);free(workspace);return 0;
 }

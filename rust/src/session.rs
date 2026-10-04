@@ -78,6 +78,7 @@ pub struct Session<
     detail: Option<crate::detail_analysis::DetailCache<'a, T>>,
     bands: Option<crate::band::OverviewBands<S>>,
     config: SessionConfig,
+    initially_unknown: bool,
     queue: Q,
     output: O,
     head: usize,
@@ -142,6 +143,7 @@ where
             quality_enabled: false,
             detail: None,
             bands: None,
+            initially_unknown: config.total_frames == TOTAL_FRAMES_UNKNOWN,
             config,
             queue,
             output,
@@ -244,6 +246,25 @@ where
             .as_mut()
             .ok_or(Error::InvalidState)?
             .lock_range(range)
+    }
+    /// Lock transactionally with an owning publication callback. Failure restores
+    /// the working lock; revision acceptance intentionally uses a different path.
+    pub fn publish_grid_lock(
+        &mut self,
+        range: crate::FrameRange,
+        generation: u64,
+        publish: impl FnOnce(crate::session_snapshot::SessionSnapshot<'_>) -> Result<(), Error>,
+    ) -> Result<bool, Error> {
+        let checkpoint = self.lock_checkpoint().ok_or(Error::InvalidState)?;
+        self.lock_grid_range(range)?;
+        if self.analysis_serial() == checkpoint.2 {
+            return Ok(false);
+        }
+        if let Err(error) = self.snapshot(generation).and_then(publish) {
+            self.restore_lock(checkpoint);
+            return Err(error);
+        }
+        Ok(true)
     }
     pub(crate) fn lock_checkpoint(&self) -> Option<(Option<crate::LocalGrid>, bool, u64)> {
         self.analysis.as_ref().map(|a| a.lock_checkpoint())
@@ -854,6 +875,8 @@ where
             columns: &[],
         });
         Ok(crate::session_snapshot::SessionSnapshot {
+            initially_unknown: self.initially_unknown,
+            requested_features: None,
             header: NativeResultInput {
                 source: SourceInfo {
                     sample_rate: self.config.sample_rate,
@@ -905,13 +928,13 @@ where
             detail_tiles,
             detail_columns,
             detail_counts,
-            span: [WaveformSpan {
+            span: Some([WaveformSpan {
                 first_frame: 0,
                 end_frame: end,
                 first_column_index: 0,
                 column_count: u32::try_from(self.written).map_err(|_| Error::LimitExceeded)?,
                 data_column_offset: 0,
-            }],
+            }]),
             local,
             local_coverage: [local.map_or(FrameRange::default(), |g| g.coverage)],
             local_segment: local.map(|g| [g.segment]),

@@ -98,8 +98,9 @@ impl RequestSlot {
         }
     }
 }
-pub struct Scheduler<'a> {
-    slots: &'a mut [RequestSlot],
+pub struct Scheduler<'a, R = &'a mut [RequestSlot]> {
+    slots: R,
+    lifetime: core::marker::PhantomData<&'a mut [RequestSlot]>,
     total_frames: Option<u64>,
     requested_features: u64,
     focus: Option<Focus>,
@@ -119,17 +120,30 @@ impl<'a> Scheduler<'a> {
         requested_features: u64,
         slots: &'a mut [RequestSlot],
     ) -> Result<Self, Error> {
+        let n = slots.len().min(MAX_REQUESTS);
+        Self::with_storage(total_frames, requested_features, &mut slots[..n])
+    }
+}
+impl<'a, R: core::ops::DerefMut<Target = [RequestSlot]>> Scheduler<'a, R> {
+    /// Own or borrow at most sixteen request slots without allocating in core.
+    pub fn with_storage(
+        total_frames: Option<u64>,
+        requested_features: u64,
+        mut slots: R,
+    ) -> Result<Self, Error> {
+        if slots.len() > MAX_REQUESTS {
+            return Err(Error::InvalidArgument);
+        }
         if total_frames == Some(u64::MAX) {
             return Err(Error::InvalidArgument);
         }
         if requested_features & !(SUPPORTED_FEATURES & !WAVEFORM_DETAIL) != 0 {
             return Err(Error::Unsupported);
         }
-        let n = slots.len().min(MAX_REQUESTS);
-        let slots = &mut slots[..n];
         slots.fill(RequestSlot::default());
         Ok(Self {
             slots,
+            lifetime: core::marker::PhantomData,
             total_frames,
             requested_features,
             focus: None,
@@ -160,9 +174,11 @@ impl<'a> Scheduler<'a> {
     }
     /// Detail replay precedes ordinary overview demand. A selected fully cached
     /// target does not fall back to another detail request or focus.
-    pub(crate) fn next_detail_request(
+    pub(crate) fn next_detail_request<
+        T: AsRef<[crate::detail_analysis::DetailTile]> + AsMut<[crate::detail_analysis::DetailTile]>,
+    >(
         &mut self,
-        cache: &crate::detail_analysis::DetailCache<'_>,
+        cache: &crate::detail_analysis::DetailCache<'_, T>,
     ) -> Result<PcmDemand, Error> {
         if self.requested_features & WAVEFORM_DETAIL == 0 {
             return Err(Error::NotAvailable);
@@ -199,9 +215,11 @@ impl<'a> Scheduler<'a> {
     }
     // CMake renames both symbols in detail_replay.c: replay acceptance calls
     // its raw-priority base selector, not the public staged/aging demand path.
-    pub(crate) fn detail_replay_request(
+    pub(crate) fn detail_replay_request<
+        T: AsRef<[crate::detail_analysis::DetailTile]> + AsMut<[crate::detail_analysis::DetailTile]>,
+    >(
         &self,
-        cache: &crate::detail_analysis::DetailCache<'_>,
+        cache: &crate::detail_analysis::DetailCache<'_, T>,
     ) -> Result<PcmDemand, Error> {
         let mut selected: Option<RegionRequest> = None;
         for slot in self.slots.iter().filter(|slot| {
@@ -229,7 +247,12 @@ impl<'a> Scheduler<'a> {
             request_token: token,
         })
     }
-    pub(crate) fn refresh_detail(&mut self, cache: &crate::detail_analysis::DetailCache<'_>) {
+    pub(crate) fn refresh_detail<
+        T: AsRef<[crate::detail_analysis::DetailTile]> + AsMut<[crate::detail_analysis::DetailTile]>,
+    >(
+        &mut self,
+        cache: &crate::detail_analysis::DetailCache<'_, T>,
+    ) {
         for slot in self.slots.iter_mut() {
             let Some(request) = slot.request else {
                 continue;
@@ -388,7 +411,7 @@ impl<'a> Scheduler<'a> {
     }
     // The C automatic pull path calls the internal overview selector without
     // the public wrapper's temporary musical dependency masks.
-    pub(crate) fn next_overview_pcm_request(
+    pub fn next_overview_pcm_request(
         &mut self,
         accepted: &[FrameRange],
     ) -> Result<PcmDemand, Error> {

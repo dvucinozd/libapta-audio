@@ -446,19 +446,8 @@ impl<'a> OwnedResult<'a> {
     // Only publication's explicit C capability path may override derived bits.
     // Payload validation and external builder rules remain content based.
     pub(crate) fn apply_session_capabilities(&mut self, requested: u64) {
-        use crate::result::*;
-        let mut available = self.validation.available_features
-            & !(CONFIDENCE | GRID_LOCKING | DYNAMIC_TEMPO | WAVEFORM_3BAND);
-        if available & (WAVEFORM_OVERVIEW | BPM | LOCAL_BEATGRID | GLOBAL_BEATGRID) != 0 {
-            available |= requested & CONFIDENCE;
-        }
-        if available & LOCAL_BEATGRID != 0 {
-            available |= requested & GRID_LOCKING;
-        }
-        if available & GLOBAL_BEATGRID != 0 {
-            available |= requested & DYNAMIC_TEMPO;
-        }
-        self.validation.available_features = available;
+        self.validation.available_features =
+            crate::publication::session_capabilities(self.validation.available_features, requested);
     }
 
     /// Deep-copy this already validated immutable graph into independent caller

@@ -256,6 +256,9 @@ fn public_scheduler_demand_progress_and_process_order_match_c() {
         aging.push_str("D 0 0 0 0 0\n");
     }
     scenarios.push(aging);
+    // Near-limit public coordinates/deadlines and explicit IDs on a small
+    // source: this qualifies validation/clipping, not giant workspace capacity.
+    scenarios.push("A 4294967295 4294967551 96 18446744073709551615 4294967294\nD 0 0 0 0 0\nR 4294967294 0 0 0 0\nC 4294967294 0 0 0 0\nA 18446744073709551359 18446744073709551615 255 18446744073709551614 4294967295\nD 0 0 0 0 0\nC 4294967295 0 0 0 0\nF 18446744073709551614 18446744073709551615 18446744073709551615 240 1\nD 0 0 0 0 0\nP 18446744073709551615 1 123 0 0\n".to_string());
     let mut slots = String::new();
     for id in 1..=16 {
         slots += &format!("A 0 1024 96 0 {id}\nC {id} 0 0 0 0\n");

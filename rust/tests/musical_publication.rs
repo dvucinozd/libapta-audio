@@ -692,7 +692,10 @@ fn lifecycle_row(pool: &ResultPool<'_>, clock_calls: u64) -> Vec<u64> {
 fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
     let oracle = std::env::var_os("APTA_C_MUSICAL_LIFECYCLE_ORACLE").unwrap();
     for profile in (0..12)
-        .chain([1048577, 1048579])
+        .chain([
+            1048577, 1048579, 2097152, 2097153, 2097154, 2097155, 2162688, 2228224, 2359296,
+            2621440,
+        ])
         .chain(16..20)
         .chain(24..28)
         .chain(32..36)
@@ -909,7 +912,15 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
                     rows.push(lifecycle_row(&pool, clock_calls));
                 }
                 for _ in 0..1000 {
-                    if profile & (4 | 256) != 0 {
+                    let held = if profile & 2097152 != 0 {
+                        Some(pool.acquire().unwrap())
+                    } else {
+                        None
+                    };
+                    if held.is_some() {
+                        let work = s.process(WorkBudget::default(), &token);
+                        assert!(work.is_ok() || work == Err(Error::ResultSlotsExhausted));
+                    } else if profile & (4 | 256) != 0 {
                         s.process_with_clock(
                             WorkBudget::default(),
                             if profile & 256 != 0 { 20 } else { 1000000 },
@@ -924,6 +935,7 @@ fn exact_intermediate_musical_generations_and_capability_masks_match_c() {
                         s.process(WorkBudget::default(), &token).unwrap_or_else(|e| panic!("profile {profile} final {e:?} tempo {:?} grid {:?} global {:?} meter {:?}",s.session().tempo(),s.session().local_grid(),s.session().global_grid(),s.session().meter()));
                     }
                     rows.push(lifecycle_row(&pool, clock_calls));
+                    drop(held);
                     if s.session().state() == SessionState::Complete {
                         break;
                     }

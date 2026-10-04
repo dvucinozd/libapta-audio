@@ -262,6 +262,60 @@ pub fn validate_requested_features(features: u64) -> Result<(), Error> {
     Ok(())
 }
 
+pub(crate) fn project_session_payload(
+    input: &mut NativeResultInput<'_>,
+    requested: u64,
+    initially_unknown: bool,
+) {
+    if requested & crate::result::WAVEFORM_DETAIL == 0 {
+        input.detail = None;
+    }
+    // Derived confidence/locking/dynamic bits in C are capabilities,
+    // independently of the corresponding payload flags.
+    if requested & crate::result::BPM == 0 {
+        input.tempo = None;
+    }
+    // Unknown-duration compatibility follows C's nonbounded S4
+    // snapshot, which retains its derived local grid for BPM-only.
+    if requested & crate::result::LOCAL_BEATGRID == 0
+        && (!initially_unknown || requested & crate::result::BPM == 0)
+    {
+        input.local_grid = None;
+    }
+    if requested & crate::result::GLOBAL_BEATGRID == 0 {
+        input.global_grid = None;
+        input.revision = None;
+    }
+    if requested & crate::result::MUSICAL_KEY == 0 {
+        input.key = None;
+    }
+    if requested & crate::result::METER_DOWNBEAT == 0 {
+        input.meter = None;
+    }
+    if requested & crate::result::CALIBRATED_QUALITY == 0
+        || !matches!(
+            input.info.session_state,
+            ResultSessionState::Draining | ResultSessionState::Completed
+        )
+    {
+        input.quality = &[];
+    }
+}
+pub(crate) fn session_capabilities(mut available: u64, requested: u64) -> u64 {
+    use crate::result::*;
+    available &= !(CONFIDENCE | GRID_LOCKING | DYNAMIC_TEMPO | WAVEFORM_3BAND);
+    if available & (WAVEFORM_OVERVIEW | BPM | LOCAL_BEATGRID | GLOBAL_BEATGRID) != 0 {
+        available |= requested & CONFIDENCE;
+    }
+    if available & LOCAL_BEATGRID != 0 {
+        available |= requested & GRID_LOCKING;
+    }
+    if available & GLOBAL_BEATGRID != 0 {
+        available |= requested & DYNAMIC_TEMPO;
+    }
+    available
+}
+
 /// Storage for one session lifetime. A pool cannot be attached to a second
 /// session, including after the original session has been dropped.
 pub struct ResultPool<'a> {
@@ -500,38 +554,7 @@ impl<'a> ResultPool<'a> {
         let mut input = *input;
         input.info.generation = next;
         let changed = if let Some(requested) = self.requested_features {
-            if requested & crate::result::WAVEFORM_DETAIL == 0 {
-                input.detail = None;
-            }
-            // Derived confidence/locking/dynamic bits in C are capabilities,
-            // independently of the corresponding payload flags.
-            if requested & crate::result::BPM == 0 {
-                input.tempo = None;
-            }
-            // Unknown-duration compatibility follows C's nonbounded S4
-            // snapshot, which retains its derived local grid for BPM-only.
-            if requested & crate::result::LOCAL_BEATGRID == 0 && self.source.total_frames.is_some()
-            {
-                input.local_grid = None;
-            }
-            if requested & crate::result::GLOBAL_BEATGRID == 0 {
-                input.global_grid = None;
-                input.revision = None;
-            }
-            if requested & crate::result::MUSICAL_KEY == 0 {
-                input.key = None;
-            }
-            if requested & crate::result::METER_DOWNBEAT == 0 {
-                input.meter = None;
-            }
-            if requested & crate::result::CALIBRATED_QUALITY == 0
-                || !matches!(
-                    input.info.session_state,
-                    ResultSessionState::Draining | ResultSessionState::Completed
-                )
-            {
-                input.quality = &[];
-            }
+            project_session_payload(&mut input, requested, self.source.total_frames.is_none());
             let mut changed = changed;
             if changed & crate::result::BPM != 0 {
                 if input.tempo.is_none() {

@@ -49,6 +49,24 @@ impl<S: PullSource> GrowingPullSession<S> {
             },
         }
     }
+    pub fn set_tempo_focus(&mut self, focus: libapta::Focus) -> Result<(), Error> {
+        if let Some(error) = self.failure {
+            return Err(error);
+        }
+        self.writer.set_tempo_focus(focus)
+    }
+    pub fn lock_grid_range(&mut self, range: libapta::FrameRange) -> Result<(), Error> {
+        if let Some(error) = self.failure {
+            return Err(error);
+        }
+        self.writer.lock_grid_range(range)
+    }
+    pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
+        if let Some(error) = self.failure {
+            return Err(error);
+        }
+        self.writer.apply_grid_revision(id)
+    }
     pub fn refresh(&mut self) -> Result<bool, Error> {
         self.writer.refresh()
     }

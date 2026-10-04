@@ -250,6 +250,9 @@ where
     pub(crate) fn set_completed(&mut self, completed: bool) {
         self.completed = completed;
     }
+    pub(crate) fn meter_enabled(&self) -> bool {
+        self.meter_enabled
+    }
     pub(crate) fn enable_meter(&mut self) -> Result<(), Error> {
         if self.meter_enabled {
             return Err(Error::InvalidState);
