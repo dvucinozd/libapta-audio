@@ -21,7 +21,9 @@ release compatibility have not been approved by the maintainer.
 
 ## Architecture and constraints
 
-One workspace and one experimental `libapta` crate under `rust/`. Its version
+One workspace with an experimental portable `libapta` crate under `rust/` and
+a separate safe desktop `libapta-runtime` synchronization boundary under
+`rust/runtime/`. Its version
 `0.1.0` describes the unpublished Rust crate only; C package/API/specification
 versions remain unchanged. Core is `no_std`, forbids unsafe code, and uses no
 allocator. `libm` supplies portable floating point square root/floor needed for
@@ -145,7 +147,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | WOVR reader/writer | [container.rs](../../rust/src/container.rs) | Implemented; exact C golden roundtrip, malformed inputs, strict C reader |
 | META and fingerprints | [meta.rs](../../rust/src/meta.rs), types/container | Deterministic bounded CBOR, recognized-field ownership and writer complete; fingerprint computation pending |
 | WDTL/detail interchange | [detail.rs](../../rust/src/detail.rs), container/types | Level-1 payload reader/writer and aggregate result validation implemented; exact C bytes; native eager sequential/sparse detail and sparse request protection/replay integrated |
-| TEMP/LGRD, GGRD/REVN | [tempo.rs](../../rust/src/tempo.rs), [grid.rs](../../rust/src/grid.rs), [result.rs](../../rust/src/result.rs) | Payloads, canonical writing and cross-feature links implemented; exact C roundtrips; native default S4/S6 analysis and explicit revision acceptance integrated; musical request-mask/trace parity remains |
+| TEMP/LGRD, GGRD/REVN | [tempo.rs](../../rust/src/tempo.rs), [grid.rs](../../rust/src/grid.rs), [result.rs](../../rust/src/result.rs) | Payloads, canonical writing and cross-feature links implemented; exact C roundtrips; native default S4/S6 analysis and explicit revision acceptance integrated; explicit requested-capability path and 53 lifecycle profiles pass; full mask/failure matrix remains |
 | MKEY/MTRD/CONF + cross-feature checks | [dj.rs](../../rust/src/dj.rs), result/builder | Payloads, limits, grid/quality links and canonical bytes implemented; default native key/meter/calibration integrated; accuracy gates unchanged |
 | Buffer/stream/selective parse APIs | container/result/[stream.rs](../../rust/src/stream.rs)/[stream_write.rs](../../rust/src/stream_write.rs) | Complete known wire section set, bounded callbacks and selective retention; differences documented below; C ABI pending |
 | S16/S24/S32/F32 interleaved/planar PCM | waveform/session | All five formats through typed views/session; exact C comparisons; C block ABI pending |
@@ -153,9 +155,9 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Three-band overview/detail | [band.rs](../../rust/src/band.rs), session/sparse | Three-band overview integrated; exact C comparisons; three-band detail remains outside original scope |
 | Push/backpressure/EOF/budgets/cancel | session | Implemented sequential known/unknown duration; fixed output capacity, budget/backpressure/EOF/cancel tests pass |
 | Pull/seek/release callbacks | [pull.rs](../../rust/src/pull.rs), [sparse_pull.rs](../../rust/src/sparse_pull.rs) | Sequential known/unknown and scheduled known-duration pull; exactly-once release and absolute-offset seeking; C callback ABI remains pending |
-| Focus/requests/sparse ranges/scheduler | [sparse.rs](../../rust/src/sparse.rs), [scheduler.rs](../../rust/src/scheduler.rs), publication | Known-duration sparse overview/detail request policy, protection and replay integrated; oracle/review/combined acceptance below; musical-analysis schedulers pending |
-| Context/static workspace/allocation classes | future runtime/FFI | Caller typed storage and sequential two-slot size plan; full scheduler/platform planner pending |
-| Immutable generations/pool/concurrency | session + future runtime/FFI | Owned graphs and two caller-owned immutable slots; five lifecycle oracle traces and independent review pass; concurrent acquire/release pending |
+| Focus/requests/sparse ranges/scheduler | [sparse.rs](../../rust/src/sparse.rs), [scheduler.rs](../../rust/src/scheduler.rs), publication | Known-duration sparse overview/detail request policy, protection and replay integrated; oracle/review/combined acceptance below; musical focus/demand and S4 work/progress mapping integrated; twelve musical C scenarios pass |
+| Context/static workspace/allocation classes | future runtime/FFI | Aggregate default-feature typed-array/retained-byte planning and atomic attachment preflight; C layout/classes pending |
+| Immutable generations/pool/concurrency | session + [runtime](../../rust/runtime/src/lib.rs)/future FFI | Owned graphs, two core slots, unknown-duration sequential publication and safe independent Arc readers; safe standard-heap graph ownership/concurrent readers implemented; growing session/context and C acquire/release pending |
 | Resume/result seeding | publication/sparse/waveform | Validated owned overview checkpoint, source/fingerprint compatibility, inverse quantization and atomic native preflight; C tail difference documented below |
 | External validated result builder | [builder.rs](../../rust/src/builder.rs), [native_validation.rs](../../rust/src/native_validation.rs), [owned_result.rs](../../rust/src/owned_result.rs) | Encoded subset plus native graph/provenance/session-state validation and deep ownership; C allocator/API boundary pending |
 | S4 onset/BPM/local grid | [analysis.rs](../../rust/src/analysis.rs), session/sparse/publication | Default broadband analysis integrated; exact TEMP/LGRD C comparisons, focus and locking; experimental onset profiles pending |
@@ -163,7 +165,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Musical key/meter/downbeat | [key_analysis.rs](../../rust/src/key_analysis.rs), analysis | Default C profiles integrated; exact MKEY/MTRD comparisons; original accuracy gates remain failed |
 | Quality/confidence calibration | analysis/session/sparse/publication | BPM LUT/model 1867860160 integrated; exact CONF comparisons; fresh accuracy qualification remains open |
 | POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed WAV decoder complete initial format slice; four tests; filesystem/callback adapters pending |
-| Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform-only desktop demonstration; eight WAV formats/channel smoke cases; CLI parity pending |
+| Analyze/inspect/validate/version/corpus tools | [wav_to_apta.rs](../../rust/examples/wav_to_apta.rs) | Waveform and default musical desktop modes; eight waveform/nine musical WAV smoke cases and exact C musical bytes; CLI parity pending |
 | Push/pull/installed/package/ESP examples | examples | Push/WAV-to-container example implemented; others pending |
 | C API/ABI and frozen 1.0 consumers | future FFI | Pending; C remains installed product |
 | CMake/pkg-config/shared/static packages | root build future FFI | Cargo additive only |
@@ -987,3 +989,150 @@ passed. AArch64 no-default-features compilation passed; evidence is
 The accepted code is preserved for successive continuation. Start from live Git,
 these source-linked remaining gates, and the final combined evidence; do not
 restart waveform work or infer whole-library completion from the synthetic matrix.
+
+
+## Musical lifecycle and runtime continuation — 2026-10-04
+
+This continuation supersedes the preceding next-work descriptions for the
+implemented slices below. C source, published headers, container format and
+installed product remain unchanged. No full replacement, original algorithm
+accuracy or physical qualification claim follows.
+
+### Implemented integrated behavior
+
+- Sparse musical request/focus masks route through the existing scheduler. Public
+  PCM queries translate S4/global/key/meter targets to overview gaps. Effective
+  C S4 wrappers additionally score and refresh BPM/local/locking requests as
+  overview work. Key/global-only progress remains queued, matching C. Automatic
+  scheduled pull deliberately calls the internal overview selector without the
+  public musical mapping. Existing detail replay priorities remain intact.
+- Explicit `ResultPool::new_with_requested_features` validates C feature
+  dependencies, projects unrequested payloads, and uses requested capabilities
+  for confidence/dynamic/locking availability. Quality stays hidden until EOF.
+  Ordinary native publication retains content-derived availability. Attachment
+  rejects unrequested stages before mutation; locking validates empty ranges
+  before returning Unsupported for an absent requested capability.
+- Effective wrapper order is waveform → S4 → S6 → meter → key, established from
+  CMake compile definitions and public traces. Clock checks occur after lag
+  groups/windows, not scan initialization or commits. A frozen scan can commit
+  and follow newer evidence within the same call after the last clock expired,
+  provided work steps remain. Final partial scans and rejected unchanged
+  ensemble attempts still retain the accepted native termination differences.
+- `publication::plan_features` covers optional band/detail/default musical
+  working arrays, both slots' maximum typed graph counts and retained bytes.
+  Shared `owned_result::retained_size` avoids separate byte-accounting formulas.
+  Sequential/sparse attachment accumulates all attached features and checks
+  aggregate counts/bytes plus both slots before initializing caller arrays.
+  Native S4 reserves local arrays even for a BPM-only projected capability.
+  Queue/control bytes and caller capacity beyond referenced data are excluded;
+  this is native planning, not C ABI offsets or allocator-class equivalence.
+- Unknown-duration sequential publication plans against caller column capacity.
+  EOF resolves working/result duration atomically, rolls back on exhausted-slot
+  failure, and retries without corrupting retained unknown-source generations.
+  Partial capacity acceptance and empty EOF are tested. Invalid floating PCM is
+  now preflighted before the first Running publication as well as core mutation.
+- `OwnedResult::copy_to` deep-copies trusted immutable graphs, preserving native
+  capabilities, into independent typed storage after complete capacity preflight.
+  The separate std `libapta-runtime` crate forbids unsafe code and integrates
+  sequential/sparse processing with `ConcurrentResults`. Readers acquire Arc
+  generations under a short RwLock; independent snapshots do not pin core pool
+  slots. Standard allocator control blocks are explicit; caller-owned graph
+  arrays and their lifetimes remain enforced by Rust. Short copies can retry
+  just the mirror; committed cancellation is mirrored before returning its error.
+- The std runtime also implements `HeapResult` and `HeapResults`. Complete native
+  graphs, metadata (including opaque application identity), provenance and masks
+  are copied into independent standard-heap arrays without unsafe code or source
+  lifetime references. Copies use fallible Vec reservation and enforce aggregate
+  retained *capacity* bytes/counts; control Arc/RwLock allocations are separate.
+  Concurrent readers retain any number of generations independently of caller
+  arrays/session/core pool. Actual sequential/sparse processing mirrors through
+  the same publication lifecycle; heap limit failures retry only the mirror.
+  Trusted source-bounded meter/grid exceptions are retained exactly. `view()`
+  exposes a native graph; generic external conversion still has strict external
+  validation, so heap ownership does not widen serialization acceptance.
+- `wav_to_apta --music` advances the desktop consumer into the integrated default
+  musical graph using planning/publication/serialization. Existing waveform
+  behavior and create-new output protection remain. It is not a C CLI replacement.
+
+### Reference-derived trusted snapshot boundaries
+
+Public compiled C scheduled-source traces establish that focus-limited meter
+snapshots may contain a source-bounded downbeat outside segment applicability.
+Unknown-duration EOF can leave a grid's *requested* range rounded past the final
+partial bin. Trusted native session validation accepts those exact values;
+external builder rules remain strict, and evidence/applicability/source downbeat
+bounds remain checked. No clamping, mask normalization or tolerance hides these
+cases. Wire conversion/writers keep their own validation: every trusted snapshot
+is not thereby promised strict-interchange acceptance. The complete desktop
+container fixtures pass both native parsing and the strict C validator.
+
+### Acceptance and evidence
+
+`rust/tests/fixtures/musical_lifecycle_oracle.c` mutates only public C APIs.
+`rust/tests/musical_publication.rs` compares 53 profiles' exact generation, state,
+available/changed masks, tempo values/states, clock counts, meter coordinates,
+global flags/counts and source read/release coordinates. Profiles cover S4-only
+and all default stages with confidence/locking on/off; expired/resumed clocks;
+retained initial exhaustion/retry; cancellation; scheduled musical focus;
+known/unknown EOF; silence, near-zero and DC; long ring replacement; and changing
+tempo. This is a defined matrix, not every feature combination or failure stage.
+
+`rust/tests/scheduler_oracle.rs` compares twelve musical scenarios across
+S4/local, key, global and mixed key/tempo requests, plus the preserved six
+waveform scenarios. Exact request masks, ranges, priorities, progress, deadline
+processing order, cancellation and overflow/EOF behavior are checked.
+`rust/tests/tempo_analysis.rs` extends integrated global TEMP/GGRD/REVN bytes to
+long ring replacement, 3072-beat exhaustion and eight-segment degraded output.
+The shorter changing-tempo fixture establishes five-segment behavior separately.
+No new numerical tolerance is used.
+
+Native atomic aggregate preflight tests enumerate all 4096 feature masks and
+exercise cumulative attachment order/byte limits, preserving sentinel working
+buffers on failure. Unknown-duration publication tests cover short output,
+invalid PCM, retained source identity and EOF retry. Eight safe runtime tests exercise two participating threads, caller and heap
+retained generations across 16 actual PCM publications, storage/session/channel
+destruction, sparse gap generations, full default musical graphs, metadata/detail/
+opaque identity/provenance, count/byte limit boundaries, mirror-only retry,
+source/generation conflicts and cancellation. All caller arrays go out of scope
+before heap generations are inspected or moved to another thread.
+The complete musical container is deep-copied and reserialized after session and
+pool destruction. Existing isolated allocation counters remain separate from
+the deliberately allocating std runtime tests.
+
+Baseline evidence: `/home/shome/.local/share/libapta-audio/rust-rewrite/continuation-music-baseline.log`.
+Final integration evidence: `/home/shome/.local/share/libapta-audio/rust-rewrite/continuation-music-combined-check.log`.
+Final source-state acceptance: **123/123 C tests**, **233 ordinary Rust tests**
+(including eight std runtime tests) and **35 explicitly enabled external-C groups**
+in each debug/release profile. Formatting, all-target Clippy, no-default-features,
+isolated allocation counters, eight waveform and nine musical WAV cases pass.
+AArch64 portable no-default-features compilation passes; evidence:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/continuation-music-aarch64-check.log`.
+`git diff --check` and knowledge notebook validation also pass.
+The runner registers the new C oracle and explicitly executes ignored groups in
+both debug and release. Eight waveform and nine musical WAV interchange cases
+include overwrite protection and one complete desktop/C byte comparison.
+
+### Remaining dependency gates
+
+1. Complete musical lifecycle request combinations (including BPM-only, key-only
+   and capability projection across all stages), public C traces of all-stage
+   publication failure/retry, locking/revision exhaustion and integrated sparse
+   musical detail replay. Existing native lock/revision failure tests are retained;
+   their complete public-C lifecycle matrix is not established by these tests.
+2. Extend sparse musical evidence and near-limit coordinate acceptance, ensemble
+   promotion variants and optional experimental profiles selectively. Synthetic
+   default-profile parity does not qualify original rejected accuracy gates,
+   optional research or spent holdouts.
+3. Finish dynamically growing nonbounded session workspaces/context lifetime and
+   allocator callbacks/classes/C workspace layout. Native heap-owned retained
+   graphs and reader lifetimes are implemented using the standard allocator. The portable two-slot pool is
+   still single-threaded; the std caller/heap copy boundaries establish native
+   concurrent readers, not C ABI acquire/release or custom allocator compatibility. Unknown
+   duration remains constrained by explicit caller output capacity.
+4. Implement the audited unsafe C API/ABI boundary, static/shared CMake/pkg-config
+   packaging and frozen consumers. Complete native analyzer/inspect/validate/
+   version/corpus interfaces; the musical example covers only its documented WAV
+   mode. Existing C package/consumer tests validate preserved C, not a Rust ABI.
+5. Establish Windows/ILP32/ESP-IDF software/platform acceptance and physical P4
+   qualification. A portable AArch64 compile is not platform/hardware acceptance.
+   No services, deployment or hardware were operated.

@@ -324,6 +324,9 @@ impl<'a> GlobalAnalysis<'a> {
                 }
                 self.cursor = end;
                 done += 1;
+                if deadline.expired() && self.cursor < self.end {
+                    return Ok(done);
+                }
             } else {
                 if self.windows == 0 {
                     if let Some(t) = fallback {
@@ -333,12 +336,18 @@ impl<'a> GlobalAnalysis<'a> {
                 }
                 self.commit(eof, locked)?;
                 self.refreshed_end = self.end;
-                self.refreshed_eof = eof.is_some();
+                let follow = self.evidence(eof).is_some_and(|(first, end)| {
+                    first < self.first
+                        || end < self.end
+                        || (eof.is_some() && (first != self.first || end != self.end))
+                        || end >= self.end + 32
+                });
+                self.refreshed_eof = eof.is_some() && !follow;
                 self.active = false;
                 done += 1;
-            }
-            if deadline.expired() {
-                return Ok(done);
+                if !follow || done == steps || self.pending_count == 0 {
+                    return Ok(done);
+                }
             }
         }
     }

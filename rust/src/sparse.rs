@@ -784,7 +784,7 @@ impl<'a> SparseSession<'a> {
                 self.eof.then_some(self.config.total_frames),
                 deadline,
             )?;
-            if analysis.ensemble_pending() && done < steps && !deadline.expired() {
+            if analysis.ensemble_clock_check() && done < steps && !deadline.expired() {
                 done += analysis.ensemble(steps - done, previous)?;
             }
             Ok(done)
@@ -932,9 +932,9 @@ impl<'a> SparseSession<'a> {
             progress.completed_steps +=
                 self.process_global_analysis(steps - progress.completed_steps, deadline)?;
             progress.completed_steps +=
-                self.process_key_analysis(steps - progress.completed_steps, deadline)?;
-            progress.completed_steps +=
                 self.process_meter_analysis(steps - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_key_analysis(steps - progress.completed_steps, deadline)?;
         } else if !self.has_analysis() {
             deadline.analysis_boundaries();
         }

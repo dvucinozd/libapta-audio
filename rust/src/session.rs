@@ -396,23 +396,7 @@ impl<'a> Session<'a> {
             return Err(Error::InvalidState);
         }
         let channels = self.config.channel_count;
-        let available = self.input_capacity - self.accepted;
-        let supplied = samples.frame_count(channels)?;
-        if self.config.total_frames == TOTAL_FRAMES_UNKNOWN && available == 0 && supplied != 0 {
-            return Err(Error::BufferTooSmall);
-        }
-        let count = supplied
-            .min(self.queue.len() - self.queued)
-            .min(usize::try_from(available).unwrap_or(usize::MAX));
-        if let Some(analysis) = &self.analysis {
-            analysis.preflight(self.accepted, count)?;
-        }
-        if let Some(global) = &self.global {
-            global.preflight(self.accepted, count)?;
-        }
-        for index in 0..count {
-            samples.sample_frame(index, channels)?;
-        }
+        let count = self.preflight_push(samples)?;
         for frame in 0..count {
             let sample = samples.sample_frame(frame, channels)?;
             if let Some(detail) = &mut self.detail {
@@ -434,6 +418,30 @@ impl<'a> Session<'a> {
         }
         if count != 0 {
             self.state = SessionState::Running;
+        }
+        Ok(count)
+    }
+
+    // Shared preflight lets publication reject invalid accepted PCM before a
+    // first-push state generation is visible. No caller or working data changes.
+    pub(crate) fn preflight_push(&self, samples: PcmView<'_>) -> Result<usize, Error> {
+        let channels = self.config.channel_count;
+        let available = self.input_capacity - self.accepted;
+        let supplied = samples.frame_count(channels)?;
+        if self.config.total_frames == TOTAL_FRAMES_UNKNOWN && available == 0 && supplied != 0 {
+            return Err(Error::BufferTooSmall);
+        }
+        let count = supplied
+            .min(self.queue.len() - self.queued)
+            .min(usize::try_from(available).unwrap_or(usize::MAX));
+        if let Some(analysis) = &self.analysis {
+            analysis.preflight(self.accepted, count)?;
+        }
+        if let Some(global) = &self.global {
+            global.preflight(self.accepted, count)?;
+        }
+        for index in 0..count {
+            samples.sample_frame(index, channels)?;
         }
         Ok(count)
     }
@@ -481,6 +489,10 @@ impl<'a> Session<'a> {
     ) -> Result<Progress, Error> {
         let mut deadline = crate::deadline::Deadline::new(soft_us, clock);
         self.process_inner(budget, cancellation, true, &mut deadline)
+    }
+
+    pub(crate) fn set_publication_total_frames(&mut self, total: u64) {
+        self.config.total_frames = total;
     }
 
     pub(crate) fn set_publication_state(&mut self, state: SessionState) {
@@ -536,7 +548,7 @@ impl<'a> Session<'a> {
                 (self.state == SessionState::Draining).then_some(self.accepted),
                 deadline,
             )?;
-            if analysis.ensemble_pending() && done < steps && !deadline.expired() {
+            if analysis.ensemble_clock_check() && done < steps && !deadline.expired() {
                 done += analysis.ensemble(steps - done, previous)?;
             }
             Ok(done)
@@ -665,9 +677,9 @@ impl<'a> Session<'a> {
             progress.completed_steps +=
                 self.process_global_analysis(step_limit - progress.completed_steps, deadline)?;
             progress.completed_steps +=
-                self.process_key_analysis(step_limit - progress.completed_steps, deadline)?;
-            progress.completed_steps +=
                 self.process_meter_analysis(step_limit - progress.completed_steps, deadline)?;
+            progress.completed_steps +=
+                self.process_key_analysis(step_limit - progress.completed_steps, deadline)?;
         } else if !self.has_analysis() {
             deadline.analysis_boundaries();
         }

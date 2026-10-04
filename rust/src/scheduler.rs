@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-//! Caller-owned waveform request scheduling matching the C reference policy.
+//! Caller-owned waveform and musical request scheduling matching C policy.
 //! Deadlines are ordering hints, never timeouts. Terminal requests retain their
 //! identifiers and slots. Detail policy is enabled by an attached session cache.
 use crate::{
@@ -7,6 +7,18 @@ use crate::{
     Error, Focus, FrameRange, PcmDemand, RegionRequest, RequestProgress, RequestState,
     WaveformSpan,
 };
+// Public demand maps all musical evidence consumers to overview gaps. The S4
+// process wrapper maps only its own features to overview scheduling/progress.
+const S4_FEATURES: u64 =
+    crate::result::BPM | crate::result::LOCAL_BEATGRID | crate::result::GRID_LOCKING;
+const PCM_FEATURES: u64 = WAVEFORM_OVERVIEW
+    | S4_FEATURES
+    | crate::result::GLOBAL_BEATGRID
+    | crate::result::DYNAMIC_TEMPO
+    | crate::result::MUSICAL_KEY
+    | crate::result::METER_DOWNBEAT;
+const PROCESS_FEATURES: u64 = WAVEFORM_OVERVIEW | WAVEFORM_DETAIL | S4_FEATURES;
+const SUPPORTED_FEATURES: u64 = PCM_FEATURES | WAVEFORM_DETAIL | crate::result::CALIBRATED_QUALITY;
 pub const MAX_REQUESTS: usize = 16;
 pub const MAX_PCM_REQUEST_FRAMES: u64 = 4096;
 #[derive(Clone, Copy, Debug)]
@@ -110,7 +122,7 @@ impl<'a> Scheduler<'a> {
         if total_frames == Some(u64::MAX) {
             return Err(Error::InvalidArgument);
         }
-        if requested_features & !WAVEFORM_OVERVIEW != 0 {
+        if requested_features & !(SUPPORTED_FEATURES & !WAVEFORM_DETAIL) != 0 {
             return Err(Error::Unsupported);
         }
         let n = slots.len().min(MAX_REQUESTS);
@@ -124,6 +136,9 @@ impl<'a> Scheduler<'a> {
             next_request_id: 1,
             next_enqueue_serial: 0,
         })
+    }
+    pub(crate) fn enable_music(&mut self, features: u64) {
+        self.requested_features |= features;
     }
     pub(crate) fn enable_detail(&mut self) {
         self.requested_features |= WAVEFORM_DETAIL;
@@ -249,7 +264,7 @@ impl<'a> Scheduler<'a> {
         if request.range.first_frame >= request.range.end_frame || request.feature_mask == 0 {
             return Err(Error::InvalidArgument);
         }
-        if request.feature_mask & !(WAVEFORM_OVERVIEW | WAVEFORM_DETAIL) != 0 {
+        if request.feature_mask & !SUPPORTED_FEATURES != 0 {
             return Err(Error::Unsupported);
         }
         if request.feature_mask & WAVEFORM_DETAIL != 0
@@ -335,7 +350,7 @@ impl<'a> Scheduler<'a> {
         if focus.playhead_frame == u64::MAX {
             return Err(Error::InvalidArgument);
         }
-        if focus.feature_mask & !(WAVEFORM_OVERVIEW | WAVEFORM_DETAIL) != 0 {
+        if focus.feature_mask & !SUPPORTED_FEATURES != 0 {
             return Err(Error::Unsupported);
         }
         if self.total_frames.is_some_and(|n| focus.playhead_frame > n) {
@@ -369,6 +384,21 @@ impl<'a> Scheduler<'a> {
     /// be nonempty, ordered and non-overlapping. A fully accepted selected region
     /// returns NotAvailable; it does not fall back to another region or focus.
     pub fn next_pcm_request(&mut self, accepted: &[FrameRange]) -> Result<PcmDemand, Error> {
+        self.next_pcm_request_for(accepted, PCM_FEATURES)
+    }
+    // The C automatic pull path calls the internal overview selector without
+    // the public wrapper's temporary musical dependency masks.
+    pub(crate) fn next_overview_pcm_request(
+        &mut self,
+        accepted: &[FrameRange],
+    ) -> Result<PcmDemand, Error> {
+        self.next_pcm_request_for(accepted, WAVEFORM_OVERVIEW)
+    }
+    fn next_pcm_request_for(
+        &mut self,
+        accepted: &[FrameRange],
+        features: u64,
+    ) -> Result<PcmDemand, Error> {
         let mut previous = 0;
         for (i, r) in accepted.iter().enumerate() {
             if r.first_frame >= r.end_frame
@@ -386,7 +416,7 @@ impl<'a> Scheduler<'a> {
         for slot in self
             .slots
             .iter()
-            .filter(|s| s.active() && s.request.unwrap().feature_mask & WAVEFORM_OVERVIEW != 0)
+            .filter(|s| s.active() && s.request.unwrap().feature_mask & features != 0)
         {
             let score = slot.score();
             if selected.map_or(true, |(_, best)| score.better_than(&best)) {
@@ -395,7 +425,7 @@ impl<'a> Scheduler<'a> {
         }
         let (mut target, priority, token) = if let Some((r, s)) = selected {
             (r.range, s.effective_priority, r.request_id)
-        } else if let Some((r, p)) = self.focus_range_for(WAVEFORM_OVERVIEW) {
+        } else if let Some((r, p)) = self.focus_range_for(features) {
             (r, p, 0)
         } else {
             (FrameRange::default(), 32, 0)
@@ -455,12 +485,16 @@ impl<'a> Scheduler<'a> {
     }
     pub(crate) fn score_range(&self, range: FrameRange) -> ScheduleScore {
         let mut best = ScheduleScore::default();
-        if let Some((focus, priority)) = self.focus_range_for(WAVEFORM_OVERVIEW | WAVEFORM_DETAIL) {
+        if let Some((focus, priority)) = self.focus_range_for(PROCESS_FEATURES) {
             if focus.first_frame < focus.end_frame && overlap(range, focus) {
                 best.effective_priority = priority;
             }
         }
-        for slot in self.slots.iter().filter(|s| s.active()) {
+        for slot in self
+            .slots
+            .iter()
+            .filter(|s| s.active() && s.request.unwrap().feature_mask & PROCESS_FEATURES != 0)
+        {
             if overlap(range, slot.request.unwrap().range) {
                 let score = slot.score();
                 if score.better_than(&best) {
@@ -500,7 +534,11 @@ impl<'a> Scheduler<'a> {
         }
         // The effective C process wrapper temporarily treats detail requests
         // as overview dependencies before applying actual cache coverage.
-        for slot in self.slots.iter_mut().filter(|s| s.active()) {
+        for slot in self
+            .slots
+            .iter_mut()
+            .filter(|s| s.active() && s.request.unwrap().feature_mask & PROCESS_FEATURES != 0)
+        {
             let r = slot.request.unwrap().range;
             let first = r.first_frame / u64::from(frames_per_column);
             let last = (r.end_frame - 1) / u64::from(frames_per_column);

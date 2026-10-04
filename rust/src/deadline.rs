@@ -34,7 +34,7 @@ impl<'a> Deadline<'a> {
             .is_some_and(|clock| clock() >= self.end_ns)
     }
 
-    /// The effective C runtime checks S4, S6, key, and meter in this order,
+    /// The effective C runtime checks S4, S6, meter, and key in this order,
     /// even when only overview is enabled or a previous check has expired.
     /// Future analysis stages must use these same checks and this deadline.
     pub(crate) fn analysis_boundaries(&mut self) {

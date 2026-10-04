@@ -411,3 +411,111 @@ fn full_retained_byte_limit_is_checked_before_session_attachment() {
         Err(Error::InvalidArgument)
     );
 }
+
+#[test]
+fn unknown_duration_eof_resolution_and_publication_rollback_preserve_leases() {
+    let mut src = source(0);
+    src.total_frames = None;
+    let mut ca = [WaveformColumn::default(); 2];
+    let mut cb = ca;
+    let mut sa = [WaveformSpan::default(); 1];
+    let mut sb = sa;
+    let pool = ResultPool::new(
+        src,
+        [storage(&mut sa, &mut ca), storage(&mut sb, &mut cb)],
+        NativeLimits::default(),
+    )
+    .unwrap();
+    let mut queue = [NormalizedSample::default(); 128];
+    let mut columns = [WaveformColumn::default(); 2];
+    let cfg = config(libapta::session::TOTAL_FRAMES_UNKNOWN);
+    let p = libapta::publication::plan_with_capacity(cfg, NativeLimits::default(), 2).unwrap();
+    assert_eq!(p.working_columns, 2);
+    let mut s = PublishedSession::new(cfg, &mut queue, &mut columns, &pool).unwrap();
+    let initial = pool.acquire().unwrap();
+    assert_eq!(
+        s.push_pcm(PcmView::F32Interleaved(&[f32::NAN])),
+        Err(Error::InvalidArgument)
+    );
+    assert_eq!(s.session().state(), SessionState::Created);
+    assert_eq!(pool.generation(), 1);
+    assert_eq!(
+        s.push_pcm(PcmView::F32Interleaved(&[0.25; 65])).unwrap(),
+        65
+    );
+    assert_eq!(s.finish_input(), Err(Error::ResultSlotsExhausted));
+    assert_eq!(
+        s.session().config().total_frames,
+        libapta::session::TOTAL_FRAMES_UNKNOWN
+    );
+    assert_eq!(s.session().state(), SessionState::Running);
+    assert_eq!(initial.source().total_frames, None);
+    drop(initial);
+    s.process(step(), &CancellationToken::new()).unwrap();
+    let running = pool.acquire().unwrap();
+    assert_eq!(running.source().total_frames, None);
+    let generation = running.info().generation;
+    s.finish_input().unwrap();
+    assert_eq!(s.session().config().total_frames, 65);
+    assert_eq!(pool.acquire().unwrap().source().total_frames, Some(65));
+    assert_eq!(
+        s.process(WorkBudget::default(), &CancellationToken::new()),
+        Err(Error::ResultSlotsExhausted)
+    );
+    assert_eq!(running.info().generation, generation);
+    assert_eq!(running.source().total_frames, None);
+    assert_eq!(running.overview().unwrap().columns.len(), 1);
+    drop(running);
+    s.process(WorkBudget::default(), &CancellationToken::new())
+        .unwrap();
+    assert_eq!(s.session().state(), SessionState::Complete);
+    let r = pool.acquire().unwrap();
+    assert_eq!(r.source().total_frames, Some(65));
+    let w = r.overview().unwrap();
+    assert_eq!(w.state, FeatureState::Final);
+    assert_eq!(w.spans[0].end_frame, 65);
+    assert_eq!(w.columns.len(), 2);
+}
+
+#[test]
+fn unknown_publication_output_ceiling_is_permanent_and_empty_eof_is_valid() {
+    for frames in [0, 64] {
+        let mut src = source(0);
+        src.total_frames = None;
+        let mut ca = [WaveformColumn::default(); 1];
+        let mut cb = ca;
+        let mut sa = [WaveformSpan::default(); 1];
+        let mut sb = sa;
+        let pool = ResultPool::new(
+            src,
+            [storage(&mut sa, &mut ca), storage(&mut sb, &mut cb)],
+            NativeLimits::default(),
+        )
+        .unwrap();
+        let mut queue = [NormalizedSample::default(); 128];
+        let mut columns = [WaveformColumn::default(); 1];
+        let mut s = PublishedSession::new(
+            config(libapta::session::TOTAL_FRAMES_UNKNOWN),
+            &mut queue,
+            &mut columns,
+            &pool,
+        )
+        .unwrap();
+        if frames != 0 {
+            assert_eq!(s.push_pcm(PcmView::F32Interleaved(&[0.5; 65])).unwrap(), 64);
+            s.process(WorkBudget::default(), &CancellationToken::new())
+                .unwrap();
+            let generation = pool.generation();
+            assert_eq!(
+                s.push_pcm(PcmView::F32Interleaved(&[0.5])),
+                Err(Error::BufferTooSmall)
+            );
+            assert_eq!(pool.generation(), generation);
+        }
+        s.finish_input().unwrap();
+        s.process(WorkBudget::default(), &CancellationToken::new())
+            .unwrap();
+        assert_eq!(s.session().state(), SessionState::Complete);
+        assert_eq!(pool.acquire().unwrap().source().total_frames, Some(frames));
+    }
+}

@@ -72,7 +72,7 @@ def main():
          "-I", ROOT / "include", ROOT / "rust/tests/fixtures/seed_oracle.c",
          c_build / "libapta.a", "-lm", "-o", seed_oracle])
     analysis_oracles = {}
-    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis"):
+    for name in ("clock", "band", "detail_analysis", "detail_session", "detail_scheduler", "detail_pull", "tempo_analysis", "musical_lifecycle"):
         executable = build / f"{name.replace('_', '-')}-oracle"
         run([os.environ.get("CC", "cc"), "-std=c11", "-Wall", "-Wextra", "-Werror",
              "-I", ROOT / "include", "-I", ROOT / "src/core",
@@ -134,9 +134,32 @@ def main():
                 result = subprocess.run([str(executable), str(wav), str(apta)], capture_output=True)
                 if result.returncode == 0 or apta.read_bytes() != before:
                     raise RuntimeError("example overwrote existing output")
+                musical = wav.with_suffix(".music.apta")
+                run([executable, wav, musical, "--music"], env=env)
+                run([validator, musical, "--strict"], env=env)
+                before = musical.read_bytes()
+                result = subprocess.run([str(executable), str(wav), str(musical), "--music"], capture_output=True)
+                if result.returncode == 0 or musical.read_bytes() != before:
+                    raise RuntimeError("musical example overwrote existing output")
+        # Integrated musical desktop consumer: exact public-C container bytes.
+        pcm = b"".join(struct.pack("<f", (64 - i % 4000) / 64 * (0.75 if i // 4000 % 4 == 0 else 0.2)
+                                  if i % 4000 < 64 else 0.0) for i in range(320000))
+        pcm_path = temp / "music.pcm"
+        pcm_path.write_bytes(pcm)
+        fmt = struct.pack("<HHIIHH", 3, 1, 8000, 32000, 4, 32)
+        body = b"WAVEfmt " + struct.pack("<I", 16) + fmt + b"data" + struct.pack("<I", len(pcm)) + pcm
+        wav = temp / "music.wav"
+        musical = temp / "music.apta"
+        wav.write_bytes(b"RIFF" + struct.pack("<I", len(body)) + body)
+        run([executable, wav, musical, "--music"], env=env)
+        run([validator, musical, "--strict"], env=env)
+        reference = subprocess.check_output([analysis_oracles["APTA_C_TEMPO_ANALYSIS_ORACLE"], "8000", "0", str(pcm_path), "all"])
+        if musical.read_bytes() != reference:
+            raise RuntimeError("musical desktop container differs from unchanged C")
+        shutil.copyfile(musical, build / "smoke-musical.apta")
         # Retain one small public result for manual inspection, not a large corpus.
         shutil.copyfile(apta, build / "smoke-waveform.apta")
-    print("Combined Rust/C checks and eight WAV interchange cases passed.")
+    print("Combined Rust/C checks, eight waveform and nine musical WAV interchange cases passed.")
 
 
 if __name__ == "__main__":

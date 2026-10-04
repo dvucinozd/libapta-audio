@@ -206,8 +206,24 @@ fn native_global_grid_and_revisions_match_c_windows() {
         (44100, 44100 * 20 + 37, 128, 2, false, false),
         (8000, 8000 * 90, 95, 2, true, false),
         (8000, 8000 * 80, 125, 0, true, true),
+        (8000, 256 * 16400 + 17, 120, 0, false, false),
+        (2000, 256 * 16400 + 17, 120, 0, false, false),
+        (8000, 256 * 4800 + 17, 120, 0, false, false),
+        (8000, 256 * 16000 + 17, 120, 0, false, false),
     ] {
         let mut samples = pcm(rate, count, tempo);
+        if count == 256 * 4800 + 17 || count == 256 * 16000 + 17 {
+            for (i, sample) in samples.iter_mut().enumerate() {
+                let tempo = [80, 160, 120, 200][i / 65536 % 4];
+                let period = rate as usize * 60 / tempo;
+                let phase = i % period;
+                *sample = if phase < 64 {
+                    (64 - phase) as f32 / 64.0 * 0.75
+                } else {
+                    0.0
+                };
+            }
+        }
         if change {
             let tail = pcm(rate, count / 2, if lock { 80 } else { 150 });
             samples[count / 2..].copy_from_slice(&tail);
@@ -328,6 +344,17 @@ fn native_global_grid_and_revisions_match_c_windows() {
             "ensemble rate {rate} steps {steps}"
         );
         let grid = s.global_grid().unwrap();
+        if rate == 2000 {
+            assert_eq!(grid.beats.len(), libapta::global_analysis::MAX_BEATS);
+            assert_ne!(grid.flags & 128, 0);
+        }
+        if count == 256 * 4800 + 17 {
+            assert_eq!(grid.segments.len(), 5);
+        }
+        if count == 256 * 16000 + 17 {
+            assert_eq!(grid.segments.len(), libapta::global_analysis::MAX_SEGMENTS);
+            assert_ne!(grid.flags & 128, 0);
+        }
         let mut native = vec![0u8; 200000];
         let size = libapta::grid::write_payload(&grid, true, &mut native).unwrap();
         let reference = (0..container.section_count())

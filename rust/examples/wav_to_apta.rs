@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //! Desktop demonstration, not a replacement for the all-feature C analyzer.
+#[path = "wav_to_apta/music.rs"]
+mod music;
 use libapta::container::{waveform_size, write_waveform, Container, ParseOptions};
 use libapta::session::{CancellationToken, Session, SessionConfig, SessionState, WorkBudget};
 use libapta::wav::Wav;
@@ -13,8 +15,11 @@ use std::{
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = std::env::args_os().collect();
-    if args.len() != 3 {
-        return Err("usage: wav_to_apta INPUT.wav OUTPUT.apta (output must not exist)".into());
+    let musical = args.len() == 4 && args[3] == "--music";
+    if args.len() != 3 && !musical {
+        return Err(
+            "usage: wav_to_apta INPUT.wav OUTPUT.apta [--music] (output must not exist)".into(),
+        );
     }
     // Explicit desktop resource policy: reject files larger than 256 MiB.
     const MAX_INPUT: u64 = 256 * 1024 * 1024;
@@ -28,6 +33,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     let wav = Wav::parse(&input)?;
     if wav.frame_count() == 0 {
         return Err("an empty source has no serializable waveform".into());
+    }
+    if musical {
+        let bytes = music::analyze(&wav)?;
+        let mut output = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&args[2])?;
+        output.write_all(&bytes)?;
+        println!(
+            "{} frames, default musical analysis, {} bytes",
+            wav.frame_count(),
+            bytes.len()
+        );
+        return Ok(());
     }
     // Fixed geometry selected explicitly; this example does not implement C's
     // adaptive overview planner. 32768 is the documented long-track P4 profile.

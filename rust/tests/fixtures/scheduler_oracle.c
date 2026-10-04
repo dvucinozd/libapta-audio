@@ -13,10 +13,11 @@
         } \
     } while (0)
 
-int main(void) {
+int main(int argc, char **argv) {
+    uint64_t mask = argc > 1 ? strtoull(argv[1], NULL, 10) : APTA_FEATURE_WAVEFORM_OVERVIEW;
     apta_context_config_t cc;
     apta_context_config_init(&cc);
-    cc.requested_capabilities  =  APTA_FEATURE_WAVEFORM_OVERVIEW;
+    cc.requested_capabilities = mask;
     apta_context_t *context  =  NULL;
     CHECK(apta_context_create(&cc, &context) == 0);
     apta_session_config_t sc;
@@ -26,7 +27,7 @@ int main(void) {
     sc.channel_layout = APTA_CHANNEL_LAYOUT_MONO;
     sc.sample_format = APTA_SAMPLE_S16_NATIVE_INTERLEAVED;
     sc.total_frames = 8192;
-    sc.requested_features = APTA_FEATURE_WAVEFORM_OVERVIEW;
+    sc.requested_features = mask;
     apta_session_t *session = NULL;
     CHECK(apta_session_create(context, &sc, &session) == 0);
     char op;
@@ -43,7 +44,7 @@ int main(void) {
                 r.priority = (uint8_t)c;
                 r.soft_deadline_monotonic_ns = d;
                 r.request_id = (uint32_t)e;
-                r.feature_mask = APTA_FEATURE_WAVEFORM_OVERVIEW;
+                r.feature_mask = argc > 2 ? strtoull(argv[2], NULL, 10) : APTA_FEATURE_WAVEFORM_OVERVIEW;
                 uint32_t id = 0;
                 status = apta_session_request_region(session, &r, &id);
                 out[0] = id;

@@ -49,6 +49,10 @@ impl<'p, 'work, 'storage, S: PullSource> ScheduledPullSession<'p, 'work, 'storag
     pub fn next_pcm_request(&mut self) -> Result<PcmDemand, Error> {
         self.session.next_pcm_request()
     }
+    /// Inspect source-owned diagnostics without changing its callback state.
+    pub fn source(&self) -> &S {
+        &self.source
+    }
     pub fn into_source(self) -> S {
         self.source
     }

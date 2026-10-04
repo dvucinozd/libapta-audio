@@ -22,7 +22,7 @@ python3 rust/check.py \
 Use an appropriate external build directory on another machine. The combined
 runner requires Python 3, CMake, a C/C++ compiler, Cargo, rustfmt and Clippy. It
 builds/runs the C suite, compiles a test-only public C oracle, runs normal and
-explicit C interoperability tests, tests optimized Rust, then validates eight
+explicit C interoperability tests, tests optimized Rust, then validates eight waveform and nine musical
 synthetic WAV-to-container cases with the strict C reader. `--c-build PATH`
 reuses a C build directory. It currently targets POSIX static builds; Windows
 and embedded verification remain separate migration work.
@@ -53,9 +53,8 @@ The output path must not exist. The example accepts at most 256 MiB of input,
 uses 32,768 source frames per column, and produces a final WOVR-only container.
 It supports mono/stereo PCM S16/S24/S32 and IEEE F32 RIFF/WAVE, including
 extensible format headers. It loads the file in desktop memory; the portable
-WAV parser itself borrows input and decodes into caller scratch. No tempo/key/
-meter analysis, fingerprint computation, metadata, or C analyzer CLI parity is
-implied. Empty input has no serializable waveform and is rejected by the example.
+WAV parser itself borrows input and decodes into caller scratch. Add `--music` for the default musical path documented below. Fingerprint
+computation, metadata, and C analyzer CLI parity remain outside this example. Empty input has no serializable waveform and is rejected by the example.
 
 ## Native interfaces
 
@@ -209,7 +208,7 @@ comes from column flags despite C's bounded-pool mask omission. Exact C comparis
 run in debug and release through the existing seed and detail-pull oracles;
 allocation instrumentation includes feature-enabled seed/resume/replay/retained
 results. Evidence: `/home/shome/.local/share/libapta-audio/rust-rewrite/checkpoint-feature-seeding-combined-check.log`.
-The full core and outside replacement remain unfinished; full musical lifecycle/request-mask acceptance, nonbounded
+The full core and outside replacement remain unfinished; the continuation below advances musical lifecycle/request-mask acceptance. Nonbounded
 ownership/concurrency/allocation classes, C ABI, tools and platform gates remain.
 
 
@@ -226,9 +225,10 @@ S4 needs caller arrays of 4096 `analysis::OnsetBin` and 4096 f32 values. S6 need
 16384 bin/flux entries and 3072 `Beat` entries. Each enabled immutable slot needs
 three tempo/key candidates, one local coverage/segment, one global coverage/eight
 segments/3072 beats, one meter segment and one quality record. The core allocates
-nothing. The existing workspace planner still covers waveform only; attachment
-preflights working storage and both slots' musical array/count capacities.
-Aggregate byte limits remain checked atomically at publication.
+nothing. `publication::plan_features` now plans all default-profile typed arrays and both
+retained slots. Attachment checks aggregate retained-byte/count limits and both
+slots before initialization. These native sizes are not C ABI workspace offsets
+or allocator classes.
 
 Use `set_tempo_focus` and `lock_grid_range` for direct local-grid control.
 `apply_grid_revision` accepts a Pending S6 conflict into the locked local grid;
@@ -236,7 +236,9 @@ wrong IDs conflict, repeated acceptance is InvalidState. Acceptance persists whe
 publication fails and `process` retries it. Serialize retained session results
 with `result::from_session_result`; external builder validation remains strict.
 Known/unknown sequential pull now drains musical work after EOF without rereading
-or releasing blocks again. The two-slot publication pool remains single-threaded.
+or releasing blocks again. The portable two-slot pool remains single-threaded. Unknown-duration sequential
+publication now accepts an explicit caller column ceiling and resolves source
+duration atomically at EOF; retained earlier generations keep unknown duration.
 
 Exact C evidence covers seven wire section types and a complete integrated
 container, plus focus/locking and pending/applied revisions. Native lifecycle
@@ -245,6 +247,64 @@ pull completion. Evidence:
 `/home/shome/.local/share/libapta-audio/rust-rewrite/continuation-combined-check.log`.
 See [MIGRATION.md](../docs/rust/MIGRATION.md#integrated-musical-analysis-continuation--2026-10-04)
 for storage, termination differences, exact acceptance boundaries and next gates.
-Musical request/mask/generation trace parity, feature workspace planning,
-nonbounded/concurrent ownership and the complete C ABI/tools/platform replacement
-remain unfinished. Original algorithm accuracy and hardware gates remain open.
+The continuation below advances musical request/mask/generation traces, feature
+workspace planning and native concurrent readers. Full ownership/C ABI/tools/
+platform replacement remains unfinished. Original algorithm accuracy and hardware gates remain open.
+
+### Musical lifecycle, planning and desktop runtime continuation
+
+Use `ResultPool::new_with_requested_features` for explicit C requested-capability
+publication: unrequested musical payloads are omitted; confidence, locking and
+dynamic availability follow requested capabilities; calibrated quality appears
+at EOF. Ordinary `ResultPool::new` retains native content-derived availability.
+Requested locking errors follow C validation order. Attach the stages explicitly;
+the mask does not allocate or initialize them.
+
+Sparse musical focus and requests select overview PCM gaps while retaining their
+original requested masks. S4 requests participate in overview work/progress;
+key/global-only requests remain queued in the default C wrapper policy. Public
+musical demands target focus/request gaps, whereas automatic scheduled pull uses
+the internal overview selector. This distinction is proved against compiled C.
+
+`plan_features(config, features, limits)` returns optional working-array counts,
+per-slot native graph requirements and aggregate retained bytes.
+`plan_with_capacity` plans unknown-duration sequential overview ceilings.
+Attachment preflight accumulates all previously attached features atomically;
+failed attachments preserve caller sentinel buffers and the session.
+
+`OwnedResult::copy_to` preserves trusted session data and capability masks in
+independent caller storage. The separate safe `libapta-runtime` workspace crate
+provides `ConcurrentResults`: short locked acquisition of `Arc` generations,
+actual sequential/sparse processing followed by copies, mirror-only retry after
+short destination storage, and independent retained lifetimes. Core sessions
+remain single-writer and allocator-free. The standard allocator owns Arc control
+blocks; graph arrays remain caller-owned in that API. `HeapResult::copy_from` and
+`HeapResults` additionally own every native array/text field on the standard heap,
+with fallible copies, aggregate retained-capacity limits and independent concurrent
+lifetimes. Their sequential/sparse process mirrors retry allocation/limit failures
+without reprocessing accepted PCM. These APIs do not implement C custom allocators,
+dynamically growing session workspaces or C concurrent acquire/release.
+
+The desktop example now accepts `--music`:
+
+```sh
+cargo run --example wav_to_apta -- INPUT.wav OUTPUT.apta --music
+```
+
+It uses feature planning, actual PCM analysis, two immutable publication slots
+and trusted serialization for default tempo/local/global/key/meter/quality.
+Output must not exist. Its existing waveform mode is unchanged. This is a native
+consumer example, not the full C analyzer/inspect/validate/corpus CLI replacement.
+
+Exact lifecycle tests cover 53 PCM profiles, intermediate generation/masks,
+cooperative clock samples, cancellation, exhausted initial slots and retry,
+known/unknown EOF and scheduled sources. Long ring replacement, changing grids
+and beat/segment caps compare quantized payload/wire bytes exactly. The final
+combined runner includes eight waveform and nine musical WAV checks, with one
+complete desktop musical container compared byte-for-byte to unchanged C.
+Evidence and current totals are recorded in
+[MIGRATION.md](../docs/rust/MIGRATION.md#musical-lifecycle-and-runtime-continuation--2026-10-04).
+Full request-mask combinations, all-stage publication-failure traces, integrated
+musical detail replay, near-limit coordinates, C allocation/workspace layout,
+dynamically growing session storage/context contracts, C ABI/packaging and
+platform gates remain open.

@@ -496,9 +496,6 @@ impl<'a> Analysis<'a> {
                 self.lags = [0; 3];
                 self.active = true;
                 done += 1;
-                if deadline.expired() {
-                    return Ok(done);
-                }
             }
             if done == steps {
                 return Ok(done);
@@ -525,15 +522,27 @@ impl<'a> Analysis<'a> {
                 }
                 self.next_lag = last + 1;
                 done += 1;
+                if deadline.expired() && self.next_lag <= self.maximum_lag {
+                    return Ok(done);
+                }
             } else {
                 self.commit(eof, None)?;
                 self.active = false;
                 self.refreshed_end = self.end;
-                self.refreshed_eof = eof.is_some();
+                let follow = self.evidence(eof).is_some_and(|(first, end)| {
+                    first < self.first
+                        || end < self.end
+                        || (eof.is_some() && (first != self.first || end != self.end))
+                        || end >= self.end + 32
+                });
+                self.refreshed_eof = eof.is_some() && !follow;
                 done += 1;
-            }
-            if deadline.expired() {
-                return Ok(done);
+                // C resumes newer evidence after committing a frozen scan, even
+                // after the last lag sampled an expired clock. The next scan's
+                // first lag supplies its next cooperative clock boundary.
+                if !follow || done == steps || self.lags[0] == 0 || self.scores[0] < 0.05 {
+                    return Ok(done);
+                }
             }
         }
     }
@@ -541,10 +550,18 @@ impl<'a> Analysis<'a> {
         let (Some(t), Some((proposed, confidence))) = (self.selected, self.global_proposal) else {
             return false;
         };
-        !self.locked
-            && !self.active
+        self.ensemble_clock_check()
             && self.ensemble_attempt
                 != Some((self.first, self.end, t.tempo_millibpm, proposed, confidence))
+    }
+    // Sample C's cooperative clock even when native draining has already
+    // consumed a rejected proposal against unchanged evidence.
+    pub(crate) fn ensemble_clock_check(&self) -> bool {
+        let (Some(t), Some((proposed, confidence))) = (self.selected, self.global_proposal) else {
+            return false;
+        };
+        !self.locked
+            && !self.active
             && (proposed as f32 - t.tempo_millibpm as f32).abs() / proposed as f32 > 0.01
             && (relation(t.tempo_millibpm, proposed) != 0
                 || (confidence != 255 && t.confidence != 255 && confidence > t.confidence))

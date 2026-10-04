@@ -1,4 +1,4 @@
 # SPDX-License-Identifier: Apache-2.0
 [workspace]
-members = ["rust"]
+members = ["rust", "rust/runtime"]
 resolver = "2"

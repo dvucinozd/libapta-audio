@@ -178,8 +178,17 @@ fn counts(input: &NativeResultInput<'_>, limits: NativeLimits) -> Result<Require
             .checked_add(field.len())
             .ok_or(Error::LimitExceeded)?;
     }
-    let b = &mut r.retained_bytes;
-    *b = core::mem::size_of::<OwnedResult<'_>>();
+    r.retained_bytes = retained_size(&r)?;
+    if r.retained_bytes > limits.maximum_storage_bytes {
+        return Err(Error::LimitExceeded);
+    }
+    Ok(r)
+}
+/// Checked native graph accounting for typed storage planning. This does not
+/// validate payload semantics or promise C ABI/workspace layout sizes.
+pub fn retained_size(r: &Requirements) -> Result<usize, Error> {
+    let mut bytes = core::mem::size_of::<OwnedResult<'_>>();
+    let b = &mut bytes;
     add::<WaveformSpan>(b, r.overview_spans)?;
     add::<WaveformColumn>(b, r.overview_columns)?;
     add::<NativeTile>(b, r.detail_tiles)?;
@@ -194,11 +203,9 @@ fn counts(input: &NativeResultInput<'_>, limits: NativeLimits) -> Result<Require
     add::<MeterSegment>(b, r.meter_segments)?;
     add::<QualityRecord>(b, r.quality)?;
     add::<u8>(b, r.text_bytes)?;
-    if r.retained_bytes > limits.maximum_storage_bytes {
-        return Err(Error::LimitExceeded);
-    }
-    Ok(r)
+    Ok(bytes)
 }
+
 /// Validate semantics, counts and the exact size of the retained native graph.
 pub fn requirements(
     input: &NativeResultInput<'_>,
@@ -431,6 +438,38 @@ impl<'a> OwnedResult<'a> {
         let storage = core::mem::take(&mut self.storage);
         *self = copy_validated(input, storage, r, validation);
         Ok(())
+    }
+
+    // Only publication's explicit C capability path may override derived bits.
+    // Payload validation and external builder rules remain content based.
+    pub(crate) fn apply_session_capabilities(&mut self, requested: u64) {
+        use crate::result::*;
+        let mut available = self.validation.available_features
+            & !(CONFIDENCE | GRID_LOCKING | DYNAMIC_TEMPO | WAVEFORM_3BAND);
+        if available & (WAVEFORM_OVERVIEW | BPM | LOCAL_BEATGRID | GLOBAL_BEATGRID) != 0 {
+            available |= requested & CONFIDENCE;
+        }
+        if available & LOCAL_BEATGRID != 0 {
+            available |= requested & GRID_LOCKING;
+        }
+        if available & GLOBAL_BEATGRID != 0 {
+            available |= requested & DYNAMIC_TEMPO;
+        }
+        self.validation.available_features = available;
+    }
+
+    /// Deep-copy this already validated immutable graph into independent caller
+    /// storage. Session exceptions and capability masks remain attached to the
+    /// copied generation; arbitrary external inputs still require validation.
+    /// A short destination fails before changing any destination element.
+    pub fn copy_to<'b>(&self, storage: Storage<'b>) -> Result<OwnedResult<'b>, Error> {
+        capacity(&storage, self.requirements)?;
+        Ok(copy_validated(
+            &self.view(),
+            storage,
+            self.requirements,
+            self.validation,
+        ))
     }
 
     pub fn requirements(&self) -> Requirements {

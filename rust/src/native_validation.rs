@@ -233,7 +233,8 @@ fn native_grid(
     local: bool,
     session: bool,
 ) -> Result<(), Error> {
-    for r in [g.requested_range, g.evidence_range, g.applicability_range] {
+    range(g.requested_range, if session { None } else { total })?;
+    for r in [g.evidence_range, g.applicability_range] {
         range(r, total)?
     }
     check(confidence(g.confidence) && !g.coverage_ranges.is_empty())?;
@@ -392,7 +393,12 @@ fn key(k: Key<'_>, total: Option<u64>, limits: NativeLimits) -> Result<(), Error
 fn meter_value(n: u16, d: u16) -> bool {
     (1..=32).contains(&n) && (1..=32).contains(&d) && d.is_power_of_two()
 }
-fn meter(m: Meter<'_>, total: Option<u64>, limits: NativeLimits) -> Result<(), Error> {
+fn meter(
+    m: Meter<'_>,
+    total: Option<u64>,
+    limits: NativeLimits,
+    session: bool,
+) -> Result<(), Error> {
     check(
         meter_value(m.numerator, m.denominator)
             && confidence(m.confidence)
@@ -411,8 +417,9 @@ fn meter(m: Meter<'_>, total: Option<u64>, limits: NativeLimits) -> Result<(), E
         check(
             meter_value(s.numerator, s.denominator)
                 && confidence(s.confidence)
-                && s.downbeat_frame >= s.first_frame
-                && s.downbeat_frame < s.end_frame
+                && (session
+                    || (s.downbeat_frame >= s.first_frame && s.downbeat_frame < s.end_frame))
+                && !total.is_some_and(|end| s.downbeat_frame >= end)
                 && s.segment_id != 0
                 && s.state as u8 >= m.state as u8
                 && s.downbeat_ordinal > previous_ordinal
@@ -576,7 +583,7 @@ fn validate_inner(
         }
     }
     if let Some(m) = input.meter {
-        meter(m, source.total_frames, limits)?;
+        meter(m, source.total_frames, limits, session)?;
         features |= feature::METER_DOWNBEAT;
         if m.confidence != 255 {
             features |= feature::CONFIDENCE

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 use libapta::{
-    owned_result::Storage,
+    owned_result::{GridStorage, Storage},
     publication::{PublishedSparseSession, ResultPool},
     scheduler::RequestSlot,
     session::{CancellationToken, SessionConfig, WorkBudget},
@@ -21,7 +21,7 @@ fn status(e: Error) -> i128 {
         e => panic!("unexpected {e:?}"),
     }
 }
-fn native(commands: &str) -> Vec<Vec<i128>> {
+fn native(commands: &str, features: u64, request_mask: u64) -> Vec<Vec<i128>> {
     let source = SourceInfo {
         sample_rate: 48000,
         channel_count: 1,
@@ -34,17 +34,68 @@ fn native(commands: &str) -> Vec<Vec<i128>> {
     let mut cb = ca;
     let mut sa = [WaveformSpan::default(); 8];
     let mut sb = sa;
+    let mut tempo_a = [TempoCandidate::default(); 3];
+    let mut tempo_b = tempo_a;
+    let mut coverage_a = [FrameRange::default(); 1];
+    let mut coverage_b = coverage_a;
+    let segment = GridSegment {
+        applicability_range: FrameRange::default(),
+        anchor_position: FractionalFrame::default(),
+        anchor_ordinal: 0,
+        frames_per_beat: FramePeriod::default(),
+        beat_count: 0,
+        nominal_tempo_millibpm: 0,
+        confidence: 0,
+        state: FeatureState::Provisional,
+        flags: 0,
+        segment_id: 0,
+        revision: 0,
+    };
+    let mut local_a = [segment];
+    let mut local_b = [segment];
+    let mut key_a = [KeyCandidate::default(); 3];
+    let mut key_b = key_a;
+    let mut global_coverage_a = [FrameRange::default(); 1];
+    let mut global_coverage_b = global_coverage_a;
+    let mut global_a = [segment; 8];
+    let mut global_b = global_a;
+    let mut beats_a = vec![Beat::default(); 3072];
+    let mut beats_b = beats_a.clone();
     let pool = ResultPool::new(
         source,
         [
             Storage {
                 overview_columns: &mut ca,
                 overview_spans: &mut sa,
+                tempo_candidates: &mut tempo_a,
+                key_candidates: &mut key_a,
+                global_grid: GridStorage {
+                    coverage_ranges: &mut global_coverage_a,
+                    segments: &mut global_a,
+                    beats: &mut beats_a,
+                },
+                local_grid: GridStorage {
+                    coverage_ranges: &mut coverage_a,
+                    segments: &mut local_a,
+                    beats: &mut [],
+                },
                 ..Default::default()
             },
             Storage {
                 overview_columns: &mut cb,
                 overview_spans: &mut sb,
+                tempo_candidates: &mut tempo_b,
+                key_candidates: &mut key_b,
+                global_grid: GridStorage {
+                    coverage_ranges: &mut global_coverage_b,
+                    segments: &mut global_b,
+                    beats: &mut beats_b,
+                },
+                local_grid: GridStorage {
+                    coverage_ranges: &mut coverage_b,
+                    segments: &mut local_b,
+                    beats: &mut [],
+                },
                 ..Default::default()
             },
         ],
@@ -77,6 +128,21 @@ fn native(commands: &str) -> Vec<Vec<i128>> {
         &mut slots,
     )
     .unwrap();
+    let mut bins = vec![libapta::analysis::OnsetBin::default(); 4096];
+    let mut flux = vec![0.0; 4096];
+    let mut global_bins = vec![analysis::OnsetBin::default(); 16384];
+    let mut global_flux = vec![0.0; 16384];
+    let mut beats = vec![Beat::default(); 3072];
+    if features & result::BPM != 0 {
+        s.enable_tempo(&mut bins, &mut flux).unwrap();
+    }
+    if features & result::GLOBAL_BEATGRID != 0 {
+        s.enable_global_grid(false, &mut global_bins, &mut global_flux, &mut beats)
+            .unwrap();
+    }
+    if features & result::MUSICAL_KEY != 0 {
+        s.enable_key().unwrap();
+    }
     let cancel = CancellationToken::new();
     let mut rows = vec![];
     for line in commands.lines() {
@@ -91,7 +157,7 @@ fn native(commands: &str) -> Vec<Vec<i128>> {
                         first_frame: a,
                         end_frame: b,
                     },
-                    feature_mask: 1,
+                    feature_mask: request_mask,
                     priority: c as u8,
                     soft_deadline_monotonic_ns: d,
                     request_id: e as u32,
@@ -220,6 +286,67 @@ fn public_scheduler_demand_progress_and_process_order_match_c() {
             .lines()
             .map(|l| l.split_whitespace().map(|n| n.parse().unwrap()).collect())
             .collect();
-        assert_eq!(native(commands), expected, "scenario {i}");
+        assert_eq!(
+            native(
+                commands,
+                result::WAVEFORM_OVERVIEW,
+                result::WAVEFORM_OVERVIEW
+            ),
+            expected,
+            "scenario {i}"
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires APTA_C_SCHEDULER_ORACLE"]
+fn musical_focus_requests_and_sparse_processing_match_public_c() {
+    let oracle = std::env::var_os("APTA_C_SCHEDULER_ORACLE").unwrap();
+    let mask =
+        result::WAVEFORM_OVERVIEW | result::BPM | result::LOCAL_BEATGRID | result::GRID_LOCKING;
+    let commands = [
+        "F 4096 0 1024 240 24\nD 0 0 0 0 0\nA 0 1024 32 0 0\nD 0 0 0 0 0\nP 0 1024 123 0 0\nD 0 0 0 0 0\nC 1 0 0 0 0\nD 0 0 0 0 0\n",
+        "A 0 2048 96 5000 0\nA 4096 5120 96 1000 0\nP 0 2048 123 0 0\nP 4096 1024 456 0 0\nR 1 0 0 0 0\nW 1024 4 0 0 0\nR 1 0 0 0 0\nR 2 0 0 0 0\nW 1024 4 0 0 0\nR 1 0 0 0 0\nW 1024 4 0 0 0\nR 1 0 0 0 0\nC 1 0 0 0 0\nR 1 0 0 0 0\n",
+        "F 8192 100 18446744073709551615 250 24\nD 0 0 0 0 0\nA 8192 9000 96 0 0\nD 0 0 0 0 0\nR 1 0 0 0 0\nC 1 0 0 0 0\nD 0 0 0 0 0\n",
+    ];
+    for request_mask in [
+        24,
+        result::MUSICAL_KEY,
+        result::GLOBAL_BEATGRID,
+        result::MUSICAL_KEY | result::BPM,
+    ] {
+        let mask = mask | result::MUSICAL_KEY | result::GLOBAL_BEATGRID;
+        for commands in commands {
+            let commands = commands.replace(" 24\n", &format!(" {request_mask}\n"));
+            let mut child = std::process::Command::new(&oracle)
+                .args([mask.to_string(), request_mask.to_string()])
+                .stdin(std::process::Stdio::piped())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn()
+                .unwrap();
+            child
+                .stdin
+                .take()
+                .unwrap()
+                .write_all(commands.as_bytes())
+                .unwrap();
+            let out = child.wait_with_output().unwrap();
+            assert!(
+                out.status.success(),
+                "{}",
+                String::from_utf8_lossy(&out.stderr)
+            );
+            let expected: Vec<Vec<i128>> = std::str::from_utf8(&out.stdout)
+                .unwrap()
+                .lines()
+                .map(|l| l.split_whitespace().map(|n| n.parse().unwrap()).collect())
+                .collect();
+            assert_eq!(
+                native(&commands, mask, request_mask),
+                expected,
+                "{commands}"
+            );
+        }
     }
 }
