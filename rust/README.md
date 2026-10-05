@@ -588,3 +588,11 @@ consumer policy; no portable API or numerical change is required. Full coroutine
 and Embassy diagnostics expose substantially larger task/nested-stack needs than
 individual step futures. See the [consumer policy continuation](../docs/rust/MIGRATION.md#consumer-policy-and-full-task-storage--2026-10-04)
 for measured storage and remaining ownership/hardware gates.
+
+
+The Pajoniiir consumer now prepares its local-tempo/meter profile directly into
+an empty caller control slot and rechecks original media leases after async I/O.
+Its native FAT32/exFAT consumers remain exact. Complete-task and nested-library
+stack diagnostics are recorded in the migration section **Consumer lease and
+construction integration — 2026-10-05**; they do not qualify firmware stack sizes.
+Portable source and the immutable consumer pin are unchanged.

@@ -2270,3 +2270,38 @@ focused release tests**, **31 adapter tests + one lifetime doctest under ASan**,
 formatting/Clippy and pinned P4 checks. Artifacts **20261004T210932Z** are byte
 identical; native/streaming probes **20261004T210933Z / 20261004T210938Z** pass.
 Shared knowledge validation passes (18 projects, 89 notes, zero broken links).
+
+
+## Consumer lease and construction integration — 2026-10-05
+
+Portable source/test pin remains a242c4ab1ada6ac2547f63332ef7f7c0f36276fa.
+Pajoniiir rechecks the original media lease after async open/read/close and
+prepares its existing local-tempo/meter Session directly into an empty caller
+control slot. Product policy stays in the adapter; no C or portable algorithm,
+format, API or numerical change is required. Native FAT32/exFAT tests retain exact
+beats/columns and drive Deck Sync/Beat Jump and RGB565 consumers without measured
+allocations. Foundation exFAT broker handles are integrated; the old
+ExFatUnavailable blocker is superseded. Analysis-client lifetime, completion
+draining and exclusive handle/buffer recovery still precede production selection.
+
+Complete-task polling frames fall from 21008/21424 to 13328/13776 bytes, while
+pools grow 16 bytes to 9808/10112 (FAT32/exFAT). Preparation is 7136 bytes, so the
+identified poll+preparation subtotal is 20464/20912 before further callees. A
+separate panic-abort/forced-frame-pointer inventory records all diagnostic
+library frames, matching inspected firmware code-generation settings. This is
+not a safe stack size or an executed firmware/executor acceptance test. The
+consumer README owns measurements, exclusions and exact reproduction; new
+external handoff: `pajoniiir-libapta-native-rust-continuation-2026-10-05-0505.md`
+under `/home/shome/.local/share/libapta-audio/handoffs/`.
+
+Fresh unchanged-core combined baseline `consumer-construction-baseline-20261005.log`
+passes 123 C tests, 279 ordinary Rust + 55 external-C groups per debug/release,
+34 WAV interchange and two all-feature CLI cases. Consumer 20261005T050057Z passes
+430 workspace / 104 focused release tests, 34 adapter tests plus one compile-fail
+lifetime doctest under ASan, fmt/Clippy, allocation and P4 checks. Exact raster
+artifacts and source/task probes pass; final task evidence is 20261005T050332Z.
+The probe now emits explicit dated objects rather than choosing newest cache files.
+No broader core/runtime/C sanitizers, i686/Windows/AArch64 or physical P4 gates
+were rerun. Unknown-duration sparse ownership, production codec/view policies,
+C allocator/layout/unsafe ABI/packaging and original DSP accuracy remain open.
+The real S6 rejection and portable key coefficient boundary remain unchanged.
