@@ -344,6 +344,11 @@ host backend; owning std sessions use platform `f32` cosine/log/square root.
 A retained diagnostic exposes a one-unit portable MKEY score discrepancy against
 this host's C libm; see the newest migration section. No tolerance hides it.
 
+For S6, `Final` and full declared coverage do not guarantee full segment timing
+or local-meter binding. The [coverage evaluation](../docs/rust/DSP-COVERAGE.md)
+reproduces the inherited C limitation across EOF/window boundaries and separates
+it from the portable key boundary and independent musical accuracy.
+
 ```bash
 cargo run -p libapta-runtime --bin apta-native -- analyze INPUT.wav OUTPUT.apta --music
 cargo run -p libapta-runtime --bin apta-native -- inspect OUTPUT.apta

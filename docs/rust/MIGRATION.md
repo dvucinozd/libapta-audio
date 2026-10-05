@@ -2720,3 +2720,33 @@ combined Rust/C, interchange, formatting/Clippy/no-default/allocation checks.
 The serial consumer remainder also passes raster identity, native/streaming/task
 probes, ordinary firmware link and default/owner dependency exclusions. No hardware,
 production activation or broader legacy compatibility qualification is implied.
+
+
+## S6 coverage and independent DSP evaluation — 2026-10-05
+
+The [source-linked evaluation](DSP-COVERAGE.md) reproduces the original consumer
+rejection and portable key boundary, then establishes exact C/Rust payload parity
+across 30 known/unknown/dynamic S6 window/EOF cases in debug and release. Complete
+source input and Final/declared coverage can coexist with missing segment timing;
+full-length segment cases still disagree with local meter. The original 320000-
+frame fixture ends segment timing at 262144. This is inherited C behavior, not a
+justified Rust-only correction. No production DSP, C/API/ABI, portable backend,
+consumer source or immutable dependency pin changes.
+
+The new `rust/tests/s6_coverage.rs` runs automatically in both external-C phases
+of the combined runner. Optional external evidence output preserves original PCM,
+paired containers and CSV measurements without overwriting a previous run. The
+unchanged consumer one-step rejection, eight-backend key audit and high-precision
+coefficient diagnostic were rerun separately. A bounded one-step C drain exhaustion
+at the 64-bin minimum is retained as a separate observation, not normalized into
+parity or hidden by changing its guard. Existing native termination distinctions,
+clock/mask/retained-result tests and allocation instrumentation remain authoritative.
+
+Evidence root:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/dsp-coverage-20261005/`.
+The dated external handoff owns publication/CI and exact source hashes. This is a
+bounded reproducible evaluation and regression addition, not renewed musical
+accuracy acceptance. Original DJ corpus failures, interior/ring coverage, consumer
+owner adoption/production activation, hardware and deferred C compatibility gates
+remain independent. Keep rejection explicit; extending the tail does not repair
+meter binding or prove timing accuracy.

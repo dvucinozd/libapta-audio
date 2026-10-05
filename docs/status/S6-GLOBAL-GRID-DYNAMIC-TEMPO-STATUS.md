@@ -458,3 +458,15 @@ whether the answer is right. The other one, grid fit, took the whole job.
 
 What remains is that S6 is right on 18 tracks where S4 is badly wrong, and no
 rule tried here can tell which those are in advance.
+
+
+## 17. Final state and full-track timing are distinct
+
+The [native/C coverage evaluation](../rust/DSP-COVERAGE.md) demonstrates an
+inherited reference limitation: complete input evidence and a Final grid with
+full declared coverage can still contain segments ending before EOF. Short final
+windows and uninformative full windows are omitted after an earlier successful
+window. Full-length segments also need not bind to the independently derived
+local meter. The 30-case exact payload comparison changes neither implementation
+nor acceptance criteria. Consumers requiring complete timing must validate the
+actual segments and meter relationship; Final alone is insufficient.
