@@ -2372,3 +2372,57 @@ exclusions and publication are recorded in the consumer README and complete
 handoff `pajoniiir-libapta-native-rust-continuation-2026-10-05-0645.md` under
 `/home/shome/.local/share/libapta-audio/handoffs/`. Core source remains the published
 consumer pin `e93e667ba010d7256e06582f05cf5da0b94846e5`; this final addition is docs only.
+
+## Cooperative scan and consumer effect acknowledgement — 2026-10-05
+
+Pajoniiir's pinned native consumer now drives both WAV passes cooperatively. The
+new borrowed `ScanRead::run` yields after each incomplete bounded scan step and
+poisons a scan cancelled at either a read or its own yield. Caller control retains
+the handle for explicit abort/recovery; successful scanning still requires the
+existing framing/hash/duration verification and first close. The driver never
+resets limits or selects an executor. Manual scan APIs retain their existing
+contract. No portable source, C algorithm/header/ABI/container or Cargo pin changes
+were needed; source revision remains `e93e667ba010d7256e06582f05cf5da0b94846e5`.
+
+The isolated consumer integrates the foundation's retry-safe Deck effect contract.
+Native FAT32/exFAT output reaches actual Sync, Beat Jump and RGB565 consumers and
+exercises transport queue refusal plus downstream failed acknowledgement. The
+exact Seek remains queued until successful acknowledgement. This is a neutral
+consumer transaction, not enabled firmware playback or device-command execution.
+The foundation's existing exFAT dispatch works; a unique analysis broker lifetime,
+pending/unexpected completion draining and exclusive handle/buffer recovery remain
+owner contracts to establish before adding a production lane.
+
+A remaining diagnostic copy came from explicitly forbidding inlining on the
+complete-job async constructor, rather than a Libapta API gap. Allowing constructor
+inlining reduces standard RV32 task polling from 8432/8800 B to 4432/4560 B for
+FAT32/exFAT. Preparation remains 128 B; identified subtotals are 4560/4688 B before
+further callees. Job futures remain 4040/4288 B, pools 4416/4664 B and initialization
+frames 4416/4672 B. Arrays + pool + both external control slots + diagnostic backend
+remain 118716/119020 B. A separate forced-frame-pointer/panic-abort profile measures
+4432/4544 B polling; never mix the two profiles. No complete maximum, placement,
+interrupt nesting, DMA/cache or timing acceptance follows from these inventories.
+
+Consumer final-source `20261005T073545Z` passes 454 ordinary workspace tests plus
+one lifetime compile-fail doctest, 114 focused release tests plus that doctest, and
+39 adapter ASan tests plus that doctest; fmt/Clippy/allocation/P4 checks pass.
+Exact raster artifacts `20261005T073645Z`, native/streaming probes
+`20261005T073647Z` / `20261005T073652Z`, and complete-task `20261005T073653Z` pass.
+The three host task tests include actual Embassy execution with another runnable
+task progressing during analysis, zero measured allocations after setup and
+first-pass read/yield cancellation recovery. Nested inventory
+`task-nested-20261005T073656Z` has 1491 frames; actual combined firmware inventory
+`firmware-frames-20261005T073659Z` has 4213 frames, with APTA absent.
+
+Canonical consumer usage, commands and detailed limitations are in its adapter
+README. Neither firmware nor Slint selects APTA. Broader native ownership evidence,
+C allocator/layout/ABI/packaging and platform matrices, original DSP accuracy, and
+physical P4 memory/timing coexistence remain independent unfinished workstreams.
+
+Fresh unchanged-core combined acceptance
+`consumer-scan-final-20261005T0738.log` passes 123 C tests, 279 ordinary Rust tests
+and 55 external-C groups per debug/release, 34 WAV interchange and two all-feature
+CLI cases, formatting, Clippy, no-default-features and allocation checks. Consumer
+ASan/P4 checks above were rerun; library/runtime/C sanitizers, AArch64, i686 and
+Windows/MSVC were not rerun in this docs-only library continuation. Earlier
+acceptance remains dated evidence, not a new execution claim.

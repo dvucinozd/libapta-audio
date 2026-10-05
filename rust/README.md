@@ -607,3 +607,11 @@ and exact verification belong in the [migration record](../docs/rust/MIGRATION.m
 Inlining is a compiler optimization opportunity, not a portable stack guarantee.
 Pajoniiir owns cooperative I/O driving, cancellation and caller control placement;
 those policies do not enter this portable core.
+
+The native Pajoniiir consumer now uses cooperative borrowed drivers for both WAV
+passes and the existing acknowledged Deck effect lane. No portable API or pinned
+core revision changed in this continuation. See
+[the migration record](../docs/rust/MIGRATION.md#cooperative-scan-and-consumer-effect-acknowledgement--2026-10-05)
+for exact software evidence and the separate production, hardware and C compatibility
+gates. Filesystem policy, executor composition and product ownership stay outside
+this portable core.
