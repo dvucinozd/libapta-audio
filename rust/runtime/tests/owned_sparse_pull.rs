@@ -417,3 +417,59 @@ fn scheduled_range_backpressure_releases_and_recovers_after_reservation() {
     assert_eq!(pull.session().session().processed_frames(), 513);
     assert_eq!((reads.get(), releases.get()), (6, 6));
 }
+
+#[test]
+fn scheduled_request_reservation_keeps_source_and_terminal_failure_ownership() {
+    let w = OwnedSparseSession::new(
+        SessionConfig {
+            sample_rate: 48000,
+            channel_count: 1,
+            total_frames: 513,
+            frames_per_column: 64,
+        },
+        SparseLimits {
+            request_capacity: 0,
+            ..SparseLimits::default()
+        },
+    )
+    .unwrap();
+    let src = source();
+    let reads = src.reads.clone();
+    let releases = src.releases.clone();
+    let mut pull = OwnedScheduledPullSession::new(w, src).unwrap();
+    let r = RegionRequest {
+        range: FrameRange {
+            first_frame: 256,
+            end_frame: 512,
+        },
+        feature_mask: result::WAVEFORM_OVERVIEW,
+        priority: 240,
+        soft_deadline_monotonic_ns: 0,
+        request_id: 0,
+    };
+    assert_eq!(pull.request_region(r), Err(Error::LimitExceeded));
+    pull.reserve_requests(1).unwrap();
+    let id = pull.request_region(r).unwrap();
+    assert_eq!((reads.get(), releases.get()), (0, 0));
+    assert_eq!(pull.next_pcm_request().unwrap().request_token, id);
+    pull.process(
+        WorkBudget {
+            maximum_input_frames: 64,
+            maximum_steps: 1,
+        },
+        &CancellationToken::new(),
+    )
+    .unwrap();
+    let before = pull.request_progress(id).unwrap();
+    pull.reserve_requests(2).unwrap();
+    assert_eq!(pull.request_progress(id).unwrap(), before);
+    assert_eq!((reads.get(), releases.get()), (1, 1));
+    let token = CancellationToken::new();
+    token.cancel();
+    assert_eq!(
+        pull.process(WorkBudget::default(), &token),
+        Err(Error::Cancelled)
+    );
+    assert_eq!(pull.reserve_requests(3), Err(Error::InvalidState));
+    assert_eq!((reads.get(), releases.get()), (1, 1));
+}

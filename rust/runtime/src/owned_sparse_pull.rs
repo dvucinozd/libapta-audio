@@ -70,6 +70,12 @@ impl<S: PullSource> OwnedScheduledPullSession<S> {
     pub fn refresh(&mut self) -> Result<bool, Error> {
         self.session.refresh()
     }
+    pub fn reserve_requests(&mut self, capacity: usize) -> Result<(), Error> {
+        if let Some(error) = self.failure {
+            return Err(error);
+        }
+        self.session.reserve_requests(capacity)
+    }
     pub fn set_result_limits(&mut self, limits: libapta::NativeLimits) {
         self.session.set_result_limits(limits);
     }

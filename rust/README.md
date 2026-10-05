@@ -404,7 +404,12 @@ detail and/or default music before input or seeding. Overview storage covers the
 configured source. Queue nodes and accepted-range slots start at the configured
 capacities; `reserve_pending(queue_nodes, range_capacity)` explicitly grows them
 while Created/Running. Push keeps fixed-capacity backpressure until reservation.
-Request slots remain fixed. Construction, attachment and growth preflight all
+`reserve_requests(capacity)` also grows an initially smaller request table, up to
+the unchanged C-compatible ceiling of 16. Cancelled/satisfied records retain their
+slots and IDs. Growth preserves aging, priority/deadline/FIFO order and focus;
+it never reclaims terminal records or resets ID sequencing. The scheduled pull
+owner exposes the same reservation without reading or releasing source blocks.
+Construction, attachment and growth preflight all
 fallible arrays and actual Vec-capacity bytes under `maximum_working_bytes`.
 Growth preserves partially processed nodes, PCM, ranges and scheduler state;
 it publishes no generation. The byte limit excludes transient replacement copies.

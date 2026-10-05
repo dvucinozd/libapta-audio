@@ -209,3 +209,71 @@ fn validation_and_requests_beyond_known_eof() {
     assert_eq!(s.request_region(region(0, 96, 0)), Err(Error::InvalidState));
     assert_eq!(s.next_pcm_request(&[]), Err(Error::NotAvailable));
 }
+
+#[test]
+fn replacement_preserves_aging_focus_terminal_records_and_ids() {
+    let make = |n| {
+        Scheduler::with_storage(
+            Some(8192),
+            WAVEFORM_OVERVIEW,
+            vec![RequestSlot::default(); n],
+        )
+        .unwrap()
+    };
+    let mut small = make(3);
+    let mut full = make(16);
+    for s in [&mut small, &mut full] {
+        s.set_focus(Focus {
+            playhead_frame: 7000,
+            lookahead_frames: 100,
+            feature_mask: WAVEFORM_OVERVIEW,
+            priority: 240,
+            ..Default::default()
+        })
+        .unwrap();
+        assert_eq!(s.request_region(region(0, 32, 0)), Ok(1));
+        assert_eq!(s.request_region(region(4096, 96, 0)), Ok(2));
+        assert_eq!(s.request_region(region(2048, 96, 100)), Ok(3));
+        s.cancel_region_request(3).unwrap();
+        for _ in 0..7 {
+            s.next_pcm_request(&[]).unwrap();
+        }
+    }
+    assert_eq!(
+        small.request_region(region(1024, 96, 0)),
+        Err(Error::LimitExceeded)
+    );
+    assert!(matches!(
+        small.replace_request_storage(vec![RequestSlot::default(); 2]),
+        Err(Error::BufferTooSmall)
+    ));
+    assert!(matches!(
+        small.replace_request_storage(vec![RequestSlot::default(); 17]),
+        Err(Error::InvalidArgument)
+    ));
+    assert_eq!(small.request_capacity(), 3);
+    let old = small
+        .replace_request_storage(vec![RequestSlot::default(); 16])
+        .unwrap();
+    assert_eq!(old.len(), 3);
+    for id in 1..=3 {
+        assert_eq!(small.request_progress(id), full.request_progress(id));
+    }
+    for _ in 0..20 {
+        assert_eq!(small.next_pcm_request(&[]), full.next_pcm_request(&[]));
+    }
+    for s in [&mut small, &mut full] {
+        for id in 4..=16 {
+            assert_eq!(s.request_region(region(1024, 96, 0)), Ok(id));
+            s.cancel_region_request(id).unwrap();
+        }
+        assert_eq!(
+            s.request_region(region(1024, 96, 0)),
+            Err(Error::LimitExceeded)
+        );
+        s.cancel_region_request(1).unwrap();
+        s.cancel_region_request(2).unwrap();
+    }
+    assert_eq!(small.next_pcm_request(&[]), full.next_pcm_request(&[]));
+    assert_eq!(small.next_pcm_request(&[]).unwrap().range.first_frame, 7000);
+}

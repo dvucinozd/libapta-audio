@@ -2482,3 +2482,54 @@ archive is not. Reproduction is `verify-unknown-growth-asan-20261005.py` in the
 external rewrite evidence root. Broader core/runtime/C sanitizers, AArch64, i686
 and Windows/MSVC were not rerun. No physical hardware was operated. Original DSP
 accuracy and all C allocator/layout/ABI/packaging gates remain separate.
+
+
+## Native request reservation and PCM cursor consumer — 2026-10-05
+
+`Scheduler::replace_request_storage` grows borrowed or owned storage without
+allocation in core. It preserves all request slots, including terminal records,
+IDs, enqueue order, priority aging and focus. Oversized replacement (>16) or
+shrinking storage fails before mutation. `request_capacity` exposes the logical
+slot capacity. The existing borrowed constructor and default ceiling are unchanged.
+
+`OwnedSparseSession::reserve_requests` and the scheduled pull owner can now grow
+an initially small (including zero-slot) request table while Created/Running.
+Minimum and actual Vec-capacity bytes must fit the aggregate working-byte limit;
+allocation/quota failure leaves work, results, scheduler and accounting unchanged.
+Dirty mirrors still block mutation. No implicit growth, terminal-slot recycling,
+new generation or source callback occurs. The limit bounds committed storage,
+not transient coexistence of old and replacement arrays. C remains unchanged:
+its fixed sixteen-slot table is the policy oracle, not an allocation model.
+
+New acceptance covers exact public-C request/demand/terminal traces across sixteen
+incremental reservations, preserved priority aging/focus/IDs, quota and allocator
+failure/retry, retained generations, live PCM and scheduled-source ownership.
+Existing allocation instrumentation also covers borrowed core replacement.
+Initially unknown sparse ownership and its scheduling/seeding/musical/failure
+contracts remain separate; this change closes only explicit growth of a smaller
+native request table within the existing ceiling.
+
+The isolated Pajoniiir streaming worker now advances a cursor over retained PCM
+bytes. It compacts only the incomplete frame before another read, moving at most
+seven retained bytes for the supported mono/stereo formats instead of moving the
+whole unread suffix after each short queue acceptance. Decode/validation order,
+one-read/256-frame/one-core-step bounds, both hashes/closes and cancellation
+ownership are preserved. This is a byte-copy reduction, not measured throughput
+or target timing acceptance. Its new format matrix covers all four PCM formats,
+mono/stereo, ordinary/extensible reordered framing, one-byte/odd/full reads and
+one-/seventeen-frame queues, including a partial final waveform column. Actual
+fragmented FAT32 and contiguous/fragmented exFAT also feed every format to the
+existing retained Deck/Sync/Beat Jump/renderer path. Detailed consumer contracts,
+measurements and evidence remain in the adapter README.
+
+
+Library acceptance: `request-growth-combined-final.log` passes 123 C tests,
+282 ordinary Rust tests and 56 enabled external-C groups per debug/release,
+34 WAV interchange and two all-feature CLI cases, fmt/Clippy/no-default-features
+and allocation instrumentation. The pre-edit baseline is
+`continuation-20261005-baseline.log`. `request-growth-asan-runtime.log` covers the
+complete owning runtime including enabled external-C comparisons; focused portable
+scheduler/session allocation checks are in `request-growth-asan-core.log`.
+ASan/leak instrumentation applies to Rust, not the unchanged linked C oracle
+archive. No AArch64, i686 or Windows matrix or physical hardware was rerun here.
+Consumer final-source diagnostics and the external handoff follow separately.

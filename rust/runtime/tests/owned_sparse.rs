@@ -635,3 +635,181 @@ fn known_sparse_final_wire_matches_unknown_origin_c_with_and_without_holes() {
         assert_eq!(bytes, out.stdout);
     }
 }
+
+#[test]
+fn request_reservation_preserves_work_results_and_byte_limits() {
+    let request = RegionRequest {
+        range: FrameRange {
+            first_frame: 0,
+            end_frame: 256,
+        },
+        feature_mask: result::WAVEFORM_OVERVIEW,
+        priority: 96,
+        soft_deadline_monotonic_ns: 0,
+        request_id: 0,
+    };
+    let limits = SparseLimits {
+        request_capacity: 0,
+        ..SparseLimits::default()
+    };
+    let baseline = OwnedSparseSession::new(config(1024), limits)
+        .unwrap()
+        .working_bytes();
+    let slot_bytes = core::mem::size_of::<scheduler::RequestSlot>();
+    let mut s = OwnedSparseSession::new(
+        config(1024),
+        SparseLimits {
+            maximum_working_bytes: baseline + 2 * slot_bytes,
+            ..limits
+        },
+    )
+    .unwrap();
+    assert_eq!(s.request_region(request), Err(Error::LimitExceeded));
+    s.reserve_requests(1).unwrap();
+    assert_eq!(s.working_bytes(), baseline + slot_bytes);
+    let first = s.request_region(request).unwrap();
+    s.push_at(0, PcmView::S16Interleaved(&[100; 256])).unwrap();
+    s.process(
+        WorkBudget {
+            maximum_input_frames: 64,
+            maximum_steps: 1,
+        },
+        &CancellationToken::new(),
+    )
+    .unwrap();
+    let retained = s.results().acquire().unwrap();
+    let progress = s.request_progress(first).unwrap();
+    assert_eq!(s.reserve_requests(3), Err(Error::LimitExceeded));
+    assert_eq!(s.reserve_requests(17), Err(Error::InvalidArgument));
+    assert_eq!(s.working_bytes(), baseline + slot_bytes);
+    s.reserve_requests(2).unwrap();
+    s.reserve_requests(0).unwrap();
+    assert_eq!(s.working_bytes(), baseline + 2 * slot_bytes);
+    assert_eq!(s.request_progress(first).unwrap(), progress);
+    assert_eq!(s.results().acquire().unwrap().info(), retained.info());
+    assert_eq!(s.session().processed_frames(), 64);
+    assert_eq!(s.session().queued_frames(), 192);
+    assert_eq!(s.request_region(request), Ok(2));
+    s.cancel_region_request(first).unwrap();
+    assert_eq!(s.request_region(request), Err(Error::LimitExceeded));
+    s.finish_input().unwrap();
+    assert_eq!(s.reserve_requests(2), Err(Error::InvalidState));
+    run(&mut s);
+    assert_eq!(s.session().processed_frames(), 256);
+    assert_eq!(
+        s.request_progress(2).unwrap().state,
+        RequestState::Satisfied
+    );
+    assert_eq!(retained.view().overview, None);
+}
+
+#[test]
+#[ignore = "requires APTA_C_SCHEDULER_ORACLE"]
+fn growing_request_table_matches_public_c_demand_and_terminal_trace() {
+    use std::io::Write;
+    let mut s = OwnedSparseSession::new(
+        SessionConfig {
+            sample_rate: 48000,
+            total_frames: 8192,
+            frames_per_column: 1024,
+            channel_count: 1,
+        },
+        SparseLimits {
+            request_capacity: 0,
+            ..SparseLimits::default()
+        },
+    )
+    .unwrap();
+    let mut commands = String::new();
+    let mut expected = Vec::<Vec<i128>>::new();
+    for id in 1..=16 {
+        // Capacity changes occur between demand choices, preserving aging.
+        s.reserve_requests(id).unwrap();
+        let request = RegionRequest {
+            range: FrameRange {
+                first_frame: (id as u64 % 8) * 1024,
+                end_frame: (id as u64 % 8 + 1) * 1024,
+            },
+            feature_mask: result::WAVEFORM_OVERVIEW,
+            priority: if id % 2 == 0 { 32 } else { 96 },
+            soft_deadline_monotonic_ns: id as u64 * 100,
+            request_id: 0,
+        };
+        commands += &format!(
+            "A {} {} {} {} 0\n",
+            request.range.first_frame,
+            request.range.end_frame,
+            request.priority,
+            request.soft_deadline_monotonic_ns
+        );
+        let mut row = vec![0; 9];
+        row[1] = s.request_region(request).unwrap() as i128;
+        expected.push(row);
+        for _ in 0..3 {
+            commands += "D 0 0 0 0 0\n";
+            let d = s.next_pcm_request().unwrap();
+            expected.push(vec![
+                0,
+                d.range.first_frame as i128,
+                d.range.end_frame as i128,
+                d.priority as i128,
+                d.request_token as i128,
+                d.feature_mask as i128,
+                0,
+                0,
+                0,
+            ]);
+        }
+        if id % 3 == 0 {
+            commands += &format!("C {id} 0 0 0 0\n");
+            s.cancel_region_request(id as u32).unwrap();
+            expected.push(vec![0; 9]);
+        }
+    }
+    for id in 1..=16 {
+        commands += &format!("R {id} 0 0 0 0\n");
+        let p = s.request_progress(id).unwrap();
+        expected.push(vec![
+            0,
+            p.request_id as i128,
+            p.state as i128,
+            p.requested_range.first_frame as i128,
+            p.requested_range.end_frame as i128,
+            p.requested_features as i128,
+            p.satisfied_features as i128,
+            p.progress_permille as i128,
+            p.diagnostic_code as i128,
+        ]);
+    }
+    commands += "A 0 1024 96 0 0\n";
+    expected.push(vec![-11, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let mut child =
+        std::process::Command::new(std::env::var_os("APTA_C_SCHEDULER_ORACLE").unwrap())
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(commands.as_bytes())
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let actual: Vec<Vec<i128>> = std::str::from_utf8(&out.stdout)
+        .unwrap()
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|n| n.parse().unwrap())
+                .collect()
+        })
+        .collect();
+    assert_eq!(actual, expected);
+}

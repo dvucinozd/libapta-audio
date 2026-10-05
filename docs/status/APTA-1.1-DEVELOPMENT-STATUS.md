@@ -138,3 +138,8 @@ for exact scope and dated verification. C remains the installed reference/produc
 its implementation, ABI, headers and container version are unchanged. Native
 consumer software progress does not close the original DSP accuracy, embedded
 hardware/release or deferred C compatibility gates above.
+
+The native request-reservation and PCM-cursor continuation is recorded in
+[the latest migration section](../rust/MIGRATION.md#native-request-reservation-and-pcm-cursor-consumer--2026-10-05).
+It expands software ownership and multi-format consumer evidence; the same
+production, hardware, DSP and C compatibility gates remain in force.

@@ -27,7 +27,7 @@ pub struct SparseLimits {
     pub queue_nodes: usize,
     /// Initial capacity; explicit reserve_pending may grow it within the byte limit.
     pub range_capacity: usize,
-    /// Fixed scheduler request capacity (at most MAX_REQUESTS).
+    /// Initial scheduler capacity; reserve_requests may grow it to MAX_REQUESTS.
     pub request_capacity: usize,
     pub maximum_working_bytes: usize,
     pub results: NativeLimits,
@@ -54,6 +54,7 @@ pub struct OwnedSparseSession {
     limits: SparseLimits,
     working_bytes: usize,
     pending_bytes: usize,
+    request_bytes: usize,
     music_bytes: usize,
     bands_enabled: bool,
     detail_enabled: bool,
@@ -160,6 +161,7 @@ impl OwnedSparseSession {
             bytes::<QueuedBlock>(storage.nodes.capacity())?,
             bytes::<NormalizedSample>(storage.pcm.capacity())?,
         ])?;
+        let request_bytes = bytes::<RequestSlot>(requests.capacity())?;
         let scheduler = Scheduler::with_storage(
             Some(config.total_frames),
             result::WAVEFORM_OVERVIEW,
@@ -177,6 +179,7 @@ impl OwnedSparseSession {
             limits,
             working_bytes: actual,
             pending_bytes,
+            request_bytes,
             music_bytes: 0,
             bands_enabled: false,
             detail_enabled: false,
@@ -205,6 +208,40 @@ impl OwnedSparseSession {
     }
     pub fn working_bytes(&self) -> usize {
         self.working_bytes
+    }
+    /// Grow an initially small request table up to the C-compatible maximum.
+    /// Existing terminal records keep their IDs and slots. A failed reservation
+    /// changes neither the scheduler nor publication. As with reserve_pending,
+    /// the byte ceiling bounds committed storage, not transient peak memory.
+    pub fn reserve_requests(&mut self, capacity: usize) -> Result<(), Error> {
+        self.ensure_clean()?;
+        if !matches!(
+            self.session.state(),
+            SessionState::Created | SessionState::Running
+        ) {
+            return Err(Error::InvalidState);
+        }
+        if capacity > MAX_REQUESTS {
+            return Err(Error::InvalidArgument);
+        }
+        if capacity <= self.scheduler.request_capacity() {
+            return Ok(());
+        }
+        let base = self.working_bytes - self.request_bytes;
+        let fits = |extra| {
+            base.checked_add(extra)
+                .filter(|&n| n <= self.limits.maximum_working_bytes)
+                .ok_or(Error::LimitExceeded)
+        };
+        fits(bytes::<RequestSlot>(capacity)?)?;
+        let slots = array::<RequestSlot>(capacity)?;
+        let request_bytes = bytes::<RequestSlot>(slots.capacity())?;
+        let actual = fits(request_bytes)?;
+        self.scheduler.replace_request_storage(slots)?;
+        self.working_bytes = actual;
+        self.request_bytes = request_bytes;
+        self.limits.request_capacity = capacity;
+        Ok(())
     }
     /// Explicitly grow pending storage. Push retains fixed-capacity backpressure
     /// until the caller reserves more. No generation or scheduler state changes.

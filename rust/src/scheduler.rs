@@ -154,6 +154,26 @@ impl<'a, R: core::ops::DerefMut<Target = [RequestSlot]>> Scheduler<'a, R> {
     pub(crate) fn enable_music(&mut self, features: u64) {
         self.requested_features |= features;
     }
+    /// Enlarge caller-owned request storage without resetting IDs, terminal
+    /// records, aging, focus or scheduling order. The C-compatible maximum stays
+    /// sixteen. Failure leaves both stores unchanged; success returns the old
+    /// store. No allocation or publication occurs in this portable operation.
+    pub fn replace_request_storage(&mut self, mut slots: R) -> Result<R, Error> {
+        if slots.len() > MAX_REQUESTS {
+            return Err(Error::InvalidArgument);
+        }
+        if slots.len() < self.slots.len() {
+            return Err(Error::BufferTooSmall);
+        }
+        let used = self.slots.len();
+        slots[..used].copy_from_slice(&self.slots);
+        slots[used..].fill(RequestSlot::default());
+        Ok(core::mem::replace(&mut self.slots, slots))
+    }
+
+    pub fn request_capacity(&self) -> usize {
+        self.slots.len()
+    }
     pub(crate) fn enable_detail(&mut self) {
         self.requested_features |= WAVEFORM_DETAIL;
     }

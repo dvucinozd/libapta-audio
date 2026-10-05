@@ -187,4 +187,34 @@ fn growing_array_failures_preserve_preflight_and_retry_committed_snapshots() {
             .unwrap();
         assert_eq!(s.session().processed_frames(), 513);
     }
+    let mut s = OwnedSparseSession::new(
+        c,
+        SparseLimits {
+            request_capacity: 1,
+            ..SparseLimits::default()
+        },
+    )
+    .unwrap();
+    let request = libapta::RegionRequest {
+        range: libapta::FrameRange {
+            first_frame: 0,
+            end_frame: 256,
+        },
+        feature_mask: libapta::result::WAVEFORM_OVERVIEW,
+        priority: 96,
+        soft_deadline_monotonic_ns: 0,
+        request_id: 0,
+    };
+    let id = s.request_region(request).unwrap();
+    let old = s.results().acquire().unwrap();
+    let bytes = s.working_bytes();
+    FAIL_AFTER.store(1, Ordering::Relaxed);
+    let result = s.reserve_requests(2);
+    assert_eq!(FAIL_AFTER.swap(0, Ordering::Relaxed), 0);
+    assert_eq!(result, Err(Error::LimitExceeded));
+    assert_eq!(s.working_bytes(), bytes);
+    assert_eq!(s.results().acquire().unwrap().info(), old.info());
+    assert_eq!(s.request_region(request), Err(Error::LimitExceeded));
+    s.reserve_requests(2).unwrap();
+    assert_eq!(s.request_region(request), Ok(id + 1));
 }

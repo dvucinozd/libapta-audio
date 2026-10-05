@@ -57,6 +57,25 @@ fn entire_session_path_allocates_nothing() {
     assert_eq!(layout.decode(&bytes[44..], &mut [0.; 2]), Ok(2));
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 
+    let mut first = [libapta::scheduler::RequestSlot::default(); 1];
+    let mut replacement = [libapta::scheduler::RequestSlot::default(); 16];
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let mut scheduler = libapta::scheduler::Scheduler::new(Some(1024), 1, &mut first).unwrap();
+    let id = scheduler
+        .request_region(libapta::RegionRequest {
+            range: libapta::FrameRange {
+                first_frame: 0,
+                end_frame: 256,
+            },
+            feature_mask: 1,
+            priority: 96,
+            soft_deadline_monotonic_ns: 0,
+            request_id: 0,
+        })
+        .unwrap();
+    scheduler.replace_request_storage(&mut replacement).unwrap();
+    assert_eq!(scheduler.next_pcm_request(&[]).unwrap().request_token, id);
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
     let mut queue = [NormalizedSample {
         value: 0.0,
         clipped: false,
