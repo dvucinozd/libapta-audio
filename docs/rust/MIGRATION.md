@@ -2252,8 +2252,9 @@ are retained by `verify-task-storage-probe.py`, stamp 20261004T210659Z, in the
 existing Pajoniiir evidence directory. Production executor features, SRAM/PSRAM,
 DMA/cache, full nested stack and timing/coexistence remain unqualified.
 
-Foundation still needs exFAT broker file handles and a uniquely owned analysis
-client with pending completion/resource recovery. No Library/Deck channel is
+The later lease/construction continuation below supersedes the exFAT-handle
+blocker. Foundation still needs a uniquely owned analysis client with pending
+completion/resource recovery. No Library/Deck channel is
 borrowed; firmware/Slint selection and ADR-006 remain gated. Unknown-duration
 sparse ownership, broader codec/view profiles, C allocator/layout/unsafe ABI/
 packaging and original DSP acceptance remain independent unfinished work. The
@@ -2305,3 +2306,42 @@ No broader core/runtime/C sanitizers, i686/Windows/AArch64 or physical P4 gates
 were rerun. Unknown-duration sparse ownership, production codec/view policies,
 C allocator/layout/unsafe ABI/packaging and original DSP accuracy remain open.
 The real S6 rejection and portable key coefficient boundary remain unchanged.
+
+## Native constructor and cooperative consumer — 2026-10-05
+
+The borrowed `Session::new` wrapper now permits cross-crate inlining. The same
+`with_storage` implementation, validation order, caller buffers and algorithms
+remain authoritative; there is no API, allocator, unsafe, C or wire-format change.
+A concrete pinned Rust 1.95 RV32 complete-job consumer exposed a large temporary
+Result at this boundary. Making the wrapper visible to optimization reduced its
+consumer local-tempo preparation frame from 7136 to 128 bytes. This is a measured
+compiler result, not a portable stack-size guarantee. The external local-patch
+experiment is `task-inline-probe-20261005` / `task-inline-20261005.o` under the
+Pajoniiir evidence root; final immutable-pin acceptance is recorded by the consumer.
+
+Pajoniiir's second-pass `StreamWorker::run` borrows caller control, yields after
+each incomplete bounded step, and uses the existing open/hash/close and original
+lease checks. Processing errors close the handle; cleanup errors take precedence.
+Cancellation during reads or cooperative yields poisons delivery while keeping
+control available for explicit abort. Backend pending-operation recovery and
+non-cancellable open/close obligations still apply. These are consumer policies,
+not portable-core executor or filesystem dependencies. Real native FAT32/exFAT
+fixtures and the host WAV example use the driver and retain exact neutral output.
+Neither firmware nor Slint enables APTA; unique broker client/recovery, placement,
+timing, hardware and original DSP accuracy gates remain independent.
+
+Fresh pre-change `consumer-cooperative-baseline-20261005.log` and post-change
+`consumer-inline-final-20261005.log`, under the Libapta rewrite evidence root,
+both pass 123 C tests, 279 ordinary Rust plus 55 external-C groups in each debug/
+release profile, 34 WAV interchange cases and two all-feature CLI cases, with
+formatting, Clippy, no-default-features and allocation instrumentation. C remains
+unchanged. Expanded unknown-duration sparse ownership and C allocator/layout/ABI/
+packaging compatibility are still unfinished separate workstreams. The diagnosed
+portable key boundary and real S6 rejection are unchanged.
+
+Optimized AddressSanitizer checks (`consumer-inline-asan-20261005.log`) pass
+38 ordinary core/session/allocation/WAV tests; ignored external-C tests are not
+counted in that sanitizer run. Portable AArch64 no-default-features compilation
+passes (`consumer-inline-aarch64-20261005.log`). Broader runtime/C sanitizers,
+i686 and Windows execution were not rerun; consumer ASan/P4 acceptance follows
+the immutable pin separately.

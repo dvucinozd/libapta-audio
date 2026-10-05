@@ -127,6 +127,8 @@ pub struct Session<
 }
 
 impl<'a> Session<'a> {
+    // Let native callers eliminate the large Result temporary during construction.
+    #[inline]
     pub fn new(
         config: SessionConfig,
         queue: &'a mut [NormalizedSample],

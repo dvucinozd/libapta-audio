@@ -596,3 +596,14 @@ Its native FAT32/exFAT consumers remain exact. Complete-task and nested-library
 stack diagnostics are recorded in the migration section **Consumer lease and
 construction integration — 2026-10-05**; they do not qualify firmware stack sizes.
 Portable source and the immutable consumer pin are unchanged.
+
+
+## Native construction and cooperative consumer — 2026-10-05
+
+`Session::new` permits cross-crate inlining of its existing storage constructor.
+This lets optimized native consumers eliminate large temporary Session results;
+no API, storage lifetime, algorithm or C behavior changes. The measured effect
+and exact verification belong in the [migration record](../docs/rust/MIGRATION.md).
+Inlining is a compiler optimization opportunity, not a portable stack guarantee.
+Pajoniiir owns cooperative I/O driving, cancellation and caller control placement;
+those policies do not enter this portable core.
