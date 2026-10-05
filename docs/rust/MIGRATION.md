@@ -2553,3 +2553,39 @@ exFAT grows 16 B in that profile only. Actual combined firmware inventory
 software diagnostics, not complete call-path maxima or hardware budgets. Unique
 foundation-owned analysis-client/recovery, production retained storage/provider
 selection, original DSP accuracy and C compatibility gates remain unchanged.
+
+## Pajoniiir owned analysis-client contribution — 2026-10-05
+
+The isolated consumer now supplies the missing analysis ownership bridge in its
+foundation `pajoniiir-media-fs` crate and USB0 broker wiring. A dedicated once-only
+endpoint reuses the existing request queue and native FAT32/exFAT engines. The
+client retains original lease, pending operation/ticket, actual handle and owned
+buffer across cancelled futures; explicit recovery drains and closes before
+reuse. Unexpected completions are retained rather than discarded, stale reads
+cannot write consumer scratch, and logical file/ticket generations do not wrap.
+Short read limits preserve whole-buffer ownership at WAV framing/EOF boundaries.
+
+Existing SourceRequest/StreamWorker APIs consume this AsyncFileSystem bridge
+without a portable-core change. Both full-object hashes and both closes still
+gate delivery. Existing retained banks, Deck pins, neutral transport and waveform
+consumers are reused. The actual FAT32/exFAT fixtures traverse the bridge; host
+recovery/repeated-job tests and complete Embassy task diagnostics cover its
+software ownership path. Consumer README owns the exact contracts and acceptance.
+
+Libapta source, C oracle, public API/ABI, container, numerical behavior and pinned
+portable revision remain unchanged. No product broker/executor policy enters
+Libapta and desktop libapta-runtime remains excluded from firmware. The contribution
+is reviewable without enabling the production provider. Owner adoption of the
+lane/lifetime contract, persistent task and SRAM/PSRAM bank placement remain
+separate decisions; hardware DMA/cache/interrupt/coexistence/timing, original DSP
+accuracy and deferred C compatibility remain independent gates.
+
+Final unchanged-library acceptance `analysis-owner-combined-20261005.log` passes
+123 C tests, 282 ordinary native Rust tests and 56 enabled external-C groups per
+debug/release, 34 WAV interchange cases, two all-feature CLI cases, formatting,
+Clippy, no-default-features and allocation instrumentation. Consumer acceptance
+`20261005T094935Z` passes 463 workspace / 122 focused release / 47 adapter ASan
+tests plus the lifetime doctest in each suite. Complete Embassy host and P4
+probe `20261005T095219Z`, nested `20261005T095224Z` and actual combined firmware
+`20261005T095227Z` pass. The consumer README records the separate broker profile,
+resource exclusions and reproduction; these do not qualify physical P4 behavior.
