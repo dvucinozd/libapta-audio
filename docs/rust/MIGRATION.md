@@ -2533,3 +2533,23 @@ scheduler/session allocation checks are in `request-growth-asan-core.log`.
 ASan/leak instrumentation applies to Rust, not the unchanged linked C oracle
 archive. No AArch64, i686 or Windows matrix or physical hardware was rerun here.
 Consumer final-source diagnostics and the external handoff follow separately.
+
+
+Final owning-runtime ASan/leak acceptance is 62 cases, including enabled external
+C comparisons; focused portable ASan is eight tests. Consumer acceptance on the
+new immutable library revision `25d09de364e9507532c0508c838a8fecf0772d13`, stamp
+`20261005T091217Z`, passes 459 workspace / 119 release / 44 adapter ASan tests plus
+one lifetime compile-fail doctest in each suite. Original artifact bytes remain
+exact (`20261005T091507Z`). Native/streaming/task probes are `20261005T091511Z`,
+`20261005T091516Z`, `20261005T091517Z`; the last passes three complete-job host tests.
+
+The cursor adds eight resident bytes to each measured RV32 worker control
+(4272/4296 B FAT32/exFAT). Standard futures/pools/poll/preparation remain
+4120/4392, 4496/4768, 4256/4336 and 128 B respectively. Arrays + pool + both controls
++ diagnostic backend total 118804/119132 B. The separate forced-frame-pointer
+inventory (`task-nested-20261005T091525Z`, 1491 records) has 4256/4352 B polling:
+exFAT grows 16 B in that profile only. Actual combined firmware inventory
+`firmware-frames-20261005T091530Z` remains 4213 records with APTA absent. These are
+software diagnostics, not complete call-path maxima or hardware budgets. Unique
+foundation-owned analysis-client/recovery, production retained storage/provider
+selection, original DSP accuracy and C compatibility gates remain unchanged.
