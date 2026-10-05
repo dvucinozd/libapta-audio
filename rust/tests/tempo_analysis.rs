@@ -196,6 +196,108 @@ fn native_tempo_and_grid_payloads_match_public_c_analysis() {
     }
 }
 
+// Complete independent expected payloads for the existing segment-cap fixture.
+// The first seven segments are unchanged; C extends the eighth through all
+// subsequent incompatible windows, while Rust retains only its accepted window.
+fn capacity_payloads(corrected: bool) -> (Vec<u8>, Vec<u8>) {
+    use libapta::*;
+    let id = if corrected { 34 } else { 47 };
+    let rows = [
+        (0, 262144, 0, 3199, 4203341937, 82, 150001, 58),
+        (262144, 524288, 262144, 5887, 4214043499, 45, 81522, 58),
+        (524288, 786432, 526336, 5504, 81950550, 48, 87209, 57),
+        (786432, 1572864, 786432, 3199, 4203341937, 246, 150001, 57),
+        (1572864, 2097152, 1574912, 4863, 4127842865, 108, 98685, 59),
+        (2097152, 2359296, 2099200, 3071, 4210525343, 85, 156251, 61),
+        (2359296, 2621440, 2359296, 4479, 4269312058, 59, 107143, 60),
+        (
+            2621440,
+            if corrected { 2883584 } else { 4096017 },
+            2623488,
+            3071,
+            4210525343,
+            if corrected { 85 } else { 480 },
+            156251,
+            59,
+        ),
+    ];
+    let mut segments = Vec::new();
+    let mut beats = Vec::new();
+    for (i, (first, end, anchor, whole, fraction, count, tempo, confidence)) in
+        rows.into_iter().enumerate()
+    {
+        let ordinal = beats.len() as i64;
+        segments.push(GridSegment {
+            applicability_range: FrameRange {
+                first_frame: first,
+                end_frame: end,
+            },
+            anchor_position: FractionalFrame {
+                whole_frame: anchor,
+                fraction_q32: 0,
+            },
+            anchor_ordinal: ordinal,
+            frames_per_beat: FramePeriod {
+                whole_frames: whole,
+                fraction_q32: fraction,
+            },
+            beat_count: count,
+            nominal_tempo_millibpm: tempo,
+            confidence,
+            state: FeatureState::Final,
+            flags: 130,
+            segment_id: i as u32 + 1,
+            revision: id,
+        });
+        for n in 0..count {
+            let q32 = (u128::from(anchor) << 32)
+                + u128::from(n) * ((u128::from(whole) << 32) + u128::from(fraction));
+            beats.push(Beat {
+                position: FractionalFrame {
+                    whole_frame: (q32 >> 32) as u64,
+                    fraction_q32: q32 as u32,
+                },
+                ordinal: ordinal + i64::from(n),
+                revision: id,
+                flags: 130,
+                confidence,
+            });
+        }
+    }
+    let range = FrameRange {
+        first_frame: 0,
+        end_frame: 4096017,
+    };
+    let g = GlobalGrid {
+        state: FeatureState::Final,
+        confidence: 58,
+        flags: 130,
+        representation: GridRepresentation::Hybrid,
+        requested_range: range,
+        evidence_range: range,
+        applicability_range: range,
+        coverage_range: range,
+        segments: &segments,
+        beats: &beats,
+    };
+    let r = GridRevision {
+        state: RevisionState::Applied,
+        confidence: 58,
+        flags: 6,
+        revision_id: id,
+        previous_revision_id: id - 1,
+        proposed_representation: GridRepresentation::Hybrid,
+        proposed_segment_count: 8,
+        proposed_beat_count: beats.len() as u32,
+        affected_range: range,
+    };
+    let mut grid = vec![0; 96 + 80 * 8 + 40 * beats.len()];
+    grid::write_payload(&g, true, &mut grid).unwrap();
+    let mut revision = vec![0; 80];
+    grid::write_revision(&r, &g, true, &mut revision).unwrap();
+    (grid, revision)
+}
+
 #[test]
 #[ignore = "requires unchanged compiled C oracle"]
 fn native_global_grid_and_revisions_match_c_windows() {
@@ -362,7 +464,35 @@ fn native_global_grid_and_revisions_match_c_windows() {
             .find(|s| s.fourcc == *b"GGRD")
             .unwrap()
             .payload;
-        assert_eq!(reference, &native[..size], "rate {rate} steps {steps}");
+        if count == 256 * 16000 + 17 {
+            let (old, _) = capacity_payloads(false);
+            let (corrected, _) = capacity_payloads(true);
+            assert_eq!(reference, old, "original overflow C grid");
+            assert_eq!(&native[..size], corrected, "corrected bounded grid");
+            assert_eq!(
+                grid.segments.last().unwrap().applicability_range.end_frame,
+                2883584
+            );
+            assert_eq!(grid.beats.len(), 758);
+            if let Some(output) = std::env::var_os("APTA_S6_EVIDENCE_DIR") {
+                let output = std::path::PathBuf::from(output);
+                fs::create_dir(&output).unwrap();
+                fs::write(
+                    output.join("cap.pcm"),
+                    samples
+                        .iter()
+                        .flat_map(|v| v.to_le_bytes())
+                        .collect::<Vec<_>>(),
+                )
+                .unwrap();
+                fs::write(output.join("cap-c.apta"), &c.stdout).unwrap();
+                fs::write(output.join("cap-rust.ggrd"), &native[..size]).unwrap();
+                let (_, r) = capacity_payloads(true);
+                fs::write(output.join("cap-rust.revn"), r).unwrap();
+            }
+        } else {
+            assert_eq!(reference, &native[..size], "rate {rate} steps {steps}");
+        }
         let mut revision = [0u8; 96];
         let size =
             libapta::grid::write_revision(&s.grid_revision().unwrap(), &grid, true, &mut revision)
@@ -372,11 +502,24 @@ fn native_global_grid_and_revisions_match_c_windows() {
             .find(|s| s.fourcc == *b"REVN")
             .unwrap()
             .payload;
-        assert_eq!(
-            reference,
-            &revision[..size],
-            "revision rate {rate} steps {steps}"
-        );
+        if count == 256 * 16000 + 17 {
+            assert_eq!(
+                reference,
+                capacity_payloads(false).1,
+                "original overflow C revision"
+            );
+            assert_eq!(
+                &revision[..size],
+                capacity_payloads(true).1,
+                "corrected bounded revision"
+            );
+        } else {
+            assert_eq!(
+                reference,
+                &revision[..size],
+                "revision rate {rate} steps {steps}"
+            );
+        }
     }
 }
 

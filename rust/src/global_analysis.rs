@@ -449,11 +449,16 @@ where
                 .nominal_tempo_millibpm
                 .abs_diff(tempo)
         };
-        if self.pending_count == 0 || difference > 1500 {
+        let adjacent = self.pending_count != 0
+            && self.pending_segments[self.pending_count - 1]
+                .applicability_range
+                .end_frame
+                == first * BIN_FRAMES;
+        if !adjacent || difference > 1500 {
             if self.pending_count == 8 {
-                let segment = &mut self.pending_segments[7];
-                segment.applicability_range.end_frame = end * BIN_FRAMES;
-                segment.flags |= 128;
+                // Storage exhaustion cannot authorize timing for a rejected gap
+                // or replace the last segment's tempo with unsupported timing.
+                // Retain the represented prefix and explicitly degrade it.
                 self.degraded = true;
                 return;
             }
@@ -505,7 +510,19 @@ where
         if self.first == 0 && eof.is_some_and(|e| self.end * BIN_FRAMES >= e) {
             self.state = FeatureState::Final;
         }
-        let dynamic = self.segment_count > 1;
+        // Disconnected support alone is not evidence of a tempo change. Compare
+        // the represented tempo range: neighboring differences alone can miss
+        // cumulative variation across several disconnected islands.
+        let (minimum, maximum) = self.segments[..self.segment_count].iter().fold(
+            (u32::MAX, 0),
+            |(minimum, maximum), s| {
+                (
+                    minimum.min(s.nominal_tempo_millibpm),
+                    maximum.max(s.nominal_tempo_millibpm),
+                )
+            },
+        );
+        let dynamic = maximum - minimum > 1500;
         self.flags = if dynamic { 2 } else { 0 } | if self.degraded { 128 } else { 0 };
         self.representation = if self.dynamic || dynamic {
             GridRepresentation::Hybrid
@@ -676,6 +693,8 @@ where
         add(self.segment_count as u64);
         add(self.beat_count as u64);
         add(self.representation as u64);
+        // A capacity rejection can degrade an otherwise unchanged geometry.
+        add(u64::from(self.flags));
         for s in &self.segments[..self.segment_count] {
             add(s.applicability_range.first_frame);
             add(s.applicability_range.end_frame);
@@ -686,5 +705,211 @@ where
             add(u64::from(s.nominal_tempo_millibpm));
         }
         hash
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate std;
+    use super::*;
+    use std::vec;
+
+    fn analysis(
+        dynamic: bool,
+    ) -> GlobalAnalysis<'static, std::vec::Vec<OnsetBin>, std::vec::Vec<f32>, std::vec::Vec<Beat>>
+    {
+        GlobalAnalysis::with_storage(
+            8000,
+            None,
+            dynamic,
+            vec![OnsetBin::default(); BIN_CAPACITY],
+            vec![0.0; BIN_CAPACITY],
+            vec![Beat::default(); MAX_BEATS],
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn adjacency_and_tempo_boundaries_preserve_supported_geometry() {
+        for (first, tempo, count, dynamic) in [
+            (128, 120000, 1, false),
+            (128, 121500, 1, false),
+            (128, 121501, 2, true),
+            (256, 120000, 2, false),
+            (256, 121500, 2, false),
+            (256, 121501, 2, true),
+        ] {
+            let mut a = analysis(false);
+            a.add_window(0, 128, 120000, 1, 80);
+            a.add_window(first, first + 128, tempo, 2, 60);
+            a.end = first + 128;
+            a.commit(Some(a.end * BIN_FRAMES), None).unwrap();
+            let g = a.grid().unwrap();
+            assert_eq!(g.segments.len(), count);
+            assert_eq!(g.flags, if dynamic { 2 } else { 0 });
+            assert_eq!(
+                g.representation,
+                if dynamic {
+                    GridRepresentation::Hybrid
+                } else {
+                    GridRepresentation::Segments
+                }
+            );
+            assert_eq!(
+                g.segments[0].applicability_range.end_frame,
+                if count == 1 {
+                    (first + 128) * BIN_FRAMES
+                } else {
+                    128 * BIN_FRAMES
+                }
+            );
+            assert_eq!(g.segments[0].anchor_position.whole_frame, BIN_FRAMES);
+            if count == 2 {
+                assert_eq!(
+                    g.segments[1].applicability_range.first_frame,
+                    first * BIN_FRAMES
+                );
+                assert_eq!(
+                    g.segments[1].anchor_position.whole_frame,
+                    (first + 2) * BIN_FRAMES
+                );
+                assert_eq!(
+                    g.segments[1].anchor_ordinal,
+                    if dynamic {
+                        i64::from(g.segments[0].beat_count)
+                    } else {
+                        0
+                    }
+                );
+            }
+            for b in g.beats {
+                assert!(g.segments.iter().any(|s| s.applicability_range.first_frame
+                    <= b.position.whole_frame
+                    && b.position.whole_frame < s.applicability_range.end_frame));
+            }
+        }
+    }
+
+    #[test]
+    fn capacity_never_extends_across_dropped_windows_and_revises_degradation() {
+        for dynamic in [false, true] {
+            let mut a = analysis(dynamic);
+            for i in 0..8 {
+                a.add_window(i * 256, i * 256 + 128, 120000, 1, 80);
+            }
+            a.end = 2048;
+            a.commit(Some(a.end * BIN_FRAMES), None).unwrap();
+            let saved = a.segments;
+            let revision = a.revision().unwrap();
+            let serial = a.mutation_serial();
+            // Ninth accepted island cannot be represented. A following island
+            // must not merge back through the dropped island or either gap.
+            a.add_window(2048, 2176, 120000, 1, 80);
+            a.add_window(2176, 2304, 120000, 1, 80);
+            a.end = 2304;
+            a.commit(Some(a.end * BIN_FRAMES), None).unwrap();
+            let g = a.grid().unwrap();
+            assert_eq!(g.segments.len(), 8);
+            assert_eq!(g.flags, 128);
+            for (s, old) in g.segments.iter().zip(saved) {
+                assert_eq!(s.applicability_range, old.applicability_range);
+                assert_eq!(s.anchor_position, old.anchor_position);
+                assert_eq!(s.frames_per_beat, old.frames_per_beat);
+                assert_eq!(s.flags, 128);
+            }
+            assert_eq!(a.revision().unwrap().revision_id, revision.revision_id + 1);
+            assert_eq!(
+                a.revision().unwrap().previous_revision_id,
+                revision.revision_id
+            );
+            assert_eq!(a.revision().unwrap().flags, 4);
+            assert_eq!(a.mutation_serial(), serial + 1);
+            a.commit(Some(a.end * BIN_FRAMES), None).unwrap();
+            assert_eq!(a.mutation_serial(), serial + 1);
+        }
+    }
+
+    #[test]
+    fn capacity_still_merges_adjacent_compatible_window_but_not_changed_tempo() {
+        let mut a = analysis(false);
+        for i in 0..8 {
+            a.add_window(i * 256, i * 256 + 128, 120000, 0, 80);
+        }
+        a.add_window(1920, 2048, 120000, 0, 80);
+        assert!(!a.degraded);
+        assert_eq!(
+            a.pending_segments[7].applicability_range.end_frame,
+            2048 * BIN_FRAMES
+        );
+        a.add_window(2048, 2176, 150000, 0, 80);
+        a.add_window(2176, 2304, 120000, 0, 80);
+        assert!(a.degraded);
+        assert_eq!(
+            a.pending_segments[7].applicability_range.end_frame,
+            2048 * BIN_FRAMES
+        );
+        assert_eq!(a.pending_segments[7].nominal_tempo_millibpm, 120000);
+    }
+
+    #[test]
+    fn separated_islands_detect_total_tempo_spread_in_any_order() {
+        for tempos in [
+            [120000, 121500, 123000],
+            [121500, 120000, 123000],
+            [123000, 121500, 120000],
+        ] {
+            let mut a = analysis(false);
+            for (i, tempo) in tempos.into_iter().enumerate() {
+                a.add_window(i as u64 * 256, i as u64 * 256 + 128, tempo, 0, 80);
+            }
+            a.end = 640;
+            a.commit(Some(a.end * BIN_FRAMES), None).unwrap();
+            let g = a.grid().unwrap();
+            assert_eq!(g.segments.len(), 3);
+            assert_eq!(g.flags, 2);
+            assert_eq!(g.representation, GridRepresentation::Hybrid);
+            assert_eq!(a.revision().unwrap().flags, 2);
+            for b in g.beats {
+                assert!(g.segments.iter().any(|s| s.applicability_range.first_frame
+                    <= b.position.whole_frame
+                    && b.position.whole_frame < s.applicability_range.end_frame));
+            }
+        }
+    }
+
+    #[test]
+    fn explicit_capacity_does_not_bridge_gap_or_force_same_tempo_hybrid() {
+        for dynamic in [false, true] {
+            let mut a = analysis(dynamic);
+            a.add_window(0, 6000, 120000, 0, 80);
+            a.add_window(6128, 12128, 120000, 0, 80);
+            a.end = 12128;
+            a.commit(Some(a.end * BIN_FRAMES), None).unwrap();
+            let g = a.grid().unwrap();
+            assert_eq!(g.flags & 2, 0);
+            assert_eq!(
+                g.segments[0].applicability_range.end_frame,
+                6000 * BIN_FRAMES
+            );
+            assert_eq!(
+                g.segments[1].applicability_range.first_frame,
+                6128 * BIN_FRAMES
+            );
+            if dynamic {
+                assert_eq!(g.representation, GridRepresentation::Hybrid);
+                assert_eq!(g.flags, 128);
+                assert_eq!(g.beats.len(), MAX_BEATS);
+                assert_eq!(g.segments[1].beat_count, 0);
+                assert!(g
+                    .beats
+                    .iter()
+                    .all(|b| b.position.whole_frame < 6000 * BIN_FRAMES));
+            } else {
+                assert_eq!(g.representation, GridRepresentation::Segments);
+                assert_eq!(g.flags, 0);
+                assert!(g.beats.is_empty());
+                assert!(g.segments.iter().all(|s| s.beat_count > 3000));
+            }
+        }
     }
 }

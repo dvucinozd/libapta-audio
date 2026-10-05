@@ -164,7 +164,7 @@ explicit. Integrate before independent review; never reset another agent's work.
 | Resume/result seeding | publication/sparse/waveform | Validated owned overview checkpoint, source/fingerprint compatibility, inverse quantization and atomic native preflight; C tail difference documented below |
 | External validated result builder | [builder.rs](../../rust/src/builder.rs), [native_validation.rs](../../rust/src/native_validation.rs), [owned_result.rs](../../rust/src/owned_result.rs) | Encoded subset plus native graph/provenance/session-state validation and deep ownership; C allocator/API boundary pending |
 | S4 onset/BPM/local grid | [analysis.rs](../../rust/src/analysis.rs), session/sparse/publication | Default broadband analysis integrated; exact TEMP/LGRD C comparisons, focus and locking; experimental onset profiles pending |
-| S6 global grid/dynamic tempo/revisions | [global_analysis.rs](../../rust/src/global_analysis.rs), session/sparse/publication | Default windows, dynamic grids, revision identities, locked conflict and explicit acceptance integrated; exact GGRD/REVN comparisons |
+| S6 global grid/dynamic tempo/revisions | [global_analysis.rs](../../rust/src/global_analysis.rs), session/sparse/publication | Default windows, dynamic grids, revision identities, locked conflict and explicit acceptance integrated; exact unaffected comparisons and explicit corrected gap/capacity expectations |
 | Musical key/meter/downbeat | [key_analysis.rs](../../rust/src/key_analysis.rs), analysis | Default C profiles integrated; host-math MKEY and MTRD reference checks pass; portable key score rounding boundary remains open; original accuracy gates remain failed |
 | Quality/confidence calibration | analysis/session/sparse/publication | BPM LUT/model 1867860160 integrated; exact CONF comparisons; fresh accuracy qualification remains open |
 | POSIX/Windows file and WAV adapters | [wav.rs](../../rust/src/wav.rs) | Borrowed and constant-storage streaming WAV framing/block decode; filesystem ownership remains consumer-side |
@@ -2755,7 +2755,7 @@ meter binding or prove timing accuracy.
 
 The [expanded evaluation](DSP-COVERAGE.md#interior-rejection-and-actual-s6-ring-replacement--2026-10-05)
 closes a test-coverage gap with 18 known/unknown/budget/dynamic profiles using
-actual 16384-bin S6 replacement. Equal-tempo consolidation spans a rejected
+actual 16384-bin S6 replacement. Before the correction below, equal-tempo consolidation spanned a rejected
 interior window; a tempo change leaves a gap. Latest post-replacement output
 covers only resident suffix evidence, even with Final state. Retained caller-owned
 prefix graphs survive replacement, EOF and writer destruction unchanged.
@@ -2765,8 +2765,8 @@ cases explicitly preserve a newly characterized EOF lifecycle difference: C skip
 follow-up and retains revision 384 with an omitted tail; native existing follow-up
 produces revision 385 with an omitted prefix. The test checks both exact outcomes;
 it does not claim all-case parity or normalize revisions. Read-only C traces
-explain the gate and reproduce original oracle bytes. No production correction,
-C/API/ABI/backend/consumer change or portable pin update is justified by this run.
+explain the gate and reproduce original oracle bytes. That historical evaluation changed no production code. The explicitly authorized
+native correction below supersedes its consolidation and overflow behavior.
 
 `rust/tests/s6_ring.rs` runs in both combined external-C phases. Raw PCM, paired
 containers, retained results, traces and manifest are external under
@@ -2775,3 +2775,45 @@ The dated handoff owns final verification/publication. Full-source streaming
 history and accepted-window provenance need a separate design; meter/accuracy,
 slow replacement schedules, sparse gaps, owner adoption, hardware and deferred C
 compatibility gates remain open. Preserve explicit consumer rejection.
+
+
+## Honest S6 consolidation and bounded overflow — 2026-10-05
+
+Native [GlobalAnalysis](../../rust/src/global_analysis.rs) now requires actual
+adjacency before merging similar-tempo accepted windows. At eight segments it
+omits unrepresentable windows with degradation instead of extending unsupported
+timing. Multiple equal-tempo islands no longer imply dynamic tempo or implicit
+hybrid output. Grid flags participate in revision signatures so flag-only capacity
+degradation publishes a new revision. C is unchanged; intentional complete-payload
+differences and all unchanged comparisons are explicit.
+
+The [canonical correction record](DSP-COVERAGE.md#rejected-window-consolidation-correction--2026-10-05)
+owns exact geometry, range/ordinal semantics, capacity/representation boundaries,
+publication and consumer rejection. Public storage, no_std, container and lifecycle
+contracts remain intact. Final and the evidence envelope still do not prove full
+segment support. This corrects coverage honesty; it neither reconstructs timing
+nor establishes musical accuracy. Tail loss, ring-prefix history, meter binding,
+portable key rounding and the known C drain failure remain separate observations.
+
+The existing 18-case oracle matrix now asserts complete expected C/Rust payloads
+for five corrected interior cases; eleven cases retain full six-payload parity,
+and two retain the existing native EOF follow-up divergence. The established
+capacity fixture asserts both entire output geometries and all discrete beats.
+Five private-stage boundary tests plus one publication/exhaustion/retention test
+are added. An external probe uses the unchanged actual consumer validator on
+corrected known/unknown one-step PCM output: both real output and a gap-isolating
+meter fixture reject transactionally without fallback. No consumer pin/source,
+PR scope or production activation changes; full consumer/P4 runners are therefore
+not new acceptance claims for this independent library correction.
+
+Dated raw evidence and exact final verification/publication:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/s6-adjacency-20261005/`.
+Complete handoff:
+`/home/shome/.local/share/libapta-audio/handoffs/pajoniiir-libapta-native-rust-continuation-2026-10-05-s6-adjacency.md`.
+Use Rust 1.95.0, two build/test jobs and serial commands; unset the evidence output
+variable for combined verification. No sanitizer/platform/hardware qualification
+is inferred from these safe consolidation changes. Remaining independent work is
+frozen-evidence validation for slow scans after ring eviction, coherent streaming
+history, meter/accuracy and deferred C ABI/platform compatibility. Foundation
+adoption, actual execution-completion wiring, resource placement and physical P4
+qualification remain owner/hardware-dependent.

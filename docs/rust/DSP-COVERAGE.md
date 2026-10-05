@@ -1,6 +1,129 @@
 # Native S6 coverage and DSP boundaries
 
-## Evaluation — 2026-10-05
+The native correction below supersedes the original same-tempo interior bridging
+and segment-overflow behavior. Earlier measurements remain historical C/Rust
+compatibility evidence; C itself is unchanged.
+
+## Rejected-window consolidation correction — 2026-10-05
+
+[GlobalAnalysis](../../rust/src/global_analysis.rs) now consolidates accepted S6
+windows only when their frame ranges are adjacent **and** nominal tempos differ
+by at most the existing 1500 millibpm threshold. A rejected window therefore
+remains outside every segment. Estimation, rejection thresholds, phase selection,
+PCM accounting, cooperative scan scheduling and EOF follow-up are unchanged.
+This improves **coverage honesty**, not musical accuracy or missing-timing recovery.
+
+The smallest adjacency-only patch was insufficient: eight-segment overflow used
+to extend the last segment through later incompatible windows. Rust now omits
+unrepresentable windows and sets the existing degraded flag, retaining the exact
+represented prefix. An adjacent compatible window can still merge at capacity;
+a later window cannot merge through an omitted window. No extra storage, public
+format, dependency or history-retention framework is introduced.
+
+Multiple segments alone no longer imply dynamic tempo. The represented tempo range
+must span more than 1500 millibpm to set that flag. Equal/similar-tempo islands
+remain `Segments` unless dynamic output was explicitly requested. Explicit dynamic
+requests still produce `Hybrid`, using only beats inside supported islands; the
+existing explicit-beat ceiling stays in force. This does not resolve hybrid
+transport authority or qualify exhausted beat arrays for full-source use.
+
+### Concrete before and after
+
+The existing 8 kHz interior fixture has silence throughout [262144,524288).
+Unchanged C (and pre-correction Rust) reports one [0,786432) segment. Corrected
+Rust reports [0,262144) and [524288,786432). Both retain nominal tempo 96154
+millibpm. The new suffix anchor is 526336; the prefix anchor remains 2048.
+Each island has 53 beats. Segment representation retains independent anchor
+ordinals of zero; requested hybrid output enumerates 106 supported beats with
+suffix ordinal 53. These ordinals enumerate represented beats, not inferred
+beats in the gap. No beat or transport timing is fabricated for the silence.
+
+Revision remains 6/5 in the five established interior profiles because their
+number of geometry changes is unchanged; revision IDs are local sequence numbers,
+not cross-implementation content hashes. The internal signature covers segment
+geometry and now grid flags, so capacity degradation of otherwise unchanged
+geometry advances revision and mutation serial. Repeating the same result does
+not advance them. Retained prior graphs never change retrospectively.
+
+The established 4096017-frame changing-window capacity fixture previously extended
+segment eight [2621440,4096017), with 1153 hybrid beats and revision 47/46. Rust
+retains [2621440,2883584), 758 beats and revision 34/33. Its first seven segments,
+anchors, periods and confidences are unchanged; all output segments/explicit
+beats carry the corrected revision. Both have flags 130 (dynamic plus degraded).
+The smaller revision sequence follows omitted geometry updates, not normalization.
+
+### Range, publication and consumer contracts
+
+The existing single evidence/applicability/coverage envelope remains unchanged.
+In this implementation it is derived from inspected input, **not the union of
+accepted timing support**. This is a retained limitation, not a new definition of
+coverage: [normative beatgrid coverage](../../specification/beatgrid.md#13-coverage-gaps-and-inference)
+describes disjoint supported ranges. Do not claim complete native coverage-range
+conformance from this fix. The [v1 segment contract](../../specification/global-grid-container.md#33-segment-record)
+permits ordered nonoverlapping segments, so the corrected segment claims expose
+the discontinuity without new records or fields. Final still denotes completed
+analysis, not full-source timing. Consumers must check segment geometry and
+selected authority, not just Final or the enclosing range. The unchanged tail
+and resident-prefix limitations below still apply. Fully expressing every island
+in coverage metadata needs a separate compatibility design for the single-range
+wire subset; this task does not silently broaden that format.
+
+The existing immutable publication path copies these segments, signatures drive
+normal change detection, and both slots are already provisioned for eight segments.
+A new publication regression holds a prefix lease through exhaustion, checks its
+bytes, retries after release, drains EOF one step at a time and retains the final
+gapped graph after writer destruction. The 18-profile test also retains actual
+caller-owned prefix graphs independently through processing, EOF and destruction.
+
+An external probe links the corrected library to the **unchanged** isolated
+Pajoniiir adapter via a probe-only Cargo patch. Actual known/unknown PCM sessions
+using 256-frame/one-step work reject with `UnsupportedGrid` without writing the
+destination or falling back to local timing; a local-only control is accepted.
+A separately labelled validation fixture binds meter to a real global beat and
+uses consecutive represented ordinals to isolate the gap check; it still rejects.
+Changing only the second range start to a deliberately false joined range makes
+that artificial control pass, demonstrating why producer segment honesty matters.
+These controls are never delivered or treated as musical corrections. No consumer
+source, pin, production provider or PR scope changes.
+
+### Regression evidence and compatibility impact
+
+- [s6_ring.rs](../../rust/tests/s6_ring.rs): the same 18 cases retain exact complete
+  expected GGRD/REVN payloads for both original C and corrected Rust in all five
+  same-tempo interior cases. Eleven unaffected cases retain six-payload exact
+  parity. Two bounded ring-replacement cases retain the separately characterized
+  native EOF difference. WOVR/TEMP/LGRD/MTRD match C in all 18 cases.
+- [tempo_analysis.rs](../../rust/tests/tempo_analysis.rs): the existing capacity
+  fixture asserts both complete expected C/Rust grid and revision payloads,
+  including every generated Q32 beat. All other comparisons remain exact.
+- Private-stage tests cover adjacency, the 1500/1501 threshold, equal-tempo gaps, three-island cumulative tempo variation,
+  eight/ninth-segment boundaries, post-omission nonmerging, compatible merging at
+  capacity, flag-only revision changes and requested/unrequested hybrid behavior
+  at the 3072-beat ceiling. These controlled windows test consolidation contracts,
+  not estimator accuracy; PCM-driven tests provide the integration evidence.
+- [musical_publication.rs](../../rust/tests/musical_publication.rs) adds the
+  actual publication/exhaustion/retention regression described above. Existing
+  lifecycle, clocks, allocation and unaffected DSP tests remain required.
+
+New raw evidence, exact source/configuration hashes, serial commands, original
+and corrected outputs, consumer probe and final acceptance/publication are under
+`/home/shome/.local/share/libapta-audio/rust-rewrite/s6-adjacency-20261005/`.
+The original `s6-interior-ring-20261005/` evidence is preserved. Run the combined
+suite as below with `APTA_S6_EVIDENCE_DIR` unset. For fresh focused artifacts,
+set it to a new external directory for each s6_ring invocation or the selected
+`native_global_grid_and_revisions_match_c_windows` tempo_analysis test.
+
+C remains unchanged as historical compatibility evidence. Rust deliberately
+changes these defective grid/revision payloads while retaining API/container
+compatibility. Musical accuracy, exact local-meter/global-grid binding, missing
+S6 tails and accumulated full-source history are **not** repaired. No recordings,
+labels, unopened holdouts, numerical backend or frozen thresholds were changed.
+A coherent streaming history needs retained accepted evidence and defined revision
+boundaries; splicing earlier prefix and current suffix outputs is not sufficient.
+Slow/clock-limited scans after eviction still need independent frozen-evidence
+validation. Production adoption and physical hardware gates remain separate.
+
+## Original evaluation — 2026-10-05
 
 The native port reproduces the C reference's incomplete S6 segment coverage.
 `Final`, complete PCM processing and a full declared grid coverage range do
@@ -177,6 +300,9 @@ or embedded-memory qualification.
 
 ## Interior rejection and actual S6 ring replacement — 2026-10-05
 
+**Historical pre-correction results:** the correction above supersedes the native
+same-tempo row and its five parity claims. Original C outputs remain unchanged.
+
 [s6_ring.rs](../../rust/tests/s6_ring.rs) adds a separate **18-case** evaluation
 using the same unchanged public C oracle. It exercises the actual S6 ring of
 16384 × 2048 = **33554432 frames**, not the smaller S4 ring. No production Rust,
@@ -292,9 +418,8 @@ outside the separately measured core allocation tests.
 Recommendation: preserve explicit rejection of incomplete or unsupported timing.
 Do not concatenate old prefix and new suffix revisions or extend a segment to
 claim new timing. A future full-source streaming design must define evidence
-retention, revision boundaries and accepted-window coverage together. A separate
-algorithm protocol must decide whether consolidation across rejected windows is
-valid and evaluate meter coupling and musical accuracy. This synthetic evaluation
+retention, revision boundaries and accepted-window coverage together. The correction above now rejects consolidation across unsupported windows.
+Meter coupling and musical accuracy still require separate evaluation. This synthetic evaluation
 consumes no recordings or holdouts and changes no frozen thresholds. Sparse gaps,
 multiple complete ring turnovers, slow one-step/clock-budget scans across
 replacement, long hybrid beat exhaustion, ABI/platform and physical P4 acceptance

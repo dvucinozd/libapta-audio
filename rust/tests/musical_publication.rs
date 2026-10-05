@@ -1551,3 +1551,112 @@ fn sparse_all_stage_revision_retry_matches_public_c() {
         }
     }
 }
+
+#[test]
+fn rejected_s6_interior_survives_publication_exhaustion_and_writer_drop() {
+    let total = 786432;
+    let mut a = Buffers::new(24);
+    let mut b = Buffers::new(24);
+    let pool = ResultPool::new(
+        source(total),
+        [a.storage(), b.storage()],
+        NativeLimits::default(),
+    )
+    .unwrap();
+    let mut bins = vec![analysis::OnsetBin::default(); analysis::BIN_CAPACITY];
+    let mut flux = vec![0.0; bins.len()];
+    let mut gb = vec![analysis::OnsetBin::default(); global_analysis::BIN_CAPACITY];
+    let mut gf = vec![0.0; gb.len()];
+    let mut beats = vec![Beat::default(); global_analysis::MAX_BEATS];
+    let mut queue = vec![NormalizedSample::default(); 4096];
+    let mut columns = vec![WaveformColumn::default(); 24];
+    let final_result = {
+        let mut s = PublishedSession::new(
+            SessionConfig {
+                sample_rate: 8000,
+                channel_count: 1,
+                total_frames: total,
+                frames_per_column: 32768,
+            },
+            &mut queue,
+            &mut columns,
+            &pool,
+        )
+        .unwrap();
+        s.enable_tempo(&mut bins, &mut flux).unwrap();
+        s.enable_global_grid(false, &mut gb, &mut gf, &mut beats)
+            .unwrap();
+        let token = CancellationToken::new();
+        let mut retained: Option<libapta::publication::ResultLease<'_, '_>> = None;
+        let mut retained_bytes = Vec::new();
+        let mut exhausted = false;
+        for first in (0..total as usize).step_by(4096) {
+            let pcm: Vec<_> = (first..first + 4096)
+                .map(|i| {
+                    if !(262144..524288).contains(&i) && i % 4000 < 64 {
+                        (64 - i % 4000) as f32 / 64.0 * 0.75
+                    } else {
+                        0.0
+                    }
+                })
+                .collect();
+            assert_eq!(s.push_pcm(PcmView::F32Interleaved(&pcm)).unwrap(), 4096);
+            match s.process(WorkBudget::default(), &token) {
+                Ok(_) => (),
+                Err(Error::ResultSlotsExhausted) => {
+                    let old = retained.take().expect("retained prefix");
+                    assert_eq!(serialize(&old), retained_bytes);
+                    assert_eq!(old.global_grid().unwrap().segments.len(), 1);
+                    drop(old);
+                    exhausted = true;
+                    s.process(WorkBudget::default(), &token).unwrap();
+                }
+                Err(e) => panic!("{e:?}"),
+            }
+            if first + 4096 == 262144 {
+                let old = pool.acquire().unwrap();
+                retained_bytes = serialize(&old);
+                retained = Some(old);
+            }
+        }
+        assert!(exhausted);
+        s.finish_input().unwrap();
+        for _ in 0..10000 {
+            s.process(
+                WorkBudget {
+                    maximum_steps: 1,
+                    maximum_input_frames: 0,
+                },
+                &token,
+            )
+            .unwrap();
+            if s.session().state() == SessionState::Complete {
+                break;
+            }
+        }
+        assert_eq!(s.session().state(), SessionState::Complete);
+        let output = pool.acquire().unwrap();
+        let g = output.global_grid().unwrap();
+        assert_eq!(g.representation, GridRepresentation::Segments);
+        assert_eq!(g.flags, 0);
+        assert_eq!(g.segments.len(), 2);
+        assert_eq!(
+            g.segments[0].applicability_range,
+            FrameRange {
+                first_frame: 0,
+                end_frame: 262144
+            }
+        );
+        assert_eq!(
+            g.segments[1].applicability_range,
+            FrameRange {
+                first_frame: 524288,
+                end_frame: total
+            }
+        );
+        assert_eq!(output.revision().unwrap().revision_id, 6);
+        output
+    };
+    let bytes = serialize(&final_result);
+    assert_eq!(serialize(&pool.acquire().unwrap()), bytes);
+}

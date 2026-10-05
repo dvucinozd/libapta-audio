@@ -299,7 +299,8 @@ consumer example, not the full C analyzer/inspect/validate/corpus CLI replacemen
 Exact lifecycle tests cover 53 PCM profiles, intermediate generation/masks,
 cooperative clock samples, cancellation, exhausted initial slots and retry,
 known/unknown EOF and scheduled sources. The original S4 ring cases, changing grids
-and beat/segment caps compare quantized payload/wire bytes exactly. Actual S6
+and beat caps compare quantized payload/wire bytes exactly. Corrected segment-cap
+behavior has separate complete C/Rust expectations. Actual S6
 replacement and its bounded EOF difference are documented in the coverage
 evaluation below. The final combined runner includes eight waveform and nine musical WAV checks, with one
 complete desktop musical container compared byte-for-byte to unchanged C.
@@ -350,8 +351,12 @@ or local-meter binding. The [coverage evaluation](../docs/rust/DSP-COVERAGE.md)
 reproduces the inherited C limitation across EOF/window boundaries and separates
 it from the portable key boundary and independent musical accuracy. Its
 [interior/ring evaluation](../docs/rust/DSP-COVERAGE.md#interior-rejection-and-actual-s6-ring-replacement--2026-10-05)
-also shows consolidation across rejected windows and loss of prefix timing after
-actual S6 replacement. Two bounded EOF cases explicitly differ from C because
+preserves the original consolidation defect and loss of prefix timing after
+actual S6 replacement. [Corrected native consolidation](../docs/rust/DSP-COVERAGE.md#rejected-window-consolidation-correction--2026-10-05)
+now requires adjacency and preserves gaps, including at segment capacity. Equal-
+tempo disconnected segments do not alone imply dynamic tempo; overflow omits
+unsupported timing and marks degradation. C stays unchanged, with explicit
+complete-payload regression expectations for both implementations. Two bounded EOF cases explicitly differ from C because
 native follow-up refreshes changed resident evidence. Retained prefix results
 stay immutable; latest output is not accumulated full-source timing.
 

@@ -8,7 +8,8 @@ use libapta::{
     result,
     session::{CancellationToken, Session, SessionConfig, SessionState, WorkBudget},
     waveform::NormalizedSample,
-    Beat, FeatureState, NativeLimits, WaveformColumn,
+    Beat, FeatureState, FractionalFrame, FramePeriod, FrameRange, GlobalGrid, GridRepresentation,
+    GridRevision, GridSegment, NativeLimits, RevisionState, WaveformColumn,
 };
 use std::{fs, process::Command};
 
@@ -32,6 +33,105 @@ fn payload<'a>(container: &Container<'a>, id: [u8; 4]) -> Option<&'a [u8]> {
         .filter_map(|i| container.section(i))
         .find(|s| s.fourcc == id)
         .map(|s| s.payload)
+}
+
+// Independent expected geometry: the estimator is unchanged (96154 millibpm),
+// but support is two 128-bin islands. Keep complete original C bytes checked too.
+fn same_tempo_payloads(corrected: bool, dynamic: bool) -> (Vec<u8>, Vec<u8>) {
+    let range = FrameRange {
+        first_frame: 0,
+        end_frame: 786432,
+    };
+    let representation = if dynamic {
+        GridRepresentation::Hybrid
+    } else {
+        GridRepresentation::Segments
+    };
+    let mut segments = vec![GridSegment {
+        applicability_range: FrameRange {
+            first_frame: 0,
+            end_frame: if corrected { 262144 } else { 786432 },
+        },
+        anchor_position: FractionalFrame {
+            whole_frame: 2048,
+            fraction_q32: 0,
+        },
+        anchor_ordinal: 0,
+        frames_per_beat: FramePeriod {
+            whole_frames: 4991,
+            fraction_q32: 4260662588,
+        },
+        beat_count: if corrected { 53 } else { 158 },
+        nominal_tempo_millibpm: 96154,
+        confidence: 86,
+        state: FeatureState::Final,
+        flags: 0,
+        segment_id: 1,
+        revision: 6,
+    }];
+    if corrected {
+        segments.push(GridSegment {
+            applicability_range: FrameRange {
+                first_frame: 524288,
+                end_frame: 786432,
+            },
+            anchor_position: FractionalFrame {
+                whole_frame: 526336,
+                fraction_q32: 0,
+            },
+            anchor_ordinal: if dynamic { 53 } else { 0 },
+            confidence: 87,
+            segment_id: 2,
+            ..segments[0]
+        });
+    }
+    let mut beats = Vec::new();
+    if dynamic {
+        for s in &segments {
+            for n in 0..s.beat_count {
+                let q32 = (u128::from(s.anchor_position.whole_frame) << 32)
+                    + u128::from(n) * ((4991u128 << 32) + 4260662588);
+                beats.push(Beat {
+                    position: FractionalFrame {
+                        whole_frame: (q32 >> 32) as u64,
+                        fraction_q32: q32 as u32,
+                    },
+                    ordinal: s.anchor_ordinal + i64::from(n),
+                    revision: 6,
+                    flags: 0,
+                    confidence: s.confidence,
+                });
+            }
+        }
+    }
+    let grid = GlobalGrid {
+        state: FeatureState::Final,
+        confidence: 86,
+        flags: 0,
+        representation,
+        requested_range: range,
+        evidence_range: range,
+        applicability_range: range,
+        coverage_range: range,
+        segments: &segments,
+        beats: &beats,
+    };
+    let revision = GridRevision {
+        state: RevisionState::Applied,
+        confidence: 86,
+        flags: 0,
+        revision_id: 6,
+        previous_revision_id: 5,
+        proposed_representation: representation,
+        proposed_segment_count: segments.len() as u32,
+        proposed_beat_count: beats.len() as u32,
+        affected_range: range,
+    };
+    let mut g = vec![0; 96 + segments.len() * 80 + beats.len() * 40];
+    libapta::grid::write_payload(&grid, true, &mut g).unwrap();
+    let mut r = vec![0; 80];
+    libapta::grid::write_revision(&revision, &grid, true, &mut r).unwrap();
+    (g, r)
 }
 
 #[test]
@@ -239,12 +339,33 @@ fn s6_interior_and_resident_ring_characterize_c_and_native_eof() {
                 assert_eq!(session.processed_frames(), count as u64);
                 let native_bytes = wire(&session);
                 let native = Container::parse(&native_bytes, ParseOptions::default()).unwrap();
+
                 if let Some(output) = &output {
                     fs::write(output.join(format!("{name}-c.apta")), &c.stdout).unwrap();
                     fs::write(output.join(format!("{name}-rust.apta")), &native_bytes).unwrap();
                 }
                 for id in [*b"WOVR", *b"TEMP", *b"LGRD", *b"GGRD", *b"REVN", *b"MTRD"] {
-                    if fixture == "ring-partial"
+                    if fixture == "interior-same" && [*b"GGRD", *b"REVN"].contains(&id) {
+                        let expected_c = same_tempo_payloads(false, dynamic);
+                        let expected_rust = same_tempo_payloads(true, dynamic);
+                        let select = |pair: &(Vec<u8>, Vec<u8>)| {
+                            if id == *b"GGRD" {
+                                pair.0.clone()
+                            } else {
+                                pair.1.clone()
+                            }
+                        };
+                        assert_eq!(
+                            payload(&reference, id).unwrap(),
+                            select(&expected_c),
+                            "original C {name}"
+                        );
+                        assert_eq!(
+                            payload(&native, id).unwrap(),
+                            select(&expected_rust),
+                            "corrected Rust {name}"
+                        );
+                    } else if fixture == "ring-partial"
                         && steps == 32
                         && [*b"GGRD", *b"REVN"].contains(&id)
                     {
@@ -318,19 +439,9 @@ fn s6_interior_and_resident_ring_characterize_c_and_native_eof() {
                 assert_eq!(g.evidence_range.first_frame, expected_first, "{name}");
                 assert_eq!(first, expected_first, "{name}");
                 assert_eq!(end, count as u64, "{name}");
-                assert_eq!(
-                    g.segments.len(),
-                    if fixture == "interior-change" { 2 } else { 1 }
-                );
-                assert_eq!(
-                    gap,
-                    if fixture == "interior-change" {
-                        262144
-                    } else {
-                        0
-                    }
-                );
-                if fixture == "interior-change" {
+                assert_eq!(g.segments.len(), if interior { 2 } else { 1 });
+                assert_eq!(gap, if interior { 262144 } else { 0 });
+                if interior {
                     assert_eq!(g.segments[0].applicability_range.end_frame, 262144);
                     assert_eq!(g.segments[1].applicability_range.first_frame, 524288);
                 }
