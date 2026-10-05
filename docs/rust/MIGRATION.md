@@ -2345,3 +2345,30 @@ counted in that sanitizer run. Portable AArch64 no-default-features compilation
 passes (`consumer-inline-aarch64-20261005.log`). Broader runtime/C sanitizers,
 i686 and Windows execution were not rerun; consumer ASan/P4 acceptance follows
 the immutable pin separately.
+
+Final immutable-pin consumer acceptance: `20261005T064308Z` passes 446 workspace /
+110 focused release tests, 36 adapter tests plus one lifetime compile-fail doctest
+under ASan, formatting/Clippy/allocation and pinned Rust 1.95 P4 checks. Native
+FAT32/exFAT retained outputs now also exercise foundation Deck transport-lane
+backpressure: refusal preserves Deck state, and retry emits the exact seek once.
+Neither provider selection nor broker-client ownership is enabled.
+
+The complete job keeps both scan and worker control in caller slots. Standard
+RV32 future sizes are 4040/4288 B, pools 4416/4664 B, external scan control
+672/696 B and worker control 4264/4288 B (FAT32/exFAT). Polling is 8432/8800 B;
+preparation is 128 B, making the identified subtotal 8560/8928 B before further
+callees. Arrays + pool + external control + diagnostic backend are 118716/119020 B;
+no control is counted twice. `write_in_place` frames are separately 4416/4672 B.
+Three host complete-task tests include actual Embassy pool initialization/executor
+execution without measured allocations and first-pass cancellation recovery.
+This does not execute target esp-rtos or P4 hardware. A separate actual combined
+firmware compile/link inventory records entry/executor/interrupt disassembly and
+4211 frames, with APTA absent; it cannot be added blindly to the task diagnostic
+as a complete stack maximum. Large foundation owner frames, indirect callees,
+interrupt nesting, simultaneous workloads, placement and physical timing remain.
+
+Reproduction, exact artifacts, revised source-resolved diagnostic scripts,
+exclusions and publication are recorded in the consumer README and complete
+handoff `pajoniiir-libapta-native-rust-continuation-2026-10-05-0645.md` under
+`/home/shome/.local/share/libapta-audio/handoffs/`. Core source remains the published
+consumer pin `e93e667ba010d7256e06582f05cf5da0b94846e5`; this final addition is docs only.
