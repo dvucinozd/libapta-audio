@@ -2426,3 +2426,59 @@ CLI cases, formatting, Clippy, no-default-features and allocation checks. Consum
 ASan/P4 checks above were rerun; library/runtime/C sanitizers, AArch64, i686 and
 Windows/MSVC were not rerun in this docs-only library continuation. Earlier
 acceptance remains dated evidence, not a new execution claim.
+
+## Complete scan ownership and unknown sparse growth evidence — 2026-10-05
+
+Pajoniiir now shares a complete first-pass API between its host WAV example,
+actual native FAT32/exFAT fixtures and the complete Embassy job diagnostic.
+`SourceRequest::scan` requires an empty caller scanner slot, closes successful
+scans, aborts scan errors and preserves poisoned control on cancelled reads or
+cooperative yields. Cleanup errors take precedence; open/close completion and
+backend recovery obligations remain explicit. The verified geometry boundary
+still permits host allocation before synchronous Session preparation. Four new
+complete-job tests cover cleanup/cancellation, occupied control, limits and
+persistent generation ownership through repeated array reuse. Neutral Deck,
+Sync/Beat Jump, retained views and raster behavior remain exact. No Libapta
+production source, API, DSP, C product/header/ABI/container or consumer pin changes
+were needed. Consumer source remains pinned to `e93e667ba010d7256e06582f05cf5da0b94846e5`.
+
+The existing compiled `sparse_capacity_oracle.c`, already registered in
+`rust/check.py`, now tests initially unknown duration as well as known duration.
+For 63 and 4096 separated 64-frame fragments it retains the first-pass result,
+fills every intervening hole, rejects a conflicting short EOF and finalizes at
+8064/524288 frames. Complete wire output compares exactly among unknown-origin
+C, known-origin C and native **known-duration** owning sparse processing. The
+retained result preserves its original source duration, all span coordinates and
+column bytes after merging, EOF and session destruction, and keeps its context
+busy until released. This expands growth/retention evidence without introducing
+native unknown-duration sparse ownership or claiming its scheduling, seeding,
+musical or allocation-failure contracts. Those remain required before that change.
+
+Consumer final-source `20261005T083100Z` passes 458 ordinary workspace tests, 118
+focused release tests and 43 adapter ASan tests, each suite also passing its
+lifetime compile-fail doctest. Exact artifact/native-source/streaming/task stamps
+are `20261005T083148Z`, `20261005T083150Z`, `20261005T083155Z` and `20261005T083156Z`.
+Standard RV32 polling decreases to 4256/4336 B, while job futures increase to
+4120/4392 B and pools to 4496/4768 B. Preparation remains 128 B; initialization
+is 4496/4768 B. Arrays + pool + both external controls + diagnostic backend total
+118796/119124 B. This is an explicit resident-storage/polling-temporary tradeoff,
+not a maximum stack or placement claim. The separate nested inventory has 1491
+frames; actual combined firmware has 4213 frames with APTA absent. Detailed
+profile-specific evidence/exclusions remain in the consumer adapter README.
+
+Library final-source acceptance `unknown-growth-final-20261005T0833.log`, explicitly
+using `RUSTUP_TOOLCHAIN=1.95.0`, passes 123 C tests, 279 ordinary Rust tests plus
+55 enabled external-C groups per debug/release, 34 WAV interchange cases and two
+all-feature CLI cases, fmt/Clippy/no-default-features/allocation checks. Counts
+stay unchanged because the registered capacity group now tests both duration
+origins. The pre-edit unchanged-core runner passed in
+`consumer-composed-final-20261005T0826.log`. Focused native/C growth comparison is
+`unknown-growth-focused-20261005T0829.log`.
+
+`unknown-growth-asan-20261005T083627Z` passes four ASan/UBSan/leak-checked capacity
+oracle executions (known/unknown origin at 63/4096 fragments) with exact paired
+wire bytes. Only the oracle is sanitizer-instrumented; its unchanged linked C
+archive is not. Reproduction is `verify-unknown-growth-asan-20261005.py` in the
+external rewrite evidence root. Broader core/runtime/C sanitizers, AArch64, i686
+and Windows/MSVC were not rerun. No physical hardware was operated. Original DSP
+accuracy and all C allocator/layout/ABI/packaging gates remain separate.

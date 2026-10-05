@@ -615,3 +615,11 @@ core revision changed in this continuation. See
 for exact software evidence and the separate production, hardware and C compatibility
 gates. Filesystem policy, executor composition and product ownership stay outside
 this portable core.
+
+
+The [complete scan and sparse-growth continuation](../docs/rust/MIGRATION.md#complete-scan-ownership-and-unknown-sparse-growth-evidence--2026-10-05)
+adds shared consumer first-pass cleanup with caller-retained cancellation control.
+The compiled C capacity oracle now covers initially unknown duration through
+4096 disjoint fragments, hole merging, final exact native-known-duration wire
+comparison and retained pre-EOF snapshots. Native unknown-duration sparse
+ownership still needs scheduling/seeding/music evidence; this is not its implementation.

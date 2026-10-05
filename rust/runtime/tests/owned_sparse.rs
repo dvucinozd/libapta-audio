@@ -582,6 +582,20 @@ fn fragmented_capacity_and_merging_match_public_c_wire() {
         let mut bytes = vec![0; result::serialized_size(&view).unwrap()];
         result::write(&view, &mut bytes, Default::default()).unwrap();
         assert_eq!(bytes, c.stdout);
+        // Unknown-duration C grows storage before EOF. Native ownership still
+        // uses known duration: compare the complete final bytes without claiming
+        // an implemented native unknown-duration sparse lifecycle.
+        let unknown =
+            std::process::Command::new(std::env::var_os("APTA_C_SPARSE_CAPACITY_ORACLE").unwrap())
+                .args([count.to_string(), "1".to_owned()])
+                .output()
+                .unwrap();
+        assert!(
+            unknown.status.success(),
+            "{}",
+            String::from_utf8_lossy(&unknown.stderr)
+        );
+        assert_eq!(bytes, unknown.stdout);
     }
 }
 
