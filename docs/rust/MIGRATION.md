@@ -2688,8 +2688,9 @@ with the native Service. The product owns accepted banks, uses their borrowed
 neutral views in Deck controls/waveforms, and handles bounded catalog selection,
 delivery refusal, media invalidation and recycling. Product intent revisions
 prevent delayed same-track/superseded delivery without touching the service's
-Requests counter. Retirement waits for stopped/non-pending transport and an empty
-acknowledged effect lane, including Cue's pending Pause/Seek effects. Recycling
+Requests counter. Retirement waits for stopped/non-pending transport, an empty effect lane and
+completion of its one ticketed in-flight operation at the audio/timeline boundary.
+Downstream queue acceptance alone cannot release Cue's pending Pause/Seek pin. Recycling
 backpressure keeps ownership in bounded product slots.
 
 Host tests source-include the actual owner; native FAT32/exFAT fixtures and the
@@ -2705,16 +2706,16 @@ nesting, timing/audio coexistence or original DSP accuracy. Compiler inventories
 remain profile-specific, not total stack or hardware budgets. Production adoption
 still approves capacities, triggers and backend quarantine/hung-operation policy.
 
-Final consumer acceptance `20261005T153658Z` passes 470 workspace / 129 focused
+Final consumer acceptance `20261005T155814Z` passes 470 workspace / 129 focused
 release / 54 adapter ASan tests, plus two lifetime doctests per suite and
 formatting/Clippy/allocation/portable-P4 checks. Native filesystem fixtures execute
-the actual product owner; the real host Embassy probe passes at `20261005T154618Z`.
-Concrete USB0/product inventory `owner-firmware-frames-20261005T154654Z` records
-6352/6400-B Service future/pool and 13280/13328-B actual USB1 owner future/pool,
-including its 6608-B ProductRuntime. The consumer README gives exact individual
+the actual product owner; the real host Embassy probe passes at `20261005T160654Z`.
+Concrete USB0/product inventory `owner-firmware-frames-20261005T160723Z` records
+6352/6400-B Service future/pool and 13400/13448-B actual USB1 owner future/pool,
+including its 6728-B ProductRuntime. The consumer README gives exact individual
 frames, storage, profile configuration and exclusions; these are not system budgets.
 
-Unchanged-library `product-owner-combined-20261005.log` passes its complete
+Unchanged-library `product-completion-combined-20261005.log` passes its complete
 combined Rust/C, interchange, formatting/Clippy/no-default/allocation checks.
 The serial consumer remainder also passes raster identity, native/streaming/task
 probes, ordinary firmware link and default/owner dependency exclusions. No hardware,
