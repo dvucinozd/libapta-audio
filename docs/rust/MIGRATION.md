@@ -2633,3 +2633,50 @@ formatting/Clippy/no-default-features and allocation checks. No broader C/runtim
 sanitizer or Windows/i686/AArch64/hardware qualification was rerun. The ordinary
 combined owner-feature firmware link and both firmware dependency exclusions also
 pass; all verification commands ran serially with at most two build/test workers.
+
+## Pajoniiir long-lived owner handoff — 2026-10-05
+
+The isolated native consumer now provides a real unspawned analysis service loop.
+The retained Library catalog transfers only original lease/path/track identity;
+its receiving persistent owner alone issues request generations. Bounded commands
+apply latest-received replacement, explicit cancellation and recovery retry. The
+same concrete Client preserves pending I/O and quarantine across job or recovery
+cancellation, and drains/closes before replacement. Both full hashes and both
+successful closes still gate output.
+
+Retained banks move to the product boundary without self-reference or allocation.
+Fresh media, read-only current delivery authority and actual Deck state gate
+acceptance. Short neutral views borrow the bank; stopped/non-pending Deck state
+and released views gate explicit retirement. No free bank rejects analysis rather
+than reclaiming a playing/pending pin. Actual USB0 Embassy channels, Library enqueue,
+ProductRuntime acceptance, PSRAM/StaticCell storage and infinite task compile under
+`apta-owner-compile`; main does not claim/spawn/select this provider. See the
+consumer README's **Long-lived owner handoff** for precise policy and diagnostics.
+
+Native FAT32/exFAT fixtures run the loop through neutral consumers, and the host
+Embassy executor exercises loop cancellation/replacement with a live heartbeat.
+Host delayed completions are not USB/DMA execution. Libapta implementation, C,
+ABI/container, numerical behavior and portable pin are unchanged; no product
+policy or executor dependency enters Libapta. Production scheduling/triggers,
+approved capacities and quarantine/hung-backend decisions require adoption review.
+Physical placement/DMA/cache/interrupt/timing/audio coexistence, original DSP
+accuracy and deferred C compatibility remain independent gates. Final acceptance
+is recorded below and in the complete external handoff.
+
+Consumer acceptance `20261005T141054Z` passes 468 workspace / 127 focused release /
+52 adapter ASan tests plus two lifetime doctests per suite, formatting/Clippy/
+allocation/P4 checks. Original raster bytes remain identical (`20261005T142018Z`).
+Complete real Embassy loop/task probe `20261005T142027Z` passes all three tests.
+Concrete actual-USB0 loop diagnostics `owner-firmware-frames-20261005T142108Z`
+observe a 6344-B future, 6392-B pool and 1000-B Service (including Owner), with
+7465 frame records under the distinct link-dead-code/forced-frame-pointer profile.
+The consumer README owns exact channel/retained-array/component sizes and
+exclusions; the 126500-B selected-component subtotal is not a total memory budget.
+Ordinary firmware and nested inventories remain separate compiler profiles.
+
+Unchanged-library `service-owner-combined-20261005.log` passes 123 C tests,
+282 ordinary Rust tests plus 56 enabled external-C groups in each debug/release
+profile, 34 WAV interchange and two all-feature CLI cases, formatting/Clippy/
+no-default-features/allocation checks. Ordinary combined owner-feature firmware
+link and both firmware dependency exclusions pass. Checks ran serially with at
+most two build/test workers; no hardware or broader compatibility run occurred.

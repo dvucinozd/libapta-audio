@@ -147,3 +147,8 @@ production, hardware, DSP and C compatibility gates remain in force.
 The [persistent Pajoniiir owner continuation](../rust/MIGRATION.md#pajoniiir-persistent-consumer-owner--2026-10-05)
 adds a concrete USB0/PSRAM compile path and repeated cancellable host jobs without
 activating production APTA. It changes no Libapta source or release gate.
+
+The [long-lived consumer handoff](../rust/MIGRATION.md#pajoniiir-long-lived-owner-handoff--2026-10-05)
+adds bounded catalog commands, a persistent owner loop and safe retained-bank
+retirement in the isolated Pajoniiir contribution. This software milestone changes
+no Libapta implementation, production activation or hardware/DSP release gate.

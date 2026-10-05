@@ -634,3 +634,9 @@ USB0/PSRAM integration path, preserving request generations and retained banks
 across cancellation and repeated jobs. This changes no portable API or pinned
 core source. See [the migration record](../docs/rust/MIGRATION.md#pajoniiir-persistent-consumer-owner--2026-10-05)
 for evidence and the remaining owner-adoption/hardware gates.
+
+The isolated Pajoniiir consumer now has a bounded, long-lived owner handoff loop
+and explicit retained-bank delivery/retirement. See the
+[migration record](../docs/rust/MIGRATION.md#pajoniiir-long-lived-owner-handoff--2026-10-05).
+It remains unspawned with the production provider unselected; Libapta's portable
+implementation and dependency pin are unchanged.
