@@ -628,3 +628,9 @@ The compiled C capacity oracle now covers initially unknown duration through
 4096 disjoint fragments, hole merging, final exact native-known-duration wire
 comparison and retained pre-EOF snapshots. Native unknown-duration sparse
 ownership still needs scheduling/seeding/music evidence; this is not its implementation.
+
+Pajoniiir now has a persistent native consumer owner and a compile-only concrete
+USB0/PSRAM integration path, preserving request generations and retained banks
+across cancellation and repeated jobs. This changes no portable API or pinned
+core source. See [the migration record](../docs/rust/MIGRATION.md#pajoniiir-persistent-consumer-owner--2026-10-05)
+for evidence and the remaining owner-adoption/hardware gates.

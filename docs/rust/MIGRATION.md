@@ -2589,3 +2589,47 @@ tests plus the lifetime doctest in each suite. Complete Embassy host and P4
 probe `20261005T095219Z`, nested `20261005T095224Z` and actual combined firmware
 `20261005T095227Z` pass. The consumer README records the separate broker profile,
 resource exclusions and reproduction; these do not qualify physical P4 behavior.
+
+## Pajoniiir persistent consumer owner — 2026-10-05
+
+The isolated consumer now keeps the actual owned broker client, request generation
+owner, catalog selection and reusable working-array borrows outside cancellable
+jobs. It recovers the same endpoint before replacement/repeated work, drives the
+existing two-pass native consumer, and exposes accepted output through separately
+retained banks and the existing neutral Pin boundary. Logical job controls may be
+dropped only because this concrete client preserves actual pending resources.
+Both complete hashes and both closes still gate delivery; no timeout or USB/DMA
+cancellation is implied by dropping a job.
+
+The optional firmware compile path uses the actual USB0 Analysis endpoint,
+foundation retained Library catalog, lifecycle snapshots and existing PSRAM
+allocator/StaticCell storage mechanisms. It does not claim an endpoint at boot,
+spawn analysis, or select the production provider. Repeated native FAT32/exFAT
+fixtures and real host Embassy execution cover cancellation/recovery, generations,
+retained pins and neutral consumers. Host delayed completions are not USB evidence.
+The consumer README owns the exact contracts, diagnostics and reproduction.
+
+Libapta code, numerical behavior, C/ABI/container and portable pin are unchanged;
+no product dependency or desktop runtime enters the portable firmware path.
+Owner adoption still decides triggers/scheduling, capacity/limits, retained-bank
+retirement and quarantine/hung-backend handling. Physical memory/DMA/cache/interrupt/
+audio-coexistence/timing, original DSP accuracy and deferred C compatibility remain
+independent gates. Compiler inventories are not complete stack or hardware budgets.
+
+Consumer final acceptance `20261005T102601Z` passes 465 workspace, 124 focused
+release and 49 adapter ASan tests plus its lifetime doctest; original artifacts
+remain byte-identical (`20261005T103149Z`). Complete host Embassy/storage
+`20261005T103158Z` passes three tests; nested and ordinary firmware inventories are
+`20261005T103203Z` / `20261005T103206Z`. Actual USB0 owner compile/link inventory
+`owner-firmware-frames-20261005T103211Z` explicitly emits unselected code with
+link-dead-code/forced frame pointers. The consumer README records its 5696-B future,
+5752-B pool, retained-array/owner sizes and precise component exclusions. These
+are different compiler profiles, not hardware budgets or total stack maxima.
+
+Unchanged-library combined verification `persistent-owner-combined-20261005.log`
+passes 123 C tests, 282 ordinary Rust tests plus 56 enabled external-C groups in
+each debug/release profile, 34 WAV interchange and two all-feature CLI cases,
+formatting/Clippy/no-default-features and allocation checks. No broader C/runtime
+sanitizer or Windows/i686/AArch64/hardware qualification was rerun. The ordinary
+combined owner-feature firmware link and both firmware dependency exclusions also
+pass; all verification commands ran serially with at most two build/test workers.

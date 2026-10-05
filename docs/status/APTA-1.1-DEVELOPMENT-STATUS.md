@@ -143,3 +143,7 @@ The native request-reservation and PCM-cursor continuation is recorded in
 [the latest migration section](../rust/MIGRATION.md#native-request-reservation-and-pcm-cursor-consumer--2026-10-05).
 It expands software ownership and multi-format consumer evidence; the same
 production, hardware, DSP and C compatibility gates remain in force.
+
+The [persistent Pajoniiir owner continuation](../rust/MIGRATION.md#pajoniiir-persistent-consumer-owner--2026-10-05)
+adds a concrete USB0/PSRAM compile path and repeated cancellable host jobs without
+activating production APTA. It changes no Libapta source or release gate.
