@@ -640,3 +640,9 @@ and explicit retained-bank delivery/retirement. See the
 [migration record](../docs/rust/MIGRATION.md#pajoniiir-long-lived-owner-handoff--2026-10-05).
 It remains unspawned with the production provider unselected; Libapta's portable
 implementation and dependency pin are unchanged.
+
+Pajoniiir's optional compile path now retains native output in its actual firmware
+product owner and tests catalog-to-Deck/waveform delivery and acknowledged
+retirement on host. See [the migration record](../docs/rust/MIGRATION.md#pajoniiir-actual-product-owner-lifecycle--2026-10-05).
+This introduces no portable-library or dependency-pin change and does not activate
+the production provider.

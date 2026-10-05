@@ -2680,3 +2680,42 @@ profile, 34 WAV interchange and two all-feature CLI cases, formatting/Clippy/
 no-default-features/allocation checks. Ordinary combined owner-feature firmware
 link and both firmware dependency exclusions pass. Checks ran serially with at
 most two build/test workers; no hardware or broader compatibility run occurred.
+
+## Pajoniiir actual product-owner lifecycle — 2026-10-05
+
+The isolated consumer now executes its existing firmware ProductRuntime together
+with the native Service. The product owns accepted banks, uses their borrowed
+neutral views in Deck controls/waveforms, and handles bounded catalog selection,
+delivery refusal, media invalidation and recycling. Product intent revisions
+prevent delayed same-track/superseded delivery without touching the service's
+Requests counter. Retirement waits for stopped/non-pending transport and an empty
+acknowledged effect lane, including Cue's pending Pause/Seek effects. Recycling
+backpressure keeps ownership in bounded product slots.
+
+Host tests source-include the actual owner; native FAT32/exFAT fixtures and the
+real host Embassy probe use it. The optional P4 compile path wakes the existing
+controller/product owner for catalog, service and media events while retaining
+its pending USB wait future. No analysis endpoint is claimed, no analysis task
+is spawned, and no production provider is selected. The consumer README's
+**Actual product-owner lifecycle** defines policy and remaining gates.
+
+Libapta implementation, portable pin, DSP, C/API/ABI and container are unchanged.
+Software evidence does not qualify physical placement, DMA/cache, interrupt/FP
+nesting, timing/audio coexistence or original DSP accuracy. Compiler inventories
+remain profile-specific, not total stack or hardware budgets. Production adoption
+still approves capacities, triggers and backend quarantine/hung-operation policy.
+
+Final consumer acceptance `20261005T153658Z` passes 470 workspace / 129 focused
+release / 54 adapter ASan tests, plus two lifetime doctests per suite and
+formatting/Clippy/allocation/portable-P4 checks. Native filesystem fixtures execute
+the actual product owner; the real host Embassy probe passes at `20261005T154618Z`.
+Concrete USB0/product inventory `owner-firmware-frames-20261005T154654Z` records
+6352/6400-B Service future/pool and 13280/13328-B actual USB1 owner future/pool,
+including its 6608-B ProductRuntime. The consumer README gives exact individual
+frames, storage, profile configuration and exclusions; these are not system budgets.
+
+Unchanged-library `product-owner-combined-20261005.log` passes its complete
+combined Rust/C, interchange, formatting/Clippy/no-default/allocation checks.
+The serial consumer remainder also passes raster identity, native/streaming/task
+probes, ordinary firmware link and default/owner dependency exclusions. No hardware,
+production activation or broader legacy compatibility qualification is implied.
