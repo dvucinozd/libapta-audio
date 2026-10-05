@@ -136,8 +136,8 @@ checks mandatory. Do not infer them from Final or declared coverage, choose
 local timing after a rejected global result, or accept hybrid arrays as an
 unambiguous override policy.
 
-The next independently useful evaluation is a source-linked audit of interior
-rejected windows and S6 ring replacement, using the same exact oracle comparison.
+The follow-up evaluation below audits interior rejected windows and S6 ring
+replacement using the same oracle, with its bounded EOF discrepancy explicit.
 An algorithm change needs a separate approved candidate and evaluation protocol:
 overlapping/rebalanced final windows would re-estimate timing and can change
 existing phase/tempo/revision values; extending an existing segment would instead
@@ -174,3 +174,128 @@ The external handoff and manifest own exact source/tool hashes, publication and
 CI state. Allocation measurements remain in the existing isolated allocation
 tests; allocating test fixtures and artifact serialization are not allocation
 or embedded-memory qualification.
+
+## Interior rejection and actual S6 ring replacement — 2026-10-05
+
+[s6_ring.rs](../../rust/tests/s6_ring.rs) adds a separate **18-case** evaluation
+using the same unchanged public C oracle. It exercises the actual S6 ring of
+16384 × 2048 = **33554432 frames**, not the smaller S4 ring. No production Rust,
+C, numerical backend, consumer pin or acceptance policy changes.
+
+The four repository-generated, 8 kHz mono fixtures retain the 64-sample linear
+impulses at amplitude .75. Interior cases contain 384 bins: pulse period 4000
+frames, silence throughout bins [128,256), then either the same period or period
+6000. Ring cases contain exactly 33554432 frames and 33556481 frames (one extra
+whole bin plus one sample), with period 4000 throughout. Each runs known and
+initially unknown duration with unlimited work and a finite 32-step budget.
+Interior cases additionally request dynamic output with known duration and
+unlimited work. Masks are 1081 and 1145 respectively. The 4096-frame submissions
+match C; no soft deadline or injected clock is used. This is not one-step or
+all-budget parity. Existing clock/publication tests remain independently required.
+
+### Measured coverage
+
+| Fixture | Native evidence and segment extent | Interior gap | Revision |
+|---|---|---:|---:|
+| Interior, same tempo | [0,786432), one segment | 0 | 6, previous 5 |
+| Interior, changed tempo | [0,786432), two segments | 262144 frames | 6, previous 5 |
+| Exactly full S6 ring | [0,33554432), one segment | 0 | 384, previous 383 |
+| Replaced ring with partial EOF | [4096,33556481), one segment | 0 | 385, previous 384 |
+
+The wholly silent interior window has zero energy/flux and is rejected. Both
+implementations consolidate the next accepted window into the previous segment
+when nominal tempos differ by at most 1500 millibpm, **without an adjacency
+check**. Thus same-tempo consolidation spans rejected evidence. A larger tempo
+change instead leaves [262144,524288) uncovered between the two segments. Both
+results declare full evidence coverage and Final state; neither flag nor revision
+identity identifies the rejected window. The changed-tempo result carries the
+dynamic flag and hybrid representation, not a gap-specific degraded flag. These
+are inherited algorithm/coverage limitations. Segment continuity is necessary
+for full-source transport but cannot establish that every interior window was
+accepted or that the timing is musically correct.
+
+At the ring boundary, accepting the extra whole bin and partial bin replaces
+resident identities 0 and 1. EOF completes that final partial bin, so the current
+resident evidence starts at bin 2/frame 4096. Latest output does not retain the
+old prefix timing as accumulated full-source history. Requested range remains
+[0,33556481), while evidence/applicability/coverage and segment range start at
+4096. Completed-session views still report Final. The prefix loss and lack of
+full-source accumulation are inherited streaming limitations; Final does not
+repair them. All 18 native cases reject exact local-meter/global-grid binding.
+
+### Explicit bounded EOF discrepancy
+
+Six payloads (WOVR, TEMP, LGRD, GGRD, REVN, MTRD), including absence, compare
+exactly for **16 cases**. In the two replaced-ring cases with 32-step processing,
+WOVR/TEMP/LGRD/MTRD still match, but **GGRD and REVN do not**:
+
+- C retains [0,33554432) and revision 384/383, losing the final 2049 frames.
+  Its requested range nevertheless ends at 33556481, and its view is Final.
+- Rust refreshes [4096,33556481) and revision 385/384, exactly matching its
+  unlimited-work GGRD/REVN. It loses the replaced prefix rather than the new tail.
+
+The test explicitly asserts this difference. C's entire REVN equals the full-ring
+reference; every GGRD byte equals that reference except the explicitly checked
+requested EOF field. Native GGRD/REVN equal the unlimited replaced-ring output.
+No bytes are rewritten, revision identities normalized, tolerance introduced or
+failed comparison silently skipped. This is **not blanket Rust/C parity**.
+
+The read-only external C trace shows all 33556481 frames accepted, zero queued
+PCM, EOF signalled, no deadline, and the frozen [0,16384)-bin scan still active.
+It commits during drain. In
+[C refresh](../../src/beatgrid/apta_s6.c), commit sets
+`refreshed_after_end_of_input=1` and requests follow-up for changed EOF evidence;
+the next entry's
+[refresh gate](../../src/beatgrid/apta_s6_internal.h) skips it because only two
+new bins arrived, below the 32-bin threshold, and clears pending. The session
+completes with the old geometry. The diagnostic links unchanged C and reproduces
+the original oracle containers byte-for-byte for known/unknown and both budgets.
+
+[Native refresh](../../rust/src/global_analysis.rs) instead keeps
+`refreshed_eof=false` while follow-up is required. This behavior predates this
+work (introduced with the musical lifecycle continuation). The newly measured
+payload consequence is an explicit **native EOF lifecycle difference**, not a
+new Rust algorithm fix or numerical discrepancy. Reverting it merely to reproduce
+C's stale EOF result is not justified. Correcting C's gate would be a separate
+C lifecycle change with its own compatibility review; C remains unchanged here.
+
+### Retention, reproduction and remaining work
+
+Every profile copies an actual prefix `SessionSnapshot` at 262144 accepted
+frames into independent caller-owned `OwnedResult` arrays, using generation 17.
+After all remaining input, EOF, ring replacement and writer destruction, its
+serialized bytes, original source-duration identity and generation remain
+unchanged. Earlier prefix timing survives in that retained result; the latest
+result does not combine it with the suffix. This checks graph ownership, not
+C/native intermediate generation scheduling or a new prefix-merging policy.
+
+Run the existing combined runner with Rust 1.95.0 and two build/test jobs. It
+includes the ignored external-C group in both profiles. For raw evidence, set
+`APTA_C_TEMPO_ANALYSIS_ORACLE` as above and set `APTA_S6_EVIDENCE_DIR` to a **new**
+external directory, then run:
+
+```sh
+cargo test -p libapta --test s6_ring -- --ignored --nocapture
+# Repeat with --release and a different new evidence directory.
+# Unset APTA_S6_EVIDENCE_DIR before running the combined suite.
+```
+
+Dated evidence:
+`/home/shome/.local/share/libapta-audio/rust-rewrite/s6-interior-ring-20261005/`.
+Debug/release directories contain four PCM inputs, paired final containers,
+retained prefix containers and CSV measurements including the differing C ranges
+and revisions. External `trace.py`/`trace-oracle.c` retain the unchanged-library
+EOF diagnostic. The manifest and complete dated handoff own hashes, commands,
+verification, publication and CI. Fixture/graph/serialization allocations are
+outside the separately measured core allocation tests.
+
+Recommendation: preserve explicit rejection of incomplete or unsupported timing.
+Do not concatenate old prefix and new suffix revisions or extend a segment to
+claim new timing. A future full-source streaming design must define evidence
+retention, revision boundaries and accepted-window coverage together. A separate
+algorithm protocol must decide whether consolidation across rejected windows is
+valid and evaluate meter coupling and musical accuracy. This synthetic evaluation
+consumes no recordings or holdouts and changes no frozen thresholds. Sparse gaps,
+multiple complete ring turnovers, slow one-step/clock-budget scans across
+replacement, long hybrid beat exhaustion, ABI/platform and physical P4 acceptance
+remain separate work.

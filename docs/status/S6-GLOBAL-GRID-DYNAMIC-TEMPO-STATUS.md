@@ -470,3 +470,10 @@ window. Full-length segments also need not bind to the independently derived
 local meter. The 30-case exact payload comparison changes neither implementation
 nor acceptance criteria. Consumers requiring complete timing must validate the
 actual segments and meter relationship; Final alone is insufficient.
+
+The subsequent [interior and actual-ring evaluation](../rust/DSP-COVERAGE.md#interior-rejection-and-actual-s6-ring-replacement--2026-10-05)
+shows that consolidation can span a rejected interior window, while changed tempo
+leaves a gap. Resident replacement discards prefix timing from latest output.
+Two bounded EOF profiles expose C's skipped follow-up versus native refresh;
+the evaluation explicitly records that lifecycle discrepancy rather than claiming
+universal parity. Retained earlier graphs remain independent.

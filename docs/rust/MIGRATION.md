@@ -2750,3 +2750,28 @@ accuracy acceptance. Original DJ corpus failures, interior/ring coverage, consum
 owner adoption/production activation, hardware and deferred C compatibility gates
 remain independent. Keep rejection explicit; extending the tail does not repair
 meter binding or prove timing accuracy.
+
+## Interior S6 rejection and resident ring evidence — 2026-10-05
+
+The [expanded evaluation](DSP-COVERAGE.md#interior-rejection-and-actual-s6-ring-replacement--2026-10-05)
+closes a test-coverage gap with 18 known/unknown/budget/dynamic profiles using
+actual 16384-bin S6 replacement. Equal-tempo consolidation spans a rejected
+interior window; a tempo change leaves a gap. Latest post-replacement output
+covers only resident suffix evidence, even with Final state. Retained caller-owned
+prefix graphs survive replacement, EOF and writer destruction unchanged.
+
+Six payloads match unchanged C exactly in 16 cases. The two bounded replaced-ring
+cases explicitly preserve a newly characterized EOF lifecycle difference: C skips
+follow-up and retains revision 384 with an omitted tail; native existing follow-up
+produces revision 385 with an omitted prefix. The test checks both exact outcomes;
+it does not claim all-case parity or normalize revisions. Read-only C traces
+explain the gate and reproduce original oracle bytes. No production correction,
+C/API/ABI/backend/consumer change or portable pin update is justified by this run.
+
+`rust/tests/s6_ring.rs` runs in both combined external-C phases. Raw PCM, paired
+containers, retained results, traces and manifest are external under
+`/home/shome/.local/share/libapta-audio/rust-rewrite/s6-interior-ring-20261005/`.
+The dated handoff owns final verification/publication. Full-source streaming
+history and accepted-window provenance need a separate design; meter/accuracy,
+slow replacement schedules, sparse gaps, owner adoption, hardware and deferred C
+compatibility gates remain open. Preserve explicit consumer rejection.
