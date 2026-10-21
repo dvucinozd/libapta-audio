@@ -395,6 +395,27 @@ where
             g
         })
     }
+    /// Experimental append-only window diagnostics, not a playback grid. The
+    /// history belongs to this sequential source and consumes processing steps.
+    #[cfg(feature = "experimental-s6-history")]
+    pub fn enable_global_history(
+        &mut self,
+        history: &'a mut crate::global_history::WindowHistory<'a>,
+    ) -> Result<(), Error> {
+        if self.state != SessionState::Created || self.accepted != 0 {
+            return Err(Error::InvalidState);
+        }
+        self.global
+            .as_mut()
+            .ok_or(Error::InvalidState)?
+            .attach_history(history)
+    }
+    #[cfg(feature = "experimental-s6-history")]
+    pub fn global_history(&self) -> Option<crate::global_history::HistoryView<'_>> {
+        let eof = matches!(self.state, SessionState::Draining | SessionState::Complete)
+            .then_some(self.accepted);
+        self.global.as_ref().and_then(|g| g.history_view(eof))
+    }
     /// Accept a pending global proposal into the locked local grid.
     pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
         if id == 0 {

@@ -194,7 +194,12 @@ fn entire_session_path_allocates_nothing() {
     let samples: Vec<f32> = (0..320000)
         .map(|i| if i % 4000 < 64 { 0.75 } else { 0.0 })
         .collect();
+    #[cfg(feature = "experimental-s6-history")]
+    let mut history_records = [libapta::global_history::WindowRecord::default(); 2];
     let before = ALLOCATIONS.load(Ordering::Relaxed);
+    #[cfg(feature = "experimental-s6-history")]
+    let mut history =
+        libapta::global_history::WindowHistory::new(8000, &mut history_records).unwrap();
     let mut session = Session::new(
         SessionConfig {
             sample_rate: 8000,
@@ -210,6 +215,8 @@ fn entire_session_path_allocates_nothing() {
     session
         .enable_global_grid(true, &mut global_bins, &mut global_flux, &mut beats)
         .unwrap();
+    #[cfg(feature = "experimental-s6-history")]
+    session.enable_global_history(&mut history).unwrap();
     session.enable_key().unwrap();
     session.enable_meter().unwrap();
     session.enable_calibrated_quality().unwrap();
@@ -228,5 +235,58 @@ fn entire_session_path_allocates_nothing() {
     assert!(session.meter().is_some());
     assert!(session.key().is_some());
     assert!(session.bpm_quality().is_some());
+    #[cfg(feature = "experimental-s6-history")]
+    {
+        let view = session.global_history().unwrap();
+        assert!(view.finished);
+        assert_eq!(view.records.len(), 2);
+        let template = session.global_grid().unwrap().segments[0];
+        let mut converted_segments = [template; 2];
+        let mut converted_ranges = [libapta::FrameRange::default(); 2];
+        let converted = libapta::history_grid::convert_into(
+            view,
+            1,
+            &mut converted_segments,
+            &mut converted_ranges,
+        )
+        .unwrap();
+        assert_eq!(converted.segments.len(), 1);
+        assert_eq!(converted.unsupported_windows, 1);
+        assert!(converted.segments[0].beat_at(0).unwrap().is_some());
+        let beat = converted.segments[0].beat_at(3).unwrap().unwrap();
+        // Synthetic label exercises successful coordinate binding; this is not
+        // a claim that the classifier selected this beat as a downbeat.
+        let synthetic = libapta::MeterSegment {
+            first_frame: converted.segments[0].applicability_range.first_frame,
+            end_frame: converted.segments[0].applicability_range.end_frame,
+            downbeat_frame: beat.position.whole_frame,
+            downbeat_ordinal: beat.ordinal,
+            numerator: 4,
+            denominator: 4,
+            state: libapta::FeatureState::Provisional,
+            confidence: 80,
+            segment_id: 1,
+        };
+        let mut bindings = [libapta::history_grid::BoundMeterSegment {
+            meter: synthetic,
+            grid_segment_id: 0,
+            grid_revision_id: 0,
+            downbeat_position: libapta::FractionalFrame::default(),
+        }];
+        libapta::history_grid::bind_meter_into(converted, 1, &[synthetic], &mut bindings).unwrap();
+        let retained = bindings;
+        // The actual local-meter range extends beyond this supported global
+        // window. Preserve that real rejection rather than clipping or rebasing.
+        assert!(matches!(
+            libapta::history_grid::bind_meter_into(
+                converted,
+                1,
+                session.meter().unwrap().segments,
+                &mut bindings,
+            ),
+            Err(libapta::Error::Conflict)
+        ));
+        assert_eq!(bindings, retained);
+    }
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 }

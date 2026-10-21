@@ -1,8 +1,54 @@
 # Native Rust migration
 
-Status: implementation resumed 2026-10-04; no release, ABI replacement, full profile,
+Status: development checkpoint 2026-10-22; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
+
+## Agreed next step — resume after 2026-10-22
+
+Continue on `rust-rewrite` with one end-to-end development slice:
+**actual PCM -> grid and meter on the same lattice -> immutable published result
+-> native Pajoniiir consumer validation**. Keep the new path behind
+`experimental-s6-history` until independent evidence supports promotion.
+
+1. Inspect the existing local-meter evidence and history-grid selection, then
+   pre-register the bounded hypothesis, baseline, resource budget and veto before
+   changing the estimator. Produce meter/downbeat evidence against the selected
+   grid's exact coordinates; mechanical relabeling is insufficient. Retain the
+   current mismatched local-meter rejection as a regression.
+2. Publish a coherent caller-owned result with explicit source identity,
+   generation/revision, supported ranges, unresolved gaps and capacity status.
+   Verify retained copies across updates, cancellation and source replacement.
+3. Exercise that result through the actual native consumer validator and owner
+   boundary, including generation replacement and transactional rejection. Locate
+   and verify the current consumer checkout/pin before changing integration code.
+   Preserve the existing eight-segment wire limit and production defaults.
+
+The slice is complete when a reproducible PCM fixture produces grid and meter
+from the same evidence path, an immutable publication survives writer/source
+replacement, and the actual consumer accepts a supported case while rejecting
+unsupported, stale and exhausted cases without partial adoption. Record exact
+source hashes, commands, allocation/capacity measurements and changed verdicts.
+Synthetic matching labels alone do not satisfy this criterion.
+
+After this software slice, independently verified musical development/acceptance
+and physical ESP32-P4 timing, memory and audio-coexistence qualification remain.
+The planning estimate is roughly 5–10 focused sessions for software completion,
+with substantial uncertainty in meter/downbeat alignment; production readiness
+is expected to take weeks and depends on those separate gates. This is an
+estimate, not a committed schedule or evidence of completion.
+
+### Saved checkpoint
+
+The frozen-S6 correction, opt-in append-only history, provisional conversion and
+mechanical meter binding below are implemented. The real local-meter fixture
+still rejects; stable publication and consumer adoption are not implemented by
+these additions. Latest host verification: 289 default / 308 all-feature tests
+in each debug/release profile, 46 focused sanitizer tests, Clippy, no-default
+compilation and zero-allocation instrumentation. The full C/oracle/CLI matrix
+belongs to the earlier conversion checkpoint and was not rerun for binding.
+See [the experiment record](S6-HISTORY-EXPERIMENT.md) for evidence locations and
+limits. Resume with item 1 above; do not repeat completed API-only slices.
 
 ## Authority and baseline
 
@@ -2817,3 +2863,84 @@ frozen-evidence validation for slow scans after ring eviction, coherent streamin
 history, meter/accuracy and deferred C ABI/platform compatibility. Foundation
 adoption, actual execution-completion wiring, resource placement and physical P4
 qualification remain owner/hardware-dependent.
+
+## Frozen S6 evidence continuation — 2026-10-21
+
+Continued on `rust-rewrite` from
+`3d757c65bd29fb66b561cac4640a52dbf687c87d`. The supplied 2026-10-04 native
+integration handoff agrees with the established direct-Cargo/no_std architecture;
+its proposed adapter work is historical and superseded by the consumer records
+above. Product conversion and ownership remain in Pajoniiir. C ABI emulation and
+ESP-IDF are not prerequisites for that native consumer.
+
+The [frozen-evidence correction](DSP-COVERAGE.md#frozen-s6-scan-boundary-energy--2026-10-21)
+removes live ring reads at active S6 window boundaries. The regression first
+reproduced changed grid geometry from identical frozen evidence after eviction,
+then checks sixteen stage-level replacement/budget profiles. Existing storage
+holds the boundary energies; no extra state, allocation or DSP rule is added.
+
+The remaining priority is coherent streaming history and explicit accepted
+support across revisions, followed by meter/global-grid consistency and
+algorithmic development evidence. This fix does not join prefix/suffix revisions,
+infer missing beats, activate a product provider or close P4/accuracy gates.
+
+## Experimental S6 window history — 2026-10-22
+
+The opt-in [bounded history experiment](S6-HISTORY-EXPERIMENT.md) adds a
+caller-owned, append-only record of actual source-aligned S6 window verdicts.
+It inspects original bin evidence through the unchanged estimator, records gaps
+and capacity loss, and preserves earlier records through ring replacement.
+It is a native diagnostic view, not a splice of published grid revisions and
+not a new authoritative transport grid. Default builds exclude it.
+
+The next conversion step must establish bounded supported ranges, stable
+ordinals/revisions and meter binding before publication or consumer adoption.
+No C ABI, container, product provider or release gate changes here.
+
+Host verification passes the unchanged default combined matrix (123 C,
+289 ordinary Rust and 58 external-C groups per debug/release profile), 36
+feature tests per profile, the explicit 129-window real-PCM release case and
+36 AddressSanitizer/leak tests. The experiment record owns exact scope,
+resource measurements and external evidence location; musical accuracy and
+physical-device acceptance remain open.
+
+## Provisional history-grid conversion — 2026-10-22
+
+The same experimental feature now offers a bounded two-pass conversion into
+caller-owned provisional segments and exact supported ranges. Original window
+estimates are preserved, unsupported windows remain gaps and conversion failure
+leaves output untouched. Source-window IDs and represented-beat ordinals remain
+stable when records are appended with the same caller revision. This is a native
+graph, independent of the resident S6 view and existing eight-segment wire limit.
+See the [conversion contract](S6-HISTORY-EXPERIMENT.md#provisional-segment-conversion-continuation).
+
+Meter/global-grid binding, stable publication, wire export, consumer adoption and
+hardware/accuracy gates remain open; no transport provider is selected.
+
+Verification passes 41 feature tests in both profiles and with AddressSanitizer,
+including converter failure atomicity and allocation instrumentation. The real
+129-window PCM test now expands every converted beat inside its supported range.
+The default C/Rust, ABI/container, CLI interchange and no-default checks pass;
+see the experiment record and external `rust-s6-grid-20261022` report for hashes
+and exact evidence boundaries.
+
+## Mechanical meter/history-grid binding — 2026-10-22
+
+The experimental `bind_meter_into` associates already scoped meter labels with
+an exact grid revision, supported segment and actual whole-frame/ordinal beat.
+Full Q32 coordinates are retained, label state is capped at provisional, and
+partial input stays partial. Gaps, independent-window crossings, inconsistent
+public grid views and local/global coordinate mismatches reject transactionally.
+No ordinal rebasing, nearest-beat search or new downbeat estimator is introduced.
+
+The actual local-meter fixture remains rejected because its range extends
+beyond supported global timing. Synthetic matching labels exercise the successful
+association path only; neither proves musical phase. Source-scoped ownership,
+stable publication, actual algorithm alignment and product adoption remain open.
+See the [binding contract](S6-HISTORY-EXPERIMENT.md#mechanical-meter-binding-continuation).
+
+The exact local candidate passes default/all-feature workspace tests (289/308
+in each debug/release profile), 46 sanitizer tests, no-default compilation,
+Clippy and allocation checks. The real local-meter fixture still rejects; the
+coordinate-binding tests do not claim a downbeat accuracy improvement. Previous
+full C/oracle/CLI evidence is retained separately, not reported as newly run.

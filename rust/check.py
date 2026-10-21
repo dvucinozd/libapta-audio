@@ -103,6 +103,14 @@ def main():
     run(["cargo", "check", "--workspace", "--lib", "--no-default-features", "--locked"], env=env)
     run(["cargo", "test", "--workspace", "--release", "--locked"], env=env)
     run(["cargo", "test", "--workspace", "--release", "--locked", "--", "--ignored"], env=env)
+    # Opt-in history is separate from default C parity and transport acceptance.
+    run(["cargo", "clippy", "--workspace", "--all-targets", "--all-features", "--locked", "--", "-D", "warnings"], env=env)
+    run(["cargo", "check", "--workspace", "--lib", "--all-features", "--no-default-features", "--locked"], env=env)
+    for profile in ([], ["--release"]):
+        run(["cargo", "test", "-p", "libapta", *profile, "--features", "experimental-s6-history",
+             "--locked", "--lib", "--test", "global_history", "--test", "history_grid", "--test", "meter_binding", "--test", "session_allocation"], env=env)
+    run(["cargo", "test", "-p", "libapta", "--release", "--features", "experimental-s6-history",
+         "--locked", "--test", "global_history", "--", "--ignored"], env=env)
     run(["cargo", "build", "--example", "wav_to_apta", "--locked"], env=env)
     executable = build / "cargo-target/debug/examples/wav_to_apta"
     run(["cargo", "build", "-p", "libapta-runtime", "--bin", "apta-native", "--locked"], env=env)

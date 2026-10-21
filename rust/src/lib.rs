@@ -14,7 +14,11 @@ pub mod detail;
 pub mod detail_analysis;
 pub mod dj;
 pub mod global_analysis;
+#[cfg(feature = "experimental-s6-history")]
+pub mod global_history;
 pub mod grid;
+#[cfg(feature = "experimental-s6-history")]
+pub mod history_grid;
 pub mod key_analysis;
 pub mod meta;
 pub mod native_validation;

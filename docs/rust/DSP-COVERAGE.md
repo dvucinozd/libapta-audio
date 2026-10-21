@@ -4,6 +4,50 @@ The native correction below supersedes the original same-tempo interior bridging
 and segment-overflow behavior. Earlier measurements remain historical C/Rust
 compatibility evidence; C itself is unchanged.
 
+## Frozen S6 scan boundary energy — 2026-10-21
+
+Baseline: `3d757c65bd29fb66b561cac4640a52dbf687c87d`. The next bounded
+continuation tests the open slow-scan/ring-eviction boundary with synthetic
+stage evidence, without opening recordings or holdouts.
+
+**Hypothesis and veto:** a cooperative scan freezes flux but re-reads each
+128-bin window's first energy from the mutable ring. Replacing that identity
+can change phase, tempo, confidence and segment geometry within an otherwise
+frozen scan. Freeze boundary energy with the other evidence. Require exact
+unchanged output when the ring is not replaced, unchanged state/storage and
+allocation behavior, and the existing Rust/C regression matrix. Do not change
+estimation, thresholds, numerical backends, C, the wire format or consumers.
+
+The regression reproduces this failure before the correction. It fills the real
+16,384-bin storage with deterministic complete energy bins, freezes a scan, then
+uses the actual push path to replace old identities with partial successor bins.
+The original scan must match an uninterrupted scan of the original evidence in
+all grid fields, segments, explicit beats, revision and mutation serial. Sixteen
+profiles cross resident starts 0/17, prefix/full-ring eviction, segment/dynamic
+requests and one-step/expired-clock continuations. Zero-step work must preserve
+the pending cursor. This is stage-level scheduling evidence, not an end-to-end
+PCM/consumer or musical-accuracy qualification.
+
+The correction freezes raw energy at every window boundary in the existing
+flux array; subsequent entries keep the existing positive energy difference.
+An active scan no longer reads mutable ring energy. The estimator receives the
+same values as before whenever the original bins remain resident. No field,
+array, allocation, extra pass or per-window stack buffer is added. C remains an
+unchanged historical reference; reproducing a mutable-evidence error is not a
+native compatibility requirement.
+
+Focused reproduction and verification:
+
+```sh
+cargo test -p libapta --lib global_analysis::tests
+python3 rust/check.py --build-root /external/build/path --jobs 2
+```
+
+This closes the tested boundary-energy leak only. A scan still describes its
+frozen evidence, not all subsequently ingested frames. Full-source streaming
+history, sparse/gapped scheduling, more replacement schedules, meter binding,
+musical accuracy and physical P4 acceptance remain separate work.
+
 ## Rejected-window consolidation correction — 2026-10-05
 
 [GlobalAnalysis](../../rust/src/global_analysis.rs) now consolidates accepted S6

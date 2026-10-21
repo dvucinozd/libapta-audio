@@ -30,3 +30,8 @@ Agree upstream on migration/review cadence, Rust toolchain support and eventual
 C ABI/package switchover criteria. Approve any deliberate public-contract or
 release changes separately. Existing DJ accuracy and physical hardware blockers
 remain open; Rust does not by itself resolve them.
+
+The opt-in [S6 window-history experiment](S6-HISTORY-EXPERIMENT.md) is an
+additive native diagnostic slice of this migration. It retains source evidence
+in caller-provided bounded storage and does not change normative coverage,
+GGRD/REVN, C compatibility, production providers or release status.

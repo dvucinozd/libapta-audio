@@ -64,6 +64,8 @@ pub struct GlobalAnalysis<'a, B = &'a mut [OnsetBin], F = &'a mut [f32], E = &'a
     revision: Option<GridRevision>,
     signature: u64,
     serial: u64,
+    #[cfg(feature = "experimental-s6-history")]
+    history: Option<&'a mut crate::global_history::WindowHistory<'a>>,
 }
 impl<'a> GlobalAnalysis<'a> {
     pub fn new(
@@ -136,6 +138,8 @@ where
             revision: None,
             signature: 0,
             serial: 0,
+            #[cfg(feature = "experimental-s6-history")]
+            history: None,
         })
     }
     pub(crate) fn preflight(&self, first: u64, count: usize) -> Result<(), Error> {
@@ -155,6 +159,10 @@ where
         self.total = total;
     }
     pub(crate) fn push(&mut self, frame: u64, sample: f32) {
+        #[cfg(feature = "experimental-s6-history")]
+        if let Some(history) = &mut self.history {
+            history.observe(frame);
+        }
         let index = (frame / BIN_FRAMES) as u32;
         let b = &mut self.bins.as_mut()[index as usize % BIN_CAPACITY];
         if !b.occupied || b.index != index {
@@ -212,6 +220,10 @@ where
             || (eof.is_some() && !self.refreshed_eof)
     }
     pub(crate) fn pending(&self, eof: Option<u64>) -> bool {
+        #[cfg(feature = "experimental-s6-history")]
+        if self.history.as_ref().is_some_and(|h| h.pending(eof)) {
+            return true;
+        }
         self.active
             || self
                 .evidence(eof)
@@ -315,6 +327,15 @@ where
         deadline: &mut crate::deadline::Deadline<'_>,
     ) -> Result<u32, Error> {
         let mut done = 0;
+        #[cfg(feature = "experimental-s6-history")]
+        if steps != 0 {
+            if let Some(history) = &mut self.history {
+                done = history.step(self.bins.as_ref(), eof);
+                if done != 0 && (done == steps || deadline.expired()) {
+                    return Ok(done);
+                }
+            }
+        }
         loop {
             if !self.active {
                 let Some((first, end)) = self.evidence(eof) else {
@@ -326,7 +347,14 @@ where
                 let mut previous = 0.0;
                 for i in first..end {
                     let energy = self.energy(i);
-                    self.flux.as_mut()[(i - first) as usize] = (energy - previous).max(0.0);
+                    // Each window starts with raw energy, as in the reference
+                    // estimator. Freeze that boundary too: the live ring may
+                    // replace its identity before a cooperative scan resumes.
+                    self.flux.as_mut()[(i - first) as usize] = if (i - first) % 128 == 0 {
+                        energy
+                    } else {
+                        (energy - previous).max(0.0)
+                    };
                     previous = energy;
                 }
                 self.first = first;
@@ -346,7 +374,6 @@ where
             }
             if self.cursor < self.end {
                 let end = (self.cursor + 128).min(self.end);
-                self.flux.as_mut()[(self.cursor - self.first) as usize] = self.energy(self.cursor);
                 if let Some((tempo, phase, confidence)) = self.window(self.cursor, end) {
                     self.add_window(self.cursor, end, tempo, phase, confidence);
                 }
@@ -380,66 +407,30 @@ where
         }
     }
     fn window(&self, first: u64, end: u64) -> Option<(u32, u32, u8)> {
-        if end - first < 64 {
-            return None;
-        }
         let flux = &self.flux.as_ref()[(first - self.first) as usize..(end - self.first) as usize];
-        let minimum = (u64::from(self.rate) * 60)
-            .div_ceil(300 * BIN_FRAMES)
-            .max(1) as u32;
-        let maximum = (u64::from(self.rate) * 60 / (40 * BIN_FRAMES)).min((end - first) / 2) as u32;
-        let mut best = 0.0;
-        let mut best_correlation = 0.0;
-        let mut lag = 0;
-        for l in minimum..=maximum {
-            let c = correlation(flux, l);
-            let score = c * prior(self.tempo_at_lag(l));
-            if score > best {
-                best = score;
-                best_correlation = c;
-                lag = l;
-            }
-        }
-        if lag == 0 || best_correlation < 0.04 {
-            return None;
-        }
-        let mut phase = 0;
-        let mut phase_score = -1.0;
-        for p in 0..lag {
-            let mut score = 0.0;
-            for i in (p as usize..flux.len()).step_by(lag as usize) {
-                score += flux[i];
-            }
-            if score > phase_score {
-                phase_score = score;
-                phase = p;
-            }
-        }
-        let offset = refine(flux, lag);
-        let base = self.tempo_at_lag(lag);
-        let tempo = if offset == 0.0 {
-            base
-        } else {
-            (base as f32 * lag as f32 / (lag as f32 + offset) + 0.5) as u32
-        };
-        if !(40000..=300000).contains(&tempo) {
-            return None;
-        }
-        // C's confidence multiplication is deliberately double precision here.
-        Some((
-            tempo,
-            phase,
-            (40 + if best >= 1.0 {
-                50
-            } else {
-                (f64::from(best) * 50.0) as u32
-            })
-            .min(100) as u8,
-        ))
+        estimate_window(self.rate, flux)
     }
-    fn tempo_at_lag(&self, lag: u32) -> u32 {
-        let d = u64::from(lag) * BIN_FRAMES;
-        ((u64::from(self.rate) * 60000 + d / 2) / d) as u32
+    #[cfg(feature = "experimental-s6-history")]
+    pub(crate) fn attach_history(
+        &mut self,
+        history: &'a mut crate::global_history::WindowHistory<'a>,
+    ) -> Result<(), Error> {
+        if self.history.is_some() || history.attached {
+            return Err(Error::InvalidState);
+        }
+        if history.sample_rate != self.rate {
+            return Err(Error::InvalidArgument);
+        }
+        history.attached = true;
+        self.history = Some(history);
+        Ok(())
+    }
+    #[cfg(feature = "experimental-s6-history")]
+    pub(crate) fn history_view(
+        &self,
+        eof: Option<u64>,
+    ) -> Option<crate::global_history::HistoryView<'_>> {
+        self.history.as_ref().map(|h| h.view(eof))
     }
     fn add_window(&mut self, first: u64, end: u64, tempo: u32, phase: u32, confidence: u8) {
         let difference = if self.pending_count == 0 {
@@ -708,6 +699,67 @@ where
     }
 }
 
+// Shared unchanged estimator; histories retain its individual window verdicts.
+pub(crate) fn estimate_window(rate: u32, flux: &[f32]) -> Option<(u32, u32, u8)> {
+    if flux.len() < 64 {
+        return None;
+    }
+    let tempo_at_lag = |lag: u32| {
+        let d = u64::from(lag) * BIN_FRAMES;
+        ((u64::from(rate) * 60000 + d / 2) / d) as u32
+    };
+    let minimum = (u64::from(rate) * 60).div_ceil(300 * BIN_FRAMES).max(1) as u32;
+    let maximum = (u64::from(rate) * 60 / (40 * BIN_FRAMES)).min(flux.len() as u64 / 2) as u32;
+    let mut best = 0.0;
+    let mut best_correlation = 0.0;
+    let mut lag = 0;
+    for l in minimum..=maximum {
+        let c = correlation(flux, l);
+        let score = c * prior(tempo_at_lag(l));
+        if score > best {
+            best = score;
+            best_correlation = c;
+            lag = l;
+        }
+    }
+    if lag == 0 || best_correlation < 0.04 {
+        return None;
+    }
+    let mut phase = 0;
+    let mut phase_score = -1.0;
+    for p in 0..lag {
+        let mut score = 0.0;
+        for i in (p as usize..flux.len()).step_by(lag as usize) {
+            score += flux[i];
+        }
+        if score > phase_score {
+            phase_score = score;
+            phase = p;
+        }
+    }
+    let offset = refine(flux, lag);
+    let base = tempo_at_lag(lag);
+    let tempo = if offset == 0.0 {
+        base
+    } else {
+        (base as f32 * lag as f32 / (lag as f32 + offset) + 0.5) as u32
+    };
+    if !(40000..=300000).contains(&tempo) {
+        return None;
+    }
+    // Keep the reference's double-precision confidence multiplication.
+    Some((
+        tempo,
+        phase,
+        (40 + if best >= 1.0 {
+            50
+        } else {
+            (f64::from(best) * 50.0) as u32
+        })
+        .min(100) as u8,
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     extern crate std;
@@ -727,6 +779,114 @@ mod tests {
             vec![Beat::default(); MAX_BEATS],
         )
         .unwrap()
+    }
+
+    #[test]
+    fn active_scan_keeps_frozen_evidence_after_ring_replacement() {
+        // Stage-level fixture: fill the actual S6 ring with deterministic complete
+        // energy bins. This is not a musical-accuracy or full-PCM acceptance run.
+        for (first, replaced) in [(0, 128), (0, BIN_CAPACITY), (17, 128), (17, BIN_CAPACITY)] {
+            for dynamic in [false, true] {
+                for clock_limited in [false, true] {
+                    let mut reference = analysis(dynamic);
+                    for offset in 0..BIN_CAPACITY {
+                        let i = first + offset;
+                        reference.bins[i % BIN_CAPACITY] = OnsetBin {
+                            index: i as u32,
+                            sum: ((i as u32).wrapping_mul(1664525).wrapping_add(1013904223)
+                                % 67108864),
+                            count: BIN_FRAMES as u32,
+                            occupied: true,
+                        };
+                    }
+                    let mut delayed = analysis(dynamic);
+                    delayed.bins.copy_from_slice(&reference.bins);
+                    let mut disabled = crate::deadline::Deadline::disabled();
+                    reference
+                        .refresh(u32::MAX, None, None, None, &mut disabled)
+                        .unwrap();
+                    assert!(reference.grid().is_some());
+                    assert_eq!(delayed.refresh(1, None, None, None, &mut disabled), Ok(1));
+                    assert!(delayed.active);
+                    assert_eq!(delayed.cursor, first as u64);
+                    // Real push evicts a prefix or every old identity with partial
+                    // new bins. The frozen scan must retain its original evidence.
+                    for i in first..first + replaced {
+                        delayed.push((i + BIN_CAPACITY) as u64 * BIN_FRAMES, 1.0);
+                    }
+                    if replaced == BIN_CAPACITY {
+                        assert!(delayed.evidence(None).is_none());
+                    } else {
+                        assert_eq!(
+                            delayed.evidence(None),
+                            Some(((first + replaced) as u64, (first + BIN_CAPACITY) as u64))
+                        );
+                    }
+                    assert_eq!(delayed.refresh(0, None, None, None, &mut disabled), Ok(0));
+                    assert_eq!(delayed.cursor, first as u64);
+                    for _ in 0..BIN_CAPACITY / 128 + 1 {
+                        let done = if clock_limited {
+                            let mut time = 1u64;
+                            let mut clock = || {
+                                time += 1000;
+                                time
+                            };
+                            let mut deadline = crate::deadline::Deadline::new(1, &mut clock);
+                            delayed.refresh(u32::MAX, None, None, None, &mut deadline)
+                        } else {
+                            delayed.refresh(1, None, None, None, &mut disabled)
+                        }
+                        .unwrap();
+                        // The final window may commit in the same clock-limited
+                        // call; only calls with another window must yield first.
+                        assert!(done == 1 || (clock_limited && !delayed.active && done == 2));
+                        if !delayed.active {
+                            break;
+                        }
+                    }
+                    assert!(!delayed.active);
+                    let expected = reference.grid().unwrap();
+                    let actual = delayed.grid().unwrap();
+                    assert_eq!(actual.segments, expected.segments);
+                    assert_eq!(actual.beats, expected.beats);
+                    assert_eq!(actual.evidence_range, expected.evidence_range);
+                    assert_eq!(actual.requested_range, expected.requested_range);
+                    assert_eq!(actual.applicability_range, expected.applicability_range);
+                    assert_eq!(actual.coverage_range, expected.coverage_range);
+                    assert_eq!(actual.state, expected.state);
+                    assert_eq!(actual.representation, expected.representation);
+                    assert_eq!(actual.flags, expected.flags);
+                    assert_eq!(actual.confidence, expected.confidence);
+                    assert_eq!(delayed.revision(), reference.revision());
+                    assert_eq!(delayed.mutation_serial(), reference.mutation_serial());
+                }
+            }
+        }
+    }
+
+    #[cfg(feature = "experimental-s6-history")]
+    #[test]
+    fn global_history_obeys_zero_and_single_step_budgets() {
+        use crate::global_history::{WindowHistory, WindowRecord, WINDOW_FRAMES};
+        let mut records = [WindowRecord::default(); 1];
+        let mut history = WindowHistory::new(8000, &mut records).unwrap();
+        let mut bins = vec![OnsetBin::default(); BIN_CAPACITY];
+        let mut flux = vec![0.0; BIN_CAPACITY];
+        let mut beats = vec![Beat::default(); MAX_BEATS];
+        let mut a =
+            GlobalAnalysis::new(8000, None, false, &mut bins, &mut flux, &mut beats).unwrap();
+        a.attach_history(&mut history).unwrap();
+        for i in 0..WINDOW_FRAMES {
+            a.push(i, if i % 4000 < 64 { 0.75 } else { 0.0 });
+        }
+        let mut disabled = crate::deadline::Deadline::disabled();
+        assert_eq!(a.refresh(0, None, None, None, &mut disabled), Ok(0));
+        assert!(a.history_view(None).unwrap().records.is_empty());
+        assert_eq!(a.refresh(1, None, None, None, &mut disabled), Ok(1));
+        assert_eq!(a.history_view(None).unwrap().records.len(), 1);
+        assert!(!a.active);
+        assert_eq!(a.refresh(1, None, None, None, &mut disabled), Ok(1));
+        assert!(a.active);
     }
 
     #[test]

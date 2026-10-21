@@ -6,6 +6,16 @@ crate performs its own PCM, waveform, default musical analysis, WAV and containe
 work; it does not link C.
 It is not yet a full API/ABI or conformance replacement.
 
+The [2026-10-22 checkpoint and agreed next step](../docs/rust/MIGRATION.md#agreed-next-step--resume-after-2026-10-22)
+describe where development resumes: PCM-driven grid/meter alignment, immutable
+publication and validation by the actual native consumer.
+
+The optional `experimental-s6-history` feature adds bounded caller-owned window
+diagnostics through `Session::enable_global_history`. See the
+[experiment contract](../docs/rust/S6-HISTORY-EXPERIMENT.md) before use. It retains
+accepted, rejected and unavailable source windows across ring turnovers; it does
+not publish a full-track playback grid, alter cache formats or activate a provider.
+
 ## Build and verify
 
 From the repository root:
