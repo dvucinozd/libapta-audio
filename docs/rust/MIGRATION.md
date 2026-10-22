@@ -108,6 +108,10 @@ four-neighbor OLS extension, nine-event minimum support, fixed residual/count
 guards and zero-break vetoes before implementation or candidate scoring.
 Commit/push registration, then synthetic preflight, before the single saved-event
 development run. A failure ends this candidate without a same-cohort rescue.
+The [host implementation and preflight](MULTIBEAT-TIMING-PREFLIGHT.md) now pass
+18 new synthetic tests and 26 unchanged reference/representation/scorer tests.
+Next: commit/push implementation, then score the one fixed cohort from a clean
+exact revision. No corpus result or native candidate graph is claimed yet.
 Beat This! passes all four event/continuity screening gates on the
 100-source benchmark; original BeatNet fails all four, rejecting its port.
 Beat This! projection improves joint correctness 47 -> 187/401 complete-context
