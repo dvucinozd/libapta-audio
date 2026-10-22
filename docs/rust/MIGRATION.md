@@ -90,8 +90,18 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: measure the registered free-phase reference timing
-reachability diagnostic from clean committed source.**
+**Current next: separately register free-anchor quantized native segmented
+construction under the unchanged eight-segment cap.**
+The [free-phase result](FREE-PHASE-RESULT-20261022.md), measured at clean pushed
+`5ca4420ae2f46194904395b9e33164c80d63921b`, finds 75/100 complete continuous
+paths: all 47 prior native witnesses plus 28 of the previously unsupported 53.
+The other 25 remain infeasible under the registered necessary relaxation;
+two contain empty individual domains and 23 have accumulated interval
+contradictions. All 100 solver/checker/reverse-chain verdicts and all 600 old/new
+scores reproduce. The 300/401 joint window result is label-based feasibility,
+not detector accuracy or native serialization. Next determine which additional
+continuous paths admit a quantized native/wire/meter witness, preserving all
+100 sources, the 47 previous controls and the 25 explicit contradictions.
 The [free-phase experiment](FREE-PHASE-REACHABILITY.md) and
 [fixed protocol](FREE-PHASE-REACHABILITY-PROTOCOL.json) are registered before
 implementation. Exact continuous intervals and an independent strict
@@ -99,16 +109,17 @@ difference-constraint checker must agree; all prior native witnesses and old
 scores must remain admissible/unchanged. This does not construct a native grid.
 The [host preflight](FREE-PHASE-PREFLIGHT.md) passes 100 Python tests and 33
 unchanged native control tests per debug/release profile, plus format/Clippy/
-no-default checks. Commit/push this checkpoint before the one fixed-cohort run.
+no-default checks. Registration and preflight were committed/pushed before the
+one fixed-cohort run; commit/push its completed result before the next study.
 The [segmented reference result](SEGMENTED-REFERENCE-RESULT-20261022.md) finds
 47/100 complete anchored-family paths; all 47 pass native/wire/builder checks
 with 1..7 segments and 135 same-grid meter records. On that same 47-source
 subset, constant reference OLS has 161/188 joint windows and segmented actual
 successors have 188/188. This is label-based representation feasibility.
 The other 53 have no path in the fixed anchored family, rather than an observed
-eight-segment rejection. Preserve that family; separately test free-phase
-continuous reachability to distinguish constraint incompatibility from fixed
-anchor restrictions before any new native fit, model or capacity change.
+eight-segment rejection. That fixed-family result is preserved; the separate
+free-phase study above now distinguishes its necessary timing incompatibilities
+from fixed-anchor restrictions, before any new native fit or capacity change.
 The [measured timing audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) confirms
 106/401 windows with no constant period within every reference beat's +/-1%
 interval; complete reference-event OLS passes 227/401, versus model 187/401.

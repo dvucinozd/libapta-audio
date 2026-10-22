@@ -1,0 +1,135 @@
+{
+  "all_100_interval_and_difference_constraint_verdicts_agree": true,
+  "all_100_prior_anchored_plans_reproduced": true,
+  "all_100_reverse_chains_certificates_and_600_scores_replayed": true,
+  "approximation": {
+    "events": 4545,
+    "max_abs_frames": 4645.399999999907,
+    "max_phase_beats": 0.0999784779614305,
+    "median_abs_frames": 0.0,
+    "moved_events": 1568
+  },
+  "bound_files": 1443,
+  "formal_acceptance": false,
+  "format": "libapta-free-phase-reachability-1",
+  "incompatible_106": {
+    "complete_sequence_windows": 59,
+    "joint_windows": 59,
+    "one_to_one_phase_windows": 59,
+    "period_correct_points": 699,
+    "period_windows": 59,
+    "phase_correct_points": 699,
+    "phase_windows": 59,
+    "points": 699,
+    "reference_complete_windows": 106,
+    "scored_points": 699,
+    "unknown_successor_points": 0,
+    "windows": 106
+  },
+  "independent_replay_script_sha256": "a3496cbfd5033b3ebc1b557f44f8fea6c10fdc5ec4aa6f787169f85e6697741e",
+  "infeasible_reasons": {
+    "empty_individual_domain": 2,
+    "propagation_contradiction": 23
+  },
+  "inference_run": false,
+  "native_construction": false,
+  "new_detector": false,
+  "old_native_witnesses_admissible": 47,
+  "physical_p4": false,
+  "prior_cross_tab": {
+    "no_anchored_family_path -> feasible": 28,
+    "no_anchored_family_path -> infeasible": 25,
+    "witness -> feasible": 47
+  },
+  "production_promotion": false,
+  "protocol_sha256": "54a5cac6ee6ce86c82589fd34728fc54d9a9a5bf0b66ba5c67d5f473a9b71f41",
+  "read_audio": false,
+  "reference_relaxation_only": true,
+  "report_sha256": "af62b36ba4bcd3617dfb2ee61482d4968ab549f22d886c80277c0a26fb8a276a",
+  "resources": {
+    "rss_peak_kib": 27636,
+    "run_wall_seconds": 28.870002193000005
+  },
+  "source_archive_sha256": "9c11f61dfae803a3e89d0cc88b1b53c80125b76b32c1765cefb2d51f59cc2093",
+  "source_revision": "5ca4420ae2f46194904395b9e33164c80d63921b",
+  "statuses": {
+    "feasible": 75,
+    "infeasible": 25
+  },
+  "tests": {
+    "python": 100,
+    "rust_each_debug_release": 33
+  },
+  "totals": {
+    "constant_reference": {
+      "confirmed_joint_windows": 227,
+      "confirmed_period_windows": 228,
+      "confirmed_phase_windows": 374,
+      "downbeat_correct": 271,
+      "downbeat_scored": 271,
+      "emitted": 579,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 272,
+      "meter_emitted": 280,
+      "period_correct_beats": 4578,
+      "phase_correct_beats": 5802,
+      "predicted_beats": 5971,
+      "reference_complete_windows": 401,
+      "scored_beats": 5882,
+      "windows": 600
+    },
+    "continuous_actual": {
+      "complete_sequence_windows": 300,
+      "joint_windows": 300,
+      "one_to_one_phase_windows": 300,
+      "period_correct_points": 4470,
+      "period_windows": 300,
+      "phase_correct_points": 4545,
+      "phase_windows": 300,
+      "points": 4545,
+      "reference_complete_windows": 401,
+      "scored_points": 4545,
+      "unknown_successor_points": 75,
+      "windows": 600
+    },
+    "old_coarse": {
+      "confirmed_joint_windows": 47,
+      "confirmed_period_windows": 107,
+      "confirmed_phase_windows": 87,
+      "downbeat_correct": 31,
+      "downbeat_scored": 472,
+      "emitted": 598,
+      "high_confidence_grid_error": 13,
+      "high_confidence_grid_unknown_context": 13,
+      "meter_correct": 333,
+      "meter_emitted": 491,
+      "period_correct_beats": 2118,
+      "phase_correct_beats": 2229,
+      "predicted_beats": 6135,
+      "reference_complete_windows": 401,
+      "scored_beats": 5999,
+      "windows": 600
+    },
+    "old_ols": {
+      "confirmed_joint_windows": 187,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3704,
+      "phase_correct_beats": 4839,
+      "predicted_beats": 5771,
+      "reference_complete_windows": 401,
+      "scored_beats": 5680,
+      "windows": 600
+    }
+  },
+  "transfer_opened": false,
+  "verification_log_sha256": "d753e576ce82b93368abe3c21e819f930865bfd8919d8cfdc93fe08557b95cac"
+}

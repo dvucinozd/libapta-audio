@@ -40,8 +40,10 @@ It finds 106 reference-period-incompatible windows and a reference-only OLS
 witness with 227/401 joint passes, while identifying overlapping event/family
 errors. Its selected
 [segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md) is now
-measured: 47/100 full anchored-family paths validate within the cap. Free-phase
-reachability is the next proposed diagnostic; this PCM rejection is unchanged.
+measured: 47/100 full anchored-family paths validate within the cap. The
+[free-phase follow-up](FREE-PHASE-RESULT-20261022.md) finds 75/100 continuous
+paths and 25 necessary-relaxation contradictions. Next is free-anchor quantized
+native construction; this PCM rejection is unchanged.
 
 ## Fixed execution
 

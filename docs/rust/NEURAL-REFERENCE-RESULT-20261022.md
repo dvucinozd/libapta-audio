@@ -42,8 +42,10 @@ wire cap on 98/100 sources. The subsequent separately registered
 follow-up after the completed
 [failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is the measured
 [segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md): 47/100 full
-anchored-family paths validate within existing native/wire limits. The current
-next diagnostic is free-phase reference timing reachability under the same bounds.
+anchored-family paths validate within existing native/wire limits. The subsequent
+[free-phase diagnostic](FREE-PHASE-RESULT-20261022.md) finds 75/100 continuous
+paths, including 28 additional sources, and 25 necessary-relaxation contradictions.
+The next study is free-anchor quantized native construction within the same cap.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results

@@ -44,3 +44,7 @@ If additional paths are reachable, the next separately registered question is
 free-anchor **quantized** native segmented construction within the existing
 eight-segment limit. Previous failures, production pins/defaults, core validators,
 confidence, formal holdouts and fresh acceptance gates remain unchanged.
+
+Measured follow-up: the [2026-10-22 result](FREE-PHASE-RESULT-20261022.md) finds
+75/100 continuous paths (47 previous plus 28 additional), with 25 exact
+infeasibility outcomes. The registration above remains unchanged in scope.

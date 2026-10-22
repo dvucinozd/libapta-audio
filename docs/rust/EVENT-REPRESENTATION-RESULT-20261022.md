@@ -39,8 +39,10 @@ was PCM timing around fixed musical anchors. That
 three OLS joint breaks. The subsequent
 [failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is complete;
 its [segmented reference follow-up](SEGMENTED-REFERENCE-RESULT-20261022.md) is
-also measured: 47/100 full family paths validate within the cap. Free-phase
-reachability is the next proposed diagnostic; this audit's scores are unchanged.
+also measured: 47/100 full family paths validate within the cap. The subsequent
+[free-phase diagnostic](FREE-PHASE-RESULT-20261022.md) finds 75/100 continuous
+paths and 25 necessary-relaxation contradictions. Next is free-anchor quantized
+native construction; this audit's scores are unchanged.
 
 ## Frozen inputs and execution
 

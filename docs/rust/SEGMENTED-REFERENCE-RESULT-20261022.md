@@ -191,3 +191,10 @@ identity. Reference feasibility does not close learned event/family selection,
 independent transfer, confidence, fresh product acceptance or physical P4 gates.
 Commit and push this fixed-family result before registering free-phase
 reachability; the current family and product defaults remain unchanged.
+
+Measured follow-up: the separately registered
+[free-phase relaxation](FREE-PHASE-RESULT-20261022.md) admits 75/100 continuous
+paths, including all 47 here and 28 additional sources; 25 remain infeasible
+under those necessary bounds. It constructs no new native grid and does not
+change this anchored-family result. Next is separately registered free-anchor
+quantized native construction within the existing eight-segment cap.

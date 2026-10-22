@@ -38,7 +38,9 @@ was not started. The subsequent
 [failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is complete;
 its selected [segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md)
 is now measured, with 47/100 full family paths validating within the cap.
-The next diagnostic is free-phase reachability. This result remains unchanged.
+The subsequent [free-phase diagnostic](FREE-PHASE-RESULT-20261022.md) finds
+75/100 continuous paths and 25 necessary-relaxation contradictions. Next is
+free-anchor quantized native construction; this rejection remains unchanged.
 
 ## Fixed run and musical metrics
 
