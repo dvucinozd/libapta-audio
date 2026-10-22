@@ -99,6 +99,11 @@ The [read-only audit](TIMING-FAILURE-AUDIT.md) and
 compatibility, fixed tempo ratios, raw-event correspondence and exclusive triage
 with overlapping flags. Commit/push registration and synthetic preflight before
 reading new diagnostic results from the saved 100-source cohort.
+Its [host implementation/preflight](TIMING-FAILURE-AUDIT-PREFLIGHT.md) now passes
+17 new and 44 unchanged Python tests, including exact interval boundaries,
+tempo-family/phase errors and the limits of reference-only constant fits.
+Next: commit/push implementation, then run the fixed saved-event audit from a
+clean exact source. No new classifier measurements or estimator is claimed yet.
 The [PCM-anchor result](PCM-ANCHOR-TIMING-RESULT-20261022.md) rejects the fixed
 local-rise refiner: 186/401 joint-correct windows versus OLS 187/401, with two
 fixes and three breaks, plus one new coarse joint regression. Only 797/6095

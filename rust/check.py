@@ -144,6 +144,7 @@ def main():
     run([sys.executable, "tests/unit/apta_1_1_neural_reference.py", "-v"], env=history_env)
     run([sys.executable, "tests/unit/apta_1_1_event_representation.py", "-v"], env=history_env)
     run([sys.executable, "tests/unit/apta_1_1_multibeat_timing.py", "-v"], env=history_env)
+    run([sys.executable, "tests/unit/apta_1_1_timing_failure_audit.py", "-v"], env=history_env)
     run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "temporal-trace-diagnostics",
          "--bin", "apta-history-diagnostic", "--locked"], env=env)
     history_env.pop("APTA_DENSE_UNSUPPORTED_DIAGNOSTIC")
