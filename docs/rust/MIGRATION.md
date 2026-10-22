@@ -90,20 +90,29 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: register a read-only failure-attribution audit of existing event
-selection, tempo-family, reference support and within-window tempo variation
-before choosing another estimator.** Include reference-only constant-fit
-diagnostic witnesses without treating them as an accuracy ceiling or detector.
+**Current next: register bounded reference-path segmented-grid feasibility
+against the existing native/wire limits before implementing another detector.**
+The [measured timing audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) confirms
+106/401 windows with no constant period within every reference beat's +/-1%
+interval; complete reference-event OLS passes 227/401, versus model 187/401.
+This witness is not an accuracy ceiling: eleven windows pass only with the
+model. Model failures also contain 123 raw-correspondence mismatch flags and
+35 non-unit period families, overlapping reference variation. Test reference
+segments solely as representation witnesses, preserving source ordinals,
+same-grid meter, coverage and the eight-segment cap; then separately address
+learned variable timing and family ambiguity. No new detector is promoted.
 The [read-only audit](TIMING-FAILURE-AUDIT.md) and
-[fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) now register reference-period
+[fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) registered reference-period
 compatibility, fixed tempo ratios, raw-event correspondence and exclusive triage
-with overlapping flags. Commit/push registration and synthetic preflight before
-reading new diagnostic results from the saved 100-source cohort.
+with overlapping flags before implementation and saved-data diagnostics.
+Registration and preflight were committed/pushed before the run at exact clean
+`6f480bce5df180261f0b01ac3200f131dae3ab7d`. All 600 diagnostics and original
+scores independently reproduce; both original coarse-to-OLS regressions remain.
 Its [host implementation/preflight](TIMING-FAILURE-AUDIT-PREFLIGHT.md) now passes
 17 new and 44 unchanged Python tests, including exact interval boundaries,
 tempo-family/phase errors and the limits of reference-only constant fits.
-Next: commit/push implementation, then run the fixed saved-event audit from a
-clean exact source. No new classifier measurements or estimator is claimed yet.
+Commit/push this completed read-only audit before the next registration. No
+new estimator, audio/inference, transfer or product qualification is claimed.
 The [PCM-anchor result](PCM-ANCHOR-TIMING-RESULT-20261022.md) rejects the fixed
 local-rise refiner: 186/401 joint-correct windows versus OLS 187/401, with two
 fixes and three breaks, plus one new coarse joint regression. Only 797/6095

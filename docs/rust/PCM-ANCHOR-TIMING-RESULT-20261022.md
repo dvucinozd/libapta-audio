@@ -34,6 +34,13 @@ an accuracy ceiling or a detector. Preserve the old scorer and both original
 regressions, and do not use such diagnoses as an automatic selection oracle.
 No new classifier, candidate or corpus run is implemented by this checkpoint.
 
+Follow-up: the separately registered
+[failure-attribution audit is now complete](TIMING-FAILURE-AUDIT-RESULT-20261022.md).
+It finds 106 reference-period-incompatible windows and a reference-only OLS
+witness with 227/401 joint passes, while identifying overlapping event/family
+errors. The next unit is bounded reference-path segmented-grid feasibility;
+this PCM candidate and its measured rejection remain unchanged.
+
 ## Fixed execution
 
 All 100 previously selected GTZAN sources and 600 S6 windows are retained,

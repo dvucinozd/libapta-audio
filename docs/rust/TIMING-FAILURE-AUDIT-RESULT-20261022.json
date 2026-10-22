@@ -1,0 +1,300 @@
+{
+  "all_600_diagnostics_and_scores_independently_replayed": true,
+  "bound_files": 1228,
+  "by_genre": {
+    "blues": {
+      "complete": 40,
+      "model_joint": 10,
+      "windows": 60,
+      "witness_joint": 12
+    },
+    "classical": {
+      "complete": 40,
+      "model_joint": 1,
+      "windows": 60,
+      "witness_joint": 4
+    },
+    "country": {
+      "complete": 40,
+      "model_joint": 17,
+      "windows": 60,
+      "witness_joint": 15
+    },
+    "disco": {
+      "complete": 40,
+      "model_joint": 37,
+      "windows": 60,
+      "witness_joint": 37
+    },
+    "hiphop": {
+      "complete": 40,
+      "model_joint": 29,
+      "windows": 60,
+      "witness_joint": 33
+    },
+    "jazz": {
+      "complete": 40,
+      "model_joint": 7,
+      "windows": 60,
+      "witness_joint": 13
+    },
+    "metal": {
+      "complete": 40,
+      "model_joint": 9,
+      "windows": 60,
+      "witness_joint": 23
+    },
+    "pop": {
+      "complete": 40,
+      "model_joint": 37,
+      "windows": 60,
+      "witness_joint": 38
+    },
+    "reggae": {
+      "complete": 40,
+      "model_joint": 14,
+      "windows": 60,
+      "witness_joint": 22
+    },
+    "rock": {
+      "complete": 41,
+      "model_joint": 26,
+      "windows": 60,
+      "witness_joint": 30
+    }
+  },
+  "compatibility_model_cross_tab": {
+    "compatible_model_fail": 108,
+    "compatible_model_pass": 187,
+    "incompatible_model_fail": 106
+  },
+  "complete_context_correspondence": {
+    "covered_reference": 3840,
+    "duplicate_matches": 0,
+    "nonunique_reference": 580,
+    "outside_window_matches": 10,
+    "phase_matched_events": 3850,
+    "phase_mismatched_events": 559,
+    "raw_events": 4409,
+    "reference_events": 4420,
+    "uncovered_reference": 580,
+    "uniquely_covered_reference": 3840,
+    "unknown_events": 0
+  },
+  "complete_context_families": {
+    "double_period_half_bpm": 16,
+    "half_period_double_bpm": 13,
+    "one_third_period": 4,
+    "same_period": 290,
+    "three_halves_period": 2,
+    "unavailable_projection": 7,
+    "unmatched_ratio": 69
+  },
+  "complete_context_flags": {
+    "event_correspondence_mismatch": 138,
+    "non_unit_tempo_family": 35,
+    "reference_period_incompatibility": 106,
+    "reference_witness_joint_fail": 174,
+    "reference_witness_sequence_fail": 174
+  },
+  "complete_context_witness_kinds": {
+    "accepted": 394,
+    "insufficient_events": 2,
+    "unsupported_projection": 5
+  },
+  "confidence_calibrated": false,
+  "constant_period_compatibility": {
+    "compatible": 295,
+    "incompatible": 106
+  },
+  "failure_families": {
+    "double_period_half_bpm": 16,
+    "half_period_double_bpm": 13,
+    "one_third_period": 4,
+    "same_period": 103,
+    "three_halves_period": 2,
+    "unavailable_projection": 7,
+    "unmatched_ratio": 69
+  },
+  "failure_flags": {
+    "event_correspondence_mismatch": 123,
+    "non_unit_tempo_family": 35,
+    "reference_period_incompatibility": 106,
+    "reference_witness_joint_fail": 163,
+    "reference_witness_sequence_fail": 163
+  },
+  "formal_acceptance": false,
+  "format": "libapta-timing-failure-attribution-1",
+  "inference_run": false,
+  "integrity_passed": true,
+  "model_witness_cross_tab": {
+    "model_fail_witness_fail": 163,
+    "model_fail_witness_pass": 51,
+    "model_pass_witness_fail": 11,
+    "model_pass_witness_pass": 176
+  },
+  "new_candidate": false,
+  "original_regressions_redacted": [
+    {
+      "flags": {
+        "event_correspondence_mismatch": true,
+        "non_unit_tempo_family": true,
+        "reference_period_incompatibility": false,
+        "reference_witness_joint_fail": false,
+        "reference_witness_sequence_fail": false
+      },
+      "model_period_correct": false,
+      "model_phase_correct": false,
+      "reference_witness_joint_correct": true,
+      "reference_witness_sequence_correct": true,
+      "tempo_family": "half_period_double_bpm",
+      "triage_group": "non_unit_tempo_family"
+    },
+    {
+      "flags": {
+        "event_correspondence_mismatch": false,
+        "non_unit_tempo_family": false,
+        "reference_period_incompatibility": false,
+        "reference_witness_joint_fail": true,
+        "reference_witness_sequence_fail": true
+      },
+      "model_period_correct": false,
+      "model_phase_correct": true,
+      "reference_witness_joint_correct": false,
+      "reference_witness_sequence_correct": false,
+      "tempo_family": "same_period",
+      "triage_group": "period_precision_or_projection"
+    }
+  ],
+  "physical_p4": false,
+  "production_promotion": false,
+  "protocol_sha256": "8f47045ccd26983b04085aabb4a58d2868f074528bb2031804aed2a3e6270867",
+  "read_audio": false,
+  "report_sha256": "0fce2185c2d5fd4fd93e9809aa78274267e3ae9a58167af90282daaecae39afa",
+  "resources": {
+    "audit_wall_seconds": 31.912804131999962,
+    "rss_peak_kib": 29832
+  },
+  "source_archive_sha256": "fa9252cec9a35b0a1202699b2a5c88c12bfc11f44bf93ea5a14700722c5260ab",
+  "source_revision": "6f480bce5df180261f0b01ac3200f131dae3ab7d",
+  "tests": {
+    "new_python": 17,
+    "unchanged_python": 44
+  },
+  "totals": {
+    "model_common": {
+      "complete_sequence_windows": 178,
+      "joint_windows": 187,
+      "one_to_one_phase_windows": 274,
+      "period_correct_points": 3704,
+      "period_windows": 192,
+      "phase_correct_points": 4839,
+      "phase_windows": 300,
+      "points": 5771,
+      "reference_complete_windows": 401,
+      "scored_points": 5680,
+      "unknown_successor_points": 0,
+      "windows": 600
+    },
+    "old_coarse": {
+      "confirmed_joint_windows": 47,
+      "confirmed_period_windows": 107,
+      "confirmed_phase_windows": 87,
+      "downbeat_correct": 31,
+      "downbeat_scored": 472,
+      "emitted": 598,
+      "high_confidence_grid_error": 13,
+      "high_confidence_grid_unknown_context": 13,
+      "meter_correct": 333,
+      "meter_emitted": 491,
+      "period_correct_beats": 2118,
+      "phase_correct_beats": 2229,
+      "predicted_beats": 6135,
+      "reference_complete_windows": 401,
+      "scored_beats": 5999,
+      "windows": 600
+    },
+    "old_ols": {
+      "confirmed_joint_windows": 187,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3704,
+      "phase_correct_beats": 4839,
+      "predicted_beats": 5771,
+      "reference_complete_windows": 401,
+      "scored_beats": 5680,
+      "windows": 600
+    },
+    "reference_witness": {
+      "confirmed_joint_windows": 227,
+      "confirmed_period_windows": 228,
+      "confirmed_phase_windows": 374,
+      "downbeat_correct": 271,
+      "downbeat_scored": 271,
+      "emitted": 579,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 272,
+      "meter_emitted": 280,
+      "period_correct_beats": 4578,
+      "phase_correct_beats": 5802,
+      "predicted_beats": 5971,
+      "reference_complete_windows": 401,
+      "scored_beats": 5882,
+      "windows": 600
+    },
+    "witness_common": {
+      "complete_sequence_windows": 227,
+      "joint_windows": 227,
+      "one_to_one_phase_windows": 369,
+      "period_correct_points": 4578,
+      "period_windows": 228,
+      "phase_correct_points": 5802,
+      "phase_windows": 374,
+      "points": 5971,
+      "reference_complete_windows": 401,
+      "scored_points": 5882,
+      "unknown_successor_points": 0,
+      "windows": 600
+    }
+  },
+  "transfer_opened": false,
+  "triage_all": {
+    "event_correspondence_mismatch": 34,
+    "model_joint_pass": 187,
+    "non_unit_tempo_family": 26,
+    "period_precision_or_projection": 45,
+    "projection_unsupported": 7,
+    "reference_context_incomplete": 199,
+    "reference_period_incompatibility": 102
+  },
+  "triage_complete_failures": {
+    "event_correspondence_mismatch": 34,
+    "non_unit_tempo_family": 26,
+    "period_precision_or_projection": 45,
+    "projection_unsupported": 7,
+    "reference_period_incompatibility": 102
+  },
+  "witness_pass_model_fail_families": {
+    "double_period_half_bpm": 6,
+    "half_period_double_bpm": 9,
+    "same_period": 18,
+    "three_halves_period": 1,
+    "unavailable_projection": 3,
+    "unmatched_ratio": 14
+  },
+  "witness_pass_model_fail_flags": {
+    "event_correspondence_mismatch": 35,
+    "non_unit_tempo_family": 16,
+    "reference_period_incompatibility": 0,
+    "reference_witness_joint_fail": 0,
+    "reference_witness_sequence_fail": 0
+  }
+}

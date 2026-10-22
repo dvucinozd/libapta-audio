@@ -39,7 +39,9 @@ wire cap on 98/100 sources. The subsequent separately registered
 188 versus 187 joint-correct windows, but twelve OLS joint breaks. The subsequent
 [PCM-anchor refinement](PCM-ANCHOR-TIMING-RESULT-20261022.md) is also rejected:
 186 versus 187 joint-correct windows, with three OLS joint breaks. The current
-next proposal is read-only failure attribution before another estimator choice.
+next unit after the completed
+[failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is bounded
+reference-path segmented-grid feasibility under existing native/wire limits.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results

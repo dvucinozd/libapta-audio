@@ -34,8 +34,10 @@ refiner is implemented or measured by this checkpoint.
 Follow-up: the separately registered
 [PCM-anchor experiment is now measured and rejected](PCM-ANCHOR-TIMING-RESULT-20261022.md),
 with 186 versus 187 joint-correct windows and three OLS joint breaks. Transfer
-was not started. The current next unit is a read-only failure-attribution audit;
-this multi-beat result and its parameters remain unchanged.
+was not started. The subsequent
+[failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is complete;
+bounded reference-path segmented-grid feasibility is the current next unit.
+This multi-beat result and its parameters remain unchanged.
 
 ## Fixed run and musical metrics
 

@@ -36,8 +36,10 @@ is now measured and rejected, with twelve OLS joint breaks despite a net gain
 of one window. Its parameters remain frozen; the next proposed evidence axis
 was PCM timing around fixed musical anchors. That
 [PCM experiment is now rejected](PCM-ANCHOR-TIMING-RESULT-20261022.md), with
-three OLS joint breaks. The current next step is diagnostic failure attribution;
-this audit's scores are unchanged.
+three OLS joint breaks. The subsequent
+[failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is complete;
+the current next step is bounded reference-path segmented-grid feasibility.
+This audit's scores are unchanged.
 
 ## Frozen inputs and execution
 
