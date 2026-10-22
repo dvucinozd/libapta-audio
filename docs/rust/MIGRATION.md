@@ -94,6 +94,11 @@ pushed separately before the next step, with historical evidence hashes intact.
 selection, tempo-family, reference support and within-window tempo variation
 before choosing another estimator.** Include reference-only constant-fit
 diagnostic witnesses without treating them as an accuracy ceiling or detector.
+The [read-only audit](TIMING-FAILURE-AUDIT.md) and
+[fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) now register reference-period
+compatibility, fixed tempo ratios, raw-event correspondence and exclusive triage
+with overlapping flags. Commit/push registration and synthetic preflight before
+reading new diagnostic results from the saved 100-source cohort.
 The [PCM-anchor result](PCM-ANCHOR-TIMING-RESULT-20261022.md) rejects the fixed
 local-rise refiner: 186/401 joint-correct windows versus OLS 187/401, with two
 fixes and three breaks, plus one new coarse joint regression. Only 797/6095

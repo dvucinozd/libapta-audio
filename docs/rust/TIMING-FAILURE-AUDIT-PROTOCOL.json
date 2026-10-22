@@ -1,0 +1,60 @@
+{
+  "format": "libapta-timing-failure-attribution-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "1bc100402af93941167f5fefbe7598e2d800b44b",
+  "formal_acceptance": false,
+  "purpose": "Read-only decomposition of saved Beat This OLS failures into reference context, constant-period compatibility, tempo-family and event correspondence; no new estimator or rescue of rejected candidates.",
+  "inputs": {
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_freeze_sha256": "0e0ab33d990e40253d61a6a39758fc30c33510238e02ad58d1467b7fa3d5e3ef",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "beat_this_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "pcm_result_sha256": "c2a1c25e2b420b7b09b8fdfe7fc46d04bc7cd6a4b88ab325b3e28b889b8e4019",
+    "read_audio": false,
+    "model_inference": false,
+    "new_labels_or_corpus": false,
+    "formal_holdout_or_reserved_asap_transfer": false
+  },
+  "diagnostics": {
+    "baseline": "unchanged source-local Beat This OLS projection and score_window; exactly reproduce saved tuples, coarse/OLS per-window scores and aggregates, including 187/401 joint windows and two original coarse-to-OLS regressions",
+    "context": "same reference envelope test as frozen scorer; report all 600 windows, but complete-context quality/triage tables use only the original 401; incomplete windows remain explicitly unknown",
+    "reference_constant_witness": "apply the unchanged project function to reference beat/downbeat coordinates on each original window, then the unchanged frozen scorer and common one-to-one diagnostics; this uses labels and is solely a representation witness, never detector output, an optimized oracle, accuracy ceiling or candidate selection",
+    "reference_periods": "use the unchanged nearest-five-interval local-period helper at every annotated in-window beat; preserve its exact integer/half-integer value as a Fraction; report min/median/max and local variation separately from raw annotated intervals",
+    "constant_period_compatibility": "intersect [0.99*local_period,1.01*local_period] over every in-window reference beat; empty intersection is incompatible with the period criterion under a complete one-to-one sequence correspondence; it is not an impossibility claim for the old precision-only scorer or a proof of musical tempo change rather than annotation jitter",
+    "tempo_family": "selected Q32 grid period divided by median annotated local period; label same_period, half_period_double_bpm, double_period_half_bpm, two_thirds_period, three_halves_period, one_third_period, triple_period only when within 1% of that fixed ratio; otherwise unmatched_ratio; absent projection/reference is unavailable; do not alter selected tempo",
+    "event_correspondence": "each original raw in-window event maps to its nearest annotated beat in the whole source, ties to earlier; retain it only within 0.10 of that reference beat's local period; separately count phase-mismatched events, duplicate matches, matches outside the window and annotated in-window beats without a unique match; these are diagnostic mismatch indications, not manually established missing/extra musical events",
+    "triage_order": [
+      "reference_context_incomplete",
+      "model_joint_pass",
+      "projection_unsupported",
+      "reference_period_incompatibility",
+      "non_unit_tempo_family",
+      "event_correspondence_mismatch",
+      "period_precision_or_projection",
+      "phase_or_projection"
+    ],
+    "triage_semantics": "first applicable rule produces one exclusive display group; report overlapping flags, tempo families and model/witness pass cross-tab independently; a priority group is not causal proof or an additive attribution of accuracy loss",
+    "regressions": "retain the original two coarse-to-OLS failures with all private diagnostics; publish only redacted categories/flags and witness verdicts",
+    "confidence": "unknown/uncalibrated, no new confidence score or safety qualification"
+  },
+  "limits": {
+    "maximum_source_frames": 1440000,
+    "maximum_events_per_sequence": 3072,
+    "maximum_windows_per_source": 8,
+    "max_host_rss_kib": 262144,
+    "max_audit_seconds": 120
+  },
+  "integrity": {
+    "registration_and_preflight_committed_before_audit": true,
+    "source_clean_and_all_inputs_bound": true,
+    "old_tuples_scores_aggregates_byte_identical": true,
+    "all_100_sources_600_windows_retained": true,
+    "all_input_and_detail_hashes_rechecked": true,
+    "identity_or_baseline_mismatch_stops_immediately": true,
+    "production_promotion_allowed": false,
+    "no_label_based_algorithm_or_threshold_selection": true
+  }
+}
