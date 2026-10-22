@@ -35,3 +35,7 @@ gain, this closes the reference-construction sequence. The next work returns to
 with a separately registered variable-timing reconstruction and original OLS
 control. Continuous or native label-derived feasibility is never detector
 accuracy, independent transfer, confidence, FINAL/product or P4 qualification.
+
+Measured follow-up: the [terminal result](QUANTIZED-GUIDED-RESULT-20261022.md)
+adds 13 wire-qualified paths, for 60/100 total; three additional native graphs
+exceed capacity. The sequence is closed and next work returns to learned events.

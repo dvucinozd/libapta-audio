@@ -41,8 +41,10 @@ It validates 47/100 complete anchored-family paths with at most seven segments
 and all 135 supported meter bindings. The other 53 have no family path before
 capacity is applied. The subsequent
 [free-phase diagnostic](FREE-PHASE-RESULT-20261022.md) finds 75/100 continuous
-paths and 25 necessary-relaxation contradictions under the same bounds. Next is
-free-anchor quantized native construction; this audit's findings are unchanged.
+paths and 25 necessary-relaxation contradictions under the same bounds. The
+[terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) now reaches
+60/100 wire-qualified sources and closes reference construction. Next is
+label-blind learned-event timing; this audit's findings are unchanged.
 
 ## Fixed evidence and baseline
 

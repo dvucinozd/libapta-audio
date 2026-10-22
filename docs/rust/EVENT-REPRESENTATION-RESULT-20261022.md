@@ -41,8 +41,10 @@ three OLS joint breaks. The subsequent
 its [segmented reference follow-up](SEGMENTED-REFERENCE-RESULT-20261022.md) is
 also measured: 47/100 full family paths validate within the cap. The subsequent
 [free-phase diagnostic](FREE-PHASE-RESULT-20261022.md) finds 75/100 continuous
-paths and 25 necessary-relaxation contradictions. Next is free-anchor quantized
-native construction; this audit's scores are unchanged.
+paths and 25 necessary-relaxation contradictions. The
+[terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) reaches 60/100
+wire-qualified sources and closes reference construction. Next is label-blind
+learned-event timing; this audit's scores are unchanged.
 
 ## Frozen inputs and execution
 

@@ -198,3 +198,7 @@ paths, including all 47 here and 28 additional sources; 25 remain infeasible
 under those necessary bounds. It constructs no new native grid and does not
 change this anchored-family result. Next is separately registered free-anchor
 quantized native construction within the existing eight-segment cap.
+
+That [terminal construction](QUANTIZED-GUIDED-RESULT-20261022.md) is now measured:
+60/100 wire-qualified paths, including all 47 here unchanged and 13 additional.
+The reference sequence is closed; next work returns to label-blind learned events.

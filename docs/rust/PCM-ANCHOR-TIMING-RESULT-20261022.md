@@ -42,8 +42,10 @@ errors. Its selected
 [segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md) is now
 measured: 47/100 full anchored-family paths validate within the cap. The
 [free-phase follow-up](FREE-PHASE-RESULT-20261022.md) finds 75/100 continuous
-paths and 25 necessary-relaxation contradictions. Next is free-anchor quantized
-native construction; this PCM rejection is unchanged.
+paths and 25 necessary-relaxation contradictions. The
+[terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) reaches 60/100
+wire-qualified sources and closes reference construction. Next is label-blind
+learned-event timing; this PCM rejection is unchanged.
 
 ## Fixed execution
 

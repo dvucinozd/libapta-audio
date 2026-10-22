@@ -160,3 +160,10 @@ Exact source archive, verification log and independent reverse replay/export:
 Commit/push this result before the separately registered quantized construction
 study. The prior anchored-family result and all earlier failed candidates stay
 fixed; this checkpoint makes no production, release or physical qualification.
+
+Measured follow-up: the [terminal guided quantized
+construction](QUANTIZED-GUIDED-RESULT-20261022.md) realizes 16 of the 28 additional
+continuous paths natively; 13 fit the wire cap. Totals are 63 native / 60 wire
+sources, with all 47 previous responses preserved. The twelve guided-family
+failures are not global impossibility proofs. Reference-construction research
+is now closed; next work is label-blind saved learned-event timing.

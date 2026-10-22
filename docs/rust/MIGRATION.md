@@ -90,8 +90,23 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: measure the terminal continuous-guided quantized constructor
-once from clean source, then return to learned-event timing.**
+**Current next: register bounded label-blind variable-timing reconstruction of
+saved Beat This! events against the original OLS control.**
+The [terminal quantized result](QUANTIZED-GUIDED-RESULT-20261022.md), measured at
+clean pushed `77c7be4ed8847859d746a4d6d02e5cb0c54d6556`, adds 13 wire-qualified
+reference paths: 60/100 total with 166 same-grid meter records. Three further
+native graphs require 11/13/13 pieces and fail wire/builder capacity; twelve
+continuous-feasible sources have no path in the fixed guided family and 25
+retain exact earlier relaxation contradictions. All 47 legacy responses remain
+identical. Independent affine intersections/forward minima, native/meter replay
+and all 600 old/new scores reproduce. The 240/401 wire joint result is
+label-based representation feasibility; actual model OLS remains 187/401.
+Reference-construction research is closed. Construction for the next experiment
+must use learned events/windows/availability only, with labels isolated in
+scoring; preserve the original regressions and frozen failed candidates.
+No new reference-anchor search or segment-cap change follows. Listening-based
+attribution of annotation/timing variation, independent transfer, fresh acceptance,
+confidence, product/P4 qualification remain separate open work.
 The [terminal experiment](QUANTIZED-GUIDED-EXPERIMENT.md) and
 [fixed protocol](QUANTIZED-GUIDED-PROTOCOL.json) register one deterministic
 integer-anchor family, unchanged eight-segment cap, explicit prior controls and
@@ -99,7 +114,8 @@ a mechanical audit of the 25 contradictions. No additional reference optimizer
 follows this study, regardless of its result.
 The [preflight](QUANTIZED-GUIDED-PREFLIGHT.md) passes 112 Python tests, 37
 focused Rust tests per debug/release profile, strict checks and three generated
-legacy/guided interop fixtures. Commit/push before the one fixed-cohort run.
+legacy/guided interop fixtures. Registration and preflight were committed/pushed
+before the single run; commit/push its result before learned-event registration.
 The [free-phase result](FREE-PHASE-RESULT-20261022.md), measured at clean pushed
 `5ca4420ae2f46194904395b9e33164c80d63921b`, finds 75/100 complete continuous
 paths: all 47 prior native witnesses plus 28 of the previously unsupported 53.
@@ -107,9 +123,9 @@ The other 25 remain infeasible under the registered necessary relaxation;
 two contain empty individual domains and 23 have accumulated interval
 contradictions. All 100 solver/checker/reverse-chain verdicts and all 600 old/new
 scores reproduce. The 300/401 joint window result is label-based feasibility,
-not detector accuracy or native serialization. Next determine which additional
-continuous paths admit a quantized native/wire/meter witness, preserving all
-100 sources, the 47 previous controls and the 25 explicit contradictions.
+not detector accuracy or native serialization. Its additional paths are tested
+by the terminal quantized study above, preserving all 100 sources, the 47
+previous controls and the 25 explicit contradictions.
 The [free-phase experiment](FREE-PHASE-REACHABILITY.md) and
 [fixed protocol](FREE-PHASE-REACHABILITY-PROTOCOL.json) are registered before
 implementation. Exact continuous intervals and an independent strict
