@@ -1,0 +1,2 @@
+# Explicit host-only PCM experiment; not a core/runtime dependency.
+numpy==2.5.2
