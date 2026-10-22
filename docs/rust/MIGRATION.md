@@ -90,13 +90,16 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: implement/test the terminal continuous-guided quantized
-reference constructor, then measure once and return to learned-event timing.**
+**Current next: measure the terminal continuous-guided quantized constructor
+once from clean source, then return to learned-event timing.**
 The [terminal experiment](QUANTIZED-GUIDED-EXPERIMENT.md) and
 [fixed protocol](QUANTIZED-GUIDED-PROTOCOL.json) register one deterministic
 integer-anchor family, unchanged eight-segment cap, explicit prior controls and
 a mechanical audit of the 25 contradictions. No additional reference optimizer
 follows this study, regardless of its result.
+The [preflight](QUANTIZED-GUIDED-PREFLIGHT.md) passes 112 Python tests, 37
+focused Rust tests per debug/release profile, strict checks and three generated
+legacy/guided interop fixtures. Commit/push before the one fixed-cohort run.
 The [free-phase result](FREE-PHASE-RESULT-20261022.md), measured at clean pushed
 `5ca4420ae2f46194904395b9e33164c80d63921b`, finds 75/100 complete continuous
 paths: all 47 prior native witnesses plus 28 of the previously unsupported 53.

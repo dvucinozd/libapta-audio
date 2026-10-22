@@ -210,12 +210,27 @@ fn build(
     references: &[Reference],
     pieces: &[(usize, usize, u32)],
 ) -> Result<(Vec<GridSegment>, Vec<Beat>), Box<dyn Error>> {
+    let mut anchors = Vec::new();
+    for &(start, _, _) in pieces {
+        anchors.push(references.get(start).ok_or("invalid start ordinal")?.frame);
+    }
+    build_with_anchors(total, references, pieces, &anchors)
+}
+
+fn build_with_anchors(
+    total: u64,
+    references: &[Reference],
+    pieces: &[(usize, usize, u32)],
+    anchors: &[u64],
+) -> Result<(Vec<GridSegment>, Vec<Beat>), Box<dyn Error>> {
     if total == 0
         || total > 1_440_000
         || references.len() < 2
         || references.len() > 3072
         || pieces.is_empty()
         || pieces.len() > references.len()
+        || anchors.len() != pieces.len()
+        || anchors.iter().any(|&a| a >= total)
         || references
             .iter()
             .any(|r| r.frame >= total || r.twice_period == 0)
@@ -233,7 +248,7 @@ fn build(
     let mut segments = Vec::new();
     let mut points = Vec::new();
     let mut next = 0;
-    for &(start, end, tempo) in pieces {
+    for (&(start, end, tempo), &anchor_frame) in pieces.iter().zip(anchors) {
         if start != next
             || end <= start
             || end > references.len()
@@ -242,7 +257,7 @@ fn build(
             return Err("pieces changed event partition or tempo range".into());
         }
         let period = ((48000_u128 * 60000) << 32) / u128::from(tempo);
-        let anchor = u128::from(references[start].frame) << 32;
+        let anchor = u128::from(anchor_frame) << 32;
         if (anchor >= period && anchor - period >= u128::from(boundaries[start]) << 32)
             || anchor + (end - start) as u128 * period < u128::from(boundaries[end]) << 32
         {
@@ -254,7 +269,7 @@ fn build(
                 end_frame: boundaries[end],
             },
             anchor_position: FractionalFrame {
-                whole_frame: references[start].frame,
+                whole_frame: anchor_frame,
                 fraction_q32: 0,
             },
             anchor_ordinal: start as i64,
@@ -396,9 +411,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Err("request too large".into());
     }
     let mut tokens = text.split_whitespace();
-    if tokens.next() != Some("SEGMENT_REF_V1") {
-        return Err("unknown format".into());
-    }
+    let guided = match tokens.next() {
+        Some("SEGMENT_REF_V1") => false,
+        Some("SEGMENT_GUIDED_V1") => true,
+        _ => return Err("unknown format".into()),
+    };
     let total = number::<u64>(&mut tokens)?;
     let count = number::<usize>(&mut tokens)?;
     let pieces = number::<usize>(&mut tokens)?;
@@ -414,12 +431,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
     }
     let mut partition = Vec::new();
+    let mut anchors = Vec::new();
     for _ in 0..pieces {
         partition.push((
             number(&mut tokens)?,
             number(&mut tokens)?,
             number(&mut tokens)?,
         ));
+        if guided {
+            anchors.push(number::<u64>(&mut tokens)?);
+        }
     }
     let mut meters = Vec::new();
     for i in 0..meter_count {
@@ -438,7 +459,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     if tokens.next().is_some() {
         return Err("trailing fields".into());
     }
-    let (segments, points) = build(total, &references, &partition)?;
+    let (segments, points) = if guided {
+        build_with_anchors(total, &references, &partition, &anchors)?
+    } else {
+        build(total, &references, &partition)?
+    };
     let range = FrameRange {
         first_frame: references[0].frame,
         end_frame: references.last().ok_or("empty reference")?.frame + 1,
@@ -473,6 +498,65 @@ mod tests {
                 twice_period: 48000,
             })
             .collect()
+    }
+    #[test]
+    fn explicit_integer_anchor_preserves_fractional_grid_and_meter() {
+        let refs = references(12);
+        let (s, p) = build_with_anchors(300000, &refs, &[(0, 12, 120001)], &[1]).unwrap();
+        assert_eq!(p[0].position.whole_frame, 1);
+        assert_ne!(p[4].position.fraction_q32, 0);
+        let g = make_grid(
+            FrameRange {
+                first_frame: 0,
+                end_frame: 264001,
+            },
+            &s,
+        );
+        let meters = [MeterSegment {
+            first_frame: 0,
+            end_frame: 264001,
+            downbeat_frame: 1,
+            downbeat_ordinal: 0,
+            numerator: 4,
+            denominator: 4,
+            state: FeatureState::Provisional,
+            confidence: 0,
+            segment_id: 1,
+        }];
+        assert!(native_accepts(g, 48000, 300000, 120001, &meters));
+        assert!(builder_accepts(g, 48000, 300000, 120001, &meters));
+        assert!(wire_roundtrip(&g, 300000, &p).unwrap());
+        assert!(meter_roundtrip(&meters, 300000, &p));
+    }
+    #[test]
+    fn explicit_anchor_cannot_escape_reference_ownership_or_source() {
+        let refs = references(12);
+        for anchors in [&[][..], &[24000][..], &[300000][..]] {
+            assert!(build_with_anchors(300000, &refs, &[(0, 12, 120000)], anchors).is_err());
+        }
+    }
+    #[test]
+    fn guided_junction_checks_actual_interval_not_only_own_period() {
+        let refs = references(16);
+        assert!(build_with_anchors(
+            400000,
+            &refs,
+            &[(0, 8, 120000), (8, 16, 120000)],
+            &[0, 191500]
+        )
+        .is_err());
+    }
+    #[test]
+    fn explicit_reference_anchors_reproduce_legacy_points() {
+        let refs = references(12);
+        let partition = [(0, 6, 120000), (6, 12, 120000)];
+        let (old_s, old_p) = build(300000, &refs, &partition).unwrap();
+        let (new_s, new_p) = build_with_anchors(300000, &refs, &partition, &[0, 144000]).unwrap();
+        assert_eq!(old_s.len(), new_s.len());
+        assert!(old_p
+            .iter()
+            .zip(&new_p)
+            .all(|(a, b)| a.position == b.position && a.ordinal == b.ordinal));
     }
     #[test]
     fn complete_native_builder_wire_and_meter_positive_control() {
