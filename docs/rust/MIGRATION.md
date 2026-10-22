@@ -90,20 +90,32 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: register an event-to-APTA representation audit using the saved
-Beat This! events from the [measured comparison](NEURAL-REFERENCE-RESULT-20261022.md),
-including explicit/segmented grid, same-grid meter, source gaps and consumer
-capacity.** Beat This! passes all four event/continuity screening gates on the
+**Current next: register bounded multi-beat timing reconstruction using the saved
+Beat This! anchors, explicit segmentation/gap/ambiguity rules and the unchanged
+OLS control.** The completed
+[representation audit](EVENT-REPRESENTATION-RESULT-20261022.md) preserves all
+6095 events in explicit wire payloads, but raw adjacent intervals yield only
+10/401 joint-correct windows versus OLS 187/401; both original regressions remain.
+Exact segments exceed the eight-segment wire cap on 98/100 sources, and no raw
+explicit or segmented complete graph passes existing native validation. All
+events lie on a 20 ms lattice; reconstruction must estimate timing over multiple
+beats before another model/backend port or consumer contract change is justified.
+Freeze the next algorithm and caps before scoring; keep the scorer, validators,
+wire limits and failed baselines unchanged.
+Beat This! passes all four event/continuity screening gates on the
 100-source benchmark; original BeatNet fails all four, rejecting its port.
 Beat This! projection improves joint correctness 47 -> 187/401 complete-context
 windows but breaks two previously joint-correct cases. Preserve the scorer and
 all regression cases; neither model is production/P4-qualified. Confidence and
 cross-dataset identity verification remain open. BeatNet+ licensing is unresolved.
-The [representation audit](EVENT-REPRESENTATION-EXPERIMENT.md) is now registered
-and its [host implementation/preflight](EVENT-REPRESENTATION-PREFLIGHT.md)
-passes focused tests, exact compression controls and actual-consumer synthetic
-policy checks. Next: run all saved 100-source / 600-window development records
-from a clean implementation checkpoint; no new inference or corpus is needed.
+The [representation experiment](EVENT-REPRESENTATION-EXPERIMENT.md) and its
+[host implementation/preflight](EVENT-REPRESENTATION-PREFLIGHT.md) preceded the
+completed saved-event run at clean source
+`5a78304693d84b0914b4142b6a5dda2689f7ae3b`. All 100 sources / 600 windows are
+independently rescored, with byte-identical old inputs and no new inference or
+corpus. Focused verification passes 26 Python tests, 30 Rust tests per
+debug/release and eight actual-consumer synthetic cases. These checks establish
+representation/policy behavior; they do not qualify a product detector.
 The [reference experiment](NEURAL-REFERENCE-EXPERIMENT.md) and its
 [fixed protocol](NEURAL-REFERENCE-PROTOCOL.json) now register the two checkpoints,
 100-source GTZAN selection, event/continuity screening gates, projection and

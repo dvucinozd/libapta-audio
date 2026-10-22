@@ -21,7 +21,8 @@ its small causal architecture. These measurements supersede that provisional
 choice: small weights do not compensate for inadequate musical evidence.
 No model, seed, threshold or corpus selection was changed after scoring.
 
-Next, register a bounded **event-to-APTA representation audit** using the saved
+The next step selected by this comparison was a bounded
+**event-to-APTA representation audit** using the saved
 Beat This! event sequences, examining existing explicit/segmented grid support,
 same-grid meter/downbeat alignment, gaps and consumer capacity limits. Separate
 remaining neural event errors from constant-period projection loss. Preserve
@@ -29,6 +30,13 @@ the unchanged scorer and failed regression cases. Do not write a new backend
 or train another model before this resolves what the output must represent.
 Any later compact/causal model requires a separately registered comparison;
 BeatNet+ licensing remains unresolved.
+
+That [representation audit is now complete](EVENT-REPRESENTATION-RESULT-20261022.md).
+Exact raw events retain only 10/401 joint-correct windows versus OLS 187/401;
+both original regressions remain, and exact segment compression exceeds the
+wire cap on 98/100 sources. The current next step is separately registered
+multi-beat timing reconstruction on these fixed 20-ms-quantized anchors.
+The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results
 
