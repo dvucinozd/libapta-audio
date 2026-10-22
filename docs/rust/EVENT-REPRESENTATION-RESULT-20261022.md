@@ -30,6 +30,12 @@ This is the result of the approved audit, not an implementation of that next
 timing estimator. Standalone P4 inference, calibrated confidence, independent
 transfer, fresh acceptance and native product adoption remain separate gates.
 
+Follow-up: the subsequently registered
+[four-neighbor multi-beat reconstruction](MULTIBEAT-TIMING-RESULT-20261022.md)
+is now measured and rejected, with twelve OLS joint breaks despite a net gain
+of one window. Its parameters remain frozen; the next proposed evidence axis
+is PCM timing around fixed musical anchors. This audit's scores are unchanged.
+
 ## Frozen inputs and execution
 
 Reuse the completed neural comparison's saved Beat This! final0 event outputs,

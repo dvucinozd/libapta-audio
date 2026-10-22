@@ -34,8 +34,10 @@ BeatNet+ licensing remains unresolved.
 That [representation audit is now complete](EVENT-REPRESENTATION-RESULT-20261022.md).
 Exact raw events retain only 10/401 joint-correct windows versus OLS 187/401;
 both original regressions remain, and exact segment compression exceeds the
-wire cap on 98/100 sources. The current next step is separately registered
-multi-beat timing reconstruction on these fixed 20-ms-quantized anchors.
+wire cap on 98/100 sources. The subsequent separately registered
+[multi-beat reconstruction](MULTIBEAT-TIMING-RESULT-20261022.md) is also rejected:
+188 versus 187 joint-correct windows, but twelve OLS joint breaks. The current
+next proposal is independently bounded PCM timing evidence around fixed anchors.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results

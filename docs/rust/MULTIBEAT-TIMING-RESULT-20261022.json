@@ -1,0 +1,193 @@
+{
+  "all_saved_records_independently_replayed_and_rescored": true,
+  "bound_files": 1213,
+  "confidence_calibrated": false,
+  "counts": {
+    "accepted_segments": 445,
+    "full_source_support": 35,
+    "sources": 100
+  },
+  "development_gate_passed": false,
+  "formal_acceptance": false,
+  "format": "libapta-multibeat-timing-development-1",
+  "gates": {
+    "complete_sequence_improves": true,
+    "joint_improves": true,
+    "zero_coarse_joint_breaks": false,
+    "zero_old_correct_downbeat_breaks": false,
+    "zero_old_correct_meter_breaks": false,
+    "zero_ols_joint_breaks": false,
+    "zero_ols_period_breaks": false,
+    "zero_ols_phase_breaks": false
+  },
+  "independent_transfer": false,
+  "inference_run": false,
+  "kinds": {
+    "accepted": 445,
+    "anchor_outside_window": 21,
+    "event_count_changed": 8,
+    "inconsistent_events": 85,
+    "insufficient_events": 38,
+    "unsupported_tempo": 3
+  },
+  "ols_break_causes": {
+    "downbeat": {
+      "event_count_changed": 2,
+      "inconsistent_events": 10
+    },
+    "joint": {
+      "accepted": 6,
+      "event_count_changed": 3,
+      "inconsistent_events": 3
+    },
+    "meter": {
+      "event_count_changed": 3,
+      "inconsistent_events": 13
+    },
+    "period": {
+      "accepted": 7,
+      "event_count_changed": 3,
+      "inconsistent_events": 3
+    },
+    "phase": {
+      "accepted": 2,
+      "anchor_outside_window": 2,
+      "event_count_changed": 4,
+      "inconsistent_events": 20
+    }
+  },
+  "original_joint_regressions": [
+    {
+      "candidate_joint_correct": false,
+      "candidate_kind": "accepted",
+      "candidate_period_correct": false,
+      "candidate_phase_correct": false
+    },
+    {
+      "candidate_joint_correct": false,
+      "candidate_kind": "accepted",
+      "candidate_period_correct": false,
+      "candidate_phase_correct": true
+    }
+  ],
+  "paired": {
+    "coarse": {
+      "downbeat_breaks": 19,
+      "joint_breaks": 4,
+      "joint_fixes": 145,
+      "meter_breaks": 197,
+      "period_breaks": 9,
+      "period_fixes": 95,
+      "phase_breaks": 8,
+      "phase_fixes": 196
+    },
+    "ols": {
+      "downbeat_breaks": 12,
+      "joint_breaks": 12,
+      "joint_fixes": 13,
+      "meter_breaks": 16,
+      "period_breaks": 13,
+      "period_fixes": 14,
+      "phase_breaks": 28,
+      "phase_fixes": 3
+    }
+  },
+  "physical_p4": false,
+  "production_promotion": false,
+  "protocol_sha256": "66ab4e3a5fa05dd5b4eb120609ecfa79d900e8876a131005e147275e02b67bd9",
+  "report_sha256": "904d268c4ad897d4c4db8163605ad2ea58670ed733d847617cc28807b77f126c",
+  "resources": {
+    "rss_peak_kib": 26520,
+    "run_wall_seconds": 27.407711726999878
+  },
+  "source_archive_sha256": "8a5dc2c0ddf5704788178bb9ea2fa4499813fe3c2ac62585e91df41e99337913",
+  "source_revision": "7503e837af2457eaa8730d1ddac2e6377db28fc6",
+  "tests": {
+    "new_python": 18,
+    "unchanged_python": 26
+  },
+  "totals": {
+    "candidate": {
+      "confirmed_joint_windows": 188,
+      "confirmed_period_windows": 193,
+      "confirmed_phase_windows": 275,
+      "downbeat_correct": 155,
+      "downbeat_scored": 186,
+      "emitted": 445,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 179,
+      "meter_emitted": 193,
+      "period_correct_beats": 3510,
+      "phase_correct_beats": 4221,
+      "predicted_beats": 4698,
+      "reference_complete_windows": 401,
+      "scored_beats": 4619,
+      "windows": 600
+    },
+    "common_candidate": {
+      "complete_sequence_windows": 179,
+      "joint_windows": 188,
+      "one_to_one_phase_windows": 254,
+      "period_correct_points": 3510,
+      "period_windows": 193,
+      "phase_correct_points": 4221,
+      "phase_windows": 275,
+      "points": 4698,
+      "reference_complete_windows": 401,
+      "scored_points": 4619,
+      "unknown_successor_points": 0,
+      "windows": 600
+    },
+    "common_ols": {
+      "complete_sequence_windows": 178,
+      "joint_windows": 187,
+      "one_to_one_phase_windows": 274,
+      "period_correct_points": 3704,
+      "period_windows": 192,
+      "phase_correct_points": 4839,
+      "phase_windows": 300,
+      "points": 5771,
+      "reference_complete_windows": 401,
+      "scored_points": 5680,
+      "unknown_successor_points": 0,
+      "windows": 600
+    },
+    "old_coarse": {
+      "confirmed_joint_windows": 47,
+      "confirmed_period_windows": 107,
+      "confirmed_phase_windows": 87,
+      "downbeat_correct": 31,
+      "downbeat_scored": 472,
+      "emitted": 598,
+      "high_confidence_grid_error": 13,
+      "high_confidence_grid_unknown_context": 13,
+      "meter_correct": 333,
+      "meter_emitted": 491,
+      "period_correct_beats": 2118,
+      "phase_correct_beats": 2229,
+      "predicted_beats": 6135,
+      "reference_complete_windows": 401,
+      "scored_beats": 5999,
+      "windows": 600
+    },
+    "old_ols": {
+      "confirmed_joint_windows": 187,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3704,
+      "phase_correct_beats": 4839,
+      "predicted_beats": 5771,
+      "reference_complete_windows": 401,
+      "scored_beats": 5680,
+      "windows": 600
+    }
+  }
+}

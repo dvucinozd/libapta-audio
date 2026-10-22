@@ -90,9 +90,17 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: register bounded multi-beat timing reconstruction using the saved
-Beat This! anchors, explicit segmentation/gap/ambiguity rules and the unchanged
-OLS control.** The completed
+**Current next: register an anchor-guided PCM timing evidence experiment with
+fixed learned anchors, explicit ambiguity/abstention behavior and independent
+transfer gates.** The
+[four-neighbor reconstruction result](MULTIBEAT-TIMING-RESULT-20261022.md)
+rejects that exact candidate: joint correctness is 188/401 versus OLS 187/401,
+with thirteen fixes but twelve breaks, plus 28 phase, sixteen meter and twelve
+downbeat breaks. Six joint breaks occur despite an accepted candidate fit;
+both original regressions remain. Do not widen the fit, relax guards, add a
+fallback or port this rejected candidate. The next evidence axis must examine
+finer PCM timing around musical anchors, with algorithm/caps/veto fixed before
+implementation or inference; no such refiner exists yet. The completed
 [representation audit](EVENT-REPRESENTATION-RESULT-20261022.md) preserves all
 6095 events in explicit wire payloads, but raw adjacent intervals yield only
 10/401 joint-correct windows versus OLS 187/401; both original regressions remain.
@@ -103,15 +111,17 @@ beats before another model/backend port or consumer contract change is justified
 Freeze the next algorithm and caps before scoring; keep the scorer, validators,
 wire limits and failed baselines unchanged.
 The [multi-beat experiment](MULTIBEAT-TIMING-EXPERIMENT.md) and
-[fixed protocol](MULTIBEAT-TIMING-PROTOCOL.json) now register one host-only
+[fixed protocol](MULTIBEAT-TIMING-PROTOCOL.json) registered one host-only
 four-neighbor OLS extension, nine-event minimum support, fixed residual/count
 guards and zero-break vetoes before implementation or candidate scoring.
-Commit/push registration, then synthetic preflight, before the single saved-event
-development run. A failure ends this candidate without a same-cohort rescue.
+Registration and preflight were committed/pushed separately before the single
+saved-event run at clean `7503e837af2457eaa8730d1ddac2e6377db28fc6`.
+Its failed veto ends this candidate without a same-cohort rescue.
 The [host implementation and preflight](MULTIBEAT-TIMING-PREFLIGHT.md) now pass
 18 new synthetic tests and 26 unchanged reference/representation/scorer tests.
-Next: commit/push implementation, then score the one fixed cohort from a clean
-exact revision. No corpus result or native candidate graph is claimed yet.
+All 100 source records / 600 windows now independently reproduce; the frozen
+scorer and prior inputs are byte-identical. Native candidate graph construction
+is stopped by the musical veto. Physical P4 and production gates remain open.
 Beat This! passes all four event/continuity screening gates on the
 100-source benchmark; original BeatNet fails all four, rejecting its port.
 Beat This! projection improves joint correctness 47 -> 187/401 complete-context
