@@ -36,8 +36,9 @@ Follow-up: the separately registered
 with 186 versus 187 joint-correct windows and three OLS joint breaks. Transfer
 was not started. The subsequent
 [failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is complete;
-bounded reference-path segmented-grid feasibility is the current next unit.
-This multi-beat result and its parameters remain unchanged.
+its selected [segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md)
+is now measured, with 47/100 full family paths validating within the cap.
+The next diagnostic is free-phase reachability. This result remains unchanged.
 
 ## Fixed run and musical metrics
 

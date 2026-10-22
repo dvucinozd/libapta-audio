@@ -90,8 +90,17 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: register bounded reference-path segmented-grid feasibility
-against the existing native/wire limits before implementing another detector.**
+**Current next: register free-phase reference timing reachability inside the
+same bounds, before changing native limits or implementing another detector.**
+The [segmented reference result](SEGMENTED-REFERENCE-RESULT-20261022.md) finds
+47/100 complete anchored-family paths; all 47 pass native/wire/builder checks
+with 1..7 segments and 135 same-grid meter records. On that same 47-source
+subset, constant reference OLS has 161/188 joint windows and segmented actual
+successors have 188/188. This is label-based representation feasibility.
+The other 53 have no path in the fixed anchored family, rather than an observed
+eight-segment rejection. Preserve that family; separately test free-phase
+continuous reachability to distinguish constraint incompatibility from fixed
+anchor restrictions before any new native fit, model or capacity change.
 The [measured timing audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) confirms
 106/401 windows with no constant period within every reference beat's +/-1%
 interval; complete reference-event OLS passes 227/401, versus model 187/401.
@@ -102,15 +111,17 @@ segments solely as representation witnesses, preserving source ordinals,
 same-grid meter, coverage and the eight-segment cap; then separately address
 learned variable timing and family ambiguity. No new detector is promoted.
 The [segmented-reference feasibility](SEGMENTED-REFERENCE-FEASIBILITY.md) and
-[protocol](SEGMENTED-REFERENCE-FEASIBILITY-PROTOCOL.json) now register a fixed
+[protocol](SEGMENTED-REFERENCE-FEASIBILITY-PROTOCOL.json) registered a fixed
 anchored-piece family, exact Q32 constraint intervals, minimum-count partition,
 junction checks and actual native/wire/meter validation before implementation.
-Commit/push registration and synthetic preflight before witness measurements.
+Registration and preflight were committed/pushed before the single witness run
+at clean `42c9827d91c1f86203193d4d8b3acef0327a359d`; all 100 plans/minima,
+47 Rust graphs and 600 scores independently reproduce.
 The [host implementation and preflight](SEGMENTED-REFERENCE-PREFLIGHT.md) now
 passes 76 Python tests, 33 focused Rust tests per debug/release profile, strict
 format/Clippy/no-default checks and three generated Python/Rust/MTRD fixtures.
-Next: commit/push implementation, then run the fixed saved-label witness audit
-from a clean exact revision. No segmented detector accuracy is claimed.
+Commit/push this completed result before the free-phase registration. No
+segmented detector accuracy, product-owner or physical qualification is claimed.
 The [read-only audit](TIMING-FAILURE-AUDIT.md) and
 [fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) registered reference-period
 compatibility, fixed tempo ratios, raw-event correspondence and exclusive triage

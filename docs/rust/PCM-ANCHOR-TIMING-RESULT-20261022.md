@@ -38,8 +38,10 @@ Follow-up: the separately registered
 [failure-attribution audit is now complete](TIMING-FAILURE-AUDIT-RESULT-20261022.md).
 It finds 106 reference-period-incompatible windows and a reference-only OLS
 witness with 227/401 joint passes, while identifying overlapping event/family
-errors. The next unit is bounded reference-path segmented-grid feasibility;
-this PCM candidate and its measured rejection remain unchanged.
+errors. Its selected
+[segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md) is now
+measured: 47/100 full anchored-family paths validate within the cap. Free-phase
+reachability is the next proposed diagnostic; this PCM rejection is unchanged.
 
 ## Fixed execution
 

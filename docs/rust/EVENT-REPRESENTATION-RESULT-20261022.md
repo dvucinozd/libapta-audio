@@ -38,8 +38,9 @@ was PCM timing around fixed musical anchors. That
 [PCM experiment is now rejected](PCM-ANCHOR-TIMING-RESULT-20261022.md), with
 three OLS joint breaks. The subsequent
 [failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is complete;
-the current next step is bounded reference-path segmented-grid feasibility.
-This audit's scores are unchanged.
+its [segmented reference follow-up](SEGMENTED-REFERENCE-RESULT-20261022.md) is
+also measured: 47/100 full family paths validate within the cap. Free-phase
+reachability is the next proposed diagnostic; this audit's scores are unchanged.
 
 ## Frozen inputs and execution
 

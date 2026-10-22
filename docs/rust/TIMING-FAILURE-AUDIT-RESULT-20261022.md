@@ -35,6 +35,13 @@ output. This precedes a future learned-evidence decoder with variable timing
 and explicit family ambiguity. No segmented estimator, reference-to-production
 path or new model is implemented by this audit.
 
+Follow-up: the separately registered
+[segmented reference study is now complete](SEGMENTED-REFERENCE-RESULT-20261022.md).
+It validates 47/100 complete anchored-family paths with at most seven segments
+and all 135 supported meter bindings. The other 53 have no family path before
+capacity is applied. The next proposed diagnostic is free-phase timing
+reachability under the same bounds; this audit's findings remain unchanged.
+
 ## Fixed evidence and baseline
 
 All 100 previously selected GTZAN sources / 600 original S6 windows remain.

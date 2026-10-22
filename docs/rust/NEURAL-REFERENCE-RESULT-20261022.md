@@ -39,9 +39,11 @@ wire cap on 98/100 sources. The subsequent separately registered
 188 versus 187 joint-correct windows, but twelve OLS joint breaks. The subsequent
 [PCM-anchor refinement](PCM-ANCHOR-TIMING-RESULT-20261022.md) is also rejected:
 186 versus 187 joint-correct windows, with three OLS joint breaks. The current
-next unit after the completed
-[failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is bounded
-reference-path segmented-grid feasibility under existing native/wire limits.
+follow-up after the completed
+[failure-attribution audit](TIMING-FAILURE-AUDIT-RESULT-20261022.md) is the measured
+[segmented reference study](SEGMENTED-REFERENCE-RESULT-20261022.md): 47/100 full
+anchored-family paths validate within existing native/wire limits. The current
+next diagnostic is free-phase reference timing reachability under the same bounds.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results
