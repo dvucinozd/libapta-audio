@@ -6,6 +6,8 @@
 #![forbid(unsafe_code)]
 
 pub mod analysis;
+#[cfg(feature = "experimental-s6-attack-grid")]
+pub mod attack_grid;
 pub mod band;
 pub mod builder;
 pub mod container;
@@ -19,9 +21,15 @@ pub mod global_history;
 pub mod grid;
 #[cfg(feature = "experimental-s6-history")]
 pub mod history_grid;
+#[cfg(feature = "experimental-s6-history")]
+pub mod history_meter;
+#[cfg(feature = "experimental-s6-history")]
+pub mod history_publication;
 pub mod key_analysis;
 pub mod meta;
 pub mod native_validation;
+#[cfg(feature = "experimental-s6-onset-grid")]
+pub mod onset_grid;
 pub mod owned_result;
 pub mod publication;
 pub mod pull;

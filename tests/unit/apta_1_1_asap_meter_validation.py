@@ -63,6 +63,52 @@ class SelectionTests(unittest.TestCase):
             module.select_candidates(annotations, per_meter_per_split=1)
 
 
+class DevelopmentPreparationTests(unittest.TestCase):
+    def prepare_fixture(self, root, development_only):
+        annotations = {
+            f"Composer/{meter}-{score}/performance.mid": annotation(meter)
+            for meter in ("3/4", "4/4") for score in range(40)
+        }
+        expected = module.select_candidates(annotations)
+        def render(notes, start, target):
+            target.write_bytes((str(notes) + str(start)).encode())
+        with mock.patch.object(module, "_require_source_revision"), mock.patch.object(module, "load_annotations", return_value=annotations), mock.patch.object(module, "read_midi_notes", side_effect=lambda path: [str(path)]) as opened, mock.patch.object(module, "render_excerpt", side_effect=render):
+            result = module.prepare(root / "source", root / "prepared", development_only=development_only)
+        return expected, result, opened
+
+    def test_development_only_never_opens_holdout_performances(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            expected, result, opened = self.prepare_fixture(root, True)
+            allowed = {root / "source" / candidate.source_path for candidate in expected["development"]}
+            self.assertEqual({call.args[0] for call in opened.call_args_list}, allowed)
+            self.assertEqual(opened.call_count, 40)
+            self.assertEqual(result["prepared_splits"], ["development"])
+            self.assertFalse(result["holdout_performances_opened"])
+            self.assertEqual(result["track_count"], 40)
+            _manifest, labels = module.load_prepared(root / "prepared")
+            self.assertTrue(all(row["split"] == "development" for row in labels))
+
+    def test_legacy_default_keeps_both_splits_and_manifest_shape(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            _expected, result, opened = self.prepare_fixture(Path(temporary), False)
+            self.assertEqual(opened.call_count, 80)
+            self.assertEqual(result["track_count"], 80)
+            self.assertNotIn("prepared_splits", result)
+
+    def test_development_only_refuses_existing_nonempty_output(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "prepared").mkdir()
+            sentinel = root / "prepared" / "existing.json"
+            sentinel.write_bytes(b"retained")
+            with mock.patch.object(module, "_require_source_revision") as source:
+                with self.assertRaises(module.ValidationError):
+                    module.prepare(root / "source", root / "prepared", development_only=True)
+                source.assert_not_called()
+            self.assertEqual(sentinel.read_bytes(), b"retained")
+
+
 class ScoringTests(unittest.TestCase):
     def labels(self) -> list[dict[str, object]]:
         return [

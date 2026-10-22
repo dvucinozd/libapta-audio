@@ -196,10 +196,23 @@ fn entire_session_path_allocates_nothing() {
         .collect();
     #[cfg(feature = "experimental-s6-history")]
     let mut history_records = [libapta::global_history::WindowRecord::default(); 2];
+    #[cfg(feature = "experimental-s6-history")]
+    let mut attack_bins = vec![
+        libapta::history_meter::AttackBin::default();
+        libapta::history_meter::ATTACK_BIN_CAPACITY
+    ];
+    #[cfg(feature = "experimental-s6-history")]
+    let mut meter_records = [libapta::history_meter::MeterRecord::default(); 2];
     let before = ALLOCATIONS.load(Ordering::Relaxed);
+    #[cfg(feature = "experimental-s6-history")]
+    let mut history_meter =
+        libapta::history_meter::MeterHistory::new(8000, &mut attack_bins, &mut meter_records)
+            .unwrap();
     #[cfg(feature = "experimental-s6-history")]
     let mut history =
         libapta::global_history::WindowHistory::new(8000, &mut history_records).unwrap();
+    #[cfg(feature = "experimental-s6-history")]
+    history.enable_meter(&mut history_meter).unwrap();
     let mut session = Session::new(
         SessionConfig {
             sample_rate: 8000,
@@ -287,6 +300,141 @@ fn entire_session_path_allocates_nothing() {
             Err(libapta::Error::Conflict)
         ));
         assert_eq!(bindings, retained);
+        let mut published_segments = [template; 2];
+        let mut published_ranges = [libapta::FrameRange::default(); 2];
+        let mut published_meters = [retained[0]; 2];
+        let mut published_records = [libapta::history_meter::MeterRecord::default(); 2];
+        let publication = libapta::history_publication::publish_into(
+            libapta::history_publication::PublicationKey {
+                source: libapta::SourceInfo {
+                    sample_rate: 8000,
+                    channel_count: 1,
+                    channel_layout: 1,
+                    total_frames: Some(320000),
+                    fingerprint_kind: 1,
+                    fingerprint: [9; 32],
+                },
+                lineage: [1, 2],
+                generation: 1,
+                grid_revision: 1,
+                state: libapta::ResultSessionState::Completed,
+            },
+            view,
+            session.global_history_meter().unwrap(),
+            libapta::history_publication::PublicationStorage {
+                segments: &mut published_segments,
+                ranges: &mut published_ranges,
+                meters: &mut published_meters,
+                meter_records: &mut published_records,
+            },
+        )
+        .unwrap();
+        assert_eq!(publication.meter_records().len(), 2);
+        assert!(publication.meter_finished());
+        assert_eq!(publication.grid().unsupported_windows, 1);
+    }
+    assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    attack_selection_allocates_nothing(false);
+    #[cfg(feature = "experimental-s6-onset-grid")]
+    attack_selection_allocates_nothing(true);
+}
+
+#[cfg(feature = "experimental-s6-attack-grid")]
+fn attack_selection_allocates_nothing(novelty: bool) {
+    use libapta::{
+        analysis::OnsetBin,
+        attack_grid::SelectionRecord,
+        global_analysis::{BIN_CAPACITY, MAX_BEATS},
+        global_history::{WindowHistory, WindowRecord, WINDOW_FRAMES},
+        history_meter::{AttackBin, MeterHistory, MeterRecord, ATTACK_BIN_CAPACITY},
+    };
+    let mut bins = vec![OnsetBin::default(); BIN_CAPACITY];
+    let mut flux = vec![0.0; BIN_CAPACITY];
+    let mut beats = vec![libapta::Beat::default(); MAX_BEATS];
+    let mut attack_bins = vec![AttackBin::default(); ATTACK_BIN_CAPACITY];
+    let mut records = [WindowRecord::default(); 2];
+    let mut meter_records = [MeterRecord::default(); 2];
+    let mut selections = [SelectionRecord::default(); 2];
+    let mut queue = [NormalizedSample::default(); 4096];
+    let mut columns = [WaveformColumn::default(); 9];
+    let before = ALLOCATIONS.load(Ordering::Relaxed);
+    let mut meter = MeterHistory::new(8000, &mut attack_bins, &mut meter_records).unwrap();
+    let mut history = WindowHistory::new(8000, &mut records).unwrap();
+    history.enable_meter(&mut meter).unwrap();
+    if novelty {
+        #[cfg(feature = "experimental-s6-onset-grid")]
+        history.enable_onset_grid(&mut selections).unwrap();
+    } else {
+        history.enable_attack_grid(&mut selections).unwrap();
+    }
+    let total = WINDOW_FRAMES + 17;
+    let mut session = libapta::session::Session::new(
+        SessionConfig {
+            sample_rate: 8000,
+            channel_count: 1,
+            total_frames: total,
+            frames_per_column: 32768,
+        },
+        &mut queue,
+        &mut columns,
+    )
+    .unwrap();
+    session
+        .enable_global_grid(false, &mut bins, &mut flux, &mut beats)
+        .unwrap();
+    session.enable_global_history(&mut history).unwrap();
+    let mut block = [0.0f32; 4096];
+    let token = CancellationToken::new();
+    let mut frame = 0;
+    while frame < total {
+        let count = (total - frame).min(block.len() as u64) as usize;
+        for (n, sample) in block[..count].iter_mut().enumerate() {
+            let position = frame + n as u64;
+            let origin = if novelty { 768 } else { 0 };
+            let active = position >= origin && (position - origin) % 4096 < 64;
+            *sample = if active {
+                if position / 4096 % 4 == 1 {
+                    0.875
+                } else {
+                    0.25
+                }
+            } else if novelty {
+                0.05
+            } else {
+                0.0
+            };
+            if novelty {
+                *sample *= [0.0, 0.5, 1.0, 0.5, 0.0, -0.5, -1.0, -0.5][position as usize % 8];
+            }
+        }
+        frame += session.push_interleaved(&block[..count]).unwrap() as u64;
+        session.process(WorkBudget::default(), &token).unwrap();
+    }
+    session.finish_input().unwrap();
+    session.process(WorkBudget::default(), &token).unwrap();
+    let template = session.global_grid().unwrap().segments[0];
+    let history = session.global_history().unwrap();
+    let mut grid_segments = [template; 2];
+    let mut ranges = [libapta::FrameRange::default(); 2];
+    let converted =
+        libapta::history_grid::convert_into(history, 2, &mut grid_segments, &mut ranges).unwrap();
+    assert_eq!(converted.segments[0].nominal_tempo_millibpm, 117188);
+    assert_eq!(converted.unsupported_windows, 1);
+    assert_eq!(session.global_history_selection().unwrap().len(), 2);
+    #[cfg(feature = "experimental-s6-onset-trace")]
+    if novelty {
+        let trace = &session.global_history_selection().unwrap()[0].onsets;
+        assert!(trace.complete);
+        assert_eq!(trace.count, 64);
+        assert_eq!(trace.events[0].frame, 768);
+    }
+    #[cfg(feature = "experimental-s6-temporal-trace")]
+    if novelty {
+        let dense = &session.global_history_selection().unwrap()[0].dense;
+        assert!(dense.complete);
+        assert_eq!(dense.count, 1024);
+        assert_eq!(dense.startup_bins, 3);
     }
     assert_eq!(ALLOCATIONS.load(Ordering::Relaxed), before);
 }

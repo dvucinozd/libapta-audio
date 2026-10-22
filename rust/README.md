@@ -16,6 +16,43 @@ diagnostics through `Session::enable_global_history`. See the
 accepted, rejected and unavailable source windows across ring turnovers; it does
 not publish a full-track playback grid, alter cache formats or activate a provider.
 
+It also supports optional fine PCM attack evidence through
+`WindowHistory::enable_meter` and independent provisional copies through
+`history_publication::publish_into`. Read the
+[lattice experiment and rejected musical probe](../docs/rust/S6-LATTICE-METER-EXPERIMENT.md)
+before interpreting these diagnostics as musical results.
+
+The separate `experimental-s6-attack-grid` feature additionally permits
+`WindowHistory::enable_attack_grid` after meter-evidence attachment. Both build
+and per-history opt-in are required. It derives timing from sparse observed PCM
+attacks and retains baseline/candidate selection records; it never falls back
+to the coarse grid when evidence is missing. See the
+[selection experiment](../docs/rust/S6-ATTACK-GRID-EXPERIMENT.md) for its narrow
+assumptions, synthetic results and open musical/hardware qualification.
+The subsequent [recorded coverage probe](../docs/rust/S6-RECORDED-DEVELOPMENT.md)
+rejects its promotion to general recorded-music use. Host-only provisional JSON
+diagnostics are available with runtime feature `history-diagnostics` and binary
+`apta-history-diagnostic`; they do not produce an authoritative playback grid.
+
+The separate `experimental-s6-onset-grid` feature adds
+`WindowHistory::enable_onset_grid` for energy novelty over continuous PCM.
+It retains the same conservative event-to-grid vetoes and leaves existing
+coarse/sparse modes available. Runtime diagnostics additionally require
+`onset-diagnostics` and explicit `--mode=novelty`. See the
+[pre-registered onset experiment](../docs/rust/S6-NOVELTY-EXPERIMENT.md)
+for its resource cost, evidence and promotion boundary.
+Recorded windows now contain separate events but still produce 0/360 supported
+grids under unchanged timing vetoes, so this candidate remains unpromoted.
+
+`experimental-s6-onset-trace` adds caller-owned peak frame/strength capture to
+selection records (2056 extra host bytes per window). Runtime feature
+`onset-trace-diagnostics` and explicit `--mode=novelty-trace` export it for a
+separate host oracle. Non-trace output bytes and layouts remain unchanged.
+See the [event-lattice experiment](../docs/rust/S6-EVENT-LATTICE-EXPERIMENT.md);
+its label-based window diagnostics do not publish a native playback grid.
+The first frozen oracle is rejected: 16/360 joint-correct windows versus 95/360
+coarse windows, with six fixes and 85 breaks. It is not a native selector.
+
 ## Build and verify
 
 From the repository root:
@@ -672,3 +709,20 @@ product owner and tests catalog-to-Deck/waveform delivery and acknowledged
 retirement on host. See [the migration record](../docs/rust/MIGRATION.md#pajoniiir-actual-product-owner-lifecycle--2026-10-05).
 This introduces no portable-library or dependency-pin change and does not activate
 the production provider.
+
+The explicit core feature `experimental-s6-temporal-trace` captures the complete
+existing energy-novelty array before peak filtering. It implies the earlier
+onset trace feature; `SelectionRecord::dense` retains up to 1024 native f32
+values, count, startup-background length and completeness. Source coordinates
+come from the containing record range. Dense completeness is independent of
+sparse peak-list overflow. Missing source context is never a valid zero trace.
+Caller-owned `DenseTrace` is 4104 host bytes; a record with both traces is 6224
+bytes. Builds without trace features keep their 64-byte selection record.
+
+Build runtime `temporal-trace-diagnostics` for `apta-history-diagnostic` mode
+`--mode=novelty-dense`. It retains the ordinary novelty JSON and adds only a
+`dense_trace` field per window, with exact f32 values exported through f64 JSON
+numbers, full source-bin coordinates and the final partial-bin size. The mode
+is rejected when its feature is absent. This captures evidence for
+[the registered temporal experiment](../docs/rust/S6-TEMPORAL-MODEL-EXPERIMENT.md);
+it does not implement its selector, publish a FINAL grid or activate a consumer.

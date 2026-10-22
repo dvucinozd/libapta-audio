@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import sys
+import tarfile
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parents[2] / "tools"
@@ -81,6 +84,89 @@ class SelectionTests(unittest.TestCase):
             {row.audio_path.stem for row in first["development"]}
             & {row.audio_path.stem for row in first["holdout"]}
         )
+
+
+class DevelopmentPreparationTests(unittest.TestCase):
+    def test_prepare_only_development_and_preserve_legacy_default(self):
+        for development_only in (True, False):
+            with self.subTest(development_only=development_only), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                rows = [SelectionTests().row(index, meter) for meter in (3, 4) for index in range(40)]
+                rows = [module.Candidate(root / "source/BallroomData" / row.audio_path,
+                         root / "source" / row.annotation_path, row.genre, row.meter_numerator,
+                         row.beat_times, row.beat_positions) for row in rows]
+                for row in rows:
+                    row.audio_path.parent.mkdir(parents=True, exist_ok=True)
+                    row.audio_path.write_bytes(b"fixture source")
+                    row.annotation_path.write_bytes(b"fixture annotation")
+                selected = module.select_candidates(rows)
+                def convert(_ffmpeg, source, target):
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(source.name.encode())
+                with mock.patch.object(module, "require_archive"), mock.patch.object(module, "ffmpeg_version", return_value="fixture"), \
+                     mock.patch.object(module, "inventory", return_value=rows) as inventory, \
+                     mock.patch.object(module, "materialize_development") as materialize, \
+                     mock.patch.object(module, "canonicalize", side_effect=convert) as canonicalize:
+                    manifest = module.prepare(root / "source", Path(__file__), Path(__file__), Path(__file__),
+                                              root / "prepared", development_only=development_only)
+                self.assertEqual(manifest["track_count"], 40 if development_only else 80)
+                expected = selected["development"] if development_only else selected["development"] + selected["holdout"]
+                self.assertEqual([call.args[1] for call in canonicalize.call_args_list], [row.audio_path for row in expected])
+                if development_only:
+                    inventory.assert_called_once_with(root / "source", Path(__file__))
+                    materialize.assert_called_once_with(root / "source", Path(__file__), selected["development"])
+                    self.assertEqual(manifest["prepared_splits"], ["development"])
+                    self.assertIs(manifest["holdout_performances_opened"], False)
+                    self.assertEqual(set(manifest["split_counts"]), {"development"})
+                else:
+                    inventory.assert_called_once_with(root / "source")
+                    materialize.assert_not_called()
+                    self.assertNotIn("prepared_splits", manifest)
+                    self.assertEqual(set(manifest["split_counts"]), {"development", "holdout"})
+
+    def test_refuses_nonempty_output_before_source_reads(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "existing").write_text("keep")
+            with mock.patch.object(module, "require_archive") as read:
+                with self.assertRaises(module.common.ValidationError):
+                    module.prepare(root, root, root, root, root, development_only=True)
+                read.assert_not_called()
+
+    def test_materializes_selected_member_only_and_refuses_reuse(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            archive = root / "fixture.tar.gz"
+            with tarfile.open(archive, "w:gz") as target:
+                for name in ("development", "holdout"):
+                    entry = tarfile.TarInfo(f"./BallroomData/Waltz/{name}.wav")
+                    payload = name.encode()
+                    entry.size = len(payload)
+                    target.addfile(entry, io.BytesIO(payload))
+            row = module.Candidate(root / "source/BallroomData/Waltz/development.wav", root / "unused", "Waltz", 3, (), ())
+            original = tarfile.TarFile.extractfile
+            opened = []
+            def extract(archive, member):
+                opened.append(member.name)
+                return original(archive, member)
+            with mock.patch.object(tarfile.TarFile, "extractfile", extract):
+                module.materialize_development(root / "source", archive, [row])
+            self.assertEqual(opened, ["./BallroomData/Waltz/development.wav"])
+            self.assertEqual(list((root / "source").rglob("*.wav")), [row.audio_path])
+            self.assertEqual(row.audio_path.read_bytes(), b"development")
+            with self.assertRaises(module.common.ValidationError):
+                module.materialize_development(root / "source", archive, [row])
+
+    def test_archive_rejects_unsafe_duplicate_and_link_members(self):
+        for name, link in (("../outside.wav", False), ("/absolute.wav", False), ("BallroomData/Waltz/link.wav", True)):
+            member = tarfile.TarInfo(name)
+            if link:
+                member.type = tarfile.SYMTYPE
+            with self.assertRaises(module.common.ValidationError):
+                module._audio_member_name(member)
+        member = tarfile.TarInfo("BallroomData/Waltz/duplicate.wav")
+        with self.assertRaises(module.common.ValidationError):
+            module._audio_members([member, member])
 
 
 if __name__ == "__main__":

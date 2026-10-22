@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 
 
@@ -108,12 +109,43 @@ def main():
     run(["cargo", "check", "--workspace", "--lib", "--all-features", "--no-default-features", "--locked"], env=env)
     for profile in ([], ["--release"]):
         run(["cargo", "test", "-p", "libapta", *profile, "--features", "experimental-s6-history",
-             "--locked", "--lib", "--test", "global_history", "--test", "history_grid", "--test", "meter_binding", "--test", "session_allocation"], env=env)
+             "--locked", "--lib", "--test", "global_history", "--test", "history_grid", "--test", "meter_binding", "--test", "history_lattice", "--test", "session_allocation"], env=env)
+        run(["cargo", "test", "-p", "libapta", *profile, "--features", "experimental-s6-attack-grid",
+             "--locked", "--lib", "--test", "history_lattice", "--test", "session_allocation"], env=env)
+        run(["cargo", "test", "-p", "libapta", *profile, "--features", "experimental-s6-onset-grid",
+             "--locked", "--lib", "--test", "history_lattice", "--test", "session_allocation"], env=env)
+        run(["cargo", "test", "-p", "libapta", *profile, "--features", "experimental-s6-onset-trace",
+             "--locked", "--lib", "--test", "history_lattice", "--test", "session_allocation"], env=env)
+        run(["cargo", "test", "-p", "libapta", *profile, "--features", "experimental-s6-temporal-trace",
+             "--locked", "--lib", "--test", "dense_trace", "--test", "history_lattice", "--test", "session_allocation"], env=env)
     run(["cargo", "test", "-p", "libapta", "--release", "--features", "experimental-s6-history",
          "--locked", "--test", "global_history", "--", "--ignored"], env=env)
     run(["cargo", "build", "--example", "wav_to_apta", "--locked"], env=env)
     executable = build / "cargo-target/debug/examples/wav_to_apta"
     run(["cargo", "build", "-p", "libapta-runtime", "--bin", "apta-native", "--locked"], env=env)
+    run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "history-diagnostics",
+         "--bin", "apta-history-diagnostic", "--locked"], env=env)
+    history_env = env.copy()
+    history_env["APTA_HISTORY_DIAGNOSTIC"] = str(build / "cargo-target/release/apta-history-diagnostic")
+    run([sys.executable, "tests/unit/apta_1_1_native_history_development.py", "-v"], env=history_env)
+    run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "onset-diagnostics",
+         "--bin", "apta-history-diagnostic", "--locked"], env=env)
+    history_env["APTA_ONSET_DIAGNOSTIC"] = history_env["APTA_HISTORY_DIAGNOSTIC"]
+    run([sys.executable, "tests/unit/apta_1_1_native_history_development.py", "-v"], env=history_env)
+    run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "onset-trace-diagnostics",
+         "--bin", "apta-history-diagnostic", "--locked"], env=env)
+    history_env["APTA_ONSET_TRACE_DIAGNOSTIC"] = history_env["APTA_HISTORY_DIAGNOSTIC"]
+    run([sys.executable, "tests/unit/apta_1_1_native_history_development.py", "-v"], env=history_env)
+    run([sys.executable, "tests/unit/apta_1_1_native_event_lattice.py", "-v"], env=history_env)
+    history_env["APTA_DENSE_UNSUPPORTED_DIAGNOSTIC"] = history_env["APTA_HISTORY_DIAGNOSTIC"]
+    run([sys.executable, "tests/unit/apta_1_1_native_dense_development.py", "-v"], env=history_env)
+    run([sys.executable, "tests/unit/apta_1_1_native_temporal_model.py", "-v"], env=history_env)
+    run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "temporal-trace-diagnostics",
+         "--bin", "apta-history-diagnostic", "--locked"], env=env)
+    history_env.pop("APTA_DENSE_UNSUPPORTED_DIAGNOSTIC")
+    history_env["APTA_TEMPORAL_TRACE_DIAGNOSTIC"] = history_env["APTA_HISTORY_DIAGNOSTIC"]
+    run([sys.executable, "tests/unit/apta_1_1_native_history_development.py", "-v"], env=history_env)
+    run([sys.executable, "tests/unit/apta_1_1_native_dense_development.py", "-v"], env=history_env)
     native_cli = build / "cargo-target/debug/apta-native"
     run([native_cli, "version"], env=env)
     # Original synthetic PCM, no private audio or external corpus involved.

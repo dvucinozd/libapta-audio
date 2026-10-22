@@ -341,7 +341,9 @@ def _frames_in_window(times: Iterable[float], start: float) -> list[int]:
     ]
 
 
-def prepare(root: Path, output: Path) -> dict[str, Any]:
+def prepare(root: Path, output: Path, *, development_only: bool = False) -> dict[str, Any]:
+    if development_only and output.exists() and any(output.iterdir()):
+        raise ValidationError("development-only preparation requires a new or empty output")
     _require_source_revision(root)
     annotations = load_annotations(root)
     selected = select_candidates(annotations)
@@ -352,9 +354,10 @@ def prepare(root: Path, output: Path) -> dict[str, Any]:
     labels: list[dict[str, Any]] = []
     private_sources: list[dict[str, Any]] = []
     seen_tracks: set[str] = set()
-    total = sum(len(rows) for rows in selected.values())
+    splits = ("development",) if development_only else ("development", "holdout")
+    total = sum(len(selected[split]) for split in splits)
     completed = 0
-    for split in ("development", "holdout"):
+    for split in splits:
         for candidate in selected[split]:
             completed += 1
             print(f"render {completed}/{total} {split} {candidate.meter}", flush=True)
@@ -416,7 +419,7 @@ def prepare(root: Path, output: Path) -> dict[str, Any]:
             )
             for meter in SUPPORTED_METERS
         }
-        for split in ("development", "holdout")
+        for split in splits
     }
     manifest = {
         "format": FORMAT,
@@ -437,6 +440,9 @@ def prepare(root: Path, output: Path) -> dict[str, Any]:
         "track_ids": [row["track"] for row in labels],
         "labels_sha256": sha256_file(labels_path),
     }
+    if development_only:
+        manifest["prepared_splits"] = ["development"]
+        manifest["holdout_performances_opened"] = False
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -686,6 +692,7 @@ def main() -> int:
     prepare_parser = subparsers.add_parser("prepare")
     prepare_parser.add_argument("--asap-root", type=Path, required=True)
     prepare_parser.add_argument("--output", type=Path, required=True)
+    prepare_parser.add_argument("--development-only", action="store_true")
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--prepared", type=Path, required=True)
     run_parser.add_argument("--analyzer", type=Path, required=True)
@@ -701,7 +708,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.command == "prepare":
-            value = prepare(args.asap_root, args.output)
+            value = prepare(args.asap_root, args.output, development_only=args.development_only)
         elif args.command == "run":
             value = run_analysis(
                 args.prepared,

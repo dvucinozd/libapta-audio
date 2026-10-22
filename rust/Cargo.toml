@@ -10,6 +10,10 @@ publish = false
 
 [features]
 experimental-s6-history = []
+experimental-s6-attack-grid = ["experimental-s6-history"]
+experimental-s6-onset-grid = ["experimental-s6-attack-grid"]
+experimental-s6-onset-trace = ["experimental-s6-onset-grid"]
+experimental-s6-temporal-trace = ["experimental-s6-onset-trace"]
 
 [dependencies]
 libm = { version = "0.2", default-features = false }

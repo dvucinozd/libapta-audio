@@ -6,6 +6,82 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Agreed next step — resume after 2026-10-22
 
+Continuation update: the [PCM lattice experiment](S6-LATTICE-METER-EXPERIMENT.md)
+now implements same-grid attack measurement and independent provisional
+publication. Its three generated end-to-end musical probes fail; the path is
+diagnostic-only. Upstream S6 tempo-family/phase selection is the next algorithm
+target. The completion criterion below remains open; passing coordinate tests
+or tempo-only consumer conversion cannot close it.
+
+Subsequent selection work adds the separately opt-in
+[sparse-attack candidate](S6-ATTACK-GRID-EXPERIMENT.md). It fixes the three
+generated reproductions and improves the frozen synthetic challenge from 2/36
+to 36/36 complete grid/meter/downbeat cases, with no broken baseline-correct
+case. This is diagnostic transfer only; independent recorded music, stable
+publication/product adoption and P4 acceptance remain open.
+
+The [recorded development probe](S6-RECORDED-DEVELOPMENT.md)
+rejects sparse-attack promotion: 0/360 supported windows on 60 already-spent
+recorded prefixes, versus original support in 360/360. Correctness is unmeasured
+without verified frame labels. Next work is a new onset-evidence front end for
+continuous music, not threshold tuning of this rejected sparse candidate.
+
+The separately opt-in
+[energy-novelty front end](S6-NOVELTY-EXPERIMENT.md) finds enough separate events
+in all 360 recorded windows. All still fail the unchanged irregular-lattice
+vetoes, so supported grids remain 0/360 and promotion is rejected. The 120 old
+coarse/sparse outputs remain byte-identical. Resume with independently labeled
+open-development beat coordinates and a pre-registered selector that separates
+musical beats from other onsets; do not tune the spent recordings' thresholds.
+
+The [event-lattice oracle](S6-EVENT-LATTICE-EXPERIMENT.md)
+recovers the exact previously verified 60-row labels and measures actual window
+correctness. Coarse S6 has 95/360 correct period/all-beat-phase windows; the new
+host-only event selector has 16/360, with six fixes and 85 breaks. Its frozen
+gate rejects native implementation. All 180 retained native files are identical.
+Resume with external labeled development inputs and explicit phase/tempo-family
+ambiguity; the recovered DJ set remains spent and formal holdouts remain closed.
+
+Latest continuation: the [ASAP native baseline](ASAP-NATIVE-DEVELOPMENT.md)
+prepares only the previously defined 40 development performances, with no
+holdout MIDI/audio fetched or rendered. The unchanged native binary completes
+all 240 source windows. Coarse S6 confirms joint period/all-beat phase in 1/160
+reference-complete windows; sparse/novelty emit no grid. This rendered-piano
+stress result is a development baseline, not a new selector or acceptance.
+This is followed by the recorded-music baseline below.
+
+Latest continuation: the [Ballroom native baseline](BALLROOM-NATIVE-DEVELOPMENT.md)
+prepares exactly forty frozen development recordings, with no holdout WAV
+extracted, decoded or analyzed (the compressed archive contains holdout bytes).
+The identical native binary completes 240 windows, 165 with complete reference
+context. Coarse S6 confirms joint period/all-beat phase in 9/165; sparse/novelty
+emit no grid. Four high-confidence grids are wrong and six have unknown context.
+Both external baselines now exist. The next experiment is registered below;
+keep formal holdouts and fresh acceptance inputs closed.
+
+Latest checkpoint: the [dense temporal protocol](S6-TEMPORAL-MODEL-EXPERIMENT.md)
+and [machine-readable parameters](S6-TEMPORAL-MODEL-PROTOCOL.json) now freeze a
+label-blind renewal-path probe using all native energy-novelty bins, variable
+inter-beat intervals and competing phases. Historical failed continuity models
+and the event oracle remain closed. No detector code or scoring changes at
+registration. Stage A is completed below; no candidate corpus scoring yet.
+
+Latest continuation: [dense native capture](S6-DENSE-TRACE-CHECKPOINT.md) adds
+the separate `experimental-s6-temporal-trace` / `temporal-trace-diagnostics`
+options. All 240 ordinary files across eighty development sources remain
+byte-identical; 480 complete dense windows retain 449991 bins, including weak
+values absent from peak traces. No selector or scorer changes. Verification
+passes 289 default / 328 all-feature tests per debug/release and 66 focused
+sanitizer tests. Stage B is implemented below; no candidate corpus scoring yet.
+
+Latest checkpoint: the [stage B host model](S6-TEMPORAL-HOST-CHECKPOINT.md)
+implements the frozen two-path/128-tempo recurrence, exact source-coordinate
+fitting and competing-phase comparison. Thirteen new synthetic tests and 23
+existing protocol/scorer checks pass; native processing/binary hashes remain
+unchanged. A full-size weak-pulse fixture exposes a double-tempo boundary alias,
+retained without changing the model. **Next: stage C, exact ordered ASAP
+development first; stop before Ballroom on any failed gate.**
+
 Continue on `rust-rewrite` with one end-to-end development slice:
 **actual PCM -> grid and meter on the same lattice -> immutable published result
 -> native Pajoniiir consumer validation**. Keep the new path behind
@@ -38,7 +114,7 @@ with substantial uncertainty in meter/downbeat alignment; production readiness
 is expected to take weeks and depends on those separate gates. This is an
 estimate, not a committed schedule or evidence of completion.
 
-### Saved checkpoint
+### Saved checkpoint at commit `1876eb3`
 
 The frozen-S6 correction, opt-in append-only history, provisional conversion and
 mechanical meter binding below are implemented. The real local-meter fixture
@@ -47,7 +123,8 @@ these additions. Latest host verification: 289 default / 308 all-feature tests
 in each debug/release profile, 46 focused sanitizer tests, Clippy, no-default
 compilation and zero-allocation instrumentation. The full C/oracle/CLI matrix
 belongs to the earlier conversion checkpoint and was not rerun for binding.
-See [the experiment record](S6-HISTORY-EXPERIMENT.md) for evidence locations and
+See [the history record](S6-HISTORY-EXPERIMENT.md) and
+[the current PCM experiment](S6-LATTICE-METER-EXPERIMENT.md) for evidence locations and
 limits. Resume with item 1 above; do not repeat completed API-only slices.
 
 ## Authority and baseline
@@ -2944,3 +3021,316 @@ in each debug/release profile), 46 sanitizer tests, no-default compilation,
 Clippy and allocation checks. The real local-meter fixture still rejects; the
 coordinate-binding tests do not claim a downbeat accuracy improvement. Previous
 full C/oracle/CLI evidence is retained separately, not reported as newly run.
+
+## PCM evidence and independent provisional publication — 2026-10-22
+
+Continued from `1876eb34a9169299ece0d908927850e6f6e79670`. The same opt-in
+feature now captures fine PCM attack evidence and selects meter phase on each
+history window's exact Q32 lattice. Independent caller-owned publication retains
+source/lineage, generation/revision, lifecycle, grid support, bound meter and
+unsupported/capacity verdicts. Neither default DSP nor the existing local meter
+is changed. See [the pre-registered experiment and results](S6-LATTICE-METER-EXPERIMENT.md).
+
+Software verification passes 289 default / 315 all-feature tests per debug and
+release profile, 53 focused AddressSanitizer/leak tests, Clippy, no-default checks
+and allocation instrumentation. The three-case generated end-to-end musical
+probe is rejected, despite exact coordinate binding; seven declared-lattice
+accent phases work in isolation. A passing regression reproduces that rejection
+and is not musical acceptance. Formal corpus and physical P4 gates were not run.
+
+The current native validator refuses the unpromoted graph; a direct probe of the
+unchanged Pajoniiir subset converter yields no playback grid and retains its
+generation/source guards. Product-owner adoption and the original end-to-end
+completion criterion remain open. Next: pre-register and evaluate an upstream
+S6 tempo-family/lattice-selection candidate; preserve these failed fixtures and
+default behavior. Exact source inventories and logs are external under
+`D:/AI/LIBAPTA/outputs/rust-s6-lattice-20261022/`.
+
+## Sparse-attack timing selection — 2026-10-22
+
+The [separate selection experiment](S6-ATTACK-GRID-EXPERIMENT.md) confirms the
+coarse refinement and half-tempo ranking failures with read-only baseline traces,
+then adds a new opt-in lattice based on sparse observed PCM attacks. It requires
+both `experimental-s6-attack-grid` and `WindowHistory::enable_attack_grid`.
+Caller-owned selection records retain the original/candidate verdict per source
+window. Unavailable, irregular or insufficient evidence produces unsupported
+timing without fallback; all accepted timing and meter remain provisional.
+
+The three generated reproductions are fixed. A manifest-frozen 36-case synthetic
+challenge improves from 2/36 to 36/36 complete grid/meter/downbeat cases, with 34
+fixes, no breaks and no abstentions on that sparse set. Existing baseline failures
+remain unchanged tests. This is not recorded-music transfer or formal acceptance.
+
+Exact-source verification passes 289 default, 315 history-only and 320 all-feature
+workspace tests in each debug/release profile, 58 sanitizer tests, Clippy,
+no-default checks and zero-allocation instrumentation. Source inventories, trace,
+manifest, per-case results and logs are external under
+`D:/AI/LIBAPTA/outputs/rust-s6-selection-20261022/`. C, default resident S6,
+GGRD/REVN, consumer pin/provider, version and production defaults are unchanged.
+
+Next: prepare a reproducible opt-in recorded-development evaluation using the
+canonical preparation/privacy tools and native diagnostics. Freeze the candidate
+and input partition before scoring, measure abstentions and false beat-level
+lattices as well as emitted accuracy, and keep formal holdouts closed. Dense or
+syncopated audio is outside the candidate's demonstrated sparse assumptions;
+do not promote it based on these now-open synthetic fixtures. Trusted native
+publication/owner adoption and physical P4 acceptance still follow that evidence.
+
+## Recorded development coverage — 2026-10-22
+
+The [frozen recorded probe](S6-RECORDED-DEVELOPMENT.md) adds an explicit host-only
+diagnostic binary and hash-bound paired runner. It uses the already-spent 60
+canonical DJ sources, analyzing exactly the first 30 seconds of each, with no
+DSP or threshold change. The sparse candidate produces no supported timing in
+360/360 windows (`InsufficientEvents`); the original history supports 360/360
+and estimates meter in 288. These are coverage counts, not labeled correctness.
+All drains, capacities, full-file hashes and retained baseline verdicts match.
+
+The predeclared zero-coverage veto rejects sparse-candidate promotion to recorded
+music. Formal holdouts/fresh inputs are untouched; no verified machine-readable
+frame labels were used, so accuracy and false-lattice rates remain unmeasured.
+The new JSON is provisional diagnostics, not .apta/FINAL/native publication.
+
+Tooling verification passes 289 default / 320 all-feature tests in debug and
+release, five native development-protocol tests with release and sanitized
+binaries, Clippy and no-default checks. Exact source/binary/manifests and the
+aggregate coverage report are retained outside Git under
+`D:/AI/LIBAPTA/outputs/rust-s6-recorded-20261022/`. No production provider, version,
+release, commit or push changes accompany this local checkpoint.
+
+Resume with a newly pre-registered onset/novelty front end for continuous audio,
+using labeled open-development data to distinguish rhythmic beat level from
+acoustic event spacing. Do not tune the rejected sparse detector against these
+results. Keep canonical tooling, explicit unsupported ranges and all existing
+source/generation/publication safeguards; product adoption and P4 remain later
+independent gates.
+
+## Continuous-PCM novelty front end — 2026-10-22
+
+The [pre-registered energy-novelty experiment](S6-NOVELTY-EXPERIMENT.md) adds
+`experimental-s6-onset-grid`, `WindowHistory::enable_onset_grid` and runtime
+`onset-diagnostics` / `--mode=novelty`. It compares block energy with preceding
+background and selects local peaks; the existing event-to-grid vetoes and meter
+scoring remain unchanged. Core processing still uses caller-owned storage and
+allocates nothing. Host ring storage grows by 16 KiB only with the new feature;
+the named novelty/event scratch arrays total 5 KiB before frame overhead.
+
+All 60 frozen spent-development prefixes complete in all three modes. Novelty
+changes the failure reason from insufficient events to irregular lattice in
+all 360 windows, but produces no supported grid or meter. The zero-coverage veto
+therefore rejects promotion. All 120 old coarse/sparse files remain identical
+to the prior recorded run. Musical fixes/breaks and accuracy remain unmeasured
+without verified frame labels; formal holdouts and fresh inputs were unopened.
+
+Verification passes 289 default / 322 all-feature tests per debug/release,
+45 focused sparse-only tests and six release diagnostic-protocol tests, Clippy,
+rustfmt, no-default-library compilation and actual Session allocation counting.
+AddressSanitizer/leak detection also passes 60 focused core/history tests and
+six instrumented-native protocol tests; Python/prebuilt std are uninstrumented.
+Exact source, baseline/candidate inventories, reports and logs are retained
+outside Git under `D:/AI/LIBAPTA/outputs/rust-s6-novelty-20261022/`. This is a local
+development checkpoint; production provider, native consumer pin and release
+state remain unchanged.
+
+Next: obtain independently verified open-development beat/downbeat coordinates
+and pre-register beat-lattice selection over multiple acoustic events, including
+tempo-family ambiguity and the onset representation's timing resolution. Keep
+the frozen rejected front ends as baselines. Product adoption and physical P4
+qualification still follow successful independent musical evidence.
+
+## Label recovery and event-lattice oracle — 2026-10-22
+
+The [new registered oracle](S6-EVENT-LATTICE-EXPERIMENT.md) recovers the ignored
+verified labels whose exact SHA-256 matches the recorded official export.
+All 60 IDs match the canonical audio. Labels now permit development correctness
+measurements; the dataset remains spent, with no new acceptance claim.
+
+An explicit `experimental-s6-onset-trace` / runtime `onset-trace-diagnostics`
+feature captures actual native peak frames/strengths into caller-owned records.
+Trace capture adds 2056 host bytes per selected window and allocates nothing in
+core processing. Non-trace selection records remain 64 bytes. The development
+runner verifies complete trace identity, unchanged stripped evidence and all
+180 byte-identical retained native outputs. A separate host oracle proposes
+grids from event pairs and scores weighted beat support, without using labels
+to choose periods/phases or synthesizing meter on a different grid.
+
+On the same 360 windows, coarse S6 has 235 correct periods, 106 all-beat phases
+and 95 joint-correct grids. The oracle emits 65 proposals: 21 correct periods,
+16 joint-correct grids and 49 wrong emitted lattices. Its six fixes come with
+85 breaks (10 wrong emissions, 75 abstentions), so the predeclared gate rejects
+native selector implementation. Thresholds and formulas remain frozen.
+The oracle's zero high-confidence errors reflect its confidence cap of 49;
+they do not establish musical accuracy. These constant-reference window metrics
+cannot replace dense beat annotations or the frozen FINAL acceptance workflow.
+
+Verification passes 289 default / 323 all-feature workspace tests per debug and
+release, 45 sparse-only / 47 non-trace-onset focused tests, seven trace-protocol
+tests and five host-oracle tests. Clippy, rustfmt, no-default-library checks and
+the actual Session allocation counter pass. Source, hash-bound reports and logs
+include 61 focused sanitizer tests and seven protocol / five host-oracle tests
+with instrumented native execution; Python/prebuilt std remain uninstrumented.
+All artifacts are retained outside Git under
+`D:/AI/LIBAPTA/outputs/rust-s6-beat-events-20261022/`.
+The full C/oracle, actual consumer and physical P4 matrices are not rerun here.
+Production provider, consumer pin, version and release state remain unchanged.
+
+Next: bring the previously defined ASAP/Ballroom development partitions and
+source-aligned beat/downbeat references into the native diagnostic path, without
+opening their holdouts. Keep this failed oracle and recovered DJ labels as
+regressions, then pre-register any genuinely new phase/tempo-family model before
+coding/scoring it. No native selection or product adoption follows this result.
+
+## External ASAP native development baseline — 2026-10-22
+
+The [development-only preparation and dense-reference probe](ASAP-NATIVE-DEVELOPMENT.md)
+restores the pinned ASAP v1.2 source/seed and renders only its 40 development
+performances, 20 per reference meter. A filtered Git cache contains zero formal
+holdout MIDI blobs. The canonical renderer and its legacy default remain intact;
+explicit `--development-only` refuses nonempty output and declares its split.
+
+The unchanged native binary runs all 240 windows in coarse/sparse/novelty modes.
+Annotations fully cover 160 windows; 80 boundary windows retain explicit unknown
+context. Coarse emits 238 grids, with 1/160 confirmed periods, 5/160 all-beat
+phases and 1/160 joint-correct windows. Of 2290 scorable predicted beats, 632
+match phase and 149 match local annotated period. Meter is correct in 106/183
+emissions, downbeat in 21/169 scorable records. Sparse and novelty remain empty.
+This is rendered piano stress/development evidence, not a FINAL DJ gate or a
+rerun of the rejected event oracle.
+
+Nine preparer and four dense-reference tests pass, including legacy behavior,
+no holdout access, source offsets, variable tempo, half-tempo aliases and unknown
+boundaries. All Rust processing/runtime/test-driver source and binary hashes
+remain identical to the prior verified checkpoint; its full Rust/sanitizer
+evidence was not rerun for these Python-only changes. Exact tooling/source/data
+hashes and reports are external under
+`D:/AI/LIBAPTA/outputs/rust-asap-development-20261022/`.
+
+Continued by the recorded-music baseline below; all formal holdouts and fresh
+DJ inputs remain closed.
+
+## External Ballroom native development baseline — 2026-10-22
+
+The [Ballroom development-only baseline](BALLROOM-NATIVE-DEVELOPMENT.md) restores
+the frozen 20 triple / 20 common-time cohort using published archive checksums.
+Only its forty development WAVs are extracted/decoded; source metadata and tar
+headers preserve the canonical partition. The compressed archive includes
+holdout payloads, but no holdout audio is materialized or analyzed. Canonical
+conversion preserves original duration; the unchanged native binary analyzes
+at most thirty seconds per recording and completes all 240 windows.
+
+Reference annotations cover 165 complete windows and leave 75 explicitly
+incomplete. Coarse S6 emits 239 grids, with 27/165 confirmed periods, 31/165
+all-beat phases and 9/165 joint-correct windows (0/84 triple, 9/81 common time).
+Phase matches 836/2398 scored beats, local period 708/2398. Meter is correct in
+107/196 emissions and downbeat in 21/188 scorable records. Of thirteen
+high-confidence grids, three are confirmed correct, four wrong and six unknown
+from boundary context. Sparse and novelty still emit no grid. This does not
+qualify musical accuracy, confidence safety, FINAL output or hardware.
+
+Eight Ballroom, six dense-reference and nine ASAP preparation tests pass.
+The identical score function and native source/binary hashes preserve the
+previous checkpoint; no native/C/product/P4 test matrix is rerun. Exact
+snapshot, provenance, data identities and reports are retained externally at
+`D:/AI/LIBAPTA/outputs/rust-ballroom-development-20261022/` and the documented
+private WSL path. All changes remain local on `rust-rewrite`.
+
+Continued by the registered experiment below. Production provider, consumer
+pin, stable version and release remain unchanged; actual native consumer
+adoption and physical P4 measurements are still open.
+
+## Dense temporal model registered — 2026-10-22
+
+The [registered model](S6-TEMPORAL-MODEL-EXPERIMENT.md) adds information lost by
+peak-only capture: all native causal energy-novelty values, including weak and
+subthreshold events. It proposes a bounded two-path/128-tempo-state recurrence
+with variable beat intervals over up to three consecutive S6 windows. It does
+not rerank the old C top three, revive their rejected continuity models or
+collapse same-period phase alternatives before measuring ambiguity. The
+[JSON protocol](S6-TEMPORAL-MODEL-PROTOCOL.json) binds exact baselines, parameters,
+resource caps, scoring rules and zero-break external-development gates.
+
+Implementation is deliberately staged: (A) bounded native dense capture and
+unchanged-output checks, (B) a label-blind host model with synthetic tests, (C)
+one ordered ASAP then Ballroom development attempt, stopping at the first
+failure. Only both passing corpora allow an exact opt-in native selector.
+Meter/downbeat must later be measured on its actual grid; they are not inferred
+from a timing oracle. Holdouts and the fresh DJ pool stay outside this probe.
+
+This checkpoint registers and verifies the experiment only. All processing,
+runtime, test-driver and scorer code and the retained analyzer binary remain
+identical to the Ballroom checkpoint; no candidate accuracy, native test rerun,
+resource improvement or physical P4 evidence is claimed. Exact source snapshot,
+registration/source/config hashes and baseline bindings are archived externally
+under `D:/AI/LIBAPTA/outputs/rust-s6-temporal-registration-20261022/` and its
+documented private WSL counterpart.
+
+Continued by the stage A capture checkpoint below. Keep selection, publication,
+provider, consumer pin, release and stable version unchanged until the registered
+gates justify a later step.
+
+## Native dense capture complete — 2026-10-22
+
+The [stage A checkpoint](S6-DENSE-TRACE-CHECKPOINT.md) implements opt-in complete
+native energy-novelty capture before peak filtering, with source coordinates,
+startup context, partial-bin geometry and independent dense completeness.
+Runtime `novelty-dense` adds only the dense field to ordinary novelty JSON and
+exports exact native f32 values. A missing bin invalidates capture; peak-list
+overflow does not erase a complete dense array. The array is caller-owned and
+the actual Session path remains allocation-free. Additional record storage is
+4104 host bytes, below its registered cap; no P4 stack/placement claim follows.
+
+Both exact forty-source development preparations complete 480 windows and
+449991 dense bins. All 240 old ordinary files are byte-identical to their
+retained baselines; all eighty dense-stripped outputs reproduce ordinary
+novelty. Capture retains 109812 positive values <=0.20 without changing DSP.
+No holdout/fresh audio, new conversion, selector, label scoring or FINAL output
+is involved. Earlier timing accuracy and confidence limitations remain intact.
+
+Final exact-source verification passes 289 default / 328 all-feature tests per
+debug/release, 47 non-trace / 48 event-only focused tests, 66 focused native
+AddressSanitizer tests, 23 Python release checks and seventeen protocol/oracle
+checks with instrumented native execution. Rustfmt, Werror Clippy, no-default
+library compilation and allocation checks pass. Python/prebuilt std remain
+uninstrumented; full C/product/P4 matrices are not rerun. Retained source,
+protocol/data/binary hashes, reports and logs are external under
+`D:/AI/LIBAPTA/outputs/rust-s6-temporal-trace-20261022/` and its documented WSL
+counterpart. Changes stay local on `rust-rewrite`, without commit/push.
+
+Continued by the host checkpoint below. Keep the rejected oracle and thresholds
+frozen, formal holdouts/fresh DJ inputs closed, and production defaults, consumer
+pin, version and release unchanged.
+
+## Temporal host model synthetically verified — 2026-10-22
+
+The [stage B checkpoint](S6-TEMPORAL-HOST-CHECKPOINT.md) implements a label-blind
+module over complete native dense observations, with no corpus-analysis CLI.
+It retains the registered two-best paths in every tempo cell, compares complete
+extended sequences for ties, preserves distinct phases, fits source coordinates
+with integer-rational least squares and emits the exact rounded/Q32 grid.
+Shared source budgets enforce the registered numeric/RSS/time caps; resource
+failure is an operational veto, never a fallback. No native selector or meter
+is implemented or adopted by this step.
+
+Thirteen new tests pass, including a separate exhaustive path enumerator and a
+six-window 5625-bin synthetic source with weak pulses and one missing beat.
+The third target matches the independently specified 272-bin lattice, including
+the missing beat's ordinal; first/last targets nevertheless choose approximately
+double tempo. This boundary-alias limitation is documented, not tuned away or
+silently counted as six successful grids. The source uses 20.22 seconds of its
+120-second shared budget and 10080960 bytes peak numeric buffers; the complete
+test process uses 38996 KiB maximum RSS. These are synthetic host measurements.
+
+Twenty-three existing Python protocol/scorer regressions also pass against the
+unchanged native diagnostic binary. All compiled Rust/native processing and
+scorer hashes match stage A; its 289/328 tests and 66 focused sanitizer results
+remain historical evidence, not a rerun for this Python-only model. Exact
+source, model/test/config/native-binary and synthetic result identities are
+external under `D:/AI/LIBAPTA/outputs/rust-s6-temporal-model-20261022/` and its
+documented WSL source snapshot. Changes remain local on `rust-rewrite`.
+
+Next: stage C, freeze candidate and trace identities and run all forty registered
+ASAP development sources with the unchanged dense-reference scorer. Only if all
+frozen gates pass may Ballroom development follow. Any failed corpus stops the
+attempt without parameter rescue; holdouts, the spent DJ set and fresh acceptance
+audio remain outside this experiment. Native same-grid meter/downbeat, consumer
+adoption, physical P4 and FINAL qualification remain later gates.

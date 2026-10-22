@@ -161,7 +161,7 @@ where
     pub(crate) fn push(&mut self, frame: u64, sample: f32) {
         #[cfg(feature = "experimental-s6-history")]
         if let Some(history) = &mut self.history {
-            history.observe(frame);
+            history.observe_sample(frame, sample);
         }
         let index = (frame / BIN_FRAMES) as u32;
         let b = &mut self.bins.as_mut()[index as usize % BIN_CAPACITY];
@@ -431,6 +431,17 @@ where
         eof: Option<u64>,
     ) -> Option<crate::global_history::HistoryView<'_>> {
         self.history.as_ref().map(|h| h.view(eof))
+    }
+    #[cfg(feature = "experimental-s6-history")]
+    pub(crate) fn history_meter_view(
+        &self,
+        eof: Option<u64>,
+    ) -> Option<crate::history_meter::MeterHistoryView<'_>> {
+        self.history.as_ref().and_then(|h| h.meter_view(eof))
+    }
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    pub(crate) fn selection_records(&self) -> Option<&[crate::attack_grid::SelectionRecord]> {
+        self.history.as_ref().and_then(|h| h.selection_records())
     }
     fn add_window(&mut self, first: u64, end: u64, tempo: u32, phase: u32, confidence: u8) {
         let difference = if self.pending_count == 0 {

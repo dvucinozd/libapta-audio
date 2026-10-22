@@ -14,11 +14,13 @@ import argparse
 import hashlib
 import json
 import math
+import shutil
 import subprocess
 import sys
+import tarfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import apta_1_1_asap_meter_validation as common
@@ -97,11 +99,40 @@ def read_beats(path: Path) -> tuple[tuple[float, ...], tuple[int, ...]]:
     return tuple(times), tuple(positions)
 
 
-def inventory(source: Path) -> list[Candidate]:
+def _audio_member_name(member: tarfile.TarInfo) -> str | None:
+    path = PurePosixPath(member.name)
+    if path.is_absolute() or ".." in path.parts or "\\" in member.name:
+        raise common.ValidationError("unsafe audio archive path")
+    if path.suffix.lower() != ".wav":
+        return None
+    if not member.isfile() or len(path.parts) != 3 or path.parts[0] != "BallroomData":
+        raise common.ValidationError("unexpected audio archive member")
+    return path.as_posix()
+
+
+def _audio_members(archive: tarfile.TarFile) -> dict[str, tarfile.TarInfo]:
+    members = {}
+    for member in archive:
+        name = _audio_member_name(member)
+        if name is None:
+            continue
+        if name in members:
+            raise common.ValidationError("duplicate audio archive member")
+        members[name] = member
+    return members
+
+
+def inventory(source: Path, audio_archive: Path | None = None) -> list[Candidate]:
     audio_root = source / "BallroomData"
     annotation_root = source / "BallroomAnnotations-master"
     rows: list[Candidate] = []
-    for audio in sorted(audio_root.glob("*/*.wav")):
+    if audio_archive is None:
+        audio_paths = sorted(audio_root.glob("*/*.wav"))
+    else:
+        # Headers/annotation metadata only; no audio payload is materialized.
+        with tarfile.open(audio_archive, "r:gz") as archive:
+            audio_paths = [source / name for name in sorted(_audio_members(archive))]
+    for audio in audio_paths:
         if audio.parent.name == "nada":
             continue
         annotation = annotation_root / f"{audio.stem}.beats"
@@ -127,6 +158,36 @@ def inventory(source: Path) -> list[Candidate]:
     if len(rows) != 698:
         raise common.ValidationError(f"expected 698 Ballroom tracks, found {len(rows)}")
     return rows
+
+
+def materialize_development(source: Path, audio_archive: Path, rows: list[Candidate]) -> None:
+    audio_root = source / "BallroomData"
+    if audio_root.exists() and any(audio_root.iterdir()):
+        raise common.ValidationError("development-only source audio directory must be empty")
+    wanted = {row.audio_path.relative_to(source).as_posix() for row in rows}
+    if len(wanted) != len(rows):
+        raise common.ValidationError("duplicate selected source path")
+    found, seen = set(), set()
+    with tarfile.open(audio_archive, "r|gz") as archive:
+        for member in archive:
+            name = _audio_member_name(member)
+            if name is None:
+                continue
+            if name in seen:
+                raise common.ValidationError("duplicate audio archive member")
+            seen.add(name)
+            if name not in wanted:
+                continue
+            target = source / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            stream = archive.extractfile(member)
+            if stream is None:
+                raise common.ValidationError("selected audio member unavailable")
+            with stream, target.open("xb") as output:
+                shutil.copyfileobj(stream, output)
+            found.add(name)
+    if found != wanted:
+        raise common.ValidationError("selected source missing from audio archive")
 
 
 def select_candidates(
@@ -203,20 +264,27 @@ def prepare(
     annotation_archive: Path,
     ffmpeg: Path,
     output: Path,
+    *,
+    development_only: bool = False,
 ) -> dict[str, Any]:
+    if development_only and output.exists() and any(output.iterdir()):
+        raise common.ValidationError("development-only output must be empty")
     if not ffmpeg.is_file():
         raise common.ValidationError(f"ffmpeg not found: {ffmpeg}")
     require_archive(audio_archive, AUDIO_ARCHIVE_MD5, "audio")
     require_archive(annotation_archive, ANNOTATION_ARCHIVE_MD5, "annotation")
     converter_version = ffmpeg_version(ffmpeg)
-    selected = select_candidates(inventory(source))
+    selected = select_candidates(inventory(source, audio_archive) if development_only else inventory(source))
+    if development_only:
+        materialize_development(source, audio_archive, selected["development"])
+    splits = ("development",) if development_only else ("development", "holdout")
     output.mkdir(parents=True, exist_ok=True)
     labels: list[dict[str, Any]] = []
     private_sources: list[dict[str, Any]] = []
     seen: set[str] = set()
-    total = sum(len(rows) for rows in selected.values())
+    total = sum(len(selected[split]) for split in splits)
     completed = 0
-    for split in ("development", "holdout"):
+    for split in splits:
         for row in selected[split]:
             completed += 1
             print(f"canonicalize {completed}/{total} {split} {row.genre}", flush=True)
@@ -255,6 +323,11 @@ def prepare(
                     "audio_sha256": audio_hash,
                 }
             )
+            if development_only:
+                private_sources[-1].update(
+                    source_sha256=common.sha256_file(row.audio_path),
+                    annotation_sha256=common.sha256_file(row.annotation_path),
+                )
     rendering = output / "rendering"
     try:
         rendering.rmdir()
@@ -282,7 +355,7 @@ def prepare(
             )
             for meter in ("3/4", "4/4")
         }
-        for split in ("development", "holdout")
+        for split in splits
     }
     manifest = {
         "format": FORMAT,
@@ -300,6 +373,14 @@ def prepare(
         "track_ids": [row["track"] for row in labels],
         "labels_sha256": common.sha256_file(labels_path),
     }
+    if development_only:
+        manifest.update(
+            prepared_splits=["development"],
+            holdout_performances_opened=False,
+            compressed_distribution_contains_holdout=True,
+            audio_archive_sha256=common.sha256_file(audio_archive),
+            annotation_archive_sha256=common.sha256_file(annotation_archive),
+        )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -315,6 +396,7 @@ def main() -> int:
     prepare_parser.add_argument("--annotation-archive", type=Path, required=True)
     prepare_parser.add_argument("--ffmpeg", type=Path, required=True)
     prepare_parser.add_argument("--output", type=Path, required=True)
+    prepare_parser.add_argument("--development-only", action="store_true")
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--prepared", type=Path, required=True)
     run_parser.add_argument("--analyzer", type=Path, required=True)
@@ -336,6 +418,7 @@ def main() -> int:
                 args.annotation_archive,
                 args.ffmpeg,
                 args.output,
+                development_only=args.development_only,
             )
         elif args.command == "run":
             value = common.run_analysis(

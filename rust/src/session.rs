@@ -416,6 +416,16 @@ where
             .then_some(self.accepted);
         self.global.as_ref().and_then(|g| g.history_view(eof))
     }
+    #[cfg(feature = "experimental-s6-history")]
+    pub fn global_history_meter(&self) -> Option<crate::history_meter::MeterHistoryView<'_>> {
+        let eof = matches!(self.state, SessionState::Draining | SessionState::Complete)
+            .then_some(self.accepted);
+        self.global.as_ref().and_then(|g| g.history_meter_view(eof))
+    }
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    pub fn global_history_selection(&self) -> Option<&[crate::attack_grid::SelectionRecord]> {
+        self.global.as_ref().and_then(|g| g.selection_records())
+    }
     /// Accept a pending global proposal into the locked local grid.
     pub fn apply_grid_revision(&mut self, id: u32) -> Result<(), Error> {
         if id == 0 {

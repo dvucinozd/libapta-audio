@@ -149,6 +149,44 @@ mod tests {
         assert!(control < 1024);
         assert!(record <= 64);
     }
+
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    #[test]
+    fn attack_grid_requires_evidence_and_full_trace_capacity_before_attachment() {
+        use crate::{
+            attack_grid::SelectionRecord,
+            history_meter::{AttackBin, MeterHistory, MeterRecord, ATTACK_BIN_CAPACITY},
+        };
+        let mut records = [WindowRecord::default(); 2];
+        let mut premature = [SelectionRecord::default(); 2];
+        let mut bins = vec![AttackBin::default(); ATTACK_BIN_CAPACITY];
+        let mut meter_records = [MeterRecord::default(); 2];
+        let mut short = [SelectionRecord::default(); 1];
+        let mut trace = [SelectionRecord::default(); 3];
+        let mut duplicate = [SelectionRecord::default(); 2];
+        {
+            let mut history = WindowHistory::new(8000, &mut records).unwrap();
+            assert_eq!(
+                history.enable_attack_grid(&mut premature),
+                Err(Error::InvalidState)
+            );
+            let mut meter = MeterHistory::new(8000, &mut bins, &mut meter_records).unwrap();
+            history.enable_meter(&mut meter).unwrap();
+            assert_eq!(
+                history.enable_attack_grid(&mut short),
+                Err(Error::BufferTooSmall)
+            );
+            history.enable_attack_grid(&mut trace).unwrap();
+            assert!(history.selection_records().unwrap().is_empty());
+            assert_eq!(
+                history.enable_attack_grid(&mut duplicate),
+                Err(Error::InvalidState)
+            );
+        }
+        assert_eq!(premature, [SelectionRecord::default(); 2]);
+        assert_eq!(short, [SelectionRecord::default(); 1]);
+        assert_eq!(trace, [SelectionRecord::default(); 3]);
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -192,6 +230,9 @@ pub struct WindowHistory<'a> {
     observed: u64,
     next: u64,
     discontinuous: bool,
+    meter: Option<&'a mut crate::history_meter::MeterHistory<'a>>,
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    selection: Option<&'a mut [crate::attack_grid::SelectionRecord]>,
 }
 
 impl<'a> WindowHistory<'a> {
@@ -211,6 +252,9 @@ impl<'a> WindowHistory<'a> {
             observed: 0,
             next: 0,
             discontinuous: false,
+            meter: None,
+            #[cfg(feature = "experimental-s6-attack-grid")]
+            selection: None,
         })
     }
 
@@ -219,6 +263,72 @@ impl<'a> WindowHistory<'a> {
             self.discontinuous = true;
         }
         self.observed = self.observed.max(frame.saturating_add(1));
+    }
+
+    /// Attach independent fine PCM attack evidence before attaching this history
+    /// to a Session. The default coarse-window estimator remains unchanged.
+    pub fn enable_meter(
+        &mut self,
+        meter: &'a mut crate::history_meter::MeterHistory<'a>,
+    ) -> Result<(), Error> {
+        if self.attached || self.meter.is_some() || meter.attached {
+            return Err(Error::InvalidState);
+        }
+        if self.sample_rate != meter.sample_rate {
+            return Err(Error::InvalidArgument);
+        }
+        meter.attached = true;
+        self.meter = Some(meter);
+        Ok(())
+    }
+
+    pub(crate) fn observe_sample(&mut self, frame: u64, sample: f32) {
+        self.observe(frame);
+        if let Some(meter) = &mut self.meter {
+            meter.observe(frame, sample);
+        }
+    }
+
+    /// Explicit opt-in to sparse PCM attack timing. No fallback to the coarse
+    /// estimator. Selection records retain its original verdict for comparison.
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    pub fn enable_attack_grid(
+        &mut self,
+        records: &'a mut [crate::attack_grid::SelectionRecord],
+    ) -> Result<(), Error> {
+        if self.attached || self.selection.is_some() || self.meter.is_none() {
+            return Err(Error::InvalidState);
+        }
+        if records.len() < self.records.len() {
+            return Err(Error::BufferTooSmall);
+        }
+        self.selection = Some(records);
+        Ok(())
+    }
+
+    #[cfg(feature = "experimental-s6-attack-grid")]
+    pub(crate) fn selection_records(&self) -> Option<&[crate::attack_grid::SelectionRecord]> {
+        self.selection.as_ref().map(|records| &records[..self.used])
+    }
+
+    /// Separate energy-novelty front end, with unchanged conservative event
+    /// spacing checks. Must be chosen once before Session attachment.
+    #[cfg(feature = "experimental-s6-onset-grid")]
+    pub fn enable_onset_grid(
+        &mut self,
+        records: &'a mut [crate::attack_grid::SelectionRecord],
+    ) -> Result<(), Error> {
+        self.enable_attack_grid(records)?;
+        // enable_attack_grid preflight guarantees attached meter and no input.
+        self.meter.as_mut().ok_or(Error::InvalidState)?.novelty = true;
+        Ok(())
+    }
+
+    pub(crate) fn meter_view(
+        &self,
+        eof: Option<u64>,
+    ) -> Option<crate::history_meter::MeterHistoryView<'_>> {
+        self.meter.as_ref().map(|meter| meter.view(eof))
     }
 
     pub(crate) fn pending(&self, eof: Option<u64>) -> bool {
@@ -271,13 +381,36 @@ impl<'a> WindowHistory<'a> {
                 },
             )
         };
-        self.records[self.used] = WindowRecord {
-            range: FrameRange {
-                first_frame: self.next,
-                end_frame: end,
-            },
-            outcome,
+        let range = FrameRange {
+            first_frame: self.next,
+            end_frame: end,
         };
+        #[cfg(feature = "experimental-s6-attack-grid")]
+        let outcome = if let Some(selection) = &mut self.selection {
+            let mut record = crate::attack_grid::SelectionRecord {
+                range,
+                baseline: outcome,
+                ..Default::default()
+            };
+            #[cfg(feature = "experimental-s6-onset-trace")]
+            let selected = self.meter.as_ref().unwrap().select_grid_traced(
+                range,
+                &mut record.onsets,
+                #[cfg(feature = "experimental-s6-temporal-trace")]
+                &mut record.dense,
+            );
+            #[cfg(not(feature = "experimental-s6-onset-trace"))]
+            let selected = self.meter.as_ref().unwrap().select_grid(range);
+            record.outcome = selected;
+            selection[self.used] = record;
+            selected.window_outcome()
+        } else {
+            outcome
+        };
+        self.records[self.used] = WindowRecord { range, outcome };
+        if let Some(meter) = &mut self.meter {
+            meter.capture(self.records[self.used]);
+        }
         self.used += 1;
         self.next = end;
         1

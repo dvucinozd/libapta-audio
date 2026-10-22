@@ -8,6 +8,17 @@ license = "Apache-2.0"
 description = "Safe desktop concurrent result publication for native libapta sessions"
 publish = false
 
+[features]
+history-diagnostics = ["libapta/experimental-s6-attack-grid"]
+onset-diagnostics = ["history-diagnostics", "libapta/experimental-s6-onset-grid"]
+onset-trace-diagnostics = ["onset-diagnostics", "libapta/experimental-s6-onset-trace"]
+temporal-trace-diagnostics = ["onset-trace-diagnostics", "libapta/experimental-s6-temporal-trace"]
+
+[[bin]]
+name = "apta-history-diagnostic"
+path = "src/bin/apta-history-diagnostic.rs"
+required-features = ["history-diagnostics"]
+
 [dependencies]
 libapta = { path = ".." }
 sha2 = "0.10.9"

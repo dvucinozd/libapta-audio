@@ -1,0 +1,84 @@
+{
+  "format": "libapta-s6-temporal-protocol-1",
+  "status": "registered_before_implementation",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "1876eb34a9169299ece0d908927850e6f6e79670",
+  "baseline_dirty_inventory_sha256": "b4ead30f1e3662968af718389b1b785eef9eca288634453566e30e3e5be1d894",
+  "baseline_analyzer_sha256": "a92dd17ec68206306c487a39f53102cf1ceb3be660c7135d322b1d162173eeef",
+  "formal_acceptance": false,
+  "inputs": {
+    "asap": {
+      "tracks": 40,
+      "prepared_manifest_sha256": "fcfc551620cd60d85115d19a515ef4507097c854eb7c8fb7eb69cfbc9b1648cf",
+      "labels_sha256": "d181cf59fbe96442b3f893b66aa9ca56eb5e2c4b609a2c0782a879c0fb67372b",
+      "dense_baseline_report_sha256": "bc1fbbbefbbfae387e5bb418452163c9628d40ece8989a9ba074cd9ad47ffe74",
+      "complete_reference_windows": 160,
+      "coarse_joint_correct": 1
+    },
+    "ballroom": {
+      "tracks": 40,
+      "prepared_manifest_sha256": "488d2a66cc8858220054c779128e097a28b367a47ab793b8ec3f4a39112a4a46",
+      "labels_sha256": "50e0713696685ec27e29bc149c061741c6d97901e67651c12778506c84d9b00d",
+      "dense_baseline_report_sha256": "6449c890580f9702e5da3efebd268b98b668571cee28eb27b8fd446872c60e17",
+      "complete_reference_windows": 165,
+      "coarse_joint_correct": 9
+    }
+  },
+  "evidence": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "sample_width_bytes": 2,
+    "max_prefix_seconds": 30,
+    "bin_frames": 256,
+    "max_window_bins": 1024,
+    "context_windows": 3,
+    "max_context_bins": 3072,
+    "native_values": "unchanged causal energy novelty before peak selection",
+    "background_ms": 80,
+    "new_peak_threshold": null,
+    "holdout_audio_allowed": false,
+    "spent_dj_run_allowed": false
+  },
+  "model": {
+    "tempo_min_bpm": 40,
+    "tempo_max_bpm": 300,
+    "tempo_states": 128,
+    "tempo_grid": "40 * (300 / 40) ** (j / 127), j=0..127",
+    "paths_per_cell": 2,
+    "predecessor_tempo_index_radius": 1,
+    "max_interval_error_bins": 1,
+    "minimum_context_beats": 8,
+    "minimum_target_beats": 4,
+    "fit": "ordinary least squares of source frame against path beat ordinal in target window",
+    "max_fit_residual_beats": 0.1,
+    "confidence": 49,
+    "fallback": false,
+    "strict_positive_score_and_distinct_margin": true,
+    "period_equivalence_fraction": 0.01,
+    "phase_equivalence_beats": 0.1
+  },
+  "resources": {
+    "additional_native_trace_bytes_per_record_max": 4128,
+    "host_numeric_workspace_bytes_max": 16777216,
+    "host_rss_kib_max": 262144,
+    "host_seconds_per_thirty_second_source_max": 120,
+    "future_native_caller_storage_bytes_max": 4194304,
+    "future_native_internal_scratch_bytes_max": 65536,
+    "core_heap_allocations_allowed": 0,
+    "physical_p4_qualified": false
+  },
+  "gates": {
+    "stage_a": "dense native capture and byte-identical retained outputs; no selector scoring",
+    "stage_b": "synthetic model tests before any corpus selector result",
+    "stage_c_corpus_order": ["asap", "ballroom"],
+    "require_positive_period_and_joint_transfer_per_corpus": true,
+    "max_period_breaks_per_corpus": 0,
+    "max_phase_breaks_per_corpus": 0,
+    "max_joint_breaks_per_corpus": 0,
+    "abstention_counts_as_break": true,
+    "max_high_confidence_safety_regressions": 0,
+    "default_native_outputs_must_be_identical": true,
+    "stop_after_first_failed_corpus": true,
+    "native_selector_implementation_requires_both_corpora": true
+  }
+}

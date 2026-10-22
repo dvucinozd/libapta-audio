@@ -32,7 +32,7 @@ pub struct HistoryGrid<'a> {
     pub supported_ranges: &'a [FrameRange],
 }
 
-fn prepare(
+pub(crate) fn prepare(
     sample_rate: u32,
     revision: u32,
     index: usize,
@@ -200,7 +200,7 @@ pub struct BoundMeter<'a> {
     pub segments: &'a [BoundMeterSegment],
 }
 
-fn validate_converted_grid(grid: HistoryGrid<'_>) -> Result<(), Error> {
+pub(crate) fn validate_converted_grid(grid: HistoryGrid<'_>) -> Result<(), Error> {
     if grid.sample_rate == 0
         || grid.sample_rate > 768000
         || grid.revision_id == 0
