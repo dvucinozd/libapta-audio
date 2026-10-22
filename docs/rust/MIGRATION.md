@@ -102,6 +102,12 @@ events lie on a 20 ms lattice; reconstruction must estimate timing over multiple
 beats before another model/backend port or consumer contract change is justified.
 Freeze the next algorithm and caps before scoring; keep the scorer, validators,
 wire limits and failed baselines unchanged.
+The [multi-beat experiment](MULTIBEAT-TIMING-EXPERIMENT.md) and
+[fixed protocol](MULTIBEAT-TIMING-PROTOCOL.json) now register one host-only
+four-neighbor OLS extension, nine-event minimum support, fixed residual/count
+guards and zero-break vetoes before implementation or candidate scoring.
+Commit/push registration, then synthetic preflight, before the single saved-event
+development run. A failure ends this candidate without a same-cohort rescue.
 Beat This! passes all four event/continuity screening gates on the
 100-source benchmark; original BeatNet fails all four, rejecting its port.
 Beat This! projection improves joint correctness 47 -> 187/401 complete-context

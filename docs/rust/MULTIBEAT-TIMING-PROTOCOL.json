@@ -1,0 +1,63 @@
+{
+  "format": "libapta-multibeat-timing-development-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "8733376524fb9ca4c7ea851aa17dd96a1bda7734",
+  "formal_acceptance": false,
+  "hypothesis": "A bounded extension of each S6 fit by four adjacent saved events on either side reduces period variance from 20-ms event quantization, while residual and count checks expose unsupported timing instead of creating or removing beats.",
+  "inputs": {
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_freeze_sha256": "0e0ab33d990e40253d61a6a39758fc30c33510238e02ad58d1467b7fa3d5e3ef",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "beat_this_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "representation_result_sha256": "32ce91758c8754b7475e61d95ac531325d8dce93eefcf49ed5f7c2a7ed1032d9",
+    "model_inference_allowed": false,
+    "new_audio_or_labels_allowed": false,
+    "formal_holdout_access_allowed": false
+  },
+  "algorithm": {
+    "name": "s6-four-neighbor-ols-v1",
+    "window_partition": "unchanged six source-local S6 windows per recording; each accepted window is one constant-period diagnostic segment; no adaptive split or merge",
+    "neighbor_events_per_side": 4,
+    "minimum_support_events": 9,
+    "maximum_source_events": 3072,
+    "maximum_source_frames": 1440000,
+    "maximum_windows": 8,
+    "fit": "exact rational ordinary least squares of source frames against original consecutive event indices over all in-window events plus up to four adjacent events on either side, clipped only at source boundaries",
+    "tempo": "round 48000*60000/fitted_period to nearest millibpm, ties upward; require 40000..300000 inclusive; publish period floor((48000*60000<<32)/tempo)",
+    "anchor": "evaluate the exact fitted line at the first original in-window event ordinal and round to integer source frame, ties upward; keep original global event ordinal; require anchor within the unchanged window",
+    "maximum_residual_frames": 1920,
+    "residual": "require every support event within two original feature hops (1920 frames) of its corresponding published Q32 line, including neighbor support; this is a fixed model-consistency guard, not a reference tolerance",
+    "event_identity": "the Q32 line enumerated from the anchor to the unchanged window end must contain exactly the original in-window event count; retain the one-to-one original global ordinals and reject count changes, never repair or truncate",
+    "boundaries": "require all neighboring accepted window points to remain strictly ordered with consecutive global ordinals; analysis abstention creates unknown support, not a known PCM gap; never bridge it or assert complete-source coverage",
+    "gaps_and_ambiguity": "explicit declared PCM gaps reject affected context before fitting; missing or extra musical events are not declared PCM gaps; residual/support/count/tempo failures abstain without fallback, half/double-tempo search, phase rescue or silent event deletion",
+    "meter": "retain the raw two-complete-equal-bars support rule inside the original window; map that original downbeat ordinal onto this window's published Q32 line and require its whole frame within the same window; never borrow another grid or reference meter",
+    "confidence": "uncalibrated, placeholder zero; never a safety PASS or stable/final result"
+  },
+  "evaluation": {
+    "control": "reproduce all saved OLS tuples and old score_window verdicts and old coarse scores before comparison; old scorer and event-representation diagnostics unchanged",
+    "candidate": "score the same six unchanged window ranges with the frozen constant-grid score_window, plus the unchanged common point/period and one-to-one sequence diagnostics",
+    "paired": "record period/phase/joint fixes and breaks against both OLS and coarse; report both original coarse-to-OLS regressions separately",
+    "meter": "record same-grid meter numerator/denominator and downbeat correctness, support/abstention changes, and individual old-correct-to-wrong or missing transitions",
+    "run_order": "single fixed 100-source cohort in its existing manifest order, all 600 windows retained; evaluate the aggregate veto once after this complete cohort; no subsequent corpus or parameter search after veto failure",
+    "minimum_joint_windows": 188,
+    "minimum_complete_sequence_windows": 179,
+    "maximum_ols_period_breaks": 0,
+    "maximum_ols_phase_breaks": 0,
+    "maximum_ols_joint_breaks": 0,
+    "maximum_coarse_joint_breaks": 0,
+    "maximum_old_correct_meter_breaks": 0,
+    "maximum_old_correct_downbeat_breaks": 0,
+    "identity_or_baseline_failure": "stop immediately; no successful algorithm result",
+    "failure_action": "reject and preserve this exact candidate; no same-cohort threshold, context, fallback or model rescue",
+    "production_promotion_allowed": false
+  },
+  "resources": {
+    "max_host_rss_kib": 262144,
+    "max_run_seconds": 120,
+    "no_core_or_consumer_changes": true,
+    "p4_measured": false
+  }
+}
