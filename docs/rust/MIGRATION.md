@@ -106,6 +106,11 @@ The [segmented-reference feasibility](SEGMENTED-REFERENCE-FEASIBILITY.md) and
 anchored-piece family, exact Q32 constraint intervals, minimum-count partition,
 junction checks and actual native/wire/meter validation before implementation.
 Commit/push registration and synthetic preflight before witness measurements.
+The [host implementation and preflight](SEGMENTED-REFERENCE-PREFLIGHT.md) now
+passes 76 Python tests, 33 focused Rust tests per debug/release profile, strict
+format/Clippy/no-default checks and three generated Python/Rust/MTRD fixtures.
+Next: commit/push implementation, then run the fixed saved-label witness audit
+from a clean exact revision. No segmented detector accuracy is claimed.
 The [read-only audit](TIMING-FAILURE-AUDIT.md) and
 [fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) registered reference-period
 compatibility, fixed tempo ratios, raw-event correspondence and exclusive triage
