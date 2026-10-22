@@ -1,0 +1,91 @@
+{
+  "format": "libapta-neural-reference-protocol-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "546085909853cd4eef1d4e6c358244c6886ebd5c",
+  "formal_acceptance": false,
+  "hypothesis": "Learned beat/downbeat activations can distinguish musical pulses better than the exhausted handcrafted onset selectors; separately measure loss when projecting events to constant S6 grids.",
+  "models": {
+    "beatnet": {
+      "repository": "https://github.com/mjhydri/BeatNet",
+      "revision": "81cedd4beeb7235262db80969a0c9ce9a48a0ed4",
+      "weights": "src/BeatNet/models/model_1_weights.pt",
+      "weights_sha256": "619091bc317ca3e83b45591d46f6de3d5a41588bcb39fe9fe7be30cffa6aca84",
+      "mode": "online",
+      "decoder": "official PF defaults, no plots",
+      "sample_rate": 22050,
+      "feature_hop": 441,
+      "feature_window": 1411,
+      "tempo_range_bpm": [55, 215],
+      "beats_per_bar": [2, 3, 4],
+      "rng_seed": 20261022,
+      "license": "upstream CC BY 4.0; retain attribution and madmom source notice"
+    },
+    "beat_this": {
+      "repository": "https://github.com/CPJKU/beat_this",
+      "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+      "weights": "final0.ckpt",
+      "weights_sha256": "bind downloaded bytes in immutable external acquisition manifest before inference",
+      "decoder": "official minimal postprocessor, dbn=False",
+      "sample_rate": 22050,
+      "license": "MIT code and published weights",
+      "causality": "offline reference; future context allowed, not a P4 streaming candidate"
+    }
+  },
+  "data": {
+    "corpus": "GTZAN, public benchmark development only",
+    "audio_sha256": "b28cc067ff6199bd826f5d1a6931458586d64acae7f44b2e882b7a97af057531",
+    "audio_mirror": "https://huggingface.co/datasets/marsyas/gtzan/resolve/main/data/genres.tar.gz",
+    "index_url": "https://zenodo.org/records/13993311/files/gtzan_genre_index_1.0.json?download=1",
+    "index_md5": "533ca050855f22acf2feb283d9957fe3",
+    "annotation_revision": "c3c47fd37d3074d9f8119f18bbf460f909609f22",
+    "selection": "Before annotation values or inference: verify archive/index; exclude known corrupt jazz.00054; collapse identical source-audio MD5s to lexicographically first ID; per genre order remaining IDs by SHA256('libapta-neural-reference-20261022:' + ID), take ten; no replacement after reading annotations or predictions.",
+    "expected_tracks": 100,
+    "genres": 10,
+    "tracks_per_genre": 10,
+    "canonical_audio": "reuse tools/apta_1_1_prepare_corpus.py; 48000 Hz stereo PCM16, complete original excerpt, analysis limited to first thirty seconds",
+    "comparison_input": "both neural models receive identical mono source samples resampled from canonical PCM with soxr HQ to 22050 Hz",
+    "labels": "official Beat This annotations v1.0 GTZAN beat/downbeat coordinates, rounded to canonical source frames with half-up rounding",
+    "dataset_exclusion": "both selected checkpoints declare GTZAN excluded from training",
+    "cross_dataset_identity": "dataset exclusion is not proof of composition/recording disjointness; unresolved reuse prevents an independent-transfer promotion claim",
+    "holdout_access_allowed": false,
+    "fresh_acceptance_access_allowed": false,
+    "audio_redistribution_allowed_by_this_protocol": false
+  },
+  "metrics": {
+    "event_metrics": "mir_eval beat F-measure and CMLt on beat/downbeat event sequences separately",
+    "event_tolerance_seconds": 0.07,
+    "trim_before_seconds": 5,
+    "aggregation": "macro mean of all 100 tracks; no genre or failure exclusion; also report each genre and complete/unresolved reference contexts",
+    "empty_prediction": "zero event score; never dropped",
+    "grid_score": "unchanged tools/apta_1_1_native_annotated_development.py:score_window, 1% local period and 0.10-beat phase; every source window included",
+    "projection": "OLS consecutive predicted beat ordinals within each native S6 window; period converted to nearest millibpm, first in-window anchor rounded half-up; no reference data in candidate projection; unsupported or fewer than four events abstains",
+    "meter": "infer only when at least three consecutive predicted downbeats delimit two equal bars of 3 or 4 predicted beat intervals; candidate grid and downbeat must agree within 0.10 beat; otherwise abstain",
+    "confidence": "uncalibrated; candidate confidence null, no high-confidence claim; scorer adapter uses 0 only to avoid falsely asserting confidence",
+    "representation_audit": "label-derived OLS grid uses the same projection and unchanged scorer on already-open ASAP/Ballroom references; passing is a representability witness, failing is not a proven impossibility ceiling",
+    "baseline": "retained unchanged native coarse S6 diagnostic; hash-bound binary and ordinary outputs"
+  },
+  "resources": {
+    "device": "cpu",
+    "torch_threads": 2,
+    "max_host_rss_kib": 2097152,
+    "max_model_seconds_per_source": 120,
+    "native_core_heap_allocations_allowed": 0,
+    "physical_p4": "not measured; host resources cannot qualify device"
+  },
+  "gates": {
+    "preflight": "exact source/weights/data/conversion hashes, deterministic PF seed including module-local default_rng, finite valid sorted events, synthetic timestamp/state/parity checks before real model scoring",
+    "beat_f1_min": 0.85,
+    "downbeat_f1_min": 0.70,
+    "beat_cmlt_min": 0.75,
+    "downbeat_cmlt_min": 0.60,
+    "no_regression": "zero confirmed period/phase/joint breaks versus coarse for an eventual native promotion; report all breaks without hiding low confidence or abstentions",
+    "confidence_safety": "no calibrated confidence supplied; confidence acceptance remains open",
+    "port_requires": "event gates, exact reference/parity/resource checks and verified independent development; projection failures are resolved separately before product promotion",
+    "run_once": true,
+    "stop_on_operational_failure": true,
+    "complete_both_fixed_models_even_if_event_gate_fails": true,
+    "no_threshold_or_seed_rescue": true,
+    "failed_attempt_outputs_never_overwritten": true,
+    "production_promotion": false
+  }
+}

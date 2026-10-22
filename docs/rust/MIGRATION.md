@@ -97,6 +97,12 @@ interpreting accuracy.** The original BeatNet CRNN is the first P4 candidate;
 Beat This! is a host quality reference. BeatNet+ licensing remains unresolved.
 This replaces another handcrafted-selector attempt, not the frozen product
 gates. No neural model has yet been run locally or qualified on P4.
+The [reference experiment](NEURAL-REFERENCE-EXPERIMENT.md) and its
+[fixed protocol](NEURAL-REFERENCE-PROTOCOL.json) now register the two checkpoints,
+100-source GTZAN selection, event/continuity screening gates, projection and
+representation audit before new annotation values or predictions are inspected.
+Next: tested host adapters, hash-bound acquisition and synthetic parity, then
+the single registered comparison if preflight succeeds.
 Preserve this failed candidate; no threshold rescue or native temporal selector.
 
 Continue on `rust-rewrite` with one end-to-end development slice:
