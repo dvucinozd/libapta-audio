@@ -79,8 +79,20 @@ implements the frozen two-path/128-tempo recurrence, exact source-coordinate
 fitting and competing-phase comparison. Thirteen new synthetic tests and 23
 existing protocol/scorer checks pass; native processing/binary hashes remain
 unchanged. A full-size weak-pulse fixture exposes a double-tempo boundary alias,
-retained without changing the model. **Next: stage C, exact ordered ASAP
-development first; stop before Ballroom on any failed gate.**
+retained without changing the model. Stage C is completed below.
+
+Latest continuation: the [ordered temporal development gate](S6-TEMPORAL-DEVELOPMENT.md)
+evaluates all forty registered ASAP sources / 240 windows with the unchanged
+model and scorer. Joint-correct windows improve 1 → 4 and period-correct 1 → 6,
+but two previously phase-correct windows break. The frozen zero-phase-break
+veto **rejects the candidate and stops before Ballroom**. Forty-six Python
+tests and post-run rescoring/hash checks pass; native processing is unchanged.
+The preceding checkpoint is pushed as
+`b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
+pushed separately before the next step, with historical evidence hashes intact.
+**Next: separately register an audit of S6 output representation versus timing
+evidence on the existing development references before choosing another model.**
+Preserve this failed candidate; no threshold rescue or native temporal selector.
 
 Continue on `rust-rewrite` with one end-to-end development slice:
 **actual PCM -> grid and meter on the same lattice -> immutable published result

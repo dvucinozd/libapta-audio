@@ -6,7 +6,10 @@ any candidate corpus scoring. The paired machine-readable
 Status: stage A complete; [native dense capture](S6-DENSE-TRACE-CHECKPOINT.md)
 preserves all retained outputs. [Stage B host implementation](S6-TEMPORAL-HOST-CHECKPOINT.md)
 now passes synthetic implementation checks and retains a boundary-tempo alias
-counterexample. Stage C recorded candidate accuracy remains unmeasured.
+counterexample. [Stage C](S6-TEMPORAL-DEVELOPMENT.md) now rejects the candidate
+on ASAP: joint-correct windows 1 → 4, but two protected phase-correct windows
+break. Ballroom is not run. Registration and parameters below remain historical
+and unchanged; this result does not authorize native selector implementation.
 Registered rules below are unchanged.
 Baseline is `1876eb34a9169299ece0d908927850e6f6e79670` plus the exact retained
 dirty Ballroom tooling inventory. No production/native-selector change is
@@ -210,5 +213,7 @@ No accuracy gain, fixes/breaks, runtime or P4 claim is inferred from it.
 Stage A is now complete in the separate capture checkpoint, with 240 unchanged
 ordinary files and 480 complete dense windows. Stage B is now implemented and
 synthetically verified in its separate checkpoint; it does not establish
-musical accuracy. **Next executable step: C, the frozen ordered external attempt,
-ASAP development first.** Stop before Ballroom if any ASAP gate fails.
+musical accuracy. Stage C subsequently executes the frozen ASAP-first attempt
+and fails its zero-phase-break gate, stopping before Ballroom. Preserve the
+rejection; the [stage C checkpoint](S6-TEMPORAL-DEVELOPMENT.md) owns the next
+separately registered diagnostic step.

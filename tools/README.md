@@ -75,7 +75,8 @@ analyzes at most thirty seconds with unchanged dense scoring. See
 The successor [dense temporal protocol](../docs/rust/S6-TEMPORAL-MODEL-EXPERIMENT.md)
 is registered with [frozen parameters](../docs/rust/S6-TEMPORAL-MODEL-PROTOCOL.json).
 Its native dense capture is implemented as stage A; a separate stage B host
-model is implemented, with no native selector or recorded evaluation yet.
+model is implemented. Its ordered development evaluation now rejects the model
+on ASAP; there is no native temporal selector.
 Build runtime `temporal-trace-diagnostics`, then use the explicit
 `run --candidate novelty --dense` on the history runner to retain an additional
 `novelty-dense` output. Existing invocations keep their original report shape.
@@ -100,4 +101,17 @@ context and shared source resource caps. Run its synthetic suite with
 An optional new `APTA_TEMPORAL_SYNTHETIC_REPORT` path retains synthetic-only
 coordinates/results without overwriting an earlier report. See
 [the host checkpoint](../docs/rust/S6-TEMPORAL-HOST-CHECKPOINT.md) for its observed
-boundary alias and the unrun ordered ASAP/Ballroom gate.
+boundary alias. The subsequent
+[ordered evaluation](../docs/rust/S6-TEMPORAL-DEVELOPMENT.md) retains the failed
+ASAP result and leaves Ballroom candidate evaluation unrun.
+
+`apta_1_1_native_temporal_development.py` implements that single ordered stage C
+attempt over retained traces. Supply `--evidence-root`, `--stage-b-report`,
+`--source-inventory`, full `--source-revision` and a new `--output` directory.
+It binds the exact model/protocol/prerequisite/reference/native-output hashes
+before any selection, reuses the unchanged annotated scorer, reports every
+window and paired regression, and stops before Ballroom on any ASAP failure.
+It has no DSP knobs, corpus-order switch, fallback or meter borrowing. Existing
+outputs are never overwritten. The retained rejection is not permission to
+retry or tune this frozen attempt. Synthetic wrapper verification is
+`PYTHONWARNINGS=error python3 tests/unit/apta_1_1_native_temporal_development.py -v`.

@@ -125,15 +125,17 @@ resource limits and the unrun gates. Existing stage A artifacts remain intact.
 
 ## Next gate
 
-Stage C is not run. Freeze the exact candidate/config/trace identities, then
-run only the forty registered ASAP development sources first, using the
-unchanged dense-reference scorer and every source window. Ballroom development
-is permitted only if every frozen ASAP gate passes. Stop on the first failed
-corpus; no threshold/support/penalty/context rescue after results. Preserve the
-synthetic alias limitation and use it to interpret results, not to retune them.
+Stage B originally handed off the frozen ASAP-first attempt. The subsequent
+[stage C checkpoint](S6-TEMPORAL-DEVELOPMENT.md) completes all forty ASAP
+sources, then rejects the candidate on two protected phase regressions despite
+joint improvement 1 → 4. Ballroom is not run. The stage B model, protocol and
+synthetic alias counterexample stay unchanged; no threshold/support/penalty/
+context rescue or native temporal selector is authorized by this result.
 
 Keep formal holdouts, the spent DJ set and fresh acceptance audio outside this
 experiment. Both external development passes are required before any native
 selector implementation. Same-grid meter/downbeat, consumer adoption, physical
-P4 measurements and FINAL qualification remain later gates. Changes stay local
-on `rust-rewrite`, with no commit/push, version, provider or consumer-pin change.
+P4 measurements and FINAL qualification remain later gates. Stage B was later
+included in checkpoint `b32345f77660c3f4864b188e941bc9d31886aa68` on
+`rust-rewrite`; its historical dirty inventories remain intact. Version,
+provider and consumer pin remain unchanged.
