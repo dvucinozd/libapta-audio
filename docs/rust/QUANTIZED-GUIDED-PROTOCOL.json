@@ -1,0 +1,56 @@
+{
+  "format": "libapta-quantized-guided-reference-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "9c5c344bede00de775733dff3281aa6eaa5234d8",
+  "purpose": "One terminal reference-representation experiment using deterministic continuous-guided integer anchors; then return to label-blind learned events regardless of outcome.",
+  "inputs": {
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "prior_audit_report_sha256": "0fce2185c2d5fd4fd93e9809aa78274267e3ae9a58167af90282daaecae39afa",
+    "segmented_report_sha256": "0a0f152ae3f504188eace23e8a806b91bf87d33b7e0423da1f7bdc1d172e71ae",
+    "reachability_report_sha256": "af62b36ba4bcd3617dfb2ee61482d4968ab549f22d886c80277c0a26fb8a276a",
+    "reachability_aggregate_sha256": "194232300ac2fea8d1cd5f4fa4a56f7ae4b7dcb09fff2bd970b5710513636d44",
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "read_audio": false,
+    "model_inference": false,
+    "new_labels_or_corpus": false,
+    "formal_holdout_or_reserved_transfer": false
+  },
+  "constructor": {
+    "family": "continuous-guided-integer-anchors-v1",
+    "anchors": "Use each saved feasible continuous position x_i. Intersect its exact reachability domain D_i with integer frames, respecting strict endpoints. Empty integer domain refuses this guided family. Otherwise take nearest integer to x_i, ties upward, clamped to that integer domain. Exactly one anchor per ordinal; no search, alternative rounding, score-based adjustment or rerun.",
+    "pieces": "Each contiguous piece starts at its precomputed guided integer anchor and original ordinal. Reuse original reference envelope, cell boundaries, Q32-rounded ownership including original S6 membership, nearest-reference ties, guarded 0.10-beat phase and guarded 1% own-period bounds. Preserve natural-point count geometry and actual outgoing interval to the next piece's guided anchor. Final source successor stays unknown.",
+    "quantization": "Intersect exact rational/Q32 period constraints and integer tempos 40000..300000. Choose nearest first-reference local tempo within that interval, as in the previous family. Dynamic programming minimizes count within this single deterministic anchor family; ties use longest first piece. This is not exhaustive free-anchor feasibility or a global optimum over anchors.",
+    "capacity": "Retain the full guided-family solution before the eight-segment cap. Over-cap graphs can pass native validation but must explicitly fail wire/builder without truncation. Guided-family failure is not continuous infeasibility or proof that quantization/cap caused it.",
+    "prior_controls": "Reproduce all 100 old anchored plans and saved reachability plans. Run the guided family on all 75 feasible sources. Retain an existing native witness unchanged when one of the old 47 is available; count new wire-qualified witnesses only among the 28 newly continuous-feasible sources. Report guided-only and preserved-control union outcomes separately. The other 25 retain exact relaxation-infeasible status.",
+    "meter": "Use unchanged two-equal-complete-bars rule on original reference ordinals per original window, map the downbeat ordinal onto the chosen Q32 path, clip ranges to the reference envelope and validate exact whole-frame binding through actual MTRD/native/builder APIs.",
+    "state": "Provisional grid/meter, pending REVN, uncalibrated confidence zero, selected TEMP first segment actual nominal tempo. No FINAL export, detector confidence or production adoption."
+  },
+  "native_checks": {
+    "probe": "Extend only the host segmented_reference_probe with a versioned SEGMENT_GUIDED_V1 request carrying explicit integer piece anchors. Preserve legacy SEGMENT_REF_V1 behavior and all 47 old native response values. Core library/validators/limits remain unchanged.",
+    "checks": "Actual beat_at expansion exactly matches Python Q32 positions/ordinals, original guarded reference/period/junction/count checks, complete native validation, strict/canonical GGRD roundtrip and external builder with meter, plus MTRD roundtrip and grid lookup. Python separately verifies original S6 membership. Synthetic overview column is structural fixture only."
+  },
+  "contradiction_audit": {
+    "scope": "Read existing labels, domains and certificates only; no altered constraint experiment or listening claim. Classify the 25 by empty nominal tempo range, geometry-empty domain with nonempty nominal range, or nonempty domains with chain contradiction. Retain first source-order representative of each category privately; public counts only. Cannot distinguish annotation jitter from expressive timing or musical errors without separate listening evidence."
+  },
+  "evaluation": {
+    "denominators": "All 100 sources/600 windows/401 complete/199 incomplete contexts and all 106 prior constant-period-incompatible windows retained. No successful partial prefix.",
+    "control": "Reproduce saved old tuples/scores, anchored plans and reachability results. Legacy probe response values match the prior 47 native records including meter. Existing controls stay explicit, not presented as new improvements.",
+    "diagnostics": "Unchanged common point/actual-successor/one-to-one diagnostics for guided native and wire paths, and preserved-control union. Report approximation, counts, capacity failures and unsupported family separately; no detector accuracy claim.",
+    "stop": "Immediate stop on hash/control/Q32/ordinal/meter/native mismatch, old witness loss, input/source mutation or resource cap. No rescue by changed anchors, tolerances, capacities, labels or cohort.",
+    "terminal_decision": "After one run close reference-construction research for this sequence. Record successes and remaining limitations, then separately register a bounded label-blind variable-timing reconstruction of saved Beat This! events against the original OLS control. No further reference-anchor optimizer follows this result."
+  },
+  "limits": {
+    "maximum_source_frames": 1440000,
+    "maximum_reference_events": 3072,
+    "maximum_windows": 8,
+    "wire_segments": 8,
+    "max_host_rss_kib": 262144,
+    "max_run_seconds": 180,
+    "native_probe_timeout_seconds": 10
+  },
+  "formal_acceptance": false,
+  "production_promotion_allowed": false
+}
