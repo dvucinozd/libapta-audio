@@ -90,13 +90,16 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: implement/test the registered free-phase reference timing
-reachability diagnostic, then measure from clean committed source.**
+**Current next: measure the registered free-phase reference timing
+reachability diagnostic from clean committed source.**
 The [free-phase experiment](FREE-PHASE-REACHABILITY.md) and
 [fixed protocol](FREE-PHASE-REACHABILITY-PROTOCOL.json) are registered before
 implementation. Exact continuous intervals and an independent strict
 difference-constraint checker must agree; all prior native witnesses and old
 scores must remain admissible/unchanged. This does not construct a native grid.
+The [host preflight](FREE-PHASE-PREFLIGHT.md) passes 100 Python tests and 33
+unchanged native control tests per debug/release profile, plus format/Clippy/
+no-default checks. Commit/push this checkpoint before the one fixed-cohort run.
 The [segmented reference result](SEGMENTED-REFERENCE-RESULT-20261022.md) finds
 47/100 complete anchored-family paths; all 47 pass native/wire/builder checks
 with 1..7 segments and 135 same-grid meter records. On that same 47-source
