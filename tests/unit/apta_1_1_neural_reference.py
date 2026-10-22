@@ -107,6 +107,10 @@ class NeuralProjectionTests(unittest.TestCase):
         self.assertEqual(len(selected), 100)
         self.assertEqual(index, original)
         self.assertEqual(selected, module.select_ids(index))
+        available = set(index["tracks"]) - {selected[0]}
+        repaired = module.select_ids(index, available)
+        self.assertEqual(len(repaired), 100)
+        self.assertNotIn(selected[0], repaired)
         self.assertTrue(all(sum(x.startswith(f"g{g}.") for x in selected) == 10 for g in range(10)))
         index["tracks"]["g0.99999"] = {"audio": ["unused", "0-0"]}
         self.assertEqual(selected, module.select_ids(index))

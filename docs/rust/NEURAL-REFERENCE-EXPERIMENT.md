@@ -81,3 +81,14 @@ and representation audit, (C) one two-model GTZAN run if all preflight checks
 pass. Commit and push each completed checkpoint before moving to the next.
 No native estimator/backend, production provider, consumer pin, release,
 stable version or failed temporal experiment changes in this experiment.
+
+## Availability amendment, before the first music prediction
+
+The first preparation stopped for a missing annotation, as required. Its
+selection/canonicalization remain retained, with no music model inference.
+The [availability amendment](NEURAL-REFERENCE-AVAILABILITY-AMENDMENT.json)
+registers metadata-only eligibility from annotation-file presence before
+applying the same hash selection. It preserves all 100 tracks per attempt,
+ten per genre, with no post-freeze replacement. The original registration is
+unchanged. All models, seeds, metrics, numeric gates and output rules remain
+identical; this repair does not respond to a model accuracy result.

@@ -23,14 +23,17 @@ import apta_1_1_prepare_corpus as preparation
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_PATH = ROOT / "docs/rust/NEURAL-REFERENCE-PROTOCOL.json"
-PROTOCOL_SHA256 = "67969fb5d1402a1a8427f947dff286b5b71d49b5cb1c3fa482242727b5d26a2f"
+PARENT_PROTOCOL_SHA256 = "67969fb5d1402a1a8427f947dff286b5b71d49b5cb1c3fa482242727b5d26a2f"
+PROTOCOL_SHA256 = "4cd932e5984f8b9bb589b426596de7ba4fcd56b6d5d9db9f4c4670e333e41a50"
+AMENDMENT_PATH = ROOT / "docs/rust/NEURAL-REFERENCE-AVAILABILITY-AMENDMENT.json"
 FORMAT = "libapta-neural-reference-development-1"
 RATE = 48000
 FINAL0_SHA256 = "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331"
 
 
 def protocol() -> dict:
-    if history.sha256_file(PROTOCOL_PATH) != PROTOCOL_SHA256:
+    if (history.sha256_file(PROTOCOL_PATH) != PARENT_PROTOCOL_SHA256
+        or history.sha256_file(AMENDMENT_PATH) != PROTOCOL_SHA256):
         raise ValueError("registered protocol changed")
     return json.loads(PROTOCOL_PATH.read_text())
 
@@ -96,10 +99,10 @@ def project(beats: list[int], downbeats: list[int], first: int, end: int) -> dic
     return result
 
 
-def select_ids(index: dict) -> list[str]:
+def select_ids(index: dict, available: set[str] | None = None) -> list[str]:
     groups, seen = {}, set()
     for name, row in sorted(index["tracks"].items()):
-        if name == "jazz.00054":
+        if name == "jazz.00054" or available is not None and name not in available:
             continue
         digest = row["audio"][1]
         if digest in seen:
@@ -145,10 +148,13 @@ def prepare(assets: Path, output: Path, ffmpeg: Path) -> dict:
     if revision(assets / "annotations") != config["data"]["annotation_revision"]:
         raise ValueError("annotation revision differs")
     index = json.loads(index_path.read_text())
-    names = select_ids(index)
+    annotation_root = assets / "annotations/gtzan/annotations/beats"
+    available = {name for name in index["tracks"] if (annotation_root / ("gtzan_" + name.replace(".", "_") + ".beats")).is_file()}
+    names = select_ids(index, available)
     output.mkdir(parents=True)
     history.write_new(output / "selection.private.json", {"format": FORMAT,
         "annotation_values_opened": False, "protocol_sha256": PROTOCOL_SHA256,
+        "annotation_availability_checked_before_values": True,
         "source_ids": names, "source_audio_md5": {name: index["tracks"][name]["audio"][1] for name in names}})
     source = output / "selected-source"
     source.mkdir()

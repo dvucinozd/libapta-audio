@@ -1,0 +1,17 @@
+{
+  "format": "libapta-neural-reference-availability-amendment-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "78dc2026d39e64edee59d2f047b7ff68e4f5ddb7",
+  "parent_protocol_sha256": "67969fb5d1402a1a8427f947dff286b5b71d49b5cb1c3fa482242727b5d26a2f",
+  "reason": "The first preparation stopped because one frozen source lacked a v1.0 annotation. No real-music model predictions or accuracy scores exist. Preserve that preparation; repair metadata eligibility before a separately frozen attempt.",
+  "preserved_failed_selection_sha256": "6cdd2aa7ca7f4ce371b47438627834aa0c7acdae20b8e8bb63196d04e001078e",
+  "selection_change": "Before reading annotation contents, intersect published index IDs with regular annotation-file paths in the pinned v1.0 tree; then apply the unchanged corrupt-file exclusion, exact-audio deduplication, hash order and ten-per-genre rule. No replacement after freezing this new selection.",
+  "models_changed": false,
+  "weights_changed": false,
+  "rng_changed": false,
+  "metric_thresholds_changed": false,
+  "projection_changed": false,
+  "expected_tracks": 100,
+  "formal_acceptance": false,
+  "fresh_holdout_access_allowed": false
+}

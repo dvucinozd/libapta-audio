@@ -197,6 +197,8 @@ def main():
     parser.add_argument("--model", choices=("beatnet", "beat_this"))
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.output.exists():
+        parser.error("attempt output already exists; refusing modification")
     if (args.inputs is None) != (args.model is None):
         parser.error("model and label-free inputs must be supplied together")
     try:
