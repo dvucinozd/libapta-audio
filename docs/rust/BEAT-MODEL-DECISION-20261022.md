@@ -5,7 +5,13 @@ Research baseline: `rust-rewrite` at
 This is a source/literature audit and engineering recommendation, not a new
 corpus result, model adoption, or ESP32-P4 qualification.
 
-## Decision
+Measured follow-up: the [fixed 100-source comparison](NEURAL-REFERENCE-RESULT-20261022.md)
+now supersedes the provisional P4 candidate below. Beat This! passes all four
+event/continuity screening gates; original BeatNet fails all four and its port
+is rejected under that protocol. Neither qualifies for production/P4. Next is
+event-to-APTA representation analysis, with Beat This! as the fixed reference.
+
+## Pre-measurement decision
 
 Stop adding handcrafted selectors over the existing onset/energy evidence.
 Use **learned beat and downbeat activations**, with:

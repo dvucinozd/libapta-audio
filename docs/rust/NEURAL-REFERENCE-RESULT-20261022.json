@@ -1,0 +1,352 @@
+{
+  "all_saved_outputs_rescored": true,
+  "by_genre": {
+    "blues": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.8293837447579954,
+          "beat_f1": 0.8993477522891027,
+          "downbeat_cmlt": 0.5324509803921569,
+          "downbeat_f1": 0.7054262139361973
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.46918735301434966,
+          "beat_f1": 0.746114347688003,
+          "downbeat_cmlt": 0.25435277141159496,
+          "downbeat_f1": 0.4205321824805558
+        },
+        "tracks": 10
+      }
+    },
+    "classical": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.5985187616611578,
+          "beat_f1": 0.7192463352114599,
+          "downbeat_cmlt": 0.4948349673202614,
+          "downbeat_f1": 0.6484747996844771
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.14678673046903684,
+          "beat_f1": 0.44639832831017234,
+          "downbeat_cmlt": 0.12140692640692641,
+          "downbeat_f1": 0.2682566030460768
+        },
+        "tracks": 10
+      }
+    },
+    "country": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.8896020269435174,
+          "beat_f1": 0.937060844351293,
+          "downbeat_cmlt": 0.7941102756892231,
+          "downbeat_f1": 0.903888888888889
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.5418996104372091,
+          "beat_f1": 0.738325347100268,
+          "downbeat_cmlt": 0.4899343711843712,
+          "downbeat_f1": 0.5844145109632914
+        },
+        "tracks": 10
+      }
+    },
+    "disco": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.9901960784313726,
+          "beat_f1": 0.9888411823398482,
+          "downbeat_cmlt": 0.9733333333333334,
+          "downbeat_f1": 0.9760739260739261
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.8116013824168071,
+          "beat_f1": 0.923793620474572,
+          "downbeat_cmlt": 0.5154621848739496,
+          "downbeat_f1": 0.6605203994641335
+        },
+        "tracks": 10
+      }
+    },
+    "hiphop": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.9720982323729264,
+          "beat_f1": 0.9821575746967064,
+          "downbeat_cmlt": 0.8065934065934066,
+          "downbeat_f1": 0.8502424242424242
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.5697913971644768,
+          "beat_f1": 0.7430442102084931,
+          "downbeat_cmlt": 0.33033799533799535,
+          "downbeat_f1": 0.36672469864231877
+        },
+        "tracks": 10
+      }
+    },
+    "jazz": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.7889033706238007,
+          "beat_f1": 0.9073311280529536,
+          "downbeat_cmlt": 0.5314285714285714,
+          "downbeat_f1": 0.6619021377770051
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.4917412599664188,
+          "beat_f1": 0.6814736907177752,
+          "downbeat_cmlt": 0.13652777777777778,
+          "downbeat_f1": 0.3093290938013043
+        },
+        "tracks": 10
+      }
+    },
+    "metal": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.6741837680391898,
+          "beat_f1": 0.8208891194057435,
+          "downbeat_cmlt": 0.4060360363825164,
+          "downbeat_f1": 0.6185809507802975
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.36004978287200645,
+          "beat_f1": 0.6606042206361702,
+          "downbeat_cmlt": 0.2658699633699634,
+          "downbeat_f1": 0.35654953426585223
+        },
+        "tracks": 10
+      }
+    },
+    "pop": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.9587533875338753,
+          "beat_f1": 0.9574129898602356,
+          "downbeat_cmlt": 0.9916666666666666,
+          "downbeat_f1": 0.9501976284584981
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.6625261502234243,
+          "beat_f1": 0.8198452909963099,
+          "downbeat_cmlt": 0.5661538461538461,
+          "downbeat_f1": 0.6723520923520924
+        },
+        "tracks": 10
+      }
+    },
+    "reggae": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.5904923599320883,
+          "beat_f1": 0.8616014392643636,
+          "downbeat_cmlt": 0.31343503686753116,
+          "downbeat_f1": 0.6572737364513014
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.5740734046078927,
+          "beat_f1": 0.8342457451198821,
+          "downbeat_cmlt": 0.11991228070175439,
+          "downbeat_f1": 0.30998130121542095
+        },
+        "tracks": 10
+      }
+    },
+    "rock": {
+      "beat_this": {
+        "event_means": {
+          "beat_cmlt": 0.8727761929744027,
+          "beat_f1": 0.9088903985895996,
+          "downbeat_cmlt": 0.9,
+          "downbeat_f1": 0.8831786030061892
+        },
+        "tracks": 10
+      },
+      "beatnet": {
+        "event_means": {
+          "beat_cmlt": 0.6778315242954542,
+          "beat_f1": 0.8283291999591086,
+          "downbeat_cmlt": 0.48455419580419584,
+          "downbeat_f1": 0.5776461509504986
+        },
+        "tracks": 10
+      }
+    }
+  },
+  "confidence_calibrated": false,
+  "cross_dataset_identity_verified": false,
+  "event_gates": {
+    "beat_this": {
+      "beat_cmlt": true,
+      "beat_f1": true,
+      "downbeat_cmlt": true,
+      "downbeat_f1": true
+    },
+    "beatnet": {
+      "beat_cmlt": false,
+      "beat_f1": false,
+      "downbeat_cmlt": false,
+      "downbeat_f1": false
+    }
+  },
+  "event_means": {
+    "beat_this": {
+      "beat_cmlt": 0.8164907923270326,
+      "beat_f1": 0.8982778764061308,
+      "downbeat_cmlt": 0.6743889274673666,
+      "downbeat_f1": 0.7855239309299203
+    },
+    "beatnet": {
+      "beat_cmlt": 0.5305488595467076,
+      "beat_f1": 0.7422174001210753,
+      "downbeat_cmlt": 0.3284512313022374,
+      "downbeat_f1": 0.45263065671815444
+    }
+  },
+  "formal_acceptance": false,
+  "format": "libapta-neural-reference-development-1",
+  "freeze_sha256": "0e0ab33d990e40253d61a6a39758fc30c33510238e02ad58d1467b7fa3d5e3ef",
+  "model_harness_loads_both_models": true,
+  "p4_measured": false,
+  "paired": {
+    "beat_this": {
+      "confirmed_joint_windows_breaks": 2,
+      "confirmed_joint_windows_fixes": 142,
+      "confirmed_period_windows_breaks": 7,
+      "confirmed_period_windows_fixes": 92,
+      "confirmed_phase_windows_breaks": 8,
+      "confirmed_phase_windows_fixes": 221
+    },
+    "beatnet": {
+      "confirmed_joint_windows_breaks": 24,
+      "confirmed_joint_windows_fixes": 57,
+      "confirmed_period_windows_breaks": 60,
+      "confirmed_period_windows_fixes": 38,
+      "confirmed_phase_windows_breaks": 50,
+      "confirmed_phase_windows_fixes": 71
+    }
+  },
+  "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+  "promotion_allowed": false,
+  "protocol_sha256": "4cd932e5984f8b9bb589b426596de7ba4fcd56b6d5d9db9f4c4670e333e41a50",
+  "report_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+  "resources": {
+    "beat_this": {
+      "exclusive_endpoint_events": {
+        "beats": 10,
+        "downbeats": 3
+      },
+      "max_source_seconds": 4.257632027999989,
+      "rss_peak_kib": 515824,
+      "source_seconds_sum": 388.24554847999997,
+      "worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+      "worker_wall_seconds": 395.28321374999996
+    },
+    "beatnet": {
+      "exclusive_endpoint_events": {
+        "beats": 0,
+        "downbeats": 0
+      },
+      "max_source_seconds": 7.807220319999999,
+      "rss_peak_kib": 466592,
+      "source_seconds_sum": 432.3836851859998,
+      "worker_report_sha256": "1cadfb8eb17c0e10ed3e7f619e924e3b93eb38d56da672053b5ed597d25396ca",
+      "worker_wall_seconds": 439.409373701
+    }
+  },
+  "source_archive_sha256": "7b67c736d167f07737456ff128aa3dfb1a138e85aff23ebebe029b39338fdb82",
+  "source_revision": "f00d482f775c51621ca03136d6e4941232cf24f4",
+  "source_snapshot_files": 893,
+  "status": "reference_comparison_completed",
+  "tests": {
+    "event_boundary_metrics": 4,
+    "projection_provenance": 10,
+    "unchanged_annotation_suite": 6
+  },
+  "totals": {
+    "beat_this": {
+      "confirmed_joint_windows": 187,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3704,
+      "phase_correct_beats": 4839,
+      "predicted_beats": 5771,
+      "reference_complete_windows": 401,
+      "scored_beats": 5680,
+      "windows": 600
+    },
+    "beatnet": {
+      "confirmed_joint_windows": 80,
+      "confirmed_period_windows": 85,
+      "confirmed_phase_windows": 108,
+      "downbeat_correct": 41,
+      "downbeat_scored": 69,
+      "emitted": 508,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 64,
+      "meter_emitted": 69,
+      "period_correct_beats": 1365,
+      "phase_correct_beats": 2245,
+      "predicted_beats": 4612,
+      "reference_complete_windows": 401,
+      "scored_beats": 4574,
+      "windows": 600
+    },
+    "coarse": {
+      "confirmed_joint_windows": 47,
+      "confirmed_period_windows": 107,
+      "confirmed_phase_windows": 87,
+      "downbeat_correct": 31,
+      "downbeat_scored": 472,
+      "emitted": 598,
+      "high_confidence_grid_error": 13,
+      "high_confidence_grid_unknown_context": 13,
+      "meter_correct": 333,
+      "meter_emitted": 491,
+      "period_correct_beats": 2118,
+      "phase_correct_beats": 2229,
+      "predicted_beats": 6135,
+      "reference_complete_windows": 401,
+      "scored_beats": 5999,
+      "windows": 600
+    }
+  },
+  "tracks": 100
+}

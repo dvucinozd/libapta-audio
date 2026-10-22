@@ -90,13 +90,15 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Next: follow the [model research decision](BEAT-MODEL-DECISION-20261022.md):
-register one fixed BeatNet causal / Beat This! offline reference comparison,
-including training-overlap checks and the S6 representation audit before
-interpreting accuracy.** The original BeatNet CRNN is the first P4 candidate;
-Beat This! is a host quality reference. BeatNet+ licensing remains unresolved.
-This replaces another handcrafted-selector attempt, not the frozen product
-gates. No neural model has yet been run locally or qualified on P4.
+**Current next: register an event-to-APTA representation audit using the saved
+Beat This! events from the [measured comparison](NEURAL-REFERENCE-RESULT-20261022.md),
+including explicit/segmented grid, same-grid meter, source gaps and consumer
+capacity.** Beat This! passes all four event/continuity screening gates on the
+100-source benchmark; original BeatNet fails all four, rejecting its port.
+Beat This! projection improves joint correctness 47 -> 187/401 complete-context
+windows but breaks two previously joint-correct cases. Preserve the scorer and
+all regression cases; neither model is production/P4-qualified. Confidence and
+cross-dataset identity verification remain open. BeatNet+ licensing is unresolved.
 The [reference experiment](NEURAL-REFERENCE-EXPERIMENT.md) and its
 [fixed protocol](NEURAL-REFERENCE-PROTOCOL.json) now register the two checkpoints,
 100-source GTZAN selection, event/continuity screening gates, projection and
@@ -115,6 +117,10 @@ presence before the unchanged balanced selection. The second preparation now
 contains 100 verified/canonicalized sources; host synthetic network/decoder
 parity and source-coordinate tests pass. Next: freeze source/runtime/weights,
 run both fixed references once and rescore saved outputs.
+This is now completed at exact clean source
+`f00d482f775c51621ca03136d6e4941232cf24f4`; both models process all 100 sources.
+Saved events and all 600 windows per output are independently rescored with
+bound code/runtime/data hashes. See the measured result for the decision above.
 Preserve this failed candidate; no threshold rescue or native temporal selector.
 
 Continue on `rust-rewrite` with one end-to-end development slice:
@@ -3369,3 +3375,20 @@ frozen gates pass may Ballroom development follow. Any failed corpus stops the
 attempt without parameter rescue; holdouts, the spent DJ set and fresh acceptance
 audio remain outside this experiment. Native same-grid meter/downbeat, consumer
 adoption, physical P4 and FINAL qualification remain later gates.
+
+## Fixed neural references measured — 2026-10-22
+
+The [measured comparison](NEURAL-REFERENCE-RESULT-20261022.md) completes the
+research recommendation on 100 hash-bound GTZAN development sources. Beat This!
+final0 scores beat/downbeat F1 89.83%/78.55% and passes all four registered
+event/continuity gates. Original BeatNet scores 74.22%/45.26%, fails all four,
+and its proposed port is rejected. Both frozen model runs and all saved event,
+projection and scorer records are retained externally, alongside failed
+operational preparations and the exact clean source snapshot.
+
+Beat This!'s constant-grid projection improves joint-correct windows from
+47 to 187/401 complete references but breaks two previously correct cases.
+It is a host reference, not a promoted detector. Next: separately register the
+event-to-APTA representation audit described at the top of this document before
+another model/backend implementation. Keep confidence calibration, independent
+transfer, fresh acceptance, native consumer and physical P4 gates open.
