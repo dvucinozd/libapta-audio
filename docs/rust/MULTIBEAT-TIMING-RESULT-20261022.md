@@ -31,6 +31,12 @@ algorithm, resource caps, ambiguous/no-attack behavior, untouched transfer
 partition and veto must be fixed before implementation or inference. No such
 refiner is implemented or measured by this checkpoint.
 
+Follow-up: the separately registered
+[PCM-anchor experiment is now measured and rejected](PCM-ANCHOR-TIMING-RESULT-20261022.md),
+with 186 versus 187 joint-correct windows and three OLS joint breaks. Transfer
+was not started. The current next unit is a read-only failure-attribution audit;
+this multi-beat result and its parameters remain unchanged.
+
 ## Fixed run and musical metrics
 
 The single registered cohort contains all 100 previously selected GTZAN

@@ -36,8 +36,10 @@ Exact raw events retain only 10/401 joint-correct windows versus OLS 187/401;
 both original regressions remain, and exact segment compression exceeds the
 wire cap on 98/100 sources. The subsequent separately registered
 [multi-beat reconstruction](MULTIBEAT-TIMING-RESULT-20261022.md) is also rejected:
-188 versus 187 joint-correct windows, but twelve OLS joint breaks. The current
-next proposal is independently bounded PCM timing evidence around fixed anchors.
+188 versus 187 joint-correct windows, but twelve OLS joint breaks. The subsequent
+[PCM-anchor refinement](PCM-ANCHOR-TIMING-RESULT-20261022.md) is also rejected:
+186 versus 187 joint-correct windows, with three OLS joint breaks. The current
+next proposal is read-only failure attribution before another estimator choice.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results

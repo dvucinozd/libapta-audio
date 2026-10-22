@@ -34,7 +34,10 @@ Follow-up: the subsequently registered
 [four-neighbor multi-beat reconstruction](MULTIBEAT-TIMING-RESULT-20261022.md)
 is now measured and rejected, with twelve OLS joint breaks despite a net gain
 of one window. Its parameters remain frozen; the next proposed evidence axis
-is PCM timing around fixed musical anchors. This audit's scores are unchanged.
+was PCM timing around fixed musical anchors. That
+[PCM experiment is now rejected](PCM-ANCHOR-TIMING-RESULT-20261022.md), with
+three OLS joint breaks. The current next step is diagnostic failure attribution;
+this audit's scores are unchanged.
 
 ## Frozen inputs and execution
 

@@ -1,0 +1,209 @@
+{
+  "absolute_movement_frames": {
+    "count": 774,
+    "max": 912,
+    "median": 528
+  },
+  "all_100_pcm_refinements_and_600_scores_independently_replayed": true,
+  "anchor_counts": {
+    "moved": 774,
+    "supported": 797,
+    "unrefined_ambiguous": 5116,
+    "unrefined_low_contrast": 94,
+    "unrefined_low_energy": 5,
+    "unrefined_ownership": 3,
+    "unrefined_search_edge": 49,
+    "unrefined_source_boundary": 31
+  },
+  "bound_files": 1749,
+  "changed_projection_windows": 387,
+  "confidence_calibrated": false,
+  "formal_acceptance": false,
+  "format": "libapta-pcm-anchor-timing-development-1",
+  "gates": {
+    "complete_sequence_improves": false,
+    "joint_improves": false,
+    "no_new_coarse_joint_breaks": false,
+    "zero_ols_downbeat_breaks": true,
+    "zero_ols_joint_breaks": false,
+    "zero_ols_meter_breaks": true,
+    "zero_ols_period_breaks": false,
+    "zero_ols_phase_breaks": false
+  },
+  "inference_run": false,
+  "new_coarse_joint_break_count": 1,
+  "numpy_version": "2.5.2",
+  "original_joint_regressions": [
+    {
+      "candidate_joint_correct": false,
+      "candidate_period_correct": false,
+      "candidate_phase_correct": false
+    },
+    {
+      "candidate_joint_correct": false,
+      "candidate_period_correct": false,
+      "candidate_phase_correct": true
+    }
+  ],
+  "paired": {
+    "coarse": {
+      "downbeat_breaks": 16,
+      "joint_breaks": 3,
+      "joint_fixes": 142,
+      "meter_breaks": 186,
+      "period_breaks": 6,
+      "period_fixes": 91,
+      "phase_breaks": 9,
+      "phase_fixes": 222
+    },
+    "ols": {
+      "downbeat_breaks": 0,
+      "joint_breaks": 3,
+      "joint_fixes": 2,
+      "meter_breaks": 0,
+      "period_breaks": 2,
+      "period_fixes": 2,
+      "phase_breaks": 2,
+      "phase_fixes": 2
+    }
+  },
+  "physical_p4": false,
+  "point_phase_changes": {
+    "breaks": 15,
+    "fixes": 14,
+    "scored": 5971,
+    "unknown": 124
+  },
+  "production_promotion": false,
+  "projection_kinds": {
+    "accepted": 560,
+    "insufficient_events": 17,
+    "unsupported_projection": 23
+  },
+  "protocol_sha256": "0668dc34481a8c6021ea972866ed02d66f763694c8dc2607475143f5febc72de",
+  "report_sha256": "8b01dd4e3c5ca7f6ac9886494028604ff132e743eb277ed9d9575e97f9767bea",
+  "resources": {
+    "rss_peak_kib": 78732,
+    "run_wall_seconds": 30.022853654000016
+  },
+  "source_archive_sha256": "9eee891788f1c32fd91cf5d40d978336a682bfacdd16a42f8f0d7c3c1ea2de44",
+  "source_revision": "f09263db482268839b2f69fb4309fe7664e4207f",
+  "stage_a_gate_passed": false,
+  "tests": {
+    "new_python": 21,
+    "unchanged_python": 44
+  },
+  "totals": {
+    "candidate": {
+      "confirmed_joint_windows": 186,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3701,
+      "phase_correct_beats": 4841,
+      "predicted_beats": 5769,
+      "reference_complete_windows": 401,
+      "scored_beats": 5677,
+      "windows": 600
+    },
+    "common_candidate": {
+      "complete_sequence_windows": 175,
+      "joint_windows": 186,
+      "one_to_one_phase_windows": 271,
+      "period_correct_points": 3701,
+      "period_windows": 192,
+      "phase_correct_points": 4841,
+      "phase_windows": 300,
+      "points": 5769,
+      "reference_complete_windows": 401,
+      "scored_points": 5677,
+      "unknown_successor_points": 0,
+      "windows": 600
+    },
+    "common_ols": {
+      "complete_sequence_windows": 178,
+      "joint_windows": 187,
+      "one_to_one_phase_windows": 274,
+      "period_correct_points": 3704,
+      "period_windows": 192,
+      "phase_correct_points": 4839,
+      "phase_windows": 300,
+      "points": 5771,
+      "reference_complete_windows": 401,
+      "scored_points": 5680,
+      "unknown_successor_points": 0,
+      "windows": 600
+    },
+    "old_coarse": {
+      "confirmed_joint_windows": 47,
+      "confirmed_period_windows": 107,
+      "confirmed_phase_windows": 87,
+      "downbeat_correct": 31,
+      "downbeat_scored": 472,
+      "emitted": 598,
+      "high_confidence_grid_error": 13,
+      "high_confidence_grid_unknown_context": 13,
+      "meter_correct": 333,
+      "meter_emitted": 491,
+      "period_correct_beats": 2118,
+      "phase_correct_beats": 2229,
+      "predicted_beats": 6135,
+      "reference_complete_windows": 401,
+      "scored_beats": 5999,
+      "windows": 600
+    },
+    "old_ols": {
+      "confirmed_joint_windows": 187,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3704,
+      "phase_correct_beats": 4839,
+      "predicted_beats": 5771,
+      "reference_complete_windows": 401,
+      "scored_beats": 5680,
+      "windows": 600
+    },
+    "raw_events": {
+      "complete_sequence_windows": 9,
+      "joint_windows": 10,
+      "one_to_one_phase_windows": 263,
+      "period_correct_points": 1724,
+      "period_windows": 10,
+      "phase_correct_points": 5170,
+      "phase_windows": 290,
+      "points": 6095,
+      "reference_complete_windows": 401,
+      "scored_points": 5971,
+      "unknown_successor_points": 58,
+      "windows": 600
+    },
+    "refined_events": {
+      "complete_sequence_windows": 3,
+      "joint_windows": 4,
+      "one_to_one_phase_windows": 261,
+      "period_correct_points": 1626,
+      "period_windows": 4,
+      "phase_correct_points": 5174,
+      "phase_windows": 287,
+      "points": 6095,
+      "reference_complete_windows": 401,
+      "scored_points": 5976,
+      "unknown_successor_points": 58,
+      "windows": 600
+    }
+  },
+  "transfer_opened": false
+}

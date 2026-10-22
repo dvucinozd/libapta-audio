@@ -90,37 +90,45 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: register an anchor-guided PCM timing evidence experiment with
-fixed learned anchors, explicit ambiguity/abstention behavior and independent
-transfer gates.** The
+**Current next: register a read-only failure-attribution audit of existing event
+selection, tempo-family, reference support and within-window tempo variation
+before choosing another estimator.** Include reference-only constant-fit
+diagnostic witnesses without treating them as an accuracy ceiling or detector.
+The [PCM-anchor result](PCM-ANCHOR-TIMING-RESULT-20261022.md) rejects the fixed
+local-rise refiner: 186/401 joint-correct windows versus OLS 187/401, with two
+fixes and three breaks, plus one new coarse joint regression. Only 797/6095
+anchors have supported rises; 774 move. All 100 source PCM refinements / 600 scores
+independently reproduce. The reserved ASAP transfer is stopped before audio,
+labels or inference; no same-cohort radius/contrast/dominance rescue follows.
+The
 [four-neighbor reconstruction result](MULTIBEAT-TIMING-RESULT-20261022.md)
 rejects that exact candidate: joint correctness is 188/401 versus OLS 187/401,
 with thirteen fixes but twelve breaks, plus 28 phase, sixteen meter and twelve
 downbeat breaks. Six joint breaks occur despite an accepted candidate fit;
 both original regressions remain. Do not widen the fit, relax guards, add a
-fallback or port this rejected candidate. The next evidence axis must examine
-finer PCM timing around musical anchors, with algorithm/caps/veto fixed before
-implementation or inference. The
+fallback or port this rejected candidate. That result selected finer PCM timing
+around fixed musical anchors as a separately registered evidence axis.
+That hypothesis is now completed and rejected above.
+The
 [PCM-anchor experiment](PCM-ANCHOR-TIMING-EXPERIMENT.md) and
-[protocol](PCM-ANCHOR-TIMING-PROTOCOL.json) now register this single local
+[protocol](PCM-ANCHOR-TIMING-PROTOCOL.json) registered this single local
 energy-rise hypothesis, fixed original OLS control, unchanged-anchor ambiguity
 policy and conditional forty-source ASAP transfer before implementation.
-Commit/push registration and synthetic preflight before GTZAN scoring; any
-development veto stops before transfer. Its
+Registration and preflight were committed/pushed before GTZAN scoring at clean
+`f09263db482268839b2f69fb4309fe7664e4207f`; its development veto stops transfer. Its
 [host implementation/preflight](PCM-ANCHOR-TIMING-PREFLIGHT.md) now passes
 21 new synthetic tests and 44 unchanged reference/scorer tests. Native code,
-default CI dependencies and production behavior remain unchanged. Next: commit
-and push preflight, then run the single clean-source stage-A comparison.
+default CI dependencies and production behavior remain unchanged. Preserve this
+measured rejection and all earlier failed baselines before the diagnostic audit.
 The completed
 [representation audit](EVENT-REPRESENTATION-RESULT-20261022.md) preserves all
 6095 events in explicit wire payloads, but raw adjacent intervals yield only
 10/401 joint-correct windows versus OLS 187/401; both original regressions remain.
 Exact segments exceed the eight-segment wire cap on 98/100 sources, and no raw
 explicit or segmented complete graph passes existing native validation. All
-events lie on a 20 ms lattice; reconstruction must estimate timing over multiple
-beats before another model/backend port or consumer contract change is justified.
-Freeze the next algorithm and caps before scoring; keep the scorer, validators,
-wire limits and failed baselines unchanged.
+events lie on a 20 ms lattice; the audit selected the subsequently rejected
+multi-beat reconstruction before another model/backend port or consumer change.
+Keep the scorer, validators, wire limits and failed baselines unchanged.
 The [multi-beat experiment](MULTIBEAT-TIMING-EXPERIMENT.md) and
 [fixed protocol](MULTIBEAT-TIMING-PROTOCOL.json) registered one host-only
 four-neighbor OLS extension, nine-event minimum support, fixed residual/count
