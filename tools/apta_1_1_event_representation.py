@@ -129,7 +129,9 @@ def run(attempt: Path, prepared: Path, analyzer: Path, output: Path, consumer_ro
     consumer = config["consumer_snapshot"]
     if ref.revision(consumer_root) != consumer["revision"]:
         raise ValueError("consumer source revision differs")
-    if subprocess.check_output(["git", "status", "--porcelain"], cwd=consumer_root, text=True):
+    # The Windows-owned consumer checkout uses core.autocrlf=true. Apply the
+    # same clean-filter semantics in WSL without changing repository config.
+    if subprocess.check_output(["git", "-c", "core.autocrlf=true", "status", "--porcelain"], cwd=consumer_root, text=True):
         raise ValueError("consumer source checkout must be unchanged")
     adapter = consumer_root / "firmware-rust/crates/pajoniiir-apta-adapter"
     ref.bind(adapter / "src/lib.rs", consumer["adapter_lib_rs_sha256"], bindings)

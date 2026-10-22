@@ -50,3 +50,12 @@ are under `D:/AI/LIBAPTA/outputs/rust-event-representation-20261022/` and
 Commit and push this checkpoint before running the saved-event audit from the
 clean exact implementation. No musical or production conclusion is inferred
 from these preflight tests.
+
+The first audit invocation stopped during consumer preflight, before creating
+an output directory or scoring events. WSL Git interpreted the Windows-owned
+consumer's CRLF checkout with different clean-filter settings. The adapter
+now supplies `git -c core.autocrlf=true status --porcelain` for that consumer,
+matching its owning Windows Git configuration without modifying repository
+settings or files. Exact pinned adapter byte hashes are still mandatory.
+Both Windows and equivalently configured WSL Git confirm the same clean M1
+revision. This is an execution-environment correction, not a data/model change.
