@@ -103,6 +103,12 @@ The [reference experiment](NEURAL-REFERENCE-EXPERIMENT.md) and its
 representation audit before new annotation values or predictions are inspected.
 Next: tested host adapters, hash-bound acquisition and synthetic parity, then
 the single registered comparison if preflight succeeds.
+The [host preflight checkpoint](NEURAL-REFERENCE-PREFLIGHT.md) adds tested
+projection/preparation/adapters and a label-derived representation audit:
+reference fits pass 6/160 ASAP and 49/165 Ballroom complete-context windows.
+These are diagnostic witnesses, not detector accuracy or an impossibility
+ceiling. GTZAN's first preparation stops for one missing annotation before
+music inference; preserve it and register the metadata-availability repair.
 Preserve this failed candidate; no threshold rescue or native temporal selector.
 
 Continue on `rust-rewrite` with one end-to-end development slice:
