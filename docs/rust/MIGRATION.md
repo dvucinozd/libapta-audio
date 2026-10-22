@@ -90,8 +90,13 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Next: separately register an audit of S6 output representation versus timing
-evidence on the existing development references before choosing another model.**
+**Next: follow the [model research decision](BEAT-MODEL-DECISION-20261022.md):
+register one fixed BeatNet causal / Beat This! offline reference comparison,
+including training-overlap checks and the S6 representation audit before
+interpreting accuracy.** The original BeatNet CRNN is the first P4 candidate;
+Beat This! is a host quality reference. BeatNet+ licensing remains unresolved.
+This replaces another handcrafted-selector attempt, not the frozen product
+gates. No neural model has yet been run locally or qualified on P4.
 Preserve this failed candidate; no threshold rescue or native temporal selector.
 
 Continue on `rust-rewrite` with one end-to-end development slice:
