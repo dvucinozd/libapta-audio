@@ -102,6 +102,18 @@ class Models:
             raise ValueError("upstream emitted invalid source timestamps")
         return values
 
+    @staticmethod
+    def source_domain(events, duration):
+        """Keep [0, duration); preserve an exact padded end-frame separately.
+
+        No negative, non-finite or later event is silently clipped or shifted.
+        """
+        import math
+        values = list(map(float, events))
+        if any(not math.isfinite(v) or not 0 <= v <= duration for v in values) or any(b <= a for a, b in zip(values, values[1:])):
+            raise ValueError("upstream emitted invalid source timestamps")
+        return [v for v in values if v < duration], [v for v in values if v == duration]
+
     def infer(self, name: str, audio: Path, frames: int) -> dict:
         import soundfile as sf
         import soxr
@@ -123,8 +135,8 @@ class Models:
                 beats, db = self.beat_this(mono, 22050)
             else:
                 raise ValueError("unregistered model")
-        beats = self.validate_seconds(beats, frames / 48000)
-        db = self.validate_seconds(db, frames / 48000)
+        beats, boundary_beats = self.source_domain(beats, frames / 48000)
+        db, boundary_downbeats = self.source_domain(db, frames / 48000)
         beat_frames = [reference.rounded(v * 48000) for v in beats]
         db_frames = [reference.rounded(v * 48000) for v in db]
         reference.valid_events(beat_frames, frames)
@@ -132,7 +144,8 @@ class Models:
         if not set(db_frames) <= set(beat_frames):
             raise ValueError("downbeats are not on the candidate beat sequence")
         return {"beat_seconds": beats, "downbeat_seconds": db, "beat_frames": beat_frames,
-                "downbeat_frames": db_frames, "confidence": None, "input_sample_rate": 22050}
+                "downbeat_frames": db_frames, "confidence": None, "input_sample_rate": 22050,
+                "exclusive_endpoint_events": {"beat_seconds": boundary_beats, "downbeat_seconds": boundary_downbeats}}
 
 
 def timeout(_signal, _frame):

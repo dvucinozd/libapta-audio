@@ -7,9 +7,16 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
 import apta_1_1_neural_comparison as module
+from apta_1_1_neural_inference import Models
 
 
 class EventScoringTests(unittest.TestCase):
+    def test_exact_exclusive_endpoint_is_retained_separately(self):
+        self.assertEqual(Models.source_domain([0, .5, 30.0], 30.0), ([0.0, .5], [30.0]))
+        for invalid in ([-.01], [30.01], [float("nan")], [.5, .5]):
+            with self.assertRaises(ValueError):
+                Models.source_domain(invalid, 30.0)
+
     def fixture(self):
         return {"beat_frames": list(range(0, 1440000, 24000)),
                 "downbeat_frames": list(range(0, 1440000, 96000))}

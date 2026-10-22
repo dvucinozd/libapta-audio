@@ -92,3 +92,19 @@ applying the same hash selection. It preserves all 100 tracks per attempt,
 ten per genre, with no post-freeze replacement. The original registration is
 unchanged. All models, seeds, metrics, numeric gates and output rules remain
 identical; this repair does not respond to a model accuracy result.
+
+## Exclusive source endpoint, operational repair before scoring
+
+The first music attempt at `447b7cbfa5d56bb87ecc09839f8f0e32497e79f2`
+stopped after four Beat This! sources because its next output includes an
+event exactly at 30.000 seconds for 30-second PCM. Centered STFT produces this
+exclusive endpoint frame. The sibling BeatNet process was stopped with thirteen
+saved outputs. No accuracy metrics were calculated or inspected.
+
+Retain that complete frozen attempt and raw partial outputs. The adapter now
+records exact-endpoint events separately and supplies only events in the
+source domain `[0, duration)` to projection/scoring. Negative, non-finite,
+duplicate or later events still fail; nothing is shifted or fitted to labels.
+A regression covers exact endpoints and invalid timestamps. A new attempt
+uses the identical frozen 100-source prepared manifest, checkpoints, seeds,
+metrics and gates. This is a source-boundary adapter repair, not model tuning.
