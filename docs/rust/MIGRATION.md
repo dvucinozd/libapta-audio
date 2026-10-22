@@ -101,6 +101,12 @@ both original regressions remain. Do not widen the fit, relax guards, add a
 fallback or port this rejected candidate. The next evidence axis must examine
 finer PCM timing around musical anchors, with algorithm/caps/veto fixed before
 implementation or inference; no such refiner exists yet. The completed
+ [PCM-anchor experiment](PCM-ANCHOR-TIMING-EXPERIMENT.md) and
+[protocol](PCM-ANCHOR-TIMING-PROTOCOL.json) now register this single local
+energy-rise hypothesis, fixed original OLS control, unchanged-anchor ambiguity
+policy and conditional forty-source ASAP transfer before implementation.
+Commit/push registration and synthetic preflight before GTZAN scoring; any
+development veto stops before transfer. The completed
 [representation audit](EVENT-REPRESENTATION-RESULT-20261022.md) preserves all
 6095 events in explicit wire payloads, but raw adjacent intervals yield only
 10/401 joint-correct windows versus OLS 187/401; both original regressions remain.
