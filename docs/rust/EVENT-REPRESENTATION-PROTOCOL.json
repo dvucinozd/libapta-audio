@@ -1,0 +1,60 @@
+{
+  "format": "libapta-event-representation-audit-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "96bf323af7e2f964f697637f395831785b2291bf",
+  "formal_acceptance": false,
+  "hypothesis": "Explicit positions and exact interval segments preserve learned events lost by a constant-period projection, but event timing quantization, interval accuracy, native tempo validation, meter and consumer policy may remain independent blockers.",
+  "inputs": {
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_freeze_sha256": "0e0ab33d990e40253d61a6a39758fc30c33510238e02ad58d1467b7fa3d5e3ef",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "beat_this_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "model_inference_allowed": false,
+    "new_audio_or_labels_allowed": false,
+    "formal_holdout_access_allowed": false,
+    "scope": "reuse only saved Beat This final0 events, frozen truth and coarse/projection outputs from the completed GTZAN development run"
+  },
+  "representations": {
+    "control": "unchanged OLS projection; reproduce all saved tuples and old score_window verdicts, including 187 joint-correct windows and all two coarse-to-OLS joint breaks",
+    "explicit": "every saved in-domain event at its exact integer source frame with original sequence index as ordinal; no insertion, deletion, smoothing, tempo-family choice or phase shift",
+    "segments": "exact lossless run-length compression of consecutive equal integer event intervals; non-final runs exclude their shared boundary beat, final run includes last beat; no approximation; do not truncate a graph larger than eight wire segments",
+    "coverage": "event-supported envelope [first event,last event+1), never the full audio source by assumption; keep declared PCM gaps separate; current recordings have continuous PCM and supply no known unavailable-input gaps",
+    "tempo": "selected convenience tempo is the unchanged whole-source consecutive-event OLS millibpm; each segment uses its exact own period and nearest millibpm; out-of-range segments reject rather than clamp",
+    "meter": "reuse the existing two-equal-complete-bars rule per original S6 window; bind each downbeat to its exact raw beat ordinal/coordinate; do not infer full-source single meter or fill unsupported windows",
+    "limits": {"wire_segments": 8, "wire_explicit_beats": 3072, "native_default_segments": 65536, "native_default_beats": 1048576},
+    "native_checks": "actual Rust payload writer/strict reader and external validator, native-result validator, same-grid downbeat lookup; distinguish payload roundtrip from complete-result acceptance",
+    "consumer": "inspect and exercise unchanged actual Pajoniiir subset converter with provisional graph and synthetic policy fixtures; no trusted result promotion or real product activation"
+  },
+  "diagnostics": {
+    "frozen_score": "old constant-grid score_window unchanged; it cannot directly score arbitrary explicit intervals",
+    "common_point_phase": "every represented in-window point within 0.10 of the nearest reference beat's local period, using the unchanged nearest-five-interval local-period helper",
+    "common_point_period": "each represented in-window point's outgoing successor interval versus that same local reference period within 1%; a constant segment retains its own period; explicit sequence uses its actual successor even outside the window; missing successor is unknown, not success",
+    "common_joint": "complete original reference context, nonempty fully scored in-window points, all phase and period checks pass; report for OLS and explicit using these same definitions",
+    "sequence_coverage": "separate strict diagnostic additionally requires one-to-one phase correspondence covering every annotated beat in the window; no precision-only success from omitted beats",
+    "projection_error": "measure exact displacement and beat count changes from saved events to OLS; report fixed comparisons, never optimize against labels",
+    "quantization": "report distance of saved points to the 960-source-frame/50-Hz lattice and the minimal single-interval error possible on that lattice versus local annotated periods; describe as a diagnostic constraint, not a new acceptance gate",
+    "regressions": "report fixes/breaks for identical common diagnostics and keep original old-score regressions separately; never compare unlike metrics as a promotion gain",
+    "confidence": "unknown/uncalibrated throughout; no safety acceptance from placeholder zero"
+  },
+  "consumer_snapshot": {
+    "revision": "0f2fb1425ef76f2541a8c76841cfa52178dca589",
+    "production_libapta_pin": "25d09de364e9507532c0508c838a8fecf0772d13",
+    "adapter_lib_rs_sha256": "fafa449d3c90c2c39ff0a5ab6423f9cb6e9728724bb109524d7df623d9109046",
+    "adapter_cargo_toml_sha256": "80d5d58e345f2387ea80e1b1b292571bf5d7d9a825a845fbdbae3970449ffea9"
+  },
+  "resources": {"max_host_rss_kib": 262144, "max_audit_seconds": 120, "no_new_core_allocations_or_processing_changes": true, "p4_measured": false},
+  "gates": {
+    "baseline_and_input_hashes_exact": true,
+    "all_events_roundtrip_without_change_or_explicit_capacity_rejection": true,
+    "segmented_expansion_matches_explicit_exactly_or_reports_unsupported_period": true,
+    "all_600_windows_retained": true,
+    "gaps_not_bridged_in_synthetic_checks": true,
+    "consumer_rejections_transactional": true,
+    "stop_on_identity_or_roundtrip_mismatch": true,
+    "musical_no_regression_veto_for_any_later_promotion": "zero old period/phase/joint breaks and independently verified transfer plus frozen product gates; this audit cannot promote a candidate",
+    "production_promotion_allowed": false
+  }
+}
