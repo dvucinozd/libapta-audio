@@ -1,0 +1,49 @@
+{
+  "format": "libapta-free-phase-reachability-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "5ba400185e03fb4eb1dc8fc26795ac9c2f883023",
+  "purpose": "Reference-only continuous timing relaxation of the fixed anchored segmented family; necessary feasibility diagnostic, never a detector, native construction or accuracy ceiling.",
+  "inputs": {
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "prior_audit_report_sha256": "0fce2185c2d5fd4fd93e9809aa78274267e3ae9a58167af90282daaecae39afa",
+    "segmented_report_sha256": "0a0f152ae3f504188eace23e8a806b91bf87d33b7e0423da1f7bdc1d172e71ae",
+    "segmented_aggregate_sha256": "c0ff1246877ad168c62206e9f427b50eac86eafdcd8ad8c665560699bdc49705",
+    "segmented_protocol_sha256": "483fca380e70810d793ca02c739a342f3c720ad370823e28a53f557b40e991c1",
+    "read_audio": false,
+    "model_inference": false,
+    "new_labels_or_corpus": false,
+    "formal_holdout_or_reserved_transfer": false
+  },
+  "relaxation": {
+    "positions": "One real rational position x_i per original reference beat/ordinal, with no insertion/deletion. Reuse exact Q32-rounded ownership bounds from the registered segmented prepare: guarded 0.10-local-period phase, integer midpoint cells, exact nearest reference ties earlier, original S6 window and [first beat,last beat+1) envelope.",
+    "local_period": "Unchanged nearest-five-interval local reference period L_i. Let e_i=L_i/100-1 source frame, a_i=L_i-e_i and b_i=L_i+e_i. Negative guard tolerances are infeasible, never relaxed.",
+    "nominal_period": "An independent continuous nominal period p_i in [a_i,b_i] intersect [floor(K/300000)/Q,floor(K/40000)/Q], K=48000*60000*Q, Q=2^32. No integer-tempo or Q32 lattice constraint on the continuous witness.",
+    "natural_counts": "Preserve necessary per-cell geometry: x_i-p_i < B_i and x_i+p_i >= B_(i+1), with original integer cell boundaries B. Eliminate p_i by its upper endpoint U_i, giving x_i < B_i+U_i and x_i >= B_(i+1)-U_i. Empty nominal range is infeasible. These inequalities are necessary for each point of every previous multi-event segment as well as singletons.",
+    "actual_successors": "For every nonfinal original ordinal require a_i <= x_(i+1)-x_i <= b_i, including original segment junctions. Do not constrain the unknown final source successor. Nominal p_i and actual successor can differ: removing piecewise equality, fixed reference anchors, tempo quantization and the segment cap makes this a necessary relaxation only.",
+    "gaps": "Validate declared gaps; any gap intersecting the reference envelope refuses the entire relaxation without bridging. Actual cohort has no declared gaps.",
+    "solver": "Exact rational intervals with independent closed/open endpoint flags. Forward reachable interval R_0=D_0; R_(i+1)=D_(i+1) intersect (R_i+[a_i,b_i]). First empty interval is a private infeasible-prefix certificate. Reconstruct a feasible path backward from full forward intervals: choose the original reference if contained, otherwise nearest included bound, otherwise interval midpoint. No float or epsilon feasibility decisions.",
+    "verification": "Independently formulate all original domain, nominal-geometry and successor inequalities as difference constraints. Bellman-Ford with exact integer-scaled weights and symbolic strictness detects negative cycles, including zero-length strict cycles. Its feasible/infeasible verdict must equal the interval solver for every source. Validate every rational witness against every original inequality. All 47 prior native witnesses must remain admissible and every old anchored plan must reproduce exactly.",
+    "interpretation": "Empty means no path satisfies this registered necessary timing relaxation of the prior family under these reference/window/geometry bounds. It does not prove all wire formats, ownership policies, segment envelopes or musical annotations impossible. Nonempty does not prove quantized native construction, eight-segment fit, meter serialization, FINAL export or product adoption. No native/builder validation claimed for continuous paths."
+  },
+  "evaluation": {
+    "control": "Reproduce all 100 prior anchored plans and all 600 old coarse/learned OLS scores and reference constant-fit records. No changes to previous tools or frozen score_window/tolerances.",
+    "denominators": "Retain all 100 sources, 600 windows and 401 complete/199 incomplete contexts; cross-tab both prior 47 witness/53 no-path groups, and all 106 prior constant-period-incompatible windows. Infeasible sources emit no successful partial path.",
+    "diagnostics": "Use unchanged common point/actual-successor/one-to-one scoring on continuous rational witnesses. Retain unknown final successors and incomplete contexts. Report approximation and per-window totals as label-derived timing diagnostics, never detector accuracy. Meter is not newly constructed or scored.",
+    "integrity_stop": "Stop immediately on any hash/control/replay mismatch, old witness excluded by the relaxation, interval/difference-constraint disagreement, inequality violation or resource-cap failure. No rescue by changing guards, ownership, tempo range, source cohort or caps.",
+    "next_decision": "If additional paths are continuous-feasible, separately register free-anchor quantized native segmented construction under the unchanged eight-segment cap. If none are added, document the active bounds; never train or retune a detector from this result alone."
+  },
+  "limits": {
+    "maximum_source_frames": 1440000,
+    "maximum_reference_events": 3072,
+    "maximum_windows": 8,
+    "max_host_rss_kib": 262144,
+    "max_run_seconds": 180
+  },
+  "formal_acceptance": false,
+  "production_promotion_allowed": false,
+  "core_validators_limits_and_defaults_unchanged": true
+}

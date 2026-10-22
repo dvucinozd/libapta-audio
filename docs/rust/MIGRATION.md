@@ -90,8 +90,13 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: register free-phase reference timing reachability inside the
-same bounds, before changing native limits or implementing another detector.**
+**Current next: implement/test the registered free-phase reference timing
+reachability diagnostic, then measure from clean committed source.**
+The [free-phase experiment](FREE-PHASE-REACHABILITY.md) and
+[fixed protocol](FREE-PHASE-REACHABILITY-PROTOCOL.json) are registered before
+implementation. Exact continuous intervals and an independent strict
+difference-constraint checker must agree; all prior native witnesses and old
+scores must remain admissible/unchanged. This does not construct a native grid.
 The [segmented reference result](SEGMENTED-REFERENCE-RESULT-20261022.md) finds
 47/100 complete anchored-family paths; all 47 pass native/wire/builder checks
 with 1..7 segments and 135 same-grid meter records. On that same 47-source
@@ -120,7 +125,7 @@ at clean `42c9827d91c1f86203193d4d8b3acef0327a359d`; all 100 plans/minima,
 The [host implementation and preflight](SEGMENTED-REFERENCE-PREFLIGHT.md) now
 passes 76 Python tests, 33 focused Rust tests per debug/release profile, strict
 format/Clippy/no-default checks and three generated Python/Rust/MTRD fixtures.
-Commit/push this completed result before the free-phase registration. No
+The completed result is pushed at `5ba4001`, before free-phase registration. No
 segmented detector accuracy, product-owner or physical qualification is claimed.
 The [read-only audit](TIMING-FAILURE-AUDIT.md) and
 [fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) registered reference-period
