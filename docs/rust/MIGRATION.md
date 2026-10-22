@@ -109,6 +109,12 @@ reference fits pass 6/160 ASAP and 49/165 Ballroom complete-context windows.
 These are diagnostic witnesses, not detector accuracy or an impossibility
 ceiling. GTZAN's first preparation stops for one missing annotation before
 music inference; preserve it and register the metadata-availability repair.
+The [availability amendment](NEURAL-REFERENCE-AVAILABILITY-AMENDMENT.json)
+is registered and pushed before music inference. It filters annotation-file
+presence before the unchanged balanced selection. The second preparation now
+contains 100 verified/canonicalized sources; host synthetic network/decoder
+parity and source-coordinate tests pass. Next: freeze source/runtime/weights,
+run both fixed references once and rescore saved outputs.
 Preserve this failed candidate; no threshold rescue or native temporal selector.
 
 Continue on `rust-rewrite` with one end-to-end development slice:
