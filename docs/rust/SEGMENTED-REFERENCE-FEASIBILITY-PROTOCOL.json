@@ -1,0 +1,60 @@
+{
+  "format": "libapta-segmented-reference-feasibility-1",
+  "registered_date": "2026-10-22",
+  "baseline_revision": "35f3822e252376ce139c9a0ad508614e0ce82ffc",
+  "formal_acceptance": false,
+  "purpose": "Reference-only piecewise-period representation witnesses under existing native/wire contracts; no musical detector, optimized detector ceiling or production promotion.",
+  "inputs": {
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "beat_this_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "prior_audit_report_sha256": "0fce2185c2d5fd4fd93e9809aa78274267e3ae9a58167af90282daaecae39afa",
+    "prior_audit_aggregate_sha256": "85a8749ee4ebc38b0def97ab44e68a7f1b17a040dfcc04b372839b9ad31ca7ac",
+    "read_audio": false,
+    "model_inference": false,
+    "new_labels_or_corpus": false,
+    "formal_holdout_or_reserved_transfer": false
+  },
+  "witness_family": {
+    "name": "reference-anchored-constant-pieces-v1",
+    "sample_rate": 48000,
+    "source_envelope": "[first reference beat,last reference beat+1), never full-source coverage by assumption; declared unavailable PCM intersecting this envelope rejects the entire witness without bridging",
+    "ownership": "integer cell boundaries are first beat, floor((previous+current)/2)+1 for internal boundaries, last beat+1; each represented event must remain in its own cell, its exact nearest-reference Voronoi cell (ties earlier), and its original S6 window",
+    "anchor": "each contiguous segment starts exactly at its first reference event with that original global ordinal; single-beat segments permitted, no insertion or deletion",
+    "phase_and_period": "use the unchanged nearest-five-interval local reference period; phase error <=0.10*local_period minus one source frame and own segment period error <=0.01*local_period minus one source frame; conservative one-frame guard does not alter frozen scoring tolerances",
+    "geometry": "segment applicability runs from its first event's integer cell boundary to the boundary after its last event; previous natural line point must precede the range and next natural point must be at or beyond the range end, so declared counts cannot hide extra in-range line points",
+    "junction": "for a nonfinal segment require the interval from its last represented point to the next segment's exact reference anchor within 0.01*local_period_at_last minus one frame; final source successor remains unknown, not invented",
+    "tempo_quantization": "find the exact feasible integer Q32 period interval from phase/period/ownership/window/count/junction inequalities; intersect integer nominal tempos 40000..300000 whose floor((48000*60000<<32)/tempo) lies in that interval; choose nearest to the first reference event's rounded local tempo within this feasible interval, without rescuing an empty interval",
+    "partition": "dynamic programming minimizes segment count within this anchored family over every contiguous candidate; among equal-count solutions choose the longest first piece; deterministic tempo choice as above; no claim of global optimum over all possible grid anchors/representations",
+    "capacity": "compute and retain the complete minimum-count family witness before applying eight-segment wire cap; over-cap graphs may undergo native-only validation, but wire/builder adoption fails explicitly and no partial prefix is scored as success",
+    "meter": "reuse the two-equal-complete-bars rule on original reference indices per S6 window, map that downbeat ordinal to this witness's Q32 point, clip its range to the reference envelope, retain numerator/denominator and exact whole-frame binding; no unsupported meter or source prefix/suffix is filled",
+    "state": "all graphs/meters provisional, pending revision, confidence uncalibrated zero, selected TEMP equals first segment's actual nominal tempo and existing dynamic flags permit differing segment tempos"
+  },
+  "native_checks": {
+    "scope": "separate host-only Rust example using actual unchanged grid::validate_external/write/strict parse/canonical write, native_validation and external builder with same-grid MTRD included",
+    "identity": "Python expansion and Rust beat_at expansion must agree exactly on every Q32 coordinate and original ordinal; compare approximation to original reference separately, never call it lossless reference preservation",
+    "meter": "MTRD write/parse/grid lookup and complete native/builder cross-feature validation; no isolated meter-payload-only acceptance claim",
+    "consumer": "production M1 converter, dependency pin and owner handoff unchanged; prior actual-consumer audit remains the boundary, no new playback adoption"
+  },
+  "evaluation": {
+    "control": "reproduce all old coarse/Beat This OLS tuples, per-window scores and prior reference-only constant-fit witnesses; original score_window unchanged",
+    "diagnostics": "unchanged common point/period/one-to-one score on own segment periods, and separately on actual outgoing successor intervals including junctions; final source successor unknown; report full native-family witness and separately wire-cap-qualified witness across all 600 windows",
+    "denominators": "original 401 complete-reference contexts and 199 incomplete retained; report all 106 prior constant-period-incompatible windows separately, without selecting or dropping sources",
+    "integrity_stop": "immediate failure on baseline/hash/Q32/ordinal/meter mismatch; cap/unsupported-family outcomes remain explicit diagnostics, never trigger threshold or limit rescue",
+    "evidence_level": "label-based representation feasibility only; no detector accuracy, musical promotion, training/transfer, calibrated confidence or physical qualification"
+  },
+  "limits": {
+    "maximum_source_frames": 1440000,
+    "maximum_reference_events": 3072,
+    "maximum_windows": 8,
+    "wire_segments": 8,
+    "max_host_rss_kib": 262144,
+    "max_run_seconds": 180,
+    "native_probe_timeout_seconds": 10
+  },
+  "production_promotion_allowed": false,
+  "core_validators_limits_and_defaults_unchanged": true
+}

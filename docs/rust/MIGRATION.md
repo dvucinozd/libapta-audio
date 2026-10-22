@@ -101,6 +101,11 @@ model. Model failures also contain 123 raw-correspondence mismatch flags and
 segments solely as representation witnesses, preserving source ordinals,
 same-grid meter, coverage and the eight-segment cap; then separately address
 learned variable timing and family ambiguity. No new detector is promoted.
+The [segmented-reference feasibility](SEGMENTED-REFERENCE-FEASIBILITY.md) and
+[protocol](SEGMENTED-REFERENCE-FEASIBILITY-PROTOCOL.json) now register a fixed
+anchored-piece family, exact Q32 constraint intervals, minimum-count partition,
+junction checks and actual native/wire/meter validation before implementation.
+Commit/push registration and synthetic preflight before witness measurements.
 The [read-only audit](TIMING-FAILURE-AUDIT.md) and
 [fixed protocol](TIMING-FAILURE-AUDIT-PROTOCOL.json) registered reference-period
 compatibility, fixed tempo ratios, raw-event correspondence and exclusive triage
