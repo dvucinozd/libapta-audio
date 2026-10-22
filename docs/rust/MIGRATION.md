@@ -99,6 +99,11 @@ Beat This! projection improves joint correctness 47 -> 187/401 complete-context
 windows but breaks two previously joint-correct cases. Preserve the scorer and
 all regression cases; neither model is production/P4-qualified. Confidence and
 cross-dataset identity verification remain open. BeatNet+ licensing is unresolved.
+The [representation audit](EVENT-REPRESENTATION-EXPERIMENT.md) is now registered
+and its [host implementation/preflight](EVENT-REPRESENTATION-PREFLIGHT.md)
+passes focused tests, exact compression controls and actual-consumer synthetic
+policy checks. Next: run all saved 100-source / 600-window development records
+from a clean implementation checkpoint; no new inference or corpus is needed.
 The [reference experiment](NEURAL-REFERENCE-EXPERIMENT.md) and its
 [fixed protocol](NEURAL-REFERENCE-PROTOCOL.json) now register the two checkpoints,
 100-source GTZAN selection, event/continuity screening gates, projection and
