@@ -8,10 +8,13 @@ reference. This document owns the migration checklist and next-step handoff.
 
 The user-requested [detailed implementation plan](DENSE-DECODER-IMPLEMENTATION-PLAN-20261023.md)
 and [machine-readable plan](DENSE-DECODER-PLAN-20261023.json) define DD-00 through
-DD-10. This checkpoint is documentation only: no decoder, new measurement,
-model adoption or gate closure. Resume at DD-00 (input identities and product
-constraints), then DD-01 (registered protocol), before implementing the fixed
-integer dense decoder. Commit/push each verified checkpoint before the next.
+DD-10. DD-00 now passes the [input audit and consumer inventory](DENSE-DECODER-P4-CONSTRAINTS.md):
+all 300 payload/metadata/event files, geometry, coverage and legacy events verify.
+The [aggregate evidence](DENSE-DECODER-DD00-20261023.json) binds the exact source
+and consumer documents. Product RAM/latency budgets remain UNKNOWN; physical P4
+is unmeasured. No decoder or musical scoring yet. Resume at DD-01 (registered
+protocol), before implementing the fixed integer dense decoder. Commit/push each
+verified checkpoint before the next.
 
 The plan separates raw-event, unchanged OLS-projection and actual-interval
 evaluation. A failed development gate stops transfer and native implementation;

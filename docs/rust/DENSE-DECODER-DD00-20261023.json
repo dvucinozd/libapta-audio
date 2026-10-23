@@ -1,0 +1,50 @@
+{
+  "audio_read": false,
+  "candidate_constructed": false,
+  "consumer": {
+    "branch": "main",
+    "clean": true,
+    "file_sha256": {
+      "docs/M1_RUST_ARCHITECTURE.md": "b651f3c3a4351a4148be11666491ac1459d86f92160dc81da9d972d13e6757dd",
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "fed3a81e8509aa3234905903658fd96341b6a24dd2c86725a467ebdf73554b97",
+      "firmware-rust/Cargo.lock": "63717c885671f17ff0ffbfae09995e7a22eab94e3fa4b992179bdf7e8ac778ed",
+      "firmware-rust/crates/pajoniiir-apta-adapter/README.md": "80d9f490f5c7bbde8c95aa1b9d46a26ba41fb0defa409df2343fd04e19a475e0",
+      "firmware-rust/crates/pajoniiir-apta-adapter/src/owner.rs": "63256c5cd604edbc6430a73648e35266f14d776cf61c253e757645bd86b04a1c",
+      "firmware-rust/crates/pajoniiir-apta-adapter/src/service.rs": "c3c4bfebef1a9d5948489cbb01d6075ffaf8f35c81f13d18cce34f54443f6a02",
+      "firmware-rust/crates/pajoniiir-apta-adapter/src/storage.rs": "2f4f0471571c827f4fb5f77db720bf7cc722458ee8293dc8e48b48eecf8903fc"
+    },
+    "revision": "0f2fb1425ef76f2541a8c76841cfa52178dca589"
+  },
+  "counts": {
+    "beyond_source_rows": 0,
+    "exclusive_endpoint_beat_events": 10,
+    "exclusive_endpoint_downbeat_events": 3,
+    "exclusive_endpoint_rows": 98,
+    "legacy_beat_events": 6095,
+    "legacy_downbeat_events": 1851,
+    "payload_bytes": 1202360,
+    "rows": 150095,
+    "source_owned_rows": 149997,
+    "sources": 100,
+    "windows": 600
+  },
+  "dd00_input_integrity": "PASS",
+  "dense_report_sha256": "72707018f6cbe8ff8550d6e799fcb3a224747f2ce68381f9e1e3963383cf9b05",
+  "formal_acceptance": false,
+  "format": "libapta-dense-decoder-dd00-1",
+  "hash_roundtrip_geometry_coverage_legacy_event_identity": true,
+  "labels_parsed": false,
+  "legacy_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+  "musical_scoring": false,
+  "new_inference": false,
+  "old_scores_parsed": false,
+  "physical_p4": "UNMEASURED",
+  "plan_json_sha256": "820d83952c268b97de8028b5517fa48e203b970b97272632548651da216d88f7",
+  "private_audit_sha256": "1292c2efba0410902b84e9f7da3c7adcb6fc953f0ed58440300ec921b87fbee2",
+  "product_resource_budget": "UNKNOWN",
+  "production_promotion": false,
+  "source_revision": "39d32ac225073e3b0f135ba14bb77738ce02e128",
+  "verification_script_sha256": "a49102a884f16237383c86ab3b45b9eb19e0b7f9ae5003d5f79442c87c8761fd",
+  "verified_private_payload_record_event_files": 300,
+  "wall_seconds": 25.03569951499958
+}
