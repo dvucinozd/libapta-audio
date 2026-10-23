@@ -154,6 +154,7 @@ def main():
     run([sys.executable, "tests/unit/apta_1_1_dense_decoder_runner.py", "-v"], env=history_env)
     run([sys.executable, "tests/unit/apta_1_1_dense_decoder_verify.py", "-v"], env=history_env)
     run([sys.executable, "tests/unit/apta_1_1_coupled_time.py", "-v"], env=history_env)
+    run([sys.executable, "tests/unit/apta_1_1_coupled_time_verify.py", "-v"], env=history_env)
     run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "temporal-trace-diagnostics",
          "--bin", "apta-history-diagnostic", "--locked"], env=env)
     history_env.pop("APTA_DENSE_UNSUPPORTED_DIAGNOSTIC")

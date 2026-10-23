@@ -79,9 +79,19 @@ oracle comparisons for N1..8 and three N3072/window8 arithmetic cases. The
 [aggregate receipt](COUPLED-TIME-CT01-20261023.json) binds component/test hashes;
 45 returned instances also pass the registered JSON schema. The routine suite
 is wired into the combined runner, whose full C/Rust matrix was not run here.
-**Next: CT-02 independent exact replay verifier and supervised generated resource preflight.**
-Independent replay and actual watchdog/RSS/output enforcement remain NOT_RUN;
-full-size arithmetic coverage does not establish resource qualification.
+CT-02 now passes [independent exact replay and supervised generated preflight](COUPLED-TIME-CT02-20261023.md).
+All 37 focused Python tests pass (23 CT-01 controls plus 14 new, zero skips).
+All 21 generated candidates freeze and replay byte-for-byte; 141 corrupted saved
+leaves/containers plus additional type/JSON/hash corruptions are rejected.
+Actual timeout/RSS/output, descendant accounting/group termination and live-orphan
+negative checks pass. The [aggregate evidence](COUPLED-TIME-CT02-20261023.json)
+binds exact components and logs. Maximum supervised source time is 11.216s,
+source self RSS 20308 KiB and supervised process RSS/HWM 36176 KiB, within the
+registered 60s/262144 KiB limits; total attempt output is 1359576 bytes.
+These are generated host measurements only; no neural-pipeline/P4 qualification.
+**Next: CT-03 register exact musical input/baseline/labels/gates and resolve or explicitly record independence.**
+The real construct/verify/score CLI remains absent; CT-04 isolation and a separately
+registered/authorized CT-05 attempt still precede any real measurement.
 The original proposal and CT-00 registration remain frozen and synthetic-only.
 No new candidate is registered for real music or musically measured;
 evaluation manifests and independence remain unresolved. No private inputs were
