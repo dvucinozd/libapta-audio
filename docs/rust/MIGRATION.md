@@ -114,19 +114,26 @@ are rejected. The CT-02 21-case numerical/process preflight is repeated.
 The two-source/four-window canonical attempt uses 478659 bytes; phase times are
 3.261/3.743/6.969s and maximum observed process RSS/HWM is 108968 KiB.
 These are generated host values, not a real musical result or P4 qualification.
-**Next: execute the authorized CT-05 exposed diagnostic attempt.**
-The [CT-05 scope](COUPLED-TIME-CT05-SCOPE.md) and separate
-[authorization](COUPLED-TIME-ATTEMPT-AUTHORIZATION.json) now bind one fresh external
-destination. All643 input identities and registered/preflight components recheck.
-Before dispatch, commit/push this checkpoint and verify the same clean execution
-source for all phases. Construct all100, independently verify all100, then score
-once; retain the exact100/600 cohort, unchanged gates and one-run stop policy.
-The original proposal and CT-00 registration remain frozen. No real candidate
-was constructed or musically scored, no new inference ran, and the original
-rejection stays frozen. Independent transfer and product qualification stay open.
-This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
-the frozen failure and baseline; no automatic retry, retuning, fallback, new
-model/training or production activation follows this result.
+CT-05 now closes the [single exposed diagnostic attempt](COUPLED-TIME-CT05-20261023.md)
+on clean pushed source `362b6fa54ca3903794a34729d66bb5b7b202a446`.
+Construction freezes all100 candidates/600 windows; all6095 original beats are
+retained. Independent verification completes56/100 sources before the fixed
+1800-second phase ceiling stops it: **INVALID; whole-cohort verification INCOMPLETE**.
+There is no verification completion envelope and evaluation was never invoked.
+No real labels or musical scores were parsed; this is no musical rejection/pass.
+The [aggregate receipt](COUPLED-TIME-CT05-20261023.json) binds exact identities and
+resources. Supervised construct/verify wall times are1699.345/1800.045s, with
+maximum observed process RSS/HWM21212/22204KiB. Retained attempt output is11934333bytes.
+Closeout rechecks100 candidate hashes/1653 bindings and finds zero runner processes.
+The source/remote SHA still match before result edits; the implementation is unchanged.
+**Next: separate read-only verification-cost diagnosis and a plan for full-cohort
+generated operational preflight.** The one-attempt authorization is consumed.
+Preserve all partials and the timeout; do not retry, score the subset, raise caps,
+retune or repair/replay within this attempt. Any later real attempt needs a new
+registered scope and matching preflight after its separate repair checkpoint.
+The numerical proposal and prior rejection remain frozen; no new inference ran.
+Independent transfer, confidence, whole-pipeline resources, native consumer,
+physical P4, fresh acceptance and release stay open. No production promotion follows.
 Commit/push each verified checkpoint before the next.
 
 The plan separates raw-event, unchanged OLS-projection and actual-interval
