@@ -1,0 +1,41 @@
+{
+  "format": "libapta-neural-dense-capture-1",
+  "registered_date": "2026-10-23",
+  "baseline_revision": "346d5034e68f266ffa52d0dc4cb14d10a6466d0e",
+  "purpose": "Capture complete existing Beat This! final0 beat/downbeat f32 logits without changing legacy events; no musical scoring or new decoder.",
+  "inputs": {
+    "label_free_inputs_sha256": "db3c3985ada4a40e8a8ae9cda2ee68a3cd33573427f3fc39a37937295dcca937",
+    "legacy_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "checkpoint_sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331",
+    "model_revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+    "sources": 100,
+    "windows": 600,
+    "new_labels_or_holdouts": false,
+    "new_audio_or_model": false,
+    "existing_audio_inference_allowed": true
+  },
+  "capture": {
+    "inference": "Reuse unchanged apta_1_1_neural_inference.Models including its synthetic preflight, loading/reset behavior, CPU two threads, final0 checkpoint, canonical PCM48k stereo f32 read, numpy channel mean and soxr HQ to 22050 Hz. Wrap beat_this.signal2spect and spect2frames only to observe inputs and returned logits; invoke original methods unchanged, exactly once per real source. Original infer performs the same upstream minimal dbn=False event postprocessing and source-domain endpoint adapter.",
+    "binding": "Before real inference bind exact current repository source, legacy label-free inputs, legacy 100 event records, checkpoint/upstream Python, original frozen runtime py/so files, audio hashes and original six-window coarse files. Recheck asset/runtime/audio hashes from legacy comparison freeze rather than trusting new hashes. Never parse prepared labels or scoring reports; read original coarse files for source/window geometry only. No package installation or code patching of upstream/runtime.",
+    "geometry": "Source 48000 Hz. Input mono length must lie between floor and ceil of source_frames*22050/48000. Introspect original MelSpectrogram n_fft=1024, hop=441, centered reflect padding; n_mels=128. Require spect rows = mono_length//441+1 and two returned f32 one-dimensional arrays with exactly this row count. Index i has upstream center i/50 seconds, corresponding exactly to source frame 960*i. This is a centered analysis coordinate, not a causal availability or zero-latency claim.",
+    "coverage": "Use original split_piece chunk_size1500/border6/avoid_short_end=True schedule to independently prove every spect row is assigned by aggregation after border trim. Preserve all rows, including centered final boundary/padded rows; do not infer missing data from a finite sentinel-like logit. Keep original keep_first aggregation unchanged. Check no NaN/Inf and no dropped/duplicated/reordered rows.",
+    "payload": "Private binary: eight-byte magic APTADN01, LE u32 row_count, LE u32 channels=2, then interleaved LE f32 beat,downbeat in original index order. Exactly 16+8*rows bytes. No sigmoid, threshold, f16, quantization, peak filtering or timestamp rounding in payload. Decode and compare exact f32 bit patterns; use decoded logits through the same upstream postprocessor and event adapter, requiring exact full event dictionaries equal both current original infer and all saved legacy events.",
+    "windows": "Retain all six original source S6 ranges. Map rows by source center in [first,end), separately retain centers == exclusive source end and centers > source end. Window row ownership plus boundary/beyond sets must partition every row exactly once. Centered feature support may cross source/S6 edges; do not call a center partition independent window inference or claim unsupported audio as measured silence.",
+    "metadata": "Private per-source metadata includes binary hash/shape, original and resampled geometry/input hashes, aggregation coverage ranges, center mapping, original events and endpoint records, saved-event parity, window row ownership, counts of nonpositive/positive logits per channel and host resources. Logit magnitude/sign is model evidence, not calibrated confidence. No label values, event correctness or grid-score computation.",
+    "integrity": "Freeze registration, implementation and preflight before the single clean-source capture. Refuse existing output, input/source mutation, nonfinite/shape/mapping/coverage/parity mismatch or resource-cap overrun. Preserve failed output; no parameter/endpoint/sample-rate/model rescue. Stop at first source failure; never call partial capture a complete cohort."
+  },
+  "limits": {
+    "maximum_source_frames": 1440000,
+    "maximum_rows": 1501,
+    "maximum_windows": 8,
+    "maximum_trace_bytes": 131072,
+    "max_model_seconds_per_source": 120,
+    "max_capture_seconds": 1800,
+    "max_host_rss_kib": 2097152,
+    "max_output_bytes": 67108864
+  },
+  "verification": "Synthetic stdlib payload/mapping/coverage/corruption/endpoint tests plus actual pinned-runtime silent and pulse/noise capture/replay preflight, prior worker synthetic checks, unchanged native controls. After capture independently decode every payload, reconstruct centers/window ownership/coverage and replay original postprocessing against all saved events without a second model inference. Check all file hashes and complete cohort before aggregate publication.",
+  "next": "Only complete capture with exact 100-source event parity allows a separately registered bounded decoder of dense beat/downbeat evidence with competing variable timing/family/phase paths. No decoder search, labels, musical scoring, model training or product/native/P4 activation in this checkpoint.",
+  "formal_acceptance": false,
+  "production_promotion_allowed": false
+}

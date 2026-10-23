@@ -90,8 +90,12 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: separately register label-free dense Beat This! final0
-beat/downbeat logit capture with exact legacy-event parity, before decoding.**
+**Current next: implement and synthetically verify the registered dense
+Beat This! logit capture, then capture once with exact legacy-event parity.**
+The [capture experiment](NEURAL-DENSE-CAPTURE.md) and
+[fixed protocol](NEURAL-DENSE-CAPTURE-PROTOCOL.json) freeze unchanged upstream
+forward/postprocessing, full f32 row retention, source/S6/boundary mapping,
+coverage proof and exact saved-event replay before any real inference.
 The [learned-piecewise result](LEARNED-PIECEWISE-RESULT-20261023.md) rejects the
 fixed candidate at clean pushed `7c6faac44a46a33e0146d0eae57993e6258f802e`:
 174/401 nominal joint windows versus 187 OLS, zero fixes and 13 breaks; actual
