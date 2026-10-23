@@ -12,9 +12,13 @@ DD-10. DD-00 now passes the [input audit and consumer inventory](DENSE-DECODER-P
 all 300 payload/metadata/event files, geometry, coverage and legacy events verify.
 The [aggregate evidence](DENSE-DECODER-DD00-20261023.json) binds the exact source
 and consumer documents. Product RAM/latency budgets remain UNKNOWN; physical P4
-is unmeasured. No decoder or musical scoring yet. Resume at DD-01 (registered
-protocol), before implementing the fixed integer dense decoder. Commit/push each
-verified checkpoint before the next.
+is unmeasured. DD-01 now registers the [experiment](DENSE-DECODER-EXPERIMENT.md)
+and [fixed protocol](DENSE-DECODER-PROTOCOL.json), bound to the completed DD-00
+checkpoint and original plan. Protocol SHA-256:
+`5dc1241087a08663b06766f91faade5a5758f9791fd85e0077c62e78d5a186fd`.
+No decoder or musical scoring yet. **Resume at DD-02: pure deterministic host
+decoder and generated tests**, then the isolated runner and independent preflight.
+Commit/push each verified checkpoint before the next.
 
 The plan separates raw-event, unchanged OLS-projection and actual-interval
 evaluation. A failed development gate stops transfer and native implementation;
