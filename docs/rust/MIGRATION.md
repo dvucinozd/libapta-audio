@@ -114,12 +114,13 @@ are rejected. The CT-02 21-case numerical/process preflight is repeated.
 The two-source/four-window canonical attempt uses 478659 bytes; phase times are
 3.261/3.743/6.969s and maximum observed process RSS/HWM is 108968 KiB.
 These are generated host values, not a real musical result or P4 qualification.
-**Next: CT-05, one separately authorized exposed diagnostic attempt.**
-The CLI now exists with real dispatch disabled. Matching CT-02/CT-03 tokens,
-this CT-04 preflight and a distinct authorized CT-05 scope/destination record
-must precede real construction. That authorization record does not exist here.
-Before dispatch, commit/push and verify the same clean execution source for all
-phases; retain the exact 100/600 cohort, unchanged gates and one-run stop policy.
+**Next: execute the authorized CT-05 exposed diagnostic attempt.**
+The [CT-05 scope](COUPLED-TIME-CT05-SCOPE.md) and separate
+[authorization](COUPLED-TIME-ATTEMPT-AUTHORIZATION.json) now bind one fresh external
+destination. All643 input identities and registered/preflight components recheck.
+Before dispatch, commit/push this checkpoint and verify the same clean execution
+source for all phases. Construct all100, independently verify all100, then score
+once; retain the exact100/600 cohort, unchanged gates and one-run stop policy.
 The original proposal and CT-00 registration remain frozen. No real candidate
 was constructed or musically scored, no new inference ran, and the original
 rejection stays frozen. Independent transfer and product qualification stay open.

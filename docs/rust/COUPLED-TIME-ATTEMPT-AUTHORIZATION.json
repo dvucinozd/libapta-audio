@@ -1,0 +1,15 @@
+{
+  "attempt_path_sha256": "809770bda8c1aad0f0c0eb0cc1a4172f3ed0da317107706035d56be92e96236a",
+  "authorization_basis": "Direct user instruction: moze. nastavi; continuation of the recorded CT05 next step",
+  "authorized": true,
+  "candidate": "coupled-neural-event-time-v1",
+  "ct04_preflight_sha256": "68812862e2ee06f76b60b2a439c70db20b7d783037bf4f9858ae025f088023a5",
+  "date": "2026-10-23",
+  "format": "libapta-coupled-time-authorized-attempt-1",
+  "maximum_attempts": 1,
+  "parent_revision": "94b35c115ebeed5a2006c1d3bf1aacf0865384aa",
+  "registration_sha256": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+  "scope": "EXPOSED_DIAGNOSTIC_ONLY",
+  "sources": 100,
+  "windows": 600
+}
