@@ -179,3 +179,8 @@ Exact source archive, tests and independent fit/partition/score replay/export:
 Commit/push this measured rejection before any dense-logit registration.
 Independent transfer, confidence, key, fresh acceptance, production adoption
 and physical P4 qualification remain open. No new musical accuracy gain.
+
+Measured follow-up: the separately registered
+[complete dense capture](NEURAL-DENSE-RESULT-20261023.md) retains 150095 f32 rows
+and exactly reproduces all 100 saved event sequences. No labels or musical
+scoring are read. Dense decoder registration is next; this rejection stays fixed.

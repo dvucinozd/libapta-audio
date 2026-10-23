@@ -90,16 +90,27 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: run the registered dense Beat This! logit capture once from
-clean committed source, requiring exact legacy-event parity for all 100 inputs.**
+**Current next: separately register a bounded label-blind dense beat/downbeat
+decoder for variable timing and competing phase/family paths.**
+The [complete capture](NEURAL-DENSE-RESULT-20261023.md), measured at clean pushed
+`297284933e922a669f65b8939b824da7b9e6f740`, retains 150095 two-channel f32 rows
+over all 100 sources/600 windows. Original inference, saved legacy records and
+decoded postprocessing reproduce all 6095 beat and 1851 downbeat events exactly,
+plus the separate 10/3 exclusive-endpoint events. All rows, including 98 centered
+at source end and nonpositive/weak evidence, are retained and covered.
+Independent binary/center/window/chunk/event replay passes without another real
+model forward. No labels or musical scoring are read. Bind this completed trace
+set before defining a bounded decoder and zero-regression controls; do not
+retrain/change model, tune the failed piecewise fit or reopen reference research.
 The [capture experiment](NEURAL-DENSE-CAPTURE.md) and
 [fixed protocol](NEURAL-DENSE-CAPTURE-PROTOCOL.json) freeze unchanged upstream
 forward/postprocessing, full f32 row retention, source/S6/boundary mapping,
 coverage proof and exact saved-event replay before any real inference.
 The [preflight](NEURAL-DENSE-PREFLIGHT.md) passes 148 Python tests, 37 unchanged
 Rust controls per debug/release profile and two actual pinned-runtime synthetic
-dense captures with bit/exact-event/coverage checks. Commit/push before the
-single real pass; no labels, musical scoring or new decoder in this capture.
+dense captures with bit/exact-event/coverage checks. Registration and preflight
+were committed/pushed before the single real pass; commit/push the result before
+decoder registration. No labels, musical scoring or new decoder in this capture.
 The [learned-piecewise result](LEARNED-PIECEWISE-RESULT-20261023.md) rejects the
 fixed candidate at clean pushed `7c6faac44a46a33e0146d0eae57993e6258f802e`:
 174/401 nominal joint windows versus 187 OLS, zero fixes and 13 breaks; actual
@@ -109,11 +120,10 @@ remain accepted but wrong, so guard removal/capacity increases are not a full
 repair. All 100 label-isolated candidates, independent fits/partitions and 600
 scores reproduce. No transfer or same-cohort rescue follows this rejection.
 The local bound upstream source exposes `Audio2Frames` logits before
-`Audio2Beats` postprocessing. Next freeze model/preprocessing/coordinate/cap
-contracts and capture complete dense evidence with unchanged saved-event
-parity, without scoring labels. Only after trace integrity should a separate
-bounded probability decoder address competing timing/family/phase paths.
-No new inference or such capture is performed by this checkpoint.
+`Audio2Beats` postprocessing. Its separately registered complete capture above
+preserves model/preprocessing/coordinate/cap contracts and saved-event parity,
+without scoring labels. This supplies trace integrity for a future separate
+bounded probability decoder addressing competing timing/family/phase paths.
 The [learned-event experiment](LEARNED-PIECEWISE-EXPERIMENT.md) and
 [fixed protocol](LEARNED-PIECEWISE-PROTOCOL.json) register adaptive pieces,
 one-hop learned residuals, actual seam checks, eight-piece source cap and

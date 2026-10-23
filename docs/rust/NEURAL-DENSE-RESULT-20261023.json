@@ -1,0 +1,64 @@
+{
+  "all_100_original_saved_and_decoded_events_identical": true,
+  "all_100_payloads_windows_coverage_and_legacy_events_independently_replayed": true,
+  "all_f32_payloads_bit_exact": true,
+  "all_rows_aggregation_assigned": true,
+  "all_source_window_boundary_rows_retained": true,
+  "bound_files": 11821,
+  "complete": true,
+  "counts": {
+    "beyond_source_rows": 0,
+    "exclusive_endpoint_beat_events": 10,
+    "exclusive_endpoint_downbeat_events": 3,
+    "exclusive_endpoint_rows": 98,
+    "legacy_beat_events": 6095,
+    "legacy_downbeat_events": 1851,
+    "payload_bytes": 1202360,
+    "rows": 150095,
+    "source_owned_rows": 149997,
+    "sources": 100,
+    "windows": 600
+  },
+  "feature_length_histogram": {
+    "1497": 1,
+    "1500": 1,
+    "1501": 98
+  },
+  "formal_acceptance": false,
+  "format": "libapta-neural-dense-capture-1",
+  "independent_replay_script_sha256": "6af4c8098217c546a0688b38eb13fae0b75c6fd1e8630d4138be001b54410acb",
+  "logit_counts": {
+    "beat": {
+      "nonpositive_logits": 132081,
+      "positive_logits": 18014,
+      "values": 150095
+    },
+    "downbeat": {
+      "nonpositive_logits": 144046,
+      "positive_logits": 6049,
+      "values": 150095
+    }
+  },
+  "musical_scoring": false,
+  "new_decoder": false,
+  "physical_p4": false,
+  "production_promotion": false,
+  "protocol_sha256": "28490ab1983cac6abd011923c5f4e78d3e7bf5096fdb119a102c386e1de62685",
+  "read_labels": false,
+  "report_sha256": "72707018f6cbe8ff8550d6e799fcb3a224747f2ce68381f9e1e3963383cf9b05",
+  "resources": {
+    "capture_wall_seconds": 431.52945081400003,
+    "max_source_seconds": 5.781572762999986,
+    "rss_peak_kib": 648132,
+    "source_output_bytes": 1679365
+  },
+  "source_archive_sha256": "0cad34cd5b26b55b8f1fc910ae2b86dac2493374c72ed6066fe4fbe1a5d5fff8",
+  "source_revision": "297284933e922a669f65b8939b824da7b9e6f740",
+  "synthetic_preflight_sha256": "a018fc5de43372fc047f943bb1c6aed28bca9f14308db45b96f7080f913aae1a",
+  "tests": {
+    "neural_synthetic_fixtures": 2,
+    "python": 148,
+    "rust_each_debug_release": 37
+  },
+  "verification_log_sha256": "fd4b338001d6d7e25a2463894b46125eec5dc0123f73dfe08e21814c5688ddd8"
+}

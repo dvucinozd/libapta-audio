@@ -50,7 +50,10 @@ now complete: 60/100 wire-qualified paths, including 13 additional witnesses.
 Reference-construction research is closed. The subsequent
 [label-blind piecewise timing](LEARNED-PIECEWISE-RESULT-20261023.md) is rejected
 with 13 OLS joint breaks. Next is complete upstream logit capture and unchanged
-event parity before a separately registered probability decoder.
+event parity before a separately registered probability decoder. That
+[complete capture](NEURAL-DENSE-RESULT-20261023.md) now passes for all 100 sources
+with 150095 two-channel f32 rows and identical legacy events. Next is bounded
+dense decoder registration; these measured model scores remain unchanged.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results

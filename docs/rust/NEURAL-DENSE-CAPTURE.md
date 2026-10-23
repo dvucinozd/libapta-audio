@@ -38,3 +38,7 @@ counts/hashes only. Coordinates, logits, audio, IDs and mappings remain private.
 Only complete parity permits the next separately registered dense probability
 decoder; no labels, scoring, decoder, native/default/consumer/release change or
 fresh/holdout/transfer access is part of this capture.
+
+Measured follow-up: [complete capture and independent replay pass](NEURAL-DENSE-RESULT-20261023.md)
+for all 100 sources, 150095 two-channel f32 rows and unchanged legacy events.
+Next is separately registered bounded dense decoding; no musical gain is claimed.
