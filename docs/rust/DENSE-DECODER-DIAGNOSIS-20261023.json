@@ -1,0 +1,96 @@
+{
+  "absolute_adjacent_refinement_difference_frames": {
+    "count": 5922,
+    "max": 886,
+    "p50": 122,
+    "p90": 392,
+    "p99": 634
+  },
+  "absolute_interval_error_percent": {
+    "count": 5922,
+    "max": 107.52728174603175,
+    "p50": 1.3274754346182918,
+    "p90": 49.83607237715803,
+    "p99": 101.39573070607553
+  },
+  "absolute_row_interval_change_counts": {
+    "0": 3675,
+    "1": 2222,
+    "2": 6
+  },
+  "absolute_saved_refinement_frames": {
+    "count": 6101,
+    "max": 480,
+    "p50": 66,
+    "p90": 326,
+    "p99": 464
+  },
+  "actual_window_reasons": {
+    "empty": 4,
+    "incomplete_reference": 1,
+    "incomplete_reference+empty": 2,
+    "incomplete_reference+known_period_error": 18,
+    "incomplete_reference+outside_reference": 7,
+    "incomplete_reference+outside_reference+known_period_error": 76,
+    "incomplete_reference+outside_reference+phase_error": 2,
+    "incomplete_reference+outside_reference+phase_error+known_period_error": 31,
+    "incomplete_reference+phase_error+known_period_error": 7,
+    "incomplete_reference+unknown_successor": 7,
+    "incomplete_reference+unknown_successor+known_period_error": 39,
+    "incomplete_reference+unknown_successor+phase_error": 1,
+    "incomplete_reference+unknown_successor+phase_error+known_period_error": 8,
+    "known_period_error": 293,
+    "pass": 9,
+    "phase_error+known_period_error": 95
+  },
+  "alternative_candidate_scored": false,
+  "candidate_redecoded": false,
+  "format": "libapta-dense-decoder-posthoc-diagnosis-1",
+  "interval_counts": {
+    "actual_period_correct": 2345,
+    "actual_period_failures": 3577,
+    "gt_5pct": 1041,
+    "known_intervals": 5922,
+    "le_1pct": 2345,
+    "le_2pct": 1475,
+    "le_5pct": 1061,
+    "local_target_without_one_percent_lattice_multiple": 2810,
+    "outside_reference_points": 124,
+    "refinement_difference_exceeds_one_percent": 1672,
+    "row_fail_actual_fail": 3087,
+    "row_fail_actual_pass": 787,
+    "row_pass_actual_fail": 490,
+    "row_pass_actual_pass": 1558,
+    "scored_points": 5977,
+    "unknown_successor_points": 55
+  },
+  "last_event_per_nonempty_window_successor_kind": {
+    "final_source_unknown": 99,
+    "known_cross_window_successor": 495
+  },
+  "new_inference": false,
+  "nominal_joint_correct_actual_joint_failed_reasons": {
+    "known_period_error": 177,
+    "phase_error+known_period_error": 4
+  },
+  "original_actual_joint_break_reasons": {
+    "known_period_error": 95
+  },
+  "original_measurement_revision": "8e27cf1495cc5d496a3c251b0e5c825c56dc81d6",
+  "original_result_sha256": "40b3ac60c3e19d7bdb747be78c5f345d7ec96f2c7c8938c2f55dc6925ce37b59",
+  "original_verdict": "REJECTED",
+  "posthoc_on_observed_development_labels": true,
+  "protocol_sha256": "5dc1241087a08663b06766f91faade5a5758f9791fd85e0077c62e78d5a186fd",
+  "raw_logits_or_audio_read": false,
+  "reference_annotation_consistency": {
+    "in_source_reference_pairs": 5958,
+    "outside_one_percent_local_median": 1923
+  },
+  "scorer_replay_exact": true,
+  "source_revision": "dc18bd147885e28c1c8195b86d1381bd578fdea1",
+  "sources": 100,
+  "status": "AUDIT_COMPLETE_REJECTION_UNCHANGED",
+  "thresholds_changed": false,
+  "wall_seconds": 46.90174919000128,
+  "windows": 600
+}

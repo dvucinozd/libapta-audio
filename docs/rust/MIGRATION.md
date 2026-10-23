@@ -45,11 +45,18 @@ Nominal joint improves 187 -> 190 and complete 178 -> 182, with 10 joint fixes
 and 7 breaks. Actual joint falls 101 -> 9 and complete 97 -> 8; beat/downbeat
 F1 also decrease. Exact metrics, paired changes, genre aggregates and identities
 are in the [aggregate evidence](DENSE-DECODER-DD05-20261023.json).
-**Next: separately scope failure diagnosis and a new hypothesis decision.**
-The [post-hoc diagnosis scope](DENSE-DECODER-DIAGNOSIS-SCOPE.md) and read-only
-audit tool now have 12 generated checks. Execute that saved-output audit from a
-clean committed/pushed revision before drawing causal conclusions. It reproduces
-the original scorer and decomposes existing intervals without a new candidate.
+The [post-hoc interval diagnosis](DENSE-DECODER-DIAGNOSIS-20261023.md) now exactly
+replays all 600 saved actual scores on clean audit source
+`dc18bd147885e28c1c8195b86d1381bd578fdea1`; 40 focused Python tests pass.
+All 95 actual joint breaks are known-period-only errors. Refinement crosses the
+arithmetic 1% tolerance favorably for 787 intervals and unfavorably for 490;
+3087 failures already have an out-of-tolerance row term. The 20-ms lattice and
+the independent post-DP offsets both need attention. Reference/local-median
+self-consistency also requires explicit treatment; no old gate is relaxed.
+**Next: plan/register a continuous-time trajectory hypothesis before coding.**
+First address the large-error tail and output/reference semantics in the
+diagnosis's ordered decision checklist. No alternate candidate has
+been scored, no new inference was run, and the original rejection is unchanged.
 This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
 the frozen failure and baseline; no automatic retry, retuning, fallback, new
 model/training or production activation follows this result.
