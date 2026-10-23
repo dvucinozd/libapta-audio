@@ -1,10 +1,10 @@
 # Native Rust migration
 
-Status: development checkpoint 2026-10-23; no release, ABI replacement, full profile,
+Status: development checkpoint 2026-10-24; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
-## Current implementation handoff — 2026-10-23
+## Current implementation handoff — 2026-10-24
 
 The user-requested [detailed implementation plan](DENSE-DECODER-IMPLEMENTATION-PLAN-20261023.md)
 and [machine-readable plan](DENSE-DECODER-PLAN-20261023.json) define DD-00 through
@@ -126,8 +126,19 @@ resources. Supervised construct/verify wall times are1699.345/1800.045s, with
 maximum observed process RSS/HWM21212/22204KiB. Retained attempt output is11934333bytes.
 Closeout rechecks100 candidate hashes/1653 bindings and finds zero runner processes.
 The source/remote SHA still match before result edits; the implementation is unchanged.
-**Next: separate read-only verification-cost diagnosis and a plan for full-cohort
-generated operational preflight.** The one-attempt authorization is consumed.
+The [read-only cost diagnosis](COUPLED-TIME-COST-DIAGNOSIS-20261024.md) now identifies
+whole-cohort provenance checks repeated inside every verify worker. One current
+instrumented pass over1524 frozen paths takes19.615s; saved successful verify
+workers average30.377s including provenance/runtime work. These are operational
+timings, not isolated numerical or neural-inference costs. All836 retained attempt
+files rehash identically before/after; no constructor/verifier/scorer is imported.
+The [aggregate audit](COUPLED-TIME-COST-DIAGNOSIS-20261024.json) and
+[ordered repair plan](COUPLED-TIME-RUNNER-REPAIR-PLAN-20261024.md) specify a separate
+v2 runner with parent whole-cohort boundary checks, bounded selected-source worker
+checks and a full100-source/600-window generated preflight on realistic source/storage
+fixtures. Code and old contracts/results remain unchanged at this audit checkpoint.
+**Next: R0, register the v2 operational contract before implementation; then follow
+R1-R4 through generated preflight.** The one-attempt authorization is consumed.
 Preserve all partials and the timeout; do not retry, score the subset, raise caps,
 retune or repair/replay within this attempt. Any later real attempt needs a new
 registered scope and matching preflight after its separate repair checkpoint.

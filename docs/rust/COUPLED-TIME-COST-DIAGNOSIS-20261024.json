@@ -1,0 +1,236 @@
+{
+  "attempt_unchanged": true,
+  "audit_revision": "67a509c284ab31a6734458f75056f05db845ba15",
+  "audit_script_sha256": "f931f65959169a2b99aa199246a7986346194be637eb5d0d450fca2bc0a329cf",
+  "candidate_replay_executed": false,
+  "constructor_imported": false,
+  "ct05_aggregate_sha256": "736c8633eb13f7d0cde68c4fd921b41396d1bfdfd582a799feff7f8c5ff55682",
+  "date": "2026-10-24",
+  "format": "libapta-coupled-time-cost-diagnosis-1",
+  "historical": {
+    "construct": {
+      "phase_status": "PASS",
+      "phase_wall_seconds": 1699.3451949469963,
+      "source_peak_rss_kib": 20392,
+      "successful_reports": 100,
+      "successful_supervised_source_seconds": {
+        "count": 100,
+        "maximum": 29.793143404000148,
+        "mean": 15.408247545490012,
+        "median": 14.28657205700074,
+        "minimum": 11.655451766004262,
+        "sum": 1540.8247545490012
+      },
+      "worker_binding_counts": {
+        "count": 100,
+        "maximum": 365,
+        "mean": 365,
+        "median": 365.0,
+        "minimum": 365,
+        "sum": 36500
+      },
+      "worker_inner_span_seconds_not_pure_solver": {
+        "count": 100,
+        "maximum": 16.642602908003028,
+        "mean": 5.035671046349962,
+        "median": 4.2613362110023445,
+        "minimum": 3.224594444000104,
+        "sum": 503.5671046349962
+      }
+    },
+    "frozen_binding_count": 1524,
+    "verify": {
+      "phase_status": "INVALID",
+      "phase_wall_seconds": 1800.0450728840005,
+      "source_peak_rss_kib": 21576,
+      "successful_reports": 56,
+      "successful_supervised_source_seconds": {
+        "count": 56,
+        "maximum": 46.431806523003615,
+        "mean": 30.376992861857484,
+        "median": 29.857998370000132,
+        "minimum": 24.812887342995964,
+        "sum": 1701.1116002640192
+      },
+      "worker_binding_counts": {
+        "count": 56,
+        "maximum": 468,
+        "mean": 468,
+        "median": 468.0,
+        "minimum": 468,
+        "sum": 26208
+      },
+      "worker_inner_span_seconds_not_pure_solver": {
+        "count": 56,
+        "maximum": 40.29741881300288,
+        "mean": 26.895592427589822,
+        "median": 26.39910866450373,
+        "minimum": 21.951817544999358,
+        "sum": 1506.15317594503
+      }
+    }
+  },
+  "labels_or_audio_read": false,
+  "measured_attempt_revision": "362b6fa54ca3903794a34729d66bb5b7b202a446",
+  "readonly_microprofile": {
+    "categories": {
+      "attempt_artifact": 301,
+      "label_free_observation": 200,
+      "runtime_or_other_label_free_provenance": 1,
+      "tracked_source": 1022
+    },
+    "expected_historical_document_drift": {
+      "tracked_source": 1
+    },
+    "files": 1524,
+    "functions": [
+      {
+        "calls": 1,
+        "cumulative_seconds": 19.614553058000002,
+        "file": "apta_dense_runner_support.py",
+        "function": "recheck",
+        "internal_seconds": 0.010167378000000001,
+        "line": 26,
+        "primitive_calls": 1
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 19.583050115000002,
+        "file": "apta_dense_runner_support.py",
+        "function": "bind",
+        "internal_seconds": 0.034549465,
+        "line": 19,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 9.696710029,
+        "file": "pathlib.py",
+        "function": "resolve",
+        "internal_seconds": 0.011715682000000002,
+        "line": 1230,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 4572,
+        "cumulative_seconds": 7.8112199780000005,
+        "file": "pathlib.py",
+        "function": "stat",
+        "internal_seconds": 0.0061868850000000005,
+        "line": 837,
+        "primitive_calls": 4572
+      },
+      {
+        "calls": 4572,
+        "cumulative_seconds": 7.8050330930000005,
+        "file": "~",
+        "function": "<built-in method posix.stat>",
+        "internal_seconds": 7.709212828,
+        "line": 0,
+        "primitive_calls": 4572
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 7.000024816000001,
+        "file": "<frozen posixpath>",
+        "function": "realpath",
+        "internal_seconds": 0.008175696,
+        "line": 428,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 13066,
+        "cumulative_seconds": 6.8094923960000004,
+        "file": "~",
+        "function": "<built-in method posix.lstat>",
+        "internal_seconds": 6.8094923960000004,
+        "line": 0,
+        "primitive_calls": 13066
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 4.680597657,
+        "file": "apta_dense_runner_support.py",
+        "function": "sha",
+        "internal_seconds": 0.029298498000000003,
+        "line": 14,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 2.614023941,
+        "file": "pathlib.py",
+        "function": "is_file",
+        "internal_seconds": 0.005435261,
+        "line": 888,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 2.551754643,
+        "file": "pathlib.py",
+        "function": "is_symlink",
+        "internal_seconds": 0.005060699,
+        "line": 911,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 2.5453078010000003,
+        "file": "pathlib.py",
+        "function": "lstat",
+        "internal_seconds": 0.002070195,
+        "line": 844,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 1.224674596,
+        "file": "hashlib.py",
+        "function": "file_digest",
+        "internal_seconds": 0.049096277,
+        "line": 195,
+        "primitive_calls": 1524
+      },
+      {
+        "calls": 14590,
+        "cumulative_seconds": 0.009027817,
+        "file": "~",
+        "function": "<built-in method _stat.S_ISLNK>",
+        "internal_seconds": 0.009027817,
+        "line": 0,
+        "primitive_calls": 14590
+      },
+      {
+        "calls": 1524,
+        "cumulative_seconds": 0.001710986,
+        "file": "~",
+        "function": "<built-in method _stat.S_ISREG>",
+        "internal_seconds": 0.001710986,
+        "line": 0,
+        "primitive_calls": 1524
+      }
+    ],
+    "kind": "one neutral io.recheck of current bytes at retained freeze paths; no runner or numeric replay",
+    "limitations": "single current warm-filesystem instrumented sample; not an additive CT05 timing decomposition or full-cohort preflight",
+    "wall_seconds": 19.614632413002255
+  },
+  "retained_files_rehashed_before_and_after": 836,
+  "scorer_imported": false,
+  "source_clean_after_audit": true,
+  "static_call_graph": {
+    "completed_verify_worker_full_input_loads": 112,
+    "completed_verify_worker_input_file_bind_calls": 44800,
+    "construct_all_input_loads_planned": 101,
+    "construct_input_file_bind_calls_planned": 40400,
+    "event_and_capture_files": 200,
+    "scope": "static lower bounds for these named paths, excludes settings/runtime/finish/parent and interrupted worker",
+    "sources": 100,
+    "verify_all_candidate_hash_checks_planned": 10100,
+    "verify_all_input_loads_planned": 201,
+    "verify_frozen_calls_planned": 101,
+    "verify_full_frozen_binding_rechecks_planned": 153924,
+    "verify_input_file_bind_calls_planned": 80400
+  },
+  "verifier_imported": false
+}
