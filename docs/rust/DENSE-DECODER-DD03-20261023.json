@@ -1,0 +1,55 @@
+{
+  "component_sha256": {
+    "rust/check.py": "9edcda290a6d37ef31e05217b0ed190fd866a070e6c4804b05c90ac66255c9dc",
+    "tests/unit/apta_1_1_dense_decoder_runner.py": "b5d7b266e41c492db38687b9e1913a493136eac72d9c636fb51be4e7c84fb8eb",
+    "tools/apta_1_1_dense_decoder.py": "316fb06578fb75fc6da1a5167196d469c2357da6929c0dfe3a4179bb92ce109d",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+  },
+  "confidence_calibrated": false,
+  "evidence_level": "generated-only runner integration and failure tests",
+  "formal_acceptance": false,
+  "format": "libapta-dense-decoder-dd03-1",
+  "full_dd04_preflight_complete": false,
+  "generated_event_helper_uses_pinned_mir_eval": true,
+  "generated_fixture_sources_per_test": [
+    1,
+    2
+  ],
+  "generated_labels_used": true,
+  "implemented": [
+    "separate construction/evaluation processes",
+    "full-source candidate hash freeze",
+    "three canonical scoring paths",
+    "source/input/runtime binding and recheck",
+    "Linux process-group time/RSS/output supervision",
+    "pure worker hard address-space limit",
+    "DD-04 component-bound CLI preflight gate"
+  ],
+  "independent_full_verifier_implemented": false,
+  "independent_transfer": false,
+  "native_graph_constructed": false,
+  "new_inference": false,
+  "next_step": "DD-04 independent scalar verifier and full operational preflight before registered real cohort attempt",
+  "physical_p4": false,
+  "previous_checkpoint_revision": "69524802bbcdcaaaa914401cd7139616c1f8a9d2",
+  "production_promotion": false,
+  "protocol_sha256": "5dc1241087a08663b06766f91faade5a5758f9791fd85e0077c62e78d5a186fd",
+  "real_cohort_cli_enabled": false,
+  "real_dense_logits_read": false,
+  "real_music_scoring": false,
+  "real_reference_labels_read": false,
+  "registered_development_verdict": "NOT_RUN",
+  "tests": {
+    "fmt": "PASS",
+    "focused_clippy_werror": "PASS",
+    "new_runner_python": 31,
+    "no_default_lib_check": "PASS",
+    "previous_decoder_python": 33,
+    "prior_python_controls": 148,
+    "python_total": 212,
+    "skipped": 0,
+    "unchanged_rust_each_debug_release": 37
+  },
+  "verification_log_sha256": "2ae70f936eb29da07cc44314293b0a07168619ac1b410a91fb84038441368169",
+  "verification_script_sha256": "035fdf5c905ef0d592784c1ab40aaf4c105ef96e0fb604ee32757ea173a10f9f"
+}
