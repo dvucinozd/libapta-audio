@@ -26,9 +26,20 @@ source/runtime/input binding, candidate freeze before label loading, three uncha
 scoring paths and Linux parent/worker resource enforcement. All 31 new/212 total
 Python tests and 37 unchanged Rust controls per debug/release pass. Generated
 fixtures only; no real-logit decoding or musical verdict. The real-cohort CLI
-requires the not-yet-created DD-04 component-bound preflight JSON.
-**Resume at DD-04: independent scalar verifier and complete operational preflight**
-before the single registered DD-05 development attempt.
+requires the DD-04 component-bound preflight JSON.
+DD-04 now passes [independent replay and complete generated operational preflight](DENSE-DECODER-PREFLIGHT.md).
+The [preflight JSON](DENSE-DECODER-PREFLIGHT.json) binds the exact implementation:
+14 new/226 total Python tests, zero skipped, and 37 unchanged Rust controls per
+debug/release pass, with fmt, focused Clippy and no-default-features check.
+Five full-size generated cases replay exactly; maximum child RSS is 31932 KiB,
+construct time 1.194 s and verifier time 3.191 s. Actual process-separated
+construct/verify/evaluate and negative resource checks pass on generated inputs.
+The decoder and registered protocol bytes remain unchanged. Evaluation now
+requires successful independent verification before reference-label loading.
+**Resume at DD-05: one clean registered construct -> verify -> evaluate attempt.**
+Run the independent verifier command in the preflight handoff between the
+experiment's construct and evaluate commands. Real logits/labels and musical
+development remain NOT_RUN; no retry, tuning, transfer or port follows a failure.
 Commit/push each verified checkpoint before the next.
 
 The plan separates raw-event, unchanged OLS-projection and actual-interval

@@ -149,6 +149,13 @@ class RunnerTests(unittest.TestCase):
         io.write_new(Path(str(output)+"-supervision")/"report.json",
                      {"status":"PASS","protocol_sha256":model.PROTOCOL_SHA256,
                       "completion_sha256":io.sha(output/"candidates-frozen.private.json")})
+        import apta_dense_decoder_verify as verifier
+        verification = Path(str(output)+"-verification")
+        with self.patched():
+            verifier.cohort(output, legacy, verification)
+        io.write_new(Path(str(verification)+"-supervision")/"report.json",
+                     {"status":"PASS","protocol_sha256":model.PROTOCOL_SHA256,
+                      "completion_sha256":io.sha(verification/"report.private.json")})
         return output,result
 
     def test_protocol_matches_decoder_and_no_preflight_is_not_authorization(self):

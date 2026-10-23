@@ -270,6 +270,29 @@ def actual_points(candidate):
             for w in candidate["windows"]]
 
 
+def validate_verification(candidates, complete, config, bindings):
+    output = Path(str(candidates.resolve()) + "-verification")
+    path = output / "report.private.json"
+    value = io.read_bound(path, io.sha(path), bindings)
+    parent = Path(str(output) + "-supervision") / "report.json"
+    supervised = io.read_bound(parent, io.sha(parent), bindings)
+    if (value.get("format") != "libapta-dense-independent-verification-1"
+            or value.get("status") != "PASS" or value.get("reference_labels_loaded") is not False
+            or value.get("protocol_sha256") != model.PROTOCOL_SHA256
+            or value.get("source_revision") != complete["source_revision"]
+            or value.get("sources_verified") != config["inputs"]["sources"]
+            or value.get("candidate_freeze_sha256") != io.sha(candidates / "candidates-frozen.private.json")
+            or value.get("verifier_module_sha256") != io.sha(ROOT / "tools/apta_dense_decoder_verify.py")
+            or supervised.get("status") != "PASS"
+            or supervised.get("protocol_sha256") != model.PROTOCOL_SHA256
+            or supervised.get("completion_sha256") != io.sha(path)):
+        raise ValueError("independent verification incomplete or stale")
+    if max(value["resources"][k] for k in ("self_peak_rss_kib", "waited_children_peak_rss_kib")) > config["limits"]["max_host_rss_kib_per_process"]:
+        raise ValueError("independent verification RSS failed")
+    io.recheck(value["bindings"])
+    bindings.update(value["bindings"])
+
+
 def score_source(candidate, oldevents, geometry, truth, saved, coarse, event_metrics=None):
     # Canonical analysis imports exist ONLY on the evaluation path.
     import apta_1_1_event_representation as representation
@@ -380,6 +403,7 @@ def evaluate(candidates, legacy, prepared, output):
     io.disjoint_output(output, (candidates, legacy, prepared))
     revision = io.source_snapshot(ROOT, bindings)
     complete, frozen, ids = validate_frozen(candidates, legacy, config, bindings)
+    validate_verification(candidates, complete, config, bindings)
     if revision != complete["source_revision"]:
         raise ValueError("construction/evaluation source revision differs")
     dense = Path(frozen["dense"])
@@ -486,7 +510,8 @@ def evaluate(candidates, legacy, prepared, output):
         "all_candidates_frozen_before_label_loading":True,"confidence_calibrated":False,
         "independent_transfer":False,"native_graph_constructed":False,"physical_p4":False,
         "formal_acceptance":False,"production_promotion":False}
-    roots = (output,candidates,Path(str(candidates)+"-supervision"))
+    roots = (output,candidates,Path(str(candidates)+"-supervision"),
+             Path(str(candidates)+"-verification"),Path(str(candidates)+"-verification-supervision"))
     if io.tree_bytes(roots) + io.json_bytes(result) > config["limits"]["max_attempt_output_bytes"]:
         raise ValueError("final evaluation report exceeds attempt output cap")
     io.write_new(output/"report.private.json", result)
@@ -537,7 +562,8 @@ def main():
         io.write_new(supervision/"request.json",request)
         roots = [output,supervision]
         if args.action == "evaluate":
-            roots += [args.candidates,Path(str(args.candidates)+"-supervision")]
+            roots += [args.candidates,Path(str(args.candidates)+"-supervision"),
+                      Path(str(args.candidates)+"-verification"),Path(str(args.candidates)+"-verification-supervision")]
         limits = config["limits"]
         result = io.supervise([sys.executable,str(Path(__file__).resolve()),"_phase-worker",
                                "--request",str(supervision/"request.json")],
