@@ -89,13 +89,25 @@ binds exact components and logs. Maximum supervised source time is 11.216s,
 source self RSS 20308 KiB and supervised process RSS/HWM 36176 KiB, within the
 registered 60s/262144 KiB limits; total attempt output is 1359576 bytes.
 These are generated host measurements only; no neural-pipeline/P4 qualification.
-**Next: CT-03 register exact musical input/baseline/labels/gates and resolve or explicitly record independence.**
-The real construct/verify/score CLI remains absent; CT-04 isolation and a separately
-registered/authorized CT-05 attempt still precede any real measurement.
-The original proposal and CT-00 registration remain frozen and synthetic-only.
-No new candidate is registered for real music or musically measured;
-evaluation manifests and independence remain unresolved. No private inputs were
-read, no new inference was run and the original rejection stays frozen.
+CT-03 now records the [exposed-development scope and independence decision](COUPLED-TIME-DEVELOPMENT-PROTOCOL.md)
+and [fixed development protocol](COUPLED-TIME-DEVELOPMENT-PROTOCOL.json).
+Protocol SHA-256:
+`681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6`.
+The [CT-03 evidence](COUPLED-TIME-CT03-20261023.json) binds the private inventory
+and separate label-free input manifest. All 643 existing artifacts verify;
+6095 original beats and 1851 exact downbeat ordinals cover the same 100 sources /
+600 windows. Original event/geometry records and the baseline report index were
+read; labels and per-source score values were not parsed. Audio, dense payloads,
+model/runtime and per-source score bytes were hashed without decoding/inference.
+The old baseline and all 16 musical gates remain fixed. Independence is explicitly
+UNRESOLVED, with no independent cohort selected; a later pass on this exposed
+cohort is diagnostic-only. CT-03 registers scope, not real execution permission.
+**Next: CT-04 generated-only construct/verify/score runner and isolation preflight.**
+The real CLI remains absent/disabled; matching CT-02/CT-03 tokens, CT-04 preflight
+and a distinct authorized CT-05 scope record must precede any real measurement.
+The original proposal and CT-00 registration remain frozen. No real candidate
+was constructed or musically scored, no new inference ran, and the original
+rejection stays frozen. Independent transfer and product qualification stay open.
 This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
 the frozen failure and baseline; no automatic retry, retuning, fallback, new
 model/training or production activation follows this result.
