@@ -2,6 +2,15 @@
 
 The canonical detailed procedure is `docs/status/APTA-1.1-QUALIFICATION-RUNBOOK.md`; use the repository scripts rather than reimplementing them.
 
+Use this workflow for final APTA qualification and release checks. A Python
+development probe, neural trace capture or experimental Rust decoder follows its
+own registered protocol and does not automatically enter this final workflow.
+The commands below name the established analyzer/export path. Another native
+implementation needs a validated adapter and equivalent input/output semantics;
+do not substitute its executable and claim final qualification without that gate.
+The repository's frozen DJ acceptance protocol/evaluator remains authoritative
+if this convenience reference differs; report drift instead of changing gates.
+
 ## Corpus boundary
 
 Use at least 48 tracks that were independently verified and were not used to tune the candidate. Canonicalize to 48 kHz stereo PCM16 WAV, label those exact WAV frames, and keep all private source material and mappings local. Freeze labels with `tools/apta_1_1_freeze_corpus.py`; do not use `--allow-diagnostic` for final acceptance.

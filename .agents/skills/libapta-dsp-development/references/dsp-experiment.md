@@ -1,36 +1,70 @@
 # DSP experiment protocol
 
-Use this reference for key, meter, downbeat, beatgrid, tempo, or confidence changes.
+Use for a candidate affecting key, meter, downbeat, beatgrid, tempo or confidence.
+Follow the active branch's committed handoff and registered protocol for the next
+algorithm; this reference does not prescribe a permanent research direction.
 
-## Record before coding
+## Register the candidate
 
-Write a short experiment record containing:
+Before coding, record the hypothesis, concrete failure mode, baseline source/output,
+metric definitions, input identities, prior exposure and known training overlap.
+Define allowed constructor inputs, output representation, unknown-support policy,
+fixed parameters, resource caps, paired no-regression veto and stop/retry policy.
+If the active plan already fixes these, implement it rather than designing another
+candidate. Synthetic preflight may reveal a bug; document repairs before real
+evaluation. After real results, do not tune the failed candidate or quietly amend
+its protocol. Preserve rejected outputs and their hashes.
 
-- hypothesis and the specific failure mode it addresses;
-- baseline revision, build flags, and baseline metric;
-- development evidence to be used (never a formal holdout for tuning);
-- expected accuracy/resource trade-off;
-- an explicit no-regression veto and a stop condition.
+## Choose the implementation boundary
 
-The current development evidence says the main remaining deficits are key accuracy and beat-lattice phase. Key profile shape and fixed longer windows have already yielded insufficient gains; the next useful axes are harmonic-weighted evidence, tuning estimation, or adaptive aggregation. For beatgrid/downbeat, simple rescoring of the existing full-band flux is exhausted; prioritize new onset/temporal evidence and upstream lattice quality.
+| Changed layer | Isolation and relevant verification |
+|---|---|
+| C/native detector | Opt-in CMake/build option; relevant Werror, conformance and sanitizer checks |
+| Rust core/runtime | Cargo feature or experimental executable; fmt, focused Clippy/tests, applicable no_std/no-allocation and interoperability contracts |
+| Python host experiment | Separate opt-in command/pure constructor; unit/oracle tests, deterministic output, input isolation and resource enforcement |
+| Documentation/registration | Schema consistency, links, identities and diff checks; no algorithm or corpus PASS claim |
 
-## Implement narrowly
+Preserve default state layout, output semantics and serialization unless the
+registered experiment covers a change. Keep baseline/native output identity when
+it is a control. Test changed decisions and failure modes; avoid tests that merely
+repeat implementation details. Do not rerun unrelated full matrices for every
+host-only or documentation checkpoint.
 
-- Add an opt-in CMake/build flag for a new detector path.
-- Preserve default state layout, output semantics, and serialized ordering unless the experiment explicitly measures those contracts.
-- Keep trace tools diagnostic and privacy-safe; do not include source filenames or audio in committed artifacts.
-- Add focused selector/regression tests for every changed decision rule.
+Use canonical runners/scorers. Read the exact function and coordinate contract
+before adapting inputs; do not infer units or fields from filenames or silently
+change scoring to accommodate a new representation.
 
-## Evaluate in layers
+## Evaluate in bounded stages
 
-1. Run focused unit tests and the normal Werror suite.
-2. Run the candidate on the ordered development corpus and compare baseline/candidate per track.
-3. Check fixes, breaks, changed verdicts, confidence safety, and resource cost. A small gain with any safety regression is not a promotion candidate.
-4. Run independent transfer checks on open development partitions (for example Ballroom or ASAP) without opening their holdouts.
-5. Only after the candidate is stabilized, run one newly verified >=48-track acceptance corpus through the frozen evaluator.
+1. Pass focused synthetic/operational preflight.
+2. Freeze exact source, protocol, inputs and outputs at the prescribed boundaries.
+   Construct all label-blind candidates before loading reference labels for scoring.
+3. Run the registered cohort/order and retain every required source and window.
+   Compare paired fixes/breaks, unsupported output and safety, not just averages.
+4. Stop on the registered veto. Integrity/resource failures yield INVALID or
+   INCOMPLETE; a complete valid musical gate failure yields REJECTED.
+5. Only a passing candidate proceeds to separately registered transfer. Verify
+   recording/performance and model-training independence first. Ballroom/ASAP or
+   another named corpus is not automatically independent.
+6. Only after required development and transfer gates, enter final acceptance
+   on a fresh independently verified corpus under its separate frozen workflow.
 
-Do not compare scores from different evidence spaces directly. Compare verdict changes and safety instead. Do not enable a candidate by default merely because it improves a spent corpus.
+An implementation repair is not automatically an authorized real-data retry.
+Follow the registered retry policy, preserve failed attempts and disclose whether
+labels/results were exposed. Do not invent retries, sweep parameters or overwrite
+outputs. A new hypothesis needs explicit registration and appropriate task scope.
 
-## Minimum evidence record
+## Compare like with like
 
-Record the full commit SHA, build flags, analyzer hash, corpus/manifest hash, test counts, accuracy per family, high-confidence error counts, fixes/breaks, changed verdict count, and memory/runtime delta. State whether the result is diagnostic-only, development evidence, rejected acceptance evidence, or accepted release evidence.
+Keep event F1/CMLt, nominal grid period/phase, actual outgoing intervals,
+meter/downbeat and confidence separate. Preserve reference context, tolerances,
+trim, projection and missing-successor rules. Compare matched definitions and
+denominators. A reference-label construction proves representability, not detector
+quality. A spent-development improvement does not enable production.
+
+## Evidence record
+
+Record full source SHA, protocol/input hashes, flags, relevant executable/runtime
+identities, executed tests, per-family aggregates, paired fixes/breaks, support and
+unknown counts, and memory/time scope. Keep private source-level evidence external.
+Publish a valid rejection as carefully as a pass; state the exact evidence level.

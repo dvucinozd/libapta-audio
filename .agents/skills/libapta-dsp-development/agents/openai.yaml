@@ -1,4 +1,6 @@
 interface:
   display_name: "LIBAPTA DSP Development"
-  short_description: "Run safe DSP experiments and 1.1 acceptance"
-  default_prompt: "Use $libapta-dsp-development to plan and verify the next LIBAPTA DSP or acceptance step."
+  short_description: "Plan and verify C, Rust and neural DSP experiments"
+  default_prompt: "Use $libapta-dsp-development to follow the active LIBAPTA plan and verify the next DSP experiment or acceptance step."
+policy:
+  allow_implicit_invocation: true
