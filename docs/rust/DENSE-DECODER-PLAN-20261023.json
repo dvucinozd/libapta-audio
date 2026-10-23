@@ -1,0 +1,192 @@
+{
+  "format": "libapta-dense-decoder-implementation-plan-1",
+  "status": "plan-only-not-run",
+  "date": "2026-10-23",
+  "branch": "rust-rewrite",
+  "baseline_revision": "ea7e67af10e641cd190dc0fd0b3496e6ed3ee817",
+  "scope": "One bounded host-only dense decoder experiment; later stages are conditional decision gates.",
+  "inputs": {
+    "dense_source_revision": "297284933e922a669f65b8939b824da7b9e6f740",
+    "dense_report_sha256": "72707018f6cbe8ff8550d6e799fcb3a224747f2ce68381f9e1e3963383cf9b05",
+    "dense_protocol_sha256": "28490ab1983cac6abd011923c5f4e78d3e7bf5096fdb119a102c386e1de62685",
+    "legacy_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "legacy_scoring_report_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "sources": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "reference_incomplete_windows": 199,
+    "read_audio": false,
+    "new_inference": false,
+    "read_labels_during_construction": false
+  },
+  "decoder": {
+    "name": "dense-joint-renewal-v1",
+    "source_sample_rate": 48000,
+    "feature_fps": 50,
+    "source_hop_frames": 960,
+    "meters": [
+      3,
+      4
+    ],
+    "meter_changes_within_source": false,
+    "minimum_interval_rows": 10,
+    "maximum_interval_rows": 75,
+    "maximum_interval_change_rows": 2,
+    "logit_clip_abs": 32,
+    "logit_scale": 1024,
+    "logit_rounding": "nearest, ties away from zero",
+    "transition_penalty_per_squared_row": 2048,
+    "state": "last beat row t, incoming interval d, beat-in-bar k; separate meter m",
+    "emission": "qb[t] + (qd[t] if k == 0 else 0)",
+    "seed": "t < d; every k allowed; score emission; no middle restart",
+    "transition": "previous t-d, previous phase (k-1)%m, previous p in [10,75] intersect [d-2,d+2]",
+    "predecessor_tie": "lowest p",
+    "terminal": "(t+d)*960 >= total_frames",
+    "terminal_tie": "lowest (t,d,k)",
+    "meter_tie": 3,
+    "null_score": 0,
+    "minimum_path_score_exclusive": 0,
+    "minimum_winning_path_events": 9,
+    "insufficient_winner_fallback": false,
+    "refinement": "concave strict local maximum in quantized beat logits; delta=(left-right)/(2*(left-2*center+right)), clamp +/-1/2; in-domain neighbors only; otherwise zero",
+    "source_frame_rounding": "nearest, ties upward",
+    "known_gap_policy": "whole-source abstention after geometry validation",
+    "confidence": 0,
+    "confidence_calibrated": false,
+    "raw_payload_mutated": false,
+    "native_graph_constructed": false
+  },
+  "limits": {
+    "maximum_source_frames": 1440000,
+    "maximum_rows": 1501,
+    "maximum_windows": 8,
+    "maximum_events": 3072,
+    "unchanged_wire_segments": 8,
+    "score_item_bytes": 8,
+    "parent_item_bytes": 1,
+    "maximum_single_meter_state_bytes": 3566376,
+    "max_construct_source_seconds": 60,
+    "max_construct_process_seconds": 1800,
+    "max_evaluate_process_seconds": 1800,
+    "max_verify_process_seconds": 1800,
+    "max_host_rss_kib_per_process": 262144,
+    "max_attempt_output_bytes": 67108864,
+    "wall_time_includes_binding_and_recheck": true
+  },
+  "baseline": {
+    "ols_nominal_joint_windows": 187,
+    "ols_nominal_complete_sequence_windows": 178,
+    "ols_actual_joint_windows": 101,
+    "ols_actual_complete_sequence_windows": 97,
+    "coarse_joint_windows": 47,
+    "original_coarse_to_ols_joint_breaks": 2
+  },
+  "development_gates": {
+    "integrity_and_resources_required": true,
+    "minimum_projected_nominal_joint_windows": 188,
+    "minimum_projected_nominal_complete_sequence_windows": 179,
+    "maximum_projected_ols_period_breaks": 0,
+    "maximum_projected_ols_phase_breaks": 0,
+    "maximum_projected_ols_joint_breaks": 0,
+    "maximum_projected_coarse_joint_breaks": 0,
+    "maximum_projected_ols_meter_breaks": 0,
+    "maximum_projected_ols_downbeat_breaks": 0,
+    "minimum_candidate_actual_complete_sequence_windows": 98,
+    "maximum_actual_ols_period_breaks": 0,
+    "maximum_actual_ols_phase_breaks": 0,
+    "maximum_actual_ols_joint_breaks": 0,
+    "event_macro_no_decrease": [
+      "beat_f1",
+      "downbeat_f1",
+      "beat_cmlt",
+      "downbeat_cmlt"
+    ],
+    "event_comparison_absolute_epsilon": 1e-12,
+    "event_metric_units": "fraction [0,1]; compare to unrounded saved legacy metrics",
+    "all_gates_conjunctive": true
+  },
+  "steps": [
+    {
+      "id": "DD-00",
+      "depends_on": [],
+      "deliverable": "Verified inputs and documented product constraints"
+    },
+    {
+      "id": "DD-01",
+      "depends_on": [
+        "DD-00"
+      ],
+      "deliverable": "Committed registered protocol and experiment"
+    },
+    {
+      "id": "DD-02",
+      "depends_on": [
+        "DD-01"
+      ],
+      "deliverable": "Pure deterministic decoder with synthetic tests"
+    },
+    {
+      "id": "DD-03",
+      "depends_on": [
+        "DD-02"
+      ],
+      "deliverable": "Separate candidate-construction and evaluation processes"
+    },
+    {
+      "id": "DD-04",
+      "depends_on": [
+        "DD-03"
+      ],
+      "deliverable": "Independent synthetic verification and committed preflight"
+    },
+    {
+      "id": "DD-05",
+      "depends_on": [
+        "DD-04"
+      ],
+      "deliverable": "One complete development attempt and frozen verdict"
+    },
+    {
+      "id": "DD-06",
+      "depends_on": [
+        "DD-05:PASS"
+      ],
+      "deliverable": "Proven-independent transfer or documented STOP"
+    },
+    {
+      "id": "DD-07",
+      "depends_on": [
+        "DD-06:PASS"
+      ],
+      "deliverable": "Whole-pipeline P4 feasibility and product budget or STOP"
+    },
+    {
+      "id": "DD-08",
+      "depends_on": [
+        "DD-07:PASS"
+      ],
+      "deliverable": "Gated Rust port and supported representation parity"
+    },
+    {
+      "id": "DD-09",
+      "depends_on": [
+        "DD-08:PASS"
+      ],
+      "deliverable": "Consumer integration and exact-image physical evidence"
+    },
+    {
+      "id": "DD-10",
+      "depends_on": [
+        "DD-09:PASS"
+      ],
+      "deliverable": "Separate remaining product, acceptance and release gates"
+    }
+  ],
+  "implementation_performed": false,
+  "measurement_performed": false,
+  "formal_acceptance": false,
+  "production_promotion_allowed": false,
+  "decision_on_musical_failure": "Freeze REJECTED; no transfer, retuning or native port",
+  "decision_on_integrity_failure": "Preserve INVALID/INCOMPLETE attempt; no musical verdict or automatic retry"
+}

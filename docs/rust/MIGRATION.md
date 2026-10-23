@@ -1,10 +1,25 @@
 # Native Rust migration
 
-Status: development checkpoint 2026-10-22; no release, ABI replacement, full profile,
+Status: development checkpoint 2026-10-23; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
-## Agreed next step — resume after 2026-10-22
+## Current implementation handoff — 2026-10-23
+
+The user-requested [detailed implementation plan](DENSE-DECODER-IMPLEMENTATION-PLAN-20261023.md)
+and [machine-readable plan](DENSE-DECODER-PLAN-20261023.json) define DD-00 through
+DD-10. This checkpoint is documentation only: no decoder, new measurement,
+model adoption or gate closure. Resume at DD-00 (input identities and product
+constraints), then DD-01 (registered protocol), before implementing the fixed
+integer dense decoder. Commit/push each verified checkpoint before the next.
+
+The plan separates raw-event, unchanged OLS-projection and actual-interval
+evaluation. A failed development gate stops transfer and native implementation;
+independent transfer and whole-pipeline P4 feasibility must precede a large
+Rust port. Product budgets and future representation/inference decisions may
+not be invented by the implementing agent. Historical results below stay frozen.
+
+## Historical continuation — resume after 2026-10-22
 
 Continuation update: the [PCM lattice experiment](S6-LATTICE-METER-EXPERIMENT.md)
 now implements same-grid attack measurement and independent provisional
