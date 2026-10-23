@@ -133,7 +133,10 @@ class DiagnosisTests(unittest.TestCase):
             write(public,{"status":"REJECTED","integrity_passed":True,"source_revision":"generated","protocol_sha256":"generated", "phase_identity":identity,
                 "input_identity":{"prepared_manifest_sha256":audit.io.sha(manifest)}})
             with mock.patch.object(audit,"RESULT",public), mock.patch.object(audit,"RESULT_SHA256",audit.io.sha(public)), mock.patch.object(audit.io,"source_snapshot",return_value="generated-audit"), mock.patch.object(audit.io,"check_source"):
-                result = audit.diagnose(candidates,evaluation,prepared,output)
+                observed = []
+                result = audit.diagnose(candidates,evaluation,prepared,output,
+                    lambda track,candidate,saved,truth: observed.append(track))
+                self.assertEqual(len(observed),100)
                 self.assertEqual(result["interval_counts"]["actual_period_correct"],300)
                 self.assertEqual(result["actual_window_reasons"],{"unknown_successor":100})
                 self.assertNotIn("track",json.dumps(result))

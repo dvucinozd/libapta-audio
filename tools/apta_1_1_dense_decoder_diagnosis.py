@@ -111,7 +111,7 @@ def annotation_consistency(truth, total):
     return count
 
 
-def diagnose(candidates, evaluation, prepared, output):
+def diagnose(candidates, evaluation, prepared, output, observer=None):
     started = time.monotonic()
     bindings = {}
     io.external(output, ROOT)
@@ -162,6 +162,9 @@ def diagnose(candidates, evaluation, prepared, output):
             raise ValueError("unsafe saved identity")
         candidate = io.read_bound(candidates/"candidates"/(track+".json"), entry["sha256"], bindings)
         saved = io.read_bound(evaluation/(track+".json"), scored["sha256"], bindings)["scores"]
+        if observer is not None:
+            # Read-only diagnostic extension; never reaches a constructor/scorer.
+            observer(track, candidate, saved, truth)
         frames, rows = candidate["events"]["beat_frames"], candidate["events"]["beat_rows"]
         counter, relative, absolute_offsets, absolute_differences = interval_audit(frames, rows, truth)
         counts.update(counter)
