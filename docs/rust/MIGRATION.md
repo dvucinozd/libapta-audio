@@ -36,10 +36,19 @@ construct time 1.194 s and verifier time 3.191 s. Actual process-separated
 construct/verify/evaluate and negative resource checks pass on generated inputs.
 The decoder and registered protocol bytes remain unchanged. Evaluation now
 requires successful independent verification before reference-label loading.
-**Resume at DD-05: one clean registered construct -> verify -> evaluate attempt.**
-Run the independent verifier command in the preflight handoff between the
-experiment's construct and evaluate commands. Real logits/labels and musical
-development remain NOT_RUN; no retry, tuning, transfer or port follows a failure.
+DD-05 now completes the [single registered real development attempt](DENSE-DECODER-DD05-20261023.md)
+on clean source `8e27cf1495cc5d496a3c251b0e5c825c56dc81d6`.
+All 100 candidates freeze and independently replay before scoring 100 sources /
+600 windows (401 complete / 199 incomplete reference contexts). Integrity and
+resources PASS; the musical verdict is **REJECTED** (11 of 16 gates fail).
+Nominal joint improves 187 -> 190 and complete 178 -> 182, with 10 joint fixes
+and 7 breaks. Actual joint falls 101 -> 9 and complete 97 -> 8; beat/downbeat
+F1 also decrease. Exact metrics, paired changes, genre aggregates and identities
+are in the [aggregate evidence](DENSE-DECODER-DD05-20261023.json).
+**Next: separately scope failure diagnosis and a new hypothesis decision.**
+This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
+the frozen failure and baseline; no automatic retry, retuning, fallback, new
+model/training or production activation follows this result.
 Commit/push each verified checkpoint before the next.
 
 The plan separates raw-event, unchanged OLS-projection and actual-interval
