@@ -16,8 +16,13 @@ is unmeasured. DD-01 now registers the [experiment](DENSE-DECODER-EXPERIMENT.md)
 and [fixed protocol](DENSE-DECODER-PROTOCOL.json), bound to the completed DD-00
 checkpoint and original plan. Protocol SHA-256:
 `5dc1241087a08663b06766f91faade5a5758f9791fd85e0077c62e78d5a186fd`.
-No decoder or musical scoring yet. **Resume at DD-02: pure deterministic host
-decoder and generated tests**, then the isolated runner and independent preflight.
+DD-02 now implements the [pure host decoder and generated checks](DENSE-DECODER-DD02-20261023.md):
+33 new/181 total Python tests and 37 unchanged Rust controls per debug/release
+profile pass. Full-size generated calls take 1.023..1.120 s, with 3564000 bytes
+of live score/parent payload and process RSS at most 25000 KiB. This is generated
+implementation evidence only; no real-logit decoding, musical scoring or P4 claim.
+**Resume at DD-03: isolated construct/evaluate runner**, then DD-04 independent
+full verification and operational preflight before the single development run.
 Commit/push each verified checkpoint before the next.
 
 The plan separates raw-event, unchanged OLS-projection and actual-interval

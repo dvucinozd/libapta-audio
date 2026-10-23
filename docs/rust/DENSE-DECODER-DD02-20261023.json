@@ -1,0 +1,73 @@
+{
+  "complete_dd04_preflight": false,
+  "confidence_calibrated": false,
+  "evidence_level": "generated-only implementation correctness and host operational checks",
+  "exhaustive_path_oracle_rows_at_most": 24,
+  "formal_acceptance": false,
+  "format": "libapta-dense-decoder-dd02-1",
+  "independent_transfer": false,
+  "module_sha256": "782e66ab56ec143d8214f73b74c181a3b2cd393fb56e3364b849cfd7c9c920ca",
+  "music_scoring": false,
+  "native_graph_constructed": false,
+  "new_inference": false,
+  "next_step": "DD-03: isolated construct/evaluate runner; DD-04 independent full verifier and watchdog preflight before real decoding",
+  "physical_p4": false,
+  "production_promotion": false,
+  "protocol_sha256": "5dc1241087a08663b06766f91faade5a5758f9791fd85e0077c62e78d5a186fd",
+  "real_logits_read": false,
+  "reference_labels_read": false,
+  "registration_revision": "ade78898891767064671f7cf0cf4fe2eb5c8d4be",
+  "resource_script_sha256": "94ab04b8c6e2408c9c7145927882652114f6c3e9ee8735b2edb68f28fc266661",
+  "runner_implemented": false,
+  "synthetic_resource_cases": [
+    {
+      "candidate_sha256": "2499142aafb21d023f8abd4cae94b4e5ba434751c3f6bd51ee51e0dc7c229b7f",
+      "events": 60,
+      "fixture": "pulse_4_4",
+      "maximum_live_state_bytes": 3564000,
+      "rss_peak_kib_process_cumulative": 22740,
+      "selected_meter": 4,
+      "state_cells": 693000,
+      "status": "candidate_events",
+      "transitions_examined": 3305610,
+      "wall_seconds": 1.1199060550006834
+    },
+    {
+      "candidate_sha256": "e44af47163773128583e2f99def135b834a302cf42e1d98b4eff6b9692a637e0",
+      "events": 150,
+      "fixture": "flat_positive_ambiguous",
+      "maximum_live_state_bytes": 3564000,
+      "rss_peak_kib_process_cumulative": 25000,
+      "selected_meter": 3,
+      "state_cells": 693000,
+      "status": "candidate_events",
+      "transitions_examined": 3305610,
+      "wall_seconds": 1.1178302190000977
+    },
+    {
+      "candidate_sha256": "1ffac39bfbdd38f9874fa54b1ff98bfa8f44260867edfca06c14dcb20d821a87",
+      "events": 0,
+      "fixture": "flat_nonpositive",
+      "maximum_live_state_bytes": 3564000,
+      "rss_peak_kib_process_cumulative": 25000,
+      "selected_meter": 3,
+      "state_cells": 693000,
+      "status": "nonpositive_path",
+      "transitions_examined": 3305610,
+      "wall_seconds": 1.0234014070010744
+    }
+  ],
+  "synthetic_resources_report_sha256": "b5092a324724227e3feba744b407b9c349a8081eb8e228432860135154739563",
+  "tests": {
+    "fmt": "PASS",
+    "focused_clippy_werror": "PASS",
+    "new_generated_python": 33,
+    "no_default_lib_check": "PASS",
+    "prior_python_controls": 148,
+    "total_python": 181,
+    "unchanged_rust_each_debug_release": 37
+  },
+  "tests_sha256": "25a8f96f2c72720fd6d64e8d064d65c84c5e2044dedc0f834ae8c44e29804765",
+  "verification_log_sha256": "23d64624add35a495b2f36125e5b171c5eea28a898d17112848baffda17618eb",
+  "verification_script_sha256": "a7eb39947ddf885dcc53101d11cd3f6a8d42ab44dd343a098a860fff4d05d17a"
+}
