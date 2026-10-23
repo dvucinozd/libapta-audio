@@ -70,13 +70,20 @@ Protocol SHA-256:
 `5f23a96330e7852f9dcb21b6273acf258e7252177da9bef53ceb9e3bea1afced`.
 The [registration checks](COUPLED-TIME-CT00-20261023.json) validate seven generated
 contract examples, reject forty invalid schema/strict-JSON examples and verify
-seven bound document hashes. These are documentation/schema checks only:
-the solver, independent oracle, runtime cross-field checks, resource preflight
-and musical evaluation have not run. The contract fixes float64 operation order,
+seven bound document hashes. Those registration checks are documentation/schema
+evidence only. The contract fixes float64 operation order,
 box constraints, stopping limits, rounding, abstention and technical-failure rules.
-**Next: CT-01 pure solver with an independent rational tiny-case oracle.**
-The original proposal remains frozen; CT-00 registers synthetic work only.
-No new candidate is implemented, registered for real music or measured;
+CT-01 now implements the [pure solver and independent tiny oracle](COUPLED-TIME-CT01-20261023.md).
+All 23 generated tests pass, with zero failures/errors/skips, 29 exact rational
+oracle comparisons for N1..8 and three N3072/window8 arithmetic cases. The
+[aggregate receipt](COUPLED-TIME-CT01-20261023.json) binds component/test hashes;
+45 returned instances also pass the registered JSON schema. The routine suite
+is wired into the combined runner, whose full C/Rust matrix was not run here.
+**Next: CT-02 independent exact replay verifier and supervised generated resource preflight.**
+Independent replay and actual watchdog/RSS/output enforcement remain NOT_RUN;
+full-size arithmetic coverage does not establish resource qualification.
+The original proposal and CT-00 registration remain frozen and synthetic-only.
+No new candidate is registered for real music or musically measured;
 evaluation manifests and independence remain unresolved. No private inputs were
 read, no new inference was run and the original rejection stays frozen.
 This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
