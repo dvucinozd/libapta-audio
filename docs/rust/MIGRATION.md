@@ -90,13 +90,16 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: implement/test the registered label-blind learned-event
-piecewise OLS experiment, then measure once against the original controls.**
+**Current next: measure the registered label-blind learned-event piecewise
+OLS experiment once from clean exact source against the original controls.**
 The [learned-event experiment](LEARNED-PIECEWISE-EXPERIMENT.md) and
 [fixed protocol](LEARNED-PIECEWISE-PROTOCOL.json) register adaptive pieces,
 one-hop learned residuals, actual seam checks, eight-piece source cap and
 zero-regression gates. Construction is isolated from reference labels and all
 100 candidate outputs are frozen before labels are loaded for scoring.
+The [implementation/preflight](LEARNED-PIECEWISE-PREFLIGHT.md) passes 130 Python
+tests, 37 unchanged Rust controls per debug/release profile and strict checks.
+Commit/push this checkpoint before the one 100-source development run.
 The [terminal quantized result](QUANTIZED-GUIDED-RESULT-20261022.md), measured at
 clean pushed `77c7be4ed8847859d746a4d6d02e5cb0c54d6556`, adds 13 wire-qualified
 reference paths: 60/100 total with 166 same-grid meter records. Three further
