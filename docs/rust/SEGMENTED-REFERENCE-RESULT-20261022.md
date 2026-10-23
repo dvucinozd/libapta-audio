@@ -201,4 +201,6 @@ quantized native construction within the existing eight-segment cap.
 
 That [terminal construction](QUANTIZED-GUIDED-RESULT-20261022.md) is now measured:
 60/100 wire-qualified paths, including all 47 here unchanged and 13 additional.
-The reference sequence is closed; next work returns to label-blind learned events.
+The reference sequence is closed. The subsequent
+[label-blind learned-piecewise experiment](LEARNED-PIECEWISE-RESULT-20261023.md)
+is rejected; next is upstream dense logit capture and event-output parity.

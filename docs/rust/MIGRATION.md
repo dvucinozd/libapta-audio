@@ -90,8 +90,22 @@ tests and post-run rescoring/hash checks pass; native processing is unchanged.
 The preceding checkpoint is pushed as
 `b32345f77660c3f4864b188e941bc9d31886aa68`; this continuation is committed and
 pushed separately before the next step, with historical evidence hashes intact.
-**Current next: measure the registered label-blind learned-event piecewise
-OLS experiment once from clean exact source against the original controls.**
+**Current next: separately register label-free dense Beat This! final0
+beat/downbeat logit capture with exact legacy-event parity, before decoding.**
+The [learned-piecewise result](LEARNED-PIECEWISE-RESULT-20261023.md) rejects the
+fixed candidate at clean pushed `7c6faac44a46a33e0146d0eae57993e6258f802e`:
+174/401 nominal joint windows versus 187 OLS, zero fixes and 13 breaks; actual
+complete sequences 95 versus 97 under matched actual-successor diagnostics.
+All nine gates fail, including meter/downbeat no-regression. Five joint breaks
+remain accepted but wrong, so guard removal/capacity increases are not a full
+repair. All 100 label-isolated candidates, independent fits/partitions and 600
+scores reproduce. No transfer or same-cohort rescue follows this rejection.
+The local bound upstream source exposes `Audio2Frames` logits before
+`Audio2Beats` postprocessing. Next freeze model/preprocessing/coordinate/cap
+contracts and capture complete dense evidence with unchanged saved-event
+parity, without scoring labels. Only after trace integrity should a separate
+bounded probability decoder address competing timing/family/phase paths.
+No new inference or such capture is performed by this checkpoint.
 The [learned-event experiment](LEARNED-PIECEWISE-EXPERIMENT.md) and
 [fixed protocol](LEARNED-PIECEWISE-PROTOCOL.json) register adaptive pieces,
 one-hop learned residuals, actual seam checks, eight-piece source cap and
@@ -99,7 +113,8 @@ zero-regression gates. Construction is isolated from reference labels and all
 100 candidate outputs are frozen before labels are loaded for scoring.
 The [implementation/preflight](LEARNED-PIECEWISE-PREFLIGHT.md) passes 130 Python
 tests, 37 unchanged Rust controls per debug/release profile and strict checks.
-Commit/push this checkpoint before the one 100-source development run.
+Registration and preflight were committed/pushed before the one 100-source
+run; commit/push its rejected result before the dense-logit registration.
 The [terminal quantized result](QUANTIZED-GUIDED-RESULT-20261022.md), measured at
 clean pushed `77c7be4ed8847859d746a4d6d02e5cb0c54d6556`, adds 13 wire-qualified
 reference paths: 60/100 total with 166 same-grid meter records. Three further

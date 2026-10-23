@@ -47,7 +47,10 @@ anchored-family paths validate within existing native/wire limits. The subsequen
 paths, including 28 additional sources, and 25 necessary-relaxation contradictions.
 The [terminal guided quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) is
 now complete: 60/100 wire-qualified paths, including 13 additional witnesses.
-Reference-construction research is closed; next is label-blind learned-event timing.
+Reference-construction research is closed. The subsequent
+[label-blind piecewise timing](LEARNED-PIECEWISE-RESULT-20261023.md) is rejected
+with 13 OLS joint breaks. Next is complete upstream logit capture and unchanged
+event parity before a separately registered probability decoder.
 The measured model comparison and its frozen scores remain unchanged.
 
 ## Event results

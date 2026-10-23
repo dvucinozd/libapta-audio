@@ -35,3 +35,8 @@ Q32 quantization, small exhaustive partition solutions and label isolation.
 Commit/push preflight before one exact-source development run. A passing result
 only authorizes separately registered independent development transfer; no
 production/native integration, confidence calibration or physical qualification.
+
+Measured follow-up: [the fixed candidate is rejected](LEARNED-PIECEWISE-RESULT-20261023.md),
+with 174/401 nominal joint windows against 187 OLS, zero fixes and 13 breaks.
+No transfer or parameter rescue follows. Next is separately registered capture
+of complete upstream beat/downbeat logits and unchanged-event parity.

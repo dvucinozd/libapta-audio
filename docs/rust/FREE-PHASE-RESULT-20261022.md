@@ -166,4 +166,6 @@ construction](QUANTIZED-GUIDED-RESULT-20261022.md) realizes 16 of the 28 additio
 continuous paths natively; 13 fit the wire cap. Totals are 63 native / 60 wire
 sources, with all 47 previous responses preserved. The twelve guided-family
 failures are not global impossibility proofs. Reference-construction research
-is now closed; next work is label-blind saved learned-event timing.
+is now closed. The subsequent
+[label-blind learned-piecewise experiment](LEARNED-PIECEWISE-RESULT-20261023.md)
+is rejected. Next work is upstream dense logit capture and event-output parity.

@@ -42,7 +42,9 @@ The subsequent [free-phase diagnostic](FREE-PHASE-RESULT-20261022.md) finds
 75/100 continuous paths and 25 necessary-relaxation contradictions. The
 [terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) now reaches
 60/100 wire-qualified sources. Reference construction is closed; next is
-label-blind learned-event timing. This rejection remains unchanged.
+label-blind learned-event timing, now
+[measured and rejected](LEARNED-PIECEWISE-RESULT-20261023.md). Next is upstream
+logit capture/event parity. This rejection remains unchanged.
 
 ## Fixed run and musical metrics
 

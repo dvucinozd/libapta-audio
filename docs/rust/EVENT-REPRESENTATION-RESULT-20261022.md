@@ -44,7 +44,9 @@ also measured: 47/100 full family paths validate within the cap. The subsequent
 paths and 25 necessary-relaxation contradictions. The
 [terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) reaches 60/100
 wire-qualified sources and closes reference construction. Next is label-blind
-learned-event timing; this audit's scores are unchanged.
+learned-event timing, now
+[measured and rejected](LEARNED-PIECEWISE-RESULT-20261023.md). Next is upstream
+logit capture/event parity; this audit's scores are unchanged.
 
 ## Frozen inputs and execution
 

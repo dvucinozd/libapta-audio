@@ -1,0 +1,270 @@
+{
+  "all_100_independent_fits_suffix_minima_source_vetoes_and_600_scores_replayed": true,
+  "all_candidates_frozen_before_label_loading": true,
+  "bound_files": 1257,
+  "candidate_freeze_sha256": "8508d4c38c67be0af4268aea2c00e96032bd9dbb2df246119da1e06d6d06b791",
+  "candidate_module_sha256": "dec643e9b948c11c7f9ce23cc4a2df6b3fdfcbfa7142860c1bce1a8473a41acb",
+  "confidence_calibrated": false,
+  "counts": {
+    "accepted_pieces": 524,
+    "capacity_rejected_sources": 3,
+    "full_source_support": 55,
+    "source_seam_rejected_windows": 8,
+    "sources": 100
+  },
+  "development_gate_passed": false,
+  "formal_acceptance": false,
+  "format": "libapta-learned-piecewise-timing-1",
+  "gates": {
+    "actual_sequence_improves": false,
+    "nominal_joint_improves": false,
+    "nominal_sequence_improves": false,
+    "zero_coarse_joint_breaks": false,
+    "zero_downbeat_breaks": false,
+    "zero_meter_breaks": false,
+    "zero_ols_joint_breaks": false,
+    "zero_ols_period_breaks": false,
+    "zero_ols_phase_breaks": false
+  },
+  "independent_replay_script_sha256": "468409977e3de43394465bd3c9080315a42bd258985342e0e37fbae1e4b85b10",
+  "independent_transfer": false,
+  "inference_run": false,
+  "new_audio": false,
+  "ols_joint_break_statuses": {
+    "accepted": 5,
+    "no_piecewise_path": 4,
+    "source_capacity_exceeded": 4
+  },
+  "original_regressions": [
+    {
+      "actual": {
+        "complete_sequence_windows": 0,
+        "joint_windows": 0,
+        "one_to_one_phase_windows": 0,
+        "period_correct_points": 0,
+        "period_windows": 0,
+        "phase_correct_points": 9,
+        "phase_windows": 0,
+        "points": 19,
+        "reference_complete_windows": 1,
+        "scored_points": 19,
+        "unknown_successor_points": 0,
+        "windows": 1
+      },
+      "case": "A",
+      "meter": {
+        "downbeat_correct": 1,
+        "downbeat_scored": 1,
+        "meter_correct": 0,
+        "meter_emitted": 1
+      },
+      "nominal": {
+        "complete_sequence_windows": 0,
+        "joint_windows": 0,
+        "one_to_one_phase_windows": 0,
+        "period_correct_points": 0,
+        "period_windows": 0,
+        "phase_correct_points": 9,
+        "phase_windows": 0,
+        "points": 19,
+        "reference_complete_windows": 1,
+        "scored_points": 19,
+        "unknown_successor_points": 0,
+        "windows": 1
+      }
+    },
+    {
+      "actual": {
+        "complete_sequence_windows": 0,
+        "joint_windows": 0,
+        "one_to_one_phase_windows": 1,
+        "period_correct_points": 8,
+        "period_windows": 0,
+        "phase_correct_points": 10,
+        "phase_windows": 1,
+        "points": 10,
+        "reference_complete_windows": 1,
+        "scored_points": 10,
+        "unknown_successor_points": 0,
+        "windows": 1
+      },
+      "case": "B",
+      "meter": {
+        "downbeat_correct": 1,
+        "downbeat_scored": 1,
+        "meter_correct": 1,
+        "meter_emitted": 1
+      },
+      "nominal": {
+        "complete_sequence_windows": 0,
+        "joint_windows": 0,
+        "one_to_one_phase_windows": 1,
+        "period_correct_points": 7,
+        "period_windows": 0,
+        "phase_correct_points": 10,
+        "phase_windows": 1,
+        "points": 10,
+        "reference_complete_windows": 1,
+        "scored_points": 10,
+        "unknown_successor_points": 0,
+        "windows": 1
+      }
+    }
+  ],
+  "paired": {
+    "coarse": {
+      "downbeat_breaks": 17,
+      "joint_breaks": 4,
+      "joint_fixes": 131,
+      "meter_breaks": 199,
+      "period_breaks": 9,
+      "period_fixes": 81,
+      "phase_breaks": 10,
+      "phase_fixes": 197
+    },
+    "ols": {
+      "downbeat_breaks": 16,
+      "joint_breaks": 13,
+      "joint_fixes": 0,
+      "meter_breaks": 19,
+      "period_breaks": 13,
+      "period_fixes": 0,
+      "phase_breaks": 27,
+      "phase_fixes": 1
+    }
+  },
+  "physical_p4": false,
+  "production_promotion": false,
+  "protocol_sha256": "007b1c0cb834c5768947e2df9f1431e6a8483a9ea1a51eace42d0f76c7f4e7fc",
+  "report_sha256": "0d2b4bee22549fb3e3f7a3f604196bc0da8ea75a78d0020f5bdf31db64dbe03f",
+  "resources": {
+    "rss_peak_kib": 26352,
+    "run_wall_seconds": 23.004647815999988
+  },
+  "source_archive_sha256": "6b4cd2c0bb982f9dede21c20b2b1e6ad2a700a34c0971f8c73b2cad66dc72edf",
+  "source_pieces_before_capacity_histogram": {
+    "0": 4,
+    "1": 2,
+    "2": 4,
+    "3": 7,
+    "4": 6,
+    "5": 9,
+    "6": 42,
+    "7": 12,
+    "8": 11,
+    "9": 3
+  },
+  "source_revision": "7c6faac44a46a33e0146d0eae57993e6258f802e",
+  "tests": {
+    "python": 130,
+    "rust_each_debug_release": 37
+  },
+  "totals": {
+    "candidate_actual": {
+      "complete_sequence_windows": 95,
+      "joint_windows": 98,
+      "one_to_one_phase_windows": 253,
+      "period_correct_points": 3217,
+      "period_windows": 101,
+      "phase_correct_points": 4263,
+      "phase_windows": 274,
+      "points": 4801,
+      "reference_complete_windows": 401,
+      "scored_points": 4721,
+      "unknown_successor_points": 76,
+      "windows": 600
+    },
+    "candidate_meter": {
+      "downbeat_correct": 151,
+      "downbeat_scored": 185,
+      "meter_correct": 177,
+      "meter_emitted": 191
+    },
+    "candidate_nominal": {
+      "complete_sequence_windows": 168,
+      "joint_windows": 174,
+      "one_to_one_phase_windows": 253,
+      "period_correct_points": 3373,
+      "period_windows": 179,
+      "phase_correct_points": 4263,
+      "phase_windows": 274,
+      "points": 4801,
+      "reference_complete_windows": 401,
+      "scored_points": 4721,
+      "unknown_successor_points": 0,
+      "windows": 600
+    },
+    "old_coarse": {
+      "confirmed_joint_windows": 47,
+      "confirmed_period_windows": 107,
+      "confirmed_phase_windows": 87,
+      "downbeat_correct": 31,
+      "downbeat_scored": 472,
+      "emitted": 598,
+      "high_confidence_grid_error": 13,
+      "high_confidence_grid_unknown_context": 13,
+      "meter_correct": 333,
+      "meter_emitted": 491,
+      "period_correct_beats": 2118,
+      "phase_correct_beats": 2229,
+      "predicted_beats": 6135,
+      "reference_complete_windows": 401,
+      "scored_beats": 5999,
+      "windows": 600
+    },
+    "old_ols": {
+      "confirmed_joint_windows": 187,
+      "confirmed_period_windows": 192,
+      "confirmed_phase_windows": 300,
+      "downbeat_correct": 167,
+      "downbeat_scored": 207,
+      "emitted": 560,
+      "high_confidence_grid_error": 0,
+      "high_confidence_grid_unknown_context": 0,
+      "meter_correct": 195,
+      "meter_emitted": 215,
+      "period_correct_beats": 3704,
+      "phase_correct_beats": 4839,
+      "predicted_beats": 5771,
+      "reference_complete_windows": 401,
+      "scored_beats": 5680,
+      "windows": 600
+    },
+    "ols_actual": {
+      "complete_sequence_windows": 97,
+      "joint_windows": 101,
+      "one_to_one_phase_windows": 274,
+      "period_correct_points": 3547,
+      "period_windows": 103,
+      "phase_correct_points": 4839,
+      "phase_windows": 300,
+      "points": 5771,
+      "reference_complete_windows": 401,
+      "scored_points": 5680,
+      "unknown_successor_points": 88,
+      "windows": 600
+    },
+    "ols_nominal": {
+      "complete_sequence_windows": 178,
+      "joint_windows": 187,
+      "one_to_one_phase_windows": 274,
+      "period_correct_points": 3704,
+      "period_windows": 192,
+      "phase_correct_points": 4839,
+      "phase_windows": 300,
+      "points": 5771,
+      "reference_complete_windows": 401,
+      "scored_points": 5680,
+      "unknown_successor_points": 0,
+      "windows": 600
+    }
+  },
+  "verification_log_sha256": "d6e0d4380e2ff847dec6cd8842064206dbb3a6bbbc3c563630d63611b81d047a",
+  "window_statuses": {
+    "accepted": 467,
+    "insufficient_events": 17,
+    "no_piecewise_path": 92,
+    "source_capacity_exceeded": 16,
+    "source_seam_failure": 8
+  }
+}

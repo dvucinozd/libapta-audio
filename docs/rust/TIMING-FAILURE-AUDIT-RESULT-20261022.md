@@ -44,7 +44,9 @@ capacity is applied. The subsequent
 paths and 25 necessary-relaxation contradictions under the same bounds. The
 [terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) now reaches
 60/100 wire-qualified sources and closes reference construction. Next is
-label-blind learned-event timing; this audit's findings are unchanged.
+label-blind learned-event timing, now
+[measured and rejected](LEARNED-PIECEWISE-RESULT-20261023.md). Next is complete
+upstream logit capture/event parity; this audit's findings are unchanged.
 
 ## Fixed evidence and baseline
 

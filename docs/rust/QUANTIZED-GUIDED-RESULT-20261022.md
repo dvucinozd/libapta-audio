@@ -164,3 +164,9 @@ Exact archive, log, synthetic fixtures and independent replay/export:
 No audio/inference, new labels/corpus, holdout or reserved transfer is opened.
 The already-open cohort and unresolved cross-dataset identity remain development
 limitations. Commit/push this terminal result before learned-event registration.
+
+Measured follow-up: the separately registered
+[label-blind learned-piecewise fit](LEARNED-PIECEWISE-RESULT-20261023.md) is
+rejected with 174/401 nominal joint windows versus OLS 187/401 and 13 breaks.
+Reference construction remains closed. Next is complete upstream beat/downbeat
+logit capture with unchanged-event parity, before another decoder.

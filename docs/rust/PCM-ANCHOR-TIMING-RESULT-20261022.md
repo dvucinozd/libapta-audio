@@ -45,7 +45,9 @@ measured: 47/100 full anchored-family paths validate within the cap. The
 paths and 25 necessary-relaxation contradictions. The
 [terminal quantized study](QUANTIZED-GUIDED-RESULT-20261022.md) reaches 60/100
 wire-qualified sources and closes reference construction. Next is label-blind
-learned-event timing; this PCM rejection is unchanged.
+learned-event timing, now
+[measured and rejected](LEARNED-PIECEWISE-RESULT-20261023.md). Next is upstream
+logit capture/event parity; this PCM rejection is unchanged.
 
 ## Fixed execution
 
