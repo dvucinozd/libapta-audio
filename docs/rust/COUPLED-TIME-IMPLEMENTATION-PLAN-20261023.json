@@ -1,0 +1,92 @@
+{
+  "format": "libapta-coupled-time-plan-1",
+  "date": "2026-10-23",
+  "status": "DESIGN_PROPOSAL_NOT_REGISTERED",
+  "hypothesis_name": "coupled-neural-event-time-v1",
+  "next_checkpoint": "CT-00",
+  "candidate_implemented": false,
+  "candidate_measured": false,
+  "original_dense_decoder_verdict": "REJECTED",
+  "evidence": {
+    "dd05_sha256": "40b3ac60c3e19d7bdb747be78c5f345d7ec96f2c7c8938c2f55dc6925ce37b59",
+    "diagnosis_sha256": "901faeca3290ae9ef7a688960542119d126180eb89caf6d798a47830382816f8",
+    "tail_sha256": "a4cf765cf9cb4eeb2467a47fa43696df6e7b2a27c611827ee77db97e4b41623d",
+    "tail_audit_source_revision": "e452a843cbaae43956a3366050e83d4f24e41687"
+  },
+  "new_input_contract": {
+    "observations": "original raw Beat This decoded source-frame events and neural downbeat ordinals",
+    "explicitly_differs_from_v1_forbidden_inputs": true,
+    "rejected_v1_path_allowed": false,
+    "coarse_or_ols_tempo_meter_allowed": false,
+    "labels_ids_correctness_allowed": false,
+    "raw_logits_or_inference_needed": false,
+    "event_insertion_deletion_allowed": false,
+    "downbeat_ordinal_changes_allowed": false
+  },
+  "proposed_numerical_contract": {
+    "objective": "sum((x-a)^2) + lambda*sum((D2*x)^2)",
+    "lambda": 16,
+    "maximum_radius_frames": 960,
+    "neighbor_gap_radius_divisor": 4,
+    "box_source_domain": "[0,total_frames-1]",
+    "numeric_type": "IEEE754 float64, separate operations in registered order",
+    "initialization": "x=a",
+    "coordinate_order": "ascending then descending each sweep; triples and variable indices ascending",
+    "maximum_sweeps": 4096,
+    "maximum_clipped_coordinate_residual_frames": 0.000001,
+    "pre_round_serialization": "float.hex",
+    "output_rounding": "floor(x+0.5), once after convergence",
+    "nonconvergence": "INVALID, no fallback",
+    "oracle_maximum_events": 8,
+    "oracle_coordinate_tolerance_frames": 0.001,
+    "oracle_objective_excess_relative_or_unit_tolerance": 0.001,
+    "oracle_below_optimum_relative_or_unit_tolerance": 0.000000001,
+    "minimum_constructor_events": 9,
+    "maximum_source_frames": 1440000,
+    "maximum_events": 3072,
+    "maximum_windows": 8,
+    "confidence": 0,
+    "confidence_calibrated": false
+  },
+  "proposed_host_preflight_ceilings": {
+    "seconds_per_source": 60,
+    "seconds_per_phase": 1800,
+    "rss_kib_per_process": 262144,
+    "attempt_output_bytes": 67108864,
+    "four_float_vector_payload_bytes_at_max_events": 98304,
+    "maximum_coordinate_root_evaluations": 37751808,
+    "measured_solver_resources": "NOT_RUN",
+    "product_budget_or_p4_feasibility": "UNKNOWN"
+  },
+  "checkpoints": [
+    {"id": "CT-00", "depends_on": [], "deliverable": "synthetic-only protocol/schema/numerics registration", "real_candidate_cli_enabled": false},
+    {"id": "CT-01", "depends_on": ["CT-00"], "deliverable": "pure box-constrained solver and independent rational tiny oracle", "real_candidate_cli_enabled": false},
+    {"id": "CT-02", "depends_on": ["CT-01"], "deliverable": "independent verifier and full generated resource preflight", "real_candidate_cli_enabled": false},
+    {"id": "CT-03", "depends_on": ["CT-02"], "deliverable": "explicit musical input/baseline/exposure/independence/gate registration", "real_candidate_cli_enabled": false},
+    {"id": "CT-04", "depends_on": ["CT-02", "CT-03"], "deliverable": "separate construct/verify/score processes and generated operational preflight"},
+    {"id": "CT-05", "depends_on": ["CT-04"], "deliverable": "one separately authorized registered attempt and frozen decision"}
+  ],
+  "real_evaluation_registration_ready": false,
+  "unresolved_before_real_evaluation": [
+    "new private input and exact-baseline manifest not selected or bound",
+    "GTZAN is already exposed; independent development/transfer membership unresolved",
+    "new-denominator absolute gates not registered; do not transfer old counts to another cohort"
+  ],
+  "retained_same_cohort_gate_proposal": {
+    "only_if_separately_registered_as_exposed_diagnostic": true,
+    "sources": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "nominal_joint_minimum": 188,
+    "nominal_complete_minimum": 179,
+    "actual_complete_minimum": 98,
+    "paired_breaks_maximum": 0,
+    "four_event_macro_no_decrease_epsilon": 0.000000000001
+  },
+  "training_or_new_model_selection": false,
+  "new_corpus_acquisition": false,
+  "independent_transfer": false,
+  "native_port": false,
+  "physical_p4": false,
+  "production_promotion": false
+}

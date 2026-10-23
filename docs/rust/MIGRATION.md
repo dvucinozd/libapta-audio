@@ -53,10 +53,21 @@ arithmetic 1% tolerance favorably for 787 intervals and unfavorably for 490;
 3087 failures already have an out-of-tolerance row term. The 20-ms lattice and
 the independent post-DP offsets both need attention. Reference/local-median
 self-consistency also requires explicit treatment; no old gate is relaxed.
-**Next: plan/register a continuous-time trajectory hypothesis before coding.**
-First address the large-error tail and output/reference semantics in the
-diagnosis's ordered decision checklist. No alternate candidate has
-been scored, no new inference was run, and the original rejection is unchanged.
+The [large-tail audit](DENSE-DECODER-TAIL-20261023.md) now replays the same 600
+scores on clean source `e452a843cbaae43956a3366050e83d4f24e41687`; 50 focused
+Python tests pass. All 95 actual regressions contain only <=5% known-period
+errors (452 errors / 977 intervals), with no half/double-family tail. Global
+large errors include skipped annotated events and remain a separate limitation.
+The [coupled-time implementation plan](COUPLED-TIME-IMPLEMENTATION-PLAN-20261023.md)
+and [machine-readable plan](COUPLED-TIME-IMPLEMENTATION-PLAN-20261023.json) propose
+bounded joint timing of original decoded neural events, with final-interval
+regularity and fixed event/downbeat topology. This explicitly changes the input
+contract in a new hypothesis; it is not a retry or amendment of rejected v1.
+**Next: CT-00 synthetic-only numerical/schema registration, before coding.**
+The plan fixes a proposed objective, deterministic solver, independent oracle,
+caps, tests and ordered CT-00..05 checkpoints. No new candidate is implemented,
+registered for real music or measured; evaluation manifests and independence
+remain unresolved. No new inference was run and the original rejection stays frozen.
 This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
 the frozen failure and baseline; no automatic retry, retuning, fallback, new
 model/training or production activation follows this result.
