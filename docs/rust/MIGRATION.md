@@ -46,6 +46,10 @@ and 7 breaks. Actual joint falls 101 -> 9 and complete 97 -> 8; beat/downbeat
 F1 also decrease. Exact metrics, paired changes, genre aggregates and identities
 are in the [aggregate evidence](DENSE-DECODER-DD05-20261023.json).
 **Next: separately scope failure diagnosis and a new hypothesis decision.**
+The [post-hoc diagnosis scope](DENSE-DECODER-DIAGNOSIS-SCOPE.md) and read-only
+audit tool now have 12 generated checks. Execute that saved-output audit from a
+clean committed/pushed revision before drawing causal conclusions. It reproduces
+the original scorer and decomposes existing intervals without a new candidate.
 This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
 the frozen failure and baseline; no automatic retry, retuning, fallback, new
 model/training or production activation follows this result.
