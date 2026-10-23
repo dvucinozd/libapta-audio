@@ -63,11 +63,22 @@ and [machine-readable plan](COUPLED-TIME-IMPLEMENTATION-PLAN-20261023.json) prop
 bounded joint timing of original decoded neural events, with final-interval
 regularity and fixed event/downbeat topology. This explicitly changes the input
 contract in a new hypothesis; it is not a retry or amendment of rejected v1.
-**Next: CT-00 synthetic-only numerical/schema registration, before coding.**
-The plan fixes a proposed objective, deterministic solver, independent oracle,
-caps, tests and ordered CT-00..05 checkpoints. No new candidate is implemented,
-registered for real music or measured; evaluation manifests and independence
-remain unresolved. No new inference was run and the original rejection stays frozen.
+CT-00 now registers the [synthetic numerical contract](COUPLED-TIME-SYNTHETIC-PROTOCOL.md),
+[fixed protocol](COUPLED-TIME-SYNTHETIC-PROTOCOL.json) and
+[candidate schema](COUPLED-TIME-CANDIDATE-SCHEMA.json), before solver implementation.
+Protocol SHA-256:
+`5f23a96330e7852f9dcb21b6273acf258e7252177da9bef53ceb9e3bea1afced`.
+The [registration checks](COUPLED-TIME-CT00-20261023.json) validate seven generated
+contract examples, reject forty invalid schema/strict-JSON examples and verify
+seven bound document hashes. These are documentation/schema checks only:
+the solver, independent oracle, runtime cross-field checks, resource preflight
+and musical evaluation have not run. The contract fixes float64 operation order,
+box constraints, stopping limits, rounding, abstention and technical-failure rules.
+**Next: CT-01 pure solver with an independent rational tiny-case oracle.**
+The original proposal remains frozen; CT-00 registers synthetic work only.
+No new candidate is implemented, registered for real music or measured;
+evaluation manifests and independence remain unresolved. No private inputs were
+read, no new inference was run and the original rejection stays frozen.
 This candidate does not proceed to DD-06 transfer or a native/P4 port. Preserve
 the frozen failure and baseline; no automatic retry, retuning, fallback, new
 model/training or production activation follows this result.

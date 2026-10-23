@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Coupled neural-event time candidate, synthetic protocol version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "hypothesis_name", "protocol_sha256", "total_frames", "input_event_count", "status", "confidence", "confidence_calibrated", "events", "solution", "windows", "known_pcm_gaps", "window_ownership_changes", "native_graph_constructed", "physical_p4", "formal_acceptance", "production_promotion"],
+  "properties": {
+    "format": {"const": "libapta-coupled-time-candidate-1"},
+    "hypothesis_name": {"const": "coupled-neural-event-time-v1"},
+    "protocol_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "total_frames": {"type": "integer", "minimum": 1, "maximum": 1440000},
+    "input_event_count": {"type": "integer", "minimum": 0, "maximum": 3072},
+    "status": {"enum": ["candidate_events", "known_pcm_gap", "insufficient_events"]},
+    "confidence": {"type": "integer", "const": 0},
+    "confidence_calibrated": {"const": false},
+    "native_graph_constructed": {"const": false},
+    "physical_p4": {"const": false},
+    "formal_acceptance": {"const": false},
+    "production_promotion": {"const": false},
+    "events": {
+      "type": "object", "additionalProperties": false,
+      "required": ["beat_frames", "beat_ordinals", "downbeat_frames", "downbeat_ordinals"],
+      "properties": {
+        "beat_frames": {"$ref": "#/$defs/frameArray"},
+        "beat_ordinals": {"$ref": "#/$defs/ordinalArray"},
+        "downbeat_frames": {"$ref": "#/$defs/frameArray"},
+        "downbeat_ordinals": {"$ref": "#/$defs/ordinalArray"}
+      }
+    },
+    "solution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["coordinates_hex", "lower_bounds", "upper_bounds", "sweeps", "root_evaluations", "coordinate_updates", "residual_frames", "objective_frames_squared", "active_lower_ordinals", "active_upper_ordinals"],
+      "properties": {
+        "coordinates_hex": {"type": "array", "maxItems": 3072, "items": {"type": "string", "pattern": "^-?0x[01]\\.[0-9a-f]+p[+-][0-9]+$"}},
+        "lower_bounds": {"$ref": "#/$defs/frameArray"},
+        "upper_bounds": {"$ref": "#/$defs/frameArray"},
+        "sweeps": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "root_evaluations": {"type": "integer", "minimum": 0, "maximum": 37751808},
+        "coordinate_updates": {"type": "integer", "minimum": 0, "maximum": 25165824},
+        "residual_frames": {"type": ["number", "null"], "minimum": 0, "maximum": 0.000001},
+        "objective_frames_squared": {"type": ["number", "null"], "minimum": 0},
+        "active_lower_ordinals": {"$ref": "#/$defs/ordinalArray"},
+        "active_upper_ordinals": {"$ref": "#/$defs/ordinalArray"}
+      }
+    },
+    "windows": {
+      "type": "array", "minItems": 1, "maxItems": 8,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["first_frame", "end_frame", "status", "beat_ordinals"],
+        "properties": {
+          "first_frame": {"type": "integer", "minimum": 0, "maximum": 1439999},
+          "end_frame": {"type": "integer", "minimum": 1, "maximum": 1440000},
+          "status": {"enum": ["candidate_events", "no_events", "known_pcm_gap", "insufficient_events"]},
+          "beat_ordinals": {"$ref": "#/$defs/ordinalArray"}
+        }
+      }
+    },
+    "known_pcm_gaps": {
+      "type": "array", "maxItems": 1440000,
+      "items": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"type": "integer", "minimum": 0, "maximum": 1440000}}
+    },
+    "window_ownership_changes": {
+      "type": "array", "maxItems": 3072,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["ordinal", "observed_window", "final_window"],
+        "properties": {
+          "ordinal": {"type": "integer", "minimum": 0, "maximum": 3071},
+          "observed_window": {"type": "integer", "minimum": 0, "maximum": 7},
+          "final_window": {"type": "integer", "minimum": 0, "maximum": 7}
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "candidate_events"}}},
+      "then": {
+        "properties": {
+          "input_event_count": {"minimum": 9},
+          "known_pcm_gaps": {"maxItems": 0},
+          "events": {"properties": {"beat_frames": {"minItems": 9}, "beat_ordinals": {"minItems": 9}}},
+          "solution": {"properties": {
+            "coordinates_hex": {"minItems": 9}, "lower_bounds": {"minItems": 9}, "upper_bounds": {"minItems": 9},
+            "root_evaluations": {"minimum": 9},
+            "residual_frames": {"type": "number"}, "objective_frames_squared": {"type": "number"}
+          }},
+          "windows": {"items": {"properties": {"status": {"enum": ["candidate_events", "no_events"]}}}}
+        }
+      },
+      "else": {
+        "properties": {
+          "events": {"properties": {"beat_frames": {"maxItems": 0}, "beat_ordinals": {"maxItems": 0}, "downbeat_frames": {"maxItems": 0}, "downbeat_ordinals": {"maxItems": 0}}},
+          "solution": {"properties": {
+            "coordinates_hex": {"maxItems": 0}, "lower_bounds": {"maxItems": 0}, "upper_bounds": {"maxItems": 0},
+            "sweeps": {"const": 0}, "root_evaluations": {"const": 0}, "coordinate_updates": {"const": 0},
+            "residual_frames": {"type": "null"}, "objective_frames_squared": {"type": "null"},
+            "active_lower_ordinals": {"maxItems": 0}, "active_upper_ordinals": {"maxItems": 0}
+          }},
+          "windows": {"items": {"properties": {"beat_ordinals": {"maxItems": 0}}}},
+          "window_ownership_changes": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "known_pcm_gap"}}},
+      "then": {"properties": {"known_pcm_gaps": {"minItems": 1}, "windows": {"items": {"properties": {"status": {"const": "known_pcm_gap"}}}}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "insufficient_events"}}},
+      "then": {"properties": {"input_event_count": {"maximum": 8}, "known_pcm_gaps": {"maxItems": 0}, "windows": {"items": {"properties": {"status": {"const": "insufficient_events"}}}}}}
+    }
+  ],
+  "$defs": {
+    "frameArray": {"type": "array", "maxItems": 3072, "uniqueItems": true, "items": {"type": "integer", "minimum": 0, "maximum": 1439999}},
+    "ordinalArray": {"type": "array", "maxItems": 3072, "uniqueItems": true, "items": {"type": "integer", "minimum": 0, "maximum": 3071}}
+  }
+}
