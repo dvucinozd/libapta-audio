@@ -102,9 +102,24 @@ model/runtime and per-source score bytes were hashed without decoding/inference.
 The old baseline and all 16 musical gates remain fixed. Independence is explicitly
 UNRESOLVED, with no independent cohort selected; a later pass on this exposed
 cohort is diagnostic-only. CT-03 registers scope, not real execution permission.
-**Next: CT-04 generated-only construct/verify/score runner and isolation preflight.**
-The real CLI remains absent/disabled; matching CT-02/CT-03 tokens, CT-04 preflight
-and a distinct authorized CT-05 scope record must precede any real measurement.
+CT-04 now implements the [separate construct/verify/evaluate runner](COUPLED-TIME-CT04-20261023.md).
+The [operational receipt](COUPLED-TIME-CT04-20261023.json) binds the exact runner,
+tests and logs. All 53 focused tests pass (23 CT-01, 14 CT-02, 16 CT-04), with
+no skips/failures/errors; the additional stdlib routine suite passes 16 tests.
+Canonical unchanged mir_eval scoring runs in a separate generated evaluation
+process after construction and independent verification with labels absent.
+Label changes leave candidate bytes unchanged. Partial/corrupt/stale inputs,
+missing verification, baseline drift, overwrite and parent resource failures
+are rejected. The CT-02 21-case numerical/process preflight is repeated.
+The two-source/four-window canonical attempt uses 478659 bytes; phase times are
+3.261/3.743/6.969s and maximum observed process RSS/HWM is 108968 KiB.
+These are generated host values, not a real musical result or P4 qualification.
+**Next: CT-05, one separately authorized exposed diagnostic attempt.**
+The CLI now exists with real dispatch disabled. Matching CT-02/CT-03 tokens,
+this CT-04 preflight and a distinct authorized CT-05 scope/destination record
+must precede real construction. That authorization record does not exist here.
+Before dispatch, commit/push and verify the same clean execution source for all
+phases; retain the exact 100/600 cohort, unchanged gates and one-run stop policy.
 The original proposal and CT-00 registration remain frozen. No real candidate
 was constructed or musically scored, no new inference ran, and the original
 rejection stays frozen. Independent transfer and product qualification stay open.

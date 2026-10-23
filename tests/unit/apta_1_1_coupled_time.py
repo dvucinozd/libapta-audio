@@ -218,7 +218,7 @@ class CoupledTimeTests(unittest.TestCase):
         self.assertEqual(model.MAXIMUM_EVENTS, 3072)
         self.assertEqual(model.MAXIMUM_SOURCE_FRAMES, 1440000)
         self.assertEqual(model.MAXIMUM_WINDOWS, 8)
-        self.assertFalse((ROOT / "tools/apta_1_1_coupled_time.py").exists())
+        # CT04 now tests the runner's disabled real dispatch in separate processes.
 
     def test_g01_affine_initial_convergence(self):
         for period in (24000, 25000, 30240):

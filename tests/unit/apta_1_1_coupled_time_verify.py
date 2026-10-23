@@ -301,7 +301,7 @@ class PreflightTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(b'unrecognized arguments', result.stderr)
                 self.assertFalse(output.exists())
-        self.assertFalse((ROOT / 'tools/apta_1_1_coupled_time.py').exists())
+        # Runner existence is expected at CT04; its real-role gates have own tests.
 
 
 if __name__ == '__main__':
