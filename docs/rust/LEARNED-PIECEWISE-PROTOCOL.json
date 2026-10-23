@@ -1,0 +1,43 @@
+{
+  "format": "libapta-learned-piecewise-timing-1",
+  "registered_date": "2026-10-23",
+  "baseline_revision": "b19d3451dea6acabff88926fb378cc5b43847cd4",
+  "hypothesis": "Adaptive piecewise OLS on learned events can preserve variable tempo hidden by the original single constant S6 fit, while bounded residual, identity, natural-count and seam guards expose unsupported evidence.",
+  "inputs": {
+    "prepared_manifest_sha256": "47dcabf6c3d683ac2fdb0e5b58f9c60f84644ad4cf24b0558ee872f4aee6510c",
+    "previous_scoring_sha256": "9f5832722dfb51a9ff05b535d18f72c7328270f9d7670bfda8df576e192d24be",
+    "beat_this_worker_report_sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d",
+    "tracks": 100,
+    "windows": 600,
+    "reference_complete_windows": 401,
+    "read_audio": false,
+    "inference": false,
+    "new_labels_or_holdouts": false
+  },
+  "constructor": {
+    "name": "learned-window-piecewise-ols-v1",
+    "interface": "Separate stdlib constructor module accepts learned beat/downbeat frame arrays, source total, plain first/end S6 ranges and explicit known PCM gaps only. No truth, saved scores, reference-derived witnesses, coarse tempo or corpus identifiers. Evaluator constructs all candidates before loading the prepared label manifest.",
+    "fit": "For each contiguous event run entirely in one original S6 window with at least four events, exact rational OLS of frame against original consecutive ordinal. Round nominal tempo to nearest integer millibpm and anchor at its first ordinal to nearest whole frame, ties upward. Tempo must be 40000..300000; published Q32 period is floor((48000*60000<<32)/tempo).",
+    "bounds": "Each event retains global ordinal and original S6 membership and remains in its learned midpoint cell: boundaries first window frame, floor((previous+current)/2)+1 internally, window end. Its fitted displacement from its learned event must be <=960 frames (one original feature hop). Each piece spans the relevant cells; previous natural point must precede the range, next natural point at/after range end, no extra points hidden by count. No event insertion, deletion, half/double family search or anchor alternatives.",
+    "partition": "Within each window, enumerate all valid runs, then dynamic programming on candidate pieces linked by compatible actual seams. Seam from previous last fitted point to next first must be positive, preserve consecutive ordinals, and differ from previous own period by <=1920 frames. Minimize number of pieces, then sum squared Q32 residual over all original events, then lexicographically longest-first ends. Candidate fit/tempo is deterministic, no parameter search.",
+    "source_seams": "After independent window plans, check adjacent supported windows with the same positive/consecutive/1920-frame seam guard. Mark BOTH windows unsupported on a failed seam, simultaneously without retry or merging. Unknown analysis support resets adjacency; it is not a known PCM gap and is never bridged.",
+    "capacity": "Retain all per-window candidate plans and diagnostics. If the remaining supported pieces total more than eight, abstain for the whole source with explicit capacity status; never truncate or select windows by scores. Full source-native grid is not constructed by this host experiment.",
+    "gaps": "Reject any window intersecting a validated declared PCM gap. Source window partition must be complete, contiguous and bounded; source tail is never discarded.",
+    "meter": "Reuse original two-complete-equal-bars rule on learned event/downbeat ordinals per original S6 window. Map its ordinal onto that window's fitted Q32 path, retaining whole/fractional frame. Meter only emitted on supported candidate grids, with numerator/denominator from learned bars. No reference meter or borrowed grid.",
+    "state": "Opt-in host-only diagnostic; all confidence zero and uncalibrated, no stable/FINAL/native serialization or product activation."
+  },
+  "evaluation": {
+    "baseline": "Reproduce every original ref.project OLS tuple and score_window score and coarse score, unchanged 187/401 OLS joint, 178/401 common nominal complete-sequence. Frozen score_window is not changed or claimed to accept variable grids.",
+    "candidate": "Use unchanged common score_points separately on own piece periods and actual outgoing intervals including seams. An actual successor is available only at next consecutive ordinal in a supported adjacent window or piece; missing/terminal successor is unknown, never substituted by nominal period. Original OLS also gets a separately reported actual-successor diagnostic with identical gap/adjacency rules and its enumerated ordinals.",
+    "meter": "Use unchanged score_window meter/downbeat logic by passing a diagnostic accepted proxy carrying candidate's mapped meter. Discard proxy grid scores: only meter_emitted/correct and downbeat_scored/correct are retained. Same mapped Q32 coordinates are checked independently. No accepted proxy exists for unsupported candidates.",
+    "paired": "Against original OLS common nominal score record phase/period/joint fixes/breaks; require zero of each. Also zero coarse joint breaks, zero old-correct meter/downbeat breaks; report both original coarse-to-OLS regressions unchanged. Actual complete-sequence must improve over identically evaluated OLS actual successors; nominal complete-sequence must improve over 178.",
+    "gates": {"minimum_nominal_joint_windows": 188, "minimum_nominal_complete_sequence_windows": 179, "maximum_ols_period_breaks": 0, "maximum_ols_phase_breaks": 0, "maximum_ols_joint_breaks": 0, "maximum_coarse_joint_breaks": 0, "maximum_meter_breaks": 0, "maximum_downbeat_breaks": 0},
+    "denominators": "All 100 sources/600 original windows/401 complete/199 incomplete reference contexts retained. Missing support counts as missing, not success. No reference-only constructor/control is used to select candidate behavior.",
+    "integrity": "Stop immediately on hash/control/ordinal/count/window identity failure, source mutation or resource-cap violation. Before scoring verify constructor cannot read labels, and changing labels cannot affect saved candidate hashes.",
+    "run_order": "One fixed complete 100-source development attempt in original order, aggregate veto once after cohort. Reject exact candidate on any gate failure; no same-cohort residual/minimum-length/seam/cap/context/fallback rescue. No further corpus, audio or inference follows failure.",
+    "success_action": "Only after all development gates pass, separately register independent open-development transfer using same frozen constructor. No automatic native port, release or formal holdout access."
+  },
+  "limits": {"maximum_source_frames": 1440000, "maximum_events": 3072, "maximum_windows": 8, "maximum_pieces": 8, "minimum_piece_events": 4, "maximum_residual_frames": 960, "maximum_seam_error_frames": 1920, "max_host_rss_kib": 262144, "max_run_seconds": 180},
+  "formal_acceptance": false,
+  "production_promotion_allowed": false
+}
