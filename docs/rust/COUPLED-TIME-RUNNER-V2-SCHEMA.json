@@ -1,0 +1,1039 @@
+{
+  "$defs": {
+    "absolutePath": {
+      "maxLength": 4096,
+      "pattern": "^/[^\u0000]+$",
+      "type": "string"
+    },
+    "authorization": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorized": {
+          "const": true,
+          "type": "boolean"
+        },
+        "format": {
+          "const": "libapta-coupled-time-authorized-attempt-2",
+          "type": "string"
+        },
+        "label_free_manifest_sha256": {
+          "const": "96913d4eb9a1e86f478006c59d837e02fa5a05b86b375ab85cf13f4052f635fc",
+          "type": "string"
+        },
+        "maximum_attempts": {
+          "const": 1,
+          "type": "integer"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "preflight_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "preflight_source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "private_inventory_sha256": {
+          "const": "b035915cc7983add25c6a4894cd9025bed357c0b7a174ccd76b2621762256199",
+          "type": "string"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "scope": {
+          "const": "EXPOSED_DIAGNOSTIC_ONLY",
+          "type": "string"
+        },
+        "source_count": {
+          "const": 100,
+          "type": "integer"
+        },
+        "window_count": {
+          "const": 600,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "authorized",
+        "scope",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "preflight_sha256",
+        "preflight_source_revision",
+        "attempt_path_sha256",
+        "label_free_manifest_sha256",
+        "private_inventory_sha256",
+        "source_count",
+        "window_count",
+        "maximum_attempts"
+      ],
+      "type": "object"
+    },
+    "bindings": {
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "maxLength": 4096,
+        "pattern": "^/[^\u0000]+$",
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "completion": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bindings": {
+          "$ref": "#/$defs/bindings"
+        },
+        "candidates": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "source_id": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "index",
+              "source_id",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "evaluation_report_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "const": "libapta-coupled-time-phase-completion-2",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reference_labels_loaded": {
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        },
+        "upstream": {
+          "$ref": "#/$defs/upstream"
+        },
+        "window_count": {
+          "maximum": 800,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "worker_reports": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "source_id": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "index",
+              "source_id",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 0,
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "status",
+        "context_sha256",
+        "source_count",
+        "window_count",
+        "reference_labels_loaded",
+        "candidates",
+        "worker_reports",
+        "upstream",
+        "evaluation_report_sha256",
+        "bindings"
+      ],
+      "type": "object"
+    },
+    "context": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "libapta-coupled-time-phase-context-2",
+          "type": "string"
+        },
+        "input_manifest_path": {
+          "$ref": "#/$defs/absolutePath"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "rows": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "candidate_sha256": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "index": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "job_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "source_id": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "index",
+              "source_id",
+              "job_sha256",
+              "candidate_sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_order": {
+          "items": {
+            "$ref": "#/$defs/identity"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "upstream": {
+          "$ref": "#/$defs/upstream"
+        },
+        "window_count": {
+          "maximum": 800,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "input_manifest_path",
+        "source_count",
+        "window_count",
+        "source_order",
+        "rows",
+        "upstream"
+      ],
+      "type": "object"
+    },
+    "identity": {
+      "pattern": "^[A-Za-z0-9_.-]{1,128}$",
+      "type": "string"
+    },
+    "invalid": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "context_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        "format": {
+          "const": "libapta-coupled-time-invalid-2",
+          "type": "string"
+        },
+        "musical_verdict_valid": {
+          "const": false,
+          "type": "boolean"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "status": {
+          "const": "INVALID",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "status",
+        "operational_registration_sha256",
+        "attempt_path_sha256",
+        "context_sha256",
+        "error",
+        "musical_verdict_valid"
+      ],
+      "type": "object"
+    },
+    "ioCounters": {
+      "additionalProperties": false,
+      "properties": {
+        "context_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "full_cohort_audits": {
+          "const": 0,
+          "type": "integer"
+        },
+        "full_tracked_tree_rechecks": {
+          "const": 0,
+          "type": "integer"
+        },
+        "manifest_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_candidate_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_file_bind_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_job_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_pair_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unselected_source_file_reads": {
+          "const": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "manifest_reads",
+        "context_reads",
+        "selected_pair_reads",
+        "selected_job_reads",
+        "selected_candidate_reads",
+        "selected_file_bind_calls",
+        "unselected_source_file_reads",
+        "full_cohort_audits",
+        "full_tracked_tree_rechecks"
+      ],
+      "type": "object"
+    },
+    "phaseResources": {
+      "additionalProperties": false,
+      "properties": {
+        "max_observed_process_rss_kib": {
+          "maximum": 262144,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "process_group_monitored": {
+          "const": true,
+          "type": "boolean"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        },
+        "wall_seconds": {
+          "maximum": 1800,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "status",
+        "wall_seconds",
+        "max_observed_process_rss_kib",
+        "process_group_monitored"
+      ],
+      "type": "object"
+    },
+    "preflight": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_output_bytes": {
+          "maximum": 67108864,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "canonical_event_metrics": {
+          "const": true,
+          "type": "boolean"
+        },
+        "component_sha256": {
+          "additionalProperties": {
+            "$ref": "#/$defs/sha256"
+          },
+          "required": [
+            "tools/apta_1_1_coupled_time_v2.py",
+            "tests/unit/apta_1_1_coupled_time_v2_runner.py",
+            "tests/unit/apta_coupled_time_v2_runner_bootstrap.py",
+            "tests/unit/apta_coupled_time_v2_preflight.py",
+            "rust/check.py"
+          ],
+          "type": "object"
+        },
+        "evidence_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "fixture_source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "fixture_tracked_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "fixture_tracked_count": {
+          "minimum": 1024,
+          "type": "integer"
+        },
+        "format": {
+          "const": "libapta-coupled-time-runner-v2-preflight-1",
+          "type": "string"
+        },
+        "gates": {
+          "additionalProperties": false,
+          "properties": {
+            "absent_permuted_label_invariance": {
+              "const": true,
+              "type": "boolean"
+            },
+            "actual_timeout_rss_output_enforcement": {
+              "const": true,
+              "type": "boolean"
+            },
+            "canonical_evaluator_baseline_parity": {
+              "const": true,
+              "type": "boolean"
+            },
+            "descendant_termination_and_orphan_rejection": {
+              "const": true,
+              "type": "boolean"
+            },
+            "dirty_stale_partial_missing_and_mixed_receipts_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "exact_generated_v1_candidate_parity": {
+              "const": true,
+              "type": "boolean"
+            },
+            "full100_construct_verify_evaluate": {
+              "const": true,
+              "type": "boolean"
+            },
+            "full_global_checks_before_success": {
+              "const": true,
+              "type": "boolean"
+            },
+            "numerical_n3072_window8_controls": {
+              "const": true,
+              "type": "boolean"
+            },
+            "old_authorization_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "persistent_cross_worker_mutation_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "poisoned_context_job_or_binding_map_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "registered_caps_and_storage_topology": {
+              "const": true,
+              "type": "boolean"
+            },
+            "selected_source_access_scaling_1_10_100": {
+              "const": true,
+              "type": "boolean"
+            },
+            "strict_json_type_and_path_rejection": {
+              "const": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "selected_source_access_scaling_1_10_100",
+            "full_global_checks_before_success",
+            "persistent_cross_worker_mutation_rejected",
+            "poisoned_context_job_or_binding_map_rejected",
+            "dirty_stale_partial_missing_and_mixed_receipts_rejected",
+            "old_authorization_rejected",
+            "strict_json_type_and_path_rejection",
+            "absent_permuted_label_invariance",
+            "exact_generated_v1_candidate_parity",
+            "canonical_evaluator_baseline_parity",
+            "actual_timeout_rss_output_enforcement",
+            "descendant_termination_and_orphan_rejection",
+            "numerical_n3072_window8_controls",
+            "full100_construct_verify_evaluate",
+            "registered_caps_and_storage_topology"
+          ],
+          "type": "object"
+        },
+        "generated_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "generated_scientific_verdict": {
+          "enum": [
+            "REJECTED",
+            "EXPOSED_DIAGNOSTIC_PASS_ONLY"
+          ]
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "phases": {
+          "additionalProperties": false,
+          "properties": {
+            "construct": {
+              "$ref": "#/$defs/phaseResources"
+            },
+            "evaluate": {
+              "$ref": "#/$defs/phaseResources"
+            },
+            "verify": {
+              "$ref": "#/$defs/phaseResources"
+            }
+          },
+          "required": [
+            "construct",
+            "verify",
+            "evaluate"
+          ],
+          "type": "object"
+        },
+        "real_private_inputs_read": {
+          "const": false,
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "source_count": {
+          "const": 100,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "GENERATED_OPERATIONAL_PREFLIGHT_PASS",
+          "type": "string"
+        },
+        "storage": {
+          "additionalProperties": false,
+          "properties": {
+            "observations": {
+              "const": "linux",
+              "type": "string"
+            },
+            "output": {
+              "const": "linux",
+              "type": "string"
+            },
+            "source": {
+              "const": "windows-mounted",
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "observations",
+            "output"
+          ],
+          "type": "object"
+        },
+        "tests": {
+          "additionalProperties": false,
+          "properties": {
+            "errors": {
+              "const": 0,
+              "type": "integer"
+            },
+            "failures": {
+              "const": 0,
+              "type": "integer"
+            },
+            "skipped": {
+              "const": 0,
+              "type": "integer"
+            },
+            "total": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total",
+            "errors",
+            "failures",
+            "skipped"
+          ],
+          "type": "object"
+        },
+        "window_count": {
+          "const": 600,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "status",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "source_revision",
+        "generated_only",
+        "canonical_event_metrics",
+        "real_private_inputs_read",
+        "source_count",
+        "window_count",
+        "fixture_source_revision",
+        "fixture_tracked_count",
+        "fixture_tracked_bytes",
+        "storage",
+        "component_sha256",
+        "gates",
+        "tests",
+        "phases",
+        "attempt_output_bytes",
+        "evidence_sha256",
+        "generated_scientific_verdict"
+      ],
+      "type": "object"
+    },
+    "revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "supervision": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "completion_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "libapta-coupled-time-supervision-2",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "resources_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "status",
+        "context_sha256",
+        "completion_sha256",
+        "resources_sha256"
+      ],
+      "type": "object"
+    },
+    "timings": {
+      "additionalProperties": false,
+      "properties": {
+        "compute_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "finalization_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "input_validation_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "runtime_binding_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "startup_seconds": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "startup_seconds",
+        "input_validation_seconds",
+        "runtime_binding_seconds",
+        "compute_seconds",
+        "finalization_seconds"
+      ],
+      "type": "object"
+    },
+    "upstream": {
+      "additionalProperties": false,
+      "properties": {
+        "construction_completion_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "construction_supervision_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verification_completion_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verification_supervision_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "construction_completion_sha256",
+        "construction_supervision_sha256",
+        "verification_completion_sha256",
+        "verification_supervision_sha256"
+      ],
+      "type": "object"
+    },
+    "worker": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bindings": {
+          "$ref": "#/$defs/bindings"
+        },
+        "candidate_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "libapta-coupled-time-worker-2",
+          "type": "string"
+        },
+        "index": {
+          "maximum": 99,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "io_counters": {
+          "$ref": "#/$defs/ioCounters"
+        },
+        "job_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reference_labels_loaded": {
+          "const": false,
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify"
+          ]
+        },
+        "scoring_imported": {
+          "const": false,
+          "type": "boolean"
+        },
+        "self_peak_rss_kib": {
+          "maximum": 262144,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "source_id": {
+          "$ref": "#/$defs/identity"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        },
+        "timings": {
+          "$ref": "#/$defs/timings"
+        },
+        "wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "status",
+        "index",
+        "source_id",
+        "context_sha256",
+        "job_sha256",
+        "candidate_sha256",
+        "reference_labels_loaded",
+        "scoring_imported",
+        "self_peak_rss_kib",
+        "wall_seconds",
+        "timings",
+        "io_counters",
+        "bindings"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/context"
+    },
+    {
+      "$ref": "#/$defs/worker"
+    },
+    {
+      "$ref": "#/$defs/completion"
+    },
+    {
+      "$ref": "#/$defs/supervision"
+    },
+    {
+      "$ref": "#/$defs/invalid"
+    },
+    {
+      "$ref": "#/$defs/authorization"
+    },
+    {
+      "$ref": "#/$defs/preflight"
+    }
+  ],
+  "title": "Coupled-time v2 operational records; runtime semantic checks also mandatory"
+}

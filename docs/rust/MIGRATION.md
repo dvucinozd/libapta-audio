@@ -137,8 +137,21 @@ The [aggregate audit](COUPLED-TIME-COST-DIAGNOSIS-20261024.json) and
 v2 runner with parent whole-cohort boundary checks, bounded selected-source worker
 checks and a full100-source/600-window generated preflight on realistic source/storage
 fixtures. Code and old contracts/results remain unchanged at this audit checkpoint.
-**Next: R0, register the v2 operational contract before implementation; then follow
-R1-R4 through generated preflight.** The one-attempt authorization is consumed.
+R0 now registers the [v2 operational contract](COUPLED-TIME-RUNNER-V2-PROTOCOL.md),
+[machine protocol](COUPLED-TIME-RUNNER-V2-PROTOCOL.json) and
+[record schemas](COUPLED-TIME-RUNNER-V2-SCHEMA.json) before implementation.
+Operational protocol SHA-256:
+`9c252c0734c43d3856146b2915648e6273d38060edf635fce717298131a2370e`.
+The [R0 registration receipt](COUPLED-TIME-RUNNER-V2-R0-20261024.json) verifies15
+document bindings and13 immutable components, accepts14 generated record examples,
+rejects270 malformed shape/type/fixture-semantic examples and4 duplicate/nonfinite
+JSON examples. These are documentation/schema checks, not runtime or resource tests.
+The contract fixes parent entry/exit audits, selected-source worker checks, strict
+context/upstream chains, v2 envelopes, canonical evaluator reuse and full100/600
+generated preflight with unchanged caps. V2 code/tests/preflight and authorization
+remain absent; no real/private input, numerical replay or scoring was run at R0.
+**Next: R1/R2 v2 runner implementation and R3 generated integrity/parity tests;
+commit/push before the R4 full generated preflight.** CT-05 authorization is consumed.
 Preserve all partials and the timeout; do not retry, score the subset, raise caps,
 retune or repair/replay within this attempt. Any later real attempt needs a new
 registered scope and matching preflight after its separate repair checkpoint.
