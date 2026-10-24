@@ -1,0 +1,145 @@
+{
+  "authority_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-P0-20261024.json": "8a301b0bdc91ad5db849152cffd4953a53e5f855e3322d511677a08a2cb2700d",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-PROTOCOL.json": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+    "tests/unit/apta_1_1_context_projection_registration.py": "b872a25fa596cc3fc5911aecc315fb82b273da181be7f4a809676cd6f9544bfb"
+  },
+  "branch": "rust-rewrite",
+  "c_rust_interoperability_probes_run": false,
+  "candidate_axis_changed": false,
+  "checks": {
+    "counts": {
+      "legacy_accepted_grid_intersections": 246,
+      "legacy_native_unowned_meter_conflicts": 0,
+      "legacy_owned_meter_intersections": 119,
+      "meter_NOT_EVALUATED": 121,
+      "meter_NO_ELIGIBLE_BARS": 172,
+      "meter_NO_OWNED_WITNESS": 1,
+      "meter_OWNED": 152,
+      "oracle_comparisons": 446,
+      "status_ACCEPTED": 325,
+      "status_INSUFFICIENT_EVENTS": 50,
+      "status_NO_OWNED_POINTS": 0,
+      "status_SOURCE_ANCHOR_OUT_OF_DOMAIN": 1,
+      "status_UNSUPPORTED_TEMPO": 70
+    },
+    "empty_lattice_only_ownership_checked": true,
+    "errors": 0,
+    "fabricated_high_level_fit_used": false,
+    "failures": 0,
+    "first_triple_no_rescue_checked": true,
+    "fresh_interpreter_import_io_isolation_checked": true,
+    "frozen_c3_components_verified": 37,
+    "frozen_document_bindings_verified": 14,
+    "frozen_public_examples": 5,
+    "lattice_only_examples": 6,
+    "legacy_comparison_scope": "PUBLIC_GENERATED_EVENTS_ONLY_NO_SCORING",
+    "legacy_native_unowned_meter_conflicts_promoted_to_correctness": 0,
+    "max_generated_call_seconds_including_oracle_and_schema": 0.06869462800000292,
+    "new_tests": 14,
+    "no_owned_points_high_level_observed": false,
+    "public_matrix_calls": 405,
+    "registration_tests": 9,
+    "reviewed_sources_verified": 17,
+    "skips": 0
+  },
+  "confidence_qualified": false,
+  "consumer_provider_pin_or_checkout_modified": false,
+  "current_consumer_built": false,
+  "date": "2026-10-24",
+  "documentation_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-P1-20261024.md": "7a96c51d35a00448a78ef783cced3e8a1935c04dfda4ebfac3abb6efb98d39e5",
+    "docs/rust/MIGRATION.md": "a2b4728fd5b56621cf6d8e3ec031fac26d8bc58a1d6d7fc8f3bfe472b99096b3"
+  },
+  "environment": {
+    "jsonschema": "4.10.3",
+    "platform": "WSL Ubuntu Linux",
+    "python": "3.12.3"
+  },
+  "external_evidence": {
+    "all_attempt_directories_bytes": 17736,
+    "artifacts_sha256": {
+      "p0.resources.json": "743b05cc5d5e49f73229ffac3c3e984ebf45b12075a39d6b57e36c4950e02a48",
+      "p0.stderr": "27b6afe881fd73404c9b0f731bbd4d6864c9a1c5b5434bf7007e4a15a70bdefe",
+      "p0.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p1.resources.json": "1b6ed687c2be45438b122e7b95d93f813493e4c71f77bfb9ff743cbf2053fc1d",
+      "p1.stderr": "d774dcb40aa72b562e848491548580a1738b324b4a0b8749542dee7570826ff4",
+      "p1.stdout": "5092f549e15911952ea2c3da762e904326086c43c5eb0efaa7673370edae5ca2",
+      "summary.json": "e723d1c0b004fa50c7215be2a3dc11eaec9c126386bec73b7d513ec9ee5612f6",
+      "verify.py": "02e5758cdb2a05f6048e92efa76ac02a1da52852e102d0d1faf3557c76bf02fd"
+    },
+    "final_directory_bytes": 8979,
+    "path": "D:/AI/LIBAPTA/outputs/context-anchor-projection-p1-20261024/final"
+  },
+  "formal_acceptance": false,
+  "format": "libapta-context-anchor-projection-p1-generated-1",
+  "full_c_rust_matrix_run": false,
+  "implementation_sha256": {
+    "tests/unit/apta_1_1_context_projection.py": "ab90b64c2861707c8fdeb363dff2f5230ee06c168fd441fb0246d17673228ec9",
+    "tests/unit/apta_context_projection_oracle.py": "a9a807bbcc71943c9f5ede89debfd51ab0d39908cdc4152af0cf0c77ac9bc593",
+    "tools/apta_context_projection.py": "637fa7ea839528d5b0ab1471bace2aa656f74f6fb5ecbe783f8c1312d99048fb"
+  },
+  "independence": "UNRESOLVED",
+  "legacy_gate_count": 16,
+  "legacy_gate_pass_count": 14,
+  "legacy_scientific_verdict": "REJECTED",
+  "limits": {
+    "enforced_suite_seconds": 60,
+    "external_evidence_bytes": 67108864,
+    "maximum_events": 3072,
+    "maximum_source_frames": 1440000,
+    "maximum_windows": 8,
+    "process_rss_kib": 262144,
+    "source_seconds": 60,
+    "suite_seconds": 1800
+  },
+  "model_inference_or_training": false,
+  "native_activation": false,
+  "native_coordinate_controls_rerun": false,
+  "new_candidates": 0,
+  "new_projector_implemented": true,
+  "next": "P2_GENERATED_NATIVE_INTEROPERABILITY_AND_CONSUMER_POLICY_PROBES",
+  "old_projector_modified": false,
+  "physical_p4": false,
+  "real_authorization_created": false,
+  "real_runtime_audit": "NOT_AUDITED",
+  "registration_sha256": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+  "release": false,
+  "resources": {
+    "p0": {
+      "failure": null,
+      "max_observed_process_rss_kib": 27820,
+      "peak_rss_kib_by_pid": {
+        "317": 26052,
+        "373": 27820
+      },
+      "poll_seconds": 0.02,
+      "process_group_monitored": true,
+      "root_pid": 373,
+      "status": "PASS",
+      "supervisor_pid": 317,
+      "wall_seconds": 0.6725752039999975
+    },
+    "p1": {
+      "failure": null,
+      "max_observed_process_rss_kib": 32540,
+      "peak_rss_kib_by_pid": {
+        "317": 26040,
+        "371": 32540,
+        "372": 12260
+      },
+      "poll_seconds": 0.02,
+      "process_group_monitored": true,
+      "root_pid": 371,
+      "status": "PASS",
+      "supervisor_pid": 317,
+      "wall_seconds": 2.0302674750000023
+    }
+  },
+  "saved_source_artifacts_opened": false,
+  "scoring_calls": 0,
+  "source_baseline_revision": "03229c066d3de733aecc581c6bc925d8bcf8f5c0",
+  "source_state": "P0 baseline plus SHA-bound uncommitted P1 generated implementation; no real campaign",
+  "stable_version": "1.0.1",
+  "status": "P1_GENERATED_IMPLEMENTATION_AND_ORACLE_PASS"
+}

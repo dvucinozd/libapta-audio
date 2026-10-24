@@ -263,13 +263,23 @@ raw bar witness. It does not join independent windows into product-ready coverag
 Nine registration tests and five existing native-coordinate Rust controls pass.
 The fetched Ruzina consumer snapshot and unchanged libapta pin are explicitly
 bound; consumer/provider/pin/checkout and all37 C3 code components are preserved.
-**Next: P1, implement the separately registered pure generated projector and
-independent rational/enumeration oracle. No corpus scoring or real replay.**
+P1 now implements the [pure generated context-anchor projector and independent
+oracle](CONTEXT-ANCHOR-PROJECTION-P1-20261024.md). The
+[P1 receipt](CONTEXT-ANCHOR-PROJECTION-P1-20261024.json) binds the new components:
+14 P1 +9 P0 tests pass with zero failures/errors/skips;446 generated call outputs
+match the independent rational/enumeration oracle exactly. All246 old accepted
+synthetic grid intersections and119 owned-meter intersections are preserved.
+Maximum observed process RSS is32540 KiB; supervised P1 wall time is2.030268s.
+All14 document bindings,17 reviewed sources and37 C3 components remain unchanged.
+No source events/scorers/constructor/native producer/consumer are modified;
+independent window models establish no continuous product coverage.
+**Next: P2, prepare generated C/Rust generic-builder/GGRD/MTRD interoperability
+and consumer-policy probes. No corpus scoring, real replay or native activation.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 handoffs are historical; P0 owns the current P1 handoff. Full generated
+C1/C2/C3 and P0 handoffs are historical; P1 owns the current P2 handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
