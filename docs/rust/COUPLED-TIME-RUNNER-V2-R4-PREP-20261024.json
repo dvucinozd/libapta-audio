@@ -1,0 +1,62 @@
+{
+  "component_sha256": {
+    "rust/check.py": "3c166595cc6c3d6e44ddacc76906181e764b999ded7090ff991acaf12c72bef0",
+    "tests/unit/apta_1_1_coupled_time.py": "8e1532353557229eff663a51253875d843e7c80b2eada93a02d73edb503e7a13",
+    "tests/unit/apta_1_1_coupled_time_runner.py": "e67cea389422a68bd45b5dfec675728b0208cb0f574227993b55aa7e1c963e13",
+    "tests/unit/apta_1_1_coupled_time_v2_preflight.py": "67d26855f03c8caa1b44c9e43c20cd6560c7e354af0c3760b03d4dfae7552a27",
+    "tests/unit/apta_1_1_coupled_time_v2_runner.py": "45f688140b0b6e7a8332aa37342475a11fd0dd836a96fb104c3524ea22a865d6",
+    "tests/unit/apta_1_1_coupled_time_verify.py": "909be5106000d9fb2da4fcbe8862393bb334ca46d995db6a5b1b854ce865a348",
+    "tests/unit/apta_1_1_dense_decoder_runner.py": "e1733af2c2ea0781cddfad0818dc9bdbd55316c0899d3a875f63283b6a586ca1",
+    "tests/unit/apta_coupled_time_v2_preflight.py": "e255d29a7047b094992852ad3d30199215249fe7dc06c6bd2a51e9de0fe8a686",
+    "tests/unit/apta_coupled_time_v2_runner_bootstrap.py": "919f574f7078bd90d833c3318b409276be9dae981d4c0594e8dab0a956b698be",
+    "tools/apta_1_1_coupled_time.py": "bcfe9a7c60e516de063808694f6df7054b61e9c09ea8041857a0964207538699",
+    "tools/apta_1_1_coupled_time_v2.py": "9723e0082761c5d1d5a396b25f485f9c597d0100fe15f02a594b144d18c45612",
+    "tools/apta_1_1_dense_decoder.py": "7ab7a427b5270cadc43bfbc678a5efcc71cc89570e6d54062b228bc8a5b12c93",
+    "tools/apta_1_1_event_representation.py": "3e6dd303b9f4bea617fbf7eaa9480d692a0bdade91555611682627404d15c300",
+    "tools/apta_1_1_learned_piecewise.py": "fc2c502e743c89e6167fd019d02a209f6e1c9de7c81c17e348ec178f0f565d1b",
+    "tools/apta_1_1_native_annotated_development.py": "47b2d70e0a222a07248d1860b02b53255557e0c9d3a660a0c1f3e1c8bcb1f1cc",
+    "tools/apta_1_1_neural_comparison.py": "2968dbdb7b854003d1d938c089ab5bce1a777d6fad03480bb0211601ff78a3f7",
+    "tools/apta_1_1_neural_inference.py": "8fafc7b22268700ee2b822c7877c47035597394b8d9571ae76243ad249bfd2d8",
+    "tools/apta_1_1_neural_reference.py": "4e3d661fa5b0d7e44d0027b0461e44a88618f40e6f71b9bbc8fccbe17bf334a7",
+    "tools/apta_coupled_time.py": "ce2b46d34565edf93609391f9e1710937d9d634c8a61f5121d25040b4c85bc11",
+    "tools/apta_coupled_time_preflight.py": "9e3387d111f4f86017e8a1d693be823c53f4d4964625a6e2d1f61427e55a2dee",
+    "tools/apta_coupled_time_verify.py": "77c397a3211d42b99cccc28cd59f4329e8a0855534dbb6e20537a403a932b6cc",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89",
+    "tools/apta_neural_dense.py": "8af046e7875c1c68b97c90573cc4f1945784c4737d79ec14e67ab71e83eb5a4f"
+  },
+  "date": "2026-10-24",
+  "errors": 0,
+  "failures": 0,
+  "format": "libapta-coupled-time-r4-preparation-1",
+  "full_generated_R4_run": false,
+  "inherited_numerical_controls": {
+    "ct01": 23,
+    "ct02": 14,
+    "r3_receipt_sha256": "bad43b48e4f46d7c6f0097b254a05f992f82f54295e372b9c9161e5bd8ae45ec",
+    "scientific_and_numerical_test_dependencies_unchanged": true
+  },
+  "new_test_executions": 29,
+  "operational_registration_sha256": "9c252c0734c43d3856146b2915648e6273d38060edf635fce717298131a2370e",
+  "parent_revision": "2faeabd3bd52cb397991ebc7700c33a2db2f21c9",
+  "real_execution_enabled": false,
+  "real_private_inputs_read": false,
+  "skipped": 0,
+  "status": "GENERATED_DRIVER_CHECKS_PASS",
+  "tests": [
+    {
+      "log_sha256": "517279c665d49df7da25fd0267013776181a39b1c9c6f7bfb2ca8b6ae23863bf",
+      "passed": true,
+      "suite": "v2-regression",
+      "tests": 23,
+      "wall_seconds": 203.107332122
+    },
+    {
+      "log_sha256": "7f29ae81c24d25b72b390edc37572256fd6413fca54452e15091c8cd76c371d8",
+      "passed": true,
+      "suite": "r4-driver-canonical",
+      "tests": 6,
+      "wall_seconds": 31.41374098299997
+    }
+  ],
+  "verification_driver_sha256": "50e7aa8510bf77f4e529aecf72e7ba3a90ec40579bae037f7a77aba3de26fd2c"
+}

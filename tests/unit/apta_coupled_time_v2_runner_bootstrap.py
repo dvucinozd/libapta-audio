@@ -66,15 +66,44 @@ if phase and cfg.get('test_boundary_trace'):
 
     io.source_snapshot, runner.audit_cohort, io.recheck, runner.write_record = traced_snapshot, traced_audit, traced_recheck, traced_write
 opened, bound = [], []
+access_counts = dict.fromkeys(('open_calls', 'bind_calls', 'selected_observation_opens',
+                               'unselected_source_file_opens', 'unselected_source_file_binds',
+                               'tracked_fixture_file_binds'), 0)
+summary_access = cfg.get('test_access_summary', False)
 if worker:
     old_open, old_bind = Path.open, io.bind
+    index = int(sys.argv[3])
+    attempt = Path(sys.argv[sys.argv.index('--attempt') + 1])
+    policy = cfg.get('test_access_policy', {})
+    selected = set(policy.get('sources', [{}])[index].values()) if summary_access else set()
+    selected |= {str(attempt / 'jobs' / (str(index) + '.json')),
+                 str(attempt / 'candidates' / (str(index) + '.json'))}
+
+    def count_access(path, kind):
+        resolved = path.resolve()
+        text = str(resolved)
+        access_counts[kind + '_calls'] += 1
+        roots = [Path(value) for value in policy.get('source_roots', [])]
+        roots += [attempt / 'jobs', attempt / 'candidates']
+        if any(resolved.is_relative_to(root) for root in roots) and text not in selected:
+            access_counts['unselected_source_file_' + ('opens' if kind == 'open' else 'binds')] += 1
+        if kind == 'open' and text in set(policy.get('sources', [{}])[index].values()):
+            access_counts['selected_observation_opens'] += 1
+        if kind == 'bind' and resolved.is_relative_to(Path(cfg['source_root'])):
+            access_counts['tracked_fixture_file_binds'] += 1
 
     def opened_file(path, *args, **kwargs):
-        opened.append(str(path.resolve()))
+        if summary_access:
+            count_access(path, 'open')
+        else:
+            opened.append(str(path.resolve()))
         return old_open(path, *args, **kwargs)
 
     def bound_file(path, *args, **kwargs):
-        bound.append(str(Path(path).resolve()))
+        if summary_access:
+            count_access(Path(path), 'bind')
+        else:
+            bound.append(str(Path(path).resolve()))
         return old_bind(path, *args, **kwargs)
 
     Path.open, io.bind = opened_file, bound_file
@@ -95,7 +124,9 @@ try:
         role, index = sys.argv[2], int(sys.argv[3])
         attempt = Path(sys.argv[sys.argv.index('--attempt') + 1])
         Path.open, io.bind = old_open, old_bind
-        io.write_new(attempt / role / (str(index) + '.access.json'), {'opened': opened, 'bound': bound})
+        io.write_new(attempt / role / (str(index) + '.access.json'),
+                     {'format': 'generated-access-counts-1', **access_counts} if summary_access
+                     else {'opened': opened, 'bound': bound})
         mutation = cfg.get('test_mutation', {})
         if mutation.get('role', 'construct') == role and mutation.get('after_index') == index:
             path = Path(mutation['path'])

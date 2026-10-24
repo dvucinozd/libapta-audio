@@ -157,6 +157,14 @@ def main():
     run([sys.executable, "tests/unit/apta_1_1_coupled_time_verify.py", "-v"], env=history_env)
     run([sys.executable, "tests/unit/apta_1_1_coupled_time_runner.py", "-v"], env=history_env)
     run([sys.executable, "tests/unit/apta_1_1_coupled_time_v2_runner.py", "-v"], env=history_env)
+    # R4 canonical fixture tests use the retained NumPy/mir_eval environment
+    # separately; the combined stdlib runner validates the nonmetric contracts.
+    run([sys.executable, "tests/unit/apta_1_1_coupled_time_v2_preflight.py",
+         "PreflightTests.test_fixed100_generated_geometry_and_topology",
+         "PreflightTests.test_archive_regular_bytes_and_unsafe_members",
+         "PreflightTests.test_storage_and_real_tracked_inventory",
+         "PreflightTests.test_cli_has_no_private_input_or_limit_options",
+         "PreflightTests.test_existing_campaign_directory_is_preserved", "-v"], env=history_env)
     run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "temporal-trace-diagnostics",
          "--bin", "apta-history-diagnostic", "--locked"], env=env)
     history_env.pop("APTA_DENSE_UNSUPPORTED_DIAGNOSTIC")

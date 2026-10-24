@@ -160,9 +160,16 @@ mutation/resource/orphan cases fail closed. Canonical generated evaluation uses
 the unchanged legacy evaluator after full v2 verification with labels absent.
 These operational fixtures use two sources/four windows; the100-source access
 unit cases do not constitute R4 or demonstrate whole-cohort throughput.
-**Next: add the generated-only R4 driver, bind the full clean repair archive and
-registered storage topology, then commit/push before R4 measurement.** No R4
-receipt or real v2 authorization exists. CT-05 authorization remains consumed.
+The [R4 preparation](COUPLED-TIME-RUNNER-V2-R4-PREP-20261024.md) now adds the
+generated-only100-source/six-window campaign driver and bounded test access counters.
+Its [component receipt](COUPLED-TIME-RUNNER-V2-R4-PREP-20261024.json) records23
+repeated v2 regressions plus6 driver checks, including a canonical2-source/12-window
+three-process fixture with labels withheld. The driver binds a full tracked repair
+archive, exact source/input/output storage classes and the retained canonical
+runtime. Immutable scientific code, metrics, gates and caps remain unchanged.
+**Next: after committing/pushing this preparation, run the single full generated
+R4 campaign and publish its complete operational result.** No full R4 receipt or
+real v2 authorization exists at this preparation checkpoint. CT-05 stays closed.
 Preserve all partials and the timeout; do not retry, score the subset, raise caps,
 retune or repair/replay within this attempt. Any later real attempt needs a new
 registered scope and matching preflight after its separate repair checkpoint.
