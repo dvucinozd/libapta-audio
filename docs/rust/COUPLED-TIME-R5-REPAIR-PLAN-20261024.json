@@ -1,0 +1,98 @@
+{
+  "format": "libapta-coupled-time-r5-repair-plan-1",
+  "date": "2026-10-24",
+  "status": "PLAN_ONLY_SEPARATE_REGISTRATION_REQUIRED",
+  "audit_source_revision": "8dc8b7b8be1883250e11c0e69c5d6d439f071025",
+  "audit_receipt_sha256": "f6056b7262276d78cf73cf0d0f1503ad49385bd8d97008d79945610a9dd75c6f",
+  "next": "C0",
+  "execution_enabled": false,
+  "real_authorization_created": false,
+  "counter_repair_implemented": false,
+  "projection_decision": "UNDECIDED",
+  "real_historical_runtime_freeze_audited": false,
+  "preserve": [
+    "13 immutable dependencies",
+    "25 existing R4 component bindings until separately registered source changes",
+    "historical registrations, preflights, results and attempts",
+    "401/199 real registered support expectation",
+    "14/16 generated scientific outcome for counter-only parity",
+    "original source/phase/RSS/output caps"
+  ],
+  "steps": [
+    {
+      "id": "C0",
+      "status": "NOT_STARTED",
+      "depends_on": [],
+      "task": "Register support-metadata-only amendment and new operational evaluator/payload/record identities",
+      "outputs": [
+        "COUPLED-TIME-SUPPORT-METADATA-AMENDMENT.json/.md",
+        "COUPLED-TIME-RUNNER-V2-METADATA-PROTOCOL.json/.md",
+        "closed metadata record schemas"
+      ],
+      "pass": "Old scientific behavior and bytes frozen; explicit metadata-only parity contract; no candidate or data run; commit/push"
+    },
+    {
+      "id": "C1",
+      "status": "NOT_STARTED",
+      "depends_on": [
+        "C0"
+      ],
+      "task": "Implement strict reference_support and versioned evaluator; select it only under new hashed operational registration",
+      "outputs": [
+        "tools/apta_reference_support.py",
+        "tools/apta_1_1_coupled_time_evaluation_v2_metadata.py",
+        "newly registered mutable orchestration selection"
+      ],
+      "pass": "Integer context partition conserved; old complete flags and every old metric unchanged; no old scorer edit or production override; commit/push"
+    },
+    {
+      "id": "C2",
+      "status": "NOT_STARTED",
+      "depends_on": [
+        "C1"
+      ],
+      "task": "Generated support, exact score/gate parity, isolation, identity and actual resource negative tests",
+      "pass": "All600 exposed saved records preserve every old field after removing only new metadata; 400/200 and synthetic401/199 partitions validate; generated verdict stays14/16 REJECTED; commit/push"
+    },
+    {
+      "id": "C3",
+      "status": "NOT_RUN",
+      "depends_on": [
+        "C2"
+      ],
+      "task": "Fresh clean pushed complete generated100/600 preflight in exact prepared runtime and original topology/caps",
+      "pass": "Candidate bytes identical to old R4; complete400+incomplete200=600; all old metrics/gates identical; new component-bound preflight only on complete operational PASS; no automatic retry; commit/push"
+    },
+    {
+      "id": "P0",
+      "status": "UNDECIDED",
+      "depends_on": [
+        "C3"
+      ],
+      "task": "Review consumer/ownership contract and choose whether to retain the known projection limitation or register one new scientific axis",
+      "pass": "Explicit candidate-versus-representation decision; no clamp, borrowed meter, threshold relaxation or invented parameters"
+    },
+    {
+      "id": "H0",
+      "status": "NOT_AUDITED",
+      "depends_on": [
+        "C3"
+      ],
+      "task": "Separately scoped historical real-runtime metadata inventory and byte-identity comparison",
+      "pass": "No audio/labels/inference access; no old freeze rewrite or version-string equivalence assumption"
+    },
+    {
+      "id": "REAL_SCOPE",
+      "status": "DISABLED",
+      "depends_on": [
+        "C3",
+        "P0",
+        "H0"
+      ],
+      "task": "Only then consider a separate diagnostic real-scope proposal and one-run authorization",
+      "pass": "Exact new preflight/source/code/input/destination/failure identities and explicit exposure/independence limits; commit/push before any measurement"
+    }
+  ],
+  "stop_policy": "Any resource, support, parity or identity failure preserves INVALID partials; no automatic replay, retuning or cap increase",
+  "plan_is_not_registration": true
+}

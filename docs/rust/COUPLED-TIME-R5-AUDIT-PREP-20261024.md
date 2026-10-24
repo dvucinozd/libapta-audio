@@ -22,7 +22,7 @@ limit arguments. It inspects the exact retained generated attempt; its manifest
 must be GENERATED_R4_ONLY and match the successful preflight's result/context
 hashes and100-source/600-window order. Saved output and baseline artifacts are
 hash-checked before use and rechecked at exit. All25 R4 code/test bindings and15
-registered documents remain unchanged. The old real authorization is not opened.
+registered documents remain unchanged. Historical authority metadata is only hash-checked; no real authorization is activated.
 
 The auditor consumes existing paired counters and support flags, verifies their
 window/source/cohort accounting, and checks event/downbeat ordinal topology.

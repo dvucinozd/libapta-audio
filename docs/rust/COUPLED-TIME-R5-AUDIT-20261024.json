@@ -1,0 +1,112 @@
+{
+  "R4_components_unchanged": 25,
+  "affected_sources": 1,
+  "affected_windows": 1,
+  "audit_registration_sha256": "097938364d6b5d83525d9138c20016329a15fcdbf6cb86cd00a6c89209939c11",
+  "audit_tool_sha256": "4208ce8d4173a03062636e8249755c8143b1b91efa5405c80b85bfa78049be91",
+  "bound_artifacts_rechecked": 615,
+  "candidate_case_meter_missing": true,
+  "canonical_projection_replay_calls": 2,
+  "case_topology_preserved": true,
+  "case_window_event_membership_preserved": true,
+  "counts": {
+    "sources": 100,
+    "topology_preserved_sources": 100,
+    "windows": 600
+  },
+  "date": "2026-10-24",
+  "evidence_sha256": {
+    "aggregate_private": "eae6a98633cd408de7de8872564968ba07599b7cc669fcb06aebae6e6228e749",
+    "audit.resources.json": "eeb6e0caada8db925bd50552c62d47a7c0c4edfb054caaebe49129124556cc6c",
+    "audit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "audit.stdout": "91661fb0f3f92132775177b28a0fa887319680afe115cd368511dc0ac2ff248c",
+    "audit_prep": "8a20c0215c52d02e67ac3391815e02f011d4381fff6854eceaffd90722f74357",
+    "dispatch-result.json": "c112d3c23dace5513793e036185981b46fd3b9da96b4900616e30b009d19130d",
+    "dispatch.json": "91806ce0c6fbb1750f8149d53bf8022ffa99ffa957837efb180e2e32e518d427",
+    "dispatch.py": "ac234230d471844daae3e7dbc66e18ffd791b899e7f4816f63b72eda2c629f11",
+    "publication_script": "14519f89b7fcf0100fdeb728d3fed07c26d90e96ecffc255c576d9e752901716",
+    "runtime_snapshot": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+    "supervise.py": "087f658f1f102aa22960603f33de00929f373f621eb4368e1298afd37ffee9db"
+  },
+  "format": "libapta-coupled-time-r5-audit-public-1",
+  "generated_only": true,
+  "historical_real_runtime_metadata_status": "NOT_AUDITED; generated runtime history is not the real neural freeze",
+  "immutable_scientific_components_unchanged": 13,
+  "labels_loaded": false,
+  "new_candidates": 0,
+  "new_scoring_calls": 0,
+  "old_case_meter_present": true,
+  "outer_wall_seconds": 56.778671453,
+  "output_bytes": 106690,
+  "paired": {
+    "actual": {
+      "downbeat_breaks": 1,
+      "joint_breaks": 0,
+      "joint_fixes": 90,
+      "meter_breaks": 1,
+      "period_breaks": 0,
+      "period_fixes": 90,
+      "phase_breaks": 0,
+      "phase_fixes": 43
+    },
+    "coarse": {
+      "downbeat_breaks": 1,
+      "joint_breaks": 0,
+      "joint_fixes": 28,
+      "meter_breaks": 1,
+      "period_breaks": 0,
+      "period_fixes": 28,
+      "phase_breaks": 0,
+      "phase_fixes": 28
+    },
+    "ols": {
+      "downbeat_breaks": 1,
+      "joint_breaks": 0,
+      "joint_fixes": 28,
+      "meter_breaks": 1,
+      "period_breaks": 0,
+      "period_fixes": 28,
+      "phase_breaks": 0,
+      "phase_fixes": 28
+    }
+  },
+  "private_receipt_sha256": "99c22f59e34f8eb21cd215f3c5d975fddb96160180e6de1e1f17b3f980825fd5",
+  "projection_guard_reasons": {
+    "ANCHOR_BEFORE_WINDOW": 1
+  },
+  "r4_result_sha256": "a46fad2d05ce9824dc444dc56d2b443f932c4aaa00259bbb293bf63ee91b0a1b",
+  "real_authorization_created": false,
+  "real_execution_enabled": false,
+  "real_historical_runtime_freeze_audited": false,
+  "real_private_inputs_read": false,
+  "real_registered_incomplete_count": 199,
+  "real_support_counter_guard_would_fail": true,
+  "reference_support": {
+    "incomplete_counter_emitted": false,
+    "missing_counter_lookup_default": 0,
+    "reference_context_complete": 400,
+    "reference_context_not_complete": 200,
+    "serialized_incomplete_counter": null,
+    "windows": 600
+  },
+  "registered_repair_or_new_candidate_implemented": false,
+  "resources": {
+    "max_observed_process_rss_kib": 31668,
+    "process_group_monitored": true,
+    "status": "PASS",
+    "wall_seconds": 19.23588614799999
+  },
+  "saved_R4_artifacts_rechecked": 316,
+  "scientific_verdict_unchanged": "REJECTED",
+  "self_peak_rss_kib": 31612,
+  "source_revision": "8dc8b7b8be1883250e11c0e69c5d6d439f071025",
+  "status": "DIAGNOSIS_COMPLETE_NO_REPAIR",
+  "tests": {
+    "errors": 0,
+    "evidence": "bound R5 preparation; not rerun during the saved-artifact audit",
+    "failures": 0,
+    "skipped": 0,
+    "total": 9
+  },
+  "wall_seconds": 18.948746084999996
+}
