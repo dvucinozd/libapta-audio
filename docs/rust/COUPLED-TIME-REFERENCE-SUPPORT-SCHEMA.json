@@ -1,0 +1,251 @@
+{
+  "$defs": {
+    "supportGeometry": {
+      "additionalProperties": false,
+      "properties": {
+        "end_frame": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "first_frame": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "first_frame",
+        "end_frame"
+      ],
+      "type": "object"
+    },
+    "supportInput": {
+      "additionalProperties": false,
+      "properties": {
+        "reference_beats": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "windows": {
+          "items": {
+            "$ref": "#/$defs/supportGeometry"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "reference_beats",
+        "windows"
+      ],
+      "type": "object"
+    },
+    "supportProof": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_freeze_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "counts": {
+          "$ref": "#/$defs/supportTotals"
+        },
+        "format": {
+          "const": "libapta-reference-support-proof-1",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "metadata_amendment_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "reference_labels_loaded": {
+          "const": true,
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/supportRevision"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/supportSource"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "verification_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "window_count": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "metadata_amendment_sha256",
+        "source_revision",
+        "context_sha256",
+        "input_manifest_sha256",
+        "candidate_freeze_sha256",
+        "verification_sha256",
+        "reference_labels_loaded",
+        "source_count",
+        "window_count",
+        "counts",
+        "sources"
+      ],
+      "type": "object"
+    },
+    "supportRevision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "supportSha": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "supportSource": {
+      "additionalProperties": false,
+      "properties": {
+        "counts": {
+          "$ref": "#/$defs/supportTotals"
+        },
+        "index": {
+          "maximum": 99,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "counts": {
+                "$ref": "#/$defs/supportWindow"
+              },
+              "index": {
+                "maximum": 7,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "index",
+              "counts"
+            ],
+            "type": "object"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "index",
+        "counts",
+        "windows"
+      ],
+      "type": "object"
+    },
+    "supportTotals": {
+      "additionalProperties": false,
+      "properties": {
+        "reference_complete_windows": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_incomplete_windows": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "windows",
+        "reference_complete_windows",
+        "reference_incomplete_windows"
+      ],
+      "type": "object"
+    },
+    "supportWindow": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "reference_complete_windows": {
+              "const": 1
+            },
+            "reference_incomplete_windows": {
+              "const": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "reference_complete_windows": {
+              "const": 0
+            },
+            "reference_incomplete_windows": {
+              "const": 1
+            }
+          }
+        }
+      ],
+      "properties": {
+        "reference_complete_windows": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_incomplete_windows": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "const": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "windows",
+        "reference_complete_windows",
+        "reference_incomplete_windows"
+      ],
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/supportProof",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reference-support proof and exact counter/input shapes; arithmetic/identity checks are also mandatory"
+}

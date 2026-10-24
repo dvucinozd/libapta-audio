@@ -214,11 +214,22 @@ The [aggregate](COUPLED-TIME-R5-AUDIT-20261024.json) records615 rechecked bindin
 Support accounting confirms400 complete/200 incomplete contexts; the absent
 serialized counter is not zero unsupported support. Historical real-runtime
 metadata remains NOT_AUDITED; no real inputs or reference manifest were opened.
-**Next: C0 in the [separate repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md):
-register a support-metadata-only extension before implementing or measuring it.**
-The [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) keeps the counter
-repair NOT_STARTED and projection-contract decision UNDECIDED. Neither changes
-old scores/gates, reopens attempts or authorizes a real run. Preserve the historical real runtime
+C0 now registers the [support-metadata-only amendment](COUPLED-TIME-SUPPORT-METADATA-AMENDMENT.md)
+and [isolated metadata runner contract](COUPLED-TIME-RUNNER-V2-METADATA-PROTOCOL.md).
+The [C0 receipt](COUPLED-TIME-METADATA-C0-20261024.json) records16 passing generated
+schema/contract tests,27 bound documents,nine distinct record formats and24 required
+future operational gates. All25 R4 component files and13 immutable dependencies
+remain unchanged. New schemas reject missing/ill-typed/nonconserving counters,
+old/mixed records and broken context/proof/payload links. These are document/model
+checks, not an implemented evaluator, runtime qualification or a new data run.
+**Next: C1 under the new metadata operational registration: implement the isolated
+support helper, versioned evaluator and new metadata runner while preserving the
+old25 files.** The [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
+[machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
+pre-registration baseline; the new operational document's stage.next=C1 owns the
+current handoff. Counter implementation, metadata preflight and real authorization
+remain absent; projection stays UNDECIDED and real-runtime metadata NOT_AUDITED.
+Neither C0 nor C1 permits a threshold change, attempt replay or real run. Preserve the historical real runtime
 freeze; this generated compatibility result does not requalify it.
 The [registered R5 saved-generated audit preparation](COUPLED-TIME-R5-AUDIT-PREP-20261024.md)
 now adds an output-only artifact inspector and nine passing generated tests. Its

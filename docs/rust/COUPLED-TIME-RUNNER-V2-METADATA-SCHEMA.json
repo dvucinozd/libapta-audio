@@ -1,0 +1,2275 @@
+{
+  "$defs": {
+    "absolutePath": {
+      "maxLength": 4096,
+      "pattern": "^/[^\u0000]+$",
+      "type": "string"
+    },
+    "authorization": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorized": {
+          "const": true,
+          "type": "boolean"
+        },
+        "format": {
+          "const": "libapta-coupled-time-metadata-authorized-attempt-1",
+          "type": "string"
+        },
+        "historical_real_runtime_audit_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "label_free_manifest_sha256": {
+          "const": "96913d4eb9a1e86f478006c59d837e02fa5a05b86b375ab85cf13f4052f635fc",
+          "type": "string"
+        },
+        "maximum_attempts": {
+          "const": 1,
+          "type": "integer"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "preflight_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "preflight_source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "prior_failed_attempt_sha256": {
+          "const": "736c8633eb13f7d0cde68c4fd921b41396d1bfdfd582a799feff7f8c5ff55682",
+          "type": "string"
+        },
+        "private_inventory_sha256": {
+          "const": "b035915cc7983add25c6a4894cd9025bed357c0b7a174ccd76b2621762256199",
+          "type": "string"
+        },
+        "projection_scope_decision_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "real_scope_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "scope": {
+          "const": "EXPOSED_DIAGNOSTIC_ONLY",
+          "type": "string"
+        },
+        "source_count": {
+          "const": 100,
+          "type": "integer"
+        },
+        "window_count": {
+          "const": 600,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "authorized",
+        "scope",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "preflight_sha256",
+        "preflight_source_revision",
+        "attempt_path_sha256",
+        "label_free_manifest_sha256",
+        "private_inventory_sha256",
+        "source_count",
+        "window_count",
+        "maximum_attempts",
+        "metadata_amendment_sha256",
+        "projection_scope_decision_sha256",
+        "historical_real_runtime_audit_sha256",
+        "real_scope_sha256",
+        "prior_failed_attempt_sha256"
+      ],
+      "type": "object"
+    },
+    "bindings": {
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "maxLength": 4096,
+        "pattern": "^/[^\u0000]+$",
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "completion": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bindings": {
+          "$ref": "#/$defs/bindings"
+        },
+        "candidates": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "source_id": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "index",
+              "source_id",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "evaluation_report_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "const": "libapta-coupled-time-phase-completion-metadata-1",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reference_labels_loaded": {
+          "type": "boolean"
+        },
+        "reference_support_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        },
+        "upstream": {
+          "$ref": "#/$defs/upstream"
+        },
+        "window_count": {
+          "maximum": 800,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "worker_reports": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "source_id": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "index",
+              "source_id",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 0,
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "status",
+        "context_sha256",
+        "source_count",
+        "window_count",
+        "reference_labels_loaded",
+        "candidates",
+        "worker_reports",
+        "upstream",
+        "evaluation_report_sha256",
+        "bindings",
+        "metadata_amendment_sha256",
+        "reference_support_sha256"
+      ],
+      "type": "object"
+    },
+    "context": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "libapta-coupled-time-phase-context-metadata-1",
+          "type": "string"
+        },
+        "input_manifest_path": {
+          "$ref": "#/$defs/absolutePath"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "rows": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "candidate_sha256": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "index": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "job_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "source_id": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "index",
+              "source_id",
+              "job_sha256",
+              "candidate_sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_order": {
+          "items": {
+            "$ref": "#/$defs/identity"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "upstream": {
+          "$ref": "#/$defs/upstream"
+        },
+        "window_count": {
+          "maximum": 800,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "input_manifest_path",
+        "source_count",
+        "window_count",
+        "source_order",
+        "rows",
+        "upstream",
+        "metadata_amendment_sha256"
+      ],
+      "type": "object"
+    },
+    "evaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "$ref": "#/$defs/bindings"
+        },
+        "by_genre": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "candidate": {
+                "$ref": "#/$defs/metadataSums"
+              },
+              "legacy": {
+                "$ref": "#/$defs/metadataSums"
+              },
+              "sources": {
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "sources",
+              "legacy",
+              "candidate"
+            ],
+            "type": "object"
+          },
+          "minProperties": 1,
+          "type": "object"
+        },
+        "candidate_event_means": {
+          "$ref": "#/$defs/metadataMeans"
+        },
+        "candidate_freeze_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "confidence_calibrated": {
+          "const": false,
+          "type": "boolean"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "details": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "track": {
+                "$ref": "#/$defs/identity"
+              }
+            },
+            "required": [
+              "track",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "formal_acceptance": {
+          "const": false,
+          "type": "boolean"
+        },
+        "format": {
+          "const": "libapta-coupled-time-evaluation-support-1",
+          "type": "string"
+        },
+        "gates": {
+          "$ref": "#/$defs/metadataGates"
+        },
+        "independent_transfer": {
+          "const": false,
+          "type": "boolean"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "native_graph_constructed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "old_event_means": {
+          "$ref": "#/$defs/metadataMeans"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "original_regressions": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "track": {
+                "$ref": "#/$defs/identity"
+              },
+              "window": {
+                "maximum": 7,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "track",
+              "window"
+            ],
+            "type": "object"
+          },
+          "maxItems": 600,
+          "minItems": 0,
+          "type": "array"
+        },
+        "paired": {
+          "$ref": "#/$defs/metadataPaired"
+        },
+        "physical_p4": {
+          "const": false,
+          "type": "boolean"
+        },
+        "production_promotion": {
+          "const": false,
+          "type": "boolean"
+        },
+        "reference_labels_loaded": {
+          "const": true,
+          "type": "boolean"
+        },
+        "reference_support_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "sources": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "REJECTED",
+            "EXPOSED_DIAGNOSTIC_PASS_ONLY"
+          ],
+          "type": "string"
+        },
+        "totals": {
+          "additionalProperties": false,
+          "properties": {
+            "candidate_actual": {
+              "$ref": "#/$defs/metadataDiagnosticCounts"
+            },
+            "candidate_nominal": {
+              "$ref": "#/$defs/metadataDiagnosticCounts"
+            },
+            "candidate_projected": {
+              "$ref": "#/$defs/metadataRawCounts"
+            },
+            "old_coarse": {
+              "$ref": "#/$defs/metadataRawCounts"
+            },
+            "old_ols": {
+              "$ref": "#/$defs/metadataRawCounts"
+            },
+            "ols_actual": {
+              "$ref": "#/$defs/metadataDiagnosticCounts"
+            },
+            "ols_nominal": {
+              "$ref": "#/$defs/metadataDiagnosticCounts"
+            }
+          },
+          "required": [
+            "candidate_actual",
+            "candidate_nominal",
+            "candidate_projected",
+            "old_coarse",
+            "old_ols",
+            "ols_actual",
+            "ols_nominal"
+          ],
+          "type": "object"
+        },
+        "verification_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "format",
+        "status",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "metadata_amendment_sha256",
+        "context_sha256",
+        "reference_support_sha256",
+        "candidate_freeze_sha256",
+        "verification_sha256",
+        "gates",
+        "totals",
+        "paired",
+        "old_event_means",
+        "candidate_event_means",
+        "by_genre",
+        "original_regressions",
+        "details",
+        "bindings",
+        "sources",
+        "reference_labels_loaded",
+        "confidence_calibrated",
+        "independent_transfer",
+        "native_graph_constructed",
+        "physical_p4",
+        "formal_acceptance",
+        "production_promotion"
+      ],
+      "type": "object"
+    },
+    "identity": {
+      "pattern": "^[A-Za-z0-9_.-]{1,128}$",
+      "type": "string"
+    },
+    "invalid": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "context_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        "format": {
+          "const": "libapta-coupled-time-invalid-metadata-1",
+          "type": "string"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "musical_verdict_valid": {
+          "const": false,
+          "type": "boolean"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "status": {
+          "const": "INVALID",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "status",
+        "operational_registration_sha256",
+        "attempt_path_sha256",
+        "context_sha256",
+        "error",
+        "musical_verdict_valid",
+        "metadata_amendment_sha256"
+      ],
+      "type": "object"
+    },
+    "ioCounters": {
+      "additionalProperties": false,
+      "properties": {
+        "context_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "full_cohort_audits": {
+          "const": 0,
+          "type": "integer"
+        },
+        "full_tracked_tree_rechecks": {
+          "const": 0,
+          "type": "integer"
+        },
+        "manifest_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_candidate_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_file_bind_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_job_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "selected_pair_reads": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unselected_source_file_reads": {
+          "const": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "manifest_reads",
+        "context_reads",
+        "selected_pair_reads",
+        "selected_job_reads",
+        "selected_candidate_reads",
+        "selected_file_bind_calls",
+        "unselected_source_file_reads",
+        "full_cohort_audits",
+        "full_tracked_tree_rechecks"
+      ],
+      "type": "object"
+    },
+    "metadataDiagnosticCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "complete_sequence_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "joint_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "one_to_one_phase_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "period_correct_points": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "period_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "phase_correct_points": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "phase_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "points": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_complete_windows": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_incomplete_windows": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "scored_points": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unknown_successor_points": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "complete_sequence_windows",
+        "joint_windows",
+        "one_to_one_phase_windows",
+        "period_correct_points",
+        "period_windows",
+        "phase_correct_points",
+        "phase_windows",
+        "points",
+        "reference_complete_windows",
+        "scored_points",
+        "unknown_successor_points",
+        "windows",
+        "reference_incomplete_windows"
+      ],
+      "type": "object"
+    },
+    "metadataGates": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_complete_improves": {
+          "type": "boolean"
+        },
+        "event_beat_cmlt_no_decrease": {
+          "type": "boolean"
+        },
+        "event_beat_f1_no_decrease": {
+          "type": "boolean"
+        },
+        "event_downbeat_cmlt_no_decrease": {
+          "type": "boolean"
+        },
+        "event_downbeat_f1_no_decrease": {
+          "type": "boolean"
+        },
+        "nominal_complete_improves": {
+          "type": "boolean"
+        },
+        "nominal_joint_improves": {
+          "type": "boolean"
+        },
+        "zero_actual_joint_breaks": {
+          "type": "boolean"
+        },
+        "zero_actual_period_breaks": {
+          "type": "boolean"
+        },
+        "zero_actual_phase_breaks": {
+          "type": "boolean"
+        },
+        "zero_coarse_joint_breaks": {
+          "type": "boolean"
+        },
+        "zero_ols_downbeat_breaks": {
+          "type": "boolean"
+        },
+        "zero_ols_joint_breaks": {
+          "type": "boolean"
+        },
+        "zero_ols_meter_breaks": {
+          "type": "boolean"
+        },
+        "zero_ols_period_breaks": {
+          "type": "boolean"
+        },
+        "zero_ols_phase_breaks": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "actual_complete_improves",
+        "event_beat_cmlt_no_decrease",
+        "event_beat_f1_no_decrease",
+        "event_downbeat_cmlt_no_decrease",
+        "event_downbeat_f1_no_decrease",
+        "nominal_complete_improves",
+        "nominal_joint_improves",
+        "zero_actual_joint_breaks",
+        "zero_actual_period_breaks",
+        "zero_actual_phase_breaks",
+        "zero_coarse_joint_breaks",
+        "zero_ols_downbeat_breaks",
+        "zero_ols_joint_breaks",
+        "zero_ols_meter_breaks",
+        "zero_ols_period_breaks",
+        "zero_ols_phase_breaks"
+      ],
+      "type": "object"
+    },
+    "metadataMeans": {
+      "additionalProperties": false,
+      "properties": {
+        "beat_cmlt": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "beat_f1": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "downbeat_cmlt": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "downbeat_f1": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "beat_cmlt",
+        "beat_f1",
+        "downbeat_cmlt",
+        "downbeat_f1"
+      ],
+      "type": "object"
+    },
+    "metadataPaired": {
+      "additionalProperties": false,
+      "properties": {
+        "actual": {
+          "additionalProperties": false,
+          "properties": {
+            "downbeat_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "joint_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "joint_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "meter_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "period_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "period_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "phase_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "phase_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "downbeat_breaks",
+            "joint_breaks",
+            "joint_fixes",
+            "meter_breaks",
+            "period_breaks",
+            "period_fixes",
+            "phase_breaks",
+            "phase_fixes"
+          ],
+          "type": "object"
+        },
+        "coarse": {
+          "additionalProperties": false,
+          "properties": {
+            "downbeat_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "joint_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "joint_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "meter_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "period_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "period_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "phase_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "phase_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "downbeat_breaks",
+            "joint_breaks",
+            "joint_fixes",
+            "meter_breaks",
+            "period_breaks",
+            "period_fixes",
+            "phase_breaks",
+            "phase_fixes"
+          ],
+          "type": "object"
+        },
+        "ols": {
+          "additionalProperties": false,
+          "properties": {
+            "downbeat_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "joint_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "joint_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "meter_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "period_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "period_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "phase_breaks": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "phase_fixes": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "downbeat_breaks",
+            "joint_breaks",
+            "joint_fixes",
+            "meter_breaks",
+            "period_breaks",
+            "period_fixes",
+            "phase_breaks",
+            "phase_fixes"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "ols",
+        "coarse",
+        "actual"
+      ],
+      "type": "object"
+    },
+    "metadataRawCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "confirmed_joint_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "confirmed_period_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "confirmed_phase_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "downbeat_correct": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "downbeat_scored": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "emitted": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "high_confidence_grid_error": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "high_confidence_grid_unknown_context": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "meter_correct": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "meter_emitted": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "period_correct_beats": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "phase_correct_beats": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "predicted_beats": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_complete_windows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "scored_beats": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "confirmed_joint_windows",
+        "confirmed_period_windows",
+        "confirmed_phase_windows",
+        "downbeat_correct",
+        "downbeat_scored",
+        "emitted",
+        "high_confidence_grid_error",
+        "high_confidence_grid_unknown_context",
+        "meter_correct",
+        "meter_emitted",
+        "period_correct_beats",
+        "phase_correct_beats",
+        "predicted_beats",
+        "reference_complete_windows",
+        "scored_beats",
+        "windows"
+      ],
+      "type": "object"
+    },
+    "metadataSums": {
+      "additionalProperties": false,
+      "properties": {
+        "beat_cmlt": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "beat_f1": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "downbeat_cmlt": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "downbeat_f1": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "beat_cmlt",
+        "beat_f1",
+        "downbeat_cmlt",
+        "downbeat_f1"
+      ],
+      "type": "object"
+    },
+    "phaseResources": {
+      "additionalProperties": false,
+      "properties": {
+        "max_observed_process_rss_kib": {
+          "maximum": 262144,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "process_group_monitored": {
+          "const": true,
+          "type": "boolean"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        },
+        "wall_seconds": {
+          "maximum": 1800,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "status",
+        "wall_seconds",
+        "max_observed_process_rss_kib",
+        "process_group_monitored"
+      ],
+      "type": "object"
+    },
+    "preflight": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_output_bytes": {
+          "maximum": 67108864,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "baseline_r4_preflight_sha256": {
+          "const": "12f9fc50a3d262f7e9796d1e24a312e3aa5e8bb78a6f0ce2d90ef608bb6f8245",
+          "type": "string"
+        },
+        "baseline_r4_result_sha256": {
+          "const": "a46fad2d05ce9824dc444dc56d2b443f932c4aaa00259bbb293bf63ee91b0a1b",
+          "type": "string"
+        },
+        "candidate_byte_parity_sources": {
+          "const": 100,
+          "type": "integer"
+        },
+        "canonical_event_metrics": {
+          "const": true,
+          "type": "boolean"
+        },
+        "component_sha256": {
+          "additionalProperties": {
+            "$ref": "#/$defs/sha256"
+          },
+          "required": [
+            "rust/check.py",
+            "tests/unit/apta_1_1_coupled_time.py",
+            "tests/unit/apta_1_1_coupled_time_evaluation_v2_metadata.py",
+            "tests/unit/apta_1_1_coupled_time_metadata_registration.py",
+            "tests/unit/apta_1_1_coupled_time_runner.py",
+            "tests/unit/apta_1_1_coupled_time_v2_metadata_preflight.py",
+            "tests/unit/apta_1_1_coupled_time_v2_metadata_runner.py",
+            "tests/unit/apta_1_1_coupled_time_v2_preflight.py",
+            "tests/unit/apta_1_1_coupled_time_v2_runner.py",
+            "tests/unit/apta_1_1_coupled_time_v2_runtime.py",
+            "tests/unit/apta_1_1_coupled_time_verify.py",
+            "tests/unit/apta_1_1_dense_decoder_runner.py",
+            "tests/unit/apta_1_1_reference_support.py",
+            "tests/unit/apta_coupled_time_metadata_checks.py",
+            "tests/unit/apta_coupled_time_v2_metadata_bootstrap.py",
+            "tests/unit/apta_coupled_time_v2_metadata_preflight.py",
+            "tests/unit/apta_coupled_time_v2_metadata_runtime.py",
+            "tests/unit/apta_coupled_time_v2_preflight.py",
+            "tests/unit/apta_coupled_time_v2_runner_bootstrap.py",
+            "tests/unit/apta_coupled_time_v2_runtime.py",
+            "tools/apta_1_1_coupled_time.py",
+            "tools/apta_1_1_coupled_time_evaluation_v2_metadata.py",
+            "tools/apta_1_1_coupled_time_v2.py",
+            "tools/apta_1_1_coupled_time_v2_metadata.py",
+            "tools/apta_1_1_dense_decoder.py",
+            "tools/apta_1_1_event_representation.py",
+            "tools/apta_1_1_learned_piecewise.py",
+            "tools/apta_1_1_native_annotated_development.py",
+            "tools/apta_1_1_neural_comparison.py",
+            "tools/apta_1_1_neural_inference.py",
+            "tools/apta_1_1_neural_reference.py",
+            "tools/apta_coupled_time.py",
+            "tools/apta_coupled_time_preflight.py",
+            "tools/apta_coupled_time_verify.py",
+            "tools/apta_dense_runner_support.py",
+            "tools/apta_neural_dense.py",
+            "tools/apta_reference_support.py"
+          ],
+          "type": "object"
+        },
+        "evidence_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "fixture_source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "fixture_tracked_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "fixture_tracked_count": {
+          "minimum": 1024,
+          "type": "integer"
+        },
+        "format": {
+          "const": "libapta-coupled-time-metadata-preflight-1",
+          "type": "string"
+        },
+        "gates": {
+          "additionalProperties": false,
+          "properties": {
+            "absent_permuted_label_invariance": {
+              "const": true,
+              "type": "boolean"
+            },
+            "actual_timeout_rss_output_enforcement": {
+              "const": true,
+              "type": "boolean"
+            },
+            "all_100_candidate_bytes_identical": {
+              "const": true,
+              "type": "boolean"
+            },
+            "all_600_legacy_records_exact_parity": {
+              "const": true,
+              "type": "boolean"
+            },
+            "canonical_evaluator_baseline_parity": {
+              "const": true,
+              "type": "boolean"
+            },
+            "complete_support_partition_400_200": {
+              "const": true,
+              "type": "boolean"
+            },
+            "descendant_termination_and_orphan_rejection": {
+              "const": true,
+              "type": "boolean"
+            },
+            "dirty_stale_partial_missing_and_mixed_receipts_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "exact_generated_v1_candidate_parity": {
+              "const": true,
+              "type": "boolean"
+            },
+            "full100_construct_verify_evaluate": {
+              "const": true,
+              "type": "boolean"
+            },
+            "full_global_checks_before_success": {
+              "const": true,
+              "type": "boolean"
+            },
+            "legacy_14_of_16_rejection_preserved": {
+              "const": true,
+              "type": "boolean"
+            },
+            "metadata_proof_and_payload_hash_chain": {
+              "const": true,
+              "type": "boolean"
+            },
+            "missing_boolean_inconsistent_counters_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "numerical_n3072_window8_controls": {
+              "const": true,
+              "type": "boolean"
+            },
+            "old_authorization_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "old_v2_ct05_and_mixed_metadata_records_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "persistent_cross_worker_mutation_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "poisoned_context_job_or_binding_map_rejected": {
+              "const": true,
+              "type": "boolean"
+            },
+            "registered_caps_and_storage_topology": {
+              "const": true,
+              "type": "boolean"
+            },
+            "selected_source_access_scaling_1_10_100": {
+              "const": true,
+              "type": "boolean"
+            },
+            "strict_json_type_and_path_rejection": {
+              "const": true,
+              "type": "boolean"
+            },
+            "support_isolation_after_full_verification": {
+              "const": true,
+              "type": "boolean"
+            },
+            "synthetic_reference_partition_401_199": {
+              "const": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "selected_source_access_scaling_1_10_100",
+            "full_global_checks_before_success",
+            "persistent_cross_worker_mutation_rejected",
+            "poisoned_context_job_or_binding_map_rejected",
+            "dirty_stale_partial_missing_and_mixed_receipts_rejected",
+            "old_authorization_rejected",
+            "strict_json_type_and_path_rejection",
+            "absent_permuted_label_invariance",
+            "exact_generated_v1_candidate_parity",
+            "canonical_evaluator_baseline_parity",
+            "actual_timeout_rss_output_enforcement",
+            "descendant_termination_and_orphan_rejection",
+            "numerical_n3072_window8_controls",
+            "full100_construct_verify_evaluate",
+            "registered_caps_and_storage_topology",
+            "complete_support_partition_400_200",
+            "synthetic_reference_partition_401_199",
+            "missing_boolean_inconsistent_counters_rejected",
+            "all_600_legacy_records_exact_parity",
+            "all_100_candidate_bytes_identical",
+            "legacy_14_of_16_rejection_preserved",
+            "metadata_proof_and_payload_hash_chain",
+            "old_v2_ct05_and_mixed_metadata_records_rejected",
+            "support_isolation_after_full_verification"
+          ],
+          "type": "object"
+        },
+        "generated_only": {
+          "const": true,
+          "type": "boolean"
+        },
+        "generated_scientific_verdict": {
+          "enum": [
+            "REJECTED",
+            "EXPOSED_DIAGNOSTIC_PASS_ONLY"
+          ]
+        },
+        "legacy_metric_parity": {
+          "const": true,
+          "type": "boolean"
+        },
+        "legacy_scientific_gate_pass_count": {
+          "const": 14,
+          "type": "integer"
+        },
+        "legacy_scientific_verdict": {
+          "const": "REJECTED",
+          "type": "string"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "phases": {
+          "additionalProperties": false,
+          "properties": {
+            "construct": {
+              "$ref": "#/$defs/phaseResources"
+            },
+            "evaluate": {
+              "$ref": "#/$defs/phaseResources"
+            },
+            "verify": {
+              "$ref": "#/$defs/phaseResources"
+            }
+          },
+          "required": [
+            "construct",
+            "verify",
+            "evaluate"
+          ],
+          "type": "object"
+        },
+        "real_private_inputs_read": {
+          "const": false,
+          "type": "boolean"
+        },
+        "reference_support": {
+          "additionalProperties": false,
+          "properties": {
+            "reference_complete_windows": {
+              "const": 400,
+              "type": "integer"
+            },
+            "reference_incomplete_windows": {
+              "const": 200,
+              "type": "integer"
+            },
+            "windows": {
+              "const": 600,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "windows",
+            "reference_complete_windows",
+            "reference_incomplete_windows"
+          ],
+          "type": "object"
+        },
+        "reference_support_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "runtime_snapshot_sha256": {
+          "const": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+          "type": "string"
+        },
+        "source_count": {
+          "const": 100,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "GENERATED_OPERATIONAL_PREFLIGHT_PASS",
+          "type": "string"
+        },
+        "storage": {
+          "additionalProperties": false,
+          "properties": {
+            "observations": {
+              "const": "linux",
+              "type": "string"
+            },
+            "output": {
+              "const": "linux",
+              "type": "string"
+            },
+            "source": {
+              "const": "windows-mounted",
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "observations",
+            "output"
+          ],
+          "type": "object"
+        },
+        "tests": {
+          "additionalProperties": false,
+          "properties": {
+            "errors": {
+              "const": 0,
+              "type": "integer"
+            },
+            "failures": {
+              "const": 0,
+              "type": "integer"
+            },
+            "skipped": {
+              "const": 0,
+              "type": "integer"
+            },
+            "total": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "total",
+            "errors",
+            "failures",
+            "skipped"
+          ],
+          "type": "object"
+        },
+        "window_count": {
+          "const": 600,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "status",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "source_revision",
+        "generated_only",
+        "canonical_event_metrics",
+        "real_private_inputs_read",
+        "source_count",
+        "window_count",
+        "fixture_source_revision",
+        "fixture_tracked_count",
+        "fixture_tracked_bytes",
+        "storage",
+        "component_sha256",
+        "gates",
+        "tests",
+        "phases",
+        "attempt_output_bytes",
+        "evidence_sha256",
+        "generated_scientific_verdict",
+        "metadata_amendment_sha256",
+        "reference_support",
+        "candidate_byte_parity_sources",
+        "legacy_metric_parity",
+        "legacy_scientific_verdict",
+        "legacy_scientific_gate_pass_count",
+        "reference_support_sha256",
+        "baseline_r4_result_sha256",
+        "baseline_r4_preflight_sha256",
+        "runtime_snapshot_sha256"
+      ],
+      "type": "object"
+    },
+    "revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "supervision": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "completion_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "libapta-coupled-time-supervision-metadata-1",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "resources_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify",
+            "evaluate"
+          ]
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "status",
+        "context_sha256",
+        "completion_sha256",
+        "resources_sha256",
+        "metadata_amendment_sha256"
+      ],
+      "type": "object"
+    },
+    "support": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_freeze_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "counts": {
+          "$ref": "#/$defs/supportTotals"
+        },
+        "format": {
+          "const": "libapta-reference-support-proof-1",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "reference_labels_loaded": {
+          "const": true,
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/supportRevision"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/supportSource"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "verification_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "window_count": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "metadata_amendment_sha256",
+        "source_revision",
+        "context_sha256",
+        "input_manifest_sha256",
+        "candidate_freeze_sha256",
+        "verification_sha256",
+        "reference_labels_loaded",
+        "source_count",
+        "window_count",
+        "counts",
+        "sources"
+      ],
+      "type": "object"
+    },
+    "supportGeometry": {
+      "additionalProperties": false,
+      "properties": {
+        "end_frame": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "first_frame": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "first_frame",
+        "end_frame"
+      ],
+      "type": "object"
+    },
+    "supportInput": {
+      "additionalProperties": false,
+      "properties": {
+        "reference_beats": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "windows": {
+          "items": {
+            "$ref": "#/$defs/supportGeometry"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "reference_beats",
+        "windows"
+      ],
+      "type": "object"
+    },
+    "supportProof": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_freeze_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "counts": {
+          "$ref": "#/$defs/supportTotals"
+        },
+        "format": {
+          "const": "libapta-reference-support-proof-1",
+          "type": "string"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "metadata_amendment_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "reference_labels_loaded": {
+          "const": true,
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "source_count": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/supportRevision"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/supportSource"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "verification_sha256": {
+          "$ref": "#/$defs/supportSha"
+        },
+        "window_count": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "metadata_amendment_sha256",
+        "source_revision",
+        "context_sha256",
+        "input_manifest_sha256",
+        "candidate_freeze_sha256",
+        "verification_sha256",
+        "reference_labels_loaded",
+        "source_count",
+        "window_count",
+        "counts",
+        "sources"
+      ],
+      "type": "object"
+    },
+    "supportRevision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "supportSha": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "supportSource": {
+      "additionalProperties": false,
+      "properties": {
+        "counts": {
+          "$ref": "#/$defs/supportTotals"
+        },
+        "index": {
+          "maximum": 99,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "counts": {
+                "$ref": "#/$defs/supportWindow"
+              },
+              "index": {
+                "maximum": 7,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "index",
+              "counts"
+            ],
+            "type": "object"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "index",
+        "counts",
+        "windows"
+      ],
+      "type": "object"
+    },
+    "supportTotals": {
+      "additionalProperties": false,
+      "properties": {
+        "reference_complete_windows": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_incomplete_windows": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "windows",
+        "reference_complete_windows",
+        "reference_incomplete_windows"
+      ],
+      "type": "object"
+    },
+    "supportWindow": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "reference_complete_windows": {
+              "const": 1
+            },
+            "reference_incomplete_windows": {
+              "const": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "reference_complete_windows": {
+              "const": 0
+            },
+            "reference_incomplete_windows": {
+              "const": 1
+            }
+          }
+        }
+      ],
+      "properties": {
+        "reference_complete_windows": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reference_incomplete_windows": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windows": {
+          "const": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "windows",
+        "reference_complete_windows",
+        "reference_incomplete_windows"
+      ],
+      "type": "object"
+    },
+    "timings": {
+      "additionalProperties": false,
+      "properties": {
+        "compute_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "finalization_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "input_validation_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "runtime_binding_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "startup_seconds": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "startup_seconds",
+        "input_validation_seconds",
+        "runtime_binding_seconds",
+        "compute_seconds",
+        "finalization_seconds"
+      ],
+      "type": "object"
+    },
+    "upstream": {
+      "additionalProperties": false,
+      "properties": {
+        "construction_completion_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "construction_supervision_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verification_completion_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verification_supervision_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "construction_completion_sha256",
+        "construction_supervision_sha256",
+        "verification_completion_sha256",
+        "verification_supervision_sha256"
+      ],
+      "type": "object"
+    },
+    "worker": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_path_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "authorization_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bindings": {
+          "$ref": "#/$defs/bindings"
+        },
+        "candidate_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "context_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "libapta-coupled-time-worker-metadata-1",
+          "type": "string"
+        },
+        "index": {
+          "maximum": 99,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "input_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "io_counters": {
+          "$ref": "#/$defs/ioCounters"
+        },
+        "job_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "metadata_amendment_sha256": {
+          "const": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+          "type": "string"
+        },
+        "operational_registration_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reference_labels_loaded": {
+          "const": false,
+          "type": "boolean"
+        },
+        "registration_sha256": {
+          "const": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "construct",
+            "verify"
+          ]
+        },
+        "scoring_imported": {
+          "const": false,
+          "type": "boolean"
+        },
+        "self_peak_rss_kib": {
+          "maximum": 262144,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "source_id": {
+          "$ref": "#/$defs/identity"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "status": {
+          "const": "PASS",
+          "type": "string"
+        },
+        "timings": {
+          "$ref": "#/$defs/timings"
+        },
+        "wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "format",
+        "role",
+        "source_revision",
+        "registration_sha256",
+        "operational_registration_sha256",
+        "authorization_sha256",
+        "attempt_path_sha256",
+        "input_manifest_sha256",
+        "status",
+        "index",
+        "source_id",
+        "context_sha256",
+        "job_sha256",
+        "candidate_sha256",
+        "reference_labels_loaded",
+        "scoring_imported",
+        "self_peak_rss_kib",
+        "wall_seconds",
+        "timings",
+        "io_counters",
+        "bindings",
+        "metadata_amendment_sha256"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/context"
+    },
+    {
+      "$ref": "#/$defs/worker"
+    },
+    {
+      "$ref": "#/$defs/completion"
+    },
+    {
+      "$ref": "#/$defs/supervision"
+    },
+    {
+      "$ref": "#/$defs/invalid"
+    },
+    {
+      "$ref": "#/$defs/preflight"
+    },
+    {
+      "$ref": "#/$defs/authorization"
+    },
+    {
+      "$ref": "#/$defs/support"
+    },
+    {
+      "$ref": "#/$defs/evaluation"
+    }
+  ],
+  "title": "Isolated metadata runner records; exact-type, arithmetic, linkage and parity checks required"
+}
