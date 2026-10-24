@@ -240,18 +240,25 @@ selected1/10/100 access, global checks, mixed/corrupt records, proof/hash linkag
 resource failures and descendant/orphan rejection. Saved controls preserve all600
 old diagnostics after six-leaf extension/removal and verify100 baseline candidate
 hashes; measured coverage is400/200. No saved labels are read or old scores rerun.
-**Next: C3, one clean-source fresh full generated100-source/600-window campaign
-under the metadata registration.** Require actual100 candidate-byte parity,
-all600 new diagnostic records equal, explicit400/200 support and the same14/16
-REJECTED verdict. The C2 comparison controls do not qualify that future full run.
+The [C3 full generated checkpoint](COUPLED-TIME-METADATA-C3-20261024.md) now passes
+construct100, independent verify100 and evaluate100/600 on clean pushed source
+`6191bbdc3b8093dd4a3bc2000d302f7b8fcf2e70`. The
+[new metadata preflight](COUPLED-TIME-RUNNER-V2-METADATA-PREFLIGHT.json) qualifies
+all24 operational gates. Actual100 candidate bytes and all600 old diagnostic
+values/types match the frozen R4; explicit support is400 complete +200 incomplete.
+Independent closeout validates211 actual records and203 resource records, with
+the original caps and exact runtime preserved. The [aggregate evidence](COUPLED-TIME-METADATA-C3-20261024.json)
+records actual resources and identities. Scientific REJECTED at14/16 remains
+unchanged; this is metadata qualification, not musical acceptance.
+**Next: P0, review the native/APTA projection/ownership contract and register one
+separate scientific axis before implementation or measurement.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1 checkpoint is also historical; C2 owns the current C3 handoff. Actual small
-process isolation and all600 saved extension controls pass; full new100/600
-execution/parity remains unrun. Metadata preflight and real authorization remain
-absent. Real dispatch
+C1/C2 handoffs are also historical; C3 owns the current P0 handoff. Full generated
+100/600 execution and parity pass, and the metadata preflight is published.
+Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
 checks; projection stays UNDECIDED and real-runtime metadata NOT_AUDITED.
 Neither C0 nor C1 permits a threshold change, attempt replay or real run. Preserve the historical real runtime
