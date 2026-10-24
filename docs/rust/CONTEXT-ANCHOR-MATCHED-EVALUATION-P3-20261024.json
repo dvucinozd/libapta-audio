@@ -1,0 +1,111 @@
+{
+  "branch": "rust-rewrite",
+  "candidate_constructions": 0,
+  "checks": {
+    "binary_support_correctness_context_states": 88,
+    "duplicate_nonfinite_boolean_float_missing_and_nonconserving_records_rejected": true,
+    "errors": 0,
+    "failures": 0,
+    "frozen_c3_components_verified": 37,
+    "new_authority_bindings_verified": 23,
+    "p0_document_bindings_verified": 14,
+    "p2_probe_components_preserved": 4,
+    "projector_or_scorer_imported_or_called": false,
+    "public_counter_examples": 3,
+    "reviewed_sources_verified": 17,
+    "skips": 0,
+    "strict_closed_local_schema": true,
+    "tests": 10
+  },
+  "confidence_qualified": false,
+  "corpus_run": false,
+  "current_consumer_built": false,
+  "date": "2026-10-24",
+  "environment": {
+    "jsonschema": "4.10.3",
+    "platform": "WSL Ubuntu Linux",
+    "python": "3.12.3"
+  },
+  "evaluator_or_runner_implemented": false,
+  "external_evidence": {
+    "artifact_sha256": {
+      "registration.resources.json": "70cd63f4f881b2608709b7724a42813c0111f27f041f76bcb1a5f6289c929de5",
+      "registration.stderr": "1c62be3cc5061591e67eae14a516b0373f5f1bab9bab4ccd4bef3b974ea6708d",
+      "registration.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary.json": "1332e88b42b9129d52cf846adca7a8dacba5067918005e39b39337b4c34ba305",
+      "verify.py": "161f09fb4ea223c516030c822ef3e83ca63f890ffc66789eb87ac290de5acdd4"
+    },
+    "bytes": 5811,
+    "path": "D:/AI/LIBAPTA/outputs/context-anchor-matched-p3-20261024"
+  },
+  "formal_acceptance": false,
+  "format": "libapta-context-matched-p3-registration-1",
+  "future_generated_scope": {
+    "arms": 2,
+    "evaluated_cells": 2400,
+    "fixed_c3_construct_context_sha256": "0fe406fe50e689e99ae9fff8d7ea754a8cdef93b89f9213edecea97f1011f54b",
+    "fixed_c3_result_sha256": "b5f047bc410bee201bba44d9d4a86b7d921de43ff7d4c524711273f0d8213fae",
+    "fixed_c3_source_revision": "6191bbdc3b8093dd4a3bc2000d302f7b8fcf2e70",
+    "fixed_c3_support_sha256": "bb07b8a41ac1673dd86b8d0fd24679f16f24b45bd42297bb0bdd7b39fe17bb39",
+    "leaf_input_closure_state": "BIND_FROM_VERIFIED_C3_CHAIN_IN_P5_NOT_OPENED_BY_P3",
+    "new_context_projection_records": 1200,
+    "parent_generated_runtime_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+    "real_401_199_scope_excluded": true,
+    "reference_complete_windows": 400,
+    "reference_incomplete_windows": 200,
+    "representations": 2,
+    "sources": 100,
+    "windows": 600
+  },
+  "future_implementation_files_present": 0,
+  "handoff_sha256": "14a541336659afcad47e3b217fdbd9a4d13e679bc4e4cb37be0a94f5b7c1365b",
+  "independence": "UNRESOLVED",
+  "model_inference_or_training": false,
+  "native_activation": false,
+  "next": "P4_PURE_MATCHED_LEDGER_METER_ADAPTER_AND_INDEPENDENT_ORACLE",
+  "old_gate_count": 16,
+  "old_gate_pass_count": 14,
+  "old_scientific_verdict": "REJECTED",
+  "physical_p4": false,
+  "projection_execution": false,
+  "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+  "real_authorization_created": false,
+  "real_runtime_audit": "NOT_AUDITED",
+  "real_scope_registered": false,
+  "registration_component_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-EXAMPLES.json": "abc4b59680562615bbd5906242c39346600b4ddc8df262b07d7c62df88a60776",
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.json": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.md": "b2aa185858636e3fc760a5c0b0b3ce3b5f74d82d3d70237299f6a2fda105e90c",
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-SCHEMA.json": "f249fc49a1d12b25a14c27e0d1d63e5538dee64148c54791d6cb647548c5db29",
+    "tests/unit/apta_1_1_context_matched_registration.py": "5a0bc044367f604a667c0d66a46dc2bab9d4ddad881499fffaf403b013a9a42c"
+  },
+  "registration_resource_limits": {
+    "enforced_suite_seconds": 60,
+    "external_bytes": 67108864,
+    "phase_seconds": 1800,
+    "process_rss_kib": 262144
+  },
+  "release": false,
+  "resources": {
+    "failure": null,
+    "max_observed_process_rss_kib": 29224,
+    "peak_rss_kib_by_pid": {
+      "306": 21360,
+      "338": 29224
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 338,
+    "status": "PASS",
+    "supervisor_pid": 306,
+    "wall_seconds": 0.9267345009999985
+  },
+  "runtime_image_opened": false,
+  "saved_cases_or_labels_opened": false,
+  "scope": "REGISTRATION_ONLY_PUBLIC_COUNTER_ARITHMETIC",
+  "scoring_calls": 0,
+  "source_baseline_revision": "499db930a01948b9ec73ed2deb8887872b6556da",
+  "source_state": "baseline plus five SHA-bound P3 registration/test files; no evaluator implementation or execution",
+  "stable_version": "1.0.1",
+  "status": "P3_REGISTRATION_AND_PUBLIC_ACCOUNTING_CHECKS_PASS"
+}

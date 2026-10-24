@@ -285,13 +285,26 @@ time is4.953909s and observed process RSS28612 KiB; compilation has separate cap
 Preparation failures and repairs are preserved in the receipt. Production code,
 P1 projection/oracle, old evidence and actual consumer checkout/provider/pin
 remain unchanged. No current firmware/pinned-library/P4 qualification is implied.
-**Next: P3, register matched projection evaluation with explicit support and
-shared-intersection denominators before execution. No corpus scoring or real replay.**
+P3 now registers the [matched projection evaluation](CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.md)
+and [machine contract](CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.json), with a
+[closed ledger schema](CONTEXT-ANCHOR-MATCHED-EVALUATION-SCHEMA.json), three public
+counter examples and [registration receipt](CONTEXT-ANCHOR-MATCHED-EVALUATION-P3-20261024.json).
+Ten registration tests pass, including88 support/correctness/context truth states;
+23 new bindings and all14/17/37 P0 document/reviewed-source/C3 bindings verify.
+The four cells compare original/fixed-coupled events under legacy/context
+projection. G/M/D support partitions and shared correctness stay separate;
+new support is never a shared correctness fix, and empty rates remain null.
+The future scope is fixed generated100/600 with400/200 reference support;
+real401/199 is excluded, and the exact leaf/runtime closure still needs P5 binding.
+No projector/scorer, saved case, label, runtime image or campaign is executed.
+Old scientific REJECTED14/16 and P1/P2 code remain unchanged.
+**Next: P4, implement the separately registered pure matched ledger/meter adapter
+and independent oracle on public generated fixtures. No corpus scoring or real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0/P1 handoffs are historical; P2 owns the current P3 handoff. Full generated
+C1/C2/C3 and P0/P1/P2 handoffs are historical; P3 owns the current P4 handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content

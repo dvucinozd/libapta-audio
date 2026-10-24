@@ -1,0 +1,252 @@
+{
+  "examples": [
+    {
+      "ledger": {
+        "comparison": "candidate_vs_original_context",
+        "counts": {
+          "both_supported": 3,
+          "breaks_on_both": 0,
+          "correct_both": 1,
+          "fixes_on_both": 1,
+          "incorrect_both": 1,
+          "left_correct_on_both": 1,
+          "left_only_correct": 0,
+          "left_only_supported": 1,
+          "legacy_native_unowned_meter_conflicts": 0,
+          "neither_supported": 2,
+          "reference_complete_windows": 6,
+          "reference_incomplete_windows": 2,
+          "right_correct_on_both": 2,
+          "right_only_correct": 2,
+          "right_only_supported": 2,
+          "windows": 8
+        },
+        "family": "grid_joint",
+        "format": "libapta-context-matched-ledger-1",
+        "left_conditional_accuracy": {
+          "denominator": 3,
+          "numerator": 1
+        },
+        "level": "cohort",
+        "protocol_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "right_conditional_accuracy": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "scope": "GENERATED_C3_DIAGNOSTIC",
+        "stratum": "all"
+      },
+      "name": "support_gain_is_not_paired_correctness_fix",
+      "rows": [
+        [
+          1,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "ledger": {
+        "comparison": "candidate_vs_original_context",
+        "counts": {
+          "both_supported": 0,
+          "breaks_on_both": 0,
+          "correct_both": 0,
+          "fixes_on_both": 0,
+          "incorrect_both": 0,
+          "left_correct_on_both": 0,
+          "left_only_correct": 2,
+          "left_only_supported": 3,
+          "legacy_native_unowned_meter_conflicts": 0,
+          "neither_supported": 3,
+          "reference_complete_windows": 8,
+          "reference_incomplete_windows": 0,
+          "right_correct_on_both": 0,
+          "right_only_correct": 1,
+          "right_only_supported": 2,
+          "windows": 8
+        },
+        "family": "meter",
+        "format": "libapta-context-matched-ledger-1",
+        "left_conditional_accuracy": null,
+        "level": "cohort",
+        "protocol_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "right_conditional_accuracy": null,
+        "scope": "GENERATED_C3_DIAGNOSTIC",
+        "stratum": "all"
+      },
+      "name": "empty_shared_domain_has_no_accuracy",
+      "rows": [
+        [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "ledger": {
+        "comparison": "context_vs_legacy_original",
+        "counts": {
+          "both_supported": 0,
+          "breaks_on_both": 0,
+          "correct_both": 0,
+          "fixes_on_both": 0,
+          "incorrect_both": 0,
+          "left_correct_on_both": 0,
+          "left_only_correct": 0,
+          "left_only_supported": 0,
+          "legacy_native_unowned_meter_conflicts": 1,
+          "neither_supported": 0,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 1,
+          "right_correct_on_both": 0,
+          "right_only_correct": 1,
+          "right_only_supported": 1,
+          "windows": 1
+        },
+        "family": "meter",
+        "format": "libapta-context-matched-ledger-1",
+        "left_conditional_accuracy": null,
+        "level": "cohort",
+        "protocol_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "right_conditional_accuracy": null,
+        "scope": "GENERATED_C3_DIAGNOSTIC",
+        "stratum": "all"
+      },
+      "name": "legacy_unowned_meter_is_support_gain_only",
+      "rows": [
+        [
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "format": "libapta-context-matched-registration-examples-1",
+  "projector_called": false,
+  "scope": "PUBLIC_COUNTER_ARITHMETIC_ONLY_NOT_MEASURED",
+  "scorer_called": false
+}

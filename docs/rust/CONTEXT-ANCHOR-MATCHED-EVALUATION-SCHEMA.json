@@ -1,0 +1,210 @@
+{
+  "$defs": {
+    "ledger": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison": {
+          "enum": [
+            "candidate_vs_original_legacy",
+            "candidate_vs_original_context",
+            "context_vs_legacy_original",
+            "context_vs_legacy_coupled"
+          ]
+        },
+        "counts": {
+          "additionalProperties": false,
+          "properties": {
+            "both_supported": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "breaks_on_both": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "correct_both": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "fixes_on_both": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "incorrect_both": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "left_correct_on_both": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "left_only_correct": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "left_only_supported": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "legacy_native_unowned_meter_conflicts": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "neither_supported": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "reference_complete_windows": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "reference_incomplete_windows": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "right_correct_on_both": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "right_only_correct": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "right_only_supported": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "windows": {
+              "maximum": 600,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "windows",
+            "reference_complete_windows",
+            "reference_incomplete_windows",
+            "both_supported",
+            "left_only_supported",
+            "right_only_supported",
+            "neither_supported",
+            "correct_both",
+            "fixes_on_both",
+            "breaks_on_both",
+            "incorrect_both",
+            "left_correct_on_both",
+            "right_correct_on_both",
+            "left_only_correct",
+            "right_only_correct",
+            "legacy_native_unowned_meter_conflicts"
+          ],
+          "type": "object"
+        },
+        "family": {
+          "enum": [
+            "grid_phase",
+            "grid_period",
+            "grid_joint",
+            "grid_complete_sequence",
+            "meter",
+            "downbeat"
+          ]
+        },
+        "format": {
+          "const": "libapta-context-matched-ledger-1"
+        },
+        "left_conditional_accuracy": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/ratio"
+            }
+          ]
+        },
+        "level": {
+          "enum": [
+            "source",
+            "group",
+            "cohort"
+          ]
+        },
+        "protocol_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "right_conditional_accuracy": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/ratio"
+            }
+          ]
+        },
+        "scope": {
+          "const": "GENERATED_C3_DIAGNOSTIC"
+        },
+        "stratum": {
+          "enum": [
+            "all",
+            "reference_complete",
+            "reference_incomplete"
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "protocol_sha256",
+        "scope",
+        "comparison",
+        "family",
+        "stratum",
+        "level",
+        "counts",
+        "left_conditional_accuracy",
+        "right_conditional_accuracy"
+      ],
+      "type": "object"
+    },
+    "ratio": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "numerator": {
+          "maximum": 600,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/ledger",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
