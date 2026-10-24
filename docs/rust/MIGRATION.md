@@ -150,8 +150,19 @@ The contract fixes parent entry/exit audits, selected-source worker checks, stri
 context/upstream chains, v2 envelopes, canonical evaluator reuse and full100/600
 generated preflight with unchanged caps. V2 code/tests/preflight and authorization
 remain absent; no real/private input, numerical replay or scoring was run at R0.
-**Next: R1/R2 v2 runner implementation and R3 generated integrity/parity tests;
-commit/push before the R4 full generated preflight.** CT-05 authorization is consumed.
+R1/R2 now implement the [separate v2 runner and R3 generated checks](COUPLED-TIME-RUNNER-V2-R3-20261024.md).
+The [component-bound receipt](COUPLED-TIME-RUNNER-V2-R3-20261024.json) records76
+distinct focused tests/99 evidence executions with zero failures/errors/skips. All13
+immutable scientific/evaluation/support components match registration. Both
+construct/verify selected workers access only their source at1/10/100 fixture
+sizes; whole-cohort checks remain at parent boundaries. Actual malformed/stale/
+mutation/resource/orphan cases fail closed. Canonical generated evaluation uses
+the unchanged legacy evaluator after full v2 verification with labels absent.
+These operational fixtures use two sources/four windows; the100-source access
+unit cases do not constitute R4 or demonstrate whole-cohort throughput.
+**Next: add the generated-only R4 driver, bind the full clean repair archive and
+registered storage topology, then commit/push before R4 measurement.** No R4
+receipt or real v2 authorization exists. CT-05 authorization remains consumed.
 Preserve all partials and the timeout; do not retry, score the subset, raise caps,
 retune or repair/replay within this attempt. Any later real attempt needs a new
 registered scope and matching preflight after its separate repair checkpoint.

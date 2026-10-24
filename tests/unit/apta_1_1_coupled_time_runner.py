@@ -298,14 +298,17 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(report['status'], 'INVALID')
             self.assertIn({'timeout': 'wall-time', 'rss': 'RSS', 'output': 'output'}[kind], report['failure'])
 
-    def test_public_all_roles_remain_disabled_without_real_scope(self):
+    def test_public_roles_cannot_create_unregistered_output(self):
         for args in (('construct', '--inputs', '/absent'), ('verify',), ('evaluate', '--inventory', '/absent'),
                      ('_phase', 'construct', '--inputs', '/absent'), ('_worker', 'construct', '0')):
             output = self.root / ('never-' + str(len(args)))
             result = subprocess.run([sys.executable, str(ROOT / 'tools/apta_1_1_coupled_time.py'),
                                      *args, '--attempt', str(output)], capture_output=True, text=True, timeout=20)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn('disabled', result.stderr)
+            # After CT05 the historical token exists, but its destination is
+            # consumed and/or component identities are stale. Error wording
+            # need not imply that the scope record is still absent.
+            self.assertTrue(result.stderr.strip())
             self.assertFalse(output.exists())
 
 
