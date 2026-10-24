@@ -222,13 +222,24 @@ future operational gates. All25 R4 component files and13 immutable dependencies
 remain unchanged. New schemas reject missing/ill-typed/nonconserving counters,
 old/mixed records and broken context/proof/payload links. These are document/model
 checks, not an implemented evaluator, runtime qualification or a new data run.
-**Next: C1 under the new metadata operational registration: implement the isolated
-support helper, versioned evaluator and new metadata runner while preserving the
-old25 files.** The [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
+The [C1 checkpoint](COUPLED-TIME-METADATA-C1-20261024.md) now implements the isolated
+support helper, versioned evaluator and separate metadata runner. Its
+[aggregate receipt](COUPLED-TIME-METADATA-C1-20261024.json) binds26 new focused tests
+plus16 unchanged C0 controls (42 PASS, zero skips), code/log hashes and the exact
+read-only runtime. Small generated canonical scores preserve all old values and
+gates after the six registered additions. New runtime checks validate actual
+proof/payload/detail hashes and reject mixed records, nonconserving counts and
+role/support leaks. All25 old R4 files and13 immutable dependencies remain unchanged.
+**Next: C2 generated process/parity/integrity preparation under the new metadata
+registration; then a clean-source fresh full C3 preflight.** The
+[repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
-pre-registration baseline; the new operational document's stage.next=C1 owns the
-current handoff. Counter implementation, metadata preflight and real authorization
-remain absent; projection stays UNDECIDED and real-runtime metadata NOT_AUDITED.
+pre-registration baseline. C0's machine stage.next=C1 is historical; this later
+C1 checkpoint owns the current C2 handoff. Full process isolation, all600 saved
+record parity and the complete100-source attempt are not yet checked for the new
+runner. Metadata preflight and real authorization remain absent. Real dispatch
+also rejects shape-only future tokens pending registered scope-report content
+checks; projection stays UNDECIDED and real-runtime metadata NOT_AUDITED.
 Neither C0 nor C1 permits a threshold change, attempt replay or real run. Preserve the historical real runtime
 freeze; this generated compatibility result does not requalify it.
 The [registered R5 saved-generated audit preparation](COUPLED-TIME-R5-AUDIT-PREP-20261024.md)

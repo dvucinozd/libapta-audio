@@ -1,0 +1,161 @@
+{
+  "checks": {
+    "actual_proof_payload_detail_hash_chain_unit_checks": true,
+    "bound_operational_documents": 27,
+    "canonical_scorer_and_gate_call_ast_parity": true,
+    "component_hashes_equal_before_and_after": true,
+    "generated_400_200_and_interface_only_401_199": true,
+    "immutable_component_hashes_preserved": 13,
+    "old_r4_component_hashes_preserved": 25,
+    "real_dispatch_fail_closed": true,
+    "runtime_full_inventory_verified_before_and_after": true,
+    "six_exact_leaf_extension_unit_parity": true
+  },
+  "component_sha256": {
+    "tests/unit/apta_1_1_coupled_time_evaluation_v2_metadata.py": "51d4d7abe7f6d2d9d283815a86b5135c6faf89438dacf09c099bc3a4b0d991f3",
+    "tests/unit/apta_1_1_coupled_time_v2_metadata_runner.py": "fef1fe01187524109770dc0c193961d2a156ddbb3f346deb7f8f4303915462e7",
+    "tests/unit/apta_1_1_reference_support.py": "cb18ee3551ceb5a19c1a03fe941b4aff3f6f668dfc9f2fbf97d6f955aa3bb97a",
+    "tools/apta_1_1_coupled_time_evaluation_v2_metadata.py": "a40cfedd12702793a65cd7ed341e9cef1acd9bb9c59d1c830275cfb3d902db85",
+    "tools/apta_1_1_coupled_time_v2_metadata.py": "b3bdc6c6af4edf9f22b310959647dc575d7a94e3200405f53f173ef1735c8cb8",
+    "tools/apta_reference_support.py": "993c9c2fc881c12448491b69bac07b1b3aba10522fbdad75f38e5422d271810e"
+  },
+  "confidence_qualified": false,
+  "date": "2026-10-24",
+  "documentation_sha256": {
+    "COUPLED-TIME-METADATA-C1-20261024.md": "d2aee0672f5648edd74bc42585fc431c96261257d8de11cbc8719f6b9dc6116b"
+  },
+  "formal_acceptance": false,
+  "format": "libapta-coupled-time-metadata-c1-implementation-1",
+  "future_real_scope_content_validation": "PENDING_REGISTERED_CONTRACT; settings rejects even shape-only new tokens",
+  "historical_controls": {
+    "new_scientific_measurement": false,
+    "old_results_rewritten": false,
+    "r4_gate_count": 16,
+    "r4_gate_pass_count": 14,
+    "r4_scientific_verdict": "REJECTED",
+    "version": "1.0.1"
+  },
+  "historical_real_runtime_metadata": "NOT_AUDITED",
+  "implementation_paths": [
+    "tests/unit/apta_1_1_coupled_time_evaluation_v2_metadata.py",
+    "tests/unit/apta_1_1_coupled_time_v2_metadata_runner.py",
+    "tests/unit/apta_1_1_reference_support.py",
+    "tools/apta_1_1_coupled_time_evaluation_v2_metadata.py",
+    "tools/apta_1_1_coupled_time_v2_metadata.py",
+    "tools/apta_reference_support.py"
+  ],
+  "implementation_present": true,
+  "independence": "UNRESOLVED",
+  "log_sha256": {
+    "canonical.run.resources.json": "24bba0cb98c952a0c3f7893af25924e3222212f0c7fa958b8a7f238170dfee34",
+    "canonical.run.stderr": "df77577da6f0b48200f608bf243b70c988b412d13e9a811a93b984668551f4e9",
+    "canonical.run.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contracts.run.resources.json": "f65743d6c3d632a4158dd0f1579ef39c17236d400724e7cc79f57554bbf39bc1",
+    "contracts.run.stderr": "54c4eba4d21fa5ec4851053e4d0260828022353166ddbd51c881d0b1c86bfa15",
+    "contracts.run.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "metadata_amendment_sha256": "0c0760fd6a3ed2d737c8d7fd9c49687d083d73347833a7ea04a998a043212c9c",
+  "metadata_preflight_created": false,
+  "native_activation": false,
+  "next": "C2_GENERATED_PROCESS_PARITY_INTEGRITY_PREPARATION",
+  "next_implementation_paths": [
+    "tests/unit/apta_coupled_time_v2_metadata_bootstrap.py",
+    "tests/unit/apta_coupled_time_v2_metadata_preflight.py",
+    "tests/unit/apta_1_1_coupled_time_v2_metadata_preflight.py",
+    "tests/unit/apta_coupled_time_v2_metadata_runtime.py",
+    "tests/unit/apta_coupled_time_metadata_checks.py"
+  ],
+  "operational_registration_sha256": "0c3a0cd895d064074b1e3f5aa47c3f84bdce4a7db949c760d6b924779b8dffdc",
+  "physical_p4": false,
+  "projection_decision": "UNDECIDED",
+  "real_authorization_created": false,
+  "real_execution_enabled": false,
+  "registration_sha256": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+  "registration_test_sha256": "72b71eecdbb17198320b3c32a01c250496445ceb590459a0dd4508c696ba76db",
+  "release": false,
+  "resources": {
+    "experiment_caps_unchanged": {
+      "max_attempt_output_bytes": 67108864,
+      "max_phase_seconds": 1800,
+      "max_process_rss_kib": 262144,
+      "max_source_seconds": 60
+    },
+    "scope": "focused host suites including outer supervisor; runtime inventory/setup outside timings; no isolated evaluator/pipeline/P4 claim",
+    "suite_caps": {
+      "output_bytes": 67108864,
+      "rss_kib": 262144,
+      "seconds": 180
+    },
+    "suite_supervision": {
+      "canonical": {
+        "failure": null,
+        "max_observed_process_rss_kib": 161736,
+        "peak_rss_kib_by_pid": {
+          "328": 161736,
+          "390": 2056
+        },
+        "poll_seconds": 0.02,
+        "process_group_monitored": true,
+        "root_pid": 390,
+        "status": "PASS",
+        "supervisor_pid": 328,
+        "wall_seconds": 27.470493299000054
+      },
+      "contracts": {
+        "failure": null,
+        "max_observed_process_rss_kib": 161852,
+        "peak_rss_kib_by_pid": {
+          "328": 161852,
+          "441": 2056
+        },
+        "poll_seconds": 0.02,
+        "process_group_monitored": true,
+        "root_pid": 441,
+        "status": "PASS",
+        "supervisor_pid": 328,
+        "wall_seconds": 20.37968807099992
+      }
+    }
+  },
+  "runtime_snapshot_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+  "source_baseline_revision": "485dfa50d0043bd66a9c29d3d45c01aa25a95bc9",
+  "status": "IMPLEMENTED_FOCUSED_GENERATED_CHECKS_PASS",
+  "test_scope": {
+    "actual_new_three_process_isolation_qualified": false,
+    "canonical_generated_unit_scoring": true,
+    "corpus_candidate_or_scoring_attempt_run": false,
+    "evaluation_orchestration_unit_boundary": "test-only stand-in; real boundary rejection tested separately",
+    "full100_generated_attempt_run": false,
+    "generated_unit_labels_read": true,
+    "new_inference_or_training": false,
+    "real_private_inputs_read": false,
+    "saved_r4_600_record_parity_run": false
+  },
+  "tests": {
+    "errors": 0,
+    "failures": 0,
+    "new": 26,
+    "skips": 0,
+    "suites": [
+      {
+        "errors": 0,
+        "failures": 0,
+        "python": "3.12.3",
+        "skips": 0,
+        "suite": "canonical",
+        "tests": 14
+      },
+      {
+        "errors": 0,
+        "failures": 0,
+        "python": "3.12.3",
+        "skips": 0,
+        "suite": "contracts",
+        "tests": 28
+      }
+    ],
+    "total": 42,
+    "unchanged_c0": 16
+  },
+  "verification_driver_sha256": "b6157e57410ec3e3c935a81470279de56313e1f454058da5ea4a6f8d363ee90d"
+}
