@@ -167,9 +167,19 @@ repeated v2 regressions plus6 driver checks, including a canonical2-source/12-wi
 three-process fixture with labels withheld. The driver binds a full tracked repair
 archive, exact source/input/output storage classes and the retained canonical
 runtime. Immutable scientific code, metrics, gates and caps remain unchanged.
-**Next: after committing/pushing this preparation, run the single full generated
-R4 campaign and publish its complete operational result.** No full R4 receipt or
-real v2 authorization exists at this preparation checkpoint. CT-05 stays closed.
+The [single full R4 campaign](COUPLED-TIME-RUNNER-V2-R4-20261024.md) now closes
+**INVALID** on clean pushed repair source `bc3ced8fc2e28185c5ed255423d52ad7bd80a94a`.
+Its [aggregate receipt](COUPLED-TIME-RUNNER-V2-R4-20261024.json) retains80 local
+construct PASS records/candidates, but no cohort completion. The parent rejected
+a runtime identity change: Ubuntu unattended-upgrades replaced libz.so.1.3 during
+measurement. The phase stopped after622.951s, with20788KiB maximum observed RSS;
+no cap was exceeded and no numerical failure was reported. Verify/evaluate are
+NOT_RUN; generated labels remain withheld and no subset was scored. All13 immutable
+scientific components and the prepared23-component identities remain unchanged.
+**Next: prepare a separate stable-runtime checkpoint, requalify its complete
+runtime closure with generated checks, and commit/push before any new generated
+campaign.** Preserve this failed attempt; no automatic retry, weaker binding or
+cap increase. No v2 preflight or real authorization is created. CT-05 stays closed.
 Preserve all partials and the timeout; do not retry, score the subset, raise caps,
 retune or repair/replay within this attempt. Any later real attempt needs a new
 registered scope and matching preflight after its separate repair checkpoint.
