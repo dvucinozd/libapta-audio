@@ -1,0 +1,1197 @@
+{
+  "format": "libapta-context-anchor-registration-examples-1",
+  "lattice_only_examples": [
+    {
+      "anchor_ordinal": 0,
+      "anchor_q32": 0,
+      "end_frame": 96000,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "expected_points": [
+        {
+          "ordinal": 0,
+          "position_q32": 0
+        },
+        {
+          "ordinal": 1,
+          "position_q32": 103079215104000
+        },
+        {
+          "ordinal": 2,
+          "position_q32": 206158430208000
+        },
+        {
+          "ordinal": 3,
+          "position_q32": 309237645312000
+        }
+      ],
+      "first_frame": 0,
+      "name": "inclusive_and_exclusive",
+      "period_q32": 103079215104000
+    },
+    {
+      "anchor_ordinal": 7,
+      "anchor_q32": 4294967296000,
+      "end_frame": 73000,
+      "expected_indices": [
+        1,
+        2
+      ],
+      "expected_points": [
+        {
+          "ordinal": 8,
+          "position_q32": 107374182400000
+        },
+        {
+          "ordinal": 9,
+          "position_q32": 210453397504000
+        }
+      ],
+      "first_frame": 25000,
+      "name": "context_exact_endpoint",
+      "period_q32": 103079215104000
+    },
+    {
+      "anchor_ordinal": 3,
+      "anchor_q32": 0,
+      "end_frame": 72002,
+      "expected_indices": [
+        2,
+        3
+      ],
+      "expected_points": [
+        {
+          "ordinal": 5,
+          "position_q32": 206162725175296
+        },
+        {
+          "ordinal": 6,
+          "position_q32": 309244087762944
+        }
+      ],
+      "first_frame": 24001,
+      "name": "fractional_carry",
+      "period_q32": 103081362587648
+    },
+    {
+      "anchor_ordinal": 0,
+      "anchor_q32": 4294967296000,
+      "end_frame": 49000,
+      "expected_indices": [
+        1
+      ],
+      "expected_points": [
+        {
+          "ordinal": 1,
+          "position_q32": 107374182400001
+        }
+      ],
+      "first_frame": 25000,
+      "name": "q32_unit_exclusive_end",
+      "period_q32": 103079215104001
+    },
+    {
+      "anchor_ordinal": 0,
+      "anchor_q32": 4294967296000,
+      "end_frame": 1000,
+      "expected_indices": [],
+      "expected_points": [],
+      "first_frame": 0,
+      "name": "no_owned_lattice_point",
+      "period_q32": 103079215104000
+    },
+    {
+      "anchor_ordinal": 0,
+      "anchor_q32": 0,
+      "end_frame": 1440000,
+      "expected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149
+      ],
+      "expected_points": [
+        {
+          "ordinal": 0,
+          "position_q32": 0
+        },
+        {
+          "ordinal": 1,
+          "position_q32": 41231686041600
+        },
+        {
+          "ordinal": 2,
+          "position_q32": 82463372083200
+        },
+        {
+          "ordinal": 3,
+          "position_q32": 123695058124800
+        },
+        {
+          "ordinal": 4,
+          "position_q32": 164926744166400
+        },
+        {
+          "ordinal": 5,
+          "position_q32": 206158430208000
+        },
+        {
+          "ordinal": 6,
+          "position_q32": 247390116249600
+        },
+        {
+          "ordinal": 7,
+          "position_q32": 288621802291200
+        },
+        {
+          "ordinal": 8,
+          "position_q32": 329853488332800
+        },
+        {
+          "ordinal": 9,
+          "position_q32": 371085174374400
+        },
+        {
+          "ordinal": 10,
+          "position_q32": 412316860416000
+        },
+        {
+          "ordinal": 11,
+          "position_q32": 453548546457600
+        },
+        {
+          "ordinal": 12,
+          "position_q32": 494780232499200
+        },
+        {
+          "ordinal": 13,
+          "position_q32": 536011918540800
+        },
+        {
+          "ordinal": 14,
+          "position_q32": 577243604582400
+        },
+        {
+          "ordinal": 15,
+          "position_q32": 618475290624000
+        },
+        {
+          "ordinal": 16,
+          "position_q32": 659706976665600
+        },
+        {
+          "ordinal": 17,
+          "position_q32": 700938662707200
+        },
+        {
+          "ordinal": 18,
+          "position_q32": 742170348748800
+        },
+        {
+          "ordinal": 19,
+          "position_q32": 783402034790400
+        },
+        {
+          "ordinal": 20,
+          "position_q32": 824633720832000
+        },
+        {
+          "ordinal": 21,
+          "position_q32": 865865406873600
+        },
+        {
+          "ordinal": 22,
+          "position_q32": 907097092915200
+        },
+        {
+          "ordinal": 23,
+          "position_q32": 948328778956800
+        },
+        {
+          "ordinal": 24,
+          "position_q32": 989560464998400
+        },
+        {
+          "ordinal": 25,
+          "position_q32": 1030792151040000
+        },
+        {
+          "ordinal": 26,
+          "position_q32": 1072023837081600
+        },
+        {
+          "ordinal": 27,
+          "position_q32": 1113255523123200
+        },
+        {
+          "ordinal": 28,
+          "position_q32": 1154487209164800
+        },
+        {
+          "ordinal": 29,
+          "position_q32": 1195718895206400
+        },
+        {
+          "ordinal": 30,
+          "position_q32": 1236950581248000
+        },
+        {
+          "ordinal": 31,
+          "position_q32": 1278182267289600
+        },
+        {
+          "ordinal": 32,
+          "position_q32": 1319413953331200
+        },
+        {
+          "ordinal": 33,
+          "position_q32": 1360645639372800
+        },
+        {
+          "ordinal": 34,
+          "position_q32": 1401877325414400
+        },
+        {
+          "ordinal": 35,
+          "position_q32": 1443109011456000
+        },
+        {
+          "ordinal": 36,
+          "position_q32": 1484340697497600
+        },
+        {
+          "ordinal": 37,
+          "position_q32": 1525572383539200
+        },
+        {
+          "ordinal": 38,
+          "position_q32": 1566804069580800
+        },
+        {
+          "ordinal": 39,
+          "position_q32": 1608035755622400
+        },
+        {
+          "ordinal": 40,
+          "position_q32": 1649267441664000
+        },
+        {
+          "ordinal": 41,
+          "position_q32": 1690499127705600
+        },
+        {
+          "ordinal": 42,
+          "position_q32": 1731730813747200
+        },
+        {
+          "ordinal": 43,
+          "position_q32": 1772962499788800
+        },
+        {
+          "ordinal": 44,
+          "position_q32": 1814194185830400
+        },
+        {
+          "ordinal": 45,
+          "position_q32": 1855425871872000
+        },
+        {
+          "ordinal": 46,
+          "position_q32": 1896657557913600
+        },
+        {
+          "ordinal": 47,
+          "position_q32": 1937889243955200
+        },
+        {
+          "ordinal": 48,
+          "position_q32": 1979120929996800
+        },
+        {
+          "ordinal": 49,
+          "position_q32": 2020352616038400
+        },
+        {
+          "ordinal": 50,
+          "position_q32": 2061584302080000
+        },
+        {
+          "ordinal": 51,
+          "position_q32": 2102815988121600
+        },
+        {
+          "ordinal": 52,
+          "position_q32": 2144047674163200
+        },
+        {
+          "ordinal": 53,
+          "position_q32": 2185279360204800
+        },
+        {
+          "ordinal": 54,
+          "position_q32": 2226511046246400
+        },
+        {
+          "ordinal": 55,
+          "position_q32": 2267742732288000
+        },
+        {
+          "ordinal": 56,
+          "position_q32": 2308974418329600
+        },
+        {
+          "ordinal": 57,
+          "position_q32": 2350206104371200
+        },
+        {
+          "ordinal": 58,
+          "position_q32": 2391437790412800
+        },
+        {
+          "ordinal": 59,
+          "position_q32": 2432669476454400
+        },
+        {
+          "ordinal": 60,
+          "position_q32": 2473901162496000
+        },
+        {
+          "ordinal": 61,
+          "position_q32": 2515132848537600
+        },
+        {
+          "ordinal": 62,
+          "position_q32": 2556364534579200
+        },
+        {
+          "ordinal": 63,
+          "position_q32": 2597596220620800
+        },
+        {
+          "ordinal": 64,
+          "position_q32": 2638827906662400
+        },
+        {
+          "ordinal": 65,
+          "position_q32": 2680059592704000
+        },
+        {
+          "ordinal": 66,
+          "position_q32": 2721291278745600
+        },
+        {
+          "ordinal": 67,
+          "position_q32": 2762522964787200
+        },
+        {
+          "ordinal": 68,
+          "position_q32": 2803754650828800
+        },
+        {
+          "ordinal": 69,
+          "position_q32": 2844986336870400
+        },
+        {
+          "ordinal": 70,
+          "position_q32": 2886218022912000
+        },
+        {
+          "ordinal": 71,
+          "position_q32": 2927449708953600
+        },
+        {
+          "ordinal": 72,
+          "position_q32": 2968681394995200
+        },
+        {
+          "ordinal": 73,
+          "position_q32": 3009913081036800
+        },
+        {
+          "ordinal": 74,
+          "position_q32": 3051144767078400
+        },
+        {
+          "ordinal": 75,
+          "position_q32": 3092376453120000
+        },
+        {
+          "ordinal": 76,
+          "position_q32": 3133608139161600
+        },
+        {
+          "ordinal": 77,
+          "position_q32": 3174839825203200
+        },
+        {
+          "ordinal": 78,
+          "position_q32": 3216071511244800
+        },
+        {
+          "ordinal": 79,
+          "position_q32": 3257303197286400
+        },
+        {
+          "ordinal": 80,
+          "position_q32": 3298534883328000
+        },
+        {
+          "ordinal": 81,
+          "position_q32": 3339766569369600
+        },
+        {
+          "ordinal": 82,
+          "position_q32": 3380998255411200
+        },
+        {
+          "ordinal": 83,
+          "position_q32": 3422229941452800
+        },
+        {
+          "ordinal": 84,
+          "position_q32": 3463461627494400
+        },
+        {
+          "ordinal": 85,
+          "position_q32": 3504693313536000
+        },
+        {
+          "ordinal": 86,
+          "position_q32": 3545924999577600
+        },
+        {
+          "ordinal": 87,
+          "position_q32": 3587156685619200
+        },
+        {
+          "ordinal": 88,
+          "position_q32": 3628388371660800
+        },
+        {
+          "ordinal": 89,
+          "position_q32": 3669620057702400
+        },
+        {
+          "ordinal": 90,
+          "position_q32": 3710851743744000
+        },
+        {
+          "ordinal": 91,
+          "position_q32": 3752083429785600
+        },
+        {
+          "ordinal": 92,
+          "position_q32": 3793315115827200
+        },
+        {
+          "ordinal": 93,
+          "position_q32": 3834546801868800
+        },
+        {
+          "ordinal": 94,
+          "position_q32": 3875778487910400
+        },
+        {
+          "ordinal": 95,
+          "position_q32": 3917010173952000
+        },
+        {
+          "ordinal": 96,
+          "position_q32": 3958241859993600
+        },
+        {
+          "ordinal": 97,
+          "position_q32": 3999473546035200
+        },
+        {
+          "ordinal": 98,
+          "position_q32": 4040705232076800
+        },
+        {
+          "ordinal": 99,
+          "position_q32": 4081936918118400
+        },
+        {
+          "ordinal": 100,
+          "position_q32": 4123168604160000
+        },
+        {
+          "ordinal": 101,
+          "position_q32": 4164400290201600
+        },
+        {
+          "ordinal": 102,
+          "position_q32": 4205631976243200
+        },
+        {
+          "ordinal": 103,
+          "position_q32": 4246863662284800
+        },
+        {
+          "ordinal": 104,
+          "position_q32": 4288095348326400
+        },
+        {
+          "ordinal": 105,
+          "position_q32": 4329327034368000
+        },
+        {
+          "ordinal": 106,
+          "position_q32": 4370558720409600
+        },
+        {
+          "ordinal": 107,
+          "position_q32": 4411790406451200
+        },
+        {
+          "ordinal": 108,
+          "position_q32": 4453022092492800
+        },
+        {
+          "ordinal": 109,
+          "position_q32": 4494253778534400
+        },
+        {
+          "ordinal": 110,
+          "position_q32": 4535485464576000
+        },
+        {
+          "ordinal": 111,
+          "position_q32": 4576717150617600
+        },
+        {
+          "ordinal": 112,
+          "position_q32": 4617948836659200
+        },
+        {
+          "ordinal": 113,
+          "position_q32": 4659180522700800
+        },
+        {
+          "ordinal": 114,
+          "position_q32": 4700412208742400
+        },
+        {
+          "ordinal": 115,
+          "position_q32": 4741643894784000
+        },
+        {
+          "ordinal": 116,
+          "position_q32": 4782875580825600
+        },
+        {
+          "ordinal": 117,
+          "position_q32": 4824107266867200
+        },
+        {
+          "ordinal": 118,
+          "position_q32": 4865338952908800
+        },
+        {
+          "ordinal": 119,
+          "position_q32": 4906570638950400
+        },
+        {
+          "ordinal": 120,
+          "position_q32": 4947802324992000
+        },
+        {
+          "ordinal": 121,
+          "position_q32": 4989034011033600
+        },
+        {
+          "ordinal": 122,
+          "position_q32": 5030265697075200
+        },
+        {
+          "ordinal": 123,
+          "position_q32": 5071497383116800
+        },
+        {
+          "ordinal": 124,
+          "position_q32": 5112729069158400
+        },
+        {
+          "ordinal": 125,
+          "position_q32": 5153960755200000
+        },
+        {
+          "ordinal": 126,
+          "position_q32": 5195192441241600
+        },
+        {
+          "ordinal": 127,
+          "position_q32": 5236424127283200
+        },
+        {
+          "ordinal": 128,
+          "position_q32": 5277655813324800
+        },
+        {
+          "ordinal": 129,
+          "position_q32": 5318887499366400
+        },
+        {
+          "ordinal": 130,
+          "position_q32": 5360119185408000
+        },
+        {
+          "ordinal": 131,
+          "position_q32": 5401350871449600
+        },
+        {
+          "ordinal": 132,
+          "position_q32": 5442582557491200
+        },
+        {
+          "ordinal": 133,
+          "position_q32": 5483814243532800
+        },
+        {
+          "ordinal": 134,
+          "position_q32": 5525045929574400
+        },
+        {
+          "ordinal": 135,
+          "position_q32": 5566277615616000
+        },
+        {
+          "ordinal": 136,
+          "position_q32": 5607509301657600
+        },
+        {
+          "ordinal": 137,
+          "position_q32": 5648740987699200
+        },
+        {
+          "ordinal": 138,
+          "position_q32": 5689972673740800
+        },
+        {
+          "ordinal": 139,
+          "position_q32": 5731204359782400
+        },
+        {
+          "ordinal": 140,
+          "position_q32": 5772436045824000
+        },
+        {
+          "ordinal": 141,
+          "position_q32": 5813667731865600
+        },
+        {
+          "ordinal": 142,
+          "position_q32": 5854899417907200
+        },
+        {
+          "ordinal": 143,
+          "position_q32": 5896131103948800
+        },
+        {
+          "ordinal": 144,
+          "position_q32": 5937362789990400
+        },
+        {
+          "ordinal": 145,
+          "position_q32": 5978594476032000
+        },
+        {
+          "ordinal": 146,
+          "position_q32": 6019826162073600
+        },
+        {
+          "ordinal": 147,
+          "position_q32": 6061057848115200
+        },
+        {
+          "ordinal": 148,
+          "position_q32": 6102289534156800
+        },
+        {
+          "ordinal": 149,
+          "position_q32": 6143521220198400
+        }
+      ],
+      "first_frame": 0,
+      "name": "source_budget_extreme",
+      "period_q32": 41231686041600
+    }
+  ],
+  "production_projector_called": false,
+  "project_window_examples": [
+    {
+      "input": {
+        "beat_frames": [
+          1000,
+          25000,
+          49000,
+          73000,
+          97000,
+          121000,
+          145000,
+          169000,
+          193000,
+          217000,
+          241000,
+          265000
+        ],
+        "downbeat_ordinals": [],
+        "end_frame": 288000,
+        "first_frame": 0,
+        "total_frames": 288000
+      },
+      "name": "public_constant_in_range",
+      "output": {
+        "end_frame": 288000,
+        "first_frame": 0,
+        "first_index": 0,
+        "first_observed_ordinal": 0,
+        "fit": {
+          "intercept_denominator": 1,
+          "intercept_numerator": 1000,
+          "period_denominator": 1,
+          "period_numerator": 24000,
+          "rounded_anchor": 1000,
+          "tempo_millibpm": 120000
+        },
+        "format": "libapta-context-anchor-projection-1",
+        "meter": null,
+        "meter_status": "NO_ELIGIBLE_BARS",
+        "model": {
+          "anchor_frame": 1000,
+          "anchor_ordinal": 0,
+          "confidence": 0,
+          "period_q32": 103079215104000,
+          "tempo_millibpm": 120000
+        },
+        "observed_count": 12,
+        "point_count": 12,
+        "points": [
+          {
+            "ordinal": 0,
+            "position_q32": 4294967296000
+          },
+          {
+            "ordinal": 1,
+            "position_q32": 107374182400000
+          },
+          {
+            "ordinal": 2,
+            "position_q32": 210453397504000
+          },
+          {
+            "ordinal": 3,
+            "position_q32": 313532612608000
+          },
+          {
+            "ordinal": 4,
+            "position_q32": 416611827712000
+          },
+          {
+            "ordinal": 5,
+            "position_q32": 519691042816000
+          },
+          {
+            "ordinal": 6,
+            "position_q32": 622770257920000
+          },
+          {
+            "ordinal": 7,
+            "position_q32": 725849473024000
+          },
+          {
+            "ordinal": 8,
+            "position_q32": 828928688128000
+          },
+          {
+            "ordinal": 9,
+            "position_q32": 932007903232000
+          },
+          {
+            "ordinal": 10,
+            "position_q32": 1035087118336000
+          },
+          {
+            "ordinal": 11,
+            "position_q32": 1138166333440000
+          }
+        ],
+        "registration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "source_beat_count": 12,
+        "status": "ACCEPTED",
+        "total_frames": 288000
+      }
+    },
+    {
+      "input": {
+        "beat_frames": [
+          1000,
+          25000,
+          48001,
+          71840,
+          95840,
+          119840,
+          143840,
+          167840,
+          191840,
+          215840,
+          239840
+        ],
+        "downbeat_ordinals": [
+          2,
+          6,
+          10
+        ],
+        "end_frame": 240000,
+        "first_frame": 48000,
+        "total_frames": 240000
+      },
+      "name": "public_positive_context_anchor",
+      "output": {
+        "end_frame": 240000,
+        "first_frame": 48000,
+        "first_index": 1,
+        "first_observed_ordinal": 2,
+        "fit": {
+          "intercept_denominator": 45,
+          "intercept_numerator": 2155537,
+          "period_denominator": 15,
+          "period_numerator": 359839,
+          "rounded_anchor": 47901,
+          "tempo_millibpm": 120054
+        },
+        "format": "libapta-context-anchor-projection-1",
+        "meter": {
+          "denominator": 4,
+          "downbeat_fraction_q32": 3519430444,
+          "downbeat_frame": 143857,
+          "downbeat_ordinal": 6,
+          "kind": "estimated",
+          "numerator": 4,
+          "witness_ordinals": [
+            2,
+            6,
+            10
+          ]
+        },
+        "meter_status": "OWNED",
+        "model": {
+          "anchor_frame": 47901,
+          "anchor_ordinal": 2,
+          "confidence": 0,
+          "period_q32": 103032850321355,
+          "tempo_millibpm": 120054
+        },
+        "observed_count": 9,
+        "point_count": 8,
+        "points": [
+          {
+            "ordinal": 3,
+            "position_q32": 308766078767051
+          },
+          {
+            "ordinal": 4,
+            "position_q32": 411798929088406
+          },
+          {
+            "ordinal": 5,
+            "position_q32": 514831779409761
+          },
+          {
+            "ordinal": 6,
+            "position_q32": 617864629731116
+          },
+          {
+            "ordinal": 7,
+            "position_q32": 720897480052471
+          },
+          {
+            "ordinal": 8,
+            "position_q32": 823930330373826
+          },
+          {
+            "ordinal": 9,
+            "position_q32": 926963180695181
+          },
+          {
+            "ordinal": 10,
+            "position_q32": 1029996031016536
+          }
+        ],
+        "registration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "source_beat_count": 11,
+        "status": "ACCEPTED",
+        "total_frames": 240000
+      }
+    },
+    {
+      "input": {
+        "beat_frames": [
+          1,
+          23840,
+          47840,
+          71840,
+          95840,
+          119840,
+          143840,
+          167840,
+          191840
+        ],
+        "downbeat_ordinals": [
+          0,
+          4,
+          8
+        ],
+        "end_frame": 192000,
+        "first_frame": 0,
+        "total_frames": 192000
+      },
+      "name": "public_source_negative_anchor",
+      "output": {
+        "end_frame": 192000,
+        "first_frame": 0,
+        "first_index": null,
+        "first_observed_ordinal": 0,
+        "fit": {
+          "intercept_denominator": 45,
+          "intercept_numerator": -4463,
+          "period_denominator": 15,
+          "period_numerator": 359839,
+          "rounded_anchor": -99,
+          "tempo_millibpm": 120054
+        },
+        "format": "libapta-context-anchor-projection-1",
+        "meter": null,
+        "meter_status": "NOT_EVALUATED",
+        "model": null,
+        "observed_count": 9,
+        "point_count": 0,
+        "points": [],
+        "registration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "source_beat_count": 9,
+        "status": "SOURCE_ANCHOR_OUT_OF_DOMAIN",
+        "total_frames": 192000
+      }
+    },
+    {
+      "input": {
+        "beat_frames": [],
+        "downbeat_ordinals": [],
+        "end_frame": 1000,
+        "first_frame": 0,
+        "total_frames": 1000
+      },
+      "name": "empty_window_abstains",
+      "output": {
+        "end_frame": 1000,
+        "first_frame": 0,
+        "first_index": null,
+        "first_observed_ordinal": null,
+        "fit": null,
+        "format": "libapta-context-anchor-projection-1",
+        "meter": null,
+        "meter_status": "NOT_EVALUATED",
+        "model": null,
+        "observed_count": 0,
+        "point_count": 0,
+        "points": [],
+        "registration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "source_beat_count": 0,
+        "status": "INSUFFICIENT_EVENTS",
+        "total_frames": 1000
+      }
+    },
+    {
+      "input": {
+        "beat_frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "downbeat_ordinals": [],
+        "end_frame": 100,
+        "first_frame": 0,
+        "total_frames": 100
+      },
+      "name": "unsupported_tempo_no_repair",
+      "output": {
+        "end_frame": 100,
+        "first_frame": 0,
+        "first_index": null,
+        "first_observed_ordinal": 0,
+        "fit": {
+          "intercept_denominator": 1,
+          "intercept_numerator": 0,
+          "period_denominator": 1,
+          "period_numerator": 1,
+          "rounded_anchor": 0,
+          "tempo_millibpm": 2880000000
+        },
+        "format": "libapta-context-anchor-projection-1",
+        "meter": null,
+        "meter_status": "NOT_EVALUATED",
+        "model": null,
+        "observed_count": 4,
+        "point_count": 0,
+        "points": [],
+        "registration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "source_beat_count": 4,
+        "status": "UNSUPPORTED_TEMPO",
+        "total_frames": 100
+      }
+    }
+  ],
+  "scope": "PUBLIC_ARITHMETIC_ONLY_NO_R5_CASE",
+  "scorer_called": false
+}

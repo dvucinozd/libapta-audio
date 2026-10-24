@@ -250,17 +250,31 @@ Independent closeout validates211 actual records and203 resource records, with
 the original caps and exact runtime preserved. The [aggregate evidence](COUPLED-TIME-METADATA-C3-20261024.json)
 records actual resources and identities. Scientific REJECTED at14/16 remains
 unchanged; this is metadata qualification, not musical acceptance.
-**Next: P0, review the native/APTA projection/ownership contract and register one
-separate scientific axis before implementation or measurement.**
+P0 now completes the [projection/consumer review and generated registration](CONTEXT-ANCHOR-PROJECTION-PROTOCOL.md).
+The [machine contract](CONTEXT-ANCHOR-PROJECTION-PROTOCOL.json),
+[record schema](CONTEXT-ANCHOR-PROJECTION-SCHEMA.json) and
+[P0 receipt](CONTEXT-ANCHOR-PROJECTION-P0-20261024.json) select the projection axis,
+keeping coupled candidates and old scorers fixed. Generic APTA and native
+`GridSegment::beat_at` support a source-valid context anchor before applicability;
+the frozen Python projector/history producer have stricter in-window contracts.
+The new hypothesis preserves the mathematical origin, filters exact owned Q32
+points, advances model ordinals and binds meter to an owned point from the same
+raw bar witness. It does not join independent windows into product-ready coverage.
+Nine registration tests and five existing native-coordinate Rust controls pass.
+The fetched Ruzina consumer snapshot and unchanged libapta pin are explicitly
+bound; consumer/provider/pin/checkout and all37 C3 code components are preserved.
+**Next: P1, implement the separately registered pure generated projector and
+independent rational/enumeration oracle. No corpus scoring or real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2 handoffs are also historical; C3 owns the current P0 handoff. Full generated
-100/600 execution and parity pass, and the metadata preflight is published.
+C1/C2/C3 handoffs are historical; P0 owns the current P1 handoff. Full generated
+C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
-checks; projection stays UNDECIDED and real-runtime metadata NOT_AUDITED.
+checks. The generated projection axis is now registered by P0; a real-scope
+projection decision remains unregistered and real-runtime metadata NOT_AUDITED.
 Neither C0 nor C1 permits a threshold change, attempt replay or real run. Preserve the historical real runtime
 freeze; this generated compatibility result does not requalify it.
 The [registered R5 saved-generated audit preparation](COUPLED-TIME-R5-AUDIT-PREP-20261024.md)

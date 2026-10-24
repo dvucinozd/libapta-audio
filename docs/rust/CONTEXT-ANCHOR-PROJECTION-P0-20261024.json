@@ -1,0 +1,105 @@
+{
+  "authority_sha256": {
+    "CONTEXT-ANCHOR-PROJECTION-PROTOCOL.json": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+    "CONTEXT-ANCHOR-PROJECTION-PROTOCOL.md": "6f939c134d8e62c967b9cf379e8afb62069398ab86ed8bf7ac59b05d4311cc63",
+    "CONTEXT-ANCHOR-PROJECTION-REGISTRATION-EXAMPLES.json": "7741409db50ad9cfa8c1fdeb699275a6382c1f966053aadc0ebf65a040c20e42",
+    "CONTEXT-ANCHOR-PROJECTION-SCHEMA.json": "0198446fad36ebab86be61cff4c846d5f8000409b5e55355df72df7e7d2f1796"
+  },
+  "candidate_axis_changed": false,
+  "confidence_qualified": false,
+  "consumer_checkout_revision_preserved": "0f2fb1425ef76f2541a8c76841cfa52178dca589",
+  "consumer_snapshot": {
+    "crate": "ruzina-apta-adapter",
+    "current_consumer_built": false,
+    "files": {
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": {
+        "git_blob": "0f7beaf2537597c30550417a64286c1ecc435de3",
+        "sha256": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": {
+        "git_blob": "bec3ac86af0f59bee42c5bdbf96c07712ec0bed9",
+        "sha256": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/README.md": {
+        "git_blob": "c8dcb8ef3a239160c04107000cd9e67b182e2dba",
+        "sha256": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": {
+        "git_blob": "0e057c5acb9b843497b6befa1b149c970c50c7eb",
+        "sha256": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36"
+      }
+    },
+    "hardware_qualified": false,
+    "libapta_pin": "25d09de364e9507532c0508c838a8fecf0772d13",
+    "provider_pin_or_checkout_modified": false,
+    "repository": "https://github.com/dvucinozd/Ruzina.git",
+    "revision": "df7f8f4aea3852cafb660ea67dae26f1610287ec",
+    "source": "fetched origin/main; checkout not updated"
+  },
+  "current_c3_components_preserved": 37,
+  "date": "2026-10-24",
+  "decision": "CONTEXT_ANCHOR_OWNED_LATTICE_PROJECTION_ONLY",
+  "formal_acceptance": false,
+  "format": "libapta-context-anchor-projection-p0-registration-1",
+  "immutable_scientific_components_preserved": 13,
+  "independence": "UNRESOLVED",
+  "legacy_gate_count": 16,
+  "legacy_gate_pass_count": 14,
+  "legacy_scientific_verdict": "REJECTED",
+  "model_inference_or_training": false,
+  "native_activation": false,
+  "native_coordinate_controls": {
+    "cargo": "1.95.0",
+    "command": "cargo test --manifest-path rust/Cargo.toml --locked --offline --test native_coordinates",
+    "current_consumer_built": false,
+    "environment": "WSL Ubuntu; offline locked Cargo",
+    "failures": 0,
+    "ignored": 0,
+    "lock_sha256": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4",
+    "passed": 5,
+    "physical_p4": false,
+    "rustc": "1.95.0",
+    "source_sha256": "dc1d9c7de4c4a713a6e18c2dde9f9cd2f39d7c07350c12a721c7ec6af50abd43",
+    "tests": 5,
+    "windows_cargo_available": false
+  },
+  "new_candidates": 0,
+  "new_musical_acceptance_thresholds_registered": false,
+  "new_projector_implemented": false,
+  "new_scoring_calls": 0,
+  "next": "P1_PURE_GENERATED_PROJECTOR_AND_INDEPENDENT_ORACLE",
+  "old_c3_preflight_sha256": "bf07578d05320b7ead4ce094fbab7f8e559057f5a15099884141af6a651af173",
+  "old_r4_components_preserved": 25,
+  "physical_p4": false,
+  "production_projector_or_scorer_called": false,
+  "real_authorization_created": false,
+  "real_runtime_audit": "NOT_AUDITED",
+  "real_scope_projection_decision_registered": false,
+  "registration_checks": {
+    "candidate_or_scoring_execution": false,
+    "document_bindings_verified": 14,
+    "errors": 0,
+    "failures": 0,
+    "frozen_c3_components_verified": 37,
+    "implementation_files_present": 0,
+    "jsonschema": "4.10.3",
+    "lattice_only_examples": 6,
+    "public_project_window_examples": 5,
+    "python": "3.12.3",
+    "real_private_inputs_read": false,
+    "registration_sha256": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+    "registration_test_sha256": "b872a25fa596cc3fc5911aecc315fb82b273da181be7f4a809676cd6f9544bfb",
+    "reviewed_sources_verified": 17,
+    "skips": 0,
+    "source_baseline_revision": "9d5e2ea1e4342dd29abb412dc1049ed0c74dcf45",
+    "status": "P0_REGISTRATION_CHECKS_PASS",
+    "test_log_sha256": "97eae81cd6d2f471c771fc2fd1222e8e31bdb9fbc1997dadbce512152a70f0db",
+    "tests": 9,
+    "wall_seconds": 0.7679275940000005
+  },
+  "registration_sha256": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+  "release": false,
+  "saved_case_coordinates_or_labels_opened": false,
+  "source_revision": "9d5e2ea1e4342dd29abb412dc1049ed0c74dcf45",
+  "status": "P0_REVIEW_AND_GENERATED_REGISTRATION_COMPLETE"
+}

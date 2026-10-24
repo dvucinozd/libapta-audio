@@ -1,0 +1,540 @@
+{
+  "$defs": {
+    "fit": {
+      "additionalProperties": false,
+      "properties": {
+        "intercept_denominator": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "intercept_numerator": {
+          "type": "integer"
+        },
+        "period_denominator": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "period_numerator": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "rounded_anchor": {
+          "type": "integer"
+        },
+        "tempo_millibpm": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "intercept_numerator",
+        "intercept_denominator",
+        "period_numerator",
+        "period_denominator",
+        "rounded_anchor",
+        "tempo_millibpm"
+      ],
+      "type": "object"
+    },
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "beat_frames": {
+          "items": {
+            "maximum": 1439999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxItems": 3072,
+          "minItems": 0,
+          "type": "array"
+        },
+        "downbeat_ordinals": {
+          "items": {
+            "maximum": 3071,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxItems": 3072,
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "end_frame": {
+          "maximum": 1440000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "first_frame": {
+          "maximum": 1439999,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "total_frames": {
+          "maximum": 1440000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "beat_frames",
+        "downbeat_ordinals",
+        "total_frames",
+        "first_frame",
+        "end_frame"
+      ],
+      "type": "object"
+    },
+    "meter": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "const": 4,
+          "type": "integer"
+        },
+        "downbeat_fraction_q32": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "downbeat_frame": {
+          "maximum": 1439999,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "downbeat_ordinal": {
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "estimated",
+          "type": "string"
+        },
+        "numerator": {
+          "enum": [
+            3,
+            4
+          ],
+          "type": "integer"
+        },
+        "witness_ordinals": {
+          "items": {
+            "maximum": 3071,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "kind",
+        "numerator",
+        "denominator",
+        "downbeat_frame",
+        "downbeat_fraction_q32",
+        "downbeat_ordinal",
+        "witness_ordinals"
+      ],
+      "type": "object"
+    },
+    "model": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor_frame": {
+          "maximum": 1439999,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "anchor_ordinal": {
+          "maximum": 3071,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "confidence": {
+          "const": 0,
+          "type": "integer"
+        },
+        "period_q32": {
+          "maximum": 309237645312000,
+          "minimum": 41231686041600,
+          "type": "integer"
+        },
+        "tempo_millibpm": {
+          "maximum": 300000,
+          "minimum": 40000,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "anchor_frame",
+        "anchor_ordinal",
+        "tempo_millibpm",
+        "period_q32",
+        "confidence"
+      ],
+      "type": "object"
+    },
+    "output": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "first_index": {
+              "type": "null"
+            },
+            "fit": {
+              "type": "null"
+            },
+            "meter": {
+              "type": "null"
+            },
+            "meter_status": {
+              "const": "NOT_EVALUATED",
+              "type": "string"
+            },
+            "model": {
+              "type": "null"
+            },
+            "observed_count": {
+              "maximum": 3,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "point_count": {
+              "const": 0,
+              "type": "integer"
+            },
+            "points": {
+              "maxItems": 0
+            },
+            "status": {
+              "const": "INSUFFICIENT_EVENTS",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "first_index": {
+              "type": "null"
+            },
+            "fit": {
+              "$ref": "#/$defs/fit"
+            },
+            "meter": {
+              "type": "null"
+            },
+            "meter_status": {
+              "const": "NOT_EVALUATED",
+              "type": "string"
+            },
+            "model": {
+              "type": "null"
+            },
+            "observed_count": {
+              "maximum": 3072,
+              "minimum": 4,
+              "type": "integer"
+            },
+            "point_count": {
+              "const": 0,
+              "type": "integer"
+            },
+            "points": {
+              "maxItems": 0
+            },
+            "status": {
+              "const": "UNSUPPORTED_TEMPO",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "first_index": {
+              "type": "null"
+            },
+            "fit": {
+              "$ref": "#/$defs/fit"
+            },
+            "meter": {
+              "type": "null"
+            },
+            "meter_status": {
+              "const": "NOT_EVALUATED",
+              "type": "string"
+            },
+            "model": {
+              "type": "null"
+            },
+            "observed_count": {
+              "maximum": 3072,
+              "minimum": 4,
+              "type": "integer"
+            },
+            "point_count": {
+              "const": 0,
+              "type": "integer"
+            },
+            "points": {
+              "maxItems": 0
+            },
+            "status": {
+              "const": "SOURCE_ANCHOR_OUT_OF_DOMAIN",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "first_index": {
+              "type": "null"
+            },
+            "fit": {
+              "$ref": "#/$defs/fit"
+            },
+            "meter": {
+              "type": "null"
+            },
+            "meter_status": {
+              "const": "NOT_EVALUATED",
+              "type": "string"
+            },
+            "model": {
+              "$ref": "#/$defs/model"
+            },
+            "observed_count": {
+              "maximum": 3072,
+              "minimum": 4,
+              "type": "integer"
+            },
+            "point_count": {
+              "const": 0,
+              "type": "integer"
+            },
+            "points": {
+              "maxItems": 0
+            },
+            "status": {
+              "const": "NO_OWNED_POINTS",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "first_index": {
+              "maximum": 3072,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "fit": {
+              "$ref": "#/$defs/fit"
+            },
+            "meter_status": {
+              "enum": [
+                "NO_ELIGIBLE_BARS",
+                "NO_OWNED_WITNESS",
+                "OWNED"
+              ]
+            },
+            "model": {
+              "$ref": "#/$defs/model"
+            },
+            "observed_count": {
+              "maximum": 3072,
+              "minimum": 4,
+              "type": "integer"
+            },
+            "point_count": {
+              "maximum": 3072,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "points": {
+              "minItems": 1
+            },
+            "status": {
+              "const": "ACCEPTED",
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "end_frame": {
+          "maximum": 1440000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "first_frame": {
+          "maximum": 1439999,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "first_index": {
+          "anyOf": [
+            {
+              "maximum": 3072,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_observed_ordinal": {
+          "anyOf": [
+            {
+              "maximum": 3071,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/fit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "const": "libapta-context-anchor-projection-1",
+          "type": "string"
+        },
+        "meter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/meter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "meter_status": {
+          "enum": [
+            "NOT_EVALUATED",
+            "NO_ELIGIBLE_BARS",
+            "NO_OWNED_WITNESS",
+            "OWNED"
+          ],
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/model"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_count": {
+          "maximum": 3072,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "point_count": {
+          "maximum": 3072,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/point"
+          },
+          "maxItems": 3072,
+          "minItems": 0,
+          "type": "array"
+        },
+        "registration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_beat_count": {
+          "maximum": 3072,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "INSUFFICIENT_EVENTS",
+            "UNSUPPORTED_TEMPO",
+            "SOURCE_ANCHOR_OUT_OF_DOMAIN",
+            "NO_OWNED_POINTS",
+            "ACCEPTED"
+          ],
+          "type": "string"
+        },
+        "total_frames": {
+          "maximum": 1440000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "registration_sha256",
+        "total_frames",
+        "first_frame",
+        "end_frame",
+        "source_beat_count",
+        "first_observed_ordinal",
+        "observed_count",
+        "status",
+        "fit",
+        "model",
+        "first_index",
+        "point_count",
+        "points",
+        "meter",
+        "meter_status"
+      ],
+      "type": "object"
+    },
+    "point": {
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "position_q32": {
+          "maximum": 6184752906239999,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "position_q32",
+        "ordinal"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "P0 record shape only; exact types, fit, ownership, sums and identity require semantic validation.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/input"
+    },
+    {
+      "$ref": "#/$defs/output"
+    }
+  ]
+}
