@@ -184,10 +184,30 @@ host replacement, snapshot tampering, runtime mutation, canonical scoring and
 resource/isolation checks pass. All994 prior R4 artifacts remain unchanged.
 The generated-only driver requires this exact snapshot and actual RO mounts;
 security updates remain enabled and all13 scientific components stay frozen.
-**Next: after committing/pushing this prepared checkpoint, run a distinct new
-100-source/600-window generated R4 campaign through the frozen-runtime launcher.**
-Keep the original caps and Windows-source/Linux-observation/output topology.
-No new full R4, preflight token or real authorization is created at this checkpoint.
+The [distinct frozen-runtime R4 campaign](COUPLED-TIME-RUNNER-V2-R4-FROZEN-20261024.md)
+now qualifies **GENERATED_OPERATIONAL_PREFLIGHT_PASS** on clean pushed source
+`99e0ca3f308a4c9555c5e357918f4b038f70e200`. All100 sources/600 windows complete
+construct, independent verify and canonical evaluate in separate supervised
+processes; the phases take833.559/830.242/136.599s, with maximum process RSS/HWM
+115924KiB and12039827bytes of recorded operational output. All original source/
+phase/RSS/output limits pass. The [aggregate evidence](COUPLED-TIME-RUNNER-V2-R4-FROZEN-20261024.json)
+and [new v2 preflight token](COUPLED-TIME-RUNNER-V2-PREFLIGHT.json) bind25 code/test
+components, exact1046-file repair archive, read-only runtime and unchanged
+Windows-source/Linux-observation/output topology. All15 operational gates pass,
+with74 retained preparation tests and210 independently validated emitted records.
+The generated scientific verdict is REJECTED (14/16 gates), with one paired OLS
+meter regression and one downbeat regression; no threshold was retuned. The saved
+cases need read-only diagnosis before a new scientific scope. Static inspection
+also confirms a support-counter blocker: score_points emits only complete-context
+counts, while the real evaluator requires an absent incomplete counter to equal199.
+The generated clone's missing-key default0 is not evidence of zero unsupported
+windows:400/600 contexts are complete and200 are not. No scorer/protocol is changed.
+All994 prior generated failure artifacts remain unchanged. No real authorization
+is created; production settings still reject dispatch without that separate scope.
+**Next: R5 preliminary audit of the saved generated regressions, the support-counter
+interface mismatch and historical runtime identities. Decide the required separate
+registration/qualification checkpoint before any real authorization or measurement.** Preserve the historical real runtime
+freeze; this generated compatibility result does not requalify it.
 Preserve both failed attempts; do not resume them, score their subsets, raise
 caps, retune or repair/replay within them. CT-05 stays closed. Any later real
 attempt needs a separate registered scope, matching preflight and explicit
