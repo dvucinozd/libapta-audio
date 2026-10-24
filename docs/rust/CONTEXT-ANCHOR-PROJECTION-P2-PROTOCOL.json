@@ -1,0 +1,40 @@
+{
+  "binding_sha256": {
+    "Cargo.lock": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-P1-20261024.json": "5c810db6d4f72d226a5873c58a5d3292740edf3809a9faa3785d1317cb3955bc",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-P2-PROTOCOL.md": "45a7eb0a07fd1c46cc6014692d5c839bd8eded06fb10904888ae4b0870aada73",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-PROTOCOL.json": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+    "rust/src/builder.rs": "8d9e2de10782136417cd1c6b4065bd6165836a82f901fb6303e6c55d4377a04e",
+    "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+    "rust/src/result.rs": "3ccff847fb1c15be90b4a03b22f1763979365d1e31267751901f40685124935a",
+    "src/core/apta_grid_match_internal.h": "fe6d35c798d8bdf7e4940818eb8c0ef0424337d7a9d0ba5eb34f710a50055914",
+    "src/core/apta_result_builder_validation.c": "3be9d14b32f7b153aa4788c5b3db8b3c09abb3b06950ffd9beb148a02b652485",
+    "tests/unit/apta_1_1_context_projection.py": "ab90b64c2861707c8fdeb363dff2f5230ee06c168fd441fb0246d17673228ec9",
+    "tests/unit/apta_context_projection_oracle.py": "a9a807bbcc71943c9f5ede89debfd51ab0d39908cdc4152af0cf0c77ac9bc593",
+    "tools/apta_context_projection.py": "637fa7ea839528d5b0ab1471bace2aa656f74f6fb5ecbe783f8c1312d99048fb"
+  },
+  "compile_limits": {
+    "build_bytes": 536870912,
+    "build_seconds": 600,
+    "process_rss_kib": 1048576
+  },
+  "consumer_snapshot": "df7f8f4aea3852cafb660ea67dae26f1610287ec",
+  "corpus_or_saved_outputs_allowed": false,
+  "date": "2026-10-24",
+  "format": "libapta-context-projection-p2-protocol-1",
+  "native_activation": false,
+  "next": "P3_MATCHED_PROJECTION_EVALUATION_REGISTRATION",
+  "physical_p4": false,
+  "production_changes_allowed": false,
+  "real_authorization_created": false,
+  "release": false,
+  "runtime_limits": {
+    "evidence_bytes": 67108864,
+    "probe_seconds": 60,
+    "process_rss_kib": 262144,
+    "suite_seconds": 1800
+  },
+  "scope": "GENERATED_NATIVE_WIRE_AND_CONSUMER_SOURCE_POLICY_ONLY",
+  "source_baseline_revision": "185b1a2357da1ca978f79a746f9ef8d3bde35893"
+}

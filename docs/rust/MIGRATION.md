@@ -273,13 +273,25 @@ Maximum observed process RSS is32540 KiB; supervised P1 wall time is2.030268s.
 All14 document bindings,17 reviewed sources and37 C3 components remain unchanged.
 No source events/scorers/constructor/native producer/consumer are modified;
 independent window models establish no continuous product coverage.
-**Next: P2, prepare generated C/Rust generic-builder/GGRD/MTRD interoperability
-and consumer-policy probes. No corpus scoring, real replay or native activation.**
+P2 now passes the [generated native/wire and consumer-policy probes](CONTEXT-ANCHOR-PROJECTION-P2-20261024.md)
+under its [separate registration](CONTEXT-ANCHOR-PROJECTION-P2-PROTOCOL.json).
+The [P2 receipt](CONTEXT-ANCHOR-PROJECTION-P2-20261024.json) records28 passing
+selected tests,84 C/Rust constructions,168 reader roundtrips,42 byte-identical
+GGRD/REVN/MTRD comparisons and20 expected negative builder rejections. All46
+source-exact consumer policy checks pass, preserving destination banks on
+rejection/fallback. The consumer's partial/hybrid rejection remains explicit;
+generic native representability is not product adoption. Final native suite
+time is4.953909s and observed process RSS28612 KiB; compilation has separate caps.
+Preparation failures and repairs are preserved in the receipt. Production code,
+P1 projection/oracle, old evidence and actual consumer checkout/provider/pin
+remain unchanged. No current firmware/pinned-library/P4 qualification is implied.
+**Next: P3, register matched projection evaluation with explicit support and
+shared-intersection denominators before execution. No corpus scoring or real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0 handoffs are historical; P1 owns the current P2 handoff. Full generated
+C1/C2/C3 and P0/P1 handoffs are historical; P2 owns the current P3 handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
