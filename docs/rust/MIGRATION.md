@@ -230,14 +230,28 @@ read-only runtime. Small generated canonical scores preserve all old values and
 gates after the six registered additions. New runtime checks validate actual
 proof/payload/detail hashes and reject mixed records, nonconserving counts and
 role/support leaks. All25 old R4 files and13 immutable dependencies remain unchanged.
-**Next: C2 generated process/parity/integrity preparation under the new metadata
-registration; then a clean-source fresh full C3 preflight.** The
+The [C2 preparation](COUPLED-TIME-METADATA-C2-20261024.md) now adds the separate
+canonical bootstrap, generated driver, fixed runtime launcher and exact metadata
+comparison utility. Its [receipt](COUPLED-TIME-METADATA-C2-20261024.json) binds all37
+current components and117 passing supervised numerical, contract, process and
+preparation tests (zero failures/errors/skips). Actual small generated process
+tests cover withheld/permuted labels,
+selected1/10/100 access, global checks, mixed/corrupt records, proof/hash linkage,
+resource failures and descendant/orphan rejection. Saved controls preserve all600
+old diagnostics after six-leaf extension/removal and verify100 baseline candidate
+hashes; measured coverage is400/200. No saved labels are read or old scores rerun.
+**Next: C3, one clean-source fresh full generated100-source/600-window campaign
+under the metadata registration.** Require actual100 candidate-byte parity,
+all600 new diagnostic records equal, explicit400/200 support and the same14/16
+REJECTED verdict. The C2 comparison controls do not qualify that future full run.
+The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1 checkpoint owns the current C2 handoff. Full process isolation, all600 saved
-record parity and the complete100-source attempt are not yet checked for the new
-runner. Metadata preflight and real authorization remain absent. Real dispatch
+C1 checkpoint is also historical; C2 owns the current C3 handoff. Actual small
+process isolation and all600 saved extension controls pass; full new100/600
+execution/parity remains unrun. Metadata preflight and real authorization remain
+absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
 checks; projection stays UNDECIDED and real-runtime metadata NOT_AUDITED.
 Neither C0 nor C1 permits a threshold change, attempt replay or real run. Preserve the historical real runtime
