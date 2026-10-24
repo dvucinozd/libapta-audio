@@ -164,7 +164,9 @@ def main():
          "PreflightTests.test_archive_regular_bytes_and_unsafe_members",
          "PreflightTests.test_storage_and_real_tracked_inventory",
          "PreflightTests.test_cli_has_no_private_input_or_limit_options",
-         "PreflightTests.test_existing_campaign_directory_is_preserved", "-v"], env=history_env)
+         "PreflightTests.test_existing_campaign_directory_is_preserved",
+         "PreflightTests.test_full_campaign_requires_explicit_frozen_runtime", "-v"], env=history_env)
+    run([sys.executable, "tests/unit/apta_1_1_coupled_time_v2_runtime.py", "-v"], env=history_env)
     run(["cargo", "build", "-p", "libapta-runtime", "--release", "--features", "temporal-trace-diagnostics",
          "--bin", "apta-history-diagnostic", "--locked"], env=env)
     history_env.pop("APTA_DENSE_UNSUPPORTED_DIAGNOSTIC")

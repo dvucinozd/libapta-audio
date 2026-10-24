@@ -100,6 +100,11 @@ class PreflightTests(unittest.TestCase):
             self.driver.run(output, self.root / 'source')
         self.assertEqual(marker.read_bytes(), b'preserved')
 
+    def test_full_campaign_requires_explicit_frozen_runtime(self):
+        with self.assertRaisesRegex(ValueError, 'explicit frozen runtime snapshot'):
+            self.driver.run(self.root / 'output', self.root / 'source')
+        self.assertFalse((self.root / 'output').exists())
+
     def test_small_canonical_summary_processes_with_withheld_labels(self):
         source = self.root / 'source'
         source.mkdir()

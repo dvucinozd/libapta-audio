@@ -152,7 +152,8 @@ def component_bindings():
     names = set(op['immutable_component_sha256']) | set(op['future_preflight_components'])
     names |= {'tests/unit/apta_1_1_coupled_time_runner.py', 'tests/unit/apta_1_1_dense_decoder_runner.py',
               'tests/unit/apta_1_1_coupled_time.py', 'tests/unit/apta_1_1_coupled_time_verify.py',
-              'tests/unit/apta_1_1_coupled_time_v2_preflight.py'}
+              'tests/unit/apta_1_1_coupled_time_v2_preflight.py',
+              'tests/unit/apta_coupled_time_v2_runtime.py', 'tests/unit/apta_1_1_coupled_time_v2_runtime.py'}
     values = {name: io.sha(ROOT / name) for name in sorted(names)}
     if any(values[name] != digest for name, digest in op['immutable_component_sha256'].items()):
         raise ValueError('immutable scientific component changed')
@@ -265,7 +266,7 @@ def generate_fixture(base, source_root, count=100):
     return cfg, inputs, inventory, labels
 
 
-def run(output, source_fixture):
+def run(output, source_fixture, runtime_snapshot=None):
     output, source_fixture = runner.safe_path(output), runner.safe_path(source_fixture)
     io.external(output, ROOT)
     io.external(source_fixture, ROOT)
@@ -273,17 +274,29 @@ def run(output, source_fixture):
         raise ValueError('fixture/output encloses real source')
     if output.exists() or source_fixture.exists():
         raise ValueError('new exclusive destinations required')
+    if runtime_snapshot is None:
+        raise ValueError('explicit frozen runtime snapshot required')
+    runtime_started = time.monotonic()
+    import apta_coupled_time_v2_runtime as frozen
+    runtime_snapshot = runner.safe_path(runtime_snapshot)
+    # A host caller cannot spoof readiness: copied bytes, RO mounts, loaded-file
+    # inventory and canonical metric versions all have to agree inside namespace.
+    frozen.verify(runtime_snapshot)
+    frozen_probe = frozen.probe(runtime_snapshot)
+    runtime_validation_seconds = time.monotonic() - runtime_started
     storage = {'source': filesystem_class(source_fixture), 'observations': filesystem_class(output), 'output': filesystem_class(output)}
     if storage != {'source': 'windows-mounted', 'observations': 'linux', 'output': 'linux'}:
         raise ValueError('registered storage topology required')
     revision = git(ROOT, 'rev-parse', 'HEAD')
     if git(ROOT, 'status', '--porcelain') or git(ROOT, 'ls-remote', 'origin', 'refs/heads/rust-rewrite').split()[0] != revision:
         raise ValueError('clean pushed repair revision required')
-    prep_path = ROOT / 'docs/rust/COUPLED-TIME-RUNNER-V2-R4-PREP-20261024.json'
+    prep_path = ROOT / 'docs/rust/COUPLED-TIME-RUNNER-V2-RUNTIME-PREP-20261024.json'
     preparation = json.loads(prep_path.read_text())
     op, components = component_bindings()
     if preparation['status'] != 'GENERATED_DRIVER_CHECKS_PASS' or preparation['component_sha256'] != components:
         raise ValueError('stale/missing generated driver preparation')
+    if preparation['runtime_snapshot_sha256'] != frozen_probe['snapshot_sha256']:
+        raise ValueError('runtime snapshot differs from prepared checkpoint')
     expected_runtime = json.loads((ROOT / 'docs/rust/COUPLED-TIME-RUNNER-V2-R3-20261024.json').read_text())['runtime']
     packages = {name: importlib.metadata.version(name) for name in ('numpy', 'scipy', 'mir_eval')}
     if (sys.version.split()[0] != expected_runtime['python'] or packages != expected_runtime['packages']
@@ -293,6 +306,7 @@ def run(output, source_fixture):
     phases = {}
     started = time.monotonic()
     try:
+        io.write_new(output / 'frozen-runtime.json', frozen_probe)
         archive = archive_source(ROOT, source_fixture)
         cfg, inputs, inventory, labels = generate_fixture(output / 'generated', source_fixture)
         if len(json.loads(inputs.read_text())['sources']) != 100:
@@ -326,6 +340,9 @@ def run(output, source_fixture):
             if io.sha(ROOT / name) != digest:
                 raise ValueError('component changed during R4')
         io.check_source(ROOT, revision)
+        runtime_final_started = time.monotonic()
+        frozen.verify(runtime_snapshot)
+        runtime_final_validation_seconds = time.monotonic() - runtime_final_started
         if git(ROOT, 'ls-remote', 'origin', 'refs/heads/rust-rewrite').split()[0] != revision:
             raise ValueError('remote revision changed')
         scientific = json.loads((attempt / 'evaluate.completion.json').read_text())
@@ -356,6 +373,10 @@ def run(output, source_fixture):
                   'runtime': {'python': sys.version.split()[0], 'packages': packages,
                               'interpreter_sha256': io.sha(Path(sys.executable).resolve())},
                   'preparation_receipt_sha256': io.sha(prep_path), 'attempt_bytes': io.tree_bytes((attempt,))}
+        result['runtime_snapshot_sha256'] = frozen_probe['snapshot_sha256']
+        result['frozen_runtime_probe_sha256'] = io.sha(output / 'frozen-runtime.json')
+        result['runtime_validation_seconds'] = runtime_validation_seconds
+        result['runtime_final_validation_seconds'] = runtime_final_validation_seconds
         result['artifact_sha256'] = {path.name: io.sha(path) for path in attempt.glob('*.json')}
         evidence_files = [path for path in output.iterdir() if path.is_file()]
         result['driver_evidence_bytes_before_result'] = sum(path.stat().st_size for path in evidence_files)
@@ -376,8 +397,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--source-fixture', type=Path, required=True)
+    parser.add_argument('--runtime-snapshot', type=Path)
     args = parser.parse_args()
-    run(args.output, args.source_fixture)
+    run(args.output, args.source_fixture, args.runtime_snapshot)
 
 
 if __name__ == '__main__':

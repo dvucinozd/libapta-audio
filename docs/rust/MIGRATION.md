@@ -176,13 +176,23 @@ measurement. The phase stopped after622.951s, with20788KiB maximum observed RSS;
 no cap was exceeded and no numerical failure was reported. Verify/evaluate are
 NOT_RUN; generated labels remain withheld and no subset was scored. All13 immutable
 scientific components and the prepared23-component identities remain unchanged.
-**Next: prepare a separate stable-runtime checkpoint, requalify its complete
-runtime closure with generated checks, and commit/push before any new generated
-campaign.** Preserve this failed attempt; no automatic retry, weaker binding or
-cap increase. No v2 preflight or real authorization is created. CT-05 stays closed.
-Preserve all partials and the timeout; do not retry, score the subset, raise caps,
-retune or repair/replay within this attempt. Any later real attempt needs a new
-registered scope and matching preflight after its separate repair checkpoint.
+The [runtime stabilization checkpoint](COUPLED-TIME-RUNNER-V2-RUNTIME-PREP-20261024.md)
+now passes74 fresh generated tests, zero failures/errors/skips. Its
+[preparation receipt](COUPLED-TIME-RUNNER-V2-RUNTIME-PREP-20261024.json) binds25
+code/test components and a copied runtime with13 read-only mounted roots. Actual
+host replacement, snapshot tampering, runtime mutation, canonical scoring and
+resource/isolation checks pass. All994 prior R4 artifacts remain unchanged.
+The generated-only driver requires this exact snapshot and actual RO mounts;
+security updates remain enabled and all13 scientific components stay frozen.
+**Next: after committing/pushing this prepared checkpoint, run a distinct new
+100-source/600-window generated R4 campaign through the frozen-runtime launcher.**
+Keep the original caps and Windows-source/Linux-observation/output topology.
+No new full R4, preflight token or real authorization is created at this checkpoint.
+Preserve both failed attempts; do not resume them, score their subsets, raise
+caps, retune or repair/replay within them. CT-05 stays closed. Any later real
+attempt needs a separate registered scope, matching preflight and explicit
+handling of historical runtime identities; generated runtime compatibility does
+not requalify the old real neural freeze.
 The numerical proposal and prior rejection remain frozen; no new inference ran.
 Independent transfer, confidence, whole-pipeline resources, native consumer,
 physical P4, fresh acceptance and release stay open. No production promotion follows.
