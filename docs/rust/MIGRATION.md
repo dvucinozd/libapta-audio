@@ -1,10 +1,10 @@
 # Native Rust migration
 
-Status: development checkpoint 2026-10-24; no release, ABI replacement, full profile,
+Status: development checkpoint 2026-10-25; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
-## Current implementation handoff — 2026-10-24
+## Current implementation handoff — 2026-10-25
 
 The user-requested [detailed implementation plan](DENSE-DECODER-IMPLEMENTATION-PLAN-20261023.md)
 and [machine-readable plan](DENSE-DECODER-PLAN-20261023.json) define DD-00 through
@@ -309,13 +309,28 @@ All405 within-arm pairs also preserve support and shared correctness.
 Supervised P4 wall time is2.131179s and observed process RSS34728 KiB.
 P3's23 bindings, all14/17/37 P0 bindings and P1/P2 components remain unchanged.
 No saved C3 cases, runtime image, full evaluator, runner or campaign is opened.
-**Next: P5, prepare the generated-only PROJECT/VERIFY/EVALUATE runner, exact
-leaf/runtime bindings and component-bound operational preflight. No real replay.**
+P5 now passes the [generated runner and operational preflight](CONTEXT-ANCHOR-MATCHED-EVALUATION-P5-20261025.md).
+The [component-bound preflight](CONTEXT-ANCHOR-MATCHED-EVALUATION-P5-PREFLIGHT.json)
+and [aggregate evidence](CONTEXT-ANCHOR-MATCHED-EVALUATION-P5-20261025.json) record
+14 new +15 unchanged P4 +10 unchanged P3 tests, zero failures/errors/skips.
+Separate PROJECT/VERIFY/EVALUATE processes complete the public100/600 fixture:
+1200 projections,2400 cells,7416 ledgers and103 canonical aggregate tables.
+Phase times are6.889/8.828/19.332s; worker RSS/HWM is24040/24060/188172KiB.
+Inputs plus attempt use24255410bytes, within unchanged limits. The independent
+oracle precedes label loading; support gains cannot override shared breaks.
+The metadata-only C3 audit rehashes3716 bound files without parsing reference,
+event or score leaves. Derived runtime closure matches the unchanged C3 parent
+bytes and binds actual loaded source/runtime before/after phases. All historical
+authorities remain unchanged. This is public operational evidence only; fixed
+C3 matched comparison and real-runtime H0 remain unrun.
+**Next: P6, separately register one matched comparison on the fixed generated C3
+scope, binding runtime/preflight/components/new destination; commit/push and
+verify clean matching source before dispatch. No real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0/P1/P2/P3 handoffs are historical; P4 owns the current P5 handoff. Full generated
+C1/C2/C3 and P0/P1/P2/P3/P4 handoffs are historical; P5 owns the current P6 handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
