@@ -1,0 +1,158 @@
+{
+  "api_boundary": {
+    "all_cell_inputs_validated_before_stratum_filter": true,
+    "canonical_grid_counter_consistency_checked": true,
+    "canonical_grid_scores_recomputed_in_core": false,
+    "normalized_meter_point_binding_checked": true,
+    "raw_event_construction_or_projection_in_core": false,
+    "source_identity_and_order_bound_in_core": false,
+    "verified_projection_and_source_domain_required_from_future_runner": true
+  },
+  "apis": [
+    "meter_evidence",
+    "make_cell",
+    "make_ledger"
+  ],
+  "branch": "rust-rewrite",
+  "c_rust_matrix_rerun": false,
+  "candidate_constructions": 0,
+  "checks": {
+    "all_ledger_oracle_results_validated_by_closed_p3_schema": true,
+    "counts": {
+      "canonical_meter_comparisons": 816,
+      "cell_oracle_comparisons": 810,
+      "ledger_oracle_comparisons": 3498,
+      "meter_oracle_comparisons": 824,
+      "meter_supported": 241,
+      "meter_unsupported": 583,
+      "within_arm_no_support_loss_pairs": 405
+    },
+    "empty_shared_rates_null": true,
+    "errors": 0,
+    "failures": 0,
+    "fresh_interpreter_import_io_control": "PASS",
+    "frozen_c3_components_preserved": 37,
+    "independent_oracle_imports": [
+      "fractions",
+      "statistics"
+    ],
+    "max_matrix_pair_seconds": 0.004117906999999477,
+    "new_support_separate_from_shared_correctness": true,
+    "new_tests": 15,
+    "p0_document_bindings_preserved": 14,
+    "p2_probe_components_preserved": 4,
+    "p3_bindings_preserved": 23,
+    "production_imports": 0,
+    "public_projection_pairs": 405,
+    "raw_actual_unknown_successor_cannot_replace_nominal_cell": true,
+    "reviewed_sources_preserved": 17,
+    "skips": 0,
+    "synthetic_400_200_accounting_only": true,
+    "total_tests": 25,
+    "truth_states": 88,
+    "unchanged_p3_tests": 10
+  },
+  "component_sha256": {
+    "tests/unit/apta_1_1_context_matched.py": "583fbd3ff7347938602931059181a1691330dd9ded45836d04a6664964788266",
+    "tests/unit/apta_context_matched_oracle.py": "abe4f0698bf3ebb7506ee1edd33e291527e713c7402d1509154130810255f92c",
+    "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab"
+  },
+  "confidence_qualified": false,
+  "corpus_run": false,
+  "current_consumer_built": false,
+  "date": "2026-10-24",
+  "dispatcher_or_preflight_created": false,
+  "documentation_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-P4-20261024.md": "88548b8abcd8c6af85f3e585bbc026ea2df1521ecd23983bdef6a48164bf51de",
+    "docs/rust/MIGRATION.md": "42fb9cc9132e401f28c74be87df68cdfdf6057f0d33aca9aba5d1bdda7da96b2"
+  },
+  "environment": {
+    "jsonschema": "4.10.3",
+    "platform": "WSL Ubuntu Linux",
+    "python": "3.12.3"
+  },
+  "external_evidence": {
+    "all_generated_preparation_bytes": 29175,
+    "artifacts_sha256": {
+      "p3.resources.json": "545bbc5219ee7986378262d6e7e8be72fc25100eac5010aecef86982ae3d91df",
+      "p3.stderr": "76f7168d1fe8fa693af1c6596a58aceda5913723402c34bfbc72c13138f77a76",
+      "p3.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "p4.resources.json": "24539b38ba96772977f0966e290f7fe3b580fa8da0d1e2f5f643a7bab022d6e6",
+      "p4.stderr": "bfde2fc0e9463adb780ec1462e545faf37bba17d91ac8fb8159d0448012a6bea",
+      "p4.stdout": "1a215e073f9f478204e2ee86236d81bbc2e262e717396d41713765852eba709f",
+      "summary.json": "f3d78adf318f6539ff695ee8219d4bf3044c8cab40183bcc54128596f2b8a981",
+      "verify.py": "6cdd74940fb21e977a92068afcfa83029cdcca2fb08a5f8c47fc22cb4a376f3d"
+    },
+    "final_bytes": 9787,
+    "path": "D:/AI/LIBAPTA/outputs/context-anchor-matched-p4-20261024/checked"
+  },
+  "formal_acceptance": false,
+  "format": "libapta-context-matched-p4-generated-1",
+  "future_runner_implementation_paths_absent": [
+    "tools/apta_1_1_context_matched_evaluation.py",
+    "tools/apta_1_1_context_matched_runner.py",
+    "tests/unit/apta_1_1_context_matched_runner.py"
+  ],
+  "independence": "UNRESOLVED",
+  "limits": {
+    "attempt_bytes": 67108864,
+    "enforced_suite_seconds": 60,
+    "process_rss_kib": 262144,
+    "registered_phase_seconds": 1800,
+    "source_seconds": 60
+  },
+  "model_inference_or_training": false,
+  "native_activation": false,
+  "new_full_evaluator_or_runner_implemented": false,
+  "next": "P5_GENERATED_PROJECT_VERIFY_EVALUATE_RUNNER_AND_COMPONENT_BOUND_PREFLIGHT",
+  "old_gate_count": 16,
+  "old_gate_pass_count": 14,
+  "old_scientific_verdict": "REJECTED",
+  "p3_receipt_sha256": "49a1cc2ab3344a17509294bf3db93791be9ef15fd9813817f22531182381ede5",
+  "physical_p4": false,
+  "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+  "pure_ledger_and_meter_adapter_implemented": true,
+  "raw_event_f1_cmlt_executed": false,
+  "real_authorization_created": false,
+  "real_runtime_audit": "NOT_AUDITED",
+  "release": false,
+  "resources": {
+    "p3": {
+      "failure": null,
+      "max_observed_process_rss_kib": 29292,
+      "peak_rss_kib_by_pid": {
+        "321": 21508,
+        "377": 29292
+      },
+      "poll_seconds": 0.02,
+      "process_group_monitored": true,
+      "root_pid": 377,
+      "status": "PASS",
+      "supervisor_pid": 321,
+      "wall_seconds": 0.8455310650000003
+    },
+    "p4": {
+      "failure": null,
+      "max_observed_process_rss_kib": 34728,
+      "peak_rss_kib_by_pid": {
+        "321": 21500,
+        "375": 34728,
+        "376": 11096
+      },
+      "poll_seconds": 0.02,
+      "process_group_monitored": true,
+      "root_pid": 375,
+      "status": "PASS",
+      "supervisor_pid": 321,
+      "wall_seconds": 2.1311786590000006
+    }
+  },
+  "runtime_image_opened": false,
+  "saved_cases_or_labels_opened": false,
+  "saved_source_scoring_calls": 0,
+  "source_baseline_revision": "724db83c8d26c1799c3ec38321c33cae0047c1a1",
+  "source_state": "P3 baseline plus SHA-bound uncommitted P4 pure helpers/oracle/tests; generated inputs only",
+  "stable_version": "1.0.1",
+  "status": "P4_PUBLIC_GENERATED_HELPERS_AND_ORACLE_PASS",
+  "synthetic_canonical_meter_comparison_calls": 816
+}

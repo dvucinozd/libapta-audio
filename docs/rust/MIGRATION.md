@@ -298,13 +298,24 @@ The future scope is fixed generated100/600 with400/200 reference support;
 real401/199 is excluded, and the exact leaf/runtime closure still needs P5 binding.
 No projector/scorer, saved case, label, runtime image or campaign is executed.
 Old scientific REJECTED14/16 and P1/P2 code remain unchanged.
-**Next: P4, implement the separately registered pure matched ledger/meter adapter
-and independent oracle on public generated fixtures. No corpus scoring or real replay.**
+P4 now passes the [pure matched ledger/meter implementation](CONTEXT-ANCHOR-MATCHED-EVALUATION-P4-20261024.md)
+with its [component-bound receipt](CONTEXT-ANCHOR-MATCHED-EVALUATION-P4-20261024.json).
+All15 new +10 P3 tests pass:824 meter-oracle,810 cell-oracle,3498 ledger-oracle
+comparisons and816 unchanged canonical-meter comparisons on public generated
+inputs. The helper imports nothing and validates ownership, support/correctness
+partitions, null denominators and source/group/cohort bounds. Raw actual
+unknown-successor masks remain separate from nominal projection cells.
+All405 within-arm pairs also preserve support and shared correctness.
+Supervised P4 wall time is2.131179s and observed process RSS34728 KiB.
+P3's23 bindings, all14/17/37 P0 bindings and P1/P2 components remain unchanged.
+No saved C3 cases, runtime image, full evaluator, runner or campaign is opened.
+**Next: P5, prepare the generated-only PROJECT/VERIFY/EVALUATE runner, exact
+leaf/runtime bindings and component-bound operational preflight. No real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0/P1/P2 handoffs are historical; P3 owns the current P4 handoff. Full generated
+C1/C2/C3 and P0/P1/P2/P3 handoffs are historical; P4 owns the current P5 handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
