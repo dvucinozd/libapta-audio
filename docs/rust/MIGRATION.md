@@ -208,6 +208,13 @@ is created; production settings still reject dispatch without that separate scop
 interface mismatch and historical runtime identities. Decide the required separate
 registration/qualification checkpoint before any real authorization or measurement.** Preserve the historical real runtime
 freeze; this generated compatibility result does not requalify it.
+The [registered R5 saved-generated audit preparation](COUPLED-TIME-R5-AUDIT-PREP-20261024.md)
+now adds an output-only artifact inspector and nine passing generated tests. Its
+[read-only scope](COUPLED-TIME-R5-AUDIT-PROTOCOL-20261024.json) permits paired-counter,
+topology and label-blind projection diagnosis, with no candidate/scoring dispatch.
+The exact R4 inputs/results,25 code bindings and13 immutable components stay frozen.
+Commit/push this preparation before the clean-source audit; the registered audit
+itself is NOT_RUN at this preparation checkpoint. Real authorization stays absent.
 Preserve both failed attempts; do not resume them, score their subsets, raise
 caps, retune or repair/replay within them. CT-05 stays closed. Any later real
 attempt needs a separate registered scope, matching preflight and explicit

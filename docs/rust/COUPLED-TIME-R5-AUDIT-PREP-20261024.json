@@ -1,0 +1,30 @@
+{
+  "R4_components_unchanged": 25,
+  "audit_registration_sha256": "097938364d6b5d83525d9138c20016329a15fcdbf6cb86cd00a6c89209939c11",
+  "component_sha256": {
+    "tests/unit/apta_1_1_coupled_time_r5_audit.py": "58382a2687d345229a20c3028b830fef7dccbc7f0b40651e684c958b6740ba16",
+    "tools/apta_coupled_time_r5_audit.py": "4208ce8d4173a03062636e8249755c8143b1b91efa5405c80b85bfa78049be91"
+  },
+  "date": "2026-10-24",
+  "errors": 0,
+  "evidence_sha256": {
+    "tests_stderr": "c1d558aa456026f5bc19af935e8738956328da729018f267af092ae7eab76be0",
+    "tests_stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "verification_driver": "19844348c4880ca817e2dd5a59c0196895468244449558f09d17b7f2caa698cb"
+  },
+  "failures": 0,
+  "format": "libapta-coupled-time-r5-audit-preparation-1",
+  "frozen_runtime_roots": 13,
+  "immutable_scientific_components_unchanged": 13,
+  "implementation_parent_revision": "eb0d10ce4f6b11a1428c1002eb5724b41a5db875",
+  "new_candidates": 0,
+  "new_scoring_calls": 0,
+  "real_authorization_created": false,
+  "real_private_inputs_read": false,
+  "registered_audit_run": false,
+  "runtime_snapshot_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+  "skipped": 0,
+  "status": "GENERATED_AUDIT_TESTS_PASS",
+  "tests": 9,
+  "wall_seconds": 36.311518554
+}

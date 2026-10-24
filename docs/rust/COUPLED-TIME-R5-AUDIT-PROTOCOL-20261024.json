@@ -1,0 +1,56 @@
+{
+  "format": "libapta-coupled-time-r5-audit-protocol-1",
+  "status": "REGISTERED_GENERATED_READ_ONLY_AUDIT",
+  "date": "2026-10-24",
+  "baseline_revision": "eb0d10ce4f6b11a1428c1002eb5724b41a5db875",
+  "scope": "SAVED_GENERATED_R4_ONLY",
+  "sources": 100,
+  "windows": 600,
+  "hypothesis": "The paired meter and downbeat regressions share a projection rejection; diagnose its exact label-blind predicate and the missing support counter without changing output.",
+  "binding": {
+    "COUPLED-TIME-RUNNER-V2-R4-FROZEN-20261024.json": "724c8915ef5024881190ec8d6e50894096a3525063e3d1d8c3c98ad52f00a1e2",
+    "COUPLED-TIME-RUNNER-V2-PREFLIGHT.json": "12f9fc50a3d262f7e9796d1e24a312e3aa5e8bb78a6f0ce2d90ef608bb6f8245",
+    "COUPLED-TIME-RUNNER-V2-RUNTIME-PREP-20261024.json": "6967a9f5e28bfdeb6364291a132391316c7de3c39733566e72a4892decc98443",
+    "COUPLED-TIME-DEVELOPMENT-PROTOCOL.json": "681fb6f20eb93b2817b7feee683e6f442c142573fe9e4c4860875b209237d4d6",
+    "COUPLED-TIME-RUNNER-V2-PROTOCOL.json": "9c252c0734c43d3856146b2915648e6273d38060edf635fce717298131a2370e"
+  },
+  "allowed_calls": [
+    "apta_1_1_neural_reference.project on saved regression windows only"
+  ],
+  "forbidden_calls": [
+    "construct",
+    "verify_bytes",
+    "score_source",
+    "score_window",
+    "event_metrics",
+    "inference",
+    "real input reads"
+  ],
+  "limits": {
+    "max_wall_seconds": 120,
+    "max_process_rss_kib": 262144,
+    "max_output_bytes": 4194304
+  },
+  "immutable_components_changed": false,
+  "candidate_constructed": false,
+  "execution_enabled": false,
+  "real_execution_enabled": false,
+  "real_authorization_created": false,
+  "automatic_retry": false,
+  "outputs": [
+    "private-case-audit.json",
+    "audit.aggregate.json"
+  ],
+  "required_checks": [
+    "exact saved R4 and preflight identities",
+    "all 100 sources and 600 saved windows inspected",
+    "all saved artifact hashes remain unchanged",
+    "paired totals and failed-gate names reproduced from saved counters",
+    "event/downbeat topology and window membership inspected",
+    "canonical projection replay agrees on saved failing cases",
+    "support counter missing versus zero distinguished",
+    "no labels, new candidates or new scoring",
+    "only aggregate findings may enter Git"
+  ],
+  "audit_execution_enabled": true
+}
