@@ -364,8 +364,23 @@ and [machine bindings](METER-CONTEXT-MC02-PROTOCOL.json), before implementation.
 It reuses a private instance of the frozen phase engine, fixed MC-01 helper/oracle
 facades, canonical scoring and public fixtures. New protocol/runtime identity and
 semantic job-to-scope binding precede labels; old authorization cannot select it.
-**Next: implement and qualify MC-02 on public fixtures, then separately register
-one fresh generated matched comparison. No C3/real dispatch at preparation.**
+MC-02 now passes [generated operational qualification](METER-CONTEXT-MC02-20261025.md).
+The [new preflight](METER-CONTEXT-MC02-PREFLIGHT.json) binds83 components and actual
+loaded profiles; [aggregate evidence](METER-CONTEXT-MC02-20261025.json) records33
+passing tests (18 process/15 MC-01 controls), zero failures/errors/skips. All100/600
+public cases,1200 independently verified MC-01 projections and2400 cells complete.
+Five inherited canonical helpers match qualified P5 profile bytes; every other
+source/runtime file is bound with zero unknown dependencies. Verification loads
+neither production projector. New identity and rehashed job/scope divergence tests
+fail closed before labels. Independent closeout checks7416 ledgers/1236 subtotals
+and415 unchanged attempt files. Phase15.281/17.359/29.019s; worker
+RSS/HWM22844/22928/186856KiB; inputs plus attempt25047875bytes.
+The read-only checker's initial component-subset assumption failure is retained;
+the corrected checker verifies inherited profile bindings with no suite/scoring retry.
+No saved C3 cases open at MC-02; old P6 stays rejected and real gates stay open.
+**Next: MC-03, separately register one new fixed generated C3 comparison with
+exact runtime/preflight/scope/components/new destination, commit/push and verify
+clean matching source before dispatch. No real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
