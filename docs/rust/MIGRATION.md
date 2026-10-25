@@ -382,9 +382,22 @@ MC-03 now registers [one fixed generated meter-context comparison](METER-CONTEXT
 and its [exact generated-scope identity](METER-CONTEXT-GENERATED-SCOPE.json),
 binding all three protocols,83 components, the qualified runtime/preflight and
 the fixed100/600 C3 closure to one fresh destination. No numerical code changes.
-**Next: after registration commit/push and clean matching source verification,
-execute the single MC-03 attempt and publish its full result or INVALID state.
-No real replay or automatic retry.**
+MC-03 now closes the [single fixed generated comparison](METER-CONTEXT-MC03-20261025.md)
+on clean pushed source `ccb872183f507e7c3734b359b507faf37f816178`.
+Operational integrity PASS; **PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS** solely for
+downbeat_support_loss. Meter support585/600 in both arms has zero losses. Complete
+downbeat support is390/400 in both; incomplete downbeat148 ->123 causes25 losses.
+Saved-record diagnosis places every loss in boundary/window0: original CONTEXT
+publication is in reference span; the preserved candidate P1 point is before it.
+Their model meter-phase class agrees, but missing reference support stays unknown.
+All1200 projections independently replay;7560 ledgers/1260 subtotals and3716 input
+bindings/415 unchanged attempt files verify. The [aggregate receipt](METER-CONTEXT-MC03-20261025.json)
+preserves all comparison/stratum/resource evidence. Phase42.779/45.367/87.825s;
+worker RSS/HWM22888/22920/192360KiB; attempt20458830bytes. No retry or code change.
+**Next: MC-04, read-only publication-witness/phase/partial-reference contract
+review. MC-00 freezes the candidate P1 witness, so extending fallback cannot
+alter these cases. Register any new hypothesis separately; preserve this rejection
+and the support veto. No real replay or promotion.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
