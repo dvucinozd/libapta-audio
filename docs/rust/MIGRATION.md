@@ -348,8 +348,20 @@ and [machine protocol](METER-CONTEXT-PROTOCOL.json) before implementation. It
 preserves P1 grids and owned meters; fallback uses at most two preceding/following
 downbeats, exact fit tolerance and owned publication. Conflicting meter/phase
 hypotheses abstain. Gaps and real dispatch remain excluded.
-**Next: MC-01, implement the separate pure meter-context helper and independent
-oracle on public generated fixtures, reusing P1. No saved-cohort campaign.**
+MC-01 now passes the [pure meter-context prototype and public checks](METER-CONTEXT-MC01-20261025.md).
+The [component receipt](METER-CONTEXT-MC01-20261025.json) records38 passing tests:
+15 new,14 unchanged P1 and9 unchanged P0 registration, zero failures/errors/skips.
+All826 independent full-record comparisons agree;501 new context meters and280
+P1-owned meter tuples preserve exact grid ownership. Public one-frame crossing
+examples retain meter for3/4 and4/4 in both directions; conflicting hypotheses
+abstain. Suite1.889s, worker RSS/HWM26884KiB; parent/host-control costs are separate.
+The initial missing-jsonschema old-control environment is retained separately;
+all23 old controls pass using the existing host runtime, with no dependency change.
+No saved C3 cases or scores enter MC-01; P6 remains rejected. Product budgets and
+real-runtime H0 remain open.
+**Next: MC-02, minimally bind this module/protocol into the existing generated
+phase machinery and qualify its operational runtime/fixtures, then separately
+register one fresh generated matched comparison. No real dispatch.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen

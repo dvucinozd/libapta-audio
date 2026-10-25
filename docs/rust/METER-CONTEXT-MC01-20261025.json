@@ -1,0 +1,169 @@
+{
+  "baseline_revision": "7b47885ea9bacb6f65f72ddfb9db902bcae7d29d",
+  "candidate_solver_or_scoring_run": false,
+  "component_sha256": {
+    "tests/unit/apta_1_1_meter_context.py": "ed618994894e4f59466581aab6502587dfb311e299d2333151f6d58b9fd66459",
+    "tests/unit/apta_meter_context_oracle.py": "42235591f41379f76f7d338024614579baf5393d7c1d81f5ad678200f0bc6610",
+    "tools/apta_meter_context_projection.py": "99008695b289ccfb46fa7c0b0cb6833e61a2ec0176a6d5e4738cad31504d94ee"
+  },
+  "confidence_qualified": false,
+  "consumer_provider_pin_changed": false,
+  "control_resources": {
+    "p0-host-controls": {
+      "failure": null,
+      "max_observed_process_rss_kib": 32040,
+      "peak_rss_kib_by_pid": {
+        "321": 16436,
+        "377": 32040
+      },
+      "poll_seconds": 0.02,
+      "process_group_monitored": true,
+      "root_pid": 377,
+      "status": "PASS",
+      "supervisor_pid": 321,
+      "wall_seconds": 1.5272509200000002
+    },
+    "p1-host-controls": {
+      "failure": null,
+      "max_observed_process_rss_kib": 36328,
+      "peak_rss_kib_by_pid": {
+        "321": 16428,
+        "342": 36328
+      },
+      "poll_seconds": 0.02,
+      "process_group_monitored": true,
+      "root_pid": 342,
+      "status": "PASS",
+      "supervisor_pid": 321,
+      "wall_seconds": 3.5128385990000055
+    }
+  },
+  "control_runtime_sha256": {
+    "p0-host-controls": "9c7ed1a91db85587f7634e551ac6fcd88c8750d875f382839bb03ee813341c36",
+    "p1-host-controls": "b29153ec3b0c6a1f233e89546a5bed5585b1f60ab15e0931f1d89f5f0915c69d"
+  },
+  "date": "2026-10-25",
+  "documentation_sha256": {
+    "docs/rust/METER-CONTEXT-MC01-20261025.md": "d6148413eb33718d4132d9f078fe3223c20124d6bbd44adae48965621480ea31",
+    "docs/rust/METER-CONTEXT-PROTOCOL.json": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+    "docs/rust/METER-CONTEXT-PROTOCOL.md": "c6aa61664b560c2a49324fc580a8925d60adfb30433408c1b9ae5a359600991d",
+    "docs/rust/MIGRATION.md": "d5b941bb7f954f02c9a6cb040c6643447eab5a97dc1a3e26f451c4ed83fa2399"
+  },
+  "evidence_sha256": {
+    "capture-control.py": "74813015f030e9e30398324a4061a2a6b6a79123cfcb62b95cab6a3cb9e62b9e",
+    "host-controls.json": "6399eb2999aa8c8dd742a5bc92520adbd8f563c676f3e1afc182dcb1dcd77f46",
+    "p0-host-controls.resources.json": "88785e5a361bed6c6e7bfe978fe355c7b1497c8ac078f1ddba2816a99f241a06",
+    "p0-host-controls.runtime.json": "9c7ed1a91db85587f7634e551ac6fcd88c8750d875f382839bb03ee813341c36",
+    "p0-host-controls.stderr": "19916f8aa57aaff2e13df07c2a9ab2ca9e3a9c800305cf3ffed33998d1d1ccec",
+    "p0-host-controls.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "p1-controls.resources.json": "4e06990192b15ddeafe53cf72a276f9a7aa32a201eebcbf44f41aa35120bd143",
+    "p1-controls.stderr": "2510fd08706ceb77be6f755755661db109c2befb94003805a5dbab21601066fd",
+    "p1-controls.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "p1-host-controls.resources.json": "bedd0c643e95c46b24ae9ffebeac9f87f9be012f880afd4b1866730c1e2670e8",
+    "p1-host-controls.runtime.json": "b29153ec3b0c6a1f233e89546a5bed5585b1f60ab15e0931f1d89f5f0915c69d",
+    "p1-host-controls.stderr": "e9fc4562563b185c26e4863b6beaca9910d1ee70e522cb77977b2e3e581e37e9",
+    "p1-host-controls.stdout": "56c7051580aacf8516f97cb8ff49d693adcd29b1262c1f0a9852ac6ed0b18229",
+    "publish.py": "25add38dac8ba32a28401677382252388dff9a7efcb095d5a41c4f5975c38f99",
+    "tests-1.receipt.json": "ee7a5b536dcc717d8d7376cf0cd4e8711ab8311a4383621ebfb8be1278f729d1",
+    "tests-1.resources.json": "87438b63e9ff947bcf2a50b09ff2e4ec9e4b7e70e8441129d2ded97cbbd51ad9",
+    "tests-1.result.json": "d0446b62299d6ef97621873d75b676574667b9cb820822403e2f494bede8fcb6",
+    "tests-1.stderr": "6cc5eeda39ff985162fb0d0ab6ab4bb1fff24000c2fb95921313f9db05fc8621",
+    "tests-1.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "external_artifact_root": "/mnt/d/AI/LIBAPTA/outputs/meter-context-mc01-20261025",
+  "external_evidence_bytes": 72741,
+  "format": "libapta-meter-context-mc01-evidence-1",
+  "full_c_rust_matrix_run": false,
+  "independence": "UNRESOLVED",
+  "new_operational_runtime_qualified": false,
+  "new_public_checks": {
+    "counts": {
+      "context_meters": 501,
+      "oracle_comparisons": 826,
+      "preserved_owned_meters": 280,
+      "status_AMBIGUOUS_CONTEXT": 2,
+      "status_CONTEXT_OWNED": 501,
+      "status_NOT_EVALUATED": 39,
+      "status_NO_ELIGIBLE_CONTEXT": 4,
+      "status_OWNED": 280
+    },
+    "errors": 0,
+    "failures": 0,
+    "max_public_call_seconds_including_oracle": 0.027422030000003872,
+    "self_max_rss_kib": 26884,
+    "skips": 0,
+    "tests": 15
+  },
+  "new_suite_loaded_bindings": 116,
+  "new_suite_resources": {
+    "failure": null,
+    "max_observed_process_rss_kib": 157296,
+    "peak_rss_kib_by_pid": {
+      "323": 157296,
+      "380": 2036
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 380,
+    "status": "PASS",
+    "supervisor_pid": 323,
+    "wall_seconds": 1.8894443090000053
+  },
+  "new_suite_runtime_receipt_sha256": "d0446b62299d6ef97621873d75b676574667b9cb820822403e2f494bede8fcb6",
+  "next_step": "MC-02: minimally adapt existing generated phase machinery to the new module/protocol, qualify its loaded runtime and operational fixtures, then separately register one new generated matched comparison",
+  "old_p6_verdict": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+  "p1_control_checks": {
+    "counts": {
+      "legacy_accepted_grid_intersections": 246,
+      "legacy_owned_meter_intersections": 119,
+      "meter_NOT_EVALUATED": 121,
+      "meter_NO_ELIGIBLE_BARS": 172,
+      "meter_NO_OWNED_WITNESS": 1,
+      "meter_OWNED": 152,
+      "oracle_comparisons": 446,
+      "status_ACCEPTED": 325,
+      "status_INSUFFICIENT_EVENTS": 50,
+      "status_SOURCE_ANCHOR_OUT_OF_DOMAIN": 1,
+      "status_UNSUPPORTED_TEMPO": 70
+    },
+    "max_source_seconds": 0.07261245600000166,
+    "skips": 0,
+    "tests_run": 14
+  },
+  "parent_runtime_inventory_verified_before_after": true,
+  "parent_runtime_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+  "physical_p4_run": false,
+  "preparation_history": [
+    {
+      "detail": "First P1 control launch in the unchanged generated parent venv stopped before tests because jsonschema was absent. No dependency or parent image changed. Existing host Python ran all 23 old controls with loaded runtime bindings retained.",
+      "resource_sha256": "4e06990192b15ddeafe53cf72a276f9a7aa32a201eebcbf44f41aa35120bd143",
+      "status": "CONTROL_ENVIRONMENT_UNAVAILABLE",
+      "stderr_sha256": "2510fd08706ceb77be6f755755661db109c2befb94003805a5dbab21601066fd"
+    }
+  ],
+  "preserved_bindings": {
+    "frozen_c3_components": 37,
+    "mc00_sources": 12,
+    "p0_documents": 14,
+    "p2_probe_components": 4,
+    "p5_components": 73,
+    "reviewed_sources": 17
+  },
+  "product_budget_status": "UNKNOWN; whole-pipeline port gate remains open",
+  "protocol_sha256": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+  "real_runtime_metadata": "NOT_AUDITED",
+  "release": false,
+  "saved_cohort_used_by_mc01": false,
+  "source_state": "SHA-bound new MC-01 public files on committed MC-00; not a clean-source campaign",
+  "status": "PUBLIC_GENERATED_IMPLEMENTATION_PASS",
+  "tests": {
+    "errors": 0,
+    "failures": 0,
+    "new_mc01": 15,
+    "skips": 0,
+    "total": 38,
+    "unchanged_p0_registration": 9,
+    "unchanged_p1": 14
+  },
+  "version": "1.0.1"
+}
