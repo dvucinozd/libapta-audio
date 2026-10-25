@@ -1,0 +1,57 @@
+{
+  "budgets": {
+    "analysis_internal_ram": "UNKNOWN",
+    "analysis_psram_reserve": "UNKNOWN",
+    "cancellation_deadline": "UNKNOWN",
+    "decoder_scratch_placement": "UNKNOWN",
+    "features_activations_peak": "UNKNOWN",
+    "first_useful_final_latency": "UNKNOWN",
+    "full_track_outputs": "UNKNOWN",
+    "seconds_per_minute_audio": "UNKNOWN",
+    "stack_futures_channels": "UNKNOWN",
+    "usb_audio_interference_numeric_limit": "UNKNOWN",
+    "weights_and_inference_backend": "UNKNOWN"
+  },
+  "consumer_branch_pin_provider_or_files_changed": false,
+  "consumer_checkout_revision": "0f2fb1425ef76f2541a8c76841cfa52178dca589",
+  "consumer_existing_untracked_work_preserved": true,
+  "consumer_inspected_ref": "origin/main",
+  "consumer_revision": "d000572c15b370702345f36d4dcc11a410b2f1de",
+  "consumer_source_sha256": {
+    "docs/M1_RUST_ARCHITECTURE.md": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94",
+    "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537",
+    "docs/boards/GUITION_HARDWARE_MATRIX_2026-10-20.md": "c4d0c37fed0f3ea05503e6115475299d6c92f688ee73e20d00df78367ec1ae96",
+    "firmware-rust/crates/ruzina-apta-adapter/README.md": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8"
+  },
+  "date": "2026-10-25",
+  "decision": "HOST_GENERATED_WORK_MAY_CONTINUE; PRODUCT_DIRECTED_RUST_P4_PORT_BLOCKED_PENDING_BUDGET_AND_WHOLE_PIPELINE_EVIDENCE",
+  "documentation_sha256": {
+    "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
+    "docs/rust/MIGRATION.md": "ab252e82ff2046af372f30c9c958806a56575ae75fa5edab560984ba33aa5d6a"
+  },
+  "documented_capacity": {
+    "allocator_registered_by_probe": false,
+    "external_flash_mib": 16,
+    "physical_unit_verified": false,
+    "probe_mhz": 80,
+    "psram_mib": 32,
+    "reserved_cpu_cached_probe_kib": 64
+  },
+  "existing_array_payloads": {
+    "combined_array_payload_bytes": 117868,
+    "embassy_payload_addition_bytes": 4096,
+    "local_tempo_two_output_banks_bytes": 113772,
+    "physical_budget": false
+  },
+  "format": "libapta-meter-context-product-budget-audit-1",
+  "libapta_source_revision": "91087aba4a00cc09917542f8b000b7d5b12d369b",
+  "physical_tests_run": false,
+  "policy": {
+    "analysis_cancelled_during_playback": true,
+    "guition_apta_active": false,
+    "product_adoption_requirement": "M1R-P1-001",
+    "replace_accepted_analysis": false,
+    "requires_continuous_final_full_source_grid_and_meter": true
+  },
+  "version_changed": false
+}

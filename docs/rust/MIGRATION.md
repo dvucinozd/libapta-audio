@@ -336,14 +336,20 @@ all comparisons/strata and7560 independently checked ledgers/1260 subtotals.
 All3716 input bindings and414 attempt files remain unchanged. Phase times are
 23.607/24.829/65.689s; worker RSS/HWM24060/24120/192312KiB; attempt19758218bytes.
 No solver, candidate reconstruction, campaign retry or new real scoring ran.
-**Next: P7, read-only diagnosis of the saved25 complete-context support losses
-and25 incomplete-context meter gains, then review a separately registered new
-hypothesis. No reprojecting/rescoring, relaxed veto or real dispatch.**
+P7 now closes the [read-only support diagnosis](METER-CONTEXT-P7-DIAGNOSIS-20261025.md):
+each of25 affected sources moves one downbeat from window1 to window0. Owned
+downbeats fall3 ->2 in complete window1 and rise2 ->3 in incomplete window0;
+the frozen in-window two-bar rule explains every loss/gain. All305 read files and
+414 attempt files verify; no projection/scoring runs. The refreshed
+[P4 product budget audit](METER-CONTEXT-P4-BUDGET-20261025.md) binds current Ruzina
+source d000572c; numeric whole-pipeline allocations/deadlines remain UNKNOWN.
+**Next: separately register a bounded meter-context hypothesis preserving P1
+grid/owned meters, then implement public generated checks. No real replay.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0/P1/P2/P3/P4/P5 handoffs are historical; P6 owns the current P7 handoff. Full generated
+C1/C2/C3 and P0/P1/P2/P3/P4/P5/P6 handoffs are historical; P7 owns the meter-context handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content

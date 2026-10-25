@@ -1,0 +1,98 @@
+{
+  "affected_sources": 25,
+  "attempt_files_unchanged": 414,
+  "audit_runtime_bindings_count": 71,
+  "audit_runtime_bindings_digest": "a0dce6dffa235b776ea95616058507f0f081e1ae7fb52c8b5fe31c081b3ba69a",
+  "audit_sha256": "31d932f799926a2df7042bf544e680173cd1c0e29115b82c650f4003c5b00c13",
+  "auditor": {
+    "path": "/mnt/d/AI/LIBAPTA/p7-audit.py",
+    "sha256": "909dcc21e9f942380bd1f2bd80030aac54a4c49f3ba3aa32b612b315448e9c61"
+  },
+  "code_changed": false,
+  "components_verified": 73,
+  "date": "2026-10-25",
+  "documentation_sha256": {
+    "docs/rust/METER-CONTEXT-P7-DIAGNOSIS-20261025.md": "479c8b2bff494c4800ab857df9b81b4be2e342b9f03fbc4acf927ed379e63193",
+    "docs/rust/MIGRATION.md": "ab252e82ff2046af372f30c9c958806a56575ae75fa5edab560984ba33aa5d6a"
+  },
+  "downbeat_window_crossings": [
+    {
+      "events": 25,
+      "from_window": 1,
+      "to_window": 0
+    }
+  ],
+  "format": "libapta-meter-context-p7-diagnosis-1",
+  "independence": "UNRESOLVED",
+  "labels_read": false,
+  "old_pair_verdict": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+  "p6_receipt": {
+    "path": "/mnt/d/AI/LIBAPTA/libapta-audio/docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-20261025.json",
+    "sha256": "2af80c349a8b80799f30f027cc913887a2fa809faf51d11f182a7e2084ef4242"
+  },
+  "p6_report_sha256": "53e7489a7121456950a65c8ef0dc4a7e274182d4dac2c8cb291c54d7bfd0dee2",
+  "patterns": {
+    "downbeat_gain": [],
+    "downbeat_loss": [
+      {
+        "coupled_meter_status": "NO_ELIGIBLE_BARS",
+        "coupled_owned_downbeats": 2,
+        "original_meter_status": "OWNED",
+        "original_owned_downbeats": 3,
+        "reference_complete": 1,
+        "window_index": 1,
+        "windows": 25
+      }
+    ],
+    "meter_gain": [
+      {
+        "coupled_meter_status": "OWNED",
+        "coupled_owned_downbeats": 3,
+        "original_meter_status": "NO_ELIGIBLE_BARS",
+        "original_owned_downbeats": 2,
+        "reference_complete": 0,
+        "window_index": 0,
+        "windows": 25
+      }
+    ],
+    "meter_loss": [
+      {
+        "coupled_meter_status": "NO_ELIGIBLE_BARS",
+        "coupled_owned_downbeats": 2,
+        "original_meter_status": "OWNED",
+        "original_owned_downbeats": 3,
+        "reference_complete": 1,
+        "window_index": 1,
+        "windows": 25
+      }
+    ]
+  },
+  "projection_calls": 0,
+  "raw_events_changed": false,
+  "real_runtime_metadata": "NOT_AUDITED",
+  "resources": {
+    "failure": null,
+    "max_observed_process_rss_kib": 55368,
+    "peak_rss_kib_by_pid": {
+      "320": 16384,
+      "341": 55368,
+      "343": 4168,
+      "361": 5836,
+      "382": 4044,
+      "383": 5520,
+      "386": 4236
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 341,
+    "status": "PASS",
+    "supervisor_pid": 320,
+    "wall_seconds": 12.864079591
+  },
+  "saved_files_read_and_rehashed": 305,
+  "scoring_calls": 0,
+  "solver_calls": 0,
+  "source_revision": "91087aba4a00cc09917542f8b000b7d5b12d369b",
+  "status": "PASS",
+  "wall_seconds": 4.671446024
+}
