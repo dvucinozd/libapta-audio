@@ -1,0 +1,281 @@
+{
+  "audio_labels_logits_or_per_source_scores_opened": false,
+  "audit": {
+    "historical_expectation_conflicts": 0,
+    "independently_anchored_roots": [
+      "beat_this_worker_metadata",
+      "decoder_construct_completion",
+      "decoder_construct_freeze",
+      "neural_comparison_freeze"
+    ],
+    "inference_or_scoring_calls": 0,
+    "inspector_sha256": "891da7f1258558c6efa84fb994796432fd163fc2d2daee8dfcd08a188e512275",
+    "inventory": {
+      "path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/attempt/inventory.private.json",
+      "sha256": "6913a6559a7c3c12e4a3c3536d283b461a776d5f14b52fc210872e5b27751a0e"
+    },
+    "metadata_roots_unchanged": true,
+    "model_imports_or_execution": false,
+    "program_observations_stable": true,
+    "program_opens": {
+      "permitted_content_opens": 22821
+    },
+    "protected_data_contents_opened": false,
+    "readiness": "NOT_READY_METADATA_AUDIT_IS_NOT_EXECUTION_QUALIFICATION",
+    "root_identity_links": 8,
+    "root_summaries": {
+      "beat_this_worker_metadata": {
+        "bindings": 137,
+        "classes": {
+          "asset_runtime": 34,
+          "excluded_data_or_unregistered": 103
+        },
+        "current_comparison": {
+          "equal": 34
+        },
+        "independently_anchored": true,
+        "zlib_expected": null
+      },
+      "decoder_construct_completion": {
+        "bindings": 0,
+        "classes": {},
+        "current_comparison": {},
+        "independently_anchored": true,
+        "zlib_expected": null
+      },
+      "decoder_construct_freeze": {
+        "bindings": 1423,
+        "classes": {
+          "excluded_data_or_unregistered": 308,
+          "historical_project_not_compared": 988,
+          "interpreter": 1,
+          "system_runtime": 126
+        },
+        "current_comparison": {
+          "changed": 1,
+          "equal": 126
+        },
+        "independently_anchored": true,
+        "zlib_expected": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+      },
+      "decoder_evaluation_freeze": {
+        "bindings": 3243,
+        "classes": {
+          "asset_runtime": 1331,
+          "excluded_data_or_unregistered": 615,
+          "historical_project_not_compared": 999,
+          "interpreter": 1,
+          "system_runtime": 297
+        },
+        "current_comparison": {
+          "changed": 1,
+          "equal": 1628
+        },
+        "independently_anchored": false,
+        "zlib_expected": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+      },
+      "dense_capture_freeze": {
+        "bindings": 11821,
+        "classes": {
+          "asset_runtime": 10449,
+          "excluded_data_or_unregistered": 410,
+          "historical_project_not_compared": 962
+        },
+        "current_comparison": {
+          "equal": 10449
+        },
+        "independently_anchored": false,
+        "zlib_expected": null
+      },
+      "neural_comparison_freeze": {
+        "bindings": 11550,
+        "classes": {
+          "asset_runtime": 10449,
+          "excluded_data_or_unregistered": 208,
+          "historical_project_not_compared": 893
+        },
+        "current_comparison": {
+          "equal": 10449
+        },
+        "independently_anchored": true,
+        "zlib_expected": null
+      }
+    },
+    "scope_sha256": "777e8209845d37b9190f956dadb53c53b16b940f4391e91f710a40c00f65663b",
+    "selected_program_files": 11362,
+    "self_max_rss_kib": 50764,
+    "source_revision": "43445ad7890da7b2deb48bfe5ef624364da77441",
+    "status": "H0_METADATA_AUDIT_COMPLETE",
+    "symlinks_not_followed": 0,
+    "unrecorded_program_filenames": 9457,
+    "wall_seconds": 37.253117593,
+    "zlib": {
+      "current": {
+        "bytes": 113000,
+        "sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242",
+        "status": "read"
+      },
+      "expected_by_root": {
+        "decoder_construct_freeze": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892",
+        "decoder_evaluation_freeze": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+      },
+      "generated_context": {
+        "is_real_expected_hash": false,
+        "old": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892",
+        "subsequent": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+      }
+    }
+  },
+  "audit_supervision": {
+    "failure": null,
+    "max_observed_process_rss_kib": 51132,
+    "peak_rss_kib_by_pid": {
+      "316": 16756,
+      "378": 51132,
+      "379": 4028,
+      "380": 5616,
+      "388": 4048,
+      "389": 5780
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 378,
+    "status": "PASS",
+    "supervisor_pid": 316,
+    "wall_seconds": 37.573062506
+  },
+  "closeout_supervision": {
+    "failure": null,
+    "max_observed_process_rss_kib": 57776,
+    "peak_rss_kib_by_pid": {
+      "334": 17796,
+      "355": 57776,
+      "376": 4120,
+      "390": 5668,
+      "396": 468,
+      "397": 5884
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 355,
+    "status": "PASS",
+    "supervisor_pid": 334,
+    "wall_seconds": 32.539150625000005
+  },
+  "confidence_qualified": false,
+  "date": "2026-10-25",
+  "documentation_sha256": {
+    "docs/rust/MIGRATION.md": "040c2951c9c272ba832ef925548fe2fb776c2460664eb718efd3a6a10c774af9",
+    "docs/rust/REAL-RUNTIME-H0-20261025.md": "c53188eefb73b9c39baafa90b430df116a5a375fb65c4b20c20d4960c7fef597"
+  },
+  "evidence_sha256": {
+    "attempt/audit.json": "1789a243c9ea3c0cf4e6244cb547d781e241141a82ec42f771e8d445b81d43de",
+    "audit.resources.json": "f96520c74873aaa5128378af97219a474c8ac266d6b698cc9f817c874eb173b8",
+    "audit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "audit.stdout": "8783750d9124af5dd1b17f46d4f6eb6605b0dd8fb0a89a063b52cd1e661723f6",
+    "audit_runtime.py": "891da7f1258558c6efa84fb994796432fd163fc2d2daee8dfcd08a188e512275",
+    "closeout-launch.json": "14426405b21275e15f69f02db9eeb501f6f48dae2fbc4602b0541aca0dee3950",
+    "closeout.json": "83bcadfe6553f4adc3e0dc0dc6e977dc4a60dd25b6b7f49d8debe0c681d8b965",
+    "closeout.py": "586a27e6406d88dcc0c1bde35f74efd515139bb2e87417309222bc049f8ff3fc",
+    "closeout.resources.json": "82048e7fd31a8bfd0b5ce332fff87d4b0950d4d02c7b4b533d459969abaf06c4",
+    "closeout.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "closeout.stdout": "e74f6716bb04e09d011a35e8877e7822ed2f46d346f052b11b5234fdd3089d4c",
+    "launch.json": "d53b8b68e8846532896cece135363deb7021cd1d1ecbb1fa5bcf87adb7d6c312",
+    "metadata-roots.json": "02581b7e04eb2dfcc376aa919220f35050a64cbd74ed19e9b8d0d03ae2f00389",
+    "public-tests.json": "e7c2750f2a979df6f2530bb047b5f7d351f97aa4a92f82d3877fd35e483e3209"
+  },
+  "external_output_bytes_at_publication": 8183557,
+  "format": "libapta-real-runtime-h0-metadata-result-1",
+  "historical_real_runtime_metadata_status": "AUDITED_WITH_DRIFT_AND_COVERAGE_GAPS",
+  "historical_results_reclassified": false,
+  "historical_venv_executed": false,
+  "independence": "UNRESOLVED",
+  "independent_closeout": {
+    "all_recorded_observations_stable": true,
+    "audit": {
+      "path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/attempt/audit.json",
+      "sha256": "1789a243c9ea3c0cf4e6244cb547d781e241141a82ec42f771e8d445b81d43de"
+    },
+    "inference_or_scoring_calls": 0,
+    "metadata_roots_rehashed": 6,
+    "program_differences": [
+      {
+        "actual": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242",
+        "expected": [
+          "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+        ],
+        "path": "/usr/lib/x86_64-linux-gnu/libz.so.1.3"
+      }
+    ],
+    "program_execution": false,
+    "program_files_rehashed": 11362,
+    "protected_data_contents_opened": false,
+    "root_counters_and_identity_links_verified": true,
+    "scope_sha256": "777e8209845d37b9190f956dadb53c53b16b940f4391e91f710a40c00f65663b",
+    "self_max_rss_kib": 57776,
+    "source_revision": "43445ad7890da7b2deb48bfe5ef624364da77441",
+    "status": "H0_INDEPENDENT_CLOSEOUT_PASS",
+    "unique_program_statuses": {
+      "changed": 1,
+      "equal": 11361
+    },
+    "unrecorded_filename_suffixes": {
+      ".0": 10,
+      ".1": 1,
+      ".17": 1,
+      ".19": 1,
+      ".2": 3,
+      ".4": 2,
+      ".6": 1,
+      ".7": 1,
+      ".pyc": 9433,
+      ".so": 4
+    },
+    "wall_seconds": 32.134522232
+  },
+  "inspector_sha256": "891da7f1258558c6efa84fb994796432fd163fc2d2daee8dfcd08a188e512275",
+  "limits": {
+    "audit_seconds": 1800,
+    "bookkeeping_seconds": 7200,
+    "closeout_seconds": 1800,
+    "hard_AS_bytes": 268435456,
+    "new_external_bytes": 67108864,
+    "per_hash_seconds": 60,
+    "process_rss_kib": 262144
+  },
+  "metadata_root_attestation": {
+    "as_of_only": 2,
+    "independent": 4
+  },
+  "model_import_or_inference": false,
+  "model_weights_checked": false,
+  "native_or_consumer_activation": false,
+  "new_real_scope_authorized": false,
+  "next": "H1: separately register immutable real-neural-runtime preparation and canonical public/synthetic compatibility; preserve old freezes and failures, no real replay",
+  "numerical_compatibility_qualified": false,
+  "old_freezes_modified": false,
+  "original_neural_freeze_system_coverage_complete": false,
+  "package_actions": false,
+  "physical_P4": false,
+  "private_inventory": {
+    "path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/attempt/inventory.private.json",
+    "sha256": "6913a6559a7c3c12e4a3c3536d283b461a776d5f14b52fc210872e5b27751a0e"
+  },
+  "real_execution_readiness": "NOT_READY",
+  "recorded_runtime_drift_confirmed": true,
+  "release": false,
+  "scope_sha256": "777e8209845d37b9190f956dadb53c53b16b940f4391e91f710a40c00f65663b",
+  "scoring": false,
+  "source_revision": "43445ad7890da7b2deb48bfe5ef624364da77441",
+  "status": "H0_METADATA_AUDIT_COMPLETE",
+  "system_libraries_modified": false,
+  "training": false,
+  "unrecorded_program_filenames": {
+    "bytecode_caches": 9433,
+    "new_installation_claim": false,
+    "shared_libraries": 24,
+    "total": 9457
+  },
+  "version": "1.0.1",
+  "whole_pipeline_product_budgets": "UNKNOWN"
+}

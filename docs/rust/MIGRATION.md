@@ -453,20 +453,34 @@ with [six pinned metadata roots and strict program-byte boundaries](REAL-RUNTIME
 The four public boundary fixtures pass without historical contents. Independent
 old hashes and as-of registration identities stay distinct; project/data bindings
 are excluded from runtime reads, and missing loader coverage remains UNKNOWN.
-**Next: execute H0 from the clean pushed registration, compare permitted runtime
-bytes twice and publish aggregate drift/coverage evidence. No audio, labels,
-logits, weights, model import/inference/scoring or real replay; all old results
-remain frozen. Generated compatibility does not requalify real runtime.**
+H0 now completes the [historical real-runtime metadata audit](REAL-RUNTIME-H0-20261025.md)
+with [aggregate proof](REAL-RUNTIME-H0-20261025.json), measured on clean pushed
+source`43445ad7890da7b2deb48bfe5ef624364da77441`. All11362 selected program files
+are stable across three passes:11361 equal, one changed`libz.so.1.3`. The bound
+real DD-05 construction freeze records the old zlib hash; current bytes match the
+subsequent generated environment. Original neural/dense freezes omit interpreter/
+external-system identities, and9457 unrecorded filenames (9433 caches/24 shared
+libraries) remain coverage candidates, not presumed new installs. Four of six
+metadata roots have independent parent attestation; all six rehash unchanged.
+Four public checks and independent closeout pass. No protected data, weights,
+model import/inference/scoring or package mutation occurs. H0 becomes
+**AUDITED_WITH_DRIFT_AND_COVERAGE_GAPS; real execution remains NOT_READY**.
+**Next H1: separately register immutable real-neural-runtime preparation and
+public/synthetic compatibility with exact model/program/loader/cache identities.
+Keep old freezes/results unchanged; require an explicit new real-scope decision
+after qualification. No automatic real replay or product/native promotion.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0/P1/P2/P3/P4/P5/P6 handoffs are historical; P7 owns the meter-context handoff. Full generated
+C1/C2/C3, P0 through P7 and MC-00 through MC-08 handoffs are historical; the H0/H1
+handoff above owns continuation. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
 checks. The generated projection axis is now registered by P0; a real-scope
-projection decision remains unregistered and real-runtime metadata NOT_AUDITED.
+projection decision remains unregistered. H0 metadata is now audited with drift
+and coverage gaps; real execution remains NOT_READY.
 Neither C0 nor C1 permits a threshold change, attempt replay or real run. Preserve the historical real runtime
 freeze; this generated compatibility result does not requalify it.
 The [registered R5 saved-generated audit preparation](COUPLED-TIME-R5-AUDIT-PREP-20261024.md)
