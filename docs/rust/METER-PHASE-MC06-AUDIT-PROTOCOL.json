@@ -1,0 +1,223 @@
+{
+  "authority_sha256": {
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.json": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.md": "b2aa185858636e3fc760a5c0b0b3ce3b5f74d82d3d70237299f6a2fda105e90c",
+    "docs/rust/METER-CONTEXT-GENERATED-SCOPE.json": "1116502f637d79d9181857081acb8659632123a8c09788403ad6022517513424",
+    "docs/rust/METER-CONTEXT-MC02-PREFLIGHT.json": "4f6c1efcc6cbaeafcc420fbc997abdfd53832a78e25a453ec7f6b121a61118e5",
+    "docs/rust/METER-CONTEXT-MC03-20261025.json": "7a79424f1dc18e95651883d49ae3dfcfbc75b4db7222b5d4c4779bb590f494c9",
+    "docs/rust/METER-CONTEXT-MC03-20261025.md": "535a6fe54f10f57aa142b2121e471d98e33daccc9585072b1326fc8fd6952641",
+    "docs/rust/METER-CONTEXT-MC03-PROTOCOL.md": "46f1826aaf2924158333f44fd79abd89cf17a9119353b057270a08a6546b2be1",
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.json": "538bc147a3f11ea13de19701220166f98797bfab565f4d09969a4e9f8536de50",
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.md": "242edffd31143ea424d8c0c5f3da493bd0a22dfbe3476b0c88dfef49f530edb2",
+    "docs/rust/METER-PHASE-MC05-20261025.json": "d4f21a6a10f72d5b1b91e17ada553024502c9f22b08fa31a560e8a6a56cd2fae",
+    "docs/rust/METER-PHASE-MC05-20261025.md": "fa5b7b17c78e442aaaf2c0807b044b2411a0264da29b6dfcd2afc367d5f651f1",
+    "docs/rust/METER-PHASE-MC05-PROTOCOL.json": "c9104badbd1125eabe6a4140a707abd6331653878ed8260728ab05fdd22a2f9c",
+    "docs/rust/METER-PHASE-MC05-PROTOCOL.md": "5587276234c94e2b9c6335f077dbad53a69d54daf7446f3b2bf05afeda9c5bbd",
+    "docs/rust/METER-PHASE-MC06-AUDIT-PROTOCOL.md": "8ba37d66ef3d20c1db07fe91d8c603a220a72fe4f0111b1e5ce3dcfddbcdbb7c"
+  },
+  "cohort": {
+    "arms": 2,
+    "complete": 400,
+    "groups": 4,
+    "incomplete": 200,
+    "kind": "C3_FIXED_GENERATED",
+    "prior_exposure": "MC-03, MC-04; spent synthetic development only",
+    "projections": 1200,
+    "sources": 100,
+    "windows": 600
+  },
+  "date": "2026-10-25",
+  "extract_before_reference_and_saved_correctness": true,
+  "failure_policy": {
+    "complete_status": "SAVED_GENERATED_INTERPRETATION_COMPLETE",
+    "in_attempt_repair": false,
+    "invalid_on": [
+      "integrity",
+      "runtime_membership",
+      "parity",
+      "ownership",
+      "missing_or_extra_source_window",
+      "incomplete_proof",
+      "resource",
+      "input_mutation"
+    ],
+    "musical_or_acceptance_pass_defined": false,
+    "resume": false,
+    "retry": false,
+    "subset_scoring": false
+  },
+  "format": "libapta-meter-phase-mc06-audit-registration-1",
+  "historical_component_registry": {
+    "count": 83,
+    "path": "docs/rust/METER-CONTEXT-GENERATED-SCOPE.json",
+    "sha256": "1116502f637d79d9181857081acb8659632123a8c09788403ad6022517513424"
+  },
+  "historical_inputs": {
+    "attempt_files": 415,
+    "c3_input_files": 3716,
+    "completions": {
+      "evaluate": {
+        "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-context-mc03-20261025/attempt/evaluate.complete.json",
+        "sha256": "5ad6763b42471bdc53872904ccfa88e1ff219e1ffb38a018fdf061eb7f5d70b3"
+      },
+      "project": {
+        "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-context-mc03-20261025/attempt/project.complete.json",
+        "sha256": "83cc3963966c2049d3e69e86a35fb6aac3a509837ac21630c352b21fcc0c860e"
+      },
+      "verify": {
+        "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-context-mc03-20261025/attempt/verify.complete.json",
+        "sha256": "eeee563aec7770b3bb5728df81f92a1d9c73ebc5d713914e2ed35b24cc8cef05"
+      }
+    },
+    "manifest": {
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-context-mc03-20261025/attempt/manifest.json",
+      "sha256": "74f2cc732d3aa2e4f8a13696247fb9addfaf000dc14576e6ff88954e8d14686b"
+    },
+    "measurement_source_revision": "ccb872183f507e7c3734b359b507faf37f816178",
+    "report": {
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-context-mc03-20261025/attempt/matched-report.json",
+      "sha256": "8a91e9612322716909e314f439010d40769b5c17fd44f2ec11fc6724625c4841"
+    },
+    "runtime": {
+      "path": "/mnt/d/AI/LIBAPTA/outputs/meter-context-mc02-20261025/runtime-1/runtime.json",
+      "sha256": "bda8cd2d8254cf810d6d54caa3eba83ee3611839f0b18c541c025bbe3d15a22e"
+    },
+    "scope": {
+      "path": "/mnt/d/AI/LIBAPTA/outputs/context-anchor-matched-p5-20261024/c3-scope-final.json",
+      "sha256": "2e45d042ea7e8906fb8eb42c19623c491b913259c2be47f6d87240d5f65cefdf"
+    }
+  },
+  "historical_runtime_sha256": "bda8cd2d8254cf810d6d54caa3eba83ee3611839f0b18c541c025bbe3d15a22e",
+  "hypothesis": "Measure fixed-grid phase-point support separately from unchanged published-point support on the exposed saved generated MC-03 cohort",
+  "input_inventory": {
+    "path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc06-20261025/input-inventory.json",
+    "sha256": "34cbe4be125c27490fb7c22a1f3021b81dedf3dbc1bc3eb8098366d34bc43176"
+  },
+  "ledgers": {
+    "comparison": "candidate_vs_original_context",
+    "conditional_rates": "sum integer numerators and denominators; null when denominator zero",
+    "cross_grid_point_pairing": false,
+    "domains": [
+      "M",
+      "D",
+      "E"
+    ],
+    "left": "original_context",
+    "level_counts": {
+      "cohort": 1,
+      "group": 4,
+      "source": 100
+    },
+    "levels": [
+      "source",
+      "group",
+      "cohort"
+    ],
+    "new_support_is_shared_fix": false,
+    "old_D_loss_subset": "25 pre-existing windows, descriptive post-hoc subset only; retain full cohort",
+    "partition": [
+      "both_supported",
+      "left_only_supported",
+      "right_only_supported",
+      "neither_supported"
+    ],
+    "per_arm_subtotals": 630,
+    "point_counts_are_window_counts": false,
+    "right": "coupled_context",
+    "separate_E_ledgers": 315,
+    "shared_correctness_partition": [
+      "correct_both",
+      "fixes_on_both",
+      "breaks_on_both",
+      "incorrect_both"
+    ],
+    "strata": [
+      "all",
+      "reference_complete",
+      "reference_incomplete"
+    ],
+    "total_window_ledgers": 945,
+    "unchanged_M_D_ledgers": 630,
+    "unsupported_correctness": null
+  },
+  "legacy_grid_event_scoring_calls_allowed": 0,
+  "new_attempt_path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-phase-mc06-20261025/attempt",
+  "new_evaluation_api": "apta_meter_phase_evidence.evaluate_source",
+  "new_runtime_execution_profile_qualified": false,
+  "next": "MC-07: thin adapter and public operational preflight only; bind readiness before any saved interpretation dispatch",
+  "parent_snapshot_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+  "phases": [
+    "BIND",
+    "EXTRACT",
+    "INTERPRET",
+    "CLOSE"
+  ],
+  "preparation_output_path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc06-20261025",
+  "preparation_source_revision": "38842d0e85b2ef2ed1ce14507becf4d73df2ab24",
+  "preserved": {
+    "MC03": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+    "P3_support_veto": true,
+    "VERSION": "1.0.1",
+    "all_old_bytes_and_metrics": true
+  },
+  "projector_or_solver_calls_allowed": 0,
+  "readiness": {
+    "allowed_new_source_paths": [
+      "tools/apta_1_1_meter_phase_audit.py",
+      "tests/unit/apta_1_1_meter_phase_audit.py"
+    ],
+    "automatic_runtime_extension_or_package_installation": false,
+    "clean_pushed_source_and_launch_receipt_required": true,
+    "complete_loaded_runtime_profile_required": true,
+    "execution_authorized": false,
+    "new_entrypoint_hash_required": true,
+    "non_source_runtime_must_belong_to_parent_inventory": true,
+    "required_public_preflight": true
+  },
+  "registration_actions": {
+    "binding_check": {
+      "path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc06-20261025/binding-check.json",
+      "sha256": "33994fa9f179f389e8cb012cdf8ca724cf5e9060b5dba60e49eb9d231340c5fd"
+    },
+    "input_checksums_only": true,
+    "new_projection_calls": 0,
+    "new_scoring_calls": 0,
+    "per_source_labels_events_projections_scores_parsed": false
+  },
+  "resources": {
+    "new_attempt_and_external_outputs_bytes": 67108864,
+    "old_inputs_and_runtime_are_dependencies": true,
+    "outer_bookkeeping_seconds": 7200,
+    "phase_seconds": 1800,
+    "process_rss_kib": 262144,
+    "source_seconds": 60
+  },
+  "runtime_envelope": {
+    "path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc06-20261025/runtime-envelope.json",
+    "sha256": "aac11b4f07dbd56a65578ec10e849e7bbecd01cfde42b0c55c68a505f4d97489"
+  },
+  "scope_exclusions": [
+    "real_or_GTZAN_scoring",
+    "model_training_or_inference",
+    "new_corpus_or_holdout",
+    "native_or_consumer_activation",
+    "physical_P4",
+    "confidence_qualification",
+    "fresh_acceptance",
+    "release"
+  ],
+  "source_component_sha256": {
+    "tests/unit/apta_1_1_meter_phase.py": "c08bcf31a06072b6dd591e6c04abbf0ea84c445600316f4ddfb407e9dcf06c3b",
+    "tests/unit/apta_context_matched_oracle.py": "abe4f0698bf3ebb7506ee1edd33e291527e713c7402d1509154130810255f92c",
+    "tests/unit/apta_meter_phase_oracle.py": "410aad121e1b26de7e6f5021ce694c90038f0cd6f721b65b9e4e0d576f7ba99b",
+    "tools/apta_1_1_context_matched_evaluation.py": "c60c2b651323cd8134a8d64f57f4c1e6b08545e83631bbf4a43af5fdd475e810",
+    "tools/apta_1_1_context_matched_runner.py": "0f87c77db1765cdc621f6726f71f4798319769d4f3c0ee4ab27392e45b61d767",
+    "tools/apta_1_1_meter_context_runner.py": "ab344014381e2cff461a8e4aed8b2d7ce16ea38e25e1be38ebb682546f385d61",
+    "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89",
+    "tools/apta_meter_phase_evidence.py": "c8886c92328ef0d23c8372a4920f6a94d43fd5fae2b26d0d1b95b94a8519d28e",
+    "tools/apta_meter_phase_points.py": "3b9dd2786056094a731bab42d5b84c43a969a99e822dd3e9e672f389a616b73b"
+  },
+  "status": "REGISTERED_REQUIRES_PUBLIC_PREFLIGHT"
+}

@@ -413,9 +413,22 @@ canonical controls pass; empty E stays UNKNOWN, and points/windows remain distin
 Final suite0.512142s; self RSS21912KiB. No saved-cohort scoring or native activation.
 The [bound receipt](METER-PHASE-MC05-20261025.json) records exact components/evidence.
 MC-03 remains rejected; this is a host measurement diagnostic, not detector gain.
-**Next: MC-06, register a bounded saved-projection interpretation audit with exact
-source/runtime/input/output binding and paired strata/denominators before private
-data access. No old gate change, real replay or automatic promotion.**
+MC-06 now [registers the saved-generated interpretation audit](METER-PHASE-MC06-AUDIT-PROTOCOL.md)
+with a [fixed scope and binding record](METER-PHASE-MC06-AUDIT-PROTOCOL.json).
+Registration SHA-256:
+`ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44`.
+All415 old attempt files,3716 C3 input bindings and83 historical components are
+rehashed without parsing per-source labels/events/projections/scores. Exact old
+manifest/completion roots, a new external inventory and fresh output root are bound.
+M/D remain canonical; E gets separate window ledgers and point denominators.
+The [registration checks](METER-PHASE-MC06-REGISTRATION-20261025.json) record
+documentation/binding evidence only. No new code, suite, interpretation run or
+scoring occurs. The historical runtime is a dependency; the new execution path
+is **REGISTERED_REQUIRES_PUBLIC_PREFLIGHT**, with no launch authorization yet.
+**Next: MC-07, implement the thin saved-format adapter and public operational
+preflight; freeze its entrypoint/import/runtime hashes and clean pushed source
+before any separately dispatched saved-generated interpretation. No new worker
+framework, old gate change, real replay or automatic promotion.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
