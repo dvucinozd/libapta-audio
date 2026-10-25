@@ -1,0 +1,298 @@
+{
+  "active_phase": "PF-00",
+  "active_phase_status": "COMPLETE",
+  "active_phase_verdict": "SCOPE_PASS",
+  "branch": "rust-rewrite",
+  "checks": "Document/schema/link/source identity checks only; no C/Rust/model/hardware matrix rerun",
+  "consumer_snapshot": {
+    "files_pin_provider_unchanged": true,
+    "files_sha256": {
+      "docs/M1_RUST_ARCHITECTURE.md": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94",
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537",
+      "firmware-rust/crates/ruzina-apta-adapter/README.md": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8",
+      "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36",
+      "firmware-rust/crates/ruzina-track-analysis/src/lib.rs": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+    },
+    "ref": "fetched origin/main",
+    "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+  },
+  "date": "2026-10-26",
+  "deferred_runtime": [
+    "H1-P",
+    "H1-Q"
+  ],
+  "derived_capacity_example": {
+    "caveat": "Nominal regular lattice planning example; actual event count, Q32 endpoints, segment boundaries and memory still require checks",
+    "difference_to_explicit_capacity": 72,
+    "formula": "600 seconds * 300 beats/min / 60 seconds/min",
+    "maximum_source_frames": {
+      "44100": 26460000,
+      "48000": 28800000
+    },
+    "quarter_beats": 3000,
+    "status": "DERIVED_NOT_MEASURED"
+  },
+  "engineering_profile": {
+    "channels": [
+      1,
+      2
+    ],
+    "compressed_PCM_bridge": "required before claiming full MP3/FLAC product input coverage",
+    "first_vertical_test": "existing WAV/PCM path",
+    "maximum_explicit_beats": 3072,
+    "maximum_segments": 8,
+    "meter_changes": "unsupported in first profile",
+    "meters": [
+      "3/4",
+      "4/4"
+    ],
+    "over_limit": "explicit unsupported/capacity status; no truncation or fabricated full-source output",
+    "sample_rates_hz": [
+      44100,
+      48000
+    ],
+    "status": "selected initial qualification profile; not measured",
+    "tempo_bpm": {
+      "maximum": 300,
+      "minimum": 40
+    },
+    "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
+  },
+  "evidence_level": "source inspection and product-scope decisions",
+  "execution": {
+    "DSP_changed": false,
+    "consumer_files_changed": false,
+    "hardware_flashed": false,
+    "model_or_corpus_executed": false,
+    "native_feature_implemented": false,
+    "provider_activated": false,
+    "release_created": false,
+    "runtime_prepared": false,
+    "weights_read": false
+  },
+  "format": "libapta-product-first-status-1",
+  "historical_protocols_results_unchanged": true,
+  "next": {
+    "action": "Inventory and determine exact-device memory/storage/lifetime and latency/cancellation budgets",
+    "independent_ready_phase": "PF-02",
+    "large_port_allowed": false,
+    "phase": "PF-01"
+  },
+  "open_decisions": [
+    {
+      "id": "PF01-RESOURCES",
+      "owner": "engineering and product owner",
+      "required": [
+        "exact_device_revision",
+        "internal_RAM_reserve",
+        "PSRAM_reserve",
+        "model_storage",
+        "stack_and_future_channel_overhead",
+        "two_output_and_pending_retained_banks",
+        "first_useful_final_result_latency",
+        "processing_seconds_per_audio_minute",
+        "cancel_deadline"
+      ],
+      "state": "UNKNOWN",
+      "value": null
+    },
+    {
+      "id": "PF02-CONTRACT",
+      "owner": "engineering; product owner for changed semantics",
+      "state": "NOT_RUN"
+    },
+    {
+      "id": "PF03-ROUTE",
+      "owner": "engineering; explicit owner decision for new model or offload",
+      "state": "NOT_RUN"
+    },
+    {
+      "id": "PF04-ALGORITHM",
+      "owner": "expert specification before implementation",
+      "state": "NOT_RUN"
+    }
+  ],
+  "phases": [
+    {
+      "depends_on": [],
+      "id": "PF-00",
+      "state": "COMPLETE",
+      "verdict": "SCOPE_PASS"
+    },
+    {
+      "depends_on": [
+        "PF-00"
+      ],
+      "id": "PF-01",
+      "state": "READY",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-00"
+      ],
+      "id": "PF-02",
+      "state": "READY",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-00",
+        "PF-01",
+        "PF-02"
+      ],
+      "id": "PF-03",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-03"
+      ],
+      "id": "PF-04",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-04"
+      ],
+      "id": "PF-05",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-05"
+      ],
+      "id": "PF-06",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-06"
+      ],
+      "id": "PF-07",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-07"
+      ],
+      "id": "PF-08",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-08"
+      ],
+      "id": "PF-09",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-09"
+      ],
+      "id": "PF-10",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-10"
+      ],
+      "id": "PF-11",
+      "state": "NOT_RUN",
+      "verdict": null
+    },
+    {
+      "depends_on": [
+        "PF-08"
+      ],
+      "id": "PF-12",
+      "state": "CONDITIONAL_NOT_RUN",
+      "verdict": null
+    }
+  ],
+  "plan": {
+    "path": "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json",
+    "sha256": "0e8c9709aa5034879ed362f81c0e54cfb4d86504d566d1d2902d8c9d7c86a682"
+  },
+  "product_scope": {
+    "architecture": "standalone M1 ESP32-P4; stopped-deck",
+    "architecture_basis": "Accepted product-first direction and current consumer architecture",
+    "calibrated_confidence_required": false,
+    "desktop_preanalysis_required": false,
+    "existing_accepted_analysis_policy": "preserve; do not replace",
+    "formats_required": [
+      "MP3",
+      "WAV",
+      "FLAC"
+    ],
+    "goal": "A native Rust M1 analysis",
+    "key_required": false,
+    "maximum_source_seconds": 600,
+    "playback_start_policy": "cancel analysis",
+    "production_activation": "gated by upstream embedded/release evidence and M1R-P1-001",
+    "scope_B_required": false,
+    "whole_source_required": true
+  },
+  "real_execution_readiness": "NOT_READY",
+  "reviewed_source_sha256": {
+    "docs/rust/DENSE-DECODER-DD05-20261023.md": "cfaa37c35a0d2283fda5faec2b2baf187e68c154cb6c44cb736dc0770ab2a16d",
+    "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
+    "rust/README.md": "fb45a8fca1175a02a0d4972a201926f4fcf84a0e3447bc16002c4f7181d24aa3",
+    "rust/src/global_analysis.rs": "8b29a2cccd42166c431a86c74e71710d6de82bb25eaf43c049d0b43c1bc07a8a",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "rust/src/session.rs": "0846c321fffe100354c85430c292adc8a5cfa773fc49f7e2597219d1c5b74b0a",
+    "rust/src/tempo.rs": "93eab112477179f176746a16d10872d35d395efd991c24f6c8ea3abf342fe086",
+    "rust/src/wav.rs": "cf4da4482894db99130bbcd89bd22d90b17c06f51c847820fd8b377e3493f1dc",
+    "rust/src/waveform.rs": "0d6c9ca94493b1e328737dd4f8df339faea693d7fec8dbc09ef3006461c7e8cc"
+  },
+  "scope_document": {
+    "path": "docs/rust/PRODUCT-SCOPE.md",
+    "sha256": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98"
+  },
+  "scope_gate_checks": [
+    "user_mandatory_outputs_confirmed",
+    "user_duration_confirmed",
+    "current_consumer_contract_reviewed",
+    "source_capability_inventory_completed",
+    "initial_profile_and_missing_product_paths_explicit",
+    "no_offload_provider_or_C_ABI_scope_expansion",
+    "later_budget_and_algorithm_gates_explicit"
+  ],
+  "source_baseline": "0f19ec768ffcdcd30e579ef1265fb1809ad807c4",
+  "stable_version": "1.0.1",
+  "user_decisions": [
+    {
+      "date": "2026-10-26",
+      "deferred": [
+        "key",
+        "calibrated_confidence"
+      ],
+      "id": "PF00-OUTPUTS",
+      "source": "Direct user response choosing waveform/BPM/beatgrid/meter first; key/confidence later",
+      "status": "CONFIRMED",
+      "value": [
+        "waveform",
+        "BPM",
+        "beatgrid",
+        "meter_and_downbeat_phase"
+      ]
+    },
+    {
+      "date": "2026-10-26",
+      "id": "PF00-DURATION",
+      "source": "Direct user selection: 10 minutes recommended",
+      "status": "CONFIRMED",
+      "unit": "seconds",
+      "value": 600
+    }
+  ]
+}

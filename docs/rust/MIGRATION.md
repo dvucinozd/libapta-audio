@@ -6,16 +6,26 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: PF-00 of the [product-first implementation plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md)
-and its [machine-readable checklist](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json).**
-This plan-only checkpoint changes continuation priority: define the first
-deliverable, product budgets, grid contract and whole-pipeline feasibility before
-choosing one further experiment and its necessary runtime work. H1-P/H1-Q are
-deferred until PF-04 explicitly selects the needed runtime scope. Their original
-registration and all historical results remain unchanged. No PF phase, runtime
-preparation, model/corpus execution or product activation is performed by this plan.
-Native M1 delivery and full C replacement have separate completion criteria.
-The records below retain the preceding implementation/evidence history.
+**Current next: PF-01 of the [product-first implementation plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+PF-00 now completes the [first product scope](PRODUCT-SCOPE.md), with
+[mutable phase status and source bindings](PRODUCT-FIRST-STATUS.json), inspected
+from clean pushed source`0f19ec768ffcdcd30e579ef1265fb1809ad807c4`.
+The user selects waveform/BPM/beatgrid/meter first, with key/calibrated confidence
+later, and a maximum whole-source duration of600seconds. The existing direction
+is standalone stopped-deck M1/P4 analysis with playback cancellation and preserved
+accepted generations. The initial engineering profile is mono/stereo44100/48000Hz,
+40..300BPM and one full-source3/4 or4/4 meter, within existing8-segment/3072-explicit-
+beat capacities. MP3/FLAC decoded-PCM integration remains required; the first
+vertical test may use WAV. These are scope decisions and source facts, not new
+DSP, musical or physical qualification. Consumer origin/main remains inspected
+at`4a8c660183910b0950ae7ddabce9e8b395a2f10d`, without changing its checkout or pin.
+PF-01 must resolve numeric memory/storage/lifetime/latency/cancel budgets and
+exact-device evidence; they remain UNKNOWN. PF-02 is independently ready after
+PF-00. Real execution remains NOT_READY. H1-P/H1-Q stay deferred until PF-04
+selects the needed runtime scope. Original registrations/results remain unchanged;
+native M1 delivery and full C replacement retain separate completion criteria.
+The plan JSON records initial NOT_RUN states; PRODUCT-FIRST-STATUS.json owns
+subsequent progress. The records below retain preceding implementation history.
 
 The user-requested [detailed implementation plan](DENSE-DECODER-IMPLEMENTATION-PLAN-20261023.md)
 and [machine-readable plan](DENSE-DECODER-PLAN-20261023.json) define DD-00 through
