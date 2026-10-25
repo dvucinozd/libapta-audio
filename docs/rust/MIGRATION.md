@@ -448,10 +448,15 @@ All25 old boundary/incomplete D losses have E support/correctness in both arms;
 the old D counts538/513, veto and MC-03 rejection remain unchanged. No detector gain.
 Phases51.065/62.185s; worker RSS77392/77536KiB. This closes the generated meter-
 support investigation; no projection, model, real replay or native activation.
-**Next: H0 metadata-only scope and audit of the retained historical real runtime,
-following the repair plan. Bind identities/limits before opening that closure;
-compare dependency bytes without audio/labels/logits/inference/scoring. Preserve
-all frozen results; generated compatibility does not requalify real runtime.**
+H0 now [registers a metadata-only historical real-runtime audit](REAL-RUNTIME-H0-PROTOCOL.md)
+with [six pinned metadata roots and strict program-byte boundaries](REAL-RUNTIME-H0-PROTOCOL.json).
+The four public boundary fixtures pass without historical contents. Independent
+old hashes and as-of registration identities stay distinct; project/data bindings
+are excluded from runtime reads, and missing loader coverage remains UNKNOWN.
+**Next: execute H0 from the clean pushed registration, compare permitted runtime
+bytes twice and publish aggregate drift/coverage evidence. No audio, labels,
+logits, weights, model import/inference/scoring or real replay; all old results
+remain frozen. Generated compatibility does not requalify real runtime.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen

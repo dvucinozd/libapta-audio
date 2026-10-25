@@ -1,0 +1,135 @@
+{
+  "attempt_path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/attempt",
+  "authority_sha256": {
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/COUPLED-TIME-R5-REPAIR-PLAN-20261024.md": "b6bb9c4e8cfd60502dfca96d087521dd24d2d74f0d448dc9a4decbf185ecaf8e",
+    "docs/rust/COUPLED-TIME-RUNNER-V2-R4-20261024.md": "c9716fbbce9c0bfdae343fc2a117126a171afe50719773553c33c247c3a00c5b",
+    "docs/rust/DENSE-DECODER-DD05-20261023.json": "40b3ac60c3e19d7bdb747be78c5f345d7ec96f2c7c8938c2f55dc6925ce37b59",
+    "docs/rust/METER-PHASE-MC08-20261025.json": "c66a7d44c77c3caa249daf87cd148d6b9220d0ed6522720a0f90999df61287b5",
+    "docs/rust/METER-PHASE-MC08-20261025.md": "78bfdd0021978729fd258aba486872de0fcdd7a0599ae5b2b52e8867696938b2",
+    "docs/rust/NEURAL-DENSE-CAPTURE-PROTOCOL.json": "28490ab1983cac6abd011923c5f4e78d3e7bf5096fdb119a102c386e1de62685",
+    "docs/rust/NEURAL-DENSE-RESULT-20261023.json": "0a7a519bd32eb6ce1df508010b3ec43f509a36f0f058ac8a83055b591fbbe62c",
+    "docs/rust/NEURAL-REFERENCE-RESULT-20261022.json": "d571ab0d3849210e0732c81ef573af65d667a0c0819448823750f6eec017fe15",
+    "docs/rust/REAL-RUNTIME-H0-PROTOCOL.md": "0b2c8793335366a024feea63bd0aa8a21d18207d9e194a2ee211adb9a951128c"
+  },
+  "automatic_retry": false,
+  "current_filesystem_mismatch_is_diagnostic": true,
+  "date": "2026-10-25",
+  "execution_requalification": false,
+  "experiment_root": "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-reference-20261022",
+  "forbidden": [
+    "audio",
+    "reference_labels",
+    "raw_logits",
+    "per_source_events_or_scores",
+    "model_weights",
+    "inference",
+    "training",
+    "scoring",
+    "historical_venv_execution",
+    "package_installation",
+    "old_freeze_mutation",
+    "real_replay"
+  ],
+  "format": "libapta-real-runtime-h0-metadata-registration-1",
+  "generated_zlib_context": {
+    "is_real_expected_hash": false,
+    "old": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892",
+    "subsequent": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242"
+  },
+  "historical_source_revisions": {
+    "decoder_construct_completion": "8e27cf1495cc5d496a3c251b0e5c825c56dc81d6",
+    "decoder_construct_freeze": "8e27cf1495cc5d496a3c251b0e5c825c56dc81d6",
+    "decoder_evaluation_freeze": "8e27cf1495cc5d496a3c251b0e5c825c56dc81d6",
+    "dense_capture_freeze": "297284933e922a669f65b8939b824da7b9e6f740",
+    "neural_comparison_freeze": "f00d482f775c51621ca03136d6e4941232cf24f4"
+  },
+  "inspector_path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/audit_runtime.py",
+  "inspector_sha256": "891da7f1258558c6efa84fb994796432fd163fc2d2daee8dfcd08a188e512275",
+  "interpreter_paths": [
+    "/usr/bin/python3.12",
+    "/usr/local/bin/python3.12"
+  ],
+  "limits": {
+    "audit_seconds": 1800,
+    "bookkeeping_seconds": 7200,
+    "closeout_seconds": 1800,
+    "hard_AS_bytes": 268435456,
+    "new_external_bytes": 67108864,
+    "per_hash_seconds": 60,
+    "process_rss_kib": 262144
+  },
+  "metadata_roots": {
+    "beat_this_worker_metadata": {
+      "bytes": 50634,
+      "independent_registered_hash": true,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-reference-20261022/comparison-source-domain/beat_this/report.json",
+      "sha256": "23affc0f8223303c2507f115c5a4ecc4b29fe631454a8c1e355e87f63417374d"
+    },
+    "decoder_construct_completion": {
+      "bytes": 104632,
+      "independent_registered_hash": true,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/dense-decoder-v1/candidates-attempt-1/candidates-frozen.private.json",
+      "sha256": "26c1d190a089421b2364c57ece5d2a3d36d55c18c187fbf300f7baf3fa0880f6"
+    },
+    "decoder_construct_freeze": {
+      "bytes": 219987,
+      "independent_registered_hash": false,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/dense-decoder-v1/candidates-attempt-1/freeze.private.json",
+      "sha256": "ac6dd7e4f95ff2ff2e405176e640cf9e9ba360b4bb8e84a38e05792b33b50985"
+    },
+    "decoder_evaluation_freeze": {
+      "bytes": 615751,
+      "independent_registered_hash": false,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/dense-decoder-v1/evaluation-attempt-1/freeze.private.json",
+      "sha256": "6847f73984953551bcaa36da8ed657fd618fc5a029fa9dcf765c9244607b2b0f"
+    },
+    "dense_capture_freeze": {
+      "bytes": 2567570,
+      "independent_registered_hash": false,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-dense-20261023/attempt/freeze.private.json",
+      "sha256": "2bb925f97d86dbecd22023cb0d7978d4f0fcfa77172d30c5e547b6001161277f"
+    },
+    "neural_comparison_freeze": {
+      "bytes": 2513016,
+      "independent_registered_hash": true,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-reference-20261022/comparison-source-domain/freeze.private.json",
+      "sha256": "0e0ab33d990e40253d61a6a39758fc30c33510238e02ad58d1467b7fa3d5e3ef"
+    }
+  },
+  "model_or_data_contents_hashed_before_registration": false,
+  "mutation_during_audit_is_INVALID": true,
+  "output_root": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025",
+  "preparation_baseline": "80c86eadbb687e9dfc39b763f01e454e4d1e5371",
+  "protected_roots": [
+    "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-reference-20261022",
+    "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-dense-20261023",
+    "/home/daniel/.local/share/libapta-audio/rust-rewrite/dense-decoder-v1"
+  ],
+  "public_fixture_checks": {
+    "errors": 0,
+    "failures": 0,
+    "path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/public-tests.json",
+    "sha256": "e7c2750f2a979df6f2530bb047b5f7d351f97aa4a92f82d3877fd35e483e3209",
+    "skips": 0,
+    "tests": 4
+  },
+  "reviewed_source_sha256": {
+    "tools/apta_1_1_context_matched_runner.py": "0f87c77db1765cdc621f6726f71f4798319769d4f3c0ee4ab27392e45b61d767",
+    "tools/apta_1_1_dense_decoder.py": "7ab7a427b5270cadc43bfbc678a5efcc71cc89570e6d54062b228bc8a5b12c93",
+    "tools/apta_1_1_neural_comparison.py": "2968dbdb7b854003d1d938c089ab5bce1a777d6fad03480bb0211601ff78a3f7",
+    "tools/apta_1_1_neural_dense_capture.py": "de74c5dccab08018ee6ad70ec47024f96343c29c7baceb048ffd47721075c8ec",
+    "tools/apta_1_1_neural_inference.py": "8fafc7b22268700ee2b822c7877c47035597394b8d9571ae76243ad249bfd2d8",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+  },
+  "roots_contents_opened_before_registration": false,
+  "status": "REGISTERED_METADATA_ONLY",
+  "system_program_roots": [
+    "/usr/lib/python3.12",
+    "/usr/local/lib/python3.12",
+    "/usr/lib/x86_64-linux-gnu",
+    "/etc/python3.12"
+  ],
+  "version": "1.0.1",
+  "zlib_probe": "/usr/lib/x86_64-linux-gnu/libz.so.1.3"
+}
