@@ -394,10 +394,19 @@ All1200 projections independently replay;7560 ledgers/1260 subtotals and3716 inp
 bindings/415 unchanged attempt files verify. The [aggregate receipt](METER-CONTEXT-MC03-20261025.json)
 preserves all comparison/stratum/resource evidence. Phase42.779/45.367/87.825s;
 worker RSS/HWM22888/22920/192360KiB; attempt20458830bytes. No retry or code change.
-**Next: MC-04, read-only publication-witness/phase/partial-reference contract
-review. MC-00 freezes the candidate P1 witness, so extending fallback cannot
-alter these cases. Register any new hypothesis separately; preserve this rejection
-and the support veto. No real replay or promotion.**
+MC-04 now closes the [publication/phase/reference contract review](METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.md)
+with a [bound decision/proof record](METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.json).
+MTRD binds one owned point; the current consumer derives phase modulo numerator.
+Whole-bar witness shifts on the same valid grid preserve neutral phases but can
+change the single published-point reference mask. Equal ordinal residue across
+different grids does not prove physical phase equivalence. All83 component hashes
+and415 MC-03 attempt files remain unchanged; no projection/scoring/build runs.
+Decision: stop expanding MC-00 fallback and retain P3/MC-03 rejection/veto. Select
+a separate public phase-equivalence evidence diagnostic alongside the unchanged
+published-point channel, rather than moving a witness to rescue observed support.
+**Next: MC-05, register and implement the public-only fixed-grid phase-evidence
+companion with canonical per-point arithmetic and independent oracle. No old gate
+change, saved-cohort scoring, real replay or automatic promotion.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen

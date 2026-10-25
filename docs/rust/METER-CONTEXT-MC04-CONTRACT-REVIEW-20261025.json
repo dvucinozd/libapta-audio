@@ -1,0 +1,365 @@
+{
+  "confidence_qualified": false,
+  "consumer_changed": false,
+  "consumer_libapta_pin": "25d09de364e9507532c0508c838a8fecf0772d13",
+  "consumer_revision": "d000572c15b370702345f36d4dcc11a410b2f1de",
+  "consumer_source_sha256": {
+    "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48",
+    "firmware-rust/crates/ruzina-apta-adapter/README.md": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8",
+    "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36",
+    "firmware-rust/crates/ruzina-track-analysis/src/lib.rs": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+  },
+  "date": "2026-10-25",
+  "decision": "PRESERVE_REJECTION_AND_P3; SELECT_PUBLIC_PHASE_EQUIVALENCE_EVIDENCE_SPEC_AS_NEXT_DIAGNOSTIC",
+  "documentation_sha256": {
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.md": "242edffd31143ea424d8c0c5f3da493bd0a22dfbe3476b0c88dfef49f530edb2",
+    "docs/rust/MIGRATION.md": "04c8ac212d090817f7a32dd23dcccbb085e75a3294dd6e2a4c34408af8f34bef"
+  },
+  "evidence": {
+    "auditor": {
+      "path": "/mnt/d/AI/LIBAPTA/mc04-review.py",
+      "sha256": "cab704bb1c8907b36a52ea7b5976e2b18d60074b1ecac4b928f1eb32d8f3c1f6"
+    },
+    "consumer_files_branch_pin_provider_changed": false,
+    "consumer_libapta_pin": "25d09de364e9507532c0508c838a8fecf0772d13",
+    "consumer_revision": "d000572c15b370702345f36d4dcc11a410b2f1de",
+    "consumer_source_sha256": {
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48",
+      "firmware-rust/crates/ruzina-apta-adapter/README.md": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8",
+      "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36",
+      "firmware-rust/crates/ruzina-track-analysis/src/lib.rs": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+    },
+    "cross_grid_counterexample": {
+      "first_anchor_frame": 0,
+      "meter_numerator": 4,
+      "period_frames": 24000,
+      "physical_witness_positions_differ": true,
+      "same_ordinal_residue": true,
+      "second_anchor_frame": 6000,
+      "witness_ordinals": [
+        0,
+        0
+      ]
+    },
+    "format": "libapta-meter-context-mc04-review-audit-1",
+    "labels_reopened": false,
+    "mc03_downbeat_support_diagnosis": {
+      "downbeat_support_masks_reproduced": 1200,
+      "format": "libapta-mc03-downbeat-support-readonly-diagnosis-1",
+      "patterns": [
+        {
+          "coupled_meter_origin": "P1",
+          "coupled_published_point_relation": "BEFORE_REFERENCE",
+          "group": "boundary",
+          "original_meter_origin": "CONTEXT",
+          "reference_complete": 0,
+          "same_model_meter_phase_class": true,
+          "window_index": 0,
+          "windows": 25
+        }
+      ],
+      "projection_calls": 0,
+      "report_sha256": "8a91e9612322716909e314f439010d40769b5c17fd44f2ec11fc6724625c4841",
+      "scope_sha256": "2e45d042ea7e8906fb8eb42c19623c491b913259c2be47f6d87240d5f65cefdf",
+      "scoring_calls": 0,
+      "source_revision": "ccb872183f507e7c3734b359b507faf37f816178",
+      "status": "PASS",
+      "support_losses": 25,
+      "thresholds_changed": false
+    },
+    "mc03_receipt_sha256": "7a79424f1dc18e95651883d49ae3dfcfbc75b4db7222b5d4c4779bb590f494c9",
+    "mc03_report_sha256": "8a91e9612322716909e314f439010d40769b5c17fd44f2ec11fc6724625c4841",
+    "native_tests_or_consumer_build_run": false,
+    "new_algorithm_implemented": false,
+    "new_cohort_attempts": 0,
+    "partial_span_one_frame_discontinuity": {
+      "reference_span_frames": [
+        48000,
+        216000
+      ],
+      "single_point_support": [
+        false,
+        true
+      ],
+      "witness_frames": [
+        47999,
+        48000
+      ]
+    },
+    "preserved_mc03_attempt_files": 415,
+    "projector_calls": 0,
+    "public_algebra_identity_checks": 990,
+    "public_counterexamples": [
+      {
+        "anchor_q32": 0,
+        "denominator": 4,
+        "mtrd_whole_frames": [
+          0,
+          72000
+        ],
+        "name": "integer_3_4",
+        "native_builder_executed": false,
+        "numerator": 3,
+        "period_q32": 103079215104000,
+        "reference_span_frames": [
+          48000,
+          216000
+        ],
+        "same_neutral_beat_phases": true,
+        "single_point_reference_support": [
+          false,
+          true
+        ],
+        "window_frames": [
+          0,
+          240000
+        ],
+        "witness_ordinals": [
+          0,
+          3
+        ],
+        "witness_positions_q32": [
+          0,
+          309237645312000
+        ]
+      },
+      {
+        "anchor_q32": 0,
+        "denominator": 4,
+        "mtrd_whole_frames": [
+          0,
+          96000
+        ],
+        "name": "integer_4_4",
+        "native_builder_executed": false,
+        "numerator": 4,
+        "period_q32": 103079215104000,
+        "reference_span_frames": [
+          48000,
+          216000
+        ],
+        "same_neutral_beat_phases": true,
+        "single_point_reference_support": [
+          false,
+          true
+        ],
+        "window_frames": [
+          0,
+          240000
+        ],
+        "witness_ordinals": [
+          0,
+          4
+        ],
+        "witness_positions_q32": [
+          0,
+          412316860416000
+        ]
+      },
+      {
+        "anchor_q32": 2147483648,
+        "denominator": 4,
+        "mtrd_whole_frames": [
+          0,
+          96001
+        ],
+        "name": "fractional_4_4",
+        "native_builder_executed": false,
+        "numerator": 4,
+        "period_q32": 103080646759765,
+        "reference_span_frames": [
+          48000,
+          216000
+        ],
+        "same_neutral_beat_phases": true,
+        "single_point_reference_support": [
+          false,
+          true
+        ],
+        "window_frames": [
+          0,
+          240000
+        ],
+        "witness_ordinals": [
+          0,
+          4
+        ],
+        "witness_positions_q32": [
+          2147483648,
+          412324734522708
+        ]
+      }
+    ],
+    "qualified_component_hashes_verified": 83,
+    "reviewed_source_sha256": {
+      "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.json": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+      "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.md": "b2aa185858636e3fc760a5c0b0b3ce3b5f74d82d3d70237299f6a2fda105e90c",
+      "docs/rust/METER-CONTEXT-MC03-20261025.json": "7a79424f1dc18e95651883d49ae3dfcfbc75b4db7222b5d4c4779bb590f494c9",
+      "docs/rust/METER-CONTEXT-MC03-20261025.md": "535a6fe54f10f57aa142b2121e471d98e33daccc9585072b1326fc8fd6952641",
+      "docs/rust/METER-CONTEXT-MC03-PROTOCOL.md": "46f1826aaf2924158333f44fd79abd89cf17a9119353b057270a08a6546b2be1",
+      "docs/rust/METER-CONTEXT-PROTOCOL.json": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+      "docs/rust/METER-CONTEXT-PROTOCOL.md": "c6aa61664b560c2a49324fc580a8925d60adfb30433408c1b9ae5a359600991d",
+      "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
+      "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+      "rust/src/native_validation.rs": "028707aa4998d9a2df060d052f9ce1c4d40a2cfea887fc0e0b3bc0566302f797",
+      "specification/APTA-1.1-DJ-SECTIONS.md": "c040e429f4dde4fea416f85d078fc0ee4853bdd4e93a6cdef0ee2e9d0c4b6be4",
+      "specification/beatgrid.md": "76e1eca77d9446ca0df19cbb920a18e70bd83d1493fe651a163f8567db1daed1",
+      "src/core/apta_grid_match_internal.h": "fe6d35c798d8bdf7e4940818eb8c0ef0424337d7a9d0ba5eb34f710a50055914",
+      "tools/apta_1_1_native_annotated_development.py": "47b2d70e0a222a07248d1860b02b53255557e0c9d3a660a0c1f3e1c8bcb1f1cc",
+      "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab",
+      "tools/apta_meter_context_projection.py": "99008695b289ccfb46fa7c0b0cb6833e61a2ec0176a6d5e4738cad31504d94ee"
+    },
+    "scorer_calls": 0,
+    "source_revision": "efcbc8318b16553856aabdb8485cb799f73cc0b6",
+    "status": "READ_ONLY_CONTRACT_REVIEW_VERIFIED",
+    "wall_seconds": 19.944628716
+  },
+  "evidence_sha256": {
+    "review.json": "eca5f5867119e9fd02a39a645502d61ad6623425c0cb0fd273e3fd0b11aae92d",
+    "review.resources.json": "d43b8b93e6d1e460eb2f90448bca85a6bffee77c28d144c07853a446848f8bf5",
+    "review.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "review.stdout": "a63515d36108844d7b81fb24aa7fd7210dca9783ee6be0938ed633b8ba5e6859"
+  },
+  "formal_acceptance": false,
+  "format": "libapta-meter-context-mc04-contract-review-1",
+  "fresh_unit_suite_run": false,
+  "independence": "UNRESOLVED",
+  "mc03_pair_verdict": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+  "native_activation": false,
+  "native_or_consumer_build_run": false,
+  "new_algorithm_implemented": false,
+  "new_cohort_attempts": 0,
+  "new_hypothesis_registered": false,
+  "next_public_contract": {
+    "c3_or_real_scoring_enabled": false,
+    "canonical_scorers_changed": false,
+    "capacities": "Retain MC-00 3/4 or 4/4, denominator4, exact Q32,3072 points,8 windows,1440000 frames,48000Hz; no signed-domain expansion by inference",
+    "construction_reference_access": false,
+    "domains_kept_separate": [
+      "M_meter_support",
+      "D_published_point_reference_support",
+      "E_phase_point_reference_support"
+    ],
+    "empty_reference_intersection": "Unsupported/UNKNOWN, with null conditional rates; never false certainty or a correctness fix",
+    "empty_window_all_correct": null,
+    "evaluation_reference_access_only": true,
+    "new_p3_verdict_enabled": false,
+    "new_phase_point_set": "All owned grid points with (ordinal-downbeat_ordinal) modulo numerator == 0, on the same verified grid",
+    "no_window_stitching_or_gap_filling": true,
+    "point_and_window_counts_distinct": true,
+    "publication_mutated": false,
+    "score_aggregation_proposal": "Use unchanged canonical per-point meter/downbeat arithmetic for every eligible point; report all counts and require all for an all-correct flag; never select the best point",
+    "stage": "MC-05 registration then public-only prototype",
+    "supported_phase_evidence": "Intersect that set with the inclusive reference beat span only in evaluation",
+    "window_support": "Nonempty E"
+  },
+  "next_steps": [
+    {
+      "exit": "No ambiguity between publication support and phase evidence; no new campaign authorization",
+      "order": 1,
+      "task": "Freeze MC-05 API, closed records, point/window/group/cohort denominators, source/grid identities, canonical score bindings and independent oracle before code"
+    },
+    {
+      "exit": "Original projection/meter/publication bytes unchanged; no I/O or reference-driven publication",
+      "order": 2,
+      "task": "Implement pure owned-phase-point extraction and evaluation-only companion using canonical per-point routines"
+    },
+    {
+      "exit": "Witness invariance proved within fixed grid, wrong/unknown evidence explicit, all eligible points retained",
+      "order": 3,
+      "task": "Check public same-grid equivalent witnesses, Q32 carries, wrong meter/phase, cross-grid non-equivalence, all/no/partial reference coverage, invalid inputs and input invariance with independent oracle"
+    },
+    {
+      "exit": "No reopening/reprojecting of MC-03; any later diagnostic uses a separate bound destination and cannot relabel its rejection or grant product acceptance",
+      "order": 4,
+      "task": "Review usefulness of the public diagnostic before separately registering any saved-projection interpretation audit"
+    }
+  ],
+  "options": [
+    {
+      "decision": "NOT_SELECTED",
+      "option": "Expand meter fallback again",
+      "reason": "Cannot alter a retained P1-owned candidate witness under MC-00"
+    },
+    {
+      "decision": "NOT_SELECTED",
+      "option": "Move publication to a convenient later/central point",
+      "reason": "Native phase may be equivalent, but partial-reference support is not guaranteed; no current product requirement justifies changing publication after the observed veto"
+    },
+    {
+      "decision": "REJECTED",
+      "option": "Restrict or relax the frozen P3 downbeat support gate",
+      "reason": "Would amend a closed experiment after its result"
+    },
+    {
+      "decision": "SELECTED_PUBLIC_SPEC_NEXT",
+      "option": "Separate published-point coverage from owned meter-phase evidence",
+      "reason": "Product phase semantics are witness-invariant on one fixed grid; retain the original published-point channel and report new evidence separately"
+    }
+  ],
+  "physical_p4": false,
+  "pinned_library_source_sha256": {
+    "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7"
+  },
+  "product_budgets": "UNKNOWN",
+  "projector_calls": 0,
+  "proof": {
+    "across_grid_ordinal_residue_is_sufficient": false,
+    "all_candidate_p1_witnesses_in_25_losses_are_frozen_by_mc00": true,
+    "both_witnesses_must_be_owned_bound_points": true,
+    "byte_or_generation_identity_implied": false,
+    "required_same_grid_geometry_revision_and_applicability": true,
+    "same_grid_phase_equivalence": "(b-(d+k*m)) rem_euclid m == (b-d) rem_euclid m",
+    "single_published_point_support_is_phase_invariant": false
+  },
+  "real_runtime_metadata": "NOT_AUDITED",
+  "release": false,
+  "resources": {
+    "failure": null,
+    "max_observed_process_rss_kib": 22388,
+    "peak_rss_kib_by_pid": {
+      "344": 16516,
+      "365": 22388,
+      "367": 4172,
+      "387": 5720,
+      "406": 4132,
+      "407": 5156,
+      "408": 5292,
+      "409": 5232,
+      "410": 5328,
+      "411": 4100,
+      "412": 5884
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 365,
+    "status": "PASS",
+    "supervisor_pid": 344,
+    "wall_seconds": 20.302903498
+  },
+  "review_sha256": "eca5f5867119e9fd02a39a645502d61ad6623425c0cb0fd273e3fd0b11aae92d",
+  "reviewed_source_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.json": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.md": "b2aa185858636e3fc760a5c0b0b3ce3b5f74d82d3d70237299f6a2fda105e90c",
+    "docs/rust/METER-CONTEXT-MC03-20261025.json": "7a79424f1dc18e95651883d49ae3dfcfbc75b4db7222b5d4c4779bb590f494c9",
+    "docs/rust/METER-CONTEXT-MC03-20261025.md": "535a6fe54f10f57aa142b2121e471d98e33daccc9585072b1326fc8fd6952641",
+    "docs/rust/METER-CONTEXT-MC03-PROTOCOL.md": "46f1826aaf2924158333f44fd79abd89cf17a9119353b057270a08a6546b2be1",
+    "docs/rust/METER-CONTEXT-PROTOCOL.json": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+    "docs/rust/METER-CONTEXT-PROTOCOL.md": "c6aa61664b560c2a49324fc580a8925d60adfb30433408c1b9ae5a359600991d",
+    "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+    "rust/src/native_validation.rs": "028707aa4998d9a2df060d052f9ce1c4d40a2cfea887fc0e0b3bc0566302f797",
+    "specification/APTA-1.1-DJ-SECTIONS.md": "c040e429f4dde4fea416f85d078fc0ee4853bdd4e93a6cdef0ee2e9d0c4b6be4",
+    "specification/beatgrid.md": "76e1eca77d9446ca0df19cbb920a18e70bd83d1493fe651a163f8567db1daed1",
+    "src/core/apta_grid_match_internal.h": "fe6d35c798d8bdf7e4940818eb8c0ef0424337d7a9d0ba5eb34f710a50055914",
+    "tools/apta_1_1_native_annotated_development.py": "47b2d70e0a222a07248d1860b02b53255557e0c9d3a660a0c1f3e1c8bcb1f1cc",
+    "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab",
+    "tools/apta_meter_context_projection.py": "99008695b289ccfb46fa7c0b0cb6833e61a2ec0176a6d5e4738cad31504d94ee"
+  },
+  "scorer_calls": 0,
+  "selected_axis": "measurement/interpretation diagnostic; no detector/publication/acceptance change",
+  "source_revision": "efcbc8318b16553856aabdb8485cb799f73cc0b6",
+  "status": "CONTRACT_REVIEW_COMPLETE",
+  "version": "1.0.1"
+}
