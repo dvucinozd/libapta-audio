@@ -1,0 +1,41 @@
+{
+  "baseline_revision": "1dd78470d8d741e31904765bf7b5f55d8740ac6c",
+  "bindings": {
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-PROTOCOL.json": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.json": "538bc147a3f11ea13de19701220166f98797bfab565f4d09969a4e9f8536de50",
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.md": "242edffd31143ea424d8c0c5f3da493bd0a22dfbe3476b0c88dfef49f530edb2",
+    "docs/rust/METER-CONTEXT-PROTOCOL.json": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+    "docs/rust/METER-PHASE-MC05-PROTOCOL.md": "5587276234c94e2b9c6335f077dbad53a69d54daf7446f3b2bf05afeda9c5bbd",
+    "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab",
+    "tools/apta_context_projection.py": "637fa7ea839528d5b0ab1471bace2aa656f74f6fb5ecbe783f8c1312d99048fb",
+    "tools/apta_meter_context_projection.py": "99008695b289ccfb46fa7c0b0cb6833e61a2ec0176a6d5e4738cad31504d94ee"
+  },
+  "campaign_authorized": false,
+  "date": "2026-10-25",
+  "format": "libapta-meter-phase-mc05-registration-1",
+  "frozen_p3_and_mc03_preserved": true,
+  "hypothesis": "Fixed-grid phase points separate phase evidence from single-publication reference support",
+  "implementation_paths": [
+    "tools/apta_meter_phase_points.py",
+    "tools/apta_meter_phase_evidence.py",
+    "tests/unit/apta_meter_phase_oracle.py",
+    "tests/unit/apta_1_1_meter_phase.py"
+  ],
+  "limits": {
+    "points_per_source": 3072,
+    "sample_rate": 48000,
+    "total_frames": 1440000,
+    "windows": 8
+  },
+  "physical_p4": false,
+  "private_scoring": false,
+  "product_activation": false,
+  "resources": {
+    "external_bytes": 67108864,
+    "process_rss_kib": 262144,
+    "source_seconds": 60,
+    "suite_seconds": 1800
+  },
+  "status": "REGISTERED_PUBLIC_ONLY",
+  "version": "1.0.1"
+}

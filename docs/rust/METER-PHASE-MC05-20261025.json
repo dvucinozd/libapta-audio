@@ -1,0 +1,90 @@
+{
+  "baseline_revision": "1dd78470d8d741e31904765bf7b5f55d8740ac6c",
+  "component_sha256": {
+    "docs/rust/METER-PHASE-MC05-20261025.md": "fa5b7b17c78e442aaaf2c0807b044b2411a0264da29b6dfcd2afc367d5f651f1",
+    "docs/rust/METER-PHASE-MC05-PROTOCOL.json": "c9104badbd1125eabe6a4140a707abd6331653878ed8260728ab05fdd22a2f9c",
+    "docs/rust/METER-PHASE-MC05-PROTOCOL.md": "5587276234c94e2b9c6335f077dbad53a69d54daf7446f3b2bf05afeda9c5bbd",
+    "docs/rust/MIGRATION.md": "bc62b966c3487d93711614233b56fe6bfd82e50113b96a192c5795c7c331548e",
+    "tests/unit/apta_1_1_meter_phase.py": "c08bcf31a06072b6dd591e6c04abbf0ea84c445600316f4ddfb407e9dcf06c3b",
+    "tests/unit/apta_meter_phase_oracle.py": "410aad121e1b26de7e6f5021ce694c90038f0cd6f721b65b9e4e0d576f7ba99b",
+    "tools/apta_meter_phase_evidence.py": "c8886c92328ef0d23c8372a4920f6a94d43fd5fae2b26d0d1b95b94a8519d28e",
+    "tools/apta_meter_phase_points.py": "3b9dd2786056094a731bab42d5b84c43a969a99e822dd3e9e672f389a616b73b"
+  },
+  "date": "2026-10-25",
+  "external_bytes": 14025,
+  "external_evidence_sha256": {
+    "canonical-controls.stderr": "80144f3bf12d071a1497821467ab02765712cb11da3f547a5e2b5cf79f938e9a",
+    "canonical-controls.stdout": "73a577b1154696f0efb60a504f831766d2a7c0a110d5b4a69c3ba208b1a093a9",
+    "protocol.md": "5587276234c94e2b9c6335f077dbad53a69d54daf7446f3b2bf05afeda9c5bbd",
+    "public-check-01.json": "2de909f079c699ed41ddc2be84ee9dce28e5ce4c92d3d180979918a0c7c836d4",
+    "public-check-01.stderr": "6e8d9ef0ab28adf98f6e87d228e126b0a278e1127b0d636e9797a96034fbed18",
+    "public-check-01.stdout": "2d7dd7dff261d41339efcfdd03ef74bf908e2e4af74dbeac419138933c66afcc",
+    "public-check-02.json": "8356ba61c430f16c55ad6356cd3ef207d1df9baa76ac098dd6b9ff3adb47651a",
+    "public-check-02.stderr": "741b66db9c9e9a2af9fd30c489d57b8dccbf2481893120ab0ab90d71f9a50015",
+    "public-check-02.stdout": "f0cf35d4b232a495aafed677cb26da45ef6d27c9c105cc40cff0926fe6973ab3",
+    "registration.json": "c9104badbd1125eabe6a4140a707abd6331653878ed8260728ab05fdd22a2f9c"
+  },
+  "format": "libapta-meter-phase-mc05-public-verification-1",
+  "next": "MC-06: register separately bound saved-projection interpretation audit; no audit authorized or executed by this receipt",
+  "public_checks": {
+    "errors": 0,
+    "failures": 0,
+    "full_record_oracle_comparisons": 234,
+    "max_call_including_oracle_seconds": 0.019536885000007942,
+    "registration_sha256": "c9104badbd1125eabe6a4140a707abd6331653878ed8260728ab05fdd22a2f9c",
+    "scope": "PUBLIC_ONLY",
+    "self_max_rss_kib": 21912,
+    "skips": 0,
+    "tests": 16,
+    "wall_seconds": 0.5121416990000114
+  },
+  "registration_sha256": "c9104badbd1125eabe6a4140a707abd6331653878ed8260728ab05fdd22a2f9c",
+  "resources": {
+    "fresh_process_call_timeout_seconds": 60,
+    "in_process_source_seconds_checked_after_return": true,
+    "inherited_caps": {
+      "external_bytes": 67108864,
+      "process_rss_kib": 262144,
+      "source_seconds": 60,
+      "suite_seconds": 1800
+    },
+    "per_process_address_space_ceiling_kib": 262144,
+    "product_budget_status": "UNKNOWN",
+    "suite_hard_timeout_seconds": 1800
+  },
+  "runtime": {
+    "executable": "/usr/bin/python3",
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]"
+  },
+  "scope": {
+    "confidence_qualified": false,
+    "frozen_authorities_unchanged": true,
+    "independence": "UNRESOLVED",
+    "mc03_verdict": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+    "new_detector": false,
+    "physical_p4": false,
+    "preexisting_tracked_change_only": "docs/rust/MIGRATION.md",
+    "private_inputs_or_labels_opened": false,
+    "product_activation": false,
+    "public_fixtures_only": true,
+    "real_runtime_H0": "NOT_AUDITED",
+    "rust_or_c_build": false,
+    "saved_cohort_scored": false
+  },
+  "status": "PUBLIC_IMPLEMENTATION_VERIFIED",
+  "unchanged_canonical_controls": {
+    "counts": {
+      "canonical_meter_comparisons": 6,
+      "meter_oracle_comparisons": 10,
+      "meter_supported": 9,
+      "meter_unsupported": 1
+    },
+    "errors": 0,
+    "failures": 0,
+    "max_source_seconds": 0.0,
+    "skips": 0,
+    "tests_run": 4
+  },
+  "version": "1.0.1"
+}

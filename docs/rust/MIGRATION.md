@@ -404,9 +404,18 @@ and415 MC-03 attempt files remain unchanged; no projection/scoring/build runs.
 Decision: stop expanding MC-00 fallback and retain P3/MC-03 rejection/veto. Select
 a separate public phase-equivalence evidence diagnostic alongside the unchanged
 published-point channel, rather than moving a witness to rescue observed support.
-**Next: MC-05, register and implement the public-only fixed-grid phase-evidence
-companion with canonical per-point arithmetic and independent oracle. No old gate
-change, saved-cohort scoring, real replay or automatic promotion.**
+MC-05 now verifies the [public fixed-grid phase-evidence companion](METER-PHASE-MC05-20261025.md)
+under the [preimplementation contract](METER-PHASE-MC05-PROTOCOL.md) and
+[registration](METER-PHASE-MC05-PROTOCOL.json). Pure reference-free extraction and
+evaluation-only canonical per-point scoring preserve the original published M/D
+channel. All16 public tests/234 full-record oracle comparisons and four unchanged
+canonical controls pass; empty E stays UNKNOWN, and points/windows remain distinct.
+Final suite0.512142s; self RSS21912KiB. No saved-cohort scoring or native activation.
+The [bound receipt](METER-PHASE-MC05-20261025.json) records exact components/evidence.
+MC-03 remains rejected; this is a host measurement diagnostic, not detector gain.
+**Next: MC-06, register a bounded saved-projection interpretation audit with exact
+source/runtime/input/output binding and paired strata/denominators before private
+data access. No old gate change, real replay or automatic promotion.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
