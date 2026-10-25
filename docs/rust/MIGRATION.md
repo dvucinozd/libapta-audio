@@ -323,9 +323,13 @@ event or score leaves. Derived runtime closure matches the unchanged C3 parent
 bytes and binds actual loaded source/runtime before/after phases. All historical
 authorities remain unchanged. This is public operational evidence only; fixed
 C3 matched comparison and real-runtime H0 remain unrun.
-**Next: P6, separately register one matched comparison on the fixed generated C3
-scope, binding runtime/preflight/components/new destination; commit/push and
-verify clean matching source before dispatch. No real replay.**
+P6 now registers [one fixed generated comparison](CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-PROTOCOL.md)
+and its [exact generated-scope identity](CONTEXT-ANCHOR-MATCHED-EVALUATION-GENERATED-SCOPE.json).
+The73 P5-qualified components, fixed3716-file C3 closure and derived runtime remain
+unchanged. This registration permits one fresh PROJECT/VERIFY/EVALUATE attempt
+only after commit/push and clean matching source verification; it records no result.
+**Next: execute the single registered P6 comparison and publish its complete
+outcome or preserved INVALID state. No real replay or automatic retry.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
