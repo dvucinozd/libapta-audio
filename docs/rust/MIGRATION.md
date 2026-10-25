@@ -436,10 +436,22 @@ hard256MiB worker AS limit in addition to existing deadlines/RSS/byte checks.
 Phase86.802/236.593s; worker RSS/HWM77048/76892KiB. The initial negative-link
 harness failure, successful19-test run and final hardening/22-test run are retained;
 no MC-05, P3 or old-result bytes changed. MC-03 remains rejected.
-**Next: MC-08, bind the actual clean pushed launch SHA/readiness/runtime/output,
-then execute one registered saved-generated interpretation audit under MC-06.
-Independently close parity/ledger/conservation/input proofs and publish aggregates;
-on INVALID/incomplete stop without retry. No real replay or automatic promotion.**
+MC-08 now completes [one saved-generated interpretation audit](METER-PHASE-MC08-20261025.md)
+on clean pushed source`115ff67265973f1299e913bc93910ff8d7f7fc9f`, with
+[aggregate evidence](METER-PHASE-MC08-20261025.json). All100 sources/600 windows,
+1200 projections,945 ledgers and630 subtotals close without retry. Independent
+checks cover1200 original cells,3881 point rows,630 old M/D ledgers,315 E ledgers,
+315 transition tables and unchanged415 old/3716 input/210 new attempt files.
+E supports583 windows in both arms, all supported phase points correct;17 windows
+stay UNKNOWN. Original/coupled E-point denominators1891/1865 remain separate.
+All25 old boundary/incomplete D losses have E support/correctness in both arms;
+the old D counts538/513, veto and MC-03 rejection remain unchanged. No detector gain.
+Phases51.065/62.185s; worker RSS77392/77536KiB. This closes the generated meter-
+support investigation; no projection, model, real replay or native activation.
+**Next: H0 metadata-only scope and audit of the retained historical real runtime,
+following the repair plan. Bind identities/limits before opening that closure;
+compare dependency bytes without audio/labels/logits/inference/scoring. Preserve
+all frozen results; generated compatibility does not requalify real runtime.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen

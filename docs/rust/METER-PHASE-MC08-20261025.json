@@ -1,0 +1,2845 @@
+{
+  "C_or_Rust_build": false,
+  "branch": "rust-rewrite",
+  "bundle": {
+    "path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc08-20261025/launch-inputs/bundle.json",
+    "sha256": "04a70181fa0aed8b6cbf7fd9a45d5dbd48c1c56fe2f221a5300a09c9c249c2c4"
+  },
+  "closeout": {
+    "E_set_oracle_ledgers": 315,
+    "aggregate_ledgers": [
+      {
+        "domain": "M",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 150,
+            "breaks_on_both": 0,
+            "correct_both": 150,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 150,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 150,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 150,
+            "numerator": 150
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 150,
+            "numerator": 150
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 125,
+            "breaks_on_both": 0,
+            "correct_both": 125,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 125,
+            "left_only_correct": 25,
+            "left_only_supported": 25,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 125,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 125,
+            "numerator": 125
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 125,
+            "numerator": 125
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 150,
+            "breaks_on_both": 0,
+            "correct_both": 150,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 150,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 150,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 150,
+            "numerator": 150
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 150,
+            "numerator": 150
+          },
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 100,
+            "breaks_on_both": 0,
+            "correct_both": 100,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 100,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 100,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 100,
+            "breaks_on_both": 0,
+            "correct_both": 100,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 100,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 100,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 100,
+            "breaks_on_both": 0,
+            "correct_both": 100,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 100,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 100,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 50,
+            "breaks_on_both": 0,
+            "correct_both": 50,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 50,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 50,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 50,
+            "numerator": 50
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 50,
+            "numerator": 50
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 25,
+            "breaks_on_both": 0,
+            "correct_both": 25,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 25,
+            "left_only_correct": 25,
+            "left_only_supported": 25,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 25,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 25,
+            "numerator": 25
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 25,
+            "numerator": 25
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "boundary",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 50,
+            "breaks_on_both": 0,
+            "correct_both": 50,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 50,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 50,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 50,
+            "numerator": 50
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 50,
+            "numerator": 50
+          },
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 142,
+            "breaks_on_both": 0,
+            "correct_both": 142,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 142,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 8,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 142,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 142,
+            "breaks_on_both": 0,
+            "correct_both": 142,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 142,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 8,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 142,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 142,
+            "breaks_on_both": 0,
+            "correct_both": 142,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 142,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 8,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 142,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 94,
+            "breaks_on_both": 0,
+            "correct_both": 94,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 94,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 6,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 94,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 94,
+            "numerator": 94
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 94,
+            "numerator": 94
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 94,
+            "breaks_on_both": 0,
+            "correct_both": 94,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 94,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 6,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 94,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 94,
+            "numerator": 94
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 94,
+            "numerator": 94
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 94,
+            "breaks_on_both": 0,
+            "correct_both": 94,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 94,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 6,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 94,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 94,
+            "numerator": 94
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 94,
+            "numerator": 94
+          },
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 48,
+            "breaks_on_both": 0,
+            "correct_both": 48,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 48,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 2,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 48,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 48,
+            "numerator": 48
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 48,
+            "numerator": 48
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 48,
+            "breaks_on_both": 0,
+            "correct_both": 48,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 48,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 2,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 48,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 48,
+            "numerator": 48
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 48,
+            "numerator": 48
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "constant",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 48,
+            "breaks_on_both": 0,
+            "correct_both": 48,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 48,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 2,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 48,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 48,
+            "numerator": 48
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 48,
+            "numerator": 48
+          },
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 150,
+            "breaks_on_both": 0,
+            "correct_both": 150,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 150,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 150,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 150,
+            "numerator": 150
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 150,
+            "numerator": 150
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 125,
+            "breaks_on_both": 0,
+            "correct_both": 125,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 125,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 25,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 125,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 125,
+            "numerator": 125
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 125,
+            "numerator": 125
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 149,
+            "breaks_on_both": 0,
+            "correct_both": 149,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 149,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 1,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 149,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 149,
+            "numerator": 149
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 149,
+            "numerator": 149
+          },
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 100,
+            "breaks_on_both": 0,
+            "correct_both": 100,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 100,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 100,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 100,
+            "breaks_on_both": 0,
+            "correct_both": 100,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 100,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 100,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 100,
+            "breaks_on_both": 0,
+            "correct_both": 100,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 100,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 100,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 100,
+            "numerator": 100
+          },
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 50,
+            "breaks_on_both": 0,
+            "correct_both": 50,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 50,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 0,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 50,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 50,
+            "numerator": 50
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 50,
+            "numerator": 50
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 25,
+            "breaks_on_both": 0,
+            "correct_both": 25,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 25,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 25,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 25,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 25,
+            "numerator": 25
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 25,
+            "numerator": 25
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "jitter",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 49,
+            "breaks_on_both": 0,
+            "correct_both": 49,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 49,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 1,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 49,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 49,
+            "numerator": 49
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 49,
+            "numerator": 49
+          },
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 143,
+            "breaks_on_both": 0,
+            "correct_both": 143,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 143,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 7,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 143,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 143,
+            "numerator": 143
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 143,
+            "numerator": 143
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 121,
+            "breaks_on_both": 0,
+            "correct_both": 121,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 121,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 29,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 121,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 121,
+            "numerator": 121
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 121,
+            "numerator": 121
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 142,
+            "breaks_on_both": 0,
+            "correct_both": 142,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 142,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 8,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 142,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 150
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 142,
+            "numerator": 142
+          },
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 96,
+            "breaks_on_both": 0,
+            "correct_both": 96,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 96,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 4,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 96,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 96,
+            "numerator": 96
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 96,
+            "numerator": 96
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 96,
+            "breaks_on_both": 0,
+            "correct_both": 96,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 96,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 4,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 96,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 96,
+            "numerator": 96
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 96,
+            "numerator": 96
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 96,
+            "breaks_on_both": 0,
+            "correct_both": 96,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 96,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 4,
+            "reference_complete_windows": 100,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 96,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 100
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 96,
+            "numerator": 96
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 96,
+            "numerator": 96
+          },
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 47,
+            "breaks_on_both": 0,
+            "correct_both": 47,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 47,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 3,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 47,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 47,
+            "numerator": 47
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 47,
+            "numerator": 47
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 25,
+            "breaks_on_both": 0,
+            "correct_both": 25,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 25,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 25,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 25,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 25,
+            "numerator": 25
+          },
+          "level": "group",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 25,
+            "numerator": 25
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "ramp",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 46,
+            "breaks_on_both": 0,
+            "correct_both": 46,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 46,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 4,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 50,
+            "right_correct_on_both": 46,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 50
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 46,
+            "numerator": 46
+          },
+          "level": "group",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 46,
+            "numerator": 46
+          },
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 585,
+            "breaks_on_both": 0,
+            "correct_both": 585,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 585,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 15,
+            "reference_complete_windows": 400,
+            "reference_incomplete_windows": 200,
+            "right_correct_on_both": 585,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 600
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 585,
+            "numerator": 585
+          },
+          "level": "cohort",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 585,
+            "numerator": 585
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 513,
+            "breaks_on_both": 0,
+            "correct_both": 513,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 513,
+            "left_only_correct": 25,
+            "left_only_supported": 25,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 62,
+            "reference_complete_windows": 400,
+            "reference_incomplete_windows": 200,
+            "right_correct_on_both": 513,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 600
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 513,
+            "numerator": 513
+          },
+          "level": "cohort",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 513,
+            "numerator": 513
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 583,
+            "breaks_on_both": 0,
+            "correct_both": 583,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 583,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 17,
+            "reference_complete_windows": 400,
+            "reference_incomplete_windows": 200,
+            "right_correct_on_both": 583,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 600
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 583,
+            "numerator": 583
+          },
+          "level": "cohort",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 583,
+            "numerator": 583
+          },
+          "stratum": "all"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 390,
+            "breaks_on_both": 0,
+            "correct_both": 390,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 390,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 10,
+            "reference_complete_windows": 400,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 390,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 400
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 390,
+            "numerator": 390
+          },
+          "level": "cohort",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 390,
+            "numerator": 390
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 390,
+            "breaks_on_both": 0,
+            "correct_both": 390,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 390,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 10,
+            "reference_complete_windows": 400,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 390,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 400
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 390,
+            "numerator": 390
+          },
+          "level": "cohort",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 390,
+            "numerator": 390
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 390,
+            "breaks_on_both": 0,
+            "correct_both": 390,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 390,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 10,
+            "reference_complete_windows": 400,
+            "reference_incomplete_windows": 0,
+            "right_correct_on_both": 390,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 400
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 390,
+            "numerator": 390
+          },
+          "level": "cohort",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 390,
+            "numerator": 390
+          },
+          "stratum": "reference_complete"
+        }
+      },
+      {
+        "domain": "M",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 195,
+            "breaks_on_both": 0,
+            "correct_both": 195,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 195,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 5,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 200,
+            "right_correct_on_both": 195,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 200
+          },
+          "family": "meter",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 195,
+            "numerator": 195
+          },
+          "level": "cohort",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 195,
+            "numerator": 195
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "D",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 123,
+            "breaks_on_both": 0,
+            "correct_both": 123,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 123,
+            "left_only_correct": 25,
+            "left_only_supported": 25,
+            "legacy_native_unowned_meter_conflicts": 0,
+            "neither_supported": 52,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 200,
+            "right_correct_on_both": 123,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 200
+          },
+          "family": "downbeat",
+          "format": "libapta-context-matched-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 123,
+            "numerator": 123
+          },
+          "level": "cohort",
+          "protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+          "right_conditional_accuracy": {
+            "denominator": 123,
+            "numerator": 123
+          },
+          "scope": "GENERATED_C3_DIAGNOSTIC",
+          "stratum": "reference_incomplete"
+        }
+      },
+      {
+        "domain": "E",
+        "group": "all",
+        "ledger": {
+          "comparison": "candidate_vs_original_context",
+          "counts": {
+            "both_supported": 193,
+            "breaks_on_both": 0,
+            "correct_both": 193,
+            "fixes_on_both": 0,
+            "incorrect_both": 0,
+            "left_correct_on_both": 193,
+            "left_only_correct": 0,
+            "left_only_supported": 0,
+            "neither_supported": 7,
+            "reference_complete_windows": 0,
+            "reference_incomplete_windows": 200,
+            "right_correct_on_both": 193,
+            "right_only_correct": 0,
+            "right_only_supported": 0,
+            "windows": 200
+          },
+          "domain": "E",
+          "format": "libapta-meter-phase-E-ledger-1",
+          "left_conditional_accuracy": {
+            "denominator": 193,
+            "numerator": 193
+          },
+          "level": "cohort",
+          "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+          "right_conditional_accuracy": {
+            "denominator": 193,
+            "numerator": 193
+          },
+          "stratum": "reference_incomplete"
+        }
+      }
+    ],
+    "aggregate_subtotals": [
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 150,
+          "E_points": 375,
+          "E_windows": 150,
+          "K_points": 375,
+          "M_windows": 150,
+          "correct_points": 375,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "boundary",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 375,
+          "numerator": 375
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "111": 150
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 125,
+          "E_points": 350,
+          "E_windows": 150,
+          "K_points": 375,
+          "M_windows": 150,
+          "correct_points": 350,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "boundary",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 350,
+          "numerator": 350
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "101": 25,
+          "111": 125
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 100,
+          "E_points": 250,
+          "E_windows": 100,
+          "K_points": 250,
+          "M_windows": 100,
+          "correct_points": 250,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "boundary",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 250,
+          "numerator": 250
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "111": 100
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 100,
+          "E_points": 250,
+          "E_windows": 100,
+          "K_points": 250,
+          "M_windows": 100,
+          "correct_points": 250,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "boundary",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 250,
+          "numerator": 250
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "111": 100
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 50,
+          "E_points": 125,
+          "E_windows": 50,
+          "K_points": 125,
+          "M_windows": 50,
+          "correct_points": 125,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "boundary",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 125,
+          "numerator": 125
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "111": 50
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 25,
+          "E_points": 100,
+          "E_windows": 50,
+          "K_points": 125,
+          "M_windows": 50,
+          "correct_points": 100,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "boundary",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 100,
+          "numerator": 100
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "101": 25,
+          "111": 25
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 142,
+          "E_points": 484,
+          "E_windows": 142,
+          "K_points": 487,
+          "M_windows": 142,
+          "correct_points": 484,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "constant",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 484,
+          "numerator": 484
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "000": 8,
+          "111": 142
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 142,
+          "E_points": 484,
+          "E_windows": 142,
+          "K_points": 487,
+          "M_windows": 142,
+          "correct_points": 484,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "constant",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 484,
+          "numerator": 484
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "000": 8,
+          "111": 142
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 94,
+          "E_points": 319,
+          "E_windows": 94,
+          "K_points": 319,
+          "M_windows": 94,
+          "correct_points": 319,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "constant",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 319,
+          "numerator": 319
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "000": 6,
+          "111": 94
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 94,
+          "E_points": 319,
+          "E_windows": 94,
+          "K_points": 319,
+          "M_windows": 94,
+          "correct_points": 319,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "constant",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 319,
+          "numerator": 319
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "000": 6,
+          "111": 94
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 48,
+          "E_points": 165,
+          "E_windows": 48,
+          "K_points": 168,
+          "M_windows": 48,
+          "correct_points": 165,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "constant",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 165,
+          "numerator": 165
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "000": 2,
+          "111": 48
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 48,
+          "E_points": 165,
+          "E_windows": 48,
+          "K_points": 168,
+          "M_windows": 48,
+          "correct_points": 165,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "constant",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 165,
+          "numerator": 165
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "000": 2,
+          "111": 48
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 125,
+          "E_points": 538,
+          "E_windows": 149,
+          "K_points": 563,
+          "M_windows": 150,
+          "correct_points": 538,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "jitter",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 538,
+          "numerator": 538
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "100": 1,
+          "101": 24,
+          "111": 125
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 125,
+          "E_points": 537,
+          "E_windows": 149,
+          "K_points": 562,
+          "M_windows": 150,
+          "correct_points": 537,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "jitter",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 537,
+          "numerator": 537
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "100": 1,
+          "101": 24,
+          "111": 125
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 100,
+          "E_points": 370,
+          "E_windows": 100,
+          "K_points": 370,
+          "M_windows": 100,
+          "correct_points": 370,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "jitter",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 370,
+          "numerator": 370
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "111": 100
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 100,
+          "E_points": 369,
+          "E_windows": 100,
+          "K_points": 369,
+          "M_windows": 100,
+          "correct_points": 369,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "jitter",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 369,
+          "numerator": 369
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "111": 100
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 25,
+          "E_points": 168,
+          "E_windows": 49,
+          "K_points": 193,
+          "M_windows": 50,
+          "correct_points": 168,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "jitter",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 168,
+          "numerator": 168
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "100": 1,
+          "101": 24,
+          "111": 25
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 25,
+          "E_points": 168,
+          "E_windows": 49,
+          "K_points": 193,
+          "M_windows": 50,
+          "correct_points": 168,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "jitter",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 168,
+          "numerator": 168
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "100": 1,
+          "101": 24,
+          "111": 25
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 121,
+          "E_points": 494,
+          "E_windows": 142,
+          "K_points": 516,
+          "M_windows": 143,
+          "correct_points": 494,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "ramp",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 494,
+          "numerator": 494
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "000": 7,
+          "100": 1,
+          "101": 21,
+          "111": 121
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 121,
+          "E_points": 494,
+          "E_windows": 142,
+          "K_points": 516,
+          "M_windows": 143,
+          "correct_points": 494,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 50,
+          "windows": 150
+        },
+        "group": "ramp",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 494,
+          "numerator": 494
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "000": 7,
+          "100": 1,
+          "101": 21,
+          "111": 121
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 96,
+          "E_points": 351,
+          "E_windows": 96,
+          "K_points": 351,
+          "M_windows": 96,
+          "correct_points": 351,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "ramp",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 351,
+          "numerator": 351
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "000": 4,
+          "111": 96
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 96,
+          "E_points": 351,
+          "E_windows": 96,
+          "K_points": 351,
+          "M_windows": 96,
+          "correct_points": 351,
+          "reference_complete_windows": 100,
+          "reference_incomplete_windows": 0,
+          "windows": 100
+        },
+        "group": "ramp",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 351,
+          "numerator": 351
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "000": 4,
+          "111": 96
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 25,
+          "E_points": 143,
+          "E_windows": 46,
+          "K_points": 165,
+          "M_windows": 47,
+          "correct_points": 143,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "ramp",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 143,
+          "numerator": 143
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "000": 3,
+          "100": 1,
+          "101": 21,
+          "111": 25
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 25,
+          "E_points": 143,
+          "E_windows": 46,
+          "K_points": 165,
+          "M_windows": 47,
+          "correct_points": 143,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 50,
+          "windows": 50
+        },
+        "group": "ramp",
+        "level": "group",
+        "point_accuracy": {
+          "denominator": 143,
+          "numerator": 143
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "000": 3,
+          "100": 1,
+          "101": 21,
+          "111": 25
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 538,
+          "E_points": 1891,
+          "E_windows": 583,
+          "K_points": 1941,
+          "M_windows": 585,
+          "correct_points": 1891,
+          "reference_complete_windows": 400,
+          "reference_incomplete_windows": 200,
+          "windows": 600
+        },
+        "group": "all",
+        "level": "cohort",
+        "point_accuracy": {
+          "denominator": 1891,
+          "numerator": 1891
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "000": 15,
+          "100": 2,
+          "101": 45,
+          "111": 538
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 513,
+          "E_points": 1865,
+          "E_windows": 583,
+          "K_points": 1940,
+          "M_windows": 585,
+          "correct_points": 1865,
+          "reference_complete_windows": 400,
+          "reference_incomplete_windows": 200,
+          "windows": 600
+        },
+        "group": "all",
+        "level": "cohort",
+        "point_accuracy": {
+          "denominator": 1865,
+          "numerator": 1865
+        },
+        "stratum": "all",
+        "support_patterns": {
+          "000": 15,
+          "100": 2,
+          "101": 70,
+          "111": 513
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 390,
+          "E_points": 1290,
+          "E_windows": 390,
+          "K_points": 1290,
+          "M_windows": 390,
+          "correct_points": 1290,
+          "reference_complete_windows": 400,
+          "reference_incomplete_windows": 0,
+          "windows": 400
+        },
+        "group": "all",
+        "level": "cohort",
+        "point_accuracy": {
+          "denominator": 1290,
+          "numerator": 1290
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "000": 10,
+          "111": 390
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 390,
+          "E_points": 1289,
+          "E_windows": 390,
+          "K_points": 1289,
+          "M_windows": 390,
+          "correct_points": 1289,
+          "reference_complete_windows": 400,
+          "reference_incomplete_windows": 0,
+          "windows": 400
+        },
+        "group": "all",
+        "level": "cohort",
+        "point_accuracy": {
+          "denominator": 1289,
+          "numerator": 1289
+        },
+        "stratum": "reference_complete",
+        "support_patterns": {
+          "000": 10,
+          "111": 390
+        }
+      },
+      {
+        "arm": "original",
+        "counts": {
+          "D_windows": 148,
+          "E_points": 601,
+          "E_windows": 193,
+          "K_points": 651,
+          "M_windows": 195,
+          "correct_points": 601,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 200,
+          "windows": 200
+        },
+        "group": "all",
+        "level": "cohort",
+        "point_accuracy": {
+          "denominator": 601,
+          "numerator": 601
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "000": 5,
+          "100": 2,
+          "101": 45,
+          "111": 148
+        }
+      },
+      {
+        "arm": "coupled",
+        "counts": {
+          "D_windows": 123,
+          "E_points": 576,
+          "E_windows": 193,
+          "K_points": 651,
+          "M_windows": 195,
+          "correct_points": 576,
+          "reference_complete_windows": 0,
+          "reference_incomplete_windows": 200,
+          "windows": 200
+        },
+        "group": "all",
+        "level": "cohort",
+        "point_accuracy": {
+          "denominator": 576,
+          "numerator": 576
+        },
+        "stratum": "reference_incomplete",
+        "support_patterns": {
+          "000": 5,
+          "100": 2,
+          "101": 70,
+          "111": 123
+        }
+      }
+    ],
+    "aggregate_transitions": [
+      {
+        "counts": {
+          "D10_E11_C11": 25,
+          "D11_E11_C11": 125
+        },
+        "group": "boundary",
+        "level": "group",
+        "old_D_loss_windows": 25,
+        "stratum": "all"
+      },
+      {
+        "counts": {
+          "D11_E11_C11": 100
+        },
+        "group": "boundary",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_complete"
+      },
+      {
+        "counts": {
+          "D10_E11_C11": 25,
+          "D11_E11_C11": 25
+        },
+        "group": "boundary",
+        "level": "group",
+        "old_D_loss_windows": 25,
+        "stratum": "reference_incomplete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 8,
+          "D11_E11_C11": 142
+        },
+        "group": "constant",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "all"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 6,
+          "D11_E11_C11": 94
+        },
+        "group": "constant",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_complete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 2,
+          "D11_E11_C11": 48
+        },
+        "group": "constant",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_incomplete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 1,
+          "D00_E11_C11": 24,
+          "D11_E11_C11": 125
+        },
+        "group": "jitter",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "all"
+      },
+      {
+        "counts": {
+          "D11_E11_C11": 100
+        },
+        "group": "jitter",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_complete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 1,
+          "D00_E11_C11": 24,
+          "D11_E11_C11": 25
+        },
+        "group": "jitter",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_incomplete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 8,
+          "D00_E11_C11": 21,
+          "D11_E11_C11": 121
+        },
+        "group": "ramp",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "all"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 4,
+          "D11_E11_C11": 96
+        },
+        "group": "ramp",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_complete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 4,
+          "D00_E11_C11": 21,
+          "D11_E11_C11": 25
+        },
+        "group": "ramp",
+        "level": "group",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_incomplete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 17,
+          "D00_E11_C11": 45,
+          "D10_E11_C11": 25,
+          "D11_E11_C11": 513
+        },
+        "group": "all",
+        "level": "cohort",
+        "old_D_loss_windows": 25,
+        "stratum": "all"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 10,
+          "D11_E11_C11": 390
+        },
+        "group": "all",
+        "level": "cohort",
+        "old_D_loss_windows": 0,
+        "stratum": "reference_complete"
+      },
+      {
+        "counts": {
+          "D00_E00_CNoneNone": 7,
+          "D00_E11_C11": 45,
+          "D10_E11_C11": 25,
+          "D11_E11_C11": 123
+        },
+        "group": "all",
+        "level": "cohort",
+        "old_D_loss_windows": 25,
+        "stratum": "reference_incomplete"
+      }
+    ],
+    "canonical_M_D_ledgers": 630,
+    "new_attempt_files_unchanged": 210,
+    "old_MC03_verdict": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+    "old_attempt_files_unchanged": 415,
+    "old_c3_bindings_rehashed": 3716,
+    "phases": {
+      "extract": {
+        "resource": {
+          "failure": null,
+          "max_observed_process_rss_kib": 175664,
+          "peak_rss_kib_by_pid": {
+            "427": 175664,
+            "448": 2064
+          },
+          "poll_seconds": 0.02,
+          "process_group_monitored": true,
+          "root_pid": 448,
+          "status": "PASS",
+          "supervisor_pid": 427,
+          "wall_seconds": 51.064714228999975
+        },
+        "worker_self_max_rss_kib": 77392
+      },
+      "interpret": {
+        "resource": {
+          "failure": null,
+          "max_observed_process_rss_kib": 175664,
+          "peak_rss_kib_by_pid": {
+            "427": 175664,
+            "471": 2056
+          },
+          "poll_seconds": 0.02,
+          "process_group_monitored": true,
+          "root_pid": 471,
+          "status": "PASS",
+          "supervisor_pid": 427,
+          "wall_seconds": 62.18478080699998
+        },
+        "worker_self_max_rss_kib": 77536
+      }
+    },
+    "point_counter_rows_verified": 3881,
+    "projector_calls": 0,
+    "report": {
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-phase-mc06-20261025/attempt/phase-report.json",
+      "sha256": "d8677d26af619e24ee8f431238ec57a3dddd155743e998f10758fb77da35e07b"
+    },
+    "same_grid_pair_counts": {
+      "different_or_absent_grid": 307,
+      "same_grid": 293
+    },
+    "scoring_calls": 0,
+    "self_max_rss_kib": 198772,
+    "source_cells_verified": 1200,
+    "source_revision": "115ff67265973f1299e913bc93910ff8d7f7fc9f",
+    "status": "INDEPENDENT_CLOSEOUT_PASS",
+    "subtotals_verified": 630,
+    "transitions_verified": 315,
+    "wall_seconds": 105.92772066500004
+  },
+  "closeout_supervision": {
+    "failure": null,
+    "max_observed_process_rss_kib": 73008,
+    "peak_rss_kib_by_pid": {
+      "511": 73008,
+      "512": 2056
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 512,
+    "status": "PASS",
+    "supervisor_pid": 511,
+    "wall_seconds": 123.96774333400003
+  },
+  "cohort": {
+    "complete": 400,
+    "groups": 4,
+    "incomplete": 200,
+    "saved_projections": 1200,
+    "sources": 100,
+    "subtotals": 630,
+    "window_ledgers": 945,
+    "windows": 600
+  },
+  "component_registry": {
+    "components_verified": 104,
+    "path": "docs/rust/METER-PHASE-MC07-PREFLIGHT.json",
+    "sha256": "94419640f0133d9aed12d75d3b4c60c82a86b809b91c69f00623bf1b1a353752"
+  },
+  "confidence_qualified": false,
+  "date": "2026-10-25",
+  "decision": "CLOSE_GENERATED_METER_SUPPORT_INVESTIGATION_PRESERVE_ALL_REJECTIONS",
+  "documentation_sha256": {
+    "docs/rust/METER-PHASE-MC08-20261025.md": "78bfdd0021978729fd258aba486872de0fcdd7a0599ae5b2b52e8867696938b2",
+    "docs/rust/MIGRATION.md": "d1bf30ee72ec4e972cb5ab57f67f50c2d1bed8683ae4ad30603c910943025da5"
+  },
+  "entrypoint_sha256": "cc107f288d17c130fb33ae11820a6ba22407bd993d25172b1acf1e695ea4eb4f",
+  "evidence_sha256": {
+    "closeout-launch.json": "ac5b79b0e1096e6cfdf82c1c3718bde8334ed92d84ec985434404d1e223b7542",
+    "closeout.json": "7dbc3de1c0e83e0bdf0ba0330714a23d24df9580873b114acb72cc9ebb8af90b",
+    "closeout.py": "4aa82a6ffe54d41cc4eeca7e57c009ccefbf588e0e7418cd75df3e23c543f924",
+    "closeout.resources.json": "e2e4a92abc6bee4b994ad4abeee94ebcacfcbac5182acc5f13d9c95e22910c34",
+    "closeout.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "closeout.stdout": "abc3051ab54adb4e077eb3f4095c9e82fa2c67d7f152a8115b3bea1cb86cb710",
+    "execute.py": "c16c8a157dd13ad8326d964b78187add69615e8bf430d5fdb88f8e0ca9b15e57",
+    "execution.json": "45ef87d9ce737222949fdb5150abb1f5305a66968bee2114ff3fccc5630ac699",
+    "execution.resources.json": "ad10ba52fc17650a300f4a85755749717294bbd399d6671f57395d78b6b51f14",
+    "execution.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "execution.stdout": "9b8f0c5d4313c6f8ad396cbc7c525e4be8c13d994b615d80202112d645e94b5d",
+    "launch.json": "d5c01fbe44dfdfe700a40b4ec0490346f739c6990ba95000352205d90bd49d17",
+    "launch.py": "e73ef8fac335f54105c7d466f60dc0f1d3a397a682a4a12ea755d9dbae38a5e8",
+    "prepared.json": "48b71ac556396f0b8e61d57dab7ba8f706a854b5b1123734a8d0b8413891549c"
+  },
+  "execution_supervision": {
+    "failure": null,
+    "max_observed_process_rss_kib": 72984,
+    "peak_rss_kib_by_pid": {
+      "425": 72984,
+      "426": 2056
+    },
+    "poll_seconds": 0.02,
+    "process_group_monitored": true,
+    "root_pid": 426,
+    "status": "PASS",
+    "supervisor_pid": 425,
+    "wall_seconds": 494.620182763
+  },
+  "execution_wall_seconds": 454.798519184,
+  "executor_self_max_rss_kib": 192836,
+  "external_accounting_roots": [
+    "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc06-20261025",
+    "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc07-20261025"
+  ],
+  "format": "libapta-meter-phase-mc08-saved-generated-interpretation-1",
+  "fresh_acceptance": false,
+  "independence": "UNRESOLVED",
+  "input_inventory": {
+    "path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc06-20261025/input-inventory.json",
+    "sha256": "34cbe4be125c27490fb7c22a1f3021b81dedf3dbc1bc3eb8098366d34bc43176"
+  },
+  "launch_remote_sha": "115ff67265973f1299e913bc93910ff8d7f7fc9f",
+  "launch_sha256": "d5c01fbe44dfdfe700a40b4ec0490346f739c6990ba95000352205d90bd49d17",
+  "launch_source_clean": true,
+  "native_activation": false,
+  "new_phase_evidence_evaluated": true,
+  "new_tests_run": 0,
+  "next": "H0: separately register and perform metadata-only historical real-runtime dependency audit; no audio/labels/logits/inference/scoring or real replay",
+  "old_grid_event_legacy_scoring": false,
+  "parent_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+  "physical_P4": false,
+  "preserved_MC03": "PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS",
+  "projector_or_model_calls": 0,
+  "readiness": {
+    "path": "/mnt/d/AI/LIBAPTA/libapta-audio/docs/rust/METER-PHASE-MC07-PREFLIGHT.json",
+    "sha256": "94419640f0133d9aed12d75d3b4c60c82a86b809b91c69f00623bf1b1a353752"
+  },
+  "real_or_GTZAN_scoring": false,
+  "real_runtime_H0": "NOT_AUDITED",
+  "registration_sha256": "ce5ad4a39829d06ccfe89b52330c1baa2d0cc0b080b64f6ea3865af9b625ac44",
+  "release": false,
+  "report": {
+    "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/meter-phase-mc06-20261025/attempt/phase-report.json",
+    "sha256": "d8677d26af619e24ee8f431238ec57a3dddd155743e998f10758fb77da35e07b"
+  },
+  "resources": {
+    "new_output_bytes": 67108864,
+    "outer_seconds": 7200,
+    "phase_seconds": 1800,
+    "process_rss_kib": 262144,
+    "source_seconds": 60
+  },
+  "retries": 0,
+  "runtime": {
+    "path": "/mnt/d/AI/LIBAPTA/outputs/meter-phase-mc07-20261025/runtime-03/runtime.json",
+    "sha256": "3fb1343c8fb181684303d9e2e7af7320e393250591613009dcf519df003073e4"
+  },
+  "saved_audit_invocations": 1,
+  "scientific_result": "MEASUREMENT_INTERPRETATION_ONLY_NO_NEW_CANDIDATE_VERDICT",
+  "source_revision": "115ff67265973f1299e913bc93910ff8d7f7fc9f",
+  "status": "SAVED_GENERATED_INTERPRETATION_COMPLETE",
+  "total_new_attempt_and_external_bytes_at_publication": 55480710,
+  "training_or_inference": false,
+  "version": "1.0.1",
+  "whole_pipeline_product_budgets": "UNKNOWN"
+}
