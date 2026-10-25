@@ -425,10 +425,21 @@ The [registration checks](METER-PHASE-MC06-REGISTRATION-20261025.json) record
 documentation/binding evidence only. No new code, suite, interpretation run or
 scoring occurs. The historical runtime is a dependency; the new execution path
 is **REGISTERED_REQUIRES_PUBLIC_PREFLIGHT**, with no launch authorization yet.
-**Next: MC-07, implement the thin saved-format adapter and public operational
-preflight; freeze its entrypoint/import/runtime hashes and clean pushed source
-before any separately dispatched saved-generated interpretation. No new worker
-framework, old gate change, real replay or automatic promotion.**
+MC-07 now verifies the [saved-format adapter/public operational preflight](METER-PHASE-MC07-20261025.md)
+and binds its entrypoint, source and loaded-runtime bytes in the
+[readiness receipt](METER-PHASE-MC07-PREFLIGHT.json). All22 tests/211 phase-record
+and1053 ledger-oracle comparisons pass, with four negative resource checks.
+The new public100-source/600-window pipeline emits945 M/D/E ledgers and630 arm
+subtotals; it opens no saved MC-03 cases. Both phases preserve canonical M/D,
+freeze K before labels, use frozen runtime/source/input overlays and enforce a
+hard256MiB worker AS limit in addition to existing deadlines/RSS/byte checks.
+Phase86.802/236.593s; worker RSS/HWM77048/76892KiB. The initial negative-link
+harness failure, successful19-test run and final hardening/22-test run are retained;
+no MC-05, P3 or old-result bytes changed. MC-03 remains rejected.
+**Next: MC-08, bind the actual clean pushed launch SHA/readiness/runtime/output,
+then execute one registered saved-generated interpretation audit under MC-06.
+Independently close parity/ledger/conservation/input proofs and publish aggregates;
+on INVALID/incomplete stop without retry. No real replay or automatic promotion.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
