@@ -1,0 +1,337 @@
+{
+  "authority_sha256": {
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/NEURAL-DENSE-CAPTURE-PROTOCOL.json": "28490ab1983cac6abd011923c5f4e78d3e7bf5096fdb119a102c386e1de62685",
+    "docs/rust/NEURAL-DENSE-PREFLIGHT.md": "313d8f70de3004319535a003554309e21240428a5f63b43415235b88de1c8cb5",
+    "docs/rust/NEURAL-REFERENCE-AVAILABILITY-AMENDMENT.json": "4cd932e5984f8b9bb589b426596de7ba4fcd56b6d5d9db9f4c4670e333e41a50",
+    "docs/rust/NEURAL-REFERENCE-PREFLIGHT.md": "883c7d0c136ba9a98e80e74e00164db6e9cce33c53840e68e429f44add58f5d5",
+    "docs/rust/NEURAL-REFERENCE-PROTOCOL.json": "67969fb5d1402a1a8427f947dff286b5b71d49b5cb1c3fa482242727b5d26a2f",
+    "docs/rust/REAL-RUNTIME-H0-20261025.json": "97485ea551d31cdc47727d06ad661eb0fe5410c3c5e3dc4bd9fe9c649600e80f",
+    "docs/rust/REAL-RUNTIME-H0-20261025.md": "c53188eefb73b9c39baafa90b430df116a5a375fb65c4b20c20d4960c7fef597",
+    "docs/rust/REAL-RUNTIME-H0-PROTOCOL.json": "777e8209845d37b9190f956dadb53c53b16b940f4391e91f710a40c00f65663b",
+    "docs/rust/REAL-RUNTIME-H1-PROTOCOL.md": "6b7e1dd96bc4e3e7ca899148df9dff19b9674c3497566f56f7e1839255772716"
+  },
+  "baseline_source": "c2941f1c6115ca31b57cc2c948324aea592e1b52",
+  "branch": "rust-rewrite",
+  "checkpoints": [
+    {
+      "action": "Commit/push registration; document identity/consistency checks only.",
+      "id": "H1-R",
+      "state": "REGISTERED"
+    },
+    {
+      "action": "Implement synthetic-only builder/validator/worker, public tests and negative checks; commit/push before H1-Q.",
+      "id": "H1-P",
+      "state": "NOT_RUN"
+    },
+    {
+      "action": "Clean pushed source, new coherent immutable snapshot, two synthetic workers, independent closeout and aggregate receipt; commit/push.",
+      "id": "H1-Q",
+      "state": "NOT_RUN"
+    }
+  ],
+  "date": "2026-10-25",
+  "evidence_level": "runtime construction and synthetic compatibility only",
+  "forbidden": [
+    "old_audio_contents_or_hashes",
+    "reference_labels",
+    "old_events_scores_or_logits",
+    "data_reference_following",
+    "unselected_weights",
+    "package_install_or_update",
+    "upstream_or_model_patch",
+    "training",
+    "threshold_or_seed_change",
+    "projection_change",
+    "real_inference_or_replay",
+    "historical_freeze_mutation",
+    "native_or_consumer_activation",
+    "physical_or_release_claim"
+  ],
+  "formal_acceptance": false,
+  "format": "libapta-real-runtime-h1-synthetic-registration-1",
+  "h0_context": {
+    "changed": 1,
+    "equal": 11361,
+    "historical_status": "AUDITED_WITH_DRIFT_AND_COVERAGE_GAPS",
+    "selected_unique_programs": 11362,
+    "unrecorded_cache_filenames": 9433,
+    "unrecorded_shared_library_filenames": 24,
+    "zlib": {
+      "h0_current_sha256": "f61677c7bdb7c2aa2a243ea781bfd16afcb361cede7b4ef76127a9d8eb9a5242",
+      "historical_sha256": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892",
+      "public_path": "/usr/lib/x86_64-linux-gnu/libz.so.1.3"
+    }
+  },
+  "historical_metadata_inputs": {
+    "h0_program_inventory": {
+      "path": "/mnt/d/AI/LIBAPTA/outputs/real-runtime-h0-20261025/attempt/inventory.private.json",
+      "sha256": "6913a6559a7c3c12e4a3c3536d283b461a776d5f14b52fc210872e5b27751a0e"
+    },
+    "original_neural_freeze": {
+      "bytes": 2513016,
+      "independent_registered_hash": true,
+      "path": "/home/daniel/.local/share/libapta-audio/rust-rewrite/neural-reference-20261022/comparison-source-domain/freeze.private.json",
+      "sha256": "0e0ab33d990e40253d61a6a39758fc30c33510238e02ad58d1467b7fa3d5e3ef"
+    }
+  },
+  "hypothesis": "An independently copied, coherently bound neural runtime can execute the unchanged canonical synthetic checks with enforced read-only runtime and no unbound import/loader/cache fallback.",
+  "limits": {
+    "closeout_seconds": 1800,
+    "each_synthetic_stage_seconds": 120,
+    "hash_seconds_per_file": 60,
+    "inference_hard_AS_limit": null,
+    "initialization_seconds": 120,
+    "metadata_H0_AS_applies_to_inference": false,
+    "neural_worker_rss_kib": 2097152,
+    "new_output_bytes": 67108864,
+    "new_runtime_input_bytes_including_weights": 8589934592,
+    "outer_bookkeeping_seconds": 7200,
+    "preparation_seconds": 1800,
+    "snapshot_entries": 200000,
+    "torch_threads": 2,
+    "worker_seconds": 600
+  },
+  "measurement": {
+    "automatic_retry": false,
+    "existing_output_refused": true,
+    "failure_outputs_preserved": true,
+    "in_attempt_repair": false,
+    "package_actions": false,
+    "required_clean_pushed_source": true,
+    "required_prelaunch_bindings": [
+      "source_sha",
+      "protocol_sha256",
+      "implementation_sha256",
+      "launch_command_and_environment"
+    ],
+    "snapshot_manifest_frozen_before_model_import": true
+  },
+  "models": {
+    "beat_this": {
+      "dbn": false,
+      "decoder": "minimal",
+      "float16": false,
+      "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+      "weight_relative_path": "final0.ckpt",
+      "weight_sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331"
+    },
+    "beatnet": {
+      "decoder": "official PF defaults",
+      "mode": "online",
+      "parameters": 402325,
+      "revision": "81cedd4beeb7235262db80969a0c9ce9a48a0ed4",
+      "rng_seed": 20261022,
+      "weight_relative_path": "BeatNet/src/BeatNet/models/model_1_weights.pt",
+      "weight_sha256": "619091bc317ca3e83b45591d46f6de3d5a41588bcb39fe9fe7be30cffa6aca84"
+    }
+  },
+  "next": "H1-P: implement and test the registered immutable runtime and synthetic-only worker before a separate clean-source H1-Q.",
+  "output_root": "/home/daniel/.local/share/libapta-audio/rust-rewrite/real-runtime-h1-20261025",
+  "production_promotion": false,
+  "qualification": {
+    "all_registered_checks_required": true,
+    "confidence": "UNQUALIFIED",
+    "historical_numerical_parity": "UNKNOWN",
+    "independent_transfer": "UNRESOLVED",
+    "old_results_reclassified": false,
+    "pass_status": "SYNTHETIC_COMPATIBILITY_PASS",
+    "real_cohort_readiness_after_synthetic_pass": "NOT_READY",
+    "skips_allowed": false,
+    "whole_pipeline_product_budgets": "UNKNOWN"
+  },
+  "real_execution_readiness": "NOT_READY",
+  "registration_execution": {
+    "inference": false,
+    "model_imports": false,
+    "runtime_copied": false,
+    "venv_execution": false,
+    "weights_hashed": false
+  },
+  "required_negative_checks": [
+    "changed_file",
+    "unbound_cache",
+    "unbound_ELF",
+    "symlink_escape",
+    "symlink_loop",
+    "endpoint_mutation",
+    "copy_time_mutation",
+    "malformed_membership",
+    "wrong_weight_identity",
+    "writable_or_absent_mount",
+    "protected_path_access",
+    "forbidden_worker_options",
+    "existing_output",
+    "deadline",
+    "RSS_limit",
+    "byte_limit",
+    "child_failure_and_orphan_teardown",
+    "incomplete_closeout",
+    "hidden_parent_reexposed_child_mount_order"
+  ],
+  "reviewed_component_sha256": {
+    "tests/unit/apta_1_1_neural_dense_capture.py": "7e96cef3e09b0c070c78f6a3c0d393b705b585c4d61775ea66b19f94cbb322b8",
+    "tests/unit/apta_coupled_time_v2_runtime.py": "0fcd824a0026e8430f9dbfa4ff4aa21aff6cb794b2c804132315af3ee39f9da6",
+    "tools/apta_1_1_neural_dense_capture.py": "de74c5dccab08018ee6ad70ec47024f96343c29c7baceb048ffd47721075c8ec",
+    "tools/apta_1_1_neural_inference.py": "8fafc7b22268700ee2b822c7877c47035597394b8d9571ae76243ad249bfd2d8",
+    "tools/apta_1_1_neural_reference.py": "4e3d661fa5b0d7e44d0027b0461e44a88618f40e6f71b9bbc8fccbe17bf334a7",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89",
+    "tools/apta_neural_dense.py": "8af046e7875c1c68b97c90573cc4f1945784c4737d79ec14e67ab71e83eb5a4f"
+  },
+  "runtime": {
+    "additional_roots": "Explicit interpreter/sysconfig/loader/Git requirements and verified symlink endpoints, with no protected data tree overlap.",
+    "asset_subtrees": [
+      "venv",
+      "BeatNet",
+      "beat_this",
+      "madmom"
+    ],
+    "assets_derivation": "Read assets field only from hash-verified original freeze; never traverse the mixed assets/experiment root.",
+    "cache_policy": "Include/hash .pyc as new-runtime inputs and disable writes; any excluded cache needs enforced empty-prefix mount and refusal test.",
+    "coherence": [
+      "before_inventory",
+      "copy_inventory",
+      "after_inventory"
+    ],
+    "identities_include": [
+      "file_bytes",
+      "file_modes",
+      "directory_membership",
+      "symlink_text",
+      "canonical_endpoints",
+      "interpreter",
+      "loader",
+      "model_weights"
+    ],
+    "membership_roles": [
+      "program",
+      "required_runtime_resource",
+      "selected_weight",
+      "directory",
+      "symlink",
+      "excluded"
+    ],
+    "namespace": {
+      "guard_is_os_sandbox": false,
+      "inherited_data_handles": false,
+      "network": false,
+      "protected_experiment_roots_hidden": true,
+      "read_only_source_and_runtime": true,
+      "read_only_weights": true,
+      "required_evidence": [
+        "actual_mount_flags",
+        "loaded_module_files_and_caches",
+        "proc_maps_each_stage",
+        "program_resource_open_access_trace_or_guard",
+        "parent_snapshot_recheck_after_success_or_failure"
+      ],
+      "uncovered_dependency": "FAIL_CLOSED",
+      "writable_roots": "new output/temp only"
+    },
+    "old_generated_snapshot_sufficient": false,
+    "python_environment": "Clear uncontrolled search/library/user-site settings and record effective paths/cache policy.",
+    "require_historical_asset_binding_equality": true,
+    "resource_membership": "Exact path and purpose before content read/copy; no catch-all unknown-resource allowance.",
+    "system_drift_policy": "Record new exact identity and historical difference; never replace old hashes."
+  },
+  "stage": "H1-R",
+  "status": "REGISTERED_NOT_IMPLEMENTED",
+  "synthetic_audio_exception": "Only newly generated registered fixtures in fresh output/temp.",
+  "synthetic_worker": {
+    "additional_mono_fixture": {
+      "aggregation": "unchanged keep_first",
+      "avoid_short_end": true,
+      "border_size": 6,
+      "chunk_size": 1500,
+      "event_replay": "exact",
+      "name": "pulse_noise_30s",
+      "payload_bytes": 12024,
+      "pulse_amplitude": 0.5,
+      "pulse_spacing": 11025,
+      "rows": 1501,
+      "sample_rate": 22050,
+      "seconds": 30,
+      "seed": 20261023,
+      "sigma": 0.005,
+      "source_center_step": 960,
+      "source_frames": 1440000
+    },
+    "allowed_input_roles": [
+      "snapshot",
+      "assets",
+      "output",
+      "frozen_source_identity"
+    ],
+    "canonical_calls": [
+      "apta_1_1_neural_inference.Models",
+      "apta_1_1_neural_dense_capture.synthetic"
+    ],
+    "canonical_checks": {
+      "atol": 1e-05,
+      "beat_this_silence_seconds": 2,
+      "chunk_frames": 7,
+      "dense_payload_bytes_each": 824,
+      "dense_rows_each": 101,
+      "dense_seconds": 2,
+      "dense_seed": 20261023,
+      "dense_signal_names": [
+        "silence",
+        "pulse_noise"
+      ],
+      "feature_channels": 272,
+      "feature_frames": 73,
+      "feature_seed": 12345,
+      "pf_batch_frame_exact": true,
+      "pf_rows": 300,
+      "pf_synthetic_events": 32,
+      "reset_exact": true,
+      "rtol": 1e-05
+    },
+    "compare": "deterministic complete synthetic outputs/digests; exclude time/RSS/paths",
+    "device": "cpu",
+    "forbidden_calls": [
+      "apta_1_1_neural_dense_capture.run",
+      "apta_1_1_neural_dense_capture.bind_inputs",
+      "real_worker_dispatch",
+      "corpus_preparation",
+      "scoring"
+    ],
+    "generated_pcm_fixtures": {
+      "channels": 2,
+      "channels_identical": true,
+      "checks": [
+        "soundfile canonical read",
+        "numpy channel mean",
+        "soxr HQ to 22050",
+        "mono geometry and finite values",
+        "dense bit preservation",
+        "exact original and replayed events"
+      ],
+      "format": "PCM16 WAV",
+      "invoke": "Models.infer beat_this on new generated files only",
+      "names": [
+        "silence",
+        "pulse_noise"
+      ],
+      "pulse_amplitude": 0.5,
+      "pulse_spacing": 24000,
+      "quantization": "clip to [-1,1]; multiply by 32767; round-to-nearest-even; cast signed int16",
+      "sample_rate": 48000,
+      "seconds": 2,
+      "seed": 20261023,
+      "sigma": 0.005
+    },
+    "process_order": "sequential fresh processes",
+    "processes": 2,
+    "public_codec_suite": "tests/unit/apta_1_1_neural_dense_capture.py",
+    "reject_options": [
+      "inputs",
+      "corpus",
+      "attempt",
+      "labels",
+      "model_selector"
+    ],
+    "torch_threads": 2
+  },
+  "version": "1.0.1"
+}

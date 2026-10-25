@@ -465,10 +465,23 @@ metadata roots have independent parent attestation; all six rehash unchanged.
 Four public checks and independent closeout pass. No protected data, weights,
 model import/inference/scoring or package mutation occurs. H0 becomes
 **AUDITED_WITH_DRIFT_AND_COVERAGE_GAPS; real execution remains NOT_READY**.
-**Next H1: separately register immutable real-neural-runtime preparation and
-public/synthetic compatibility with exact model/program/loader/cache identities.
-Keep old freezes/results unchanged; require an explicit new real-scope decision
-after qualification. No automatic real replay or product/native promotion.**
+H1-R now [registers immutable real-neural-runtime preparation](REAL-RUNTIME-H1-PROTOCOL.md)
+with [fixed identities, synthetic checks and limits](REAL-RUNTIME-H1-PROTOCOL.json),
+based on clean pushed source`c2941f1c6115ca31b57cc2c948324aea592e1b52`.
+It preserves both original models and separates program/resource/weight membership,
+cache and ELF closure, read-only execution and independent closeout. The existing
+dense CLI's preflight-only path still binds real inputs, so H1 requires a separate
+synthetic-only worker calling the unchanged canonical checks directly. Two fresh
+workers must cover existing checks, fixed30-second chunk coverage and generated
+PCM/resampling fixtures. This is registration only: no runtime copy, model import,
+weight hash or inference has run; real execution stays **NOT_READY**.
+Registration document checks verify17 authority/component identities, two selected
+metadata digests, canonical constants/geometry, static call boundaries and local
+links. These are document checks; H1-P negative tests and H1-Q remain NOT_RUN.
+**Next H1-P: implement the registered builder/validator and synthetic-only worker;
+pass public/negative tests, then commit/push before clean-source H1-Q preparation
+and synthetic qualification. Keep old freezes/results unchanged. No automatic
+real replay or product/native promotion follows a synthetic PASS.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
