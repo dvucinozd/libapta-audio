@@ -1,0 +1,387 @@
+{
+  "budgets": [
+    {
+      "evidence": "Direct user selection 2026-10-26; clock begins at accepted job/control request",
+      "lifetime": "accepted operation",
+      "name": "first_useful_waveform_BPM",
+      "owner": "product owner",
+      "safety_margin_and_rationale": "User-selected upper bound; no additional hidden margin or measured-feasibility claim",
+      "source_revision": null,
+      "status": "APPROVED_TARGET",
+      "storage_class": "elapsed monotonic time",
+      "unit": "ms",
+      "value": 5000
+    },
+    {
+      "evidence": "Direct user selection 2026-10-26; clock begins at accepted job/control request",
+      "lifetime": "accepted operation",
+      "name": "final_full_source_grid_meter",
+      "owner": "product owner",
+      "safety_margin_and_rationale": "User-selected upper bound; no additional hidden margin or measured-feasibility claim",
+      "source_revision": null,
+      "status": "APPROVED_TARGET",
+      "storage_class": "elapsed monotonic time",
+      "unit": "ms",
+      "value": 60000
+    },
+    {
+      "evidence": "Direct user selection 2026-10-26; clock begins at accepted job/control request",
+      "lifetime": "accepted operation",
+      "name": "cancel_to_analysis_quiescence_and_publication_fence",
+      "owner": "product owner",
+      "safety_margin_and_rationale": "User-selected upper bound; no additional hidden margin or measured-feasibility claim",
+      "source_revision": null,
+      "status": "APPROVED_TARGET",
+      "storage_class": "elapsed monotonic time",
+      "unit": "ms",
+      "value": 50
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "analysis plus resident product owners",
+      "name": "internal_RAM_analysis_reserve",
+      "owner": "engineering after exact-image measurement",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "internal RAM",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "analysis plus resident product owners",
+      "name": "PSRAM_analysis_reserve",
+      "owner": "engineering after exact-image measurement",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "PSRAM",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "firmware/model/caches/OTA coexistence",
+      "name": "model_storage_reserve",
+      "owner": "engineering and product owner",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "flash or explicitly selected storage",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "nested active task/futures plus callbacks",
+      "name": "stack_future_executor_reserve",
+      "owner": "engineering",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "internal RAM unless verified otherwise",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "actual concurrent pipeline stages",
+      "name": "decoder_frontend_activations_trace",
+      "owner": "engineering after route selection",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "unresolved internal/PSRAM/DMA placement",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "accepted and pending generations across both decks",
+      "name": "owned_pending_retained_copy_reserve",
+      "owner": "consumer owner",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "unresolved",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "resident stopped/playback-transition product owners",
+      "name": "source_codec_cache_USB_UI_reserve",
+      "owner": "consumer owner",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "unresolved internal/PSRAM/DMA placement",
+      "unit": "bytes",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "post-cancel bounded cleanup",
+      "name": "cleanup_and_bank_lease_reclamation_deadline",
+      "owner": "engineering and product owner",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "elapsed monotonic time",
+      "unit": "ms",
+      "value": null
+    },
+    {
+      "evidence": "Current consumer source does not establish an approved whole-product allowance; see PRODUCT-BUDGETS.md measurement closure",
+      "lifetime": "entire accepted job lifecycle",
+      "name": "fragmentation_and_safety_reserve",
+      "owner": "engineering after peak/contiguous-block measurement",
+      "safety_margin_and_rationale": null,
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+      "status": "UNKNOWN",
+      "storage_class": "separate per memory class",
+      "unit": "bytes",
+      "value": null
+    }
+  ],
+  "checks": {
+    "RV32_LLVM_layout": "PASS",
+    "RV32_no_default_library_build": "PASS",
+    "canonical_host_probe": "PASS",
+    "fmt": "PASS",
+    "focused_clippy_D_warnings": "PASS",
+    "full_C_Rust_matrix": "NOT_RUN",
+    "independent_accounting_reproduction": "PASS",
+    "inference": "NOT_RUN",
+    "musical_scoring": "NOT_RUN",
+    "old_diagnostic_service_total_reproduced": 117868,
+    "physical_execution": "NOT_RUN",
+    "profiles_verified": 4
+  },
+  "consumer_snapshot": {
+    "checkout_pin_provider_unchanged": true,
+    "files_sha256": {
+      "docs/M1_RUST_ARCHITECTURE.md": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94",
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537",
+      "docs/boards/GUITION_HARDWARE_MATRIX_2026-10-20.md": "c4d0c37fed0f3ea05503e6115475299d6c92f688ee73e20d00df78367ec1ae96",
+      "firmware-rust/apps/m1-firmware/.cargo/config.toml": "ebe4f4e2a6f21f493436a085e555643e97970c09f010d59a3dc77cb02134e686",
+      "firmware-rust/apps/m1-firmware/src/audio_render_owner.rs": "85bf002f102f34516bc03a73371c89ab2b494d50039a4645b720cd5d2f550705",
+      "firmware-rust/apps/m1-firmware/src/main.rs": "997f82df71122ce880c86cba76fb988d74d6e10b11348c48a85c4b352b942a61",
+      "firmware-rust/apps/m1-firmware/src/platform/memory.rs": "c106194f75f2b319e8adb5dc4cad5078b9c1d9ab37fa74ba76d991cf5f46dbc8",
+      "firmware-rust/apps/m1-firmware/src/platform/mod.rs": "876b0c168efc68410d0ddad9ba486f65fb9d2dbe2fa6edd66baa6652e7fd7267",
+      "firmware-rust/crates/ruzina-apta-adapter/src/source.rs": "fe73c5db7efbbdd1ad70b20dd8c62c2f493a29f513edaca6e220ab004916b2ba",
+      "firmware-rust/crates/ruzina-apta-adapter/src/storage.rs": "701285755ad212884e0afda083f10b3b0e1d889469766d5c48fdf57c566d00ea",
+      "firmware-rust/crates/ruzina-apta-adapter/src/streaming.rs": "8b5482edc0be082ba72be74b6b77b206e34df5cba29cdeb31dc262c9b36b6fc7",
+      "firmware-rust/crates/ruzina-audio-dsp/src/lib.rs": "3550eeb5b3056746b2922be35df428631c3e614b3b937dd25b59fa6bc80d26ea",
+      "firmware-rust/crates/ruzina-audio-runtime/src/fx.rs": "4a16e8620246adba88cd8d19448150587d8e5b6b4754e8ec0a9de70e4bc919e5",
+      "firmware-rust/crates/ruzina-audio-runtime/src/source.rs": "a114e6a1ec90aa0088f3f31ca17d04ad21c89f9bba410ee32692331abba48479",
+      "firmware-rust/crates/ruzina-board-profile/src/memory.rs": "f393badebde58cdde4248951ab114b47993082249dc84bf14a6a3ddb6730de86",
+      "firmware-rust/crates/ruzina-track-analysis/src/lib.rs": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+    },
+    "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+  },
+  "date": "2026-10-26",
+  "decision": {
+    "H1_deferred_until": "PF-04",
+    "PF03_product_feasibility_pass_allowed": false,
+    "large_product_port_allowed": false,
+    "next_ready_phase": "PF-02",
+    "phase_verdict": "NEEDS_MEASUREMENT",
+    "physical_qualification": false,
+    "stable_version": "1.0.1"
+  },
+  "derived_throughput": {
+    "applicability": "600-second maximum input and 60-second total job deadline including setup/I-O",
+    "short_track_linear_deadline_inferred": false,
+    "status": "DERIVED",
+    "unit": "wall_seconds_per_audio_minute",
+    "value": 6
+  },
+  "document": {
+    "path": "docs/rust/PRODUCT-BUDGETS.md",
+    "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524"
+  },
+  "evidence": {
+    "commands": "PRODUCT-BUDGETS.md Reprodukcija i provjere",
+    "root": "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf01-20261026",
+    "source_identity": "Base plus exact new probe hash; source audit and compiler-derived arithmetic, no clean-source musical or physical qualification claim",
+    "static_costs_sha256": "7e4cb4176fa7e09197623e2b374323f56426680a87823b96413ee6546248de72"
+  },
+  "format": "libapta-product-budgets-1",
+  "hardware": {
+    "board": "JC1060P470C_I_W_Y",
+    "board_identity_source": "Direct user response 2026-10-26",
+    "expected_capacities_are_analysis_allowances": false,
+    "expected_documented_PSRAM_bytes": 33554432,
+    "expected_documented_flash_bytes": 16777216,
+    "flashed_or_serial_session_opened": false,
+    "minimum_config_revision": 302,
+    "physical_identity_verified": false,
+    "revision_assumption_source": "User explicitly described revision as presumed and not yet available",
+    "silicon_revision_assumed": "3.2",
+    "silicon_revision_observed": null
+  },
+  "lifetime_policy": "Max of concurrently live allocation instances per storage class; no summing alternative planners, no double subtraction of shared payloads, no automatic freeing of audio/UI/USB on pause",
+  "memory_accounting": {
+    "artifact_sha256": {
+      "clippy.stderr": "ab814c5b70b82172bb377f9eb7e2e24cc3c49de7987c21240a3114e046ca20ee",
+      "clippy.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fmt.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fmt.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "host-probe.stderr": "b354654aa407a6023dee83a63d54d1bc99ce0682abd33057af1c2b04ff21d90e",
+      "host-probe.stdout": "aac504d5546890ecd3fb2920593cb831b1db6df616d3402bad8a93a47987cdc6",
+      "layout-riscv32.ll": "a52e65db2de33264b1e657093e1aac358bfeee41391fca3da4cb46de09f3de3b",
+      "target-build.stderr": "dc019d6a78d68d734c72308d4d0dc535db0c1c9b2b0530a309a1ca98d5effeda",
+      "target-build.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "target-layout.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "target-layout.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "evidence": "host canonical planner independently reproduced and target compiler sizes; no target execution",
+    "excluded": "No whole-device peak/free memory, neural costs, target execution or physical qualification; controls/copies/other product owners not included in overlap subtotal",
+    "format": "libapta-pf01-static-costs-1",
+    "host_sizes": {
+      "beat": 40,
+      "frame_range": 16,
+      "grid_segment": 80,
+      "meter_segment": 48,
+      "normalized_sample": 8,
+      "onset_bin": 16,
+      "owned_result_header": 984,
+      "result_pool_control": 2544,
+      "session_control": 3648,
+      "tempo_candidate": 12,
+      "usize": 8,
+      "waveform_column": 10,
+      "waveform_span": 32
+    },
+    "other_conditional_payloads": {
+      "fx_two_decks_bytes": 1540704,
+      "owned_beat_preview_copy_payload_bytes": 38464,
+      "rgb565_1024x600_double_bytes": 2457600,
+      "rgb565_1024x600_single_bytes": 1228800,
+      "source_history_two_decks_bytes": 131072
+    },
+    "probe_sha256": "0cabc28658fa81c5e29f50297f8fdf772730097b34f56540b9bf0066a2554751",
+    "profiles": [
+      {
+        "alternative_consumer_local_service_bytes": 2026504,
+        "broker_bytes": 4096,
+        "combined_overlap_accounting_bytes": 4793168,
+        "consumer_beat_banks_bytes": 73728,
+        "consumer_rendered_banks_bytes": 826880,
+        "frames_per_column": 256,
+        "native_target_accounting": {
+          "accounted_bytes": 3882320,
+          "optional_working_bytes": 532480,
+          "queue_bytes": 136,
+          "result_bytes_per_slot": 1158052,
+          "two_result_slots_bytes": 2316104,
+          "working_overview_bytes": 1033600
+        },
+        "sample_rate": 44100,
+        "source_frames": 26460000,
+        "source_scratch_bytes": 6144,
+        "working_columns": 103360
+      },
+      {
+        "alternative_consumer_local_service_bytes": 180568,
+        "broker_bytes": 4096,
+        "combined_overlap_accounting_bytes": 896192,
+        "consumer_beat_banks_bytes": 73728,
+        "consumer_rendered_banks_bytes": 6464,
+        "frames_per_column": 32768,
+        "native_target_accounting": {
+          "accounted_bytes": 805760,
+          "optional_working_bytes": 532480,
+          "queue_bytes": 136,
+          "result_bytes_per_slot": 132532,
+          "two_result_slots_bytes": 265064,
+          "working_overview_bytes": 8080
+        },
+        "sample_rate": 44100,
+        "source_frames": 26460000,
+        "source_scratch_bytes": 6144,
+        "working_columns": 808
+      },
+      {
+        "alternative_consumer_local_service_bytes": 2191024,
+        "broker_bytes": 4096,
+        "combined_overlap_accounting_bytes": 5140488,
+        "consumer_beat_banks_bytes": 73728,
+        "consumer_rendered_banks_bytes": 900000,
+        "frames_per_column": 256,
+        "native_target_accounting": {
+          "accounted_bytes": 4156520,
+          "optional_working_bytes": 532480,
+          "queue_bytes": 136,
+          "result_bytes_per_slot": 1249452,
+          "two_result_slots_bytes": 2498904,
+          "working_overview_bytes": 1125000
+        },
+        "sample_rate": 48000,
+        "source_frames": 28800000,
+        "source_scratch_bytes": 6144,
+        "working_columns": 112500
+      },
+      {
+        "alternative_consumer_local_service_bytes": 181846,
+        "broker_bytes": 4096,
+        "combined_overlap_accounting_bytes": 898890,
+        "consumer_beat_banks_bytes": 73728,
+        "consumer_rendered_banks_bytes": 7032,
+        "frames_per_column": 32768,
+        "native_target_accounting": {
+          "accounted_bytes": 807890,
+          "optional_working_bytes": 532480,
+          "queue_bytes": 136,
+          "result_bytes_per_slot": 133242,
+          "two_result_slots_bytes": 266484,
+          "working_overview_bytes": 8790
+        },
+        "sample_rate": 48000,
+        "source_frames": 28800000,
+        "source_scratch_bytes": 6144,
+        "working_columns": 879
+      }
+    ],
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "source_base": "9ae4927d55a476d1f590e42fd486494ed13660aa",
+    "target": "riscv32imafc-unknown-none-elf",
+    "target_sizes": {
+      "beat": 40,
+      "frame_range": 16,
+      "grid_segment": 80,
+      "meter_segment": 48,
+      "normalized_sample": 8,
+      "onset_bin": 16,
+      "owned_result_header": 704,
+      "result_pool_control": 1752,
+      "session_control": 3536,
+      "tempo_candidate": 12,
+      "usize": 4,
+      "waveform_column": 10,
+      "waveform_span": 32
+    }
+  },
+  "phase": "PF-01",
+  "probe": {
+    "path": "rust/examples/product_budget_probe.rs",
+    "sha256": "0cabc28658fa81c5e29f50297f8fdf772730097b34f56540b9bf0066a2554751"
+  },
+  "scope": {
+    "path": "docs/rust/PRODUCT-SCOPE.md",
+    "sha256": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98"
+  },
+  "source_base": "9ae4927d55a476d1f590e42fd486494ed13660aa",
+  "static_inventory_complete": true,
+  "status": "NEEDS_MEASUREMENT",
+  "streaming": {
+    "MP3_FLAC_decoded_PCM_bridge": "OPEN",
+    "existing_two_pass_WAV": "ruzina-apta-adapter/src/streaming.rs",
+    "full_F32_stereo_48k_600s_bytes": 230400000,
+    "full_PCM16_stereo_48k_600s_bytes": 115200000,
+    "full_source_retention_allowed": false,
+    "two_pass_identity_close_cost_included_in_latency": true
+  }
+}

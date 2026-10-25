@@ -1,9 +1,13 @@
 {
-  "active_phase": "PF-00",
-  "active_phase_status": "COMPLETE",
-  "active_phase_verdict": "SCOPE_PASS",
+  "active_phase": "PF-01",
+  "active_phase_status": "NEEDS_MEASUREMENT",
+  "active_phase_verdict": "STATIC_INVENTORY_COMPLETE_BUDGETS_UNQUALIFIED",
   "branch": "rust-rewrite",
-  "checks": "Document/schema/link/source identity checks only; no C/Rust/model/hardware matrix rerun",
+  "budgets_document": {
+    "path": "docs/rust/PRODUCT-BUDGETS.json",
+    "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
+  },
+  "checks": "Focused fmt/Clippy/host planning and RV32 compile/layout plus independent static arithmetic; no target execution or musical evaluation",
   "consumer_snapshot": {
     "files_pin_provider_unchanged": true,
     "files_sha256": {
@@ -32,6 +36,11 @@
     "quarter_beats": 3000,
     "status": "DERIVED_NOT_MEASURED"
   },
+  "diagnostic_implementation": {
+    "DSP_behavior_changed": false,
+    "path": "rust/examples/product_budget_probe.rs",
+    "sha256": "0cabc28658fa81c5e29f50297f8fdf772730097b34f56540b9bf0066a2554751"
+  },
   "engineering_profile": {
     "channels": [
       1,
@@ -58,7 +67,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "source inspection and product-scope decisions",
+  "evidence_level": "user-selected timing targets, source inventory and compiler-derived resource accounting",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
@@ -72,28 +81,41 @@
   },
   "format": "libapta-product-first-status-1",
   "historical_protocols_results_unchanged": true,
+  "history": [
+    {
+      "phase": "PF-00",
+      "scope_sha256": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98",
+      "source_baseline": "0f19ec768ffcdcd30e579ef1265fb1809ad807c4",
+      "status": "COMPLETE",
+      "verdict": "SCOPE_PASS"
+    }
+  ],
   "next": {
-    "action": "Inventory and determine exact-device memory/storage/lifetime and latency/cancellation budgets",
-    "independent_ready_phase": "PF-02",
+    "action": "Define exact grid/meter, owned ranges, admission/publication and evaluation contract independently of pending PF-01 device budgets",
     "large_port_allowed": false,
-    "phase": "PF-01"
+    "pending_phase": "PF-01",
+    "phase": "PF-02"
   },
   "open_decisions": [
     {
+      "approved_targets": {
+        "cancel_ms": 50,
+        "final_ms": 60000,
+        "first_useful_ms": 5000
+      },
       "id": "PF01-RESOURCES",
       "owner": "engineering and product owner",
       "required": [
-        "exact_device_revision",
+        "exact_device_revision_and_image",
         "internal_RAM_reserve",
         "PSRAM_reserve",
         "model_storage",
-        "stack_and_future_channel_overhead",
-        "two_output_and_pending_retained_banks",
-        "first_useful_final_result_latency",
-        "processing_seconds_per_audio_minute",
-        "cancel_deadline"
+        "stack_future_executor_overhead",
+        "owned_pending_retained_copy_reserve",
+        "largest_contiguous_and_fragmentation_margin",
+        "cleanup_and_bank_reclamation_deadline"
       ],
-      "state": "UNKNOWN",
+      "state": "NEEDS_MEASUREMENT",
       "value": null
     },
     {
@@ -124,8 +146,9 @@
         "PF-00"
       ],
       "id": "PF-01",
-      "state": "READY",
-      "verdict": null
+      "state": "NEEDS_MEASUREMENT",
+      "static_inventory_complete": true,
+      "verdict": "STATIC_INVENTORY_COMPLETE_BUDGETS_UNQUALIFIED"
     },
     {
       "depends_on": [
@@ -246,9 +269,12 @@
     "docs/rust/DENSE-DECODER-DD05-20261023.md": "cfaa37c35a0d2283fda5faec2b2baf187e68c154cb6c44cb736dc0770ab2a16d",
     "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
     "rust/README.md": "fb45a8fca1175a02a0d4972a201926f4fcf84a0e3447bc16002c4f7181d24aa3",
+    "rust/examples/product_budget_probe.rs": "0cabc28658fa81c5e29f50297f8fdf772730097b34f56540b9bf0066a2554751",
     "rust/src/global_analysis.rs": "8b29a2cccd42166c431a86c74e71710d6de82bb25eaf43c049d0b43c1bc07a8a",
     "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
     "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "rust/src/owned_result.rs": "f2c1c89b6f2b708864e52e2e6a7503848d7446f10bf5dbf89827fe143a8b3836",
+    "rust/src/publication.rs": "28329e47a923687e7c7409b3800b4669d2f967280b5f74a30f2d9f5c4525058e",
     "rust/src/session.rs": "0846c321fffe100354c85430c292adc8a5cfa773fc49f7e2597219d1c5b74b0a",
     "rust/src/tempo.rs": "93eab112477179f176746a16d10872d35d395efd991c24f6c8ea3abf342fe086",
     "rust/src/wav.rs": "cf4da4482894db99130bbcd89bd22d90b17c06f51c847820fd8b377e3493f1dc",
@@ -267,7 +293,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "0f19ec768ffcdcd30e579ef1265fb1809ad807c4",
+  "source_baseline": "9ae4927d55a476d1f590e42fd486494ed13660aa",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -293,6 +319,28 @@
       "status": "CONFIRMED",
       "unit": "seconds",
       "value": 600
+    },
+    {
+      "date": "2026-10-26",
+      "id": "PF01-LATENCY",
+      "source": "Direct user selection of recommended timing targets; feasibility not yet measured",
+      "status": "CONFIRMED",
+      "value": {
+        "cancel_ms": 50,
+        "final_ms": 60000,
+        "first_useful_ms": 5000
+      }
+    },
+    {
+      "date": "2026-10-26",
+      "id": "PF01-BOARD",
+      "source": "Direct user statement; assumed revision must not be treated as read identity",
+      "status": "CONFIRMED_BOARD_REVISION_UNVERIFIED",
+      "value": {
+        "board": "JC1060P470C_I_W_Y",
+        "revision_assumed": "3.2",
+        "revision_observed": null
+      }
     }
   ]
 }

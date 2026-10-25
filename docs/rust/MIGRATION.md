@@ -6,7 +6,22 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: PF-01 of the [product-first implementation plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+**Current next: PF-02 of the [product-first implementation plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+PF-01 completes the [static resource inventory](PRODUCT-BUDGETS.md), with
+[budgets and evidence](PRODUCT-BUDGETS.json), from source base
+`9ae4927d55a476d1f590e42fd486494ed13660aa` plus the bound new
+[accounting probe](../../rust/examples/product_budget_probe.rs).
+The user selects first useful waveform/BPM<=5s, final grid<=60s and cancel<=50ms,
+on JC1060P470C_I_W_Y. Silicon v3.2 is presumed, not observed. Host canonical
+planning, RV32 compile/layout and independent arithmetic close four10-minute
+profiles. At48kHz, FPC32768 native accounting is807890bytes; with the declared
+consumer bank/scratch overlap scenario898890bytes, excluding controls, retained
+copies, neural costs and other product owners. Neither is a whole-device peak.
+Internal/PSRAM/storage/stack and placement budgets remain UNKNOWN; PF-01 stays
+NEEDS_MEASUREMENT and large product ports remain blocked. PF-02 is independently
+ready to define the grid/meter/publication contract. No DSP, inference, consumer
+activation or physical qualification follows this compiler/accounting evidence.
+
 PF-00 now completes the [first product scope](PRODUCT-SCOPE.md), with
 [mutable phase status and source bindings](PRODUCT-FIRST-STATUS.json), inspected
 from clean pushed source`0f19ec768ffcdcd30e579ef1265fb1809ad807c4`.
@@ -19,9 +34,9 @@ beat capacities. MP3/FLAC decoded-PCM integration remains required; the first
 vertical test may use WAV. These are scope decisions and source facts, not new
 DSP, musical or physical qualification. Consumer origin/main remains inspected
 at`4a8c660183910b0950ae7ddabce9e8b395a2f10d`, without changing its checkout or pin.
-PF-01 must resolve numeric memory/storage/lifetime/latency/cancel budgets and
-exact-device evidence; they remain UNKNOWN. PF-02 is independently ready after
-PF-00. Real execution remains NOT_READY. H1-P/H1-Q stay deferred until PF-04
+PF-01's approved timing targets and remaining memory/device gates are recorded
+above; pending physical evidence remains UNKNOWN. Real execution stays NOT_READY.
+H1-P/H1-Q stay deferred until PF-04
 selects the needed runtime scope. Original registrations/results remain unchanged;
 native M1 delivery and full C replacement retain separate completion criteria.
 The plan JSON records initial NOT_RUN states; PRODUCT-FIRST-STATUS.json owns
