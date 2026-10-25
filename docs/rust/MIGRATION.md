@@ -321,20 +321,29 @@ oracle precedes label loading; support gains cannot override shared breaks.
 The metadata-only C3 audit rehashes3716 bound files without parsing reference,
 event or score leaves. Derived runtime closure matches the unchanged C3 parent
 bytes and binds actual loaded source/runtime before/after phases. All historical
-authorities remain unchanged. This is public operational evidence only; fixed
-C3 matched comparison and real-runtime H0 remain unrun.
-P6 now registers [one fixed generated comparison](CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-PROTOCOL.md)
-and its [exact generated-scope identity](CONTEXT-ANCHOR-MATCHED-EVALUATION-GENERATED-SCOPE.json).
-The73 P5-qualified components, fixed3716-file C3 closure and derived runtime remain
-unchanged. This registration permits one fresh PROJECT/VERIFY/EVALUATE attempt
-only after commit/push and clean matching source verification; it records no result.
-**Next: execute the single registered P6 comparison and publish its complete
-outcome or preserved INVALID state. No real replay or automatic retry.**
+authorities remain unchanged. P5 is public operational evidence only; the
+subsequent fixed C3 comparison is recorded below. Real-runtime H0 remains unrun.
+P6 now completes the [single fixed generated matched comparison](CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-20261025.md)
+on clean pushed source `2a5fa3a129fb55b5058adc8753fec2223ae76d0f`, after its
+[separate registration](CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-PROTOCOL.md).
+All100/600 cases,1200 independently verified projections and2400 cells complete.
+Operational integrity PASS; **PAIR_REJECTED_ON_GENERATED_DIAGNOSTICS** because
+meter loses25 supported windows despite25 gains, and downbeat loses25 with no gains.
+On390 shared complete grid windows, complete-sequence correctness333 ->339 gives
+six fixes/zero breaks; joint stays347. Those fixes do not override support losses.
+The [aggregate receipt](CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-20261025.json) records
+all comparisons/strata and7560 independently checked ledgers/1260 subtotals.
+All3716 input bindings and414 attempt files remain unchanged. Phase times are
+23.607/24.829/65.689s; worker RSS/HWM24060/24120/192312KiB; attempt19758218bytes.
+No solver, candidate reconstruction, campaign retry or new real scoring ran.
+**Next: P7, read-only diagnosis of the saved25 complete-context support losses
+and25 incomplete-context meter gains, then review a separately registered new
+hypothesis. No reprojecting/rescoring, relaxed veto or real dispatch.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3 and P0/P1/P2/P3/P4 handoffs are historical; P5 owns the current P6 handoff. Full generated
+C1/C2/C3 and P0/P1/P2/P3/P4/P5 handoffs are historical; P6 owns the current P7 handoff. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content
