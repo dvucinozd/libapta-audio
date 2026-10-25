@@ -1,0 +1,125 @@
+{
+  "api": {
+    "arguments": [
+      "beat_frames",
+      "downbeat_ordinals",
+      "total_frames",
+      "first_frame",
+      "end_frame"
+    ],
+    "known_gaps_allowed_value": [],
+    "maximum_events": 3072,
+    "maximum_source_frames": 1440000,
+    "maximum_windows": 8,
+    "name": "project_window",
+    "required_keyword_arguments": [
+      "known_gaps"
+    ],
+    "sample_rate": 48000
+  },
+  "baseline_revision": "1d16bffc159a6d6c406780e890d95eacd7df6ec4",
+  "binding_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-P6-20261025.json": "2af80c349a8b80799f30f027cc913887a2fa809faf51d11f182a7e2084ef4242",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-PROTOCOL.json": "56e5b498d0baa7d83b0913fe7dfb7ff14f542d479c94a2e59818753bfe424489",
+    "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.json": "eac9a16ad58d35b7b06a8061839bd2ad48b222643afde64f48bdaffde8f9b3a8",
+    "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
+    "docs/rust/METER-CONTEXT-P7-DIAGNOSIS-20261025.json": "4d54f8752575dbba266edf3062eab5ddf7dab3562bd5206800c005d6013d6069",
+    "docs/rust/METER-CONTEXT-P7-DIAGNOSIS-20261025.md": "479c8b2bff494c4800ab857df9b81b4be2e342b9f03fbc4acf927ed379e63193",
+    "docs/rust/METER-CONTEXT-PROTOCOL.md": "c6aa61664b560c2a49324fc580a8925d60adfb30433408c1b9ae5a359600991d",
+    "tests/unit/apta_1_1_context_projection.py": "ab90b64c2861707c8fdeb363dff2f5230ee06c168fd441fb0246d17673228ec9",
+    "tests/unit/apta_context_matched_oracle.py": "abe4f0698bf3ebb7506ee1edd33e291527e713c7402d1509154130810255f92c",
+    "tests/unit/apta_context_projection_oracle.py": "a9a807bbcc71943c9f5ede89debfd51ab0d39908cdc4152af0cf0c77ac9bc593",
+    "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab",
+    "tools/apta_context_projection.py": "637fa7ea839528d5b0ab1471bace2aa656f74f6fb5ecbe783f8c1312d99048fb"
+  },
+  "campaign_authorized": false,
+  "confidence_qualified": false,
+  "context": {
+    "all_context_witnesses_source_valid": true,
+    "causal": false,
+    "conflicting_hypotheses": "AMBIGUOUS_CONTEXT",
+    "equal_raw_and_mapped_bar_lengths": [
+      3,
+      4
+    ],
+    "exact_distance_tolerance": "frozen_P1_rational_period/10",
+    "hypothesis_key": [
+      "numerator",
+      "model_ordinal_modulo_numerator"
+    ],
+    "maximum_following_downbeats": 2,
+    "maximum_preceding_downbeats": 2,
+    "negative_j_allowed_for_context_only": true,
+    "publish_raw_and_model_owned_witness_only": true,
+    "rounding": "floor(x+1/2)",
+    "selection": "first eligible source-order triple, then first publishable source-order witness"
+  },
+  "date": "2026-10-25",
+  "format": "libapta-meter-context-registration-1",
+  "hypothesis": "Bounded adjacent observed bars can establish meter across window boundaries while preserving the P1 grid and existing owned meter",
+  "implementation_paths": [
+    "tools/apta_meter_context_projection.py",
+    "tests/unit/apta_meter_context_oracle.py",
+    "tests/unit/apta_1_1_meter_context.py"
+  ],
+  "independence": "UNRESOLVED",
+  "model_training_or_inference": false,
+  "physical_p4": false,
+  "private_cases_opened_by_MC01": false,
+  "product_activation": false,
+  "public_test_requirements": [
+    "both_meters_both_crossing_directions",
+    "source_window_endpoints",
+    "positive_context",
+    "Q32_fraction_half_ties",
+    "malformed_input_and_gaps",
+    "absent_insufficient_bars",
+    "conflicting_meter_and_phase",
+    "out_of_tolerance_context",
+    "bounded_witness_selection",
+    "P1_owned_meter_preservation",
+    "independent_full_record_oracle",
+    "raw_input_invariance_and_import_IO_isolation",
+    "maximum_3072_event_cost",
+    "source_point_budget"
+  ],
+  "real_dispatch": false,
+  "resources": {
+    "external_bytes": 67108864,
+    "process_rss_kib": 262144,
+    "source_seconds": 60,
+    "suite_seconds": 1800
+  },
+  "result": {
+    "P1_grid_exactly_preserved": true,
+    "additional_fields": [
+      "baseline_meter",
+      "baseline_meter_status",
+      "meter_origin",
+      "context"
+    ],
+    "context_fields": [
+      "downbeat_ordinals",
+      "examined_triples",
+      "eligible_triples",
+      "hypotheses",
+      "lookbehind_frames",
+      "lookahead_frames"
+    ],
+    "existing_P1_meter_exactly_preserved": true,
+    "format": "libapta-meter-context-projection-1",
+    "inherited_fields": "all P1 fields, format and registration replaced",
+    "meter_origins": [
+      null,
+      "P1",
+      "CONTEXT"
+    ],
+    "new_meter_statuses": [
+      "NO_ELIGIBLE_CONTEXT",
+      "AMBIGUOUS_CONTEXT",
+      "CONTEXT_OWNED"
+    ]
+  },
+  "status": "REGISTERED_GENERATED_ONLY",
+  "version": "1.0.1"
+}

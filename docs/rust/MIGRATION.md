@@ -343,8 +343,13 @@ the frozen in-window two-bar rule explains every loss/gain. All305 read files an
 414 attempt files verify; no projection/scoring runs. The refreshed
 [P4 product budget audit](METER-CONTEXT-P4-BUDGET-20261025.md) binds current Ruzina
 source d000572c; numeric whole-pipeline allocations/deadlines remain UNKNOWN.
-**Next: separately register a bounded meter-context hypothesis preserving P1
-grid/owned meters, then implement public generated checks. No real replay.**
+MC-00 now registers the [bounded meter-context contract](METER-CONTEXT-PROTOCOL.md)
+and [machine protocol](METER-CONTEXT-PROTOCOL.json) before implementation. It
+preserves P1 grids and owned meters; fallback uses at most two preceding/following
+downbeats, exact fit tolerance and owned publication. Conflicting meter/phase
+hypotheses abstain. Gaps and real dispatch remain excluded.
+**Next: MC-01, implement the separate pure meter-context helper and independent
+oracle on public generated fixtures, reusing P1. No saved-cohort campaign.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
