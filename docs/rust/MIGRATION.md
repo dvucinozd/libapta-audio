@@ -1,10 +1,21 @@
 # Native Rust migration
 
-Status: development checkpoint 2026-10-25; no release, ABI replacement, full profile,
+Status: development checkpoint 2026-10-26; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
-## Current implementation handoff — 2026-10-25
+## Current implementation handoff — 2026-10-26
+
+**Current next: PF-00 of the [product-first implementation plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md)
+and its [machine-readable checklist](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json).**
+This plan-only checkpoint changes continuation priority: define the first
+deliverable, product budgets, grid contract and whole-pipeline feasibility before
+choosing one further experiment and its necessary runtime work. H1-P/H1-Q are
+deferred until PF-04 explicitly selects the needed runtime scope. Their original
+registration and all historical results remain unchanged. No PF phase, runtime
+preparation, model/corpus execution or product activation is performed by this plan.
+Native M1 delivery and full C replacement have separate completion criteria.
+The records below retain the preceding implementation/evidence history.
 
 The user-requested [detailed implementation plan](DENSE-DECODER-IMPLEMENTATION-PLAN-20261023.md)
 and [machine-readable plan](DENSE-DECODER-PLAN-20261023.json) define DD-00 through
@@ -478,16 +489,17 @@ weight hash or inference has run; real execution stays **NOT_READY**.
 Registration document checks verify17 authority/component identities, two selected
 metadata digests, canonical constants/geometry, static call boundaries and local
 links. These are document checks; H1-P negative tests and H1-Q remain NOT_RUN.
-**Next H1-P: implement the registered builder/validator and synthetic-only worker;
-pass public/negative tests, then commit/push before clean-source H1-Q preparation
-and synthetic qualification. Keep old freezes/results unchanged. No automatic
-real replay or product/native promotion follows a synthetic PASS.**
+The historical next step was H1-P implementation followed by H1-Q qualification.
+Both are now deferred by the product-first plan at the top of this document.
+If PF-04 later selects H1, its full original requirements still apply; a different
+runtime scope needs a separate registration and cannot claim H1 qualification.
+No automatic real replay or product/native promotion follows a synthetic PASS.
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
 pre-registration baseline. C0's machine stage.next=C1 is historical; this later
-C1/C2/C3, P0 through P7 and MC-00 through MC-08 handoffs are historical; the H0/H1
-handoff above owns continuation. Full generated
+C1/C2/C3, P0 through P7, MC-00 through MC-08 and H0/H1 handoffs are historical;
+the product-first plan at the top owns continuation. Full generated
 C3 execution/parity and its metadata preflight remain preserved.
 Real authorization remains absent. Real dispatch
 also rejects shape-only future tokens pending registered scope-report content

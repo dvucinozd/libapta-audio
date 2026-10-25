@@ -1,0 +1,349 @@
+{
+  "authority_sha256": {
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/COUPLED-TIME-CT05-20261023.md": "b27c0b9d2129e1cb35d5ab6d90ca87e038d0932ebd4ecf959c4037231f0855e4",
+    "docs/rust/DENSE-DECODER-DD05-20261023.md": "cfaa37c35a0d2283fda5faec2b2baf187e68c154cb6c44cb736dc0770ab2a16d",
+    "docs/rust/DENSE-DECODER-P4-CONSTRAINTS.md": "b95071c034a9cecfd4a6df873ad089fd0e5b4c9172df5a7d0f3950a0b71afa95",
+    "docs/rust/METER-CONTEXT-MC03-20261025.md": "535a6fe54f10f57aa142b2121e471d98e33daccc9585072b1326fc8fd6952641",
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.md": "242edffd31143ea424d8c0c5f3da493bd0a22dfbe3476b0c88dfef49f530edb2",
+    "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
+    "docs/rust/METER-PHASE-MC08-20261025.md": "78bfdd0021978729fd258aba486872de0fcdd7a0599ae5b2b52e8867696938b2",
+    "docs/rust/NEURAL-REFERENCE-RESULT-20261022.md": "2d95cce78c1be5852c08d317043af032b411ccb820caeb6b21b97f58573f4b80",
+    "docs/rust/REAL-RUNTIME-H0-20261025.json": "97485ea551d31cdc47727d06ad661eb0fe5410c3c5e3dc4bd9fe9c649600e80f",
+    "docs/rust/REAL-RUNTIME-H1-PROTOCOL.json": "888470d36fac9e8168a79da8abf46d12d66f3b290f0940f90c7212e37b6d2599",
+    "docs/rust/REAL-RUNTIME-H1-PROTOCOL.md": "6b7e1dd96bc4e3e7ca899148df9dff19b9674c3497566f56f7e1839255772716",
+    "docs/status/APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md": "563a23b76b36044fa389216c15558a13794d71136ace0aa75d163e69c4a3bce0",
+    "docs/status/APTA-1.1-QUALIFICATION-RUNBOOK.md": "d3a1af4ee0c68cf459c765362518e68286481f44c4771295e689b8d7a1482bef",
+    "specification/APTA-1.1-DJ-SECTIONS.md": "c040e429f4dde4fea416f85d078fc0ee4853bdd4e93a6cdef0ee2e9d0c4b6be4",
+    "specification/beatgrid.md": "76e1eca77d9446ca0df19cbb920a18e70bd83d1493fe651a163f8567db1daed1"
+  },
+  "baseline_source": "327ef2177888ef406e23d674d59c187e00f171ef",
+  "branch": "rust-rewrite",
+  "budget_record_fields": [
+    "name",
+    "value",
+    "unit",
+    "status",
+    "source_revision",
+    "evidence",
+    "owner",
+    "lifetime",
+    "storage_class",
+    "safety_margin_and_rationale"
+  ],
+  "checkpoint_policy": {
+    "clean_source_for_measured_runs": true,
+    "complete_authorized_stage_before_stopping": true,
+    "no_force_push": true,
+    "no_generic_infrastructure_without_named_requirement": true,
+    "one_ready_stage_per_continuation": true,
+    "registration_before_implementation_and_real_measurement": true,
+    "reuse_existing_tools_and_evidence": true,
+    "selective_commit_push_and_remote_sha_check": true
+  },
+  "consumer_snapshot": {
+    "files_sha256": {
+      "docs/M1_RUST_ARCHITECTURE.md": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94",
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537",
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48",
+      "firmware-rust/crates/ruzina-apta-adapter/README.md": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8",
+      "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36"
+    },
+    "repository": "D:/AI/M1_PCB",
+    "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+    "source": "fetched origin/main; local checkout not changed"
+  },
+  "current_execution": {
+    "consumer_files_changed": false,
+    "hardware_flashed": false,
+    "implementation_started": false,
+    "model_or_corpus_execution": false,
+    "release_or_provider_activation": false,
+    "runtime_prepared": false,
+    "weights_read": false
+  },
+  "date": "2026-10-26",
+  "format": "libapta-product-first-plan-1",
+  "frozen_acceptance_authority": "docs/status/APTA-1.1-DJ-ACCEPTANCE-PROTOCOL.md",
+  "future_native_feature": "experimental-product-analysis",
+  "future_native_feature_exists_now": false,
+  "future_native_paths": [
+    "rust/src/product_analysis/mod.rs",
+    "rust/src/product_analysis/decoder.rs",
+    "rust/src/product_analysis/features.rs",
+    "rust/src/product_analysis/inference.rs",
+    "rust/tests/product_analysis.rs"
+  ],
+  "goals": {
+    "A": "Native Rust M1 deliverable with explicit scope, algorithm, resources, consumer and physical evidence",
+    "B": "Full C API/ABI/CLI/package/platform replacement only when explicitly required",
+    "desktop_offload_requires_explicit_product_decision": true,
+    "recommended_initial_priority": "standalone P4 feasibility; not an owner acceptance or feasibility claim"
+  },
+  "missing_value_policy": "Search current sources first; ask focused questions only for unresolved required decisions; continue independent work. Never invent budgets or infer approval from elapsed time.",
+  "mutable_progress_file": "docs/rust/PRODUCT-FIRST-STATUS.json",
+  "nondependent_work_while_waiting": [
+    "PF-02 contract after PF-00 while numeric PF-01 decisions remain pending",
+    "Existing Rust capability inventory"
+  ],
+  "plan_document": "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md",
+  "plan_document_sha256": "04dcfa7a661e287017dec68863b9518dc2e5f63f619cd806fbe2a807cbdff029",
+  "priority_change": {
+    "current_next": "PF-00",
+    "deferred": [
+      "H1-P",
+      "H1-Q"
+    ],
+    "historical_verdicts_unchanged": true,
+    "narrower_runtime_may_claim_H1_pass": false,
+    "old_registrations_unchanged": true,
+    "reconsider_runtime_at": "PF-04"
+  },
+  "real_execution_readiness": "NOT_READY",
+  "required_decisions": [
+    {
+      "at": "PF-00",
+      "decision": "First deliverable, architecture and mandatory outputs",
+      "value": null
+    },
+    {
+      "at": "PF-01",
+      "decision": "Numeric memory/storage/latency/cancellation limits and hardware identity",
+      "value": null
+    },
+    {
+      "at": "PF-02",
+      "decision": "Any new wire or product semantics before code",
+      "value": null
+    },
+    {
+      "at": "PF-03",
+      "decision": "Route and any compact-model/offload scope change",
+      "value": null
+    },
+    {
+      "at": "PF-04",
+      "decision": "Exact algorithm, parameters, criteria and corpus scope",
+      "value": null
+    }
+  ],
+  "stable_version": "1.0.1",
+  "stages": [
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Jedan potvrden testabilan cilj",
+      "conditional": false,
+      "depends_on": [],
+      "details_section": 5,
+      "id": "PF-00",
+      "outputs": [
+        "docs/rust/PRODUCT-SCOPE.md",
+        "docs/rust/PRODUCT-FIRST-STATUS.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "NEEDS_DECISION: arhitektura ili obvezni izlazi nisu odredjeni",
+      "title": "Prvi isporucivi opseg"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Numeric limits with units, ownership, lifetime and source evidence",
+      "conditional": false,
+      "depends_on": [
+        "PF-00"
+      ],
+      "details_section": 6,
+      "id": "PF-01",
+      "outputs": [
+        "docs/rust/PRODUCT-BUDGETS.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "NEEDS_MEASUREMENT_OR_DECISION: obvezni limit UNKNOWN blokira veliki port",
+      "title": "Produktni budzeti"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Worked examples, exact coordinates, denominators and UNKNOWN semantics",
+      "conditional": false,
+      "depends_on": [
+        "PF-00"
+      ],
+      "details_section": 7,
+      "id": "PF-02",
+      "outputs": [
+        "docs/rust/PRODUCT-GRID-CONTRACT.md"
+      ],
+      "state": "NOT_RUN",
+      "stop": "NEEDS_DECISION: nerijesena wire/product semantika",
+      "title": "Grid i evaluacijski ugovor"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "One evidence-backed route and bounded next measurement",
+      "conditional": false,
+      "depends_on": [
+        "PF-00",
+        "PF-01",
+        "PF-02"
+      ],
+      "details_section": 8,
+      "id": "PF-03",
+      "outputs": [
+        "docs/rust/PRODUCT-FEASIBILITY.md"
+      ],
+      "state": "NOT_RUN",
+      "stop": "NEEDS_DECISION: nijedna izvediva ruta ili potreban novi model",
+      "title": "Cjelovita izvedivost i ruta"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Exact algorithm/API/parameters/oracle/scope/limits before code",
+      "conditional": false,
+      "depends_on": [
+        "PF-03"
+      ],
+      "details_section": 9,
+      "id": "PF-04",
+      "outputs": [
+        "docs/rust/PRODUCT-EXPERIMENT.md",
+        "docs/rust/PRODUCT-EXPERIMENT.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "NEEDS_EXPERT_SPECIFICATION: nema potpune algoritamske specifikacije",
+      "title": "Jedna hipoteza i potreban runtime"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "All registered public and operational tests pass; frozen implementation",
+      "conditional": false,
+      "depends_on": [
+        "PF-04"
+      ],
+      "details_section": 10,
+      "id": "PF-05",
+      "outputs": [
+        "docs/rust/PRODUCT-PREFLIGHT.md",
+        "docs/rust/PRODUCT-PREFLIGHT.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "PREFLIGHT_FAILED; nova znanstvena promjena trazi novu registraciju",
+      "title": "Implementacija i preflight"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Complete registered cohort and DEVELOPMENT_PASS_ONLY",
+      "conditional": false,
+      "depends_on": [
+        "PF-05"
+      ],
+      "details_section": 11,
+      "id": "PF-06",
+      "outputs": [
+        "docs/rust/PRODUCT-DEVELOPMENT-RESULT.md",
+        "docs/rust/PRODUCT-DEVELOPMENT-RESULT.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "REJECTED or INVALID/INCOMPLETE: no automatic retry, transfer or port",
+      "title": "Jedan razvojni pokus"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Independent transfer and required confidence/key evidence",
+      "conditional": false,
+      "depends_on": [
+        "PF-06"
+      ],
+      "details_section": 12,
+      "id": "PF-07",
+      "outputs": [
+        "docs/rust/PRODUCT-TRANSFER.md",
+        "docs/rust/PRODUCT-TRANSFER.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "UNRESOLVED or REJECTED blocks promotion",
+      "title": "Transfer i confidence"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Reference parity and bounded storage/work for selected route",
+      "conditional": false,
+      "depends_on": [
+        "PF-07"
+      ],
+      "details_section": 13,
+      "id": "PF-08",
+      "outputs": [
+        "docs/rust/PRODUCT-NATIVE-API.md"
+      ],
+      "state": "NOT_RUN",
+      "stop": "Numerical/resource regression; decoder-only is not standalone end-to-end",
+      "title": "Native Rust port"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Actual consumer path and lifecycle pass on exact pins",
+      "conditional": false,
+      "depends_on": [
+        "PF-08"
+      ],
+      "details_section": 14,
+      "id": "PF-09",
+      "outputs": [
+        "docs/rust/PRODUCT-INTEGRATION.md"
+      ],
+      "state": "NOT_RUN",
+      "stop": "Consumer contract or budget failure",
+      "title": "Consumer end-to-end"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Every required product limit measured on exact device/image",
+      "conditional": false,
+      "depends_on": [
+        "PF-09"
+      ],
+      "details_section": 15,
+      "id": "PF-10",
+      "outputs": [
+        "docs/rust/PRODUCT-P4-RESULT.md",
+        "docs/rust/PRODUCT-P4-RESULT.json"
+      ],
+      "state": "NOT_RUN",
+      "stop": "HARDWARE_PENDING or resource/integration FAIL",
+      "title": "Fizicki uredjaj"
+    },
+    {
+      "activation_condition": "Dependencies completed with required decisions and evidence",
+      "completion": "Scope-specific gates and separate release decision",
+      "conditional": false,
+      "depends_on": [
+        "PF-10"
+      ],
+      "details_section": 16,
+      "id": "PF-11",
+      "outputs": [
+        "docs/rust/PRODUCT-RELEASE-CHECKLIST.md"
+      ],
+      "state": "NOT_RUN",
+      "stop": "Any required algorithm/transfer/confidence/hardware/acceptance gate open",
+      "title": "Prihvat i izdanje"
+    },
+    {
+      "activation_condition": "Explicit scope B requirement",
+      "completion": "All explicitly requested C/API/ABI/CLI/package/platform promises verified",
+      "conditional": true,
+      "depends_on": [
+        "PF-08"
+      ],
+      "details_section": 17,
+      "id": "PF-12",
+      "outputs": [
+        "docs/rust/COMPATIBILITY-CLOSURE.md"
+      ],
+      "state": "NOT_RUN",
+      "stop": "Scope B not requested or a promised contract remains open",
+      "title": "Opcionalna puna C zamjena"
+    }
+  ],
+  "status": "PLAN_ONLY",
+  "unknown_budget_value": null
+}

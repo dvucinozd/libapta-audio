@@ -6,9 +6,10 @@ crate performs its own PCM, waveform, default musical analysis, WAV and containe
 work; it does not link C.
 It is not yet a full API/ABI or conformance replacement.
 
-The [2026-10-22 checkpoint and agreed next step](../docs/rust/MIGRATION.md#agreed-next-step--resume-after-2026-10-22)
-describe where development resumes: PCM-driven grid/meter alignment, immutable
-publication and validation by the actual native consumer.
+The [current product-first plan](../docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md)
+owns continuation: first define the deliverable, resource budgets and output
+contract, then qualify one algorithm and its native consumer path. Earlier dated
+checkpoints in the migration document remain historical evidence.
 
 The optional `experimental-s6-history` feature adds bounded caller-owned window
 diagnostics through `Session::enable_global_history`. See the
