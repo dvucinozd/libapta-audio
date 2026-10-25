@@ -1,0 +1,61 @@
+{
+  "baseline_revision": "45b2838f96d7891273e9c69f74896625c85d8d7b",
+  "binding_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-MATCHED-EVALUATION-P5-PREFLIGHT.json": "713e756b12a5783450463bdbff92d781694bca35042cb5a7550fdfdcd3fa902c",
+    "docs/rust/METER-CONTEXT-MC01-20261025.json": "0ef824d2e3cd85190bfde7118752e737f3c27c1d5ece18a04a660e4fe13bb1d2",
+    "docs/rust/METER-CONTEXT-MC02-PROTOCOL.md": "2b3f9877943ae938fff372654260ad8bcdbd8a6c89d59c142959a1092ca92b4a",
+    "docs/rust/METER-CONTEXT-PROTOCOL.json": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+    "tests/unit/apta_1_1_context_matched_runner.py": "9a327142795832476548f6510db8f24c5cf788f7b66b101dfa7875948a3731e0",
+    "tests/unit/apta_1_1_meter_context.py": "ed618994894e4f59466581aab6502587dfb311e299d2333151f6d58b9fd66459",
+    "tests/unit/apta_meter_context_oracle.py": "42235591f41379f76f7d338024614579baf5393d7c1d81f5ad678200f0bc6610",
+    "tools/apta_1_1_context_matched_evaluation.py": "c60c2b651323cd8134a8d64f57f4c1e6b08545e83631bbf4a43af5fdd475e810",
+    "tools/apta_1_1_context_matched_runner.py": "0f87c77db1765cdc621f6726f71f4798319769d4f3c0ee4ab27392e45b61d767",
+    "tools/apta_meter_context_projection.py": "99008695b289ccfb46fa7c0b0cb6833e61a2ec0176a6d5e4738cad31504d94ee"
+  },
+  "date": "2026-10-25",
+  "format": "libapta-meter-context-mc02-operational-registration-1",
+  "future_authorization_path": "docs/rust/METER-CONTEXT-GENERATED-SCOPE.json",
+  "generated_campaign_authorized": false,
+  "implementation_paths": [
+    "tools/apta_1_1_meter_context_runner.py",
+    "tests/unit/apta_1_1_meter_context_runner.py"
+  ],
+  "inherited_process_tests": 14,
+  "mc01_controls": 15,
+  "native_activation": false,
+  "new_phase_identity_fields": [
+    "format",
+    "operational_protocol_sha256",
+    "projection_protocol_sha256",
+    "scientific_protocol_sha256",
+    "manifest_sha256",
+    "runtime_sha256",
+    "source_revision"
+  ],
+  "parent_runtime_sha256": "563f613b905fc95ef349101b8d83752ebf14e91dc016d8ed9b3e285e045a6f58",
+  "physical_p4": false,
+  "preflight_path": "docs/rust/METER-CONTEXT-MC02-PREFLIGHT.json",
+  "projection_protocol_sha256": "542f5e44a46662f233a013faacdcc66e5254c579e1930cc5ec99c789c10da191",
+  "public_scope": {
+    "evaluated_cells": 2400,
+    "fixed_60_beat_recipe": true,
+    "projections": 1200,
+    "reference_complete_windows": 400,
+    "reference_incomplete_windows": 200,
+    "sources": 100,
+    "windows": 600
+  },
+  "real_dispatch": false,
+  "release": false,
+  "resources": {
+    "attempt_bytes": 67108864,
+    "phase_or_suite_seconds": 1800,
+    "process_rss_kib": 262144,
+    "source_seconds": 60
+  },
+  "reuse_private_phase_engine": true,
+  "saved_c3_opened": false,
+  "scientific_protocol_sha256": "c8b17d5bda059ec96260180485f18ce59712db47c9d4037c9180e1917480c6e8",
+  "semantic_job_scope_binding_before_labels": true,
+  "version": "1.0.1"
+}

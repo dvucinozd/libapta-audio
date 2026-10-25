@@ -359,9 +359,13 @@ The initial missing-jsonschema old-control environment is retained separately;
 all23 old controls pass using the existing host runtime, with no dependency change.
 No saved C3 cases or scores enter MC-01; P6 remains rejected. Product budgets and
 real-runtime H0 remain open.
-**Next: MC-02, minimally bind this module/protocol into the existing generated
-phase machinery and qualify its operational runtime/fixtures, then separately
-register one fresh generated matched comparison. No real dispatch.**
+MC-02 now registers the [operational adapter contract](METER-CONTEXT-MC02-PROTOCOL.md)
+and [machine bindings](METER-CONTEXT-MC02-PROTOCOL.json), before implementation.
+It reuses a private instance of the frozen phase engine, fixed MC-01 helper/oracle
+facades, canonical scoring and public fixtures. New protocol/runtime identity and
+semantic job-to-scope binding precede labels; old authorization cannot select it.
+**Next: implement and qualify MC-02 on public fixtures, then separately register
+one fresh generated matched comparison. No C3/real dispatch at preparation.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
