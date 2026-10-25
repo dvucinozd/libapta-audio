@@ -378,9 +378,13 @@ RSS/HWM22844/22928/186856KiB; inputs plus attempt25047875bytes.
 The read-only checker's initial component-subset assumption failure is retained;
 the corrected checker verifies inherited profile bindings with no suite/scoring retry.
 No saved C3 cases open at MC-02; old P6 stays rejected and real gates stay open.
-**Next: MC-03, separately register one new fixed generated C3 comparison with
-exact runtime/preflight/scope/components/new destination, commit/push and verify
-clean matching source before dispatch. No real replay.**
+MC-03 now registers [one fixed generated meter-context comparison](METER-CONTEXT-MC03-PROTOCOL.md)
+and its [exact generated-scope identity](METER-CONTEXT-GENERATED-SCOPE.json),
+binding all three protocols,83 components, the qualified runtime/preflight and
+the fixed100/600 C3 closure to one fresh destination. No numerical code changes.
+**Next: after registration commit/push and clean matching source verification,
+execute the single MC-03 attempt and publish its full result or INVALID state.
+No real replay or automatic retry.**
 The
 [repair plan](COUPLED-TIME-R5-REPAIR-PLAN-20261024.md) and
 [machine checklist](COUPLED-TIME-R5-REPAIR-PLAN-20261024.json) remain the frozen
