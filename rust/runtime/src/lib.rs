@@ -4,6 +4,8 @@
 //! occupy explicit independent caller storage or independently owned heap arrays. No session or core pool is shared
 //! across threads, and no core result lease survives a synchronization call.
 #![forbid(unsafe_code)]
+#[cfg(feature = "experimental-compact-hmm")]
+pub mod compact_hmm;
 mod context;
 mod growing;
 pub use context::{ContextLimits, ContextUsage, RuntimeContext};

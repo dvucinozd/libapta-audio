@@ -1,0 +1,81 @@
+{
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "a0f8a434aeb70c2aaf44ea20c8556cd828207d4af1d8962f946c5985e95e8457",
+    "rust/runtime/src/bin/apta-compact-hmm-synthetic.rs": "576f01fbcc9ace3b93161e19f48b9e9e27bfee7a9fa7764a34fd2d92d167041c",
+    "rust/runtime/src/compact_hmm.rs": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+    "rust/runtime/src/lib.rs": "90f8032c13254a144767288860d2111f1d499533c5d00d0dc53d782260a71c8a",
+    "rust/runtime/tests/compact_hmm.rs": "4b5f9c003ad286f1fd38773f8127bd82fd9443fcebeb5e0720ded8997efd61c6",
+    "tools/apta_compact_hmm_synthetic.py": "90633086d61f9ecf50dd1a33763f23ac65384bb3e6d298f0d700a74015918a2c"
+  },
+  "date": "2026-10-26",
+  "default_enabled": false,
+  "development_enforcement": {
+    "initial_preflight": "Preserved initial development refusal caused by heavy supervisor baseline; fresh minimal supervisor now verifies allocating child exceeded unchanged 16384 KiB cap",
+    "output": "D:/AI/LIBAPTA/outputs/hs01-development-enforcement-v2-20261026",
+    "probes": [
+      "wall",
+      "rss",
+      "output",
+      "address_space"
+    ],
+    "rss_allocating_child_kib": 61712,
+    "rss_supervisor_kib": 16252,
+    "status": "EXPECTED_REFUSALS_OBSERVED"
+  },
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-HMM-IMPLEMENTATION.md",
+    "sha256": "b022da06c2583f51d7c40a728d48fe116f2a58acee0526e09d02da0020acdc49"
+  },
+  "feature": "experimental-compact-hmm",
+  "format": "libapta-host-hmm-implementation-1",
+  "id": "HS-01",
+  "maximum_trace_payload_bytes": 16575840,
+  "measured_five_cases": "NOT_RUN",
+  "protocol": {
+    "path": "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.json",
+    "sha256": "052ce2a59ae25f17f2bdaf93e2dd317f9593657a098c6b6c9dd69340e1c446de"
+  },
+  "remaining_gates": [
+    "clean exact implementation measured synthetic run",
+    "PF01 exact-device budgets NEEDS_MEASUREMENT; board unavailable",
+    "model rights LICENSE_UNRESOLVED",
+    "training provenance INDEPENDENCE_UNRESOLVED",
+    "product PF04 NOT_RUN"
+  ],
+  "safe_std_host_only": true,
+  "scope": {
+    "core_consumer_wire_changed": false,
+    "default_DSP_changed": false,
+    "model_corpus_or_device_executed": false,
+    "new_Cargo_dependencies": false,
+    "product_PF04_complete": false,
+    "provider_activated": false,
+    "stable_version": "1.0.1"
+  },
+  "source_baseline": "3c2946ef53968aa8b13d2eee2a00536187fc6857",
+  "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_MEASURED_RUN_PENDING",
+  "step_allocations": 0,
+  "tests": {
+    "debug": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "default_runtime_context": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "context_busy_lifetime_matches_public_c needs APTA_C_CONTEXT_LIFETIME_ORACLE"
+    },
+    "fmt": "PASS",
+    "focused_clippy_deny_warnings": "PASS",
+    "product_grid_contract": {
+      "ignored": 0,
+      "passed": 12
+    },
+    "python_compile": "PASS",
+    "release": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "release_binary_build": "PASS"
+  }
+}

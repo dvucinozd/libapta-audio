@@ -6,12 +6,18 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: implement the explicitly authorized [HS-01 synthetic host protocol](PRODUCT-HOST-HMM-PROTOCOL.md) ([JSON](PRODUCT-HOST-HMM-PROTOCOL.json)).**
-This scoped addendum permits a safe, opt-in runtime HMM prototype and generated
-parity/resource/cancel tests without neural weights, corpus inputs or P4 activation.
-Register/push first, then implementation/tests/push, then a clean-source measured
-synthetic run and separate result checkpoint. It does not close product PF-04,
-CS-01 rights/provenance or PF-01 exact-device budgets. Older authorities remain frozen.
+**Current next: clean-source measured HS-01 synthetic host run.** The
+[registered protocol](PRODUCT-HOST-HMM-PROTOCOL.md) and
+[implementation receipt](PRODUCT-HOST-HMM-IMPLEMENTATION.json) bind the opt-in
+`experimental-compact-hmm` decoder, fixed generated CLI and resource supervisor.
+Implementation preflight passes:13 debug +13 release tests, product-grid12,
+default context5 with1 existing C-oracle-dependent ignored/NOT_RUN. fmt and focused
+Clippy pass. Step/cancel allocate nothing; replay verifies score bits; partial
+results stay hidden. Maximum trace payload is16575840bytes including the output
+path. Commit/push implementation before the five fixed measured cases, then
+publish their separate aggregate checkpoint. No neural weights, corpus or device
+run is authorized. Product PF-04 remains NOT_RUN; CS-01 rights/provenance and
+PF-01 exact-device budgets remain open. Older authorities remain frozen.
 
 The [static binding follow-up](PRODUCT-COMPACT-BINDING.md) and
 [receipt](PRODUCT-COMPACT-BINDING.json), from source base

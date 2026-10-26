@@ -1,13 +1,13 @@
 {
-  "active_phase": "PF-03",
-  "active_phase_status": "STATIC_BINDING_FINITE_PASS_RIGHTS_PROVENANCE_AND_PHYSICAL_GATES_OPEN",
-  "active_phase_verdict": "FINITE_VALUES_PASS_NO_PRODUCT_GO",
+  "active_phase": "HS-01",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+  "active_phase_verdict": "HOST_SYNTHETIC_IMPLEMENTATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "767125 finite float32 values in seven storages/22 tensor views; independent IEEE754 exponent check; pinned public rights/provenance inspection. No model/corpus/device run.",
+  "checks": "13 new debug and 13 release passes; product-grid 12 passes; default context 5 passes and 1 existing C-oracle-dependent ignored. fmt/focused Clippy/release build/Python compile pass. Fixed five measured cases pending.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -88,10 +88,12 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "static raw weight scalar and public-source inspection; no model or physical qualification",
+  "evidence_level": "synthetic implementation and operational preflight only",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
+    "default_DSP_changed": false,
+    "experimental_host_decoder_added": true,
     "framework_tensors_constructed": false,
     "hardware_flashed": false,
     "model_or_corpus_executed": false,
@@ -163,18 +165,29 @@
       "source_baseline": "76b4f2aa9570b808633eaba5d9d385fd9f9ebe15",
       "status": "STATIC_COMPACT_SPEC_COMPLETE_NEEDS_BINDING_AND_MEASUREMENT",
       "step": "CS-02"
+    },
+    {
+      "phase": "PF-03",
+      "source_baseline": "0a4fa2d39b09368923fbb1a9256bf87c42630215",
+      "status": "STATIC_BINDING_FINITE_PASS_RIGHTS_PROVENANCE_AND_PHYSICAL_GATES_OPEN",
+      "step": "CS01 finite binding",
+      "verdict": "FINITE_VALUES_PASS_NO_PRODUCT_GO"
     }
   ],
   "host_hmm_experiment": {
     "id": "HS-01",
+    "implementation": {
+      "path": "docs/rust/PRODUCT-HOST-HMM-IMPLEMENTATION.json",
+      "sha256": "c7217a394ada021037dcaef49c64cbbe94ee4edc1190e02c93713f08f7f3e79e"
+    },
     "neural_or_corpus_execution_allowed": false,
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.json",
     "protocol_sha256": "052ce2a59ae25f17f2bdaf93e2dd317f9593657a098c6b6c9dd69340e1c446de",
-    "status": "REGISTERED_NOT_IMPLEMENTED"
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
   },
   "next": {
-    "action": "Implement registered safe host checkpointed HMM; no weights/corpus/P4 activation",
+    "action": "Commit/push implementation, then run fixed HS-01 generated cases from exact clean source and publish separate aggregate receipt",
     "large_port_allowed": false,
     "mode": "SYNTHETIC_HOST_ONLY",
     "phase": "HS-01"
@@ -411,7 +424,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "0a4fa2d39b09368923fbb1a9256bf87c42630215",
+  "source_baseline": "3c2946ef53968aa8b13d2eee2a00536187fc6857",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -481,6 +494,13 @@
       "source": "Direct user answer: Jos nije dostupna",
       "status": "CONFIRMED_UNAVAILABLE",
       "value": false
+    },
+    {
+      "date": "2026-10-26",
+      "id": "HS01-AUTHORIZATION",
+      "source": "Direct user request: registration of narrow synthetic experiment and decoder implementation",
+      "status": "CONFIRMED",
+      "value": "SYNTHETIC_HOST_ONLY_NO_NEURAL_CORPUS_DEVICE_PRODUCT_ACTIVATION"
     }
   ]
 }
