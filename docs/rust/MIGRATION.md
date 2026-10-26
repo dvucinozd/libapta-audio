@@ -6,19 +6,22 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: implement registered HS-02 synthetic path-to-events/grid.** See the
-[protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [machine registration](PRODUCT-HOST-GRID-PROTOCOL.json)
-and [50 public cases](fixtures/product-host-grid-hs02/cases.json), from baseline
-`701c44222e6304128b23a1c1c6728248a4cc75f7`. The protocol fixes typed inputs,
-full-source probability/trim checks, frozen path membership/edges, peak ties,
-exact rational/Q32 fitting, native/wire checks, bounded work/cancel behavior,
-capacities and stop rules. Static registration checks verify 26 event oracles,
-4 full-case oracles, 19635 state-map entries and authority/asset hashes.
-**No HS-02 candidate implementation/test or measured run has occurred.**
-Implement the six planned code paths in protocol order; keep HS-01 byte-identical.
-Tests/lints and implementation commit/push precede the six fixed measured cases,
-then a separate aggregate result checkpoint. This is opt-in synthetic host work;
-product PF-04 and the physical/model gates remain open.
+**Current next: clean-source HS-02 measurement after implementation commit/push.**
+The [protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [implementation](PRODUCT-HOST-GRID-IMPLEMENTATION.md)
+and [receipt](PRODUCT-HOST-GRID-IMPLEMENTATION.json) bind the opt-in postprocessor,
+fixed literals for all50 public cases and independent supervised Python checker.
+Eight new tests pass in debug/release (250 fixture/quota combinations per profile),
+including nine-phase cancellation/reuse, ten native/wire positives, two small HMM
+compositions and independent serialized-result lifetime. HS-01 controls13 per
+profile and product-grid12/default-context5 pass; one existing C lifetime oracle
+comparison is ignored/NOT_RUN. fmt/focused Clippy, release build, Python compile
+and four development enforcement probes pass. HS-01/core/consumer/wire/default
+sources and VERSION1.0.1 remain unchanged.
+
+Commit/push implementation before six registered measured cases, then audit and
+publish a separate result checkpoint. No clean HS-02 measured run has occurred at
+this implementation checkpoint. This is synthetic host work; product PF-04,
+model rights/provenance and physical budgets remain open. H1 stays deferred.
 
 The [public rights/provenance review](PRODUCT-COMPACT-RIGHTS-REVIEW.md)
 ([receipt](PRODUCT-COMPACT-RIGHTS-REVIEW.json)), committed at

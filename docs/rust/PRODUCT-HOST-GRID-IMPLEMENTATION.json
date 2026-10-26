@@ -1,0 +1,159 @@
+{
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "56b0622c74c1b462b40c89cc70f7efdcb2428c2263ee90a8a9d333486f781c4b",
+    "rust/runtime/src/bin/apta-compact-grid-synthetic.rs": "b691fa0a9fca25850994cbceade1d8b685576c4c762b0452ff77e092bd71f56a",
+    "rust/runtime/src/compact_grid.rs": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a",
+    "rust/runtime/src/lib.rs": "1fba54d97624c78714b4c630e4d37639385b975f282b3f1865271f6c58039855",
+    "rust/runtime/tests/compact_grid.rs": "3a310268595cb7e67e904e7dc66312310d5c7aed2774e7b6d55ae91c42cf8e68",
+    "tools/apta_compact_grid_synthetic.py": "dff6ecb32f33fa1fb362c28323fbf1ead798f0ac2d3643dc15c5ce93d8b71892"
+  },
+  "date": "2026-10-26",
+  "default_enabled": false,
+  "development_preflight": {
+    "child_peak_rss_kib": 18568,
+    "file_manifest": {
+      "enforcement-address/stdout.txt": {
+        "bytes": 12,
+        "sha256": "6f622d4a4bace364e1b65ab6561b11f3f9a483a4638be60b03c9a49575d1f626"
+      },
+      "enforcement-output/probe.resources.json": {
+        "bytes": 319,
+        "sha256": "292cc43615cb0411fb010cf89760bb7f4d79242c8478cde31462b92270c9c077"
+      },
+      "enforcement-output/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-output/probe.stdout": {
+        "bytes": 65536,
+        "sha256": "1f8745f0d2d1387ec1af2211a3cf417b2e9e885e853472649c1d979d0e9370e3"
+      },
+      "enforcement-rss/probe.resources.json": {
+        "bytes": 309,
+        "sha256": "97feca876bf8af638a01cb4af982e6e55eb31189f7fec9e183fb2aa36abbd572"
+      },
+      "enforcement-rss/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/probe.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/supervisor.resources.json": {
+        "bytes": 291,
+        "sha256": "2355af764fcca11a4d17da910d1cff096fbceb3bb4aaf6bff844b2026e7583bb"
+      },
+      "enforcement-rss/supervisor.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/supervisor.stdout": {
+        "bytes": 18,
+        "sha256": "22e6fdf53e4f456dfcb47a19bf87a9cad7847b575709e5e945ad9e88dcc6dfb6"
+      },
+      "enforcement-wall/probe.resources.json": {
+        "bytes": 315,
+        "sha256": "16a40b83a9217ea5b275c513d7b9a92af4709a45f3bf8a5092ff0442fcf1ceb7"
+      },
+      "enforcement-wall/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-wall/probe.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement.json": {
+        "bytes": 145,
+        "sha256": "032cd11f2902579d390ec7c64a03b3922b694d85a0bab5effdec020878d675e7"
+      },
+      "fixtures.child.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "fixtures.child.stdout": {
+        "bytes": 25814,
+        "sha256": "c63252d433d12056c6338f0264f709558312b0cfbc8a5f89bf1fbb52a904e943"
+      },
+      "fixtures.json": {
+        "bytes": 36357,
+        "sha256": "6f9a5b6975916a21f7213d6def3535c512e33a5a591625e6ab4efc9a50b57a0c"
+      },
+      "fixtures.runtime.json": {
+        "bytes": 15487,
+        "sha256": "1a30acc7868abb04cc6f4ea38b2372f5d8c4e82ad469f6c34d3b25c6635e2589"
+      }
+    },
+    "fixture_worker_observations": 50,
+    "negative_probes": "ALL_FOUR_REFUSED_AS_EXPECTED",
+    "root": "D:/AI/LIBAPTA/outputs/hs02-development-preflight-20261026",
+    "rss_allocating_child_kib": 49692,
+    "scope": "generated preflight only; not clean six-case measurement"
+  },
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-GRID-IMPLEMENTATION.md",
+    "sha256": "eaca901d4cde6424697154e0e8e98be4ef3988b5de4d25dfb71d6dcb7fa2144c"
+  },
+  "feature": "experimental-compact-grid",
+  "format": "libapta-host-grid-implementation-1",
+  "id": "HS-02",
+  "measured_six_cases": "NOT_RUN",
+  "protocol": {
+    "path": "docs/rust/PRODUCT-HOST-GRID-PROTOCOL.json",
+    "sha256": "282a8e78970aaf59c1ad837c84713c7d1ddb1dc5b87b1a30a0d1b56d63389e7e"
+  },
+  "remaining_gates": [
+    "clean exact-source six-case HS02 measurement",
+    "LICENSE_UNRESOLVED and INDEPENDENCE_UNRESOLVED",
+    "PF01 physical budgets NEEDS_MEASUREMENT; board unavailable",
+    "product PF04 and full neural/native pipeline NOT_RUN"
+  ],
+  "scope": {
+    "HS01_source_changed": false,
+    "default_core_consumer_wire_changed": false,
+    "model_corpus_device_or_training_executed": false,
+    "physical_qualification": false,
+    "product_PF04_complete": false,
+    "stable_version": "1.0.1"
+  },
+  "scratch_bytes": 24576,
+  "source_baseline": "a06afca15998a05a446ebb74dff1257fb119c563",
+  "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_MEASURED_RUN_PENDING",
+  "step_constructor_cancel_allocations": 0,
+  "tests": {
+    "HS01_debug": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "HS01_release": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "default_runtime_context": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "context_busy_lifetime_matches_public_c requires APTA_C_CONTEXT_LIFETIME_ORACLE"
+    },
+    "fixture_quota_combinations_per_profile": 250,
+    "fmt": "PASS",
+    "focused_clippy_deny_warnings": "PASS",
+    "new_HS02_debug": {
+      "ignored": 0,
+      "passed": 8
+    },
+    "new_HS02_release": {
+      "ignored": 0,
+      "passed": 8
+    },
+    "positive_native_wire_fixtures": 10,
+    "product_grid_contract": {
+      "ignored": 0,
+      "passed": 12
+    },
+    "python_compile": "PASS",
+    "reachable_processing_phases_cancelled": 9,
+    "release_binary_build": "PASS",
+    "small_HMM_compositions": 2
+  }
+}

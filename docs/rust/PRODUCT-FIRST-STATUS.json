@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-02",
-  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
-  "active_phase_verdict": "SYNTHETIC_REGISTRATION_ONLY_NO_CANDIDATE_RUN",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+  "active_phase_verdict": "HOST_SYNTHETIC_IMPLEMENTATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS02 registration only: 50 public cases, 26 event oracles and 4 full-case rational oracles checked; 19635 frozen state-map entries, 24 authority and 8 asset bindings verified. Candidate implementation/tests/measured cases NOT_RUN.",
+  "checks": "8 new HS02 tests pass debug/release, 250 fixture/quota combinations each; prior HMM13 each, native/wire10 positives, 2 small compositions; product-grid12 and default-context5 pass,1 existing C-oracle comparison ignored/NOT_RUN. fmt/Clippy/build/Python and development enforcement/fixture worker PASS; clean six-case measurement pending.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,11 +92,12 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "public rights/provenance follow-up plus synthetic registration/static mathematics; no new algorithm, musical or P4 qualification",
+  "evidence_level": "synthetic host implementation/preflight only; no product, musical or P4 qualification",
   "execution": {
     "DSP_changed": false,
-    "HS02_candidate_executed": false,
-    "HS02_registration_only": true,
+    "HS02_candidate_executed": true,
+    "HS02_generated_preflight_only": true,
+    "HS02_registration_only": false,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
     "experimental_host_decoder_added": true,
@@ -205,6 +206,13 @@
       "source_baseline": "23827c5936e5670a7b5a178533fc07e3ac0acd69",
       "status": "PUBLIC_REVIEW_COMPLETE_RIGHTS_AND_PROVENANCE_UNRESOLVED",
       "verdict": "LICENSE_UNRESOLVED_AND_INDEPENDENCE_UNRESOLVED"
+    },
+    {
+      "checkpoint": "a06afca15998a05a446ebb74dff1257fb119c563",
+      "phase": "HS-02",
+      "protocol_sha256": "282a8e78970aaf59c1ad837c84713c7d1ddb1dc5b87b1a30a0d1b56d63389e7e",
+      "status": "REGISTERED_NOT_IMPLEMENTED",
+      "step": "registration"
     }
   ],
   "host_grid_experiment": {
@@ -212,6 +220,10 @@
     "fixture_path": "docs/rust/fixtures/product-host-grid-hs02/cases.json",
     "fixture_sha256": "eb84b1ea78eab975628369a474ee63f628a3d9b456761dd7b7ebb2b4aed9ec67",
     "id": "HS-02",
+    "implementation": {
+      "path": "docs/rust/PRODUCT-HOST-GRID-IMPLEMENTATION.json",
+      "sha256": "a8e1b012148ccd17b16a3368a9070742c66ff69a738e42e64de5d42560752f59"
+    },
     "neural_or_corpus_execution_allowed": false,
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-GRID-PROTOCOL.json",
@@ -224,7 +236,7 @@
       "verifier_path": "D:/AI/LIBAPTA/outputs/check-hs02-registration-20261026.py",
       "verifier_sha256": "96e632bc236d572df1e58db080650e3fe568f769c3f0e40420a6c7b182744c51"
     },
-    "status": "REGISTERED_NOT_IMPLEMENTED"
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
   },
   "host_hmm_experiment": {
     "id": "HS-01",
@@ -243,9 +255,9 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Implement exact HS02 fitter, path correction and bounded state machine; run registered tests/lints and commit/push before six-case clean measurement. No model/corpus/device/default activation.",
+    "action": "Commit/push implementation, then execute fixed HS02 six-case clean-source run and publish separate aggregate result",
     "large_port_allowed": false,
-    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "mode": "CLEAN_SYNTHETIC_HOST_MEASUREMENT_ONLY",
     "phase": "HS-02"
   },
   "open_decisions": [
@@ -481,7 +493,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "701c44222e6304128b23a1c1c6728248a4cc75f7",
+  "source_baseline": "a06afca15998a05a446ebb74dff1257fb119c563",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
