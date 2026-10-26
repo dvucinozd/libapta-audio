@@ -6,22 +6,31 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: clean-source HS-02 measurement after implementation commit/push.**
-The [protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [implementation](PRODUCT-HOST-GRID-IMPLEMENTATION.md)
-and [receipt](PRODUCT-HOST-GRID-IMPLEMENTATION.json) bind the opt-in postprocessor,
-fixed literals for all50 public cases and independent supervised Python checker.
-Eight new tests pass in debug/release (250 fixture/quota combinations per profile),
-including nine-phase cancellation/reuse, ten native/wire positives, two small HMM
-compositions and independent serialized-result lifetime. HS-01 controls13 per
-profile and product-grid12/default-context5 pass; one existing C lifetime oracle
-comparison is ignored/NOT_RUN. fmt/focused Clippy, release build, Python compile
-and four development enforcement probes pass. HS-01/core/consumer/wire/default
-sources and VERSION1.0.1 remain unchanged.
+**HS-02 is complete: synthetic host postprocessor evidence only.** See the
+[protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [implementation](PRODUCT-HOST-GRID-IMPLEMENTATION.md)
+and [result](PRODUCT-HOST-GRID-RESULT.md) ([JSON](PRODUCT-HOST-GRID-RESULT.json)).
+The six fixed cases ran once from clean implementation commit
+`1196e5459406d4179793d53a535d516577f28436`, with55 validated observations
+(50 fixtures, four600s supplied-path cases and pending cancel). Full path-to-grid
+step loops took0.568–0.692ms on host; scratch24576B, generated owners444528/444558B.
+This excludes full-case HMM/neural/audio inference. Pending-cancel service at
+CheckResiduals was0.000112ms; scratch drop0.000916ms, separate from asynchronous
+or product timing. All registered caps stayed unchanged.58 files/322896B,
+170 parent bindings and every worker runtime were audited. No model/music/device,
+provider or release ran. HS-01/core/consumer/wire/default sources and VERSION1.0.1
+remain unchanged; full product PF-04 is NOT_RUN.
 
-Commit/push implementation before six registered measured cases, then audit and
-publish a separate result checkpoint. No clean HS-02 measured run has occurred at
-this implementation checkpoint. This is synthetic host work; product PF-04,
-model rights/provenance and physical budgets remain open. H1 stays deferred.
+Eight new tests pass per debug/release profile, including250 fixture/quota pairs,
+nine-phase cancellation/reuse, ten native/wire positives, two small HMM compositions
+and output lifetime. HS-01 controls13 per profile, product-grid12 and default-
+context5 pass; one existing C lifetime oracle comparison stays ignored/NOT_RUN.
+fmt/focused Clippy, release build and Python compile pass.
+
+**Next product prerequisites:** affirmative code/checkpoint rights and actual
+checkpoint training/recording independence, plus PF-01 exact-board budgets once
+JC1060P470C_I_W_Y becomes available. Further frontend/model/native component work
+needs a separately scoped registration. No large port or model/corpus/provider
+activation follows from HS-02; H1 stays deferred and older verdicts stay frozen.
 
 The [public rights/provenance review](PRODUCT-COMPACT-RIGHTS-REVIEW.md)
 ([receipt](PRODUCT-COMPACT-RIGHTS-REVIEW.json)), committed at

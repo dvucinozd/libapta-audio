@@ -1,0 +1,349 @@
+{
+  "attempts": {
+    "clean_measured_runs": 1,
+    "implementation_repairs": "development-only redundant arithmetic lint cleanup; no mathematical or cap changes",
+    "measured_retry": false,
+    "registered_parameters_changed": false
+  },
+  "branch": "rust-rewrite",
+  "cases": [
+    {
+      "case": "fixtures",
+      "child_cpu_seconds": 0.002985,
+      "child_peak_rss_kib": 18552,
+      "max_polled_process_rss_kib": 18856,
+      "observations": 50,
+      "outcome_counts": {
+        "EventsReady": 5,
+        "Failed": 23,
+        "GridReady": 10,
+        "NoEvidence": 4,
+        "UnsupportedGrid": 8
+      },
+      "supervised_wall_seconds": 0.48807625899996765,
+      "worker_runtime_binding_sha256": "fd3631a99fb4293c40e058b4471b89cb731c6d07eaf4c2e95ce5e9226385e91b",
+      "worker_runtime_files": 129,
+      "worker_wall_seconds": 0.10951052300003994
+    },
+    {
+      "case": "full3-44100",
+      "child_cpu_seconds": 0.003188,
+      "child_peak_rss_kib": 18600,
+      "construction_seconds": 6.08e-07,
+      "event_sha256": "0001d8b2777b1f8f411aa7188a05179c405f717cf28b175051d5d23714580df8",
+      "grid": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "18940805775360",
+        "anchor_whole": 4410,
+        "applicability_frames": [
+          0,
+          26460000
+        ],
+        "beat_count": 1200,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 48510,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 3,
+        "period_fraction_q32": 0,
+        "period_q32": "94704028876800",
+        "period_whole": 22050,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "input_sha256": "bdf38dd381531385f21158981f109f86f518e349b384868dfcfe1b8db4431a1d",
+      "max_polled_process_rss_kib": 19688,
+      "max_step_seconds": 7.1417e-05,
+      "native_wire_checked": true,
+      "observations": 1,
+      "payload_bytes": 444528,
+      "step_seconds": 0.000606523,
+      "summary_sha256": "787d4dd777c5540c6433e0378af038a3caee618456b9a5e6ab3f6149af67ccc9",
+      "supervised_wall_seconds": 0.5249518659999808,
+      "units": 128333,
+      "worker_runtime_binding_sha256": "fd3631a99fb4293c40e058b4471b89cb731c6d07eaf4c2e95ce5e9226385e91b",
+      "worker_runtime_files": 129,
+      "worker_wall_seconds": 0.09980685799996536
+    },
+    {
+      "case": "full4-44100",
+      "child_cpu_seconds": 0.003524,
+      "child_peak_rss_kib": 18568,
+      "construction_seconds": 4.27e-07,
+      "event_sha256": "38100492fed06a59c2da6b9bb104a2ece6472248268394a5f93eac1daaccdf50",
+      "grid": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "0",
+        "anchor_whole": 0,
+        "applicability_frames": [
+          0,
+          26460000
+        ],
+        "beat_count": 3000,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 0,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "37881611550720",
+        "period_whole": 8820,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 300000
+      },
+      "input_sha256": "d8c02248b195c2a0274d9fc1de4a9e7c6759ec519ea0f3486c62a4321ff7b7f6",
+      "max_polled_process_rss_kib": 19560,
+      "max_step_seconds": 3.9213e-05,
+      "native_wire_checked": true,
+      "observations": 1,
+      "payload_bytes": 444558,
+      "step_seconds": 0.000692344,
+      "summary_sha256": "e3b5acffbd1e7298cb061c5039b93cbc6acc8016a65acc9d371c02920aca3aee",
+      "supervised_wall_seconds": 0.6054748309999809,
+      "units": 134980,
+      "worker_runtime_binding_sha256": "fd3631a99fb4293c40e058b4471b89cb731c6d07eaf4c2e95ce5e9226385e91b",
+      "worker_runtime_files": 129,
+      "worker_wall_seconds": 0.1009470760000113
+    },
+    {
+      "case": "full3-48000",
+      "child_cpu_seconds": 0.0031699999999999996,
+      "child_peak_rss_kib": 18556,
+      "construction_seconds": 5.08e-07,
+      "event_sha256": "0001d8b2777b1f8f411aa7188a05179c405f717cf28b175051d5d23714580df8",
+      "grid": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "20615843020800",
+        "anchor_whole": 4800,
+        "applicability_frames": [
+          0,
+          28800000
+        ],
+        "beat_count": 1200,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 52800,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 3,
+        "period_fraction_q32": 0,
+        "period_q32": "103079215104000",
+        "period_whole": 24000,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "input_sha256": "a9c02b8d47fbba8dce7cab15edac86d7e9c069848c13be77293def07320126ba",
+      "max_polled_process_rss_kib": 19708,
+      "max_step_seconds": 3.2249e-05,
+      "native_wire_checked": true,
+      "observations": 1,
+      "payload_bytes": 444528,
+      "step_seconds": 0.000568038,
+      "summary_sha256": "4e197a4cd3bbe3a35c3ff4844ae25486d729313ca5b91e059050bbb66688102f",
+      "supervised_wall_seconds": 0.6687867359999586,
+      "units": 128333,
+      "worker_runtime_binding_sha256": "fd3631a99fb4293c40e058b4471b89cb731c6d07eaf4c2e95ce5e9226385e91b",
+      "worker_runtime_files": 129,
+      "worker_wall_seconds": 0.09775423100001035
+    },
+    {
+      "case": "full4-48000",
+      "child_cpu_seconds": 0.003196,
+      "child_peak_rss_kib": 18468,
+      "construction_seconds": 8.7e-07,
+      "event_sha256": "38100492fed06a59c2da6b9bb104a2ece6472248268394a5f93eac1daaccdf50",
+      "grid": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "0",
+        "anchor_whole": 0,
+        "applicability_frames": [
+          0,
+          28800000
+        ],
+        "beat_count": 3000,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 0,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "41231686041600",
+        "period_whole": 9600,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 300000
+      },
+      "input_sha256": "6462dfbf54ee418055fbf811a044acbd540212823917b8f8a72914d76ffbb8c4",
+      "max_polled_process_rss_kib": 18984,
+      "max_step_seconds": 3.1949e-05,
+      "native_wire_checked": true,
+      "observations": 1,
+      "payload_bytes": 444558,
+      "step_seconds": 0.00060743,
+      "summary_sha256": "70c8ec7b0a8a08f56abda085d2fd6b9bd27e69950d596f8a8a348c08ade975a2",
+      "supervised_wall_seconds": 0.4108383920000165,
+      "units": 134980,
+      "worker_runtime_binding_sha256": "fd3631a99fb4293c40e058b4471b89cb731c6d07eaf4c2e95ce5e9226385e91b",
+      "worker_runtime_files": 129,
+      "worker_wall_seconds": 0.10345207300002812
+    },
+    {
+      "case": "cancel",
+      "child_cpu_seconds": 0.00307,
+      "child_peak_rss_kib": 18492,
+      "input_sha256": "6462dfbf54ee418055fbf811a044acbd540212823917b8f8a72914d76ffbb8c4",
+      "max_polled_process_rss_kib": 19000,
+      "observations": 1,
+      "payload_bytes": 444558,
+      "pending_request_to_return_ms": 0.000112,
+      "phase_at_request": "CheckResiduals",
+      "scratch_drop_ms": 0.000916,
+      "supervised_wall_seconds": 0.4573932860000127,
+      "units": 131978,
+      "worker_runtime_binding_sha256": "fd3631a99fb4293c40e058b4471b89cb731c6d07eaf4c2e95ce5e9226385e91b",
+      "worker_runtime_files": 129,
+      "worker_wall_seconds": 0.10801971099999719
+    }
+  ],
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "56b0622c74c1b462b40c89cc70f7efdcb2428c2263ee90a8a9d333486f781c4b",
+    "rust/runtime/src/bin/apta-compact-grid-synthetic.rs": "b691fa0a9fca25850994cbceade1d8b685576c4c762b0452ff77e092bd71f56a",
+    "rust/runtime/src/compact_grid.rs": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a",
+    "rust/runtime/src/lib.rs": "1fba54d97624c78714b4c630e4d37639385b975f282b3f1865271f6c58039855",
+    "rust/runtime/tests/compact_grid.rs": "3a310268595cb7e67e904e7dc66312310d5c7aed2774e7b6d55ae91c42cf8e68",
+    "tools/apta_compact_grid_synthetic.py": "dff6ecb32f33fa1fb362c28323fbf1ead798f0ac2d3643dc15c5ce93d8b71892"
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-GRID-RESULT.md",
+    "sha256": "2775f05990e830f644dd85b788e25c2b333b7d0997060bd1b3ad2e437df34059"
+  },
+  "enforcement": {
+    "address_space": "REFUSED_AS_EXPECTED",
+    "output": "REFUSED_AS_EXPECTED",
+    "rss": "REFUSED_AS_EXPECTED",
+    "wall": "REFUSED_AS_EXPECTED"
+  },
+  "event_scratch_bytes": 24576,
+  "executable": {
+    "path": "/home/daniel/libapta-hs02-build/release/apta-compact-grid-synthetic",
+    "sha256": "28a37cde4456347f27ec9ade660f7e26dccd3ba82899181aea7c409eb1a5359c"
+  },
+  "external_audit": {
+    "bindings_checked": 170,
+    "file_count": 58,
+    "output_bytes": 322896,
+    "path": "D:/AI/LIBAPTA/outputs/hs02-measured-20261026-audit.json",
+    "sha256": "47dc60d73ef96a46f196eae5aab50a566f5b3e98df563cef993da4c6fdb4bfa7",
+    "status": "PASS"
+  },
+  "external_output": "D:/AI/LIBAPTA/outputs/hs02-measured-20261026",
+  "external_result_sha256": "6aa2e2dabdb33637c8e57776436eaf8d12becce8e7d4cb8508518295f721f4b3",
+  "format": "libapta-host-grid-aggregate-result-1",
+  "host_type_value_sizes": {
+    "event_size_bytes": 8,
+    "session_value_size_bytes": 432,
+    "summary_value_size_bytes": 96
+  },
+  "id": "HS-02",
+  "implementation": {
+    "path": "docs/rust/PRODUCT-HOST-GRID-IMPLEMENTATION.json",
+    "sha256": "a8e1b012148ccd17b16a3368a9070742c66ff69a738e42e64de5d42560752f59"
+  },
+  "limits": {
+    "address_space_bytes": 134217728,
+    "cpu_seconds": 10,
+    "output_bytes": 1048576,
+    "pending_host_cancel_request_to_return_ms": 50,
+    "rss_kib": 65536,
+    "wall_seconds": 30
+  },
+  "negative_rss_allocating_child_kib": 53468,
+  "parent_bindings_sha256": "de7fe02ff36868c0ab7d0232b40452713df1b0caa413dd9c716bce41e56c2e0b",
+  "parent_runtime_files": 129,
+  "protocol": {
+    "path": "docs/rust/PRODUCT-HOST-GRID-PROTOCOL.json",
+    "sha256": "282a8e78970aaf59c1ad837c84713c7d1ddb1dc5b87b1a30a0d1b56d63389e7e"
+  },
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "remaining_gates": [
+    "LICENSE_UNRESOLVED and INDEPENDENCE_UNRESOLVED for neural artifacts",
+    "PF01 exact-device internal/PSRAM/storage/stack/fragmentation/cleanup NEEDS_MEASUREMENT; JC1060P470C_I_W_Y unavailable; silicon revision unobserved",
+    "full frontend/neural/audio-format/progress/native consumer pipeline NOT_RUN",
+    "separately registered development/transfer/musical acceptance remains required",
+    "existing C lifetime oracle comparison NOT_RUN"
+  ],
+  "scope": {
+    "default_core_consumer_wire_or_HS01_changed": false,
+    "full_cases_are_supplied_artificial_legal_paths": true,
+    "model_corpus_training_or_device_executed": false,
+    "musical_or_P4_qualification": false,
+    "pending_cancel_is_asynchronous_latency": false,
+    "product_PF04_complete": false,
+    "provider_or_release_activated": false,
+    "stable_version": "1.0.1",
+    "synthetic_host_only": true,
+    "whole_neural_or_HMM_pipeline_timed": false
+  },
+  "source_clean_at_run_start_and_finish": true,
+  "source_revision": "1196e5459406d4179793d53a535d516577f28436",
+  "status": "HS02_SYNTHETIC_HOST_PASS_ONLY",
+  "tests": {
+    "HS01_debug": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "HS01_release": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "default_runtime_context": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "context_busy_lifetime_matches_public_c requires APTA_C_CONTEXT_LIFETIME_ORACLE"
+    },
+    "fixture_quota_combinations_per_profile": 250,
+    "fmt": "PASS",
+    "focused_clippy_deny_warnings": "PASS",
+    "new_HS02_debug": {
+      "ignored": 0,
+      "passed": 8
+    },
+    "new_HS02_release": {
+      "ignored": 0,
+      "passed": 8
+    },
+    "positive_native_wire_fixtures": 10,
+    "product_grid_contract": {
+      "ignored": 0,
+      "passed": 12
+    },
+    "python_compile": "PASS",
+    "reachable_processing_phases_cancelled": 9,
+    "release_binary_build": "PASS",
+    "small_HMM_compositions": 2
+  },
+  "toolchain_observation": {
+    "path": "D:/AI/LIBAPTA/outputs/hs02-toolchain-observation-20261026.json",
+    "scope": "Post-run installed build-toolchain observation; separate from pre-bound runtime files",
+    "sha256": "ec1eb31fee271a4797b482898cb39e41f1891eb551874642e57d0dcd30fc4f94"
+  },
+  "verification_tool": {
+    "path": "D:/AI/LIBAPTA/outputs/audit-hs02-and-write-report-20261026.py",
+    "sha256": "924d32a7b872af633311b5d4783e2b48a3f980f730744d6720c796aa0e246465"
+  }
+}
