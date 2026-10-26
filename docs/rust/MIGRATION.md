@@ -6,7 +6,13 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: close remaining CS-01 binding and PF-01 exact-device resource gates before PF-04, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+**Current next: implement the explicitly authorized [HS-01 synthetic host protocol](PRODUCT-HOST-HMM-PROTOCOL.md) ([JSON](PRODUCT-HOST-HMM-PROTOCOL.json)).**
+This scoped addendum permits a safe, opt-in runtime HMM prototype and generated
+parity/resource/cancel tests without neural weights, corpus inputs or P4 activation.
+Register/push first, then implementation/tests/push, then a clean-source measured
+synthetic run and separate result checkpoint. It does not close product PF-04,
+CS-01 rights/provenance or PF-01 exact-device budgets. Older authorities remain frozen.
+
 The [static binding follow-up](PRODUCT-COMPACT-BINDING.md) and
 [receipt](PRODUCT-COMPACT-BINDING.json), from source base
 `0a4fa2d39b09368923fbb1a9256bf87c42630215`, close finite-value inspection:

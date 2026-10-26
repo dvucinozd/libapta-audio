@@ -1,0 +1,238 @@
+{
+  "algorithm": {
+    "block_rows": 256,
+    "cancellation_checked_each_unit": true,
+    "density_negative_infinity_allowed": true,
+    "maximum_edges": 28380,
+    "maximum_finite_log_value": 0,
+    "maximum_rows": 30000,
+    "maximum_states": 11220,
+    "minimum_finite_log_value": -1024,
+    "parent_invalid": 65535,
+    "partial_result_allowed": false,
+    "precision": "f64",
+    "prior_bits": {
+      "3": "c0221356bc07601a",
+      "4": "c022a6a1cc9106f7"
+    },
+    "recurrence": "(previous[p]+log_transition)+log_density",
+    "replay_score_bits_checked": true,
+    "step_allocations_allowed": 0,
+    "test_quotas": [
+      1,
+      7,
+      256,
+      4096,
+      "usize::MAX"
+    ],
+    "tie": "first sorted predecessor; lowest final state",
+    "tiny_test_blocks": [
+      1,
+      2,
+      3
+    ],
+    "workspace_score": "16*S bytes",
+    "workspace_trace": "8*S*ceil(R/B)+2*S*min(B,R)+16*S+2*R bytes"
+  },
+  "assets": {
+    "hmm3-logp.f64le": {
+      "bytes": 107520,
+      "elements": 13440,
+      "scalar_format": "d",
+      "sha256": "ee4c4d1e05f58dfbdb14d6e79511e51453a2e4e53639cc4fd13a72780c3bff5e",
+      "shape": [
+        13440
+      ]
+    },
+    "hmm3-pointers.u32le": {
+      "bytes": 33664,
+      "elements": 8416,
+      "scalar_format": "I",
+      "sha256": "a22e4463e82febfab33271c426480ed30846eee470bc3e9648299814f0a60cd7",
+      "shape": [
+        8416
+      ]
+    },
+    "hmm3-previous.u16le": {
+      "bytes": 26880,
+      "elements": 13440,
+      "scalar_format": "H",
+      "sha256": "2b92b3ace5adb198067eaeaddc7e8c7bae46cf58790112dbc663e1351bcb8132",
+      "shape": [
+        13440
+      ]
+    },
+    "hmm3-state-map.u8": {
+      "bytes": 25245,
+      "elements": 25245,
+      "scalar_format": "B",
+      "sha256": "53849fd8a1a19f3df6326ea625c28202da7a878a1c2e0d0f7df4660c9c5203ca",
+      "shape": [
+        8415,
+        3
+      ]
+    },
+    "hmm4-logp.f64le": {
+      "bytes": 143360,
+      "elements": 17920,
+      "scalar_format": "d",
+      "sha256": "79784569c68e2ff98a7649f9388e6b0ffe599419c09d77a4ce2c777aff1b2999",
+      "shape": [
+        17920
+      ]
+    },
+    "hmm4-pointers.u32le": {
+      "bytes": 44884,
+      "elements": 11221,
+      "scalar_format": "I",
+      "sha256": "fbf8c5332a7be2b0db31526b9506766d9aa7caf74683b75d2750bfaab0bc9a67",
+      "shape": [
+        11221
+      ]
+    },
+    "hmm4-previous.u16le": {
+      "bytes": 35840,
+      "elements": 17920,
+      "scalar_format": "H",
+      "sha256": "7c77868e6f00a6563aeadc68fbb10c0be4efc86987965e255bff24084db173bc",
+      "shape": [
+        17920
+      ]
+    },
+    "hmm4-state-map.u8": {
+      "bytes": 33660,
+      "elements": 33660,
+      "scalar_format": "B",
+      "sha256": "ccf052b1bf78ed639dd0a30d314e99067cf4cd9b690ec50fbcdfe088c0938d18",
+      "shape": [
+        11220,
+        3
+      ]
+    },
+    "oracles.json": {
+      "bytes": 3640,
+      "sha256": "2aa80590acef1916a6733065f5a290753f55e2f970da706b68c5e9b3850858c8"
+    }
+  },
+  "authority_sha256": {
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7",
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+    "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json": "0e8c9709aa5034879ed362f81c0e54cfb4d86504d566d1d2902d8c9d7c86a682",
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb",
+    "docs/rust/REAL-RUNTIME-H1-PROTOCOL.json": "888470d36fac9e8168a79da8abf46d12d66f3b290f0940f90c7212e37b6d2599",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+  },
+  "cases": [
+    {
+      "meter": 3,
+      "name": "small3",
+      "rows": 257
+    },
+    {
+      "meter": 4,
+      "name": "small4",
+      "rows": 513
+    },
+    {
+      "meter": 3,
+      "name": "full3",
+      "rows": 30000
+    },
+    {
+      "meter": 4,
+      "name": "full4",
+      "rows": 30000
+    },
+    {
+      "meter": 4,
+      "name": "cancel",
+      "rows": 30000
+    }
+  ],
+  "checkpoint_sequence": [
+    "registration_commit_push",
+    "implementation_tests_lints_commit_push",
+    "clean_exact_source_generated_run",
+    "aggregate_report_commit_push"
+  ],
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.md",
+    "sha256": "4dab9a5abc6cd08e2509b1ffa6d8355d405f00f98f514ca9da982bed41819217"
+  },
+  "enforcement_probes": {
+    "AS_allocation_bytes": 536870912,
+    "allocation_bytes": 67108864,
+    "output_cap_bytes": 4096,
+    "rss_kib": 16384,
+    "sleep_seconds": 1,
+    "wall_seconds": 0.05,
+    "write_bytes": 65536
+  },
+  "files_planned": [
+    "rust/runtime/Cargo.toml",
+    "rust/runtime/src/lib.rs",
+    "rust/runtime/src/compact_hmm.rs",
+    "rust/runtime/src/bin/apta-compact-hmm-synthetic.rs",
+    "rust/runtime/tests/compact_hmm.rs",
+    "tools/apta_compact_hmm_synthetic.py"
+  ],
+  "format": "libapta-host-hmm-protocol-1",
+  "generator": {
+    "beat": [
+      0.96,
+      0.02,
+      0.02
+    ],
+    "beat_interval": 25,
+    "downbeat": [
+      0.02,
+      0.96,
+      0.02
+    ],
+    "other": [
+      0.01,
+      0.01,
+      0.98
+    ],
+    "precision": "f32 then f64 log"
+  },
+  "host_environment": {
+    "cargo": "1.95.0",
+    "logical_cpus": 16,
+    "memory_total_kib": 16052120,
+    "python": "3.12.3",
+    "rust": "1.95.0"
+  },
+  "id": "HS-01",
+  "limits": {
+    "address_space_bytes": 268435456,
+    "cancel_request_delay_ms": 10,
+    "cpu_seconds": 120,
+    "host_cancel_request_to_return_ms": 50,
+    "output_bytes": 1048576,
+    "rss_kib": 131072,
+    "wall_seconds": 180
+  },
+  "model_rights_and_training_provenance": "UNRESOLVED",
+  "outcomes": {
+    "failure": "FAIL or INVALID/INCOMPLETE; no musical verdict",
+    "failure_action": "stop, preserve output; no automatic algorithm/cap rescue",
+    "pass": "HS01_SYNTHETIC_HOST_PASS_ONLY"
+  },
+  "owner_authorization": "Direct request to register narrow synthetic experiment and implement decoder",
+  "physical_board_available": false,
+  "scope": {
+    "H1_required": false,
+    "core_consumer_wire_default_changes_allowed": false,
+    "new_Cargo_dependency_allowed": false,
+    "product_PF04_complete": false,
+    "substantial_P4_port_allowed": false,
+    "synthetic_host_only": true,
+    "uses_neural_weights_audio_labels_or_real_logits": false
+  },
+  "source_baseline": "3b0dbdb647cc752fdaa5111609c038ca6ba6ad84"
+}

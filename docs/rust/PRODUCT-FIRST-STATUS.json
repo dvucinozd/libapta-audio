@@ -165,14 +165,19 @@
       "step": "CS-02"
     }
   ],
+  "host_hmm_experiment": {
+    "id": "HS-01",
+    "neural_or_corpus_execution_allowed": false,
+    "product_gates_bypassed": false,
+    "protocol_path": "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.json",
+    "protocol_sha256": "052ce2a59ae25f17f2bdaf93e2dd317f9593657a098c6b6c9dd69340e1c446de",
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "next": {
-    "action": "Obtain affirmative code/weights rights and checkpoint training provenance; measure actual board once available; no model switch or inference",
+    "action": "Implement registered safe host checkpointed HMM; no weights/corpus/P4 activation",
     "large_port_allowed": false,
-    "mode": "REQUIRED_EXTERNAL_EVIDENCE",
-    "pending_phase": "PF-01",
-    "phase": "PF-03",
-    "repeat_runtime_audit_needed": false,
-    "step": "RIGHTS_PROVENANCE_AND_DEVICE_EVIDENCE"
+    "mode": "SYNTHETIC_HOST_ONLY",
+    "phase": "HS-01"
   },
   "open_decisions": [
     {
