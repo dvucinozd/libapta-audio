@@ -6,18 +6,26 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: clean-source measured HS-01 synthetic host run.** The
-[registered protocol](PRODUCT-HOST-HMM-PROTOCOL.md) and
-[implementation receipt](PRODUCT-HOST-HMM-IMPLEMENTATION.json) bind the opt-in
-`experimental-compact-hmm` decoder, fixed generated CLI and resource supervisor.
-Implementation preflight passes:13 debug +13 release tests, product-grid12,
-default context5 with1 existing C-oracle-dependent ignored/NOT_RUN. fmt and focused
-Clippy pass. Step/cancel allocate nothing; replay verifies score bits; partial
-results stay hidden. Maximum trace payload is16575840bytes including the output
-path. Commit/push implementation before the five fixed measured cases, then
-publish their separate aggregate checkpoint. No neural weights, corpus or device
-run is authorized. Product PF-04 remains NOT_RUN; CS-01 rights/provenance and
-PF-01 exact-device budgets remain open. Older authorities remain frozen.
+**HS-01 is complete: synthetic host evidence only.** The
+[registered protocol](PRODUCT-HOST-HMM-PROTOCOL.md),
+[implementation receipt](PRODUCT-HOST-HMM-IMPLEMENTATION.json) and
+[result](PRODUCT-HOST-HMM-RESULT.md) ([JSON](PRODUCT-HOST-HMM-RESULT.json)) bind the
+opt-in decoder and five fixed generated cases, measured from clean commit
+`7cd081f15f7e5a77af59f5bbd61c0158c65ac171`. All 5 passed; full3/full4 worker wall
+was 14.628/16.634 s, full4 trace payload 16575840 B, cancellation request-to-return
+0.002772 ms and separate workspace drop 1.439928 ms. These are host observations,
+not P4 or musical qualification. Fixed operational caps and all four negative
+probes passed; 155 parent bindings, 129 runtime files per worker and 51 output files
+(184301 B) were audited. 13 debug + 13 release tests and 12+5 controls pass;
+one existing C-lifetime oracle comparison stays ignored/NOT_RUN. Default/core/
+consumer/wire behavior and VERSION1.0.1 remain unchanged.
+
+**Next product prerequisites:** BeatNet+ code/weights rights and checkpoint training
+provenance, plus PF-01 exact-board budgets once JC1060P470C_I_W_Y is available.
+Product PF-04 remains NOT_RUN; no neural/corpus run, large port or provider
+activation follows from this host PASS. Other component work needs a separately
+scoped registration. H1 stays deferred. Older authorities and rejections remain
+frozen; see the result for the retained prelaunch/build-path incident and limits.
 
 The [static binding follow-up](PRODUCT-COMPACT-BINDING.md) and
 [receipt](PRODUCT-COMPACT-BINDING.json), from source base

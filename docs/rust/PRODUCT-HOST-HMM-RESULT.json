@@ -1,0 +1,213 @@
+{
+  "asset_concatenation_sha256": "ea6dc0bc252043e6f550cfe0038dedcbc53ac06c3c73f900bd5b303b4a8418af",
+  "branch": "rust-rewrite",
+  "cases": [
+    {
+      "allocation_seconds": 0.0020920220000000002,
+      "begin_seconds": 0.000205141,
+      "case": "small3",
+      "child_cpu_seconds": 0.132359,
+      "child_peak_rss_kib": 18280,
+      "density_sha256": "7673467f47cb650776e0d4d52e156c40d96453c882189b675ffe014f416ff27c",
+      "max_polled_process_rss_kib": 18584,
+      "max_step_seconds": 0.000105755,
+      "meter": 3,
+      "path_sha256": "7f176fb5d434413901723314ce6f8b801fa24494083beaabe522ba4de0fd8f80",
+      "rows": 257,
+      "score_bits": "c085de2e2f2cd4a5",
+      "step_seconds": 0.127015461,
+      "supervised_wall_seconds": 0.7329334660000058,
+      "trace_payload_bytes": 4578274,
+      "units": 33801747,
+      "worker_runtime_binding_sha256": "45aeaa6d31d0685816c71845a0b29190ef7ebe0ae5cf12776d9132099945e208",
+      "worker_wall_seconds": 0.20862501599999916
+    },
+    {
+      "allocation_seconds": 0.0029169950000000004,
+      "begin_seconds": 0.000203372,
+      "case": "small4",
+      "child_cpu_seconds": 0.297469,
+      "child_peak_rss_kib": 18144,
+      "density_sha256": "5164b7f65f0e3be9ee0ec55882be20fe87758c77a567d99f884f6379e0420192",
+      "max_polled_process_rss_kib": 18632,
+      "max_step_seconds": 0.000169744,
+      "meter": 4,
+      "path_sha256": "34eaa0be38525de16fb2021de8e9ee22b35a10b0fa9257c6de34e9b149ceeb1f",
+      "rows": 513,
+      "score_bits": "c095bb044a96ab9a",
+      "step_seconds": 0.292811896,
+      "supervised_wall_seconds": 1.0084905930000048,
+      "trace_payload_bytes": 6194466,
+      "units": 77774160,
+      "worker_runtime_binding_sha256": "45aeaa6d31d0685816c71845a0b29190ef7ebe0ae5cf12776d9132099945e208",
+      "worker_wall_seconds": 0.38122725099999855
+    },
+    {
+      "allocation_seconds": 0.005975839,
+      "begin_seconds": 0.000535027,
+      "case": "full3",
+      "child_cpu_seconds": 14.541692000000001,
+      "child_peak_rss_kib": 18328,
+      "density_sha256": "820cfba652a36c296d015ec27a62e6c7cc0fce4e4f96d6915e361425b97b3b37",
+      "max_polled_process_rss_kib": 18648,
+      "max_step_seconds": 0.002248116,
+      "meter": 3,
+      "path_sha256": "240e83538cdf5234e7f806c1f1b6e573e6a01d3de42601a6af969e28b3c503ab",
+      "rows": 30000,
+      "score_bits": "c0f3c1ff87af6a73",
+      "step_seconds": 14.495573147,
+      "supervised_wall_seconds": 14.985293449000011,
+      "trace_payload_bytes": 12446880,
+      "units": 3937292400,
+      "worker_runtime_binding_sha256": "45aeaa6d31d0685816c71845a0b29190ef7ebe0ae5cf12776d9132099945e208",
+      "worker_wall_seconds": 14.628027336999992
+    },
+    {
+      "allocation_seconds": 0.0073751829999999996,
+      "begin_seconds": 0.000629129,
+      "case": "full4",
+      "child_cpu_seconds": 16.507447,
+      "child_peak_rss_kib": 20172,
+      "density_sha256": "8dfe39077e35eaddcffc3a878f885d220c2415012e88232d9700df33e69e817c",
+      "max_polled_process_rss_kib": 20372,
+      "max_step_seconds": 0.010500622,
+      "meter": 4,
+      "path_sha256": "fc49878a53a1a87d02e7954311ff240225e821238c9533ea65d24606ebe552ee",
+      "rows": 30000,
+      "score_bits": "c0f3c2042207eec0",
+      "step_seconds": 16.526282584,
+      "supervised_wall_seconds": 17.074956482000005,
+      "trace_payload_bytes": 16575840,
+      "units": 4543359990,
+      "worker_runtime_binding_sha256": "45aeaa6d31d0685816c71845a0b29190ef7ebe0ae5cf12776d9132099945e208",
+      "worker_wall_seconds": 16.63403066699999
+    },
+    {
+      "cancel_request_to_return_ms": 0.0027719999999999997,
+      "case": "cancel",
+      "child_cpu_seconds": 0.022576,
+      "child_peak_rss_kib": 20416,
+      "density_sha256": "8dfe39077e35eaddcffc3a878f885d220c2415012e88232d9700df33e69e817c",
+      "drop_workspace_ms": 1.439928,
+      "max_polled_process_rss_kib": 18676,
+      "payload_bytes": 16575840,
+      "rows": 30000,
+      "supervised_wall_seconds": 0.7390523409999901,
+      "units": 2786025,
+      "worker_runtime_binding_sha256": "45aeaa6d31d0685816c71845a0b29190ef7ebe0ae5cf12776d9132099945e208",
+      "worker_wall_seconds": 0.1270298910000065
+    }
+  ],
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "a0f8a434aeb70c2aaf44ea20c8556cd828207d4af1d8962f946c5985e95e8457",
+    "rust/runtime/src/bin/apta-compact-hmm-synthetic.rs": "576f01fbcc9ace3b93161e19f48b9e9e27bfee7a9fa7764a34fd2d92d167041c",
+    "rust/runtime/src/compact_hmm.rs": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+    "rust/runtime/src/lib.rs": "90f8032c13254a144767288860d2111f1d499533c5d00d0dc53d782260a71c8a",
+    "rust/runtime/tests/compact_hmm.rs": "4b5f9c003ad286f1fd38773f8127bd82fd9443fcebeb5e0720ded8997efd61c6",
+    "tools/apta_compact_hmm_synthetic.py": "90633086d61f9ecf50dd1a33763f23ac65384bb3e6d298f0d700a74015918a2c"
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-HMM-RESULT.md",
+    "sha256": "4ec646ec23c69406d78ca3d357c99ae616ec6fafb5168df7d7863ab87970cdb7"
+  },
+  "enforcement": {
+    "address_space": "REFUSED_AS_EXPECTED",
+    "output": "REFUSED_AS_EXPECTED",
+    "rss": "REFUSED_AS_EXPECTED",
+    "wall": "REFUSED_AS_EXPECTED"
+  },
+  "enforcement_rss_child_kib": 74228,
+  "executable": {
+    "path": "/home/daniel/libapta-hs01-build/release/apta-compact-hmm-synthetic",
+    "sha256": "95b59ae4ae5537711e8d765ff97b9973cdce1d39a49e694795bad26f19fdffa2"
+  },
+  "external_audit": {
+    "attempt_output_bytes": 184301,
+    "bindings_checked": 155,
+    "file_count": 51,
+    "path": "D:/AI/LIBAPTA/outputs/hs01-measured-20261026-audit.json",
+    "sha256": "a292530aa6b96c3521cc672f08b47068c2ae24582405709f1934d29133d7fd18",
+    "status": "PASS"
+  },
+  "external_output": "D:/AI/LIBAPTA/outputs/hs01-measured-20261026",
+  "external_result_sha256": "19e31423f3237a86cfef5ea8cec5c718a5f6e6972f6b912a593925e55f3f392f",
+  "format": "libapta-host-hmm-aggregate-result-1",
+  "id": "HS-01",
+  "implementation": {
+    "path": "docs/rust/PRODUCT-HOST-HMM-IMPLEMENTATION.json",
+    "sha256": "c7217a394ada021037dcaef49c64cbbe94ee4edc1190e02c93713f08f7f3e79e"
+  },
+  "limits": {
+    "address_space_bytes": 268435456,
+    "cancel_request_delay_ms": 10,
+    "cpu_seconds": 120,
+    "host_cancel_request_to_return_ms": 50,
+    "output_bytes": 1048576,
+    "rss_kib": 131072,
+    "wall_seconds": 180
+  },
+  "parent_bindings_sha256": "9e3e5c81f1eb1c43d706834ae9da22310ef4587008504fec8e0ae059a9c80f3b",
+  "parent_runtime_files": 129,
+  "prelaunch_incident": {
+    "measured_cases_started": 0,
+    "path": "D:/AI/LIBAPTA/outputs/hs01-prelaunch-20261026.json",
+    "resolution": "Rebuilt same clean committed source to persistent external build path; protocol/code/caps unchanged",
+    "sha256": "5487460c8cd172f4ed8059ac04edc0f8e5f77b2fc003b909017dfd95dcdde059",
+    "status": "MISSING_TMP_EXECUTABLE_BEFORE_OUTPUT_CREATION_OR_CASES"
+  },
+  "protocol": {
+    "path": "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.json",
+    "sha256": "052ce2a59ae25f17f2bdaf93e2dd317f9593657a098c6b6c9dd69340e1c446de"
+  },
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "remaining_gates": [
+    "PF01 physical budgets NEEDS_MEASUREMENT; JC1060P470C_I_W_Y unavailable; silicon revision unobserved",
+    "CS01 LICENSE_UNRESOLVED and INDEPENDENCE_UNRESOLVED",
+    "PF04 full pipeline experiment NOT_RUN; new explicit scope before other host/model work",
+    "state-to-event correction/full-source grid, frontend/neural stage, compressed-audio bridge and product integration not delivered by HS01",
+    "P4 timing/stack/internal RAM/PSRAM/storage/fragmentation/cleanup and exact-image qualification NOT_RUN",
+    "existing C lifetime oracle comparison NOT_RUN"
+  ],
+  "scope": {
+    "P4_product_latency_memory_or_cancellation_qualified": false,
+    "default_core_consumer_wire_changed": false,
+    "model_corpus_or_device_executed": false,
+    "musical_accuracy_qualified": false,
+    "product_PF04_complete": false,
+    "release_or_provider_activated": false,
+    "stable_version": "1.0.1",
+    "synthetic_host_only": true
+  },
+  "source_clean_at_run_start_and_finish": true,
+  "source_revision": "7cd081f15f7e5a77af59f5bbd61c0158c65ac171",
+  "status": "HS01_SYNTHETIC_HOST_PASS_ONLY",
+  "tests": {
+    "debug": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "default_runtime_context": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "context_busy_lifetime_matches_public_c needs APTA_C_CONTEXT_LIFETIME_ORACLE"
+    },
+    "fmt": "PASS",
+    "focused_clippy_deny_warnings": "PASS",
+    "product_grid_contract": {
+      "ignored": 0,
+      "passed": 12
+    },
+    "python_compile": "PASS",
+    "release": {
+      "ignored": 0,
+      "passed": 13
+    },
+    "release_binary_build": "PASS"
+  },
+  "verification_tool": {
+    "path": "D:/AI/LIBAPTA/outputs/hs01-audit-and-report-20261026.py",
+    "purpose": "strict read-only evidence audit followed by aggregate report generation; no decoder case rerun",
+    "sha256": "f848d579f6d34b80bfc918c5ddc4c2fd4394677084816ba13f5796f973a2db80"
+  }
+}

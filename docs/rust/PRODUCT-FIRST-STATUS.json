@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-01",
-  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
-  "active_phase_verdict": "HOST_SYNTHETIC_IMPLEMENTATION_ONLY",
+  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+  "active_phase_verdict": "HS01_SYNTHETIC_HOST_PASS_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "13 new debug and 13 release passes; product-grid 12 passes; default context 5 passes and 1 existing C-oracle-dependent ignored. fmt/focused Clippy/release build/Python compile pass. Fixed five measured cases pending.",
+  "checks": "Fixed 5/5 generated host cases PASS; exact clean source/protocol/runtime/executable/assets and 51 output files audited. 13 debug +13 release new passes; controls12+5 passes; C lifetime oracle comparison remains ignored/NOT_RUN.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -88,7 +88,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "synthetic implementation and operational preflight only",
+  "evidence_level": "registered synthetic host decoder implementation/parity/resource/cancel only; no musical or P4 qualification",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
@@ -96,6 +96,7 @@
     "experimental_host_decoder_added": true,
     "framework_tensors_constructed": false,
     "hardware_flashed": false,
+    "model_corpus_device_executed_this_experiment": false,
     "model_or_corpus_executed": false,
     "native_feature_implemented": false,
     "provider_activated": false,
@@ -103,6 +104,7 @@
     "release_created": false,
     "runtime_prepared": false,
     "static_math_assets_generated": true,
+    "synthetic_host_HMM_executed": true,
     "tensor_payloads_deserialized": true,
     "weights_loaded_as_model": false,
     "weights_read": true
@@ -172,6 +174,14 @@
       "status": "STATIC_BINDING_FINITE_PASS_RIGHTS_PROVENANCE_AND_PHYSICAL_GATES_OPEN",
       "step": "CS01 finite binding",
       "verdict": "FINITE_VALUES_PASS_NO_PRODUCT_GO"
+    },
+    {
+      "checkpoint": "7cd081f15f7e5a77af59f5bbd61c0158c65ac171",
+      "implementation_sha256": "c7217a394ada021037dcaef49c64cbbe94ee4edc1190e02c93713f08f7f3e79e",
+      "phase": "HS-01",
+      "source_baseline": "3c2946ef53968aa8b13d2eee2a00536187fc6857",
+      "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+      "step": "implementation preflight"
     }
   ],
   "host_hmm_experiment": {
@@ -184,13 +194,17 @@
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.json",
     "protocol_sha256": "052ce2a59ae25f17f2bdaf93e2dd317f9593657a098c6b6c9dd69340e1c446de",
-    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
+    "result": {
+      "path": "docs/rust/PRODUCT-HOST-HMM-RESULT.json",
+      "sha256": "fcc63ee24f25dda3f123b67b04d7479a90b193e01a178269a8d160a53de076ef"
+    },
+    "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Commit/push implementation, then run fixed HS-01 generated cases from exact clean source and publish separate aggregate receipt",
+    "action": "Close model rights/training-provenance evidence; obtain PF01 exact-board budgets when hardware becomes available. Register separate scope before any further component/model experiment.",
     "large_port_allowed": false,
-    "mode": "SYNTHETIC_HOST_ONLY",
-    "phase": "HS-01"
+    "mode": "PRODUCT_PREREQUISITE_EVIDENCE_ONLY",
+    "phase": "PF-03 / PF-01"
   },
   "open_decisions": [
     {
@@ -424,7 +438,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "3c2946ef53968aa8b13d2eee2a00536187fc6857",
+  "source_baseline": "7cd081f15f7e5a77af59f5bbd61c0158c65ac171",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
