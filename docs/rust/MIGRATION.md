@@ -6,7 +6,23 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: PF-02 of the [product-first implementation plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+**Current next: PF-03 static inventory only, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+PF-02 completes the [grid/meter/publication contract](PRODUCT-GRID-CONTRACT.md)
+and [machine receipt](PRODUCT-GRID-CONTRACT.json) from source base
+`2055487efbc07d865b499f24c69d8a829afaf30f` plus12 new public
+[native geometry tests](../../rust/tests/product_grid_contract.rs).
+The contract keeps source/Q32 ownership and signed ordinals, exact MTRD binding,
+full-source/capacity and selected-tempo constraints, separate M/D/E/UNKNOWN
+denominators, and reference-free future witness selection. First5s progress must
+not occupy the accepted TrackAnalysis slot before FINAL; that separate progress
+owner remains future integration work. Fixed48000Hz/short-source evaluators
+cannot silently process44100Hz/full-source inputs. No old scorer or result changes.
+All48 tests per debug/release profile (12 new/36 existing), fmt and focused
+Clippy pass. No new detector, consumer build/activation, corpus or device run.
+PF-01 remains NEEDS_MEASUREMENT. PF-03 may only perform the bounded static
+source/public-aggregate prework permitted by PF-01; its product route completion
+and a large port still require the unresolved memory/placement/device budgets.
+
 PF-01 completes the [static resource inventory](PRODUCT-BUDGETS.md), with
 [budgets and evidence](PRODUCT-BUDGETS.json), from source base
 `9ae4927d55a476d1f590e42fd486494ed13660aa` plus the bound new
@@ -18,8 +34,8 @@ profiles. At48kHz, FPC32768 native accounting is807890bytes; with the declared
 consumer bank/scratch overlap scenario898890bytes, excluding controls, retained
 copies, neural costs and other product owners. Neither is a whole-device peak.
 Internal/PSRAM/storage/stack and placement budgets remain UNKNOWN; PF-01 stays
-NEEDS_MEASUREMENT and large product ports remain blocked. PF-02 is independently
-ready to define the grid/meter/publication contract. No DSP, inference, consumer
+NEEDS_MEASUREMENT and large product ports remain blocked. The PF-02 contract
+completion is recorded above. No DSP, inference, consumer
 activation or physical qualification follows this compiler/accounting evidence.
 
 PF-00 now completes the [first product scope](PRODUCT-SCOPE.md), with

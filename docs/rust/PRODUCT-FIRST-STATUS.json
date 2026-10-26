@@ -1,13 +1,13 @@
 {
-  "active_phase": "PF-01",
-  "active_phase_status": "NEEDS_MEASUREMENT",
-  "active_phase_verdict": "STATIC_INVENTORY_COMPLETE_BUDGETS_UNQUALIFIED",
+  "active_phase": "PF-02",
+  "active_phase_status": "COMPLETE",
+  "active_phase_verdict": "CONTRACT_AND_PUBLIC_NATIVE_CHECKS_PASS",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "Focused fmt/Clippy/host planning and RV32 compile/layout plus independent static arithmetic; no target execution or musical evaluation",
+  "checks": "PF-02: 48 debug and 48 release native test passes (12 new per profile), fmt/Clippy; no consumer build, model, corpus or device run",
   "consumer_snapshot": {
     "files_pin_provider_unchanged": true,
     "files_sha256": {
@@ -19,6 +19,15 @@
     },
     "ref": "fetched origin/main",
     "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+  },
+  "contract_document": {
+    "path": "docs/rust/PRODUCT-GRID-CONTRACT.json",
+    "sha256": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb"
+  },
+  "contract_test_implementation": {
+    "DSP_or_scorer_changed": false,
+    "path": "rust/tests/product_grid_contract.rs",
+    "sha256": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa"
   },
   "date": "2026-10-26",
   "deferred_runtime": [
@@ -67,7 +76,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "user-selected timing targets, source inventory and compiler-derived resource accounting",
+  "evidence_level": "source-derived product contract and public native geometry/wire checks",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
@@ -88,13 +97,22 @@
       "source_baseline": "0f19ec768ffcdcd30e579ef1265fb1809ad807c4",
       "status": "COMPLETE",
       "verdict": "SCOPE_PASS"
+    },
+    {
+      "budgets_sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380",
+      "phase": "PF-01",
+      "source_baseline": "9ae4927d55a476d1f590e42fd486494ed13660aa",
+      "status": "NEEDS_MEASUREMENT",
+      "verdict": "STATIC_INVENTORY_COMPLETE_BUDGETS_UNQUALIFIED"
     }
   ],
   "next": {
-    "action": "Define exact grid/meter, owned ranges, admission/publication and evaluation contract independently of pending PF-01 device budgets",
+    "action": "Bounded whole-pipeline source and public-aggregate inventory; no model import, private data or product GO",
+    "all_prerequisites_for_product_route_decision_met": false,
     "large_port_allowed": false,
+    "mode": "STATIC_INVENTORY_ONLY",
     "pending_phase": "PF-01",
-    "phase": "PF-02"
+    "phase": "PF-03"
   },
   "open_decisions": [
     {
@@ -119,14 +137,16 @@
       "value": null
     },
     {
+      "evidence": "docs/rust/PRODUCT-GRID-CONTRACT.json",
       "id": "PF02-CONTRACT",
       "owner": "engineering; product owner for changed semantics",
-      "state": "NOT_RUN"
+      "state": "COMPLETE"
     },
     {
       "id": "PF03-ROUTE",
       "owner": "engineering; explicit owner decision for new model or offload",
-      "state": "NOT_RUN"
+      "state": "NOT_RUN_PRODUCT_DECISION_WAITING_PF01",
+      "static_inventory_allowed": true
     },
     {
       "id": "PF04-ALGORITHM",
@@ -155,8 +175,8 @@
         "PF-00"
       ],
       "id": "PF-02",
-      "state": "READY",
-      "verdict": null
+      "state": "COMPLETE",
+      "verdict": "CONTRACT_AND_PUBLIC_NATIVE_CHECKS_PASS"
     },
     {
       "depends_on": [
@@ -165,7 +185,8 @@
         "PF-02"
       ],
       "id": "PF-03",
-      "state": "NOT_RUN",
+      "product_decision_gate": "PF-01 numeric/device budgets still required",
+      "state": "READY_FOR_STATIC_INVENTORY_ONLY",
       "verdict": null
     },
     {
@@ -270,15 +291,19 @@
     "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
     "rust/README.md": "fb45a8fca1175a02a0d4972a201926f4fcf84a0e3447bc16002c4f7181d24aa3",
     "rust/examples/product_budget_probe.rs": "0cabc28658fa81c5e29f50297f8fdf772730097b34f56540b9bf0066a2554751",
+    "rust/src/builder.rs": "8d9e2de10782136417cd1c6b4065bd6165836a82f901fb6303e6c55d4377a04e",
+    "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
     "rust/src/global_analysis.rs": "8b29a2cccd42166c431a86c74e71710d6de82bb25eaf43c049d0b43c1bc07a8a",
     "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
     "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "rust/src/native_validation.rs": "028707aa4998d9a2df060d052f9ce1c4d40a2cfea887fc0e0b3bc0566302f797",
     "rust/src/owned_result.rs": "f2c1c89b6f2b708864e52e2e6a7503848d7446f10bf5dbf89827fe143a8b3836",
     "rust/src/publication.rs": "28329e47a923687e7c7409b3800b4669d2f967280b5f74a30f2d9f5c4525058e",
     "rust/src/session.rs": "0846c321fffe100354c85430c292adc8a5cfa773fc49f7e2597219d1c5b74b0a",
     "rust/src/tempo.rs": "93eab112477179f176746a16d10872d35d395efd991c24f6c8ea3abf342fe086",
     "rust/src/wav.rs": "cf4da4482894db99130bbcd89bd22d90b17c06f51c847820fd8b377e3493f1dc",
-    "rust/src/waveform.rs": "0d6c9ca94493b1e328737dd4f8df339faea693d7fec8dbc09ef3006461c7e8cc"
+    "rust/src/waveform.rs": "0d6c9ca94493b1e328737dd4f8df339faea693d7fec8dbc09ef3006461c7e8cc",
+    "rust/tests/product_grid_contract.rs": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa"
   },
   "scope_document": {
     "path": "docs/rust/PRODUCT-SCOPE.md",
@@ -293,7 +318,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "9ae4927d55a476d1f590e42fd486494ed13660aa",
+  "source_baseline": "2055487efbc07d865b499f24c69d8a829afaf30f",
   "stable_version": "1.0.1",
   "user_decisions": [
     {

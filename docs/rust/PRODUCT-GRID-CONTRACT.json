@@ -1,0 +1,461 @@
+{
+  "authority_sha256": {
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-P1-20261024.md": "7a96c51d35a00448a78ef783cced3e8a1935c04dfda4ebfac3abb6efb98d39e5",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-P2-20261024.md": "cf4b7fa36f912239f641551d820cb95f521ecdae8429677c1565d44294bd972a",
+    "docs/rust/CONTEXT-ANCHOR-PROJECTION-PROTOCOL.md": "6f939c134d8e62c967b9cf379e8afb62069398ab86ed8bf7ac59b05d4311cc63",
+    "docs/rust/METER-CONTEXT-MC03-20261025.md": "535a6fe54f10f57aa142b2121e471d98e33daccc9585072b1326fc8fd6952641",
+    "docs/rust/METER-CONTEXT-MC04-CONTRACT-REVIEW-20261025.md": "242edffd31143ea424d8c0c5f3da493bd0a22dfbe3476b0c88dfef49f530edb2",
+    "docs/rust/METER-PHASE-MC08-20261025.md": "78bfdd0021978729fd258aba486872de0fcdd7a0599ae5b2b52e8867696938b2",
+    "docs/rust/PRODUCT-BUDGETS.json": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380",
+    "docs/rust/PRODUCT-SCOPE.md": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98",
+    "rust/src/builder.rs": "8d9e2de10782136417cd1c6b4065bd6165836a82f901fb6303e6c55d4377a04e",
+    "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+    "rust/src/native_validation.rs": "028707aa4998d9a2df060d052f9ce1c4d40a2cfea887fc0e0b3bc0566302f797",
+    "rust/src/types.rs": "c587be97196b2c2f1246463bcb42a5198fb51d69d98ee355ff5edb5d6ec138dc",
+    "specification/APTA-1.1-DJ-SECTIONS.md": "c040e429f4dde4fea416f85d078fc0ee4853bdd4e93a6cdef0ee2e9d0c4b6be4",
+    "specification/beatgrid.md": "76e1eca77d9446ca0df19cbb920a18e70bd83d1493fe651a163f8567db1daed1",
+    "tools/apta_1_1_asap_meter_validation.py": "768e4c1846a4d198d79bebe9f8233085e286a19042f05126a3c3151b614eb450",
+    "tools/apta_1_1_event_representation.py": "3e6dd303b9f4bea617fbf7eaa9480d692a0bdade91555611682627404d15c300",
+    "tools/apta_1_1_learned_piecewise.py": "fc2c502e743c89e6167fd019d02a209f6e1c9de7c81c17e348ec178f0f565d1b",
+    "tools/apta_1_1_native_annotated_development.py": "47b2d70e0a222a07248d1860b02b53255557e0c9d3a660a0c1f3e1c8bcb1f1cc",
+    "tools/apta_1_1_neural_comparison.py": "2968dbdb7b854003d1d938c089ab5bce1a777d6fad03480bb0211601ff78a3f7",
+    "tools/apta_context_matched.py": "f6b394a0e6399ba38b2bc6191473dde07bb10e4a27e03d3bfd07bad915f2d6ab",
+    "tools/apta_meter_phase_evidence.py": "c8886c92328ef0d23c8372a4920f6a94d43fd5fae2b26d0d1b95b94a8519d28e",
+    "tools/apta_meter_phase_points.py": "3b9dd2786056094a731bab42d5b84c43a969a99e822dd3e9e672f389a616b73b"
+  },
+  "checks": {
+    "checks_receipt_sha256": "7bc5eefc0e6703173401934a64993dee28b6ab93bb8f3399f09fcf39eebb9200",
+    "command_receipts": [
+      {
+        "args": [
+          "/home/daniel/.cargo/bin/cargo",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "exit_code": 0,
+        "failed": 0,
+        "ignored": 0,
+        "label": "fmt",
+        "passed": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "wall_seconds": 3.5441976649999996
+      },
+      {
+        "args": [
+          "/home/daniel/.cargo/bin/cargo",
+          "clippy",
+          "-p",
+          "libapta",
+          "--locked",
+          "--target-dir",
+          "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf02-20261026/build",
+          "--test",
+          "product_grid_contract",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 0,
+        "failed": 0,
+        "ignored": 0,
+        "label": "clippy",
+        "passed": 0,
+        "stderr_sha256": "e1f0f8d857a089f8ec0162737b388d7ff928f5d62e447e931e5d176d4b71a21d",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "wall_seconds": 0.6282070820000012
+      },
+      {
+        "args": [
+          "/home/daniel/.cargo/bin/cargo",
+          "test",
+          "-p",
+          "libapta",
+          "--locked",
+          "--target-dir",
+          "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf02-20261026/build",
+          "--test",
+          "product_grid_contract",
+          "--test",
+          "native_coordinates",
+          "--test",
+          "grid",
+          "--test",
+          "native_validation",
+          "--test",
+          "builder"
+        ],
+        "exit_code": 0,
+        "failed": 0,
+        "ignored": 0,
+        "label": "native-debug",
+        "passed": 43,
+        "stderr_sha256": "4920b8b683d78cf6a77fd141748a98db11edfaced03bfc27d27e59eaaff8f857",
+        "stdout_sha256": "a16ccb93eb8f0bdecebddff239e887f5728502569e48cb717dd4a0a515a042a4",
+        "wall_seconds": 1.3120650719999993
+      },
+      {
+        "args": [
+          "/home/daniel/.cargo/bin/cargo",
+          "test",
+          "-p",
+          "libapta",
+          "--locked",
+          "--target-dir",
+          "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf02-20261026/build",
+          "--features",
+          "experimental-s6-history",
+          "--test",
+          "meter_binding"
+        ],
+        "exit_code": 0,
+        "failed": 0,
+        "ignored": 0,
+        "label": "meter-debug",
+        "passed": 5,
+        "stderr_sha256": "7a102ca9bf819dcbd3cdc2fac41964b2b604e6ff8890f4ba1cfba22c7a558c4e",
+        "stdout_sha256": "d083eafc516a076fdf60d815a8c1183dfd4c3a149715f4479cd5d7dbdd8be0b1",
+        "wall_seconds": 0.19632522299999877
+      },
+      {
+        "args": [
+          "/home/daniel/.cargo/bin/cargo",
+          "test",
+          "-p",
+          "libapta",
+          "--locked",
+          "--target-dir",
+          "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf02-20261026/build",
+          "--release",
+          "--test",
+          "product_grid_contract",
+          "--test",
+          "native_coordinates",
+          "--test",
+          "grid",
+          "--test",
+          "native_validation",
+          "--test",
+          "builder"
+        ],
+        "exit_code": 0,
+        "failed": 0,
+        "ignored": 0,
+        "label": "native-release",
+        "passed": 43,
+        "stderr_sha256": "14332dff0e90c0ff997b75127bb596346dd1580f37f5836926f34d19f8db27a5",
+        "stdout_sha256": "4acedbbfd1c86bbfe0334de576f8f65c49bcf0e1b6fe51a344f0e747f6ba95a3",
+        "wall_seconds": 1.0587675389999998
+      },
+      {
+        "args": [
+          "/home/daniel/.cargo/bin/cargo",
+          "test",
+          "-p",
+          "libapta",
+          "--locked",
+          "--target-dir",
+          "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf02-20261026/build",
+          "--features",
+          "experimental-s6-history",
+          "--test",
+          "meter_binding",
+          "--release"
+        ],
+        "exit_code": 0,
+        "failed": 0,
+        "ignored": 0,
+        "label": "meter-release",
+        "passed": 5,
+        "stderr_sha256": "0b71aed4f666a995454c60eefb1e6ad8eae05cb62d7df80d1ba362b3071e7af1",
+        "stdout_sha256": "90d1bc21242bf6bd0a3db5b056db59f07db05cd3fed1859fbe33c70e3c14e208",
+        "wall_seconds": 0.20124929199999997
+      }
+    ],
+    "debug_passed": 48,
+    "evidence_root": "/home/daniel/.local/share/libapta-audio/rust-rewrite/product-pf02-20261026/final-v2",
+    "existing_controls_per_profile": 36,
+    "failed": 0,
+    "fmt": "PASS",
+    "focused_clippy_D_warnings": "PASS",
+    "ignored": 0,
+    "new_tests_per_profile": 12,
+    "preparation_failures_preserved": "Earlier geometric-only fixture passes and an intermediate Clippy precedence failure retained; final fixture exactly matches tempo, and explicit/native tempo boundary now tested.",
+    "release_passed": 48,
+    "total_test_executions": 96
+  },
+  "consumer_snapshot": {
+    "checkout_pin_provider_unchanged": true,
+    "files_sha256": {
+      "docs/M1_RUST_ARCHITECTURE.md": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94",
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537",
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48",
+      "firmware-rust/crates/ruzina-apta-adapter/README.md": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8",
+      "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36",
+      "firmware-rust/crates/ruzina-track-analysis/src/lib.rs": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+    },
+    "new_consumer_build_or_tests": false,
+    "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+  },
+  "coordinates": {
+    "Q": 4294967296,
+    "authority": "decoded source frames plus Q32",
+    "consumer_ms": "one half-up conversion of full Q32 using actual source rate",
+    "context_anchor_before_window_allowed": true,
+    "lossless_transport": "u64/i64/Q32 exact integers; no bool, NaN/Inf, duplicate keys or binary64 intermediary for geometry",
+    "maximum_seconds": 600,
+    "ordinal": "b0+j",
+    "ordinal_zero_is_implicit_downbeat": false,
+    "owned_indices": "j_first=max(0,ceil((F*Q-A)/P)); j_last=floor((E*Q-1-A)/P)",
+    "ownership": "[F,E)",
+    "position": "A+j*P",
+    "presentation_EOF_ms_is_not_source_EOF_ownership": true,
+    "signed_i64_ordinals": true,
+    "source_anchor_negative_allowed": false,
+    "source_range": "[0,N)",
+    "source_rates_hz": [
+      44100,
+      48000
+    ]
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-GRID-CONTRACT.md",
+    "sha256": "0bfccb6064f37ef85c44dd994555f69785ef23bba7c531902a8827f1e1dd66bb"
+  },
+  "format": "libapta-product-grid-contract-1",
+  "job_contract": {
+    "accepted_analysis_replacement": "forbidden by current consumer policy; recheck at final commit",
+    "cancel_effect": "analysis quiescent and publication fenced, including backend/I-O work",
+    "cancel_target_ms": 50,
+    "cleanup_deadline": "UNKNOWN PF-01 gate",
+    "clock_start": "accepted job; include internal queue, setup, I-O, source passes and required close",
+    "deferred_pauses_clock": false,
+    "final_target_ms": 60000,
+    "first_useful": "usable provisional waveform preview AND supported BPM estimate; not spinner/BPM0/UNKNOWN",
+    "first_useful_target_ms": 5000,
+    "progress_is_authoritative_TrackAnalysis": false,
+    "progress_owner_api": "NOT_IMPLEMENTED; separate future keyed progress path required",
+    "states": [
+      "REFUSED_OR_BUSY",
+      "ACCEPTED",
+      "PROGRESS",
+      "VALIDATED",
+      "DEFERRED",
+      "COMMITTED",
+      "CANCELLED_OR_STALE_OR_FAILED_OR_EXPIRED"
+    ]
+  },
+  "metric_contract": {
+    "D": "published-witness reference support and correctness",
+    "E": "all supported model phase points; empty E UNKNOWN/null",
+    "actual_unknown_successor": "None; never fill from nominal tempo",
+    "complete_window": "canonical complete reference, nonempty predicted set, all predictions scored, all family predicates true",
+    "different_grid_ordinals_implicitly_paired": false,
+    "event_metrics": "if selected: unchanged pinned mir_eval wrapper, trim5s, F1 threshold70ms, per-source macro, empty sequence0",
+    "final_DJ_acceptance_replaced": false,
+    "historical_metrics_or_verdicts_changed": false,
+    "legacy_fixed_domain_helpers_extended": false,
+    "meter": "exact numerator and denominator; emitted and whole-cohort coverage separate",
+    "nominal_actual_separate": true,
+    "paired": "same source/window/family; correct/incorrect/UNKNOWN/unsupported transitions and one-sided support separate",
+    "period_tolerance": 0.01,
+    "phase_tolerance_beats": 0.1,
+    "point_period_denominator": "scored_points - unknown_successor_points",
+    "point_phase_denominator": "scored_points with reference support",
+    "source_rate_adapter": "must be separately registered at PF-04 with original-domain parity and boundary/tie checks",
+    "status": "definitions only; PF-04 must register actual scope and gates",
+    "window_denominators": [
+      "N_all",
+      "N_reference_complete",
+      "N_incomplete"
+    ]
+  },
+  "phase": "PF-02",
+  "product_admission": {
+    "explicit_native_constraint": "Existing native validator requires each explicit interval to match one selected tempo; arbitrary variable raw intervals do not pass merely because generic wire accepts them",
+    "maximum_explicit_beats": 3072,
+    "maximum_segments": 8,
+    "on_capacity_or_overflow": "refuse; no truncated full-source success",
+    "requirements": [
+      "whole-source [0,N) coverage",
+      "known source identity and completed EOF/required source passes/close",
+      "final grid and one final full-source meter",
+      "consecutive ordinals and strict Q32 plus converted-ms order",
+      "exact grid-bound witness",
+      "applied revision coherence",
+      "no unresolved known phase/tempo ambiguity",
+      "actual consumer bank capacity",
+      "stopped current job/media/load owner"
+    ],
+    "unsupported": [
+      "known PCM gap",
+      "sparse/hybrid authority",
+      "changing meter",
+      "unsupported source/tempo/meter",
+      "source anchor out of domain"
+    ]
+  },
+  "progression": {
+    "H1_deferred_until": "PF-04",
+    "PF01_state": "NEEDS_MEASUREMENT",
+    "PF03_product_route_completion_allowed": false,
+    "large_product_port_allowed": false,
+    "model_or_corpus_execution": false,
+    "next": "PF-03 STATIC_INVENTORY_ONLY",
+    "real_execution_readiness": "NOT_READY",
+    "required_before_product_GO": "qualified PF01 memory/placement/cleanup allowances and exact-device evidence",
+    "stable_version": "1.0.1",
+    "static_inventory_entry": "PF00/PF02 complete and PF01 static inventory complete; PF01 allows documented static calculations"
+  },
+  "public_cases": [
+    {
+      "expected": "GEOMETRY_VALID_WINDOW_NOT_PRODUCT_FINAL",
+      "id": "C01",
+      "test": "context_anchor_keeps_global_frames_signed_ordinals_and_fractional_carry"
+    },
+    {
+      "expected": "EXPLICIT_PHASE_CLASS_REQUIRED",
+      "id": "C02",
+      "test": "three_and_four_meter_phase_do_not_treat_ordinal_zero_as_an_implicit_downbeat"
+    },
+    {
+      "expected": "F_INCLUSIVE_E_EXCLUSIVE",
+      "id": "C03",
+      "test": "lower_endpoint_is_owned_and_exclusive_endpoint_is_not"
+    },
+    {
+      "expected": "SOURCE_OWNERSHIP_PRECEDES_PRESENTATION_ROUNDING",
+      "id": "C04",
+      "test": "last_q32_unit_before_end_is_owned_without_rounding_it_into_source_eof"
+    },
+    {
+      "expected": "GEOMETRY_VALID_SUBJECT_TO_NATIVE_DYNAMIC_REVISION_AND_PRODUCT_CHECKS",
+      "id": "C05",
+      "test": "adjacent_tempo_segments_own_the_boundary_once_with_consecutive_ordinals"
+    },
+    {
+      "expected": "GENERIC_WIRE_VALID_PRODUCT_GAP_UNSUPPORTED",
+      "id": "C06",
+      "test": "generic_gapped_representation_does_not_establish_product_continuity"
+    },
+    {
+      "expected": "EXACT_GRID_BINDING_REQUIRED",
+      "id": "C07",
+      "test": "fractional_witness_roundtrips_and_requires_exact_grid_whole_frame_and_ordinal"
+    },
+    {
+      "expected": "PHASE_EQUIVALENCE_NOT_IDENTICAL_D_SUPPORT",
+      "id": "C08",
+      "test": "phase_equivalent_owned_witnesses_do_not_have_identical_reference_support"
+    },
+    {
+      "expected": "CAPACITY_REFUSED_NO_PARTIAL_OUTPUT",
+      "id": "C09",
+      "test": "explicit_and_segment_capacity_fail_without_partial_wire_output"
+    },
+    {
+      "expected": "3000_OWNED_BEATS_EOF_EXCLUDED",
+      "id": "C10",
+      "test": "ten_minutes_at_300_bpm_retains_3000_owned_points_at_both_source_rates"
+    },
+    {
+      "expected": "ARITHMETIC_LIMIT_EXCEEDED",
+      "id": "C11",
+      "test": "signed_ordinal_and_coordinate_overflow_fail_explicitly"
+    },
+    {
+      "expected": "GENERIC_WIRE_VALID_NATIVE_TEMPO_MISMATCH_REJECTED",
+      "id": "C12",
+      "test": "generic_explicit_timing_may_fail_native_selected_tempo_consistency"
+    }
+  ],
+  "public_tests": {
+    "new_tests": 12,
+    "path": "rust/tests/product_grid_contract.rs",
+    "sha256": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa"
+  },
+  "publication_convention": {
+    "applies_to": "future first product profile only",
+    "existing_producer_or_generation_mutation": false,
+    "frozen_MC_tuple_retention_unchanged": true,
+    "meters": [
+      "3/4",
+      "4/4"
+    ],
+    "no_owned_phase_point": "METER_UNAVAILABLE",
+    "phase": "(b-d).rem_euclid(m)",
+    "reference_access_for_witness": false,
+    "wire_change": false,
+    "witness": "earliest owned point in the model-derived downbeat phase class over the whole source"
+  },
+  "source_base": "2055487efbc07d865b499f24c69d8a829afaf30f",
+  "status": "CONTRACT_COMPLETE",
+  "worked_example": {
+    "anchor_fraction_q32": 2147483648,
+    "anchor_ordinal": -4,
+    "anchor_whole": 12000,
+    "expected_points": [
+      {
+        "consumer_ms": 1129,
+        "fraction_q32": 0,
+        "ordinal": -1,
+        "phase3": 2,
+        "phase4": 3,
+        "whole": 54188
+      },
+      {
+        "consumer_ms": 1422,
+        "fraction_q32": 2147483648,
+        "ordinal": 0,
+        "phase3": 0,
+        "phase4": 0,
+        "whole": 68250
+      },
+      {
+        "consumer_ms": 1715,
+        "fraction_q32": 0,
+        "ordinal": 1,
+        "phase3": 1,
+        "phase4": 1,
+        "whole": 82313
+      },
+      {
+        "consumer_ms": 2008,
+        "fraction_q32": 2147483648,
+        "ordinal": 2,
+        "phase3": 2,
+        "phase4": 2,
+        "whole": 96375
+      },
+      {
+        "consumer_ms": 2301,
+        "fraction_q32": 0,
+        "ordinal": 3,
+        "phase3": 0,
+        "phase4": 3,
+        "whole": 110438
+      }
+    ],
+    "first_index": 3,
+    "last_index": 7,
+    "period_fraction_q32": 2147483648,
+    "period_whole": 14062,
+    "sample_rate": 48000,
+    "status": "public window geometry; not full-source product FINAL",
+    "tempo_millibpm": 204800,
+    "total_frames": 120000,
+    "window": [
+      48000,
+      120000
+    ],
+    "witness": {
+      "grid_fraction_retained": 2147483648,
+      "ordinal": 0,
+      "whole": 68250
+    }
+  }
+}
