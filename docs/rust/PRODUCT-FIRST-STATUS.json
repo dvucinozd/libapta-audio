@@ -1,13 +1,17 @@
 {
   "active_phase": "PF-03",
-  "active_phase_status": "STATIC_INVENTORY_COMPLETE_NEEDS_DECISION_AND_MEASUREMENT",
+  "active_phase_status": "COMPACT_DESIGN_SPECIFIED_BINDING_AND_MEASUREMENT_OPEN",
   "active_phase_verdict": "CURRENT_PATH_NO_GO_AS_IS",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "PF03 stdlib static source/arithmetic checks;8 pinned program files and two weight metadata stat records; no new Rust/model/corpus/device test",
+  "checks": "14 pinned public source blobs; one checkpoint digest/22 tensor metadata records; independent288 feature geometry and mathematical design examples; no neural/corpus/device execution",
+  "compact_candidate_spec": {
+    "path": "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json",
+    "sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b"
+  },
   "consumer_snapshot": {
     "files_pin_provider_unchanged": true,
     "files_sha256": {
@@ -76,7 +80,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "pinned program source inspection and derived scenarios, metadata-only weight file sizes",
+  "evidence_level": "public source and static checkpoint metadata; derived component arithmetic and rational design oracles",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
@@ -86,7 +90,9 @@
     "provider_activated": false,
     "release_created": false,
     "runtime_prepared": false,
-    "weights_read": false
+    "tensor_payloads_deserialized": false,
+    "weights_loaded_as_model": false,
+    "weights_read": true
   },
   "feasibility_document": {
     "path": "docs/rust/PRODUCT-FEASIBILITY.json",
@@ -115,14 +121,22 @@
       "source_baseline": "2055487efbc07d865b499f24c69d8a829afaf30f",
       "status": "COMPLETE",
       "verdict": "CONTRACT_AND_PUBLIC_NATIVE_CHECKS_PASS"
+    },
+    {
+      "feasibility_sha256": "50f030f014a91df44cef86380031fa3e1d92cc82ca5bbd9d5ef926456dc932a3",
+      "phase": "PF-03",
+      "source_baseline": "dee7214603939085d5d34d1919a4582395b08e6b",
+      "status": "STATIC_INVENTORY_COMPLETE_NEEDS_DECISION_AND_MEASUREMENT",
+      "verdict": "CURRENT_PATH_NO_GO_AS_IS"
     }
   ],
   "next": {
-    "action": "Choose compact candidate specification direction or prioritize physical budgets; no model or corpus execution",
+    "action": "Freeze source-only coefficient/graph/resource oracles; close binding/license and physical budgets before PF04 implementation",
     "large_port_allowed": false,
-    "mode": "DIRECTION_DECISION_AND_PF01_GATE",
+    "mode": "STATIC_SPECIFICATION_PREWORK_ONLY",
     "pending_phase": "PF-01",
-    "phase": "PF-03"
+    "phase": "PF-03",
+    "step": "CS-02"
   },
   "open_decisions": [
     {
@@ -154,10 +168,10 @@
     },
     {
       "current_path": "NO_GO_AS_IS",
-      "evidence": "docs/rust/PRODUCT-FEASIBILITY.json",
+      "evidence": "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json",
       "id": "PF03-ROUTE",
       "owner": "engineering; explicit owner decision for new model or offload",
-      "state": "NEEDS_OWNER_DIRECTION_AND_PF01",
+      "state": "COMPACT_DESIGN_PENDING_BINDING_AND_PF01",
       "static_inventory_allowed": true
     },
     {
@@ -169,7 +183,18 @@
       "id": "PF03-DIRECTION",
       "owner": "product owner",
       "recommendation": "compact P4 candidate specification only; no model choice/training/quantization/offload",
-      "state": "AWAITING_OWNER_DECISION"
+      "state": "CONFIRMED",
+      "value": "COMPACT_P4_CANDIDATE_SPECIFICATION_ONLY"
+    },
+    {
+      "id": "CS01-BINDING",
+      "owner": "engineering and rights holder evidence",
+      "remaining": [
+        "code/weights rights",
+        "finite tensor values/training provenance",
+        "frozen coefficient/graph/parity assets"
+      ],
+      "state": "METADATA_BOUND_LICENSE_AND_NUMERIC_CHECKS_OPEN"
     }
   ],
   "phases": [
@@ -203,8 +228,8 @@
         "PF-02"
       ],
       "id": "PF-03",
-      "product_decision_gate": "owner direction and PF01 numeric/device budgets still required",
-      "state": "STATIC_INVENTORY_COMPLETE_NEEDS_DECISION_AND_MEASUREMENT",
+      "product_decision_gate": "direction confirmed for specification only; model binding, numeric/device budgets and product GO pending",
+      "state": "COMPACT_DESIGN_SPECIFIED_BINDING_AND_MEASUREMENT_OPEN",
       "verdict": "CURRENT_PATH_NO_GO_AS_IS"
     },
     {
@@ -338,7 +363,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "dee7214603939085d5d34d1919a4582395b08e6b",
+  "source_baseline": "c5a3dea0adfda497add11aba23f8b440a1a0939a",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -386,6 +411,20 @@
         "revision_assumed": "3.2",
         "revision_observed": null
       }
+    },
+    {
+      "date": "2026-10-26",
+      "does_not_authorize": [
+        "training",
+        "model execution",
+        "quantization",
+        "offload",
+        "product activation"
+      ],
+      "id": "PF03-DIRECTION",
+      "source": "Direct user response choosing compact P4 candidate specification",
+      "status": "CONFIRMED",
+      "value": "COMPACT_P4_CANDIDATE_SPECIFICATION_ONLY"
     }
   ]
 }

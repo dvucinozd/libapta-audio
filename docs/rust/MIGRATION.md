@@ -6,7 +6,26 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: PF-03 direction decision and PF-01 physical budgets, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+**Current next: CS-02 source-only resource/oracle specification, with PF-01 physical budgets still open, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+The owner confirms compact P4 candidate specification before physical measurement.
+The [CS-01 design](PRODUCT-COMPACT-CANDIDATE-SPEC.md) and
+[machine specification](PRODUCT-COMPACT-CANDIDATE-SPEC.json), from source base
+`c5a3dea0adfda497add11aba23f8b440a1a0939a`, propose one BeatNet+ main branch,
+bounded frontend and checkpointed deterministic HMM, followed by one strict
+full-source regular MODEL grid. Unsupported timing/meter support abstains and
+remains in the denominator; no rejected piecewise decoder is revived.
+Fourteen pinned public source blobs and one checkpoint digest/22 tensor metadata
+records bind the design. Independent source arithmetic closes144 bands/288 features,
+FFT1764,767125 parameters and3068500 FP32 weight bytes. No model import, pickle
+callable, tensor deserialization, inference, training, corpus or device run occurred.
+This is not a selected production model or completed PF-04 experiment registration.
+The neural part alone needs23.03 billion MACs per600s; the proposed largest
+checkpoint/parent/score payload is16515840bytes before other live owners.
+Neither is a target throughput or whole-device peak result. BeatNet+ rights,
+finite weights/training provenance, coefficient/graph/parity assets and actual
+memory/storage/placement/cleanup budgets remain open. CS-02 may continue as static
+prework; PF-04 implementation, a large port and physical PASS remain gated.
+
 PF-03 completes the permitted [whole-pipeline static inventory](PRODUCT-FEASIBILITY.md)
 and [source/arithmetic receipt](PRODUCT-FEASIBILITY.json) from source base
 `dee7214603939085d5d34d1919a4582395b08e6b`.
@@ -18,9 +37,10 @@ checkpoint hyperparameters and isolated model peak remain UNKNOWN. Eight pinned
 program sources and two weight metadata records were inspected; no weight
 contents, inference, corpus, package installation or new Rust/device test ran.
 BeatNet1/DD-05 remain rejected; CT-05 remains operationally INVALID, musical NOT_RUN.
-The recommendation is to specify one compact bounded P4 candidate in this repo,
-retaining Beat This! as offline reference. Owner direction is pending; no new
-model, training, quantization or offload is selected. PF-01 stays NEEDS_MEASUREMENT;
+The recommendation was to specify one compact bounded P4 candidate in this repo,
+retaining Beat This! as offline reference. The subsequent owner direction and
+proposed design are recorded above; the original audit receipt remains unchanged.
+No training, quantization or offload is selected. PF-01 stays NEEDS_MEASUREMENT;
 PF-03 product GO, a large port and PF-04 implementation remain gated. H1 stays
 deferred until an explicit PF-04 need. Mutable progress is recorded in
 [PRODUCT-FIRST-STATUS.json](PRODUCT-FIRST-STATUS.json).
