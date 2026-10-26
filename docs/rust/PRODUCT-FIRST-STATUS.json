@@ -1,13 +1,17 @@
 {
   "active_phase": "PF-03",
-  "active_phase_status": "STATIC_COMPACT_SPEC_COMPLETE_NEEDS_BINDING_AND_MEASUREMENT",
-  "active_phase_verdict": "STATIC_ASSETS_AND_ORACLES_PASS_PRODUCT_GATES_OPEN",
+  "active_phase_status": "STATIC_BINDING_FINITE_PASS_RIGHTS_PROVENANCE_AND_PHYSICAL_GATES_OPEN",
+  "active_phase_verdict": "FINITE_VALUES_PASS_NO_PRODUCT_GO",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "17 assets/582129 bytes; 19635 graph states;4356 interval pairs;144 filters;four exhaustive tiny HMM examples; byte-identical regeneration and five corruption refusals. No candidate/model/device execution.",
+  "checks": "767125 finite float32 values in seven storages/22 tensor views; independent IEEE754 exponent check; pinned public rights/provenance inspection. No model/corpus/device run.",
+  "compact_binding": {
+    "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
+    "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
+  },
   "compact_candidate_spec": {
     "path": "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json",
     "sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b"
@@ -84,18 +88,20 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "hash-bound public mathematical tables, independent Decimal80/rational checks and declared resource scenarios",
+  "evidence_level": "static raw weight scalar and public-source inspection; no model or physical qualification",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
+    "framework_tensors_constructed": false,
     "hardware_flashed": false,
     "model_or_corpus_executed": false,
     "native_feature_implemented": false,
     "provider_activated": false,
+    "raw_numeric_weight_scalars_decoded": true,
     "release_created": false,
     "runtime_prepared": false,
     "static_math_assets_generated": true,
-    "tensor_payloads_deserialized": false,
+    "tensor_payloads_deserialized": true,
     "weights_loaded_as_model": false,
     "weights_read": true
   },
@@ -104,6 +110,14 @@
     "sha256": "50f030f014a91df44cef86380031fa3e1d92cc82ca5bbd9d5ef926456dc932a3"
   },
   "format": "libapta-product-first-status-1",
+  "hardware_availability": {
+    "available": false,
+    "board": "JC1060P470C_I_W_Y",
+    "chip_revision_observed": null,
+    "physical_budget_phase": "NEEDS_MEASUREMENT",
+    "source": "Direct user answer: Jos nije dostupna",
+    "status": "OWNER_CONFIRMED_UNAVAILABLE"
+  },
   "historical_protocols_results_unchanged": true,
   "history": [
     {
@@ -141,16 +155,24 @@
       "source_baseline": "c5a3dea0adfda497add11aba23f8b440a1a0939a",
       "status": "COMPACT_DESIGN_SPECIFIED_BINDING_AND_MEASUREMENT_OPEN",
       "step": "CS-01"
+    },
+    {
+      "checkpoint": "0a4fa2d39b09368923fbb1a9256bf87c42630215",
+      "phase": "PF-03",
+      "resource_oracles_sha256": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+      "source_baseline": "76b4f2aa9570b808633eaba5d9d385fd9f9ebe15",
+      "status": "STATIC_COMPACT_SPEC_COMPLETE_NEEDS_BINDING_AND_MEASUREMENT",
+      "step": "CS-02"
     }
   ],
   "next": {
-    "action": "Close rights/finite/provenance binding; determine exact-device availability and physical resource budgets before PF04 registration",
-    "independent_static_binding_allowed": true,
+    "action": "Obtain affirmative code/weights rights and checkpoint training provenance; measure actual board once available; no model switch or inference",
     "large_port_allowed": false,
-    "mode": "REQUIRED_GATE_CLOSURE",
+    "mode": "REQUIRED_EXTERNAL_EVIDENCE",
     "pending_phase": "PF-01",
     "phase": "PF-03",
-    "step": "CS01-BINDING_AND_PF01"
+    "repeat_runtime_audit_needed": false,
+    "step": "RIGHTS_PROVENANCE_AND_DEVICE_EVIDENCE"
   },
   "open_decisions": [
     {
@@ -159,6 +181,7 @@
         "final_ms": 60000,
         "first_useful_ms": 5000
       },
+      "device_availability": "OWNER_CONFIRMED_UNAVAILABLE",
       "id": "PF01-RESOURCES",
       "owner": "engineering and product owner",
       "required": [
@@ -185,7 +208,7 @@
       "evidence": "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json",
       "id": "PF03-ROUTE",
       "owner": "engineering; explicit owner decision for new model or offload",
-      "state": "STATIC_DESIGN_READY_PENDING_BINDING_AND_PF01",
+      "state": "STATIC_DESIGN_BOUND_RIGHTS_PROVENANCE_AND_PF01_OPEN",
       "static_inventory_allowed": true
     },
     {
@@ -201,14 +224,14 @@
       "value": "COMPACT_P4_CANDIDATE_SPECIFICATION_ONLY"
     },
     {
+      "evidence": "docs/rust/PRODUCT-COMPACT-BINDING.json",
       "id": "CS01-BINDING",
       "owner": "engineering and rights holder evidence",
       "remaining": [
         "code/weights rights",
-        "finite tensor values",
-        "training provenance/independence"
+        "checkpoint training provenance/independence"
       ],
-      "state": "ASSETS_BOUND_LICENSE_FINITE_VALUES_AND_PROVENANCE_OPEN"
+      "state": "FINITE_PASS_RIGHTS_AND_PROVENANCE_UNRESOLVED"
     },
     {
       "evidence": "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json",
@@ -248,9 +271,9 @@
         "PF-02"
       ],
       "id": "PF-03",
-      "product_decision_gate": "CS01 rights/finite/provenance and PF01 numeric/device budgets remain required",
-      "state": "STATIC_COMPACT_SPEC_COMPLETE_NEEDS_BINDING_AND_MEASUREMENT",
-      "verdict": "STATIC_ASSETS_AND_ORACLES_PASS_PRODUCT_GATES_OPEN"
+      "product_decision_gate": "rights/provenance evidence and PF01 actual-device budgets remain required",
+      "state": "STATIC_BINDING_FINITE_PASS_RIGHTS_PROVENANCE_AND_PHYSICAL_GATES_OPEN",
+      "verdict": "FINITE_VALUES_PASS_NO_PRODUCT_GO"
     },
     {
       "depends_on": [
@@ -383,7 +406,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "76b4f2aa9570b808633eaba5d9d385fd9f9ebe15",
+  "source_baseline": "0a4fa2d39b09368923fbb1a9256bf87c42630215",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -445,6 +468,14 @@
       "source": "Direct user response choosing compact P4 candidate specification",
       "status": "CONFIRMED",
       "value": "COMPACT_P4_CANDIDATE_SPECIFICATION_ONLY"
+    },
+    {
+      "board": "JC1060P470C_I_W_Y",
+      "date": "2026-10-26",
+      "id": "PF01-AVAILABILITY",
+      "source": "Direct user answer: Jos nije dostupna",
+      "status": "CONFIRMED_UNAVAILABLE",
+      "value": false
     }
   ]
 }

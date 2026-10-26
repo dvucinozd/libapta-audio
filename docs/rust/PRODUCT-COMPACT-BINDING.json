@@ -1,0 +1,195 @@
+{
+  "authority_sha256": {
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/PRODUCT-BUDGETS.json": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380",
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+    "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json": "0e8c9709aa5034879ed362f81c0e54cfb4d86504d566d1d2902d8c9d7c86a682",
+    "docs/rust/PRODUCT-SCOPE.md": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98"
+  },
+  "checkpoint": {
+    "bytes": 3072890,
+    "framework_tensor_or_model_loading": false,
+    "git_blob": "7aefd5e56ef65482be6f671c3cca8de457dad102",
+    "path": "src/BeatNetPlus/models/generic_main_weights.pt",
+    "revision": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+    "sha256": "5bbae630b4112f3c1193654e3dbc946b850caa06a2a82e10e8de9e48bb673519"
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-COMPACT-BINDING.md",
+    "sha256": "8ecba952e5868894028e129c201d3fb766c287cc66d4d9868d4c78a51f9b5ff0"
+  },
+  "evidence": {
+    "finite_receipt_sha256": "74fa772d6c185422dbcabb71d8903fec29b24af71289dacc9d5c44e3af382b10",
+    "independent_receipt_sha256": "eda07eb1724eff310b74736873376c08e66f533dce2b9a066ca0c43248a8ba34",
+    "inspector_sha256": "d07dd919b024fa5729644de649fe6693360dc5349878977008766c9ed6a83973",
+    "public_source_snapshots_sha256": "042c507d6c7789acb704c9bac07996227ed6130d18135b98777c83d8ac1a3106",
+    "root": "/mnt/d/AI/LIBAPTA/outputs/product-compact-binding-20261026"
+  },
+  "execution_this_step": {
+    "audio_labels_logits_read": false,
+    "framework_tensors_constructed": false,
+    "model_or_corpus_executed": false,
+    "native_or_consumer_code_changed": false,
+    "packages_installed": false,
+    "physical_device_accessed": false,
+    "pickle_loaded_or_callables_invoked": false,
+    "provider_or_release_activated": false,
+    "raw_weight_bytes_and_scalars_read": true,
+    "training_or_quantization": false
+  },
+  "finite_inspection": {
+    "audio_labels_logits_read": false,
+    "checkpoint_sha256": "5bbae630b4112f3c1193654e3dbc946b850caa06a2a82e10e8de9e48bb673519",
+    "float32_values": 767125,
+    "format": "libapta-compact-finite-weight-check-1",
+    "framework_tensors_constructed": false,
+    "inspector_sha256": "d07dd919b024fa5729644de649fe6693360dc5349878977008766c9ed6a83973",
+    "logical_tensors": 22,
+    "metadata_sha256": "decfe54ca8635d90a9975fa952709c260da397a7372dad3f1b1c8e49df44a7ad",
+    "model_inference_or_training": false,
+    "nonfinite_values": 0,
+    "packages_installed": false,
+    "pickle_loaded_or_callables_invoked": false,
+    "raw_numeric_scalars_decoded": true,
+    "status": "FINITE_VALUES_PASS",
+    "storages": [
+      {
+        "bytes": 80,
+        "float32_count": 20,
+        "sha256": "66d5f215dd4e87ce758c978eaf3ab97de2fe42d6fa929d700a42970cb757229a",
+        "storage_key": "0"
+      },
+      {
+        "bytes": 8,
+        "float32_count": 2,
+        "sha256": "267dd8ec0d2d71e7770d887725e8632836871595d7af48a5b7955040a454613f",
+        "storage_key": "1"
+      },
+      {
+        "bytes": 166800,
+        "float32_count": 41700,
+        "sha256": "ba06e14c36e48153f4c864e23888cb85339ff492e550259f831599afba39b33b",
+        "storage_key": "2"
+      },
+      {
+        "bytes": 600,
+        "float32_count": 150,
+        "sha256": "d71134d7522c18efba57123d8d4f630eb25f12c3123c30abadd2a59663f5624a",
+        "storage_key": "3"
+      },
+      {
+        "bytes": 2899200,
+        "float32_count": 724800,
+        "sha256": "a9fbb5b22a80b7fda2754490b15a88724f36c2dd52582e343f999d7b98c9ba11",
+        "storage_key": "4"
+      },
+      {
+        "bytes": 1800,
+        "float32_count": 450,
+        "sha256": "d4be042555a8338bfdced8643e168f303ac67dc438bd10ef35142b357b98bcb9",
+        "storage_key": "5"
+      },
+      {
+        "bytes": 12,
+        "float32_count": 3,
+        "sha256": "c7bbbc1dada278b50f2f5a58e9a8985b8ee3a29fe488115e2aa624287c283d94",
+        "storage_key": "6"
+      }
+    ],
+    "view_coverage_no_overlap_no_gaps": true
+  },
+  "format": "libapta-product-compact-binding-1",
+  "hardware_availability": {
+    "available": false,
+    "board": "JC1060P470C_I_W_Y",
+    "chip_revision_observed": null,
+    "physical_budget_phase": "NEEDS_MEASUREMENT",
+    "source": "Direct user answer: Jos nije dostupna",
+    "status": "OWNER_CONFIRMED_UNAVAILABLE"
+  },
+  "independent_validation": {
+    "audio_model_or_training_execution": false,
+    "checkpoint_metadata_and_source_snapshot_bindings_match": true,
+    "format": "libapta-compact-binding-static-validation-1",
+    "independent_IEEE754_exponent_scan": true,
+    "license_grant_established": false,
+    "source_listing_has_no_named_license_notice_modelcard": true,
+    "status": "PASS",
+    "storages": {
+      "0": 20,
+      "1": 2,
+      "2": 41700,
+      "3": 150,
+      "4": 724800,
+      "5": 450,
+      "6": 3
+    },
+    "training_membership_independently_verified": false,
+    "values": 767125
+  },
+  "progression": {
+    "PF01": "NEEDS_MEASUREMENT_DEVICE_UNAVAILABLE",
+    "PF04": "NOT_RUN",
+    "large_port_allowed": false,
+    "new_model_or_offload_selected": false,
+    "next": "Obtain affirmative rights/provenance evidence and actual board resource measurements; no repeated runtime audit"
+  },
+  "provenance": {
+    "GTZAN_status": "already exposed development; not fresh acceptance",
+    "actual_training_membership_verified": false,
+    "config_seed": 42,
+    "declarations_bound_to_actual_weight_training_run": false,
+    "declared_test_dataset": "GTZAN",
+    "declared_training_datasets": [
+      "BALLROOM",
+      "HAINSWORTH",
+      "MUSDB18",
+      "ROCK_CORPUS",
+      "RWC_POP",
+      "RWC_JAZZ",
+      "RWC_ROYALTY_FREE",
+      "URSING"
+    ],
+    "formal_holdouts_opened": false,
+    "git_lineage_status": "SAME_BLOB_IN_UPLOAD_AND_PINNED_COMMIT",
+    "independence": "INDEPENDENCE_UNRESOLVED",
+    "recording_performance_duplicates_checked": false,
+    "upload_author_timestamp": "2026-04-13T20:27:34Z",
+    "upload_commit": "0001fb7e0d3deff862af67a516192225ccc2eb6a",
+    "upload_timestamp_is_training_date": false
+  },
+  "public_source_bindings": {
+    "README.md": {
+      "revision": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+      "sha256": "09dedda34e5c6b8b272099b7175987c35ffcb4711ab7776e1e1d1444a0e50c27"
+    },
+    "src/BeatNetPlus/configs/generic.yaml": {
+      "revision": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+      "sha256": "c8a958e57d46eda9b4df8be580013b5a8062cad0275063bd2583f93c38294f93"
+    }
+  },
+  "rights": {
+    "absence_is_not_proof_of_no_possible_external_grant": true,
+    "examined": [
+      "complete pinned Git tree",
+      "pinned README",
+      "pinned generic config",
+      "current public repository metadata"
+    ],
+    "external_messages_sent": false,
+    "grant_for_code_or_exact_checkpoint_established": false,
+    "inherited_from_BeatNet_madmom_numpy_or_paper": false,
+    "named_license_notice_copying_modelcard_paths": [],
+    "needed_evidence": [
+      "explicit code revision and checkpoint digest scope",
+      "use/modification/distribution terms for intended firmware"
+    ],
+    "repo_api_license": null,
+    "status": "LICENSE_UNRESOLVED"
+  },
+  "source_base": "0a4fa2d39b09368923fbb1a9256bf87c42630215",
+  "stable_version": "1.0.1",
+  "status": "FINITE_VALUES_PASS_RIGHTS_AND_PROVENANCE_UNRESOLVED"
+}

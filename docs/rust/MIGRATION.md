@@ -7,6 +7,21 @@ reference. This document owns the migration checklist and next-step handoff.
 ## Current implementation handoff — 2026-10-26
 
 **Current next: close remaining CS-01 binding and PF-01 exact-device resource gates before PF-04, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+The [static binding follow-up](PRODUCT-COMPACT-BINDING.md) and
+[receipt](PRODUCT-COMPACT-BINDING.json), from source base
+`0a4fa2d39b09368923fbb1a9256bf87c42630215`, close finite-value inspection:
+767125 raw f32 values in seven storages/22 contiguous tensor views, zero NaN/Inf,
+confirmed independently from IEEE754 exponent bits. Raw scalars were decoded;
+no framework tensor/model was constructed, no pickle callable or inference ran.
+The owner confirms JC1060P470C_I_W_Y is not available; PF-01 remains
+NEEDS_MEASUREMENT, without selecting another board/port or observing chip revision.
+The examined upstream tree/README/config/repository metadata do not establish an
+affirmative BeatNet+ code/weights license. Git blob lineage is bound, but declared
+training datasets/config are not a checkpoint-specific training manifest.
+LICENSE_UNRESOLVED and INDEPENDENCE_UNRESOLVED remain open; no external message
+was sent, no alternative model/offload selected. Next requires those proofs and
+actual device budgets, not another generic runtime audit. PF-04 stays NOT_RUN.
+
 CS-02 now completes the [static resource/oracle freeze](PRODUCT-COMPACT-RESOURCE-ORACLES.md)
 and [machine receipt](PRODUCT-COMPACT-RESOURCE-ORACLES.json) from source base
 `76b4f2aa9570b808633eaba5d9d385fd9f9ebe15`.
@@ -21,9 +36,9 @@ bytes with actual phase reclamation/single graph or21583819bytes with separate
 buffers and both resident graphs, before unqualified product owners/overheads.
 Neither is measured peak or an approved budget. Fixed coefficient, prior, scalar
 oracle and future primitive parity rules do not establish target kernel parity.
-BeatNet+ rights, finite tensor values/training provenance and physical
-internal/PSRAM/storage/placement/cleanup evidence remain open. Device availability
-has been requested; no COM presence is a verified board/chip identity. PF-04 is
+At CS-02, BeatNet+ rights, finite tensor values/training provenance and physical
+internal/PSRAM/storage/placement/cleanup evidence remained open. The subsequent
+finite PASS and confirmed device unavailability are recorded above. PF-04 is
 NOT_RUN, H1 stays deferred, and a large port/provider activation remains gated.
 
 The owner confirms compact P4 candidate specification before physical measurement.
