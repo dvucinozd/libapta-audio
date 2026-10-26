@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-04",
-  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
-  "active_phase_verdict": "SYNTHETIC_FRONTEND_IMPLEMENTATION_PREFLIGHT_ONLY",
+  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+  "active_phase_verdict": "HS04_SYNTHETIC_HOST_PASS_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS04 seven integration plus one internal test pass debug/release;800 short and50 primitive schedules/profile. HS03 6120 schedules/profile,12 grid controls,5 default context controls pass;one C-oracle check NOT_RUN. fmt,Clippy,build,Python,checker and four enforcement refusals pass. No full600s candidate case before clean implementation checkpoint.",
+  "checks": "HS04 six clean fixed cases PASS from ee2a488:35 observations,120068 emitted rows including14 provisional cancel rows. Four600s streams each13230000 samples/30000 rows/1270080000 complex MACs;worker wall21.604-21.701s. Both numeric oracles,work/cancel/resources/identities pass. Audit58 files/320752B,294 parent bindings,774 prebound runtime entries. Synthetic host only;P4,model,music/product gates remain open.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -259,10 +259,16 @@
       "source_baseline": "d078ef291b2df49f015ba935974256ff10d0743b",
       "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
       "step": "implementation preflight"
+    },
+    {
+      "checkpoint": "ee2a488ee8a309b7b8ba92407a5e648e2f79d91b",
+      "phase": "HS-04",
+      "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+      "verdict": "HS04_SYNTHETIC_HOST_PASS_ONLY"
     }
   ],
   "host_frontend_experiment": {
-    "candidate_tests_or_measurement": "SYNTHETIC_PREFLIGHT_PASS_CLEAN_MEASUREMENT_PENDING",
+    "candidate_tests_or_measurement": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "id": "HS-04",
     "implementation": {
       "path": "docs/rust/PRODUCT-HOST-FRONTEND-IMPLEMENTATION.json",
@@ -273,8 +279,12 @@
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.json",
     "protocol_sha256": "27cb6fe41fe4f94d22dbeac65c778feef0f2094c42aee267108d80ac17112b1f",
+    "result": {
+      "path": "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.json",
+      "sha256": "02d1aa9eeabee380c7fd433dbefb2679aece22e203308ae2eaa2f55a1a7ca59c"
+    },
     "short_stream_cases": 20,
-    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
+    "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "host_grid_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
@@ -336,10 +346,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "After implementation commit-push,run the six registered HS04 synthetic host cases from clean exact source; audit and commit-push separate aggregate result",
+    "action": "Register narrow synthetic linear/LSTM/state/softmax f32 oracles and bounded contract before new code; trained checkpoint and larger product port remain gated",
     "large_port_allowed": false,
-    "mode": "RUN_FIXED_SYNTHETIC_HOST_ONLY",
-    "phase": "HS-04"
+    "mode": "REGISTER_NARROW_SYNTHETIC_ONLY",
+    "phase": "HS-05_PROPOSED"
   },
   "open_decisions": [
     {

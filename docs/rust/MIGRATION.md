@@ -6,7 +6,23 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: freeze/push HS-04 implementation, then six clean measured cases.**
+**Current next: register separate narrow synthetic neural primitives before code.**
+**HS-04 is complete: synthetic host frontend evidence only.** The
+[result](PRODUCT-HOST-FRONTEND-RESULT.md) records six fixed cases from clean pushed
+`ee2a488ee8a309b7b8ba92407a5e648e2f79d91b`:35 validated observations,120068 rows
+including14 cancelled provisional rows. Every full600s case emits30000 rows with
+1270080000 complex MACs;worker wall21.604–21.701s on host. Both numeric references,
+geometry/status/work/cancel/resource/identity gates pass. Session41448B,Driver44960B
+are host layouts,not P4 budgets. Audit58 files/320752B,294 parent bindings and774
+prebound worker-runtime entries passes;request-to-step cancel0.000360ms in Filter.
+Next register small artificial linear/LSTM/softmax fixtures and scalar f32 order,
+state commit/reset/chunk/cancel/storage limits before another implementation.
+No trained checkpoint or full native port is enabled. Rights/provenance,PF01
+exact-device budgets and product PF04 remain open;H1 deferred,VERSION1.0.1 unchanged.
+
+### Implementation checkpoint before measurement — 2026-10-27
+
+**At this checkpoint: freeze/push implementation, then six clean measured cases.**
 The [implementation receipt](PRODUCT-HOST-FRONTEND-IMPLEMENTATION.md) records the
 opt-in bounded centered frontend, explicit-stack FFT1764,144 log/difference bands,
 strict streaming/cancel/EOF contracts and independent binary-pipe checker. Seven
