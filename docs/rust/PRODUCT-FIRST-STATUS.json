@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-02",
-  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
-  "active_phase_verdict": "HS02_SYNTHETIC_HOST_PASS_ONLY",
+  "active_phase": "HS-03",
+  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
+  "active_phase_verdict": "SYNTHETIC_REGISTRATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS02 fixed six-case clean run PASS,55 observations (50 frozen cases+4 full+pending cancel). 58 retained artifacts/322896B and170 parent bindings audited. 8 new debug/release tests plus applicable HMM/native/wire/contract/context controls pass; existing C lifetime oracle comparison remains NOT_RUN.",
+  "checks": "HS03 registration:102 public oracles; both frozen FIR assets matchCS02; compressed/direct4097 reference parity at both rates/channels; no candidate execution.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,7 +92,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "registered synthetic host path-to-events/grid evidence only; no whole neural pipeline, musical or P4 qualification",
+  "evidence_level": "synthetic resampler registration and mathematical oracle calculation only",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -222,6 +222,12 @@
       "source_baseline": "a06afca15998a05a446ebb74dff1257fb119c563",
       "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
       "step": "implementation preflight"
+    },
+    {
+      "checkpoint": "7ef5500877df760633c016e6568d00ad1b325d95",
+      "phase": "HS-02",
+      "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+      "verdict": "HS02_SYNTHETIC_HOST_PASS_ONLY"
     }
   ],
   "host_grid_experiment": {
@@ -267,11 +273,19 @@
     },
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
+  "host_resampler_experiment": {
+    "candidate_or_measured_execution": "NOT_RUN",
+    "id": "HS-03",
+    "product_gates_bypassed": false,
+    "protocol_path": "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json",
+    "protocol_sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4",
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "next": {
-    "action": "Close neural rights/training-provenance evidence and obtain exact-board resource budgets when hardware becomes available. Register separate scope before other frontend/model/native component work.",
+    "action": "Implement registered streaming resampler and tests/lints; commit/push before clean six-case run",
     "large_port_allowed": false,
-    "mode": "PRODUCT_PREREQUISITE_EVIDENCE_ONLY",
-    "phase": "PF-03 / PF-01"
+    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "phase": "HS-03"
   },
   "open_decisions": [
     {
@@ -506,7 +520,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "1196e5459406d4179793d53a535d516577f28436",
+  "source_baseline": "7ef5500877df760633c016e6568d00ad1b325d95",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -590,6 +604,13 @@
       "source": "User accepted recommendation to inspect public rights/provenance and prepare separate path-to-events/grid registration",
       "status": "CONFIRMED",
       "value": "PUBLIC_REVIEW_AND_SYNTHETIC_REGISTRATION_ONLY"
+    },
+    {
+      "date": "2026-10-26",
+      "id": "HS03-AUTHORIZATION",
+      "source": "Direct user acceptance of registration, implementation and synthetic verification of bounded resampler",
+      "status": "CONFIRMED",
+      "value": "SYNTHETIC_RESAMPLER_ONLY_NO_MODEL_DEVICE_OR_PRODUCT_ACTIVATION"
     }
   ]
 }

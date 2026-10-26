@@ -1,0 +1,283 @@
+{
+  "algorithm": {
+    "accumulate": "F64 product then F64 add; initial+0; no FMA/reassociation",
+    "channels": [
+      1,
+      2
+    ],
+    "coefficient_scalar": "normalized F64 little endian",
+    "empty_source": "NoEvidence diagnostic only",
+    "expected_full_MACs": 859950000,
+    "expected_full_units": {
+      "44100": 912870000,
+      "48000": 915210000
+    },
+    "final_round": "f32",
+    "future_context_samples": 32,
+    "input": "finite normalized f32 in[-1,1], no clipping",
+    "left_right_padding": "zero outside known[0,N), full denominator retained",
+    "maximum_outputs": 13230000,
+    "maximum_source_seconds": 600,
+    "maximum_total_units": 940000000,
+    "name": "CS-FIR65",
+    "output": "finite f32, no clipping; may exceed[-1,1]",
+    "output_count": "ceil(N*22050/fs)",
+    "output_rate": 22050,
+    "output_time_seconds": "k/22050; no group delay shift",
+    "phase44100": "center=2*k,phase0",
+    "phase48000": "center=(320*k)//147,phase=(320*k)%147",
+    "required_consumed_for_output": "min(N,center+33)",
+    "ring_bytes": 260,
+    "ring_samples": 65,
+    "source_rates": [
+      44100,
+      48000
+    ],
+    "stereo": "f32 add(L,R) then f32 multiply0.5",
+    "table_bytes": 76960,
+    "tap_order": "0..64 ascending; offset tap-32"
+  },
+  "assets": {
+    "fir-44100.f64le": {
+      "bytes": 520,
+      "sha256": "0ea7547740cd8bb98d5e1241def77faeed99f3dad5b60a5b89e187e3045b1cd6",
+      "shape": [
+        1,
+        65
+      ]
+    },
+    "fir-48000.f64le": {
+      "bytes": 76440,
+      "sha256": "0abf15aae616314f39a8c732562225561ade41a37db638e484121ce8a48411b3",
+      "shape": [
+        147,
+        65
+      ]
+    }
+  },
+  "assets_root": "docs/rust/fixtures/product-compact-cs02/assets",
+  "authority_sha256": {
+    "Cargo.lock": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4",
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7",
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70",
+    "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json": "0e8c9709aa5034879ed362f81c0e54cfb4d86504d566d1d2902d8c9d7c86a682",
+    "docs/rust/PRODUCT-HOST-GRID-RESULT.json": "bb0ee548c0a9591f628a4d2729a7b2f02829f6fe781ef5a593c8e996f3084e06",
+    "docs/rust/PRODUCT-HOST-HMM-RESULT.json": "fcc63ee24f25dda3f123b67b04d7479a90b193e01a178269a8d160a53de076ef",
+    "rust/runtime/src/compact_grid.rs": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a",
+    "rust/runtime/src/compact_hmm.rs": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+    "rust/runtime/tests/compact_grid.rs": "3a310268595cb7e67e904e7dc66312310d5c7aed2774e7b6d55ae91c42cf8e68",
+    "rust/runtime/tests/compact_hmm.rs": "4b5f9c003ad286f1fd38773f8127bd82fd9443fcebeb5e0720ded8997efd61c6",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "rust/src/waveform.rs": "0d6c9ca94493b1e328737dd4f8df339faea693d7fec8dbc09ef3006461c7e8cc",
+    "rust/tests/waveform.rs": "fbe356d8b13f32c7db488139e2ea528e4ad3b13fe0179139399dd535a12258fb",
+    "rust/tests/waveform_result.rs": "32bf9accf4858d72cb2ca2d5569e2d5e18a759fe7d4cf48de9389612c5b6a17e",
+    "tools/apta_compact_grid_synthetic.py": "dff6ecb32f33fa1fb362c28323fbf1ead798f0ac2d3643dc15c5ce93d8b71892",
+    "tools/apta_compact_hmm_synthetic.py": "90633086d61f9ecf50dd1a33763f23ac65384bb3e6d298f0d700a74015918a2c",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+  },
+  "branch": "rust-rewrite",
+  "checkpoint_sequence": [
+    "registration_commit_push",
+    "implementation_tests_lints_commit_push",
+    "clean_exact_source_six_case_run",
+    "aggregate_report_commit_push"
+  ],
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.md",
+    "sha256": "a8161844aa45d89a262c3a5071e1529f95a452ca55d41b6b9cbe433576ab7de4"
+  },
+  "enforcement_probes": {
+    "AS_allocation_bytes": 268435456,
+    "allocation_bytes": 67108864,
+    "output_cap_bytes": 4096,
+    "rss_kib": 16384,
+    "sleep_seconds": 1,
+    "wall_seconds": 0.05,
+    "write_bytes": 65536
+  },
+  "feature": {
+    "default_enabled": false,
+    "depends_on": [],
+    "name": "experimental-compact-resampler",
+    "new_dependency_allowed": false
+  },
+  "files_planned": [
+    "rust/runtime/Cargo.toml",
+    "rust/runtime/src/lib.rs",
+    "rust/runtime/src/compact_resampler.rs",
+    "rust/runtime/src/bin/apta-compact-resampler-synthetic.rs",
+    "rust/runtime/tests/compact_resampler.rs",
+    "tools/apta_compact_resampler_synthetic.py"
+  ],
+  "fixtures": {
+    "cases": 102,
+    "path": "docs/rust/fixtures/product-host-resampler-hs03/cases.json",
+    "sha256": "7c34cf873eec465b9ef6395559aea8813d3db1df7bac2971a2d0c52774c474b0"
+  },
+  "format": "libapta-host-resampler-protocol-1",
+  "host_environment": {
+    "largest_oracle_tile_bytes": 151116,
+    "physical_budget_qualified": false,
+    "python": "3.12.3",
+    "rust_cargo": "1.95.0",
+    "supervisor_baseline_approx_MiB": 19
+  },
+  "id": "HS-03",
+  "interface": {
+    "constructor": "new(Config{source_rate,channels,frames})",
+    "finish_input": "explicit short EOF fails TruncatedSource; does not invent padding",
+    "heap_allocations_in_component": 0,
+    "product_publication_allowed": false,
+    "provisional_output_before_Done": true,
+    "retained_caller_slices": false,
+    "step": "step(quota,InputBlock{first_frame,interleaved},output,cancel)->StepReport"
+  },
+  "limits": {
+    "address_space_bytes": 134217728,
+    "cpu_seconds": 60,
+    "host_cancel_request_to_return_ms": 50,
+    "output_bytes": 1048576,
+    "rss_kib": 65536,
+    "wall_seconds": 90
+  },
+  "measured_cases": [
+    {
+      "expected_observations": 102,
+      "name": "fixtures"
+    },
+    {
+      "channels": 1,
+      "frames": 26460000,
+      "name": "full44100-mono",
+      "sample_rate": 44100
+    },
+    {
+      "channels": 2,
+      "frames": 26460000,
+      "name": "full44100-stereo",
+      "sample_rate": 44100
+    },
+    {
+      "channels": 1,
+      "frames": 28800000,
+      "name": "full48000-mono",
+      "sample_rate": 48000
+    },
+    {
+      "channels": 2,
+      "frames": 28800000,
+      "name": "full48000-stereo",
+      "sample_rate": 48000
+    },
+    {
+      "asynchronous": true,
+      "name": "cancel",
+      "request_after_ms": 10,
+      "source_case": "full48000-stereo"
+    }
+  ],
+  "no_regression_veto": [
+    "any fixture/hash/count/phase/availability/chunk/quota/status mismatch",
+    "any allocation or whole-source retention in component",
+    "any unsupported/cancelled/failed source claimed as Done",
+    "any frozen source/asset/runtime/input identity drift",
+    "any applicable control failure; existing known C-oracle ignore remains NOT_RUN"
+  ],
+  "numerical_gate": {
+    "exact_f32_output_digest_for_ordered_prototype": true,
+    "independent_fsum_bound": "abs(error)<=2e-5+2e-5*abs(reference)",
+    "new_tolerance": false
+  },
+  "outcomes": {
+    "failure_action": "Stop preserve all; no cap/tolerance/filter rescue or subset; disclosed implementation repair needs new clean source",
+    "integrity_resource_incomplete": "INVALID/INCOMPLETE",
+    "musical_verdict": "NOT_RUN",
+    "pass": "HS03_SYNTHETIC_HOST_PASS_ONLY",
+    "semantic_failure": "synthetic FAIL"
+  },
+  "owner_authorization": "User accepted registration, implementation and synthetic resampler verification with separate commit/push checkpoints",
+  "preflight": {
+    "controls": [
+      "libapta waveform",
+      "libapta waveform_result",
+      "default runtime context"
+    ],
+    "debug_and_release": true,
+    "existing_C_oracle_dependent_skip": "NOT_RUN unless actual oracle available",
+    "fixture_schedules_per_case": 60,
+    "fmt": true,
+    "focused_clippy_deny_warnings": true,
+    "unit_failure_cases": [
+      "zero quota",
+      "zero input/output backpressure",
+      "mid-tap privacy",
+      "Fill/Convolve/Emit cancellation",
+      "completed fence and fresh reuse",
+      "source repeats/gaps",
+      "malformed stereo shape",
+      "oversupply",
+      "explicit premature EOF",
+      "invalid finite/range per channel and after provisional prefix",
+      "unsupported geometry/duration",
+      "canaries and exact ring occupancy"
+    ]
+  },
+  "reference": {
+    "path": "docs/rust/fixtures/product-host-resampler-hs03/resampler_reference.py",
+    "sha256": "3db457d04ad8bc9b62859b9a51894dd3d632828fa60f465ce68180432191473c"
+  },
+  "registration_checks": {
+    "candidate_or_tests_or_measured_run": "NOT_RUN",
+    "coefficient_hashes_match_frozen_CS02": true,
+    "compressed_reference_matches_direct4097": [
+      "ringwrap4097-44100-1",
+      "ringwrap4097-44100-2",
+      "ringwrap4097-48000-1",
+      "ringwrap4097-48000-2"
+    ],
+    "max_ordered_fsum_abs": 8.81404700529655e-18
+  },
+  "schedules": {
+    "input_frames": [
+      1,
+      7,
+      256,
+      512
+    ],
+    "output_samples": [
+      1,
+      7,
+      256
+    ],
+    "work_units": [
+      1,
+      7,
+      256,
+      4096,
+      "usize::MAX"
+    ]
+  },
+  "scope": {
+    "FFT_frontend_neural_model_allowed": false,
+    "H1_required": false,
+    "default_core_wire_HS01_HS02_changes_allowed": false,
+    "device_or_consumer_port_allowed": false,
+    "model_weights_music_labels_real_logits_allowed": false,
+    "product_PF04_complete": false,
+    "stable_version": "1.0.1",
+    "synthetic_host_only": true
+  },
+  "source_baseline": "7ef5500877df760633c016e6568d00ad1b325d95",
+  "status": "REGISTERED_NOT_IMPLEMENTED",
+  "stream_buffers": {
+    "full_PCM_or_output_retention_allowed": false,
+    "input_frames": 512,
+    "maximum_input_bytes": 4096,
+    "output_bytes": 1024,
+    "output_samples": 256
+  }
+}

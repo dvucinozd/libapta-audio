@@ -6,6 +6,16 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
+**Current next: implement the registered HS-03 bounded streaming resampler.**
+See [protocol](PRODUCT-HOST-RESAMPLER-PROTOCOL.md) and [JSON](PRODUCT-HOST-RESAMPLER-PROTOCOL.json).
+The owner authorized registration, implementation and synthetic verification.102
+public short oracles, four full periodic oracles, frozen FIR bytes, streaming/EOF/
+phase/rounding/work/cancel rules and host caps are fixed. No candidate/test/measured
+run yet. Commit/push registration before implementation; tests/lints and a second
+commit/push precede the clean six-case run and separate aggregate result checkpoint.
+This host-only addendum leaves all neural rights/provenance, PF01 and product PF04
+gates open, with default/core/consumer/wire and HS01/02 unchanged.
+
 **HS-02 is complete: synthetic host postprocessor evidence only.** See the
 [protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [implementation](PRODUCT-HOST-GRID-IMPLEMENTATION.md)
 and [result](PRODUCT-HOST-GRID-RESULT.md) ([JSON](PRODUCT-HOST-GRID-RESULT.json)).
