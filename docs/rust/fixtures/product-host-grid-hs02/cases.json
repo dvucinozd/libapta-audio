@@ -1,0 +1,2461 @@
+{
+  "cases": [
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "18940805775360",
+        "anchor_whole": 4410,
+        "applicability_frames": [
+          0,
+          198450
+        ],
+        "beat_count": 9,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 4410,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "94704028876800",
+        "period_whole": 22050,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "expected_summary_sha256": "e364e580735f277e0beaa88ec50e890f78e55ec254442012a3a628c0661b7b08",
+      "id": "regular4-44100",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 44100,
+      "total_frames": 198450
+    },
+    {
+      "beat_numbers": [
+        2,
+        3,
+        1,
+        2,
+        3,
+        1,
+        2
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "18940805775360",
+        "anchor_whole": 4410,
+        "applicability_frames": [
+          0,
+          154350
+        ],
+        "beat_count": 7,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 48510,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 3,
+        "period_fraction_q32": 0,
+        "period_q32": "94704028876800",
+        "period_whole": 22050,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "expected_summary_sha256": "3cf6cc2ac9cd7fbf8fb647f45d438be6317327f7d2f8d552c59e0b2253dd9ba2",
+      "id": "regular3-44100",
+      "kind": "events",
+      "meter": 3,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155
+      ],
+      "sample_rate": 44100,
+      "total_frames": 154350
+    },
+    {
+      "beat_numbers": [
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 601053504,
+        "anchor_q32": "11365084518720",
+        "anchor_whole": 2646,
+        "applicability_frames": [
+          0,
+          132300
+        ],
+        "beat_count": 9,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 32634,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 4144703920,
+        "period_q32": "64398589372848",
+        "period_whole": 14993,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 176471
+      },
+      "expected_summary_sha256": "d63287d245286d7c3fda35c8215a28c38bba32a0383284350d6a831c59c159ca",
+      "id": "fractional-44100",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        3,
+        20,
+        37,
+        54,
+        71,
+        88,
+        105,
+        122,
+        139
+      ],
+      "sample_rate": 44100,
+      "total_frames": 132300
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "18940805775360",
+        "anchor_whole": 4410,
+        "applicability_frames": [
+          0,
+          595350
+        ],
+        "beat_count": 9,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 4410,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "284112086630400",
+        "period_whole": 66150,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 40000
+      },
+      "expected_summary_sha256": "4a3e6968254eda7b15cf6ae06f9f832832783849543b2348c3764cee14b4a3f4",
+      "id": "min40-44100",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        80,
+        155,
+        230,
+        305,
+        380,
+        455,
+        530,
+        605
+      ],
+      "sample_rate": 44100,
+      "total_frames": 595350
+    },
+    {
+      "beat_numbers": {
+        "count": 3000,
+        "cycle": 4,
+        "first": 1
+      },
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "0",
+        "anchor_whole": 0,
+        "applicability_frames": [
+          0,
+          26460000
+        ],
+        "beat_count": 3000,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 0,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "37881611550720",
+        "period_whole": 8820,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 300000
+      },
+      "expected_summary_sha256": "e3b5acffbd1e7298cb061c5039b93cbc6acc8016a65acc9d371c02920aca3aee",
+      "id": "max300-44100",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": {
+        "count": 3000,
+        "first": 0,
+        "step": 10
+      },
+      "sample_rate": 44100,
+      "total_frames": 26460000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "20615843020800",
+        "anchor_whole": 4800,
+        "applicability_frames": [
+          0,
+          216000
+        ],
+        "beat_count": 9,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 4800,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "103079215104000",
+        "period_whole": 24000,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "expected_summary_sha256": "13920249cf43371b505f54550484937d6f0e0e63e4da3d0c9c41828233906bea",
+      "id": "regular4-48000",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        2,
+        3,
+        1,
+        2,
+        3,
+        1,
+        2
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "20615843020800",
+        "anchor_whole": 4800,
+        "applicability_frames": [
+          0,
+          168000
+        ],
+        "beat_count": 7,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 52800,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 3,
+        "period_fraction_q32": 0,
+        "period_q32": "103079215104000",
+        "period_whole": 24000,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "expected_summary_sha256": "c9b131f292b19e2326c6d2930b052eee774cfb84152989a5ec770891b56f42ac",
+      "id": "regular3-48000",
+      "kind": "events",
+      "meter": 3,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155
+      ],
+      "sample_rate": 48000,
+      "total_frames": 168000
+    },
+    {
+      "beat_numbers": [
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 654207896,
+        "anchor_q32": "12370160020376",
+        "anchor_whole": 2880,
+        "applicability_frames": [
+          0,
+          144000
+        ],
+        "beat_count": 9,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 35520,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 4131415322,
+        "period_q32": "70093702718746",
+        "period_whole": 16319,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 176471
+      },
+      "expected_summary_sha256": "f01f2eeb9ad7ef1b52dc9c7d4d46e9199fd9bfb2ef1830d0fb8edcaa9de6468c",
+      "id": "fractional-48000",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        3,
+        20,
+        37,
+        54,
+        71,
+        88,
+        105,
+        122,
+        139
+      ],
+      "sample_rate": 48000,
+      "total_frames": 144000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "20615843020800",
+        "anchor_whole": 4800,
+        "applicability_frames": [
+          0,
+          648000
+        ],
+        "beat_count": 9,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 4800,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "309237645312000",
+        "period_whole": 72000,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 40000
+      },
+      "expected_summary_sha256": "4fc1d46ad693122338ed0a05a6964438a0a497e753b6d4b35c7c0777d7d0435a",
+      "id": "min40-48000",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        80,
+        155,
+        230,
+        305,
+        380,
+        455,
+        530,
+        605
+      ],
+      "sample_rate": 48000,
+      "total_frames": 648000
+    },
+    {
+      "beat_numbers": {
+        "count": 3000,
+        "cycle": 4,
+        "first": 1
+      },
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "0",
+        "anchor_whole": 0,
+        "applicability_frames": [
+          0,
+          28800000
+        ],
+        "beat_count": 3000,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 0,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "41231686041600",
+        "period_whole": 9600,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 300000
+      },
+      "expected_summary_sha256": "70c8ec7b0a8a08f56abda085d2fd6b9bd27e69950d596f8a8a348c08ade975a2",
+      "id": "max300-48000",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": {
+        "count": 3000,
+        "first": 0,
+        "step": 10
+      },
+      "sample_rate": 48000,
+      "total_frames": 28800000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        2,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "PhaseDiscontinuity",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "phase-break",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "ResidualExceeded",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "timing-break",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        115,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "IncompleteCoverage",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "uncovered-tail",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 480000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "AnchorOutOfRange",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "late-anchor",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        105,
+        130,
+        155,
+        180,
+        205,
+        230,
+        255,
+        280,
+        305
+      ],
+      "sample_rate": 48000,
+      "total_frames": 312000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "InsufficientEvents",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "insufficient-events",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180
+      ],
+      "sample_rate": 48000,
+      "total_frames": 192000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "duplicate-row",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        30,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "unordered-row",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        80,
+        55,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "event-at-EOF",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        225
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "PhaseDiscontinuity",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "missing-event",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        105,
+        130,
+        155,
+        180,
+        205,
+        230,
+        255,
+        280,
+        305
+      ],
+      "sample_rate": 48000,
+      "total_frames": 312000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "PhaseDiscontinuity",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "extra-event",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        40,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205,
+        230,
+        255,
+        280,
+        305
+      ],
+      "sample_rate": 48000,
+      "total_frames": 312000
+    },
+    {
+      "beat_numbers": [
+        0,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "invalid-beat-number",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "invalid-event-class",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [
+        1,
+        2,
+        3,
+        4,
+        1,
+        2,
+        3,
+        4,
+        1
+      ],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "reserved-event-byte",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        1,
+        0
+      ],
+      "rows": [
+        5,
+        30,
+        55,
+        80,
+        105,
+        130,
+        155,
+        180,
+        205
+      ],
+      "sample_rate": 48000,
+      "total_frames": 216000
+    },
+    {
+      "beat_numbers": [],
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "result_exposed": false,
+        "status": "NoEvidence"
+      },
+      "id": "empty-events",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": [],
+      "sample_rate": 48000,
+      "total_frames": 48000
+    },
+    {
+      "beat_numbers": {
+        "count": 3072,
+        "cycle": 4,
+        "first": 1
+      },
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "TempoOutOfProfile",
+        "result_exposed": false,
+        "status": "UnsupportedGrid"
+      },
+      "id": "event-count-3072",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": {
+        "count": 3072,
+        "first": 0,
+        "step": 1
+      },
+      "sample_rate": 48000,
+      "total_frames": 28800000
+    },
+    {
+      "beat_numbers": {
+        "count": 3073,
+        "cycle": 4,
+        "first": 1
+      },
+      "classes": "class1 where number1; class0 otherwise",
+      "expected": {
+        "reason": "Capacity",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "event-count-3073",
+      "kind": "events",
+      "meter": 4,
+      "reserved_bytes": [
+        0,
+        0
+      ],
+      "rows": {
+        "count": 3073,
+        "first": 0,
+        "step": 1
+      },
+      "sample_rate": 48000,
+      "total_frames": 28800000
+    },
+    {
+      "decoded_span": [
+        0,
+        5
+      ],
+      "expected": {
+        "events": [
+          {
+            "beat_number": 1,
+            "global_row": 0,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          }
+        ],
+        "status": "EventsReady"
+      },
+      "expected_event_sha256": "01acecb507abfe1a354aa8064f4af5d3f1acd019e37db3c11c97523b71c76e9d",
+      "id": "class-tie-path-number-not-column",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ],
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ],
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ],
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ],
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 5,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 75,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 4800
+    },
+    {
+      "decoded_span": [
+        0,
+        2
+      ],
+      "expected": {
+        "events": [
+          {
+            "beat_number": 1,
+            "global_row": 0,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 1
+          }
+        ],
+        "status": "EventsReady"
+      },
+      "expected_event_sha256": "ee0293715378037132836eadb89121e2f25ce8d89e57e8621bf3a2c1a17908d7",
+      "id": "earlier-row-beats-later-class",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3dcccccd",
+          "3f19999a",
+          "3e99999a"
+        ],
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 2,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 75,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 1920
+    },
+    {
+      "decoded_span": [
+        0,
+        75
+      ],
+      "expected": {
+        "events": [
+          {
+            "beat_number": 1,
+            "global_row": 0,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 2,
+            "global_row": 72,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          }
+        ],
+        "status": "EventsReady"
+      },
+      "expected_event_sha256": "a21317f82b9d03c6c3dab76783f3cd5bb8fcd8eeb52a9bcdb5cd4eabc93f0aea",
+      "id": "both-partial-regions",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": {
+        "constant": [
+          "3dcccccd",
+          "3dcccccd",
+          "3f4ccccd"
+        ],
+        "count": 75
+      },
+      "sample_rate": 48000,
+      "source_rows": 75,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 3,
+          "interval": 75,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 72000
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "events": [
+          {
+            "beat_number": 1,
+            "global_row": 0,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          }
+        ],
+        "status": "EventsReady"
+      },
+      "expected_event_sha256": "01acecb507abfe1a354aa8064f4af5d3f1acd019e37db3c11c97523b71c76e9d",
+      "id": "row0-threshold-at",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3d4ccccd",
+          "00000000",
+          "3f733333"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        0
+      ],
+      "expected": {
+        "result_exposed": false,
+        "status": "NoEvidence"
+      },
+      "id": "threshold-predecessor",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3d4ccccc",
+          "00000000",
+          "3f733333"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "literal_ids": []
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        0
+      ],
+      "expected": {
+        "result_exposed": false,
+        "status": "NoEvidence"
+      },
+      "id": "all-nonbeat",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "00000000",
+          "00000000",
+          "3f800000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "literal_ids": []
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "result_exposed": false,
+        "status": "NoEvidence"
+      },
+      "id": "no-beat-region",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 5,
+          "interval": 75,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "probability-zero-triple",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "00000000",
+          "00000000",
+          "00000000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "probability-nan",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "7fc00000",
+          "00000000",
+          "3f800000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "probability-infinity",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "7f800000",
+          "00000000",
+          "3f800000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "probability-negative",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "bf000000",
+          "3f000000",
+          "3f800000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "probability-over-unit",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f8ccccd",
+          "00000000",
+          "00000000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "probability-sum-mismatch",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f000000",
+          "3f000000",
+          "3f000000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "invalid-after-trim",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ],
+        [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ],
+        [
+          "7fc00000",
+          "00000000",
+          "3f800000"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 3,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 2880
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "sentinel-state",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "literal_ids": [
+          65535
+        ]
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "out-of-range-state",
+      "kind": "path",
+      "meter": 3,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 1,
+      "states": {
+        "literal_ids": [
+          8415
+        ]
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        2
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "illegal-path-edge",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ],
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 2,
+      "states": {
+        "literal_ids": [
+          0,
+          3
+        ]
+      },
+      "total_frames": 1920
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "decoded-span-drift",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ],
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ],
+        [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 3,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 2880
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "Capacity",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "small-scratch",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ]
+      ],
+      "sample_rate": 48000,
+      "scratch_entries": 3071,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 960
+    },
+    {
+      "decoded_span": [
+        0,
+        1
+      ],
+      "expected": {
+        "reason": "UnsupportedProfile",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "unsupported-rate",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3f19999a",
+          "3dcccccd",
+          "3e99999a"
+        ]
+      ],
+      "sample_rate": 44101,
+      "source_rows": 1,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 882
+    },
+    {
+      "decoded_span": [
+        0,
+        0
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "zero-source",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [],
+      "sample_rate": 48000,
+      "source_rows": 0,
+      "states": {
+        "literal_ids": []
+      },
+      "total_frames": 0
+    },
+    {
+      "decoded_span": [
+        0,
+        0
+      ],
+      "expected": {
+        "reason": "Capacity",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "row-capacity",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": {
+        "constant": [
+          "00000000",
+          "00000000",
+          "3f800000"
+        ],
+        "count": 30001
+      },
+      "sample_rate": 48000,
+      "source_rows": 30001,
+      "states": {
+        "literal_ids": []
+      },
+      "total_frames": 28800000
+    },
+    {
+      "decoded_span": [
+        0,
+        2
+      ],
+      "expected": {
+        "reason": "InvalidInput",
+        "result_exposed": false,
+        "status": "Failed"
+      },
+      "id": "path-length-mismatch",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": [
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ],
+        [
+          "3ecccccd",
+          "3ecccccd",
+          "3e4ccccd"
+        ]
+      ],
+      "sample_rate": 48000,
+      "source_rows": 2,
+      "states": {
+        "literal_ids": [
+          0
+        ]
+      },
+      "total_frames": 1920
+    },
+    {
+      "decoded_span": [
+        5,
+        206
+      ],
+      "expected": {
+        "events": [
+          {
+            "beat_number": 1,
+            "global_row": 5,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 1
+          },
+          {
+            "beat_number": 2,
+            "global_row": 30,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 3,
+            "global_row": 55,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 4,
+            "global_row": 80,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 1,
+            "global_row": 105,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 1
+          },
+          {
+            "beat_number": 2,
+            "global_row": 130,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 3,
+            "global_row": 155,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 4,
+            "global_row": 180,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 0
+          },
+          {
+            "beat_number": 1,
+            "global_row": 205,
+            "reserved": [
+              0,
+              0
+            ],
+            "winning_class": 1
+          }
+        ],
+        "status": "EventsReady"
+      },
+      "expected_event_sha256": "aeb5854d298864cbebdaeea7a5f3f952a1ec68fe3a35f4383934c2e3c356b1c9",
+      "id": "offset-restoration",
+      "kind": "path",
+      "meter": 4,
+      "mode": "EventsOnly",
+      "probabilities": {
+        "count": 225,
+        "peak_train": {
+          "beat": [
+            "3f75c28f",
+            "3ca3d70a",
+            "3ca3d70a"
+          ],
+          "count": 9,
+          "downbeat": [
+            "3ca3d70a",
+            "3f75c28f",
+            "3ca3d70a"
+          ],
+          "first": 5,
+          "interval": 25,
+          "meter": 4,
+          "other": [
+            "3c23d70a",
+            "3c23d70a",
+            "3f7ae148"
+          ],
+          "start_number": 1
+        }
+      },
+      "sample_rate": 48000,
+      "source_rows": 225,
+      "states": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 25,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 216000
+    }
+  ],
+  "encoding": {
+    "canonical_summary_Q32_numbers": "anchor_q32 and period_q32 are decimal strings, split word/fraction fields are integers",
+    "class_enum": {
+      "beat": 0,
+      "downbeat": 1
+    },
+    "constant_probability_rule": "repeat triple count times",
+    "event_number_rule": "((first-1+j)%cycle)+1",
+    "event_row_rule": "first+j*step for j0..count-1",
+    "f32_values": "eight hex digits, IEEE754 u32 bits interpreted as f32; do not decimal-reparse",
+    "peak_train_rule": "start from other triple; for each peak j set downbeat if ((start_number-1+j)%meter)+1==1, beat otherwise",
+    "tuple_progression": "For k0..len-1: v=initial_q+k; b=(initial_beat_index+v//interval)%meter; q=v%interval; id=b*2805+(interval-10)*(interval+9)//2+q",
+    "unspecified_scratch_entries": 3072
+  },
+  "evidence_level": "public synthetic specification; no candidate run",
+  "fixture_batch_expected_count": 50,
+  "format": "libapta-host-grid-public-cases-1",
+  "id": "HS-02",
+  "measured_full_cases": [
+    {
+      "decoded_span": [
+        5,
+        29981
+      ],
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "18940805775360",
+        "anchor_whole": 4410,
+        "applicability_frames": [
+          0,
+          26460000
+        ],
+        "beat_count": 1200,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 48510,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 3,
+        "period_fraction_q32": 0,
+        "period_q32": "94704028876800",
+        "period_whole": 22050,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "expected_event_sha256": "0001d8b2777b1f8f411aa7188a05179c405f717cf28b175051d5d23714580df8",
+      "expected_summary_sha256": "787d4dd777c5540c6433e0378af038a3caee618456b9a5e6ab3f6149af67ccc9",
+      "first_peak_row": 5,
+      "interval": 25,
+      "meter": 3,
+      "name": "full3-44100",
+      "peak_count": 1200,
+      "probability_recipe": {
+        "beat": [
+          "3f75c28f",
+          "3ca3d70a",
+          "3ca3d70a"
+        ],
+        "downbeat": [
+          "3ca3d70a",
+          "3f75c28f",
+          "3ca3d70a"
+        ],
+        "other": [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ],
+        "peak_number": "((start_number-1+j)%meter)+1",
+        "peak_rows": "first_peak_row+j*interval for j0..peak_count-1"
+      },
+      "sample_rate": 44100,
+      "source_rows": 30000,
+      "start_number": 2,
+      "state_recipe": {
+        "tuple_progression": {
+          "initial_beat_index": 1,
+          "initial_q": 0,
+          "interval": 25,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 26460000
+    },
+    {
+      "decoded_span": [
+        0,
+        29991
+      ],
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "0",
+        "anchor_whole": 0,
+        "applicability_frames": [
+          0,
+          26460000
+        ],
+        "beat_count": 3000,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 0,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "37881611550720",
+        "period_whole": 8820,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 300000
+      },
+      "expected_event_sha256": "38100492fed06a59c2da6b9bb104a2ece6472248268394a5f93eac1daaccdf50",
+      "expected_summary_sha256": "e3b5acffbd1e7298cb061c5039b93cbc6acc8016a65acc9d371c02920aca3aee",
+      "first_peak_row": 0,
+      "interval": 10,
+      "meter": 4,
+      "name": "full4-44100",
+      "peak_count": 3000,
+      "probability_recipe": {
+        "beat": [
+          "3f75c28f",
+          "3ca3d70a",
+          "3ca3d70a"
+        ],
+        "downbeat": [
+          "3ca3d70a",
+          "3f75c28f",
+          "3ca3d70a"
+        ],
+        "other": [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ],
+        "peak_number": "((start_number-1+j)%meter)+1",
+        "peak_rows": "first_peak_row+j*interval for j0..peak_count-1"
+      },
+      "sample_rate": 44100,
+      "source_rows": 30000,
+      "start_number": 1,
+      "state_recipe": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 26460000
+    },
+    {
+      "decoded_span": [
+        5,
+        29981
+      ],
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "20615843020800",
+        "anchor_whole": 4800,
+        "applicability_frames": [
+          0,
+          28800000
+        ],
+        "beat_count": 1200,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 2,
+        "downbeat_whole_frame": 52800,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 3,
+        "period_fraction_q32": 0,
+        "period_q32": "103079215104000",
+        "period_whole": 24000,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 120000
+      },
+      "expected_event_sha256": "0001d8b2777b1f8f411aa7188a05179c405f717cf28b175051d5d23714580df8",
+      "expected_summary_sha256": "4e197a4cd3bbe3a35c3ff4844ae25486d729313ca5b91e059050bbb66688102f",
+      "first_peak_row": 5,
+      "interval": 25,
+      "meter": 3,
+      "name": "full3-48000",
+      "peak_count": 1200,
+      "probability_recipe": {
+        "beat": [
+          "3f75c28f",
+          "3ca3d70a",
+          "3ca3d70a"
+        ],
+        "downbeat": [
+          "3ca3d70a",
+          "3f75c28f",
+          "3ca3d70a"
+        ],
+        "other": [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ],
+        "peak_number": "((start_number-1+j)%meter)+1",
+        "peak_rows": "first_peak_row+j*interval for j0..peak_count-1"
+      },
+      "sample_rate": 48000,
+      "source_rows": 30000,
+      "start_number": 2,
+      "state_recipe": {
+        "tuple_progression": {
+          "initial_beat_index": 1,
+          "initial_q": 0,
+          "interval": 25,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 28800000
+    },
+    {
+      "decoded_span": [
+        0,
+        29991
+      ],
+      "expected": {
+        "anchor_fraction_q32": 0,
+        "anchor_q32": "0",
+        "anchor_whole": 0,
+        "applicability_frames": [
+          0,
+          28800000
+        ],
+        "beat_count": 3000,
+        "calibrated_quality_present": false,
+        "confidence": 0,
+        "downbeat_ordinal": 0,
+        "downbeat_whole_frame": 0,
+        "explicit_beat_count": 0,
+        "key_present": false,
+        "meter_denominator": 4,
+        "meter_numerator": 4,
+        "period_fraction_q32": 0,
+        "period_q32": "41231686041600",
+        "period_whole": 9600,
+        "segment_count": 1,
+        "status": "GridReady",
+        "tempo_millibpm": 300000
+      },
+      "expected_event_sha256": "38100492fed06a59c2da6b9bb104a2ece6472248268394a5f93eac1daaccdf50",
+      "expected_summary_sha256": "70c8ec7b0a8a08f56abda085d2fd6b9bd27e69950d596f8a8a348c08ade975a2",
+      "first_peak_row": 0,
+      "interval": 10,
+      "meter": 4,
+      "name": "full4-48000",
+      "peak_count": 3000,
+      "probability_recipe": {
+        "beat": [
+          "3f75c28f",
+          "3ca3d70a",
+          "3ca3d70a"
+        ],
+        "downbeat": [
+          "3ca3d70a",
+          "3f75c28f",
+          "3ca3d70a"
+        ],
+        "other": [
+          "3c23d70a",
+          "3c23d70a",
+          "3f7ae148"
+        ],
+        "peak_number": "((start_number-1+j)%meter)+1",
+        "peak_rows": "first_peak_row+j*interval for j0..peak_count-1"
+      },
+      "sample_rate": 48000,
+      "source_rows": 30000,
+      "start_number": 1,
+      "state_recipe": {
+        "tuple_progression": {
+          "initial_beat_index": 0,
+          "initial_q": 0,
+          "interval": 10,
+          "length": "decoded_end-decoded_first"
+        }
+      },
+      "total_frames": 28800000
+    }
+  ],
+  "measured_order": [
+    "fixtures",
+    "full3-44100",
+    "full4-44100",
+    "full3-48000",
+    "full4-48000",
+    "cancel"
+  ],
+  "registration_checks": {
+    "candidate_or_HMM_execution": "NOT_RUN",
+    "measured_resources": "NOT_RUN",
+    "positive_grid_oracles": "exact Fraction arithmetic, checked ownership/residual/profile equations only"
+  },
+  "residual_primitive_cases": [
+    {
+      "delta_scaled": "5*P",
+      "expected": true
+    },
+    {
+      "delta_scaled": "5*P+1",
+      "expected": false
+    }
+  ],
+  "round_half_up_cases": [
+    {
+      "d": 2,
+      "expected": 2,
+      "n": 3
+    },
+    {
+      "d": 2,
+      "expected": 3,
+      "n": 5
+    },
+    {
+      "d": 2,
+      "expected": 0,
+      "n": -1
+    },
+    {
+      "d": 2,
+      "expected": -1,
+      "n": -3
+    }
+  ]
+}

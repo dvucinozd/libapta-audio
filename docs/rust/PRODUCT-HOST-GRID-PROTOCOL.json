@@ -1,0 +1,382 @@
+{
+  "assets": {
+    "hmm3-logp.f64le": {
+      "bytes": 107520,
+      "elements": 13440,
+      "scalar_format": "d",
+      "sha256": "ee4c4d1e05f58dfbdb14d6e79511e51453a2e4e53639cc4fd13a72780c3bff5e",
+      "shape": [
+        13440
+      ]
+    },
+    "hmm3-pointers.u32le": {
+      "bytes": 33664,
+      "elements": 8416,
+      "scalar_format": "I",
+      "sha256": "a22e4463e82febfab33271c426480ed30846eee470bc3e9648299814f0a60cd7",
+      "shape": [
+        8416
+      ]
+    },
+    "hmm3-previous.u16le": {
+      "bytes": 26880,
+      "elements": 13440,
+      "scalar_format": "H",
+      "sha256": "2b92b3ace5adb198067eaeaddc7e8c7bae46cf58790112dbc663e1351bcb8132",
+      "shape": [
+        13440
+      ]
+    },
+    "hmm3-state-map.u8": {
+      "bytes": 25245,
+      "elements": 25245,
+      "scalar_format": "B",
+      "sha256": "53849fd8a1a19f3df6326ea625c28202da7a878a1c2e0d0f7df4660c9c5203ca",
+      "shape": [
+        8415,
+        3
+      ]
+    },
+    "hmm4-logp.f64le": {
+      "bytes": 143360,
+      "elements": 17920,
+      "scalar_format": "d",
+      "sha256": "79784569c68e2ff98a7649f9388e6b0ffe599419c09d77a4ce2c777aff1b2999",
+      "shape": [
+        17920
+      ]
+    },
+    "hmm4-pointers.u32le": {
+      "bytes": 44884,
+      "elements": 11221,
+      "scalar_format": "I",
+      "sha256": "fbf8c5332a7be2b0db31526b9506766d9aa7caf74683b75d2750bfaab0bc9a67",
+      "shape": [
+        11221
+      ]
+    },
+    "hmm4-previous.u16le": {
+      "bytes": 35840,
+      "elements": 17920,
+      "scalar_format": "H",
+      "sha256": "7c77868e6f00a6563aeadc68fbb10c0be4efc86987965e255bff24084db173bc",
+      "shape": [
+        17920
+      ]
+    },
+    "hmm4-state-map.u8": {
+      "bytes": 33660,
+      "elements": 33660,
+      "scalar_format": "B",
+      "sha256": "ccf052b1bf78ed639dd0a30d314e99067cf4cd9b690ec50fbcdfe088c0938d18",
+      "shape": [
+        11220,
+        3
+      ]
+    }
+  },
+  "assets_root": "docs/rust/fixtures/product-compact-cs02/assets",
+  "authority_sha256": {
+    "Cargo.lock": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4",
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7",
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70",
+    "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.json": "0e8c9709aa5034879ed362f81c0e54cfb4d86504d566d1d2902d8c9d7c86a682",
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb",
+    "docs/rust/PRODUCT-HOST-HMM-IMPLEMENTATION.json": "c7217a394ada021037dcaef49c64cbbe94ee4edc1190e02c93713f08f7f3e79e",
+    "docs/rust/PRODUCT-HOST-HMM-PROTOCOL.json": "052ce2a59ae25f17f2bdaf93e2dd317f9593657a098c6b6c9dd69340e1c446de",
+    "docs/rust/PRODUCT-HOST-HMM-RESULT.json": "fcc63ee24f25dda3f123b67b04d7479a90b193e01a178269a8d160a53de076ef",
+    "rust/runtime/src/bin/apta-compact-hmm-synthetic.rs": "576f01fbcc9ace3b93161e19f48b9e9e27bfee7a9fa7764a34fd2d92d167041c",
+    "rust/runtime/src/compact_hmm.rs": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+    "rust/runtime/tests/compact_hmm.rs": "4b5f9c003ad286f1fd38773f8127bd82fd9443fcebeb5e0720ded8997efd61c6",
+    "rust/src/builder.rs": "8d9e2de10782136417cd1c6b4065bd6165836a82f901fb6303e6c55d4377a04e",
+    "rust/src/dj.rs": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "rust/src/native_validation.rs": "028707aa4998d9a2df060d052f9ce1c4d40a2cfea887fc0e0b3bc0566302f797",
+    "rust/src/result.rs": "3ccff847fb1c15be90b4a03b22f1763979365d1e31267751901f40685124935a",
+    "rust/src/types.rs": "c587be97196b2c2f1246463bcb42a5198fb51d69d98ee355ff5edb5d6ec138dc",
+    "rust/tests/product_grid_contract.rs": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa",
+    "tools/apta_compact_hmm_synthetic.py": "90633086d61f9ecf50dd1a33763f23ac65384bb3e6d298f0d700a74015918a2c",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+  },
+  "branch": "rust-rewrite",
+  "checkpoint_sequence": [
+    "registration_commit_push",
+    "implementation_tests_lints_commit_push",
+    "clean_exact_source_fixed_synthetic_run",
+    "aggregate_report_commit_push"
+  ],
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-GRID-PROTOCOL.md",
+    "sha256": "1071266199b3aedc8f030b19e6a64553946ca644e525e7288c40e9ca2e8f47e6"
+  },
+  "enforcement_probes": {
+    "AS_allocation_bytes": 268435456,
+    "allocation_bytes": 67108864,
+    "output_cap_bytes": 4096,
+    "rss_kib": 16384,
+    "sleep_seconds": 1,
+    "wall_seconds": 0.05,
+    "write_bytes": 65536
+  },
+  "events": {
+    "bytes_per_event": 8,
+    "encoding": "u32le row,u8 number,u8 class,u8 zero,u8 zero",
+    "membership": "16*q<interval",
+    "no_step_or_constructor_allocations": true,
+    "number": "mapped beat_index+1 at selected row; not winning activation column",
+    "over_capacity": "Capacity, no prefix result",
+    "peak": "maximum p_b or p_d within region",
+    "regions": "maximal connected true; include both partial boundaries",
+    "scratch_bytes": 24576,
+    "tie": "earliest global row, then beat column0"
+  },
+  "execution_this_checkpoint": {
+    "candidate_implemented": false,
+    "candidate_or_HMM_executed": false,
+    "measured_cases": "NOT_RUN",
+    "registration_arithmetic_only": true
+  },
+  "feature": {
+    "default_enabled": false,
+    "depends_on": [
+      "experimental-compact-hmm"
+    ],
+    "name": "experimental-compact-grid",
+    "new_Cargo_dependency_allowed": false
+  },
+  "files_planned": [
+    "rust/runtime/Cargo.toml",
+    "rust/runtime/src/lib.rs",
+    "rust/runtime/src/compact_grid.rs",
+    "rust/runtime/src/bin/apta-compact-grid-synthetic.rs",
+    "rust/runtime/tests/compact_grid.rs",
+    "tools/apta_compact_grid_synthetic.py"
+  ],
+  "fixtures": {
+    "cases": 50,
+    "path": "docs/rust/fixtures/product-host-grid-hs02/cases.json",
+    "positive_grid_cases": 10,
+    "registration_arithmetic_generator": {
+      "external_path": "D:/AI/LIBAPTA/outputs/prepare-hs02-public-oracles-20261026.py",
+      "sha256": "4e4386ec6bec79de877439d1499f38c7517ee064d15a05c91b7c07362c447621"
+    },
+    "sha256": "eb84b1ea78eab975628369a474ee63f628a3d9b456761dd7b7ebb2b4aed9ec67"
+  },
+  "format": "libapta-host-grid-protocol-1",
+  "geometry": {
+    "analysis_rows": "ceil(50*N/fs)",
+    "explicit_event_capacity": 3072,
+    "maximum_rows": 30000,
+    "maximum_source_seconds": 600,
+    "meter_denominator": 4,
+    "meters": [
+      3,
+      4
+    ],
+    "sample_rates_hz": [
+      44100,
+      48000
+    ],
+    "source_range": "[0,N)"
+  },
+  "grid": {
+    "D": "L*sum(j*j)-sum(j)^2",
+    "Q": 4294967296,
+    "U": "L*sum(j*r_j)-sum(j)*sum(r_j)",
+    "anchor_ordinal": 0,
+    "anchor_q32": "RHU((2*fs*Q*sum(r_j)-50*L*(L-1)*P)/(100*L))",
+    "calibrated_quality": false,
+    "confidence": 0,
+    "explicit_beat_array_count": 0,
+    "intermediate_arithmetic": "checked i128/u128",
+    "key": false,
+    "maximum_event_count": 3072,
+    "minimum_event_count": "2*m+1",
+    "numbers": "1..m and one unbroken modulo-m cycle",
+    "ordered_checks": [
+      "nonempty count and phase cycle",
+      "D/U and tempo profile",
+      "0<=A<P",
+      "A+(L-1)*P<N*Q<=A+L*P",
+      "10*abs(r_j*fs*Q-50*(A+j*P))<=50*P",
+      "earliest downbeat witness and phase"
+    ],
+    "period_q32": "floor(fs*60000*Q/T)",
+    "raw_event_coordinate": "r_j*fs*Q/50 rational; no per-event floor",
+    "round_half_up_signed": "floor(n/d+1/2)=(2*n+d).div_euclid(2*d),d>0",
+    "rows": "strictly increasing and owned [0,R)",
+    "segment_count": 1,
+    "tempo_millibpm": "RHU(3000000*D/U)",
+    "tempo_profile": [
+      40000,
+      300000
+    ],
+    "unsupported_rescue_allowed": false
+  },
+  "host_environment_basis": {
+    "expected_generated_path_probability_event_payload_bytes": 444576,
+    "known_supervisor_baseline_approx_mib": 19,
+    "python": "3.12.3",
+    "rust_cargo": "1.95.0",
+    "source": "HS-01 registration and measured result; not a new host audit",
+    "whole_device_budgets_qualified": false
+  },
+  "hypothesis": "Bounded deterministic artificial decoded-path correction and strict single whole-source grid can preserve rows, Q32 geometry and phase while refusing all unsupported or invalid mandatory output",
+  "id": "HS-02",
+  "limits": {
+    "address_space_bytes": 134217728,
+    "cpu_seconds": 10,
+    "output_bytes": 1048576,
+    "pending_host_cancel_request_to_return_ms": 50,
+    "rss_kib": 65536,
+    "wall_seconds": 30
+  },
+  "measured_cases": [
+    {
+      "expected_fixture_count": 50,
+      "name": "fixtures"
+    },
+    {
+      "meter": 3,
+      "name": "full3-44100",
+      "rows": 30000,
+      "sample_rate": 44100
+    },
+    {
+      "meter": 4,
+      "name": "full4-44100",
+      "rows": 30000,
+      "sample_rate": 44100
+    },
+    {
+      "meter": 3,
+      "name": "full3-48000",
+      "rows": 30000,
+      "sample_rate": 48000
+    },
+    {
+      "meter": 4,
+      "name": "full4-48000",
+      "rows": 30000,
+      "sample_rate": 48000
+    },
+    {
+      "advance_quota": 1,
+      "input_case": "full4-48000",
+      "name": "cancel",
+      "pending_before_step": true,
+      "phase": "CheckResiduals",
+      "service_quota": "usize::MAX"
+    }
+  ],
+  "native_wire": {
+    "TEMP_candidates": 1,
+    "check_all_positive_small_fixtures": true,
+    "flags": 0,
+    "input_mutation_cannot_change_finalized_wire_bytes": true,
+    "native_provenance": "ExternalImport HS02-synthetic version1; completed default info",
+    "previous_revision": 0,
+    "revision": 1,
+    "segment_id": 1,
+    "validator_changes_allowed": false,
+    "wire_buffer_bytes": 4096,
+    "wire_overview": "one clearly synthetic zero-valued column/spans covering[0,N), serialization scaffolding only"
+  },
+  "no_regression_veto": [
+    "any expected case/status/reason/field mismatch",
+    "any quota/cancel/capacity/output-lifetime regression",
+    "any frozen source/asset/runtime/input identity drift",
+    "any core/consumer/wire/default change",
+    "any failure or silent skip in applicable controls; existing known ignored C-oracle test stays NOT_RUN"
+  ],
+  "outcomes": {
+    "failure_action": "stop and preserve all; no subset, cap/tolerance rescue or overwrite; disclosed implementation repair needs new clean source",
+    "integrity_resource_incomplete": "INVALID/INCOMPLETE",
+    "musical_verdict": "NOT_RUN",
+    "pass": "HS02_SYNTHETIC_HOST_PASS_ONLY",
+    "semantic_failure": "synthetic FAIL"
+  },
+  "owner_authorization": "Direct acceptance of public rights/provenance review and separate synthetic path-to-events/grid registration",
+  "path": {
+    "first_state": "any valid selected-graph state under uniform prior",
+    "incoming_lookup": "resumable sorted binary search, maximum7 comparisons",
+    "invalid_sentinel": 65535,
+    "source": "artificial legal supplied path; not inferred music",
+    "state_domain": "b0..m-1,i10..75,q0..i-1",
+    "state_id": "b*2805+(i-10)*(i+9)/2+q",
+    "validate_each_edge": true
+  },
+  "preflight": {
+    "controls": [
+      "product_grid_contract",
+      "compact_hmm",
+      "default runtime context"
+    ],
+    "existing_C_lifetime_oracle_skip": "NOT_RUN if actual oracle is absent",
+    "fmt": "required",
+    "focused_clippy_deny_warnings": true,
+    "new_tests": [
+      "compact_grid debug",
+      "compact_grid release",
+      "all quotas and reachable-phase cancellation",
+      "two small HS01 composition cases",
+      "native/wire roundtrips and independent output lifetime"
+    ]
+  },
+  "probabilities": {
+    "classes": [
+      "beat",
+      "downbeat",
+      "nonbeat"
+    ],
+    "decoded_span": "exact first through last qualifying row, half open; original row origin restored",
+    "empty_support": "empty states and [0,0] span => NoEvidence; inconsistent nonempty span => InvalidInput",
+    "finite": true,
+    "precision": "f32 inputs promoted to f64 for sum and threshold comparison",
+    "range": [
+      0,
+      1
+    ],
+    "renormalize_or_clip": false,
+    "sum_association": "(f64(p_b)+f64(p_d))+f64(p_n)",
+    "sum_tolerance": "2^-21",
+    "threshold_f64": 0.05,
+    "validate_outside_trim": true
+  },
+  "scheduling": {
+    "cancel_case": "already pending request before one step; not asynchronous product cancellation",
+    "cancellation_checked_each_unit": true,
+    "cancelled_session_resume_allowed": false,
+    "completed_result_immutable": true,
+    "maximum_total_units_per_case": 4194304,
+    "partial_results_allowed": false,
+    "quotas": [
+      1,
+      7,
+      256,
+      4096,
+      "usize::MAX"
+    ],
+    "units": "one row, state/search comparison, region-row decision, event or fixed arithmetic/summary operation; integration validation/wire is separate"
+  },
+  "scope": {
+    "H1_required": false,
+    "HS01_decoder_changes_allowed": false,
+    "P4_port_or_device_execution_allowed": false,
+    "default_core_consumer_wire_changes_allowed": false,
+    "model_corpus_execution_allowed": false,
+    "neural_weights_audio_labels_real_logits_allowed": false,
+    "new_model_training_quantization_offload_or_provider_activation_allowed": false,
+    "product_PF04_complete": false,
+    "safe_host_only": true,
+    "source_only_registration_this_checkpoint": true,
+    "stable_version": "1.0.1"
+  },
+  "source_baseline": "701c44222e6304128b23a1c1c6728248a4cc75f7",
+  "status": "REGISTERED_NOT_IMPLEMENTED"
+}
