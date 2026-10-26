@@ -1,0 +1,217 @@
+{
+  "fft_analytic": [
+    {
+      "expected_all_bins": [
+        1,
+        0
+      ],
+      "input": "delta[n=0]"
+    },
+    {
+      "bin0": [
+        1764,
+        0
+      ],
+      "input": "constant real1, length1764",
+      "other_bins": [
+        0,
+        0
+      ]
+    },
+    {
+      "bin7_and_1757": [
+        882,
+        0
+      ],
+      "input": "cos(2*pi*7*n/1764)",
+      "other_bins": [
+        0,
+        0
+      ]
+    },
+    {
+      "bin_k": "root[(3*k)%1764]",
+      "input": "delta[n=3]"
+    }
+  ],
+  "kind": "public mathematical examples; no candidate NN/frontend/Viterbi execution",
+  "probability_validation": {
+    "nonfinite_or_out_of_unit_interval": "INVALID_INPUT",
+    "renormalize": false,
+    "sum_tolerance": "2^-21",
+    "zero_beat_downbeat_nonbeat_one": "NO_EVIDENCE",
+    "zero_triple": "INVALID_INPUT"
+  },
+  "resampler_phase": {
+    "44100": "phase0; source center=2*k",
+    "48000": "phase=(320*k)%147; center_floor=(320*k)//147"
+  },
+  "threshold": {
+    "comparison_rhs_f64_hex": "0x1.999999999999ap-5",
+    "expected_at": true,
+    "expected_before": false,
+    "f32_at_decimal_005_hex": "0x1.99999a0000000p-5",
+    "preceding_f32_hex": "0x1.9999980000000p-5",
+    "row0_only_support": "range [0,1), not NO_EVIDENCE"
+  },
+  "tiny_hmm": [
+    {
+      "densities": [
+        [
+          "1/2",
+          "1/2"
+        ]
+      ],
+      "expected_initial": 0,
+      "expected_path": [
+        0
+      ],
+      "expected_probability": "1/8",
+      "rows": 1,
+      "transition": [
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ]
+      ]
+    },
+    {
+      "densities": [
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ]
+      ],
+      "expected_initial": 0,
+      "expected_path": [
+        0,
+        0,
+        0
+      ],
+      "expected_probability": "1/128",
+      "rows": 3,
+      "transition": [
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ]
+      ]
+    },
+    {
+      "densities": [
+        [
+          "9/10",
+          "1/10"
+        ],
+        [
+          "1/10",
+          "9/10"
+        ],
+        [
+          "9/10",
+          "1/10"
+        ]
+      ],
+      "expected_initial": 0,
+      "expected_path": [
+        0,
+        0,
+        0
+      ],
+      "expected_probability": "324/15625",
+      "rows": 3,
+      "transition": [
+        [
+          "4/5",
+          "1/5"
+        ],
+        [
+          "1/5",
+          "4/5"
+        ]
+      ]
+    },
+    {
+      "densities": [
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ]
+      ],
+      "expected_initial": 0,
+      "expected_path": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "expected_probability": "1/131072",
+      "rows": 8,
+      "transition": [
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "1/2",
+          "1/2"
+        ]
+      ]
+    }
+  ],
+  "zero_network_closed_form": {
+    "one_scalar_LSTM_zero_state_zero_weights": {
+      "c": 0,
+      "h": 0
+    },
+    "three_zero_logits_softmax_f32_hex": "0x1.5555560000000p-2"
+  }
+}

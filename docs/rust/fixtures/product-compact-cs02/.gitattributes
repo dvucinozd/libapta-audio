@@ -1,0 +1,9 @@
+# Frozen mathematical assets must survive checkout byte-for-byte.
+assets/*.f64le binary
+assets/*.f32le binary
+assets/*.u16le binary
+assets/*.u32le binary
+assets/*.u8 binary
+*.py text eol=lf
+*.txt text eol=lf
+assets/*.json text eol=lf

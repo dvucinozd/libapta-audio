@@ -1,0 +1,186 @@
+{
+  "assets": {
+    "dft-roots-1764.f64le": {
+      "bytes": 28224,
+      "elements": 3528,
+      "scalar_format": "d",
+      "sha256": "42f7feaacbbf14a92b2268e1ec771cfdcd593a0d57bd6416cf8756ef4827453d",
+      "shape": [
+        1764,
+        2
+      ]
+    },
+    "filter-edge-bins.u16le": {
+      "bytes": 292,
+      "elements": 146,
+      "scalar_format": "H",
+      "sha256": "8853eb45538aa3f51dc41a9b73407b87eda8a24c55cc43f90e89c3ca9acfe94d",
+      "shape": [
+        146
+      ]
+    },
+    "filter-offsets.u32le": {
+      "bytes": 580,
+      "elements": 145,
+      "scalar_format": "I",
+      "sha256": "9f2abf187b20ebf9a837332c28b18ebe7937a38ca9871869d789828c90b4f0d3",
+      "shape": [
+        145
+      ]
+    },
+    "filter-starts.u16le": {
+      "bytes": 288,
+      "elements": 144,
+      "scalar_format": "H",
+      "sha256": "9f1e147d29a259d1c8221c9cdf0972457dbba1a5509d34c5138626b5500e857a",
+      "shape": [
+        144
+      ]
+    },
+    "filter-weights.f32le": {
+      "bytes": 6980,
+      "elements": 1745,
+      "scalar_format": "f",
+      "sha256": "d317df76a5a013b700469090c3cfdc104cf3d3d40af3982a4396d815d2696f0a",
+      "shape": [
+        1745
+      ]
+    },
+    "fir-44100.f64le": {
+      "bytes": 520,
+      "elements": 65,
+      "scalar_format": "d",
+      "sha256": "0ea7547740cd8bb98d5e1241def77faeed99f3dad5b60a5b89e187e3045b1cd6",
+      "shape": [
+        1,
+        65
+      ]
+    },
+    "fir-48000.f64le": {
+      "bytes": 76440,
+      "elements": 9555,
+      "scalar_format": "d",
+      "sha256": "0abf15aae616314f39a8c732562225561ade41a37db638e484121ce8a48411b3",
+      "shape": [
+        147,
+        65
+      ]
+    },
+    "hann-1764.f64le": {
+      "bytes": 14112,
+      "elements": 1764,
+      "scalar_format": "d",
+      "sha256": "31a4d75c241af5f8e951234bca91333eb0337a68b990a53df810e3d82022cf0f",
+      "shape": [
+        1764
+      ]
+    },
+    "hmm3-logp.f64le": {
+      "bytes": 107520,
+      "elements": 13440,
+      "scalar_format": "d",
+      "sha256": "ee4c4d1e05f58dfbdb14d6e79511e51453a2e4e53639cc4fd13a72780c3bff5e",
+      "shape": [
+        13440
+      ]
+    },
+    "hmm3-pointers.u32le": {
+      "bytes": 33664,
+      "elements": 8416,
+      "scalar_format": "I",
+      "sha256": "a22e4463e82febfab33271c426480ed30846eee470bc3e9648299814f0a60cd7",
+      "shape": [
+        8416
+      ]
+    },
+    "hmm3-previous.u16le": {
+      "bytes": 26880,
+      "elements": 13440,
+      "scalar_format": "H",
+      "sha256": "2b92b3ace5adb198067eaeaddc7e8c7bae46cf58790112dbc663e1351bcb8132",
+      "shape": [
+        13440
+      ]
+    },
+    "hmm3-state-map.u8": {
+      "bytes": 25245,
+      "elements": 25245,
+      "scalar_format": "B",
+      "sha256": "53849fd8a1a19f3df6326ea625c28202da7a878a1c2e0d0f7df4660c9c5203ca",
+      "shape": [
+        8415,
+        3
+      ]
+    },
+    "hmm4-logp.f64le": {
+      "bytes": 143360,
+      "elements": 17920,
+      "scalar_format": "d",
+      "sha256": "79784569c68e2ff98a7649f9388e6b0ffe599419c09d77a4ce2c777aff1b2999",
+      "shape": [
+        17920
+      ]
+    },
+    "hmm4-pointers.u32le": {
+      "bytes": 44884,
+      "elements": 11221,
+      "scalar_format": "I",
+      "sha256": "fbf8c5332a7be2b0db31526b9506766d9aa7caf74683b75d2750bfaab0bc9a67",
+      "shape": [
+        11221
+      ]
+    },
+    "hmm4-previous.u16le": {
+      "bytes": 35840,
+      "elements": 17920,
+      "scalar_format": "H",
+      "sha256": "7c77868e6f00a6563aeadc68fbb10c0be4efc86987965e255bff24084db173bc",
+      "shape": [
+        17920
+      ]
+    },
+    "hmm4-state-map.u8": {
+      "bytes": 33660,
+      "elements": 33660,
+      "scalar_format": "B",
+      "sha256": "ccf052b1bf78ed639dd0a30d314e99067cf4cd9b690ec50fbcdfe088c0938d18",
+      "shape": [
+        11220,
+        3
+      ]
+    },
+    "oracles.json": {
+      "bytes": 3640,
+      "sha256": "2aa80590acef1916a6733065f5a290753f55e2f970da706b68c5e9b3850858c8"
+    }
+  },
+  "authority": "frozen file bytes; regeneration libm drift is not auto-accepted",
+  "coefficient_policy": "f64 FIR/Hann/DFT; f32 ramps and fixed NumPy1.26.4 pairwise filter normalization",
+  "execution": {
+    "audio_labels_logits_or_weights_read": false,
+    "candidate_frontend_or_Viterbi": false,
+    "neural_model": false,
+    "packages_installed": false
+  },
+  "format": "libapta-compact-cs02-assets-1",
+  "generation_runtime": {
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]"
+  },
+  "generator_sha256": "d82eb9f1c44bc0d1e74b50ea11b932dab12ca68a2b4474a39cc2ee378d5f6857",
+  "graphs": {
+    "3": {
+      "edges": 13440,
+      "graph_and_maps_bytes": 193309,
+      "states": 8415
+    },
+    "4": {
+      "edges": 17920,
+      "graph_and_maps_bytes": 257744,
+      "states": 11220
+    }
+  },
+  "scalar_endian": "little; no header/padding",
+  "source_base": "76b4f2aa9570b808633eaba5d9d385fd9f9ebe15",
+  "total_asset_bytes": 582129
+}

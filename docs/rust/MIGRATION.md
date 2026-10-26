@@ -6,7 +6,26 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: CS-02 source-only resource/oracle specification, with PF-01 physical budgets still open, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+**Current next: close remaining CS-01 binding and PF-01 exact-device resource gates before PF-04, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+CS-02 now completes the [static resource/oracle freeze](PRODUCT-COMPACT-RESOURCE-ORACLES.md)
+and [machine receipt](PRODUCT-COMPACT-RESOURCE-ORACLES.json) from source base
+`76b4f2aa9570b808633eaba5d9d385fd9f9ebe15`.
+Seventeen public mathematical assets (582129bytes) and a manifest are bound to
+the stdlib generator/verifier. Independent Decimal80/rational checks cover six
+FIR phases,4356 interval pairs,19635 graph states,144 filters and four tiny HMM
+examples. Regeneration is byte-identical; five corruption cases are refused.
+These checks execute no candidate frontend/FFT/Viterbi, neural model or corpus.
+The actual sparse graphs have13440/17920 edges; the longest winner4 schedule
+requires2016000000 predecessor updates. Declared memory scenarios are18107834
+bytes with actual phase reclamation/single graph or21583819bytes with separate
+buffers and both resident graphs, before unqualified product owners/overheads.
+Neither is measured peak or an approved budget. Fixed coefficient, prior, scalar
+oracle and future primitive parity rules do not establish target kernel parity.
+BeatNet+ rights, finite tensor values/training provenance and physical
+internal/PSRAM/storage/placement/cleanup evidence remain open. Device availability
+has been requested; no COM presence is a verified board/chip identity. PF-04 is
+NOT_RUN, H1 stays deferred, and a large port/provider activation remains gated.
+
 The owner confirms compact P4 candidate specification before physical measurement.
 The [CS-01 design](PRODUCT-COMPACT-CANDIDATE-SPEC.md) and
 [machine specification](PRODUCT-COMPACT-CANDIDATE-SPEC.json), from source base
@@ -23,8 +42,8 @@ The neural part alone needs23.03 billion MACs per600s; the proposed largest
 checkpoint/parent/score payload is16515840bytes before other live owners.
 Neither is a target throughput or whole-device peak result. BeatNet+ rights,
 finite weights/training provenance, coefficient/graph/parity assets and actual
-memory/storage/placement/cleanup budgets remain open. CS-02 may continue as static
-prework; PF-04 implementation, a large port and physical PASS remain gated.
+memory/storage/placement/cleanup budgets remain open. CS-02's subsequent static
+completion is recorded above; PF-04 implementation, a large port and physical PASS remain gated.
 
 PF-03 completes the permitted [whole-pipeline static inventory](PRODUCT-FEASIBILITY.md)
 and [source/arithmetic receipt](PRODUCT-FEASIBILITY.json) from source base

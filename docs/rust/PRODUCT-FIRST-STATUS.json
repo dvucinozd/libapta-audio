@@ -1,16 +1,20 @@
 {
   "active_phase": "PF-03",
-  "active_phase_status": "COMPACT_DESIGN_SPECIFIED_BINDING_AND_MEASUREMENT_OPEN",
-  "active_phase_verdict": "CURRENT_PATH_NO_GO_AS_IS",
+  "active_phase_status": "STATIC_COMPACT_SPEC_COMPLETE_NEEDS_BINDING_AND_MEASUREMENT",
+  "active_phase_verdict": "STATIC_ASSETS_AND_ORACLES_PASS_PRODUCT_GATES_OPEN",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "14 pinned public source blobs; one checkpoint digest/22 tensor metadata records; independent288 feature geometry and mathematical design examples; no neural/corpus/device execution",
+  "checks": "17 assets/582129 bytes; 19635 graph states;4356 interval pairs;144 filters;four exhaustive tiny HMM examples; byte-identical regeneration and five corruption refusals. No candidate/model/device execution.",
   "compact_candidate_spec": {
     "path": "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json",
     "sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b"
+  },
+  "compact_resource_oracles": {
+    "path": "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json",
+    "sha256": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539"
   },
   "consumer_snapshot": {
     "files_pin_provider_unchanged": true,
@@ -80,7 +84,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "public source and static checkpoint metadata; derived component arithmetic and rational design oracles",
+  "evidence_level": "hash-bound public mathematical tables, independent Decimal80/rational checks and declared resource scenarios",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
@@ -90,6 +94,7 @@
     "provider_activated": false,
     "release_created": false,
     "runtime_prepared": false,
+    "static_math_assets_generated": true,
     "tensor_payloads_deserialized": false,
     "weights_loaded_as_model": false,
     "weights_read": true
@@ -128,15 +133,24 @@
       "source_baseline": "dee7214603939085d5d34d1919a4582395b08e6b",
       "status": "STATIC_INVENTORY_COMPLETE_NEEDS_DECISION_AND_MEASUREMENT",
       "verdict": "CURRENT_PATH_NO_GO_AS_IS"
+    },
+    {
+      "checkpoint": "76b4f2aa9570b808633eaba5d9d385fd9f9ebe15",
+      "compact_spec_sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+      "phase": "PF-03",
+      "source_baseline": "c5a3dea0adfda497add11aba23f8b440a1a0939a",
+      "status": "COMPACT_DESIGN_SPECIFIED_BINDING_AND_MEASUREMENT_OPEN",
+      "step": "CS-01"
     }
   ],
   "next": {
-    "action": "Freeze source-only coefficient/graph/resource oracles; close binding/license and physical budgets before PF04 implementation",
+    "action": "Close rights/finite/provenance binding; determine exact-device availability and physical resource budgets before PF04 registration",
+    "independent_static_binding_allowed": true,
     "large_port_allowed": false,
-    "mode": "STATIC_SPECIFICATION_PREWORK_ONLY",
+    "mode": "REQUIRED_GATE_CLOSURE",
     "pending_phase": "PF-01",
     "phase": "PF-03",
-    "step": "CS-02"
+    "step": "CS01-BINDING_AND_PF01"
   },
   "open_decisions": [
     {
@@ -168,10 +182,10 @@
     },
     {
       "current_path": "NO_GO_AS_IS",
-      "evidence": "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json",
+      "evidence": "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json",
       "id": "PF03-ROUTE",
       "owner": "engineering; explicit owner decision for new model or offload",
-      "state": "COMPACT_DESIGN_PENDING_BINDING_AND_PF01",
+      "state": "STATIC_DESIGN_READY_PENDING_BINDING_AND_PF01",
       "static_inventory_allowed": true
     },
     {
@@ -191,10 +205,16 @@
       "owner": "engineering and rights holder evidence",
       "remaining": [
         "code/weights rights",
-        "finite tensor values/training provenance",
-        "frozen coefficient/graph/parity assets"
+        "finite tensor values",
+        "training provenance/independence"
       ],
-      "state": "METADATA_BOUND_LICENSE_AND_NUMERIC_CHECKS_OPEN"
+      "state": "ASSETS_BOUND_LICENSE_FINITE_VALUES_AND_PROVENANCE_OPEN"
+    },
+    {
+      "evidence": "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json",
+      "id": "CS02-ASSETS",
+      "state": "COMPLETE_STATIC_ONLY",
+      "target_kernel_parity_executed": false
     }
   ],
   "phases": [
@@ -228,9 +248,9 @@
         "PF-02"
       ],
       "id": "PF-03",
-      "product_decision_gate": "direction confirmed for specification only; model binding, numeric/device budgets and product GO pending",
-      "state": "COMPACT_DESIGN_SPECIFIED_BINDING_AND_MEASUREMENT_OPEN",
-      "verdict": "CURRENT_PATH_NO_GO_AS_IS"
+      "product_decision_gate": "CS01 rights/finite/provenance and PF01 numeric/device budgets remain required",
+      "state": "STATIC_COMPACT_SPEC_COMPLETE_NEEDS_BINDING_AND_MEASUREMENT",
+      "verdict": "STATIC_ASSETS_AND_ORACLES_PASS_PRODUCT_GATES_OPEN"
     },
     {
       "depends_on": [
@@ -363,7 +383,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "c5a3dea0adfda497add11aba23f8b440a1a0939a",
+  "source_baseline": "76b4f2aa9570b808633eaba5d9d385fd9f9ebe15",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
