@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-01",
-  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
-  "active_phase_verdict": "HS01_SYNTHETIC_HOST_PASS_ONLY",
+  "active_phase": "CS01-RIGHTS-REVIEW",
+  "active_phase_status": "PUBLIC_REVIEW_COMPLETE_RIGHTS_AND_PROVENANCE_UNRESOLVED",
+  "active_phase_verdict": "LICENSE_UNRESOLVED_AND_INDEPENDENCE_UNRESOLVED",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "Fixed 5/5 generated host cases PASS; exact clean source/protocol/runtime/executable/assets and 51 output files audited. 13 debug +13 release new passes; controls12+5 passes; C lifetime oracle comparison remains ignored/NOT_RUN.",
+  "checks": "Public repository/tree/setup/README/config/issues/comments/releases and publisher article reviewed; exact source/blob bindings checked. No new algorithm/model/corpus/device test.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -19,6 +19,10 @@
   "compact_resource_oracles": {
     "path": "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json",
     "sha256": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539"
+  },
+  "compact_rights_review": {
+    "path": "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json",
+    "sha256": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70"
   },
   "consumer_snapshot": {
     "files_pin_provider_unchanged": true,
@@ -88,12 +92,13 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "registered synthetic host decoder implementation/parity/resource/cancel only; no musical or P4 qualification",
+  "evidence_level": "bounded public rights/training-provenance review; no qualification",
   "execution": {
     "DSP_changed": false,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
     "experimental_host_decoder_added": true,
+    "external_messages_sent_this_step": false,
     "framework_tensors_constructed": false,
     "hardware_flashed": false,
     "model_corpus_device_executed_this_experiment": false,
@@ -182,6 +187,13 @@
       "source_baseline": "3c2946ef53968aa8b13d2eee2a00536187fc6857",
       "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
       "step": "implementation preflight"
+    },
+    {
+      "checkpoint": "23827c5936e5670a7b5a178533fc07e3ac0acd69",
+      "phase": "HS-01",
+      "source_baseline": "7cd081f15f7e5a77af59f5bbd61c0158c65ac171",
+      "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+      "verdict": "HS01_SYNTHETIC_HOST_PASS_ONLY"
     }
   ],
   "host_hmm_experiment": {
@@ -201,10 +213,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Close model rights/training-provenance evidence; obtain PF01 exact-board budgets when hardware becomes available. Register separate scope before any further component/model experiment.",
+    "action": "Register path-to-events-to-grid synthetic protocol using existing CS01/PF02 math; rights/provenance and physical gates remain open",
     "large_port_allowed": false,
-    "mode": "PRODUCT_PREREQUISITE_EVIDENCE_ONLY",
-    "phase": "PF-03 / PF-01"
+    "mode": "SYNTHETIC_REGISTRATION_ONLY",
+    "phase": "HS-02"
   },
   "open_decisions": [
     {
@@ -259,6 +271,7 @@
       "evidence": "docs/rust/PRODUCT-COMPACT-BINDING.json",
       "id": "CS01-BINDING",
       "owner": "engineering and rights holder evidence",
+      "public_review_evidence": "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json",
       "remaining": [
         "code/weights rights",
         "checkpoint training provenance/independence"
@@ -438,7 +451,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "7cd081f15f7e5a77af59f5bbd61c0158c65ac171",
+  "source_baseline": "23827c5936e5670a7b5a178533fc07e3ac0acd69",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -515,6 +528,13 @@
       "source": "Direct user request: registration of narrow synthetic experiment and decoder implementation",
       "status": "CONFIRMED",
       "value": "SYNTHETIC_HOST_ONLY_NO_NEURAL_CORPUS_DEVICE_PRODUCT_ACTIVATION"
+    },
+    {
+      "date": "2026-10-26",
+      "id": "PUBLIC-REVIEW-AND-HS02-REGISTRATION",
+      "source": "User accepted recommendation to inspect public rights/provenance and prepare separate path-to-events/grid registration",
+      "status": "CONFIRMED",
+      "value": "PUBLIC_REVIEW_AND_SYNTHETIC_REGISTRATION_ONLY"
     }
   ]
 }

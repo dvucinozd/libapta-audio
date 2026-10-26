@@ -6,6 +6,18 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
+**Current next: register the HS-02 synthetic path-to-events/grid protocol.** The
+[public rights/provenance review](PRODUCT-COMPACT-RIGHTS-REVIEW.md)
+([receipt](PRODUCT-COMPACT-RIGHTS-REVIEW.json)) confirms the pinned BeatNet+ head
+and checkpoint blob are unchanged. No affirmative code/checkpoint grant or
+checkpoint-specific training manifest was found in the examined public evidence.
+License issue4 is open with two non-owner comments; publisher article terms and
+reported training families do not close those exact-artifact gates. No weight,
+model, audio, formal holdout or device was opened/executed; no external message
+was sent. LICENSE_UNRESOLVED, INDEPENDENCE_UNRESOLVED and PF01
+NEEDS_MEASUREMENT remain open. The owner authorized this public review and a
+separate mathematical synthetic registration; product PF04 remains NOT_RUN.
+
 **HS-01 is complete: synthetic host evidence only.** The
 [registered protocol](PRODUCT-HOST-HMM-PROTOCOL.md),
 [implementation receipt](PRODUCT-HOST-HMM-IMPLEMENTATION.json) and

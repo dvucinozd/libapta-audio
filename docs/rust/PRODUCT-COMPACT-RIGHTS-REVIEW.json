@@ -1,0 +1,254 @@
+{
+  "branch": "rust-rewrite",
+  "checkpoint": {
+    "bytes": 3072890,
+    "framework_tensor_or_model_loading": false,
+    "git_blob": "7aefd5e56ef65482be6f671c3cca8de457dad102",
+    "path": "src/BeatNetPlus/models/generic_main_weights.pt",
+    "revision": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+    "sha256": "5bbae630b4112f3c1193654e3dbc946b850caa06a2a82e10e8de9e48bb673519"
+  },
+  "checks": {
+    "Git_tree_and_blob_identity": "PASS",
+    "README_and_config_original_sha256_match_frozen_binding": "PASS",
+    "candidate_or_musical_test_run": "NOT_RUN",
+    "issue_comments_complete": "PASS",
+    "source_manifest_bound": "PASS"
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.md",
+    "sha256": "42b58af078952ff7a9c50d5ad900b34d56d4a3968a7379fd341c73550f9c9aa4"
+  },
+  "execution_this_step": {
+    "code_or_defaults_changed": false,
+    "external_messages_sent": false,
+    "formal_holdouts_opened": false,
+    "model_corpus_or_device_executed": false,
+    "packages_installed": false,
+    "release_created": false,
+    "weight_bytes_opened": false
+  },
+  "format": "libapta-compact-rights-review-1",
+  "frozen_binding": {
+    "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
+    "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
+  },
+  "needed_evidence": {
+    "provenance": [
+      "checkpoint-bound training run/code/config/initialization lineage",
+      "actual dataset versions and splits including validation/test/selection exposure",
+      "private recording/performance membership and duplicate checks for proposed independent cohort"
+    ],
+    "rights": [
+      "rights holder and affirmative grant scoped to code revision and exact checkpoint digest",
+      "intended firmware use/modification/redistribution terms and obligations"
+    ]
+  },
+  "next": "Register HS-02 synthetic path-to-events-to-grid only; no model/corpus/P4 scope expansion",
+  "observed_default_head": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+  "observed_utc": "2026-10-26T20:11:45.502819+00:00",
+  "product_gates": {
+    "PF01": "NEEDS_MEASUREMENT_BOARD_UNAVAILABLE",
+    "PF04": "NOT_RUN",
+    "large_port_allowed": false,
+    "stable_version": "1.0.1"
+  },
+  "provenance": {
+    "GTZAN_local_status": "SPENT_EXPOSED_DEVELOPMENT_NOT_FRESH_ACCEPTANCE",
+    "actual_checkpoint_training_run_bound": false,
+    "actual_training_membership_verified": false,
+    "declared_test_dataset": "GTZAN",
+    "declared_train_validation_families": [
+      "BALLROOM",
+      "HAINSWORTH",
+      "MUSDB18",
+      "ROCK_CORPUS",
+      "RWC_POP",
+      "RWC_JAZZ",
+      "RWC_ROYALTY_FREE",
+      "URSING"
+    ],
+    "issue1_owner_comment_establishes": "availability only",
+    "issue2_owner_comment_establishes": "planned annotation availability only",
+    "paper": {
+      "README_citation_metadata_match": false,
+      "authors": [
+        "Mojtaba Heydari",
+        "Zhiyao Duan"
+      ],
+      "doi": "10.5334/tismir.198",
+      "publication_date": "2024-12-06",
+      "title": "BeatNet+: Real-Time Rhythm Analysis for Diverse Music Audio",
+      "training_claim_is_checkpoint_specific_manifest": false,
+      "url": "https://transactions.ismir.net/articles/10.5334/tismir.198"
+    },
+    "recording_performance_duplicates_checked": false,
+    "status": "INDEPENDENCE_UNRESOLVED"
+  },
+  "rights": {
+    "absence_is_not_proof_of_no_external_grant": true,
+    "affirmative_exact_artifact_grant_established": false,
+    "license_issue": {
+      "comments": 2,
+      "number": 4,
+      "owner_comments": 0,
+      "state": "open",
+      "url": "https://github.com/mjhydri/BeatNet-Plus/issues/4"
+    },
+    "named_license_notice_modelcard_paths": [],
+    "paper_CC_BY_4_0_is_exact_code_weights_grant": false,
+    "pinned_tree_entries": 36,
+    "pinned_tree_truncated": false,
+    "repo_api_license": null,
+    "repository_release_count": 0,
+    "setup_license_declaration": false,
+    "status": "LICENSE_UNRESOLVED"
+  },
+  "source_baseline": "23827c5936e5670a7b5a178533fc07e3ac0acd69",
+  "source_inspection": {
+    "file_manifest": {
+      "README.md": {
+        "bytes": 23590,
+        "sha256": "09dedda34e5c6b8b272099b7175987c35ffcb4711ab7776e1e1d1444a0e50c27"
+      },
+      "article.html": {
+        "bytes": 503604,
+        "sha256": "9999888e64415ee4238de9d0634f063b7e755f7dd110cf61db393d8667876080"
+      },
+      "generic.yaml": {
+        "bytes": 1970,
+        "sha256": "911a9d573ebc3eefba026fc88eac536d551d99bb808ad67e9ffb16b53f08571b"
+      },
+      "issue-1-comments.json": {
+        "bytes": 11487,
+        "sha256": "2a509360ba25a9c088b4814891611af0ba61d813503732e727860c0bcc69b89a"
+      },
+      "issue-2-comments.json": {
+        "bytes": 4729,
+        "sha256": "d83989dd07e4523fc0c239bc233c7ef280a4c8644e99ca78bb1c7f5c585e0a9c"
+      },
+      "issue-4-comments.json": {
+        "bytes": 3202,
+        "sha256": "eeccc87020d29747a53c9b60d746ab0ee1dd34472f7478c32827b36c2866a4e4"
+      },
+      "issues.json": {
+        "bytes": 13629,
+        "sha256": "266678d17adb87c91ebf177d746f29d94a9bb3cb21368f04618866eab336e69a"
+      },
+      "main-branch.json": {
+        "bytes": 4748,
+        "sha256": "997d5241cb4f8aea045b7ce162190859327294ea30cdcb864c1e6f85bb3c3276"
+      },
+      "pinned-tree.json": {
+        "bytes": 8963,
+        "sha256": "20679a196c06d43086fe22fd2050a356c2d9fbafc8dd576c3fc472d020b83ece"
+      },
+      "releases.json": {
+        "bytes": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      "repository.json": {
+        "bytes": 5279,
+        "sha256": "0c1be2d1380f760964c6343f19b127ae00c13fe93503463f981023ae01404bdc"
+      },
+      "setup.py": {
+        "bytes": 1015,
+        "sha256": "40c8586f6be7579cd4339dfe7a3f7608b134574b54b9846a07d9fed8ad08725f"
+      },
+      "sources.json": {
+        "bytes": 2567,
+        "sha256": "83773684b4558959ca0ae08f792d195ee7b7c3956ef8601629a5125482f17daa"
+      }
+    },
+    "interpretation": "bounded public evidence review, no exhaustive private agreement search",
+    "public_issues_pagination": "4 entries <100; issue1/2/4 comments match API totals",
+    "raw_git_blob_checks": {
+      "README.md": {
+        "git_blob": "2752af8ee9572b8e3ec8ba79117f261f979b71f8",
+        "original_bytes": 23590,
+        "original_sha256": "09dedda34e5c6b8b272099b7175987c35ffcb4711ab7776e1e1d1444a0e50c27",
+        "path": "README.md",
+        "snapshot_variant_matching_blob": "snapshot"
+      },
+      "generic.yaml": {
+        "git_blob": "4374cb21b0a5b674aeece17d01d16472da285a28",
+        "original_bytes": 1969,
+        "original_sha256": "c8a958e57d46eda9b4df8be580013b5a8062cad0275063bd2583f93c38294f93",
+        "path": "src/BeatNetPlus/configs/generic.yaml",
+        "snapshot_variant_matching_blob": "without_added_final_LF"
+      },
+      "setup.py": {
+        "git_blob": "575b897549b96ff57df0024d9cf74fb086f12eec",
+        "original_bytes": 1014,
+        "original_sha256": "b5efe6a56d1fafd24dd8e1b507c8bb294bc87c35362844e76c08d14b2d4ffeab",
+        "path": "setup.py",
+        "snapshot_variant_matching_blob": "without_added_final_LF"
+      }
+    },
+    "root": "D:/AI/LIBAPTA/outputs/product-compact-rights-review-20261026",
+    "sources": [
+      {
+        "name": "repository.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus"
+      },
+      {
+        "name": "main-branch.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/branches/main"
+      },
+      {
+        "name": "pinned-tree.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/git/trees/bb90eb0a9065b101a4b4c4cb2b2061950266cb4b?recursive=1"
+      },
+      {
+        "name": "README.md",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://raw.githubusercontent.com/mjhydri/BeatNet-Plus/bb90eb0a9065b101a4b4c4cb2b2061950266cb4b/README.md"
+      },
+      {
+        "name": "setup.py",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://raw.githubusercontent.com/mjhydri/BeatNet-Plus/bb90eb0a9065b101a4b4c4cb2b2061950266cb4b/setup.py"
+      },
+      {
+        "name": "generic.yaml",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://raw.githubusercontent.com/mjhydri/BeatNet-Plus/bb90eb0a9065b101a4b4c4cb2b2061950266cb4b/src/BeatNetPlus/configs/generic.yaml"
+      },
+      {
+        "name": "issues.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/issues?state=all&per_page=100"
+      },
+      {
+        "name": "releases.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/releases?per_page=100"
+      },
+      {
+        "name": "issue-1-comments.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/issues/1/comments?per_page=100"
+      },
+      {
+        "name": "issue-2-comments.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/issues/2/comments?per_page=100"
+      },
+      {
+        "name": "issue-4-comments.json",
+        "transport": "GitHub connector content snapshot; UTF-8 with final LF",
+        "url": "https://api.github.com/repos/mjhydri/BeatNet-Plus/issues/4/comments?per_page=100"
+      },
+      {
+        "name": "article.html",
+        "transport": "PowerShell Invoke-WebRequest raw HTML after browser inspection",
+        "url": "https://transactions.ismir.net/articles/10.5334/tismir.198"
+      }
+    ]
+  },
+  "status": "PUBLIC_REVIEW_COMPLETE_RIGHTS_AND_PROVENANCE_UNRESOLVED"
+}
