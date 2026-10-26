@@ -6,6 +6,23 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
+**Current next: implement registered HS-04 synthetic frontend.** See the
+[protocol](PRODUCT-HOST-FRONTEND-PROTOCOL.md), [machine registration](PRODUCT-HOST-FRONTEND-PROTOCOL.json)
+and [public mathematical cases](fixtures/product-host-frontend-hs04/cases.json).
+The registration freezes centered[-882,882) geometry,FFT1764 radices2/2/3/3/7/7,
+complex64 projection before magnitude,144 log bands plus lag1 positive differences,
+streaming/EOF/row-time/history/cancel contracts and independent binary-pipe checking.
+The derived FIR rounding envelope is<1.948071;new amplitude2 probes keep the same
+CS-02 tolerances. No clipping or implicit extension of older evidence.118 public
+assets/929484B cover10 analytic/direct FFT probes,20 short streams and4 full
+reference class schedules. Independent140 Decimal FFT anchors,93 selected bands,
+120000 reference rows and hash/shape/finite/coordinate checks pass.
+**Candidate implementation/tests/measurements are NOT_RUN.** Follow the six code
+paths and ordered handoff;tests/lints plus implementation commit/push precede the
+seven fixed clean measured cases and separate aggregate result/push. HS03 and all
+old core/default/consumer/wire sources remain immutable. This synthetic addendum
+does not close model rights/provenance,PF01 physical budgets or product PF04.
+
 **HS-03 is complete: synthetic host bounded resampler evidence only.** See the
 [protocol](PRODUCT-HOST-RESAMPLER-PROTOCOL.md),
 [implementation](PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.md) and

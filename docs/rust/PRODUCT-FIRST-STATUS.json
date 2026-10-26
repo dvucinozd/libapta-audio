@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-03",
-  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
-  "active_phase_verdict": "HS03_SYNTHETIC_HOST_PASS_ONLY",
+  "active_phase": "HS-04",
+  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
+  "active_phase_verdict": "SYNTHETIC_FRONTEND_REGISTRATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS03 six fixed cases PASS:107 observations,exact scalar output/input hashes and full13230000-output counts;58 artifacts/406115B and165 parent bindings audited. Six new debug/release tests with6120 schedules each,16 applicable controls pass;five C-oracle-dependent controls ignored/NOT_RUN.",
+  "checks": "HS04 static registration:10 analytic/direct FFT probes,20 short streams/54 feature rows,4 compressed full references;118 finite hash-bound assets/929484B. Independent140 Decimal complex anchors,93 filter-band anchors,120000 reference rows and FIR envelope proof pass. Candidate/FFT implementation/tests/measurements NOT_RUN.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,7 +92,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "registered synthetic host bounded resampler parity/resource/cancel only; no frontend/neural/musical/product/P4 qualification",
+  "evidence_level": "public mathematical frontend registration and static source inspection only",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -101,6 +101,8 @@
     "HS02_synthetic_measured_run_complete": true,
     "HS03_clean_measured_run_complete": true,
     "HS03_synthetic_preflight_executed": true,
+    "HS04_candidate_executed": false,
+    "HS04_registration_only": true,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
     "experimental_host_decoder_added": true,
@@ -245,8 +247,25 @@
       "source_baseline": "2f92972ba1147a084c442bc8d352d8cc1ea990fa",
       "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
       "step": "implementation preflight"
+    },
+    {
+      "checkpoint": "99f6ba6a5e57c5dc60eb536c699ec5d30623fbe5",
+      "phase": "HS-03",
+      "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+      "verdict": "HS03_SYNTHETIC_HOST_PASS_ONLY"
     }
   ],
+  "host_frontend_experiment": {
+    "candidate_tests_or_measurement": "NOT_RUN",
+    "id": "HS-04",
+    "new_public_asset_files": 118,
+    "primitive_cases": 10,
+    "product_gates_bypassed": false,
+    "protocol_path": "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.json",
+    "protocol_sha256": "27cb6fe41fe4f94d22dbeac65c778feef0f2094c42aee267108d80ac17112b1f",
+    "short_stream_cases": 20,
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "host_grid_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "fixture_path": "docs/rust/fixtures/product-host-grid-hs02/cases.json",
@@ -307,10 +326,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Before further code,register centered Hann/FFT1764/filter/log/difference frontend with actual unclipped FIR-output amplitude envelope and analytic/DFT oracles. Neural rights/provenance and exact-board physical budgets remain open.",
+    "action": "Implement exact HS04 bounded centered frontend and explicit-stack mixed-radix kernel,then registered tests/lints/implementation commit-push before seven-case clean measurement",
     "large_port_allowed": false,
-    "mode": "SEPARATE_SYNTHETIC_FRONTEND_REGISTRATION_ONLY",
-    "phase": "FRONTEND-REGISTRATION / PF-03 / PF-01"
+    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "phase": "HS-04"
   },
   "open_decisions": [
     {
@@ -545,7 +564,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "837b6acd5d366cb00627053a104e3762b09316e1",
+  "source_baseline": "99f6ba6a5e57c5dc60eb536c699ec5d30623fbe5",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
@@ -636,6 +655,13 @@
       "source": "Direct user acceptance of registration, implementation and synthetic verification of bounded resampler",
       "status": "CONFIRMED",
       "value": "SYNTHETIC_RESAMPLER_ONLY_NO_MODEL_DEVICE_OR_PRODUCT_ACTIVATION"
+    },
+    {
+      "date": "2026-10-26",
+      "id": "HS04-REGISTRATION",
+      "source": "Direct user continuation of the next separate frontend registration after HS03",
+      "status": "CONFIRMED",
+      "value": "SYNTHETIC_FRONTEND_REGISTRATION_ONLY_NO_MODEL_DEVICE_OR_PRODUCT_ACTIVATION"
     }
   ]
 }
