@@ -6,19 +6,33 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: clean-source HS-03 measurement after implementation commit/push.**
-The [protocol](PRODUCT-HOST-RESAMPLER-PROTOCOL.md),
+**HS-03 is complete: synthetic host bounded resampler evidence only.** See the
+[protocol](PRODUCT-HOST-RESAMPLER-PROTOCOL.md),
 [implementation](PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.md) and
-[receipt](PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json) bind the65-sample ring,
-F64 CS-FIR65, normalized mono/stereo input, exact EOF/phase counts, bounded work,
-private mid-tap state and terminal cancel. Six new tests pass debug/release,
-including6120 fixture/schedule combinations per profile. Waveform6,
-waveform_result5 and default-context5 controls pass; five existing C-oracle-
-dependent tests stay ignored/NOT_RUN. fmt/focused Clippy/release/Python and four
-development enforcement probes pass. Clean six-case measurement is pending.
-Commit/push implementation before that run, then publish a separate audited result
-checkpoint. This host-only work leaves defaults/core/wire/consumer/HS01/HS02,
-VERSION1.0.1 and all model/physical/product gates unchanged.
+[result](PRODUCT-HOST-RESAMPLER-RESULT.md) ([JSON](PRODUCT-HOST-RESAMPLER-RESULT.json)).
+The six fixed cases ran once from clean commit
+`837b6acd5d366cb00627053a104e3762b09316e1`, with107 validated observations
+(102 short cases,four600s streams,cancel). Full source/input/output hashes match
+frozen scalar references; each600s stream emits exactly13230000 samples with
+859950000 MACs. Host driver wall was3.880–4.229s including generated source and
+hashing overhead,not frontend/neural/audio-codec work. Ring260B,tables76960B;
+host Session368B,Driver5856B including4096/1024B stream buffers. No full-song PCM
+or output retained. Asynchronous cancellation was0.002790ms in Convolve; lexical
+scope end0.000133ms is not heap/device reclamation. All caps unchanged;58 files/
+406115B,165 parent bindings and loaded runtimes/toolchain were audited.
+
+Six new tests pass debug/release with6120 fixture/schedule combinations each.
+Waveform6,waveform_result5,default-context5 controls pass;five C-oracle-dependent
+checks stay ignored/NOT_RUN. fmt/focused Clippy/build/Python pass. All default/
+core/consumer/wire/HS01/HS02 sources and VERSION1.0.1 remain unchanged.
+
+**Next software step: separate synthetic frontend registration before code.**
+Specify centered Hann/FFT1764/filter/log/difference geometry,analytic/DFT oracles
+and the actual unclipped FIR-output amplitude envelope; CS-02's FFT bound for
+windowed PCM in[-1,1] must not silently cover larger FIR outputs. No frontend,
+FFT,model,music,device,provider or release ran. Model rights/training independence
+and PF-01 exact-device budgets stay open; board unavailable,revision unobserved.
+Product PF-04 remains NOT_RUN,no large port enabled,H1 deferred.
 
 **HS-02 is complete: synthetic host postprocessor evidence only.** See the
 [protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [implementation](PRODUCT-HOST-GRID-IMPLEMENTATION.md)

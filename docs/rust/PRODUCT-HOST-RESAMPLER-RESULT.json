@@ -1,0 +1,307 @@
+{
+  "attempts": {
+    "clean_measured_runs": 1,
+    "development_repairs": "lexical stack scope instead of explicit non-Drop drop; f32 extrema compared after JSON parsing; no algorithm/filter/tolerance/cap changes",
+    "measured_retry": false,
+    "registered_parameters_changed": false
+  },
+  "branch": "rust-rewrite",
+  "cases": [
+    {
+      "case": "fixtures",
+      "child_cpu_seconds": 0.007526,
+      "child_peak_rss_kib": 18708,
+      "fixture_maximum": 1.1351769,
+      "fixture_minimum": -1.1351769,
+      "max_polled_process_rss_kib": 20164,
+      "observations": 102,
+      "status_counts": {
+        "Done": 98,
+        "NoEvidence": 4
+      },
+      "supervised_wall_seconds": 2.6800558140000135,
+      "worker_runtime_binding_sha256": "01f862f24b8cfa39e3f2d2ea94fcec1aa9b34f3987bf7b9527350b9227104c7c",
+      "worker_runtime_files": 131,
+      "worker_wall_seconds": 1.8405447590000108
+    },
+    {
+      "case": "full44100-mono",
+      "child_cpu_seconds": 3.797569,
+      "child_peak_rss_kib": 18832,
+      "construction_seconds": 4.09e-07,
+      "driver_wall_seconds": 3.880181285,
+      "final_certificate": true,
+      "first_output_source_frames": 33,
+      "id": "full44100-mono",
+      "input_sha256": "73dc1476731e9b814bdbec142814bc8ff5127d749426fce5b052e2e2632d28aa",
+      "macs": 859950000,
+      "max_polled_process_rss_kib": 19100,
+      "max_step_seconds": 0.000262831,
+      "maximum": 0.97837085,
+      "minimum": -0.97837085,
+      "observations": 1,
+      "output_count": 13230000,
+      "output_sha256": "e3b07d8b5794c8dd38781a4d7a3d59364897dcb2b494784811dc2efffca8cafe",
+      "source_frames": 26460000,
+      "status": "Done",
+      "step_seconds": 3.8701054839992572,
+      "supervised_wall_seconds": 4.636531371999979,
+      "units": 912870000,
+      "worker_runtime_binding_sha256": "01f862f24b8cfa39e3f2d2ea94fcec1aa9b34f3987bf7b9527350b9227104c7c",
+      "worker_runtime_files": 131,
+      "worker_wall_seconds": 4.01866804499997
+    },
+    {
+      "case": "full44100-stereo",
+      "child_cpu_seconds": 4.177227,
+      "child_peak_rss_kib": 18708,
+      "construction_seconds": 4.83e-07,
+      "driver_wall_seconds": 4.229067654,
+      "final_certificate": true,
+      "first_output_source_frames": 33,
+      "id": "full44100-stereo",
+      "input_sha256": "61b9b2802000dfd35f91cb2890e1a7c7eee20345bec958f3d7ad5fe41336413a",
+      "macs": 859950000,
+      "max_polled_process_rss_kib": 19220,
+      "max_step_seconds": 0.004337125,
+      "maximum": 0.9006496,
+      "minimum": -0.95419824,
+      "observations": 1,
+      "output_count": 13230000,
+      "output_sha256": "ffc7dcaef7d90009f1a14a62be05155a26cb1e7f9e84bebf8a297a0259e0de75",
+      "source_frames": 26460000,
+      "status": "Done",
+      "step_seconds": 4.21843144299994,
+      "supervised_wall_seconds": 5.190521462999982,
+      "units": 912870000,
+      "worker_runtime_binding_sha256": "01f862f24b8cfa39e3f2d2ea94fcec1aa9b34f3987bf7b9527350b9227104c7c",
+      "worker_runtime_files": 131,
+      "worker_wall_seconds": 4.430880772000023
+    },
+    {
+      "case": "full48000-mono",
+      "child_cpu_seconds": 3.859533,
+      "child_peak_rss_kib": 18812,
+      "construction_seconds": 4.28e-07,
+      "driver_wall_seconds": 3.9141150810000003,
+      "final_certificate": true,
+      "first_output_source_frames": 33,
+      "id": "full48000-mono",
+      "input_sha256": "6e0c172eb3090fd6b946da6864a87fb3a2d46b5b75d729a70f6c4dc30c11118f",
+      "macs": 859950000,
+      "max_polled_process_rss_kib": 19748,
+      "max_step_seconds": 0.000326092,
+      "maximum": 0.995804,
+      "minimum": -0.99579656,
+      "observations": 1,
+      "output_count": 13230000,
+      "output_sha256": "2b2cd0fae09548fd34b3bafcba8e4a0487cf9ceb9b0052ad805344d13f141969",
+      "source_frames": 28800000,
+      "status": "Done",
+      "step_seconds": 3.9051424289998926,
+      "supervised_wall_seconds": 5.003625682999996,
+      "units": 915210000,
+      "worker_runtime_binding_sha256": "01f862f24b8cfa39e3f2d2ea94fcec1aa9b34f3987bf7b9527350b9227104c7c",
+      "worker_runtime_files": 131,
+      "worker_wall_seconds": 4.226095278999992
+    },
+    {
+      "case": "full48000-stereo",
+      "child_cpu_seconds": 4.073343,
+      "child_peak_rss_kib": 18652,
+      "construction_seconds": 4.25e-07,
+      "driver_wall_seconds": 4.11555405,
+      "final_certificate": true,
+      "first_output_source_frames": 33,
+      "id": "full48000-stereo",
+      "input_sha256": "7f87fc2f505eb85365284a1c8b754c25312068742cfd0e0cb7f1912f086cca9c",
+      "macs": 859950000,
+      "max_polled_process_rss_kib": 19888,
+      "max_step_seconds": 0.000265721,
+      "maximum": 0.84913,
+      "minimum": -0.8943256,
+      "observations": 1,
+      "output_count": 13230000,
+      "output_sha256": "eb57635ee154a825831e6f4954806291f178b5604788db3ba7677150b1f09871",
+      "source_frames": 28800000,
+      "status": "Done",
+      "step_seconds": 4.106904144001085,
+      "supervised_wall_seconds": 5.056224717999953,
+      "units": 915210000,
+      "worker_runtime_binding_sha256": "01f862f24b8cfa39e3f2d2ea94fcec1aa9b34f3987bf7b9527350b9227104c7c",
+      "worker_runtime_files": 131,
+      "worker_wall_seconds": 4.527254950999975
+    },
+    {
+      "cancel_request_to_return_ms": 0.00279,
+      "cancel_seconds": 2.79e-06,
+      "case": "cancel",
+      "child_cpu_seconds": 0.012216,
+      "child_peak_rss_kib": 18724,
+      "drop_seconds": 1.33e-07,
+      "final_certificate": false,
+      "id": "cancel",
+      "input_sha256": "ceb807b8040f5a6c304b7cb6fe41680ff5b174d78cff665647121301fa7803b2",
+      "macs": 2245239,
+      "max_polled_process_rss_kib": 19676,
+      "observations": 1,
+      "output_count": 34542,
+      "output_sha256": "f73dfe10ccabbd26c3e39b4074ce5f34420c8b6085fe42d533b8df7010674ede",
+      "phase_at_cancel": "Convolve",
+      "scope_end_ms": 0.000133,
+      "source_frames": 75226,
+      "status": "Cancelled",
+      "supervised_wall_seconds": 0.8817783009999403,
+      "units": 2389550,
+      "worker_runtime_binding_sha256": "01f862f24b8cfa39e3f2d2ea94fcec1aa9b34f3987bf7b9527350b9227104c7c",
+      "worker_runtime_files": 131,
+      "worker_wall_seconds": 0.24243652999996357
+    }
+  ],
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "761c721685e0785c85542f31c9c1590bac4e54577a294d7268bd90d09456b581",
+    "rust/runtime/src/bin/apta-compact-resampler-synthetic.rs": "05cc59b2033ff548f768e273bc52901a12157984ba0d3b63c744a7f52e936dff",
+    "rust/runtime/src/compact_resampler.rs": "2f1232b9cc1a013e51a4ecc8f2f926c309c4dff760da69851a61c96fe76b06b7",
+    "rust/runtime/src/lib.rs": "cd4412104ded3e299d2d84b79683b1fbf5250378cc60c3b4f287325420ee8477",
+    "rust/runtime/tests/compact_resampler.rs": "ec8b3dd79eff4a0550ce6a0109110ebc7beb8056ee88f6ba8ca479d00860cbd3",
+    "tools/apta_compact_resampler_synthetic.py": "25dfe0d495fbca0c5546d47380c1b0502f6f50de7baf66958a47573b62892899"
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-RESAMPLER-RESULT.md",
+    "sha256": "73f3e1ad6e146841feb5df1f238ec0c81c2ee2c5932674948e8684be9ae0a05f"
+  },
+  "enforcement": {
+    "address_space": "REFUSED_AS_EXPECTED",
+    "output": "REFUSED_AS_EXPECTED",
+    "rss": "REFUSED_AS_EXPECTED",
+    "wall": "REFUSED_AS_EXPECTED"
+  },
+  "executable": {
+    "path": "/home/daniel/libapta-hs03-build/release/apta-compact-resampler-synthetic",
+    "sha256": "7fac956c0b8a072be2c7173b1094baaba6875e743b0d45584b2125dfc2b4d1d2"
+  },
+  "external_audit": {
+    "bindings_checked": 165,
+    "file_count": 58,
+    "output_bytes": 406115,
+    "path": "D:/AI/LIBAPTA/outputs/hs03-measured-20261026-audit.json",
+    "sha256": "07751585efddf1916c3276b837c80aa8494601eaf0900225524b58e7c5254c77",
+    "status": "PASS"
+  },
+  "external_output": "D:/AI/LIBAPTA/outputs/hs03-measured-20261026",
+  "external_result_sha256": "0454ab1b4193fbe1c55917cecdf3eced8e81f0f0fbaf73a2cdca7ed680584d4f",
+  "fixtures": {
+    "cases": 102,
+    "path": "docs/rust/fixtures/product-host-resampler-hs03/cases.json",
+    "sha256": "7c34cf873eec465b9ef6395559aea8813d3db1df7bac2971a2d0c52774c474b0"
+  },
+  "format": "libapta-host-resampler-aggregate-result-1",
+  "host_value_and_buffer_sizes": {
+    "driver_value_bytes": 5856,
+    "input_buffer_bytes": 4096,
+    "output_buffer_bytes": 1024,
+    "ring_bytes": 260,
+    "session_value_bytes": 368,
+    "table_bytes": 76960
+  },
+  "id": "HS-03",
+  "implementation": {
+    "path": "docs/rust/PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json",
+    "sha256": "e4ba271e5eb17e83e84cd2857d6c2df46c812171a1bff94a128fe59e881e8703"
+  },
+  "limits": {
+    "address_space_bytes": 134217728,
+    "cpu_seconds": 60,
+    "host_cancel_request_to_return_ms": 50,
+    "output_bytes": 1048576,
+    "rss_kib": 65536,
+    "wall_seconds": 90
+  },
+  "negative_rss_allocating_child_kib": 46884,
+  "parent_bindings_sha256": "d67304be83b617952fad399c863d538d6ac616c89dee655b158b889ffaef5e2d",
+  "parent_runtime_files": 131,
+  "protocol": {
+    "path": "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json",
+    "sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4"
+  },
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "reference": {
+    "path": "docs/rust/fixtures/product-host-resampler-hs03/resampler_reference.py",
+    "sha256": "3db457d04ad8bc9b62859b9a51894dd3d632828fa60f465ce68180432191473c"
+  },
+  "remaining_gates": [
+    "separate frontend/FFT feature reference and signal-amplitude envelope registration before implementation",
+    "neural LICENSE_UNRESOLVED and INDEPENDENCE_UNRESOLVED",
+    "PF01 exact board RAM/PSRAM/storage/stack/placement/fragmentation/cleanup NEEDS_MEASUREMENT; JC1060P470C_I_W_Y unavailable; revision unobserved",
+    "full audio/frontend/neural/progress/native consumer pipeline and musical/physical qualification NOT_RUN",
+    "five existing C-oracle-dependent controls NOT_RUN"
+  ],
+  "scope": {
+    "cancel_scope_end_is_heap_reclamation": false,
+    "component_heap_allocations": 0,
+    "default_core_consumer_wire_HS01_HS02_changed": false,
+    "driver_timing_includes_synthetic_source_generation_and_hashing": true,
+    "frontend_FFT_model_music_labels_training_or_device_executed": false,
+    "full_source_PCM_or_output_retained": false,
+    "musical_or_P4_qualification": false,
+    "normalized_input_no_output_clipping": true,
+    "product_PF04_complete": false,
+    "provider_or_release_activated": false,
+    "stable_version": "1.0.1",
+    "synthetic_host_only": true
+  },
+  "source_clean_at_run_start_and_finish": true,
+  "source_revision": "837b6acd5d366cb00627053a104e3762b09316e1",
+  "status": "HS03_SYNTHETIC_HOST_PASS_ONLY",
+  "tests": {
+    "cancel_phases": 3,
+    "default_context": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "context_busy_lifetime_matches_public_c needs APTA_C_CONTEXT_LIFETIME_ORACLE"
+    },
+    "fixture_schedules_per_profile": 6120,
+    "fmt": "PASS",
+    "focused_clippy_deny_warnings": "PASS",
+    "new_debug": {
+      "ignored": 0,
+      "passed": 6
+    },
+    "new_release": {
+      "ignored": 0,
+      "passed": 6
+    },
+    "python_compile": "PASS",
+    "release_build": "PASS",
+    "waveform": {
+      "ignored": 3,
+      "passed": 6,
+      "unrun": "C reference PCM formats/quantized columns/S32 near endpoints need APTA_C_WAVEFORM_ORACLE"
+    },
+    "waveform_result": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "c_reserialization_is_byte_exact needs APTA_C_CONTAINER_ORACLE"
+    }
+  },
+  "toolchain": {
+    "feature": "experimental-compact-resampler",
+    "tools": {
+      "cargo": {
+        "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "sha256": "841072d1d92f9e841d9ba5b0814182a0adf064acf4527cd120967b7bc49dcb66",
+        "version_verbose": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\nrelease: 1.95.0\ncommit-hash: f2d3ce0bd7f24a49f8f72d9000448f8838c4e850\ncommit-date: 2026-03-21\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.2 (sys:0.20.4 vendored)\nlibcurl: 8.15.0-DEV (sys:0.4.83+curl-8.15.0 vendored ssl:OpenSSL/3.5.4)\nssl: OpenSSL 3.5.4 30 Sep 2025\nos: Ubuntu 24.4.0 (noble) [64-bit]\n"
+      },
+      "rustc": {
+        "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "sha256": "bff349e72704ff70bc08a234a3847338e797065bbedde5e556808bc87b7bf7c6",
+        "version_verbose": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2\n"
+      }
+    }
+  },
+  "verification_tool": {
+    "path": "D:/AI/LIBAPTA/outputs/audit-hs03-and-write-report-20261026.py",
+    "sha256": "f549a60af209489bfcc628f3e67bd072d96ca743968a392e077e56169fb541a2"
+  }
+}

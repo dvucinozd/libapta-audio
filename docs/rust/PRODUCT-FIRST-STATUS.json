@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-03",
-  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
-  "active_phase_verdict": "SYNTHETIC_HOST_IMPLEMENTATION_ONLY",
+  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+  "active_phase_verdict": "HS03_SYNTHETIC_HOST_PASS_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS03 six new tests pass debug/release,6120 fixture/schedule combinations per profile; waveform6+waveform_result5+context5 controls pass;5 existing C-oracle-dependent tests ignored/NOT_RUN. fmt/focused Clippy/release/Python and generated fixture/enforcement preflight pass. Clean six-case measured run pending.",
+  "checks": "HS03 six fixed cases PASS:107 observations,exact scalar output/input hashes and full13230000-output counts;58 artifacts/406115B and165 parent bindings audited. Six new debug/release tests with6120 schedules each,16 applicable controls pass;five C-oracle-dependent controls ignored/NOT_RUN.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,14 +92,14 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "synthetic host resampler implementation/preflight only; no frontend/neural/product/musical/P4 qualification",
+  "evidence_level": "registered synthetic host bounded resampler parity/resource/cancel only; no frontend/neural/musical/product/P4 qualification",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
     "HS02_generated_preflight_only": false,
     "HS02_registration_only": false,
     "HS02_synthetic_measured_run_complete": true,
-    "HS03_clean_measured_run_complete": false,
+    "HS03_clean_measured_run_complete": true,
     "HS03_synthetic_preflight_executed": true,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
@@ -237,6 +237,14 @@
       "protocol_sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4",
       "status": "REGISTERED_NOT_IMPLEMENTED",
       "step": "registration"
+    },
+    {
+      "checkpoint": "837b6acd5d366cb00627053a104e3762b09316e1",
+      "implementation_sha256": "e4ba271e5eb17e83e84cd2857d6c2df46c812171a1bff94a128fe59e881e8703",
+      "phase": "HS-03",
+      "source_baseline": "2f92972ba1147a084c442bc8d352d8cc1ea990fa",
+      "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+      "step": "implementation preflight"
     }
   ],
   "host_grid_experiment": {
@@ -283,7 +291,7 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "host_resampler_experiment": {
-    "candidate_or_measured_execution": "GENERATED_PREFLIGHT_ONLY",
+    "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "id": "HS-03",
     "implementation": {
       "path": "docs/rust/PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json",
@@ -292,13 +300,17 @@
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json",
     "protocol_sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4",
-    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
+    "result": {
+      "path": "docs/rust/PRODUCT-HOST-RESAMPLER-RESULT.json",
+      "sha256": "b3f99ac9b189bca82b1eb51d749a22ae2961d5812b5779ea6c99e5b984d2fd6c"
+    },
+    "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Commit/push implementation; run six fixed HS03 cases from exact clean implementation, audit and publish separate result checkpoint",
+    "action": "Before further code,register centered Hann/FFT1764/filter/log/difference frontend with actual unclipped FIR-output amplitude envelope and analytic/DFT oracles. Neural rights/provenance and exact-board physical budgets remain open.",
     "large_port_allowed": false,
-    "mode": "CLEAN_SYNTHETIC_HOST_MEASUREMENT_ONLY",
-    "phase": "HS-03"
+    "mode": "SEPARATE_SYNTHETIC_FRONTEND_REGISTRATION_ONLY",
+    "phase": "FRONTEND-REGISTRATION / PF-03 / PF-01"
   },
   "open_decisions": [
     {
@@ -533,7 +545,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "2f92972ba1147a084c442bc8d352d8cc1ea990fa",
+  "source_baseline": "837b6acd5d366cb00627053a104e3762b09316e1",
   "stable_version": "1.0.1",
   "user_decisions": [
     {
