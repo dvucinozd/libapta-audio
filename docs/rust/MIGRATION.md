@@ -19,7 +19,8 @@ reference class schedules. Independent140 Decimal FFT anchors,93 selected bands,
 120000 reference rows and hash/shape/finite/coordinate checks pass.
 **Candidate implementation/tests/measurements are NOT_RUN.** Follow the six code
 paths and ordered handoff;tests/lints plus implementation commit/push precede the
-seven fixed clean measured cases and separate aggregate result/push. HS03 and all
+six fixed clean measured cases and separate aggregate result/push (see the
+[count erratum](PRODUCT-HOST-FRONTEND-COUNT-ERRATUM.md)). HS03 and all
 old core/default/consumer/wire sources remain immutable. This synthetic addendum
 does not close model rights/provenance,PF01 physical budgets or product PF04.
 
