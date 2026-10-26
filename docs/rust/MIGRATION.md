@@ -6,7 +6,25 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: PF-03 static inventory only, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+**Current next: PF-03 direction decision and PF-01 physical budgets, under the [product-first plan](PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md).**
+PF-03 completes the permitted [whole-pipeline static inventory](PRODUCT-FEASIBILITY.md)
+and [source/arithmetic receipt](PRODUCT-FEASIBILITY.json) from source base
+`dee7214603939085d5d34d1919a4582395b08e6b`.
+The existing host retention strategy is NO_GO_AS_IS: one600s/22050Hz mono f32
+signal takes52920000bytes, exceeding the documented32MiB PSRAM before model
+costs. This does not prove a redesigned bounded implementation impossible.
+Beat This! source-default transformer scenarios are conditional: exact final0
+checkpoint hyperparameters and isolated model peak remain UNKNOWN. Eight pinned
+program sources and two weight metadata records were inspected; no weight
+contents, inference, corpus, package installation or new Rust/device test ran.
+BeatNet1/DD-05 remain rejected; CT-05 remains operationally INVALID, musical NOT_RUN.
+The recommendation is to specify one compact bounded P4 candidate in this repo,
+retaining Beat This! as offline reference. Owner direction is pending; no new
+model, training, quantization or offload is selected. PF-01 stays NEEDS_MEASUREMENT;
+PF-03 product GO, a large port and PF-04 implementation remain gated. H1 stays
+deferred until an explicit PF-04 need. Mutable progress is recorded in
+[PRODUCT-FIRST-STATUS.json](PRODUCT-FIRST-STATUS.json).
+
 PF-02 completes the [grid/meter/publication contract](PRODUCT-GRID-CONTRACT.md)
 and [machine receipt](PRODUCT-GRID-CONTRACT.json) from source base
 `2055487efbc07d865b499f24c69d8a829afaf30f` plus12 new public

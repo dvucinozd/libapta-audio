@@ -1,0 +1,314 @@
+{
+  "authority_sha256": {
+    "Cargo.lock": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4",
+    "Cargo.toml": "254f12ce8e669f450390141a042f22e2d15f5ae3a11890a52427ff31304ed9a1",
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/COUPLED-TIME-CT05-20261023.md": "b27c0b9d2129e1cb35d5ab6d90ca87e038d0932ebd4ecf959c4037231f0855e4",
+    "docs/rust/DENSE-DECODER-DD02-20261023.md": "09393185f64e3f3552f825510b500ea4dd89fd0f22370dbb129287581490e365",
+    "docs/rust/DENSE-DECODER-DD05-20261023.md": "cfaa37c35a0d2283fda5faec2b2baf187e68c154cb6c44cb736dc0770ab2a16d",
+    "docs/rust/NEURAL-DENSE-CAPTURE-PROTOCOL.json": "28490ab1983cac6abd011923c5f4e78d3e7bf5096fdb119a102c386e1de62685",
+    "docs/rust/NEURAL-DENSE-RESULT-20261023.md": "ac5afa7109a77fe70bdb8ea7cc84ae4b421e292934c0b49eb988d132024da2a8",
+    "docs/rust/NEURAL-REFERENCE-PREFLIGHT.md": "883c7d0c136ba9a98e80e74e00164db6e9cce33c53840e68e429f44add58f5d5",
+    "docs/rust/NEURAL-REFERENCE-PROTOCOL.json": "67969fb5d1402a1a8427f947dff286b5b71d49b5cb1c3fa482242727b5d26a2f",
+    "docs/rust/NEURAL-REFERENCE-RESULT-20261022.md": "2d95cce78c1be5852c08d317043af032b411ccb820caeb6b21b97f58573f4b80",
+    "docs/rust/PRODUCT-BUDGETS.json": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380",
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb",
+    "docs/rust/PRODUCT-SCOPE.md": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98",
+    "rust/Cargo.toml": "5091d08f3b87f602a3df6a42b2f1adfe0e1e215847b016f7a17073c5d7c4e1e6",
+    "rust/runtime/Cargo.toml": "4d1b6c172172b7ea624f5d488d6ec4175cc6c8d9b5d2c22e714cd5a605998f4c",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "tools/apta_1_1_neural_dense_capture.py": "de74c5dccab08018ee6ad70ec47024f96343c29c7baceb048ffd47721075c8ec",
+    "tools/apta_1_1_neural_inference.py": "8fafc7b22268700ee2b822c7877c47035597394b8d9571ae76243ad249bfd2d8",
+    "tools/apta_dense_decoder.py": "782e66ab56ec143d8214f73b74c181a3b2cd393fb56e3364b849cfd7c9c920ca",
+    "tools/apta_neural_dense.py": "8af046e7875c1c68b97c90573cc4f1945784c4737d79ec14e67ab71e83eb5a4f"
+  },
+  "checks": {
+    "checkpoint_contents_read": false,
+    "corpus_or_old_attempt_read": false,
+    "kind": "static source/metadata and independent arithmetic validation only",
+    "model_import_or_execution": false,
+    "new_C_Rust_or_inference_tests": false,
+    "packages_changed": false,
+    "upstream_programs_pinned_and_live_equal": 8
+  },
+  "consumer_snapshot": {
+    "checkout_pin_provider_unchanged": true,
+    "files_sha256": {
+      "docs/M1_RUST_ARCHITECTURE.md": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94",
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537",
+      "docs/boards/GUITION_HARDWARE_MATRIX_2026-10-20.md": "c4d0c37fed0f3ea05503e6115475299d6c92f688ee73e20d00df78367ec1ae96",
+      "firmware-rust/Cargo.toml": "f6b76653f701b759c4660bf8249f29409cf988f9b04f9b07c7650c8f8e79789f",
+      "firmware-rust/apps/m1-firmware/Cargo.toml": "2513266f133ed57bc800ec89a9ccd580f8011dc9c1522b5bc3fa9da08590645c",
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48"
+    },
+    "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+  },
+  "date": "2026-10-26",
+  "document": {
+    "path": "docs/rust/PRODUCT-FEASIBILITY.md",
+    "sha256": "d0d8322b41abf4bcd2223eb3f30d3a57a824fee730ecc3f40f619e9a8f09e745"
+  },
+  "evidence": {
+    "execution": "system Python stdlib AST/arithmetic and git source reads; no neural venv/model code execution",
+    "facts_sha256": "549b2eef6f799b0e09d367f30c6adc2a00c6e2c9e2a70fd9b274d52bff232105",
+    "inspector_path": "/mnt/d/AI/LIBAPTA/outputs/product-pf03-20261026/static_inventory.py",
+    "inspector_sha256": "e4a4721c990a808fc40c0037e0c7e715aa860070dfad19d670513aaa9d194bd8",
+    "root": "/mnt/d/AI/LIBAPTA/outputs/product-pf03-20261026"
+  },
+  "expert_specification_handoff": {
+    "hypothesis": "One compact bounded-context pipeline may retain timing/meter evidence while meeting product constraints; not proven",
+    "inputs": "PCM stream plus geometry/identity only; no labels or old correctness selectors",
+    "new_training_model_choice_or_corpus_run_in_this_step": false,
+    "outputs": "waveform/BPM/grid/meter as PF00/PF02; key/confidence deferred",
+    "product_limits": "600s input;5s useful/60s FINAL/50ms cancel;8 segments/3072 beats;actual memory reserves UNKNOWN",
+    "required_before_code": [
+      "one exact model/algorithm/backend and all dimensions/operators",
+      "bounded context/lifetimes/work/cancellation",
+      "exact source-rate mapping",
+      "decoder/ties/unknown/abstention and native representation contract",
+      "one public oracle/resource preflight",
+      "registered development inputs/exposure/no-regression criteria"
+    ]
+  },
+  "format": "libapta-product-feasibility-1",
+  "historical_verdicts": {
+    "BeatNet_model1": "REJECTED under original protocol",
+    "BeatThis_final0": "OFFLINE_REFERENCE_ONLY; event gates pass, projected promotion veto fails",
+    "CT05": "INVALID_OPERATIONAL_MUSICAL_NOT_RUN",
+    "DD05": "REJECTED",
+    "past_results_relabelled": false
+  },
+  "identities": {
+    "beat_this_revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+    "beatnet_revision": "81cedd4beeb7235262db80969a0c9ce9a48a0ed4",
+    "checkpoint_hparams_verified": false,
+    "current_weight_content_digests_verified": false,
+    "registered_BeatNet_weights_sha256": "619091bc317ca3e83b45591d46f6de3d5a41588bcb39fe9fe7be30cffa6aca84",
+    "registered_final0_sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331"
+  },
+  "owner_direction_decision": {
+    "alternative": "PHYSICAL_BUDGET_MEASUREMENT_BEFORE_NEW_CANDIDATE",
+    "id": "PF03-DIRECTION",
+    "implementation_allowed": false,
+    "model_selected": false,
+    "offload_allowed": false,
+    "recommended": "COMPACT_P4_CANDIDATE_SPECIFICATION_ONLY",
+    "status": "AWAITING_OWNER_DECISION",
+    "training_allowed": false
+  },
+  "phase": "PF-03",
+  "progression": {
+    "H1_deferred_until": "PF-04 explicit need",
+    "PF01_memory_gate": "NEEDS_MEASUREMENT",
+    "PF03_product_GO": false,
+    "large_product_port_allowed": false,
+    "next": "PF03 owner direction decision plus PF01 measurement; no automatic candidate code",
+    "real_execution_readiness": "NOT_READY",
+    "stable_version": "1.0.1"
+  },
+  "route_assessment": {
+    "any_redesigned_model_proven_impossible": false,
+    "as_is_reason": "A single whole600s resampled f32 signal already exceeds documented32MiB; original host graph/scope/progress/backend/quality not a qualified device path",
+    "current_path": "NO_GO_AS_IS",
+    "desktop_offload": "NOT_SELECTED_OUT_OF_SCOPE",
+    "new_runtime_H1_needed_now": false,
+    "recommendation_is_selected_model": false,
+    "recommended": "Specify one compact memory-bounded native P4 candidate/whole pipeline; retain BeatThis as reference",
+    "training_or_quantization_authorized": false
+  },
+  "source_base": "dee7214603939085d5d34d1919a4582395b08e6b",
+  "static_facts": {
+    "beat_this_source_defaults": {
+      "dropout": {
+        "frontend": 0.1,
+        "transformer": 0.2
+      },
+      "ff_mult": 4,
+      "head_dim": 32,
+      "n_layers": 6,
+      "partial_transformers": true,
+      "spect_dim": 128,
+      "stem_dim": 32,
+      "sum_head": true,
+      "transformer_dim": 512
+    },
+    "beatnet": {
+      "FP32_parameter_bytes": 1609300,
+      "musical_status": "REJECTED under original reference protocol; size does not reinstate candidate",
+      "parameters": 402325,
+      "recurrent_hidden_cell_f32_bytes": 2400
+    },
+    "checkpoint_hyperparameters": "UNKNOWN; source loader permits overrides; checkpoint not opened",
+    "conditional_default_architecture": {
+      "applies_to": "SOURCE DEFAULTS ONLY; exact final0 config unverified",
+      "attention_caveat": "Dense-score scenario only; optimized SDPA may avoid this allocation; not an irreducible lower bound",
+      "main_FF_FP32_resident_weight_bytes_lower_bound": 50331648,
+      "main_FF_MACs_per_1500_row_chunk": 18874368000,
+      "main_FF_logical_hidden_f32_bytes": 12288000,
+      "main_FF_weight_count_lower_bound": 12582912,
+      "naive_attention_score_f32_bytes": 144000000
+    },
+    "execution": {
+      "audio_labels_logits_or_old_attempts_opened": false,
+      "inference": false,
+      "model_imported": false,
+      "packages_changed": false,
+      "weights_contents_opened": false
+    },
+    "format": "libapta-pf03-static-facts-1",
+    "frontend_source_defaults": {
+      "device": "cpu",
+      "f_max": 11000,
+      "f_min": 30,
+      "hop_length": 441,
+      "log_multiplier": 1000,
+      "mel_scale": "slaney",
+      "n_fft": 1024,
+      "n_mels": 128,
+      "normalized": "frame_length",
+      "power": 1,
+      "sample_rate": 22050
+    },
+    "inspector_sha256": "e4a4721c990a808fc40c0037e0c7e715aa860070dfad19d670513aaa9d194bd8",
+    "old_DD05": {
+      "actual_registered_live_payload": 3564000,
+      "caveat": "Counterfactual unmodified table scaling; caps unchanged, algorithm remains REJECTED",
+      "hypothetical_600s_payload": 71280000,
+      "intervals": 66,
+      "maximum_meter": 4,
+      "rows_in_domain_30s": 1500,
+      "score_parent_bytes_per_cell": 9
+    },
+    "source_base": "dee7214603939085d5d34d1919a4582395b08e6b",
+    "source_bindings": {
+      "BeatNet/src/BeatNet/log_spect.py": {
+        "bytes": 2176,
+        "revision": "81cedd4beeb7235262db80969a0c9ce9a48a0ed4",
+        "sha256": "e8474d0e5eba0426a5bb0f8993c9c3cad0a9e659d936dd6d91b6aed92370db3a"
+      },
+      "BeatNet/src/BeatNet/model.py": {
+        "bytes": 2831,
+        "revision": "81cedd4beeb7235262db80969a0c9ce9a48a0ed4",
+        "sha256": "65d38b46a12cfa6f33ad09d0a2cbc2cfb628721816e4cf9bcbc2197adb98c971"
+      },
+      "BeatNet/src/BeatNet/particle_filtering_cascade.py": {
+        "bytes": 24072,
+        "revision": "81cedd4beeb7235262db80969a0c9ce9a48a0ed4",
+        "sha256": "1483c53fe972341ffebe4bdc305ce85c913d4ec357fc4aaece2424a9049b9c97"
+      },
+      "beat_this/beat_this/inference.py": {
+        "bytes": 12781,
+        "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+        "sha256": "ccccff4665399b931ebf181b73d264a6ad64fc1fe8acb4d3b950df825c47ce2d"
+      },
+      "beat_this/beat_this/model/beat_tracker.py": {
+        "bytes": 12582,
+        "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+        "sha256": "bfa2fd212b4d6bf00b007eb0e606a6b11f1f7fc44c95bd1121ef5d2a934a923f"
+      },
+      "beat_this/beat_this/model/postprocessor.py": {
+        "bytes": 8406,
+        "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+        "sha256": "431d6aeef41a8e9e9e63ee2577e895a5e214e0dbbcd2d505458cdfec02a611ee"
+      },
+      "beat_this/beat_this/model/roformer.py": {
+        "bytes": 4374,
+        "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+        "sha256": "c83fa0047fe726bbfdb33658f40a0f9e721c5796067bfda560092e5969d50722"
+      },
+      "beat_this/beat_this/preprocessing.py": {
+        "bytes": 1767,
+        "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+        "sha256": "5aaeefa811c2fd1340c8a45233af4c2e814720b65c2124e59e78538fed03b3bc"
+      }
+    },
+    "source_strategy_counterfactual_600_seconds": {
+      "caveat": "Planning only: current experiment caps remain 30 seconds; no cap extension or run",
+      "dense_two_channel_f32_payload_bytes": 240024,
+      "full_logmel_f32_bytes": 15360512,
+      "one_chunk_logmel_f32_bytes": 768000,
+      "registered_geometry_spect_rows": 30001,
+      "resampled_mono_f32_bytes": 52920000,
+      "source_mono_f32_48k_bytes": 115200000,
+      "source_stereo_f32_48k_bytes": 230400000
+    },
+    "target_documented_PSRAM_bytes": 33554432,
+    "weight_file_metadata": [
+      {
+        "bytes": 81058141,
+        "contents_opened": false,
+        "current_content_digest_verified": false,
+        "relative_path": "final0.ckpt"
+      },
+      {
+        "bytes": 1612179,
+        "contents_opened": false,
+        "current_content_digest_verified": false,
+        "relative_path": "BeatNet/src/BeatNet/models/model_1_weights.pt"
+      }
+    ]
+  },
+  "status": "STATIC_INVENTORY_COMPLETE_PRODUCT_DECISION_OPEN",
+  "whole_pipeline_inventory": [
+    {
+      "evidence": "bounded two-pass consumer WAV; compressed analysis bridge OPEN",
+      "layer": "input/codec",
+      "residual_requirement": "MP3/FLAC decoded-PCM streaming, identity/close cost and cancellation",
+      "status": "PARTIALLY_IMPLEMENTED"
+    },
+    {
+      "evidence": "230400000 B stereo f32 source;52920000 B resampled mono for600s",
+      "layer": "host whole-source storage",
+      "residual_requirement": "bounded lifetime and streaming redesign; old30s scope unchanged",
+      "status": "DERIVED_COUNTERFACTUAL_NO_GO_AS_IS"
+    },
+    {
+      "evidence": "22050Hz FFT1024/hop441/128 Slaney mel/log1p;full mel15360512 B under registered geometry",
+      "layer": "frontend",
+      "residual_requirement": "native kernels, precision/geometry parity, scratch/cache placement and largest block",
+      "status": "SOURCE_FACTS_PEAK_UNKNOWN"
+    },
+    {
+      "evidence": "filesystem size only; loader permits checkpoint hparam overrides; conditional source-default FF FP32 bound50331648 B",
+      "layer": "weights",
+      "residual_requirement": "scope-approved exact config/tensor metadata then backend/storage/lifetime accounting",
+      "status": "EXACT_CURRENT_CONFIG_UNKNOWN"
+    },
+    {
+      "evidence": "1500-row chunk; default FF hidden12288000 B; dense attention scenario144000000 B",
+      "layer": "activations/context",
+      "residual_requirement": "actual backend peak; no claim naive matrix is unavoidable",
+      "status": "CONDITIONAL_SCENARIOS_NOT_MEASURED"
+    },
+    {
+      "evidence": "core libm/DSP; no graph executor integrated for listed Torch ops",
+      "layer": "native inference backend",
+      "residual_requirement": "exact source/backend/operator support and bounded kernels after candidate decision",
+      "status": "NOT_INTEGRATED_IN_INSPECTED_PATH"
+    },
+    {
+      "evidence": "registered30s live payload3564000 B; counterfactual600s table71280000 B",
+      "layer": "decoder",
+      "residual_requirement": "accepted timing/meter algorithm; no cap bump or rejected-port rescue",
+      "status": "DD05_REJECTED"
+    },
+    {
+      "evidence": "PF02 contract; PF01 existing48kFPC32768 overlap accounting898890 B excludes model/other owners",
+      "layer": "output/consumer",
+      "residual_requirement": "full-source accepted algorithm, progress/final ownership,8/3072 caps and resource/cancel evidence",
+      "status": "EXISTING_MECHANICAL_SUPPORT_PRODUCT_GATES_OPEN"
+    },
+    {
+      "evidence": "5s/60s/50ms user targets; monolithic host calls do not establish them",
+      "layer": "latency/cancel",
+      "residual_requirement": "actual I-O/kernel/queue/close/cleanup and source-rate profile measurement",
+      "status": "P4_NOT_MEASURED"
+    },
+    {
+      "evidence": "documented capacity is not approved reserve; exact unit revision unobserved",
+      "layer": "whole-device peak/placement",
+      "residual_requirement": "internal/PSRAM/DMA reserves, stack/future/allocator/copies and fragmentation high-water",
+      "status": "PF01_NEEDS_MEASUREMENT"
+    }
+  ]
+}
