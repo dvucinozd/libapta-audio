@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-03",
-  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
-  "active_phase_verdict": "SYNTHETIC_REGISTRATION_ONLY",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+  "active_phase_verdict": "SYNTHETIC_HOST_IMPLEMENTATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS03 registration:102 public oracles; both frozen FIR assets matchCS02; compressed/direct4097 reference parity at both rates/channels; no candidate execution.",
+  "checks": "HS03 six new tests pass debug/release,6120 fixture/schedule combinations per profile; waveform6+waveform_result5+context5 controls pass;5 existing C-oracle-dependent tests ignored/NOT_RUN. fmt/focused Clippy/release/Python and generated fixture/enforcement preflight pass. Clean six-case measured run pending.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,13 +92,15 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "synthetic resampler registration and mathematical oracle calculation only",
+  "evidence_level": "synthetic host resampler implementation/preflight only; no frontend/neural/product/musical/P4 qualification",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
     "HS02_generated_preflight_only": false,
     "HS02_registration_only": false,
     "HS02_synthetic_measured_run_complete": true,
+    "HS03_clean_measured_run_complete": false,
+    "HS03_synthetic_preflight_executed": true,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
     "experimental_host_decoder_added": true,
@@ -228,6 +230,13 @@
       "phase": "HS-02",
       "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
       "verdict": "HS02_SYNTHETIC_HOST_PASS_ONLY"
+    },
+    {
+      "checkpoint": "2f92972ba1147a084c442bc8d352d8cc1ea990fa",
+      "phase": "HS-03",
+      "protocol_sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4",
+      "status": "REGISTERED_NOT_IMPLEMENTED",
+      "step": "registration"
     }
   ],
   "host_grid_experiment": {
@@ -274,17 +283,21 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "host_resampler_experiment": {
-    "candidate_or_measured_execution": "NOT_RUN",
+    "candidate_or_measured_execution": "GENERATED_PREFLIGHT_ONLY",
     "id": "HS-03",
+    "implementation": {
+      "path": "docs/rust/PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json",
+      "sha256": "e4ba271e5eb17e83e84cd2857d6c2df46c812171a1bff94a128fe59e881e8703"
+    },
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json",
     "protocol_sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4",
-    "status": "REGISTERED_NOT_IMPLEMENTED"
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
   },
   "next": {
-    "action": "Implement registered streaming resampler and tests/lints; commit/push before clean six-case run",
+    "action": "Commit/push implementation; run six fixed HS03 cases from exact clean implementation, audit and publish separate result checkpoint",
     "large_port_allowed": false,
-    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "mode": "CLEAN_SYNTHETIC_HOST_MEASUREMENT_ONLY",
     "phase": "HS-03"
   },
   "open_decisions": [
@@ -520,7 +533,7 @@
     "no_offload_provider_or_C_ABI_scope_expansion",
     "later_budget_and_algorithm_gates_explicit"
   ],
-  "source_baseline": "7ef5500877df760633c016e6568d00ad1b325d95",
+  "source_baseline": "2f92972ba1147a084c442bc8d352d8cc1ea990fa",
   "stable_version": "1.0.1",
   "user_decisions": [
     {

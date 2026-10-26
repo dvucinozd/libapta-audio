@@ -1,0 +1,154 @@
+{
+  "component_allocations": 0,
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "761c721685e0785c85542f31c9c1590bac4e54577a294d7268bd90d09456b581",
+    "rust/runtime/src/bin/apta-compact-resampler-synthetic.rs": "05cc59b2033ff548f768e273bc52901a12157984ba0d3b63c744a7f52e936dff",
+    "rust/runtime/src/compact_resampler.rs": "2f1232b9cc1a013e51a4ecc8f2f926c309c4dff760da69851a61c96fe76b06b7",
+    "rust/runtime/src/lib.rs": "cd4412104ded3e299d2d84b79683b1fbf5250378cc60c3b4f287325420ee8477",
+    "rust/runtime/tests/compact_resampler.rs": "ec8b3dd79eff4a0550ce6a0109110ebc7beb8056ee88f6ba8ca479d00860cbd3",
+    "tools/apta_compact_resampler_synthetic.py": "25dfe0d495fbca0c5546d47380c1b0502f6f50de7baf66958a47573b62892899"
+  },
+  "date": "2026-10-26",
+  "default_enabled": false,
+  "development_preflight": {
+    "file_manifest": {
+      "enforcement-address/stdout.txt": {
+        "bytes": 12,
+        "sha256": "6f622d4a4bace364e1b65ab6561b11f3f9a483a4638be60b03c9a49575d1f626"
+      },
+      "enforcement-output/probe.resources.json": {
+        "bytes": 319,
+        "sha256": "6229de4fd6fb50fd38b440dfe1ee51864a6368060d803a226e0fcbd274842294"
+      },
+      "enforcement-output/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-output/probe.stdout": {
+        "bytes": 65536,
+        "sha256": "1f8745f0d2d1387ec1af2211a3cf417b2e9e885e853472649c1d979d0e9370e3"
+      },
+      "enforcement-rss/probe.resources.json": {
+        "bytes": 309,
+        "sha256": "77109a909550a6e048fd1662ce5b270c3002e6a8693fc42ceafc354e0a57c170"
+      },
+      "enforcement-rss/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/probe.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/supervisor.resources.json": {
+        "bytes": 291,
+        "sha256": "c54cedc723f1d4e8bb6d2ad5dd8604bdb7629310b5133ad322dffa504921fbf0"
+      },
+      "enforcement-rss/supervisor.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/supervisor.stdout": {
+        "bytes": 18,
+        "sha256": "22e6fdf53e4f456dfcb47a19bf87a9cad7847b575709e5e945ad9e88dcc6dfb6"
+      },
+      "enforcement-wall/probe.resources.json": {
+        "bytes": 315,
+        "sha256": "7abed182fe1058ba8205b6a6f41485e81cb87c95859d844f95d16d278486075c"
+      },
+      "enforcement-wall/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-wall/probe.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement.json": {
+        "bytes": 145,
+        "sha256": "032cd11f2902579d390ec7c64a03b3922b694d85a0bab5effdec020878d675e7"
+      },
+      "fixtures.child.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "fixtures.child.stdout": {
+        "bytes": 51339,
+        "sha256": "5ee3861719076c6d229b86b9f031cb8e34ec9f8dcef4c975abff579e11b2adae"
+      },
+      "fixtures.json": {
+        "bytes": 64966,
+        "sha256": "45110aeb93fdc8482958e6b774c3c76ff238e43a3c484939c19d65b8284dabe7"
+      },
+      "fixtures.runtime.json": {
+        "bytes": 15867,
+        "sha256": "261248bc01a83555ebf1e25bf968ba304b9272cab84dd4f8711d4fb7939b4a5f"
+      }
+    },
+    "fixed_enforcement_probes": "ALL_FOUR_REFUSED_AS_EXPECTED",
+    "fixture_observations": 102,
+    "long_measured_cases": "NOT_RUN",
+    "root": "D:/AI/LIBAPTA/outputs/hs03-development-preflight-20261026"
+  },
+  "document": {
+    "path": "docs/rust/PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.md",
+    "sha256": "ebee00fae47c6f8f470b952cd89c3af1e27ea92ef43af7104bfea0698e59ac99"
+  },
+  "feature": "experimental-compact-resampler",
+  "format": "libapta-host-resampler-implementation-1",
+  "id": "HS-03",
+  "measured_six_cases": "NOT_RUN",
+  "protocol": {
+    "path": "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json",
+    "sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4"
+  },
+  "remaining_gates": [
+    "clean exact implementation six-case synthetic run",
+    "model LICENSE_UNRESOLVED and INDEPENDENCE_UNRESOLVED",
+    "PF01 NEEDS_MEASUREMENT; board unavailable",
+    "frontend/neural/product/native integration and musical/physical qualification NOT_RUN"
+  ],
+  "retained_source_slices": false,
+  "ring_bytes": 260,
+  "scope": {
+    "default_core_consumer_wire_HS01_HS02_changed": false,
+    "frontend_or_FFT_executed": false,
+    "model_corpus_training_or_device_executed": false,
+    "product_PF04_complete": false,
+    "stable_version": "1.0.1"
+  },
+  "source_baseline": "2f92972ba1147a084c442bc8d352d8cc1ea990fa",
+  "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_MEASURED_RUN_PENDING",
+  "tables_bytes": 76960,
+  "tests": {
+    "cancel_phases": 3,
+    "default_context": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "context_busy_lifetime_matches_public_c needs APTA_C_CONTEXT_LIFETIME_ORACLE"
+    },
+    "fixture_schedules_per_profile": 6120,
+    "fmt": "PASS",
+    "focused_clippy_deny_warnings": "PASS",
+    "new_debug": {
+      "ignored": 0,
+      "passed": 6
+    },
+    "new_release": {
+      "ignored": 0,
+      "passed": 6
+    },
+    "python_compile": "PASS",
+    "release_build": "PASS",
+    "waveform": {
+      "ignored": 3,
+      "passed": 6,
+      "unrun": "C reference PCM formats/quantized columns/S32 near endpoints need APTA_C_WAVEFORM_ORACLE"
+    },
+    "waveform_result": {
+      "ignored": 1,
+      "passed": 5,
+      "unrun": "c_reserialization_is_byte_exact needs APTA_C_CONTAINER_ORACLE"
+    }
+  }
+}

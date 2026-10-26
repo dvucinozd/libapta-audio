@@ -6,15 +6,19 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-26
 
-**Current next: implement the registered HS-03 bounded streaming resampler.**
-See [protocol](PRODUCT-HOST-RESAMPLER-PROTOCOL.md) and [JSON](PRODUCT-HOST-RESAMPLER-PROTOCOL.json).
-The owner authorized registration, implementation and synthetic verification.102
-public short oracles, four full periodic oracles, frozen FIR bytes, streaming/EOF/
-phase/rounding/work/cancel rules and host caps are fixed. No candidate/test/measured
-run yet. Commit/push registration before implementation; tests/lints and a second
-commit/push precede the clean six-case run and separate aggregate result checkpoint.
-This host-only addendum leaves all neural rights/provenance, PF01 and product PF04
-gates open, with default/core/consumer/wire and HS01/02 unchanged.
+**Current next: clean-source HS-03 measurement after implementation commit/push.**
+The [protocol](PRODUCT-HOST-RESAMPLER-PROTOCOL.md),
+[implementation](PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.md) and
+[receipt](PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json) bind the65-sample ring,
+F64 CS-FIR65, normalized mono/stereo input, exact EOF/phase counts, bounded work,
+private mid-tap state and terminal cancel. Six new tests pass debug/release,
+including6120 fixture/schedule combinations per profile. Waveform6,
+waveform_result5 and default-context5 controls pass; five existing C-oracle-
+dependent tests stay ignored/NOT_RUN. fmt/focused Clippy/release/Python and four
+development enforcement probes pass. Clean six-case measurement is pending.
+Commit/push implementation before that run, then publish a separate audited result
+checkpoint. This host-only work leaves defaults/core/wire/consumer/HS01/HS02,
+VERSION1.0.1 and all model/physical/product gates unchanged.
 
 **HS-02 is complete: synthetic host postprocessor evidence only.** See the
 [protocol](PRODUCT-HOST-GRID-PROTOCOL.md), [implementation](PRODUCT-HOST-GRID-IMPLEMENTATION.md)
