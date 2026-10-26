@@ -1,10 +1,27 @@
 # Native Rust migration
 
-Status: development checkpoint 2026-10-26; no release, ABI replacement, full profile,
+Status: development checkpoint 2026-10-27; no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
-## Current implementation handoff — 2026-10-26
+## Current implementation handoff — 2026-10-27
+
+**Current next: freeze/push HS-04 implementation, then six clean measured cases.**
+The [implementation receipt](PRODUCT-HOST-FRONTEND-IMPLEMENTATION.md) records the
+opt-in bounded centered frontend, explicit-stack FFT1764,144 log/difference bands,
+strict streaming/cancel/EOF contracts and independent binary-pipe checker. Seven
+integration tests plus one internal test pass debug/release;800 short schedules
+and50 primitive schedules/profile. HS03 controls,grid and default context pass
+with one C-oracle-dependent check NOT_RUN. Host Session41448B,Driver44960B;
+these are host type layouts,not P4 memory qualification. Development worker checks
+10 primitives and20 short streams/54 rows;full600s measurement is still NOT_RUN.
+Original registration/assets/authority files remain frozen. The explicit list
+contains six measured cases,as documented by the
+[count erratum](PRODUCT-HOST-FRONTEND-COUNT-ERRATUM.md). Publish a separate audited
+result checkpoint after the complete fixed run;do not bypass neural rights,
+training independence,PF01 physical budgets or product PF04.
+
+### Prior registration checkpoint — 2026-10-26
 
 **Current next: implement registered HS-04 synthetic frontend.** See the
 [protocol](PRODUCT-HOST-FRONTEND-PROTOCOL.md), [machine registration](PRODUCT-HOST-FRONTEND-PROTOCOL.json)

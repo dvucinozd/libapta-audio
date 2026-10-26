@@ -9,6 +9,7 @@ description = "Safe desktop concurrent result publication for native libapta ses
 publish = false
 
 [features]
+experimental-compact-frontend = ["experimental-compact-resampler"]
 experimental-compact-resampler = []
 experimental-compact-grid = ["experimental-compact-hmm"]
 experimental-compact-hmm = []
@@ -16,6 +17,11 @@ history-diagnostics = ["libapta/experimental-s6-attack-grid"]
 onset-diagnostics = ["history-diagnostics", "libapta/experimental-s6-onset-grid"]
 onset-trace-diagnostics = ["onset-diagnostics", "libapta/experimental-s6-onset-trace"]
 temporal-trace-diagnostics = ["onset-trace-diagnostics", "libapta/experimental-s6-temporal-trace"]
+
+[[bin]]
+name = "apta-compact-frontend-synthetic"
+path = "src/bin/apta-compact-frontend-synthetic.rs"
+required-features = ["experimental-compact-frontend"]
 
 [[bin]]
 name = "apta-compact-resampler-synthetic"

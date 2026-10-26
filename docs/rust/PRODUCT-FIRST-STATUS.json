@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-04",
-  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
-  "active_phase_verdict": "SYNTHETIC_FRONTEND_REGISTRATION_ONLY",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+  "active_phase_verdict": "SYNTHETIC_FRONTEND_IMPLEMENTATION_PREFLIGHT_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS04 static registration:10 analytic/direct FFT probes,20 short streams/54 feature rows,4 compressed full references;118 finite hash-bound assets/929484B. Independent140 Decimal complex anchors,93 filter-band anchors,120000 reference rows and FIR envelope proof pass. Candidate/FFT implementation/tests/measurements NOT_RUN.",
+  "checks": "HS04 seven integration plus one internal test pass debug/release;800 short and50 primitive schedules/profile. HS03 6120 schedules/profile,12 grid controls,5 default context controls pass;one C-oracle check NOT_RUN. fmt,Clippy,build,Python,checker and four enforcement refusals pass. No full600s candidate case before clean implementation checkpoint.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -45,7 +45,7 @@
     "path": "rust/tests/product_grid_contract.rs",
     "sha256": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa"
   },
-  "date": "2026-10-26",
+  "date": "2026-10-27",
   "deferred_runtime": [
     "H1-P",
     "H1-Q"
@@ -253,18 +253,28 @@
       "phase": "HS-03",
       "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
       "verdict": "HS03_SYNTHETIC_HOST_PASS_ONLY"
+    },
+    {
+      "phase": "HS-04",
+      "source_baseline": "d078ef291b2df49f015ba935974256ff10d0743b",
+      "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+      "step": "implementation preflight"
     }
   ],
   "host_frontend_experiment": {
-    "candidate_tests_or_measurement": "NOT_RUN",
+    "candidate_tests_or_measurement": "SYNTHETIC_PREFLIGHT_PASS_CLEAN_MEASUREMENT_PENDING",
     "id": "HS-04",
+    "implementation": {
+      "path": "docs/rust/PRODUCT-HOST-FRONTEND-IMPLEMENTATION.json",
+      "sha256": "468b83372e170e319df9ce54da17c2bd90efaf3a83442dd67ae292d752e11519"
+    },
     "new_public_asset_files": 118,
     "primitive_cases": 10,
     "product_gates_bypassed": false,
     "protocol_path": "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.json",
     "protocol_sha256": "27cb6fe41fe4f94d22dbeac65c778feef0f2094c42aee267108d80ac17112b1f",
     "short_stream_cases": 20,
-    "status": "REGISTERED_NOT_IMPLEMENTED"
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING"
   },
   "host_grid_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
@@ -326,9 +336,9 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Implement exact HS04 bounded centered frontend and explicit-stack mixed-radix kernel,then registered tests/lints/implementation commit-push before seven-case clean measurement",
+    "action": "After implementation commit-push,run the six registered HS04 synthetic host cases from clean exact source; audit and commit-push separate aggregate result",
     "large_port_allowed": false,
-    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "mode": "RUN_FIXED_SYNTHETIC_HOST_ONLY",
     "phase": "HS-04"
   },
   "open_decisions": [
