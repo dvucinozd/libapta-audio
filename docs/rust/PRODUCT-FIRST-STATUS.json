@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-05",
-  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
-  "active_phase_verdict": "SYNTHETIC_NEURAL_PRIMITIVES_REGISTRATION_ONLY",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+  "active_phase_verdict": "SYNTHETIC_NEURAL_IMPLEMENTATION_PREFLIGHT_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS05 static registration passes:34 primitive probes/302 checked result scalars,12 sequences/90 Decimal-checked rows;independent scalar recheck of90000 full reference rows. Four public artificial113-parameter profiles;28 finite assets/6848B. All40 authority files and135 prior assets unchanged. Candidate Rust code/tests/measurements and trained checkpoint execution NOT_RUN.",
+  "checks": "HS05 five integration plus two internal tests PASS debug/release;480 sequence and170 probe schedules/build. HS04 7+1,HS03 6/6120 schedules,grid12,context5 release controls PASS;one C-oracle test NOT_RUN. fmt,Clippy,build,Python,46 independent fixture observations and four cap refusals PASS. Long candidate cases NOT_RUN before implementation checkpoint.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -272,6 +272,12 @@
       "status": "REGISTERED_NOT_IMPLEMENTED",
       "step": "registration",
       "verdict": "SYNTHETIC_NEURAL_PRIMITIVES_REGISTRATION_ONLY"
+    },
+    {
+      "phase": "HS-05",
+      "source_baseline": "e16fa435c10baef83ebb0fb86bf67f5fcc43047b",
+      "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+      "step": "implementation preflight"
     }
   ],
   "host_frontend_experiment": {
@@ -337,8 +343,12 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "host_neural_experiment": {
-    "candidate_tests_or_measurement": "NOT_RUN",
+    "candidate_tests_or_measurement": "SYNTHETIC_PREFLIGHT_PASS_CLEAN_MEASUREMENT_PENDING",
     "id": "HS-05",
+    "implementation": {
+      "path": "docs/rust/PRODUCT-HOST-NEURAL-IMPLEMENTATION.json",
+      "sha256": "cf8ed215ae3e4e8f8dd3788b9c6874dd287412dc2d32deacd55ed05765c749a8"
+    },
     "measured_cases": 5,
     "new_public_asset_files": 28,
     "primitive_cases": 34,
@@ -354,7 +364,7 @@
     },
     "short_cases": 12,
     "short_rows": 90,
-    "status": "REGISTERED_NOT_IMPLEMENTED",
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
     "trained_checkpoint_executed": false
   },
   "host_resampler_experiment": {
@@ -374,9 +384,9 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Implement registered HS05 tiny affine/LSTM/softmax bounded state machine and probes; pass frozen tests/lints then implementation commit-push before the five clean measured cases",
+    "action": "After implementation commit-push,run all five fixed HS05 cases from clean exact source; audit and separately commit-push result",
     "large_port_allowed": false,
-    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "mode": "RUN_FIXED_SYNTHETIC_HOST_ONLY",
     "phase": "HS-05"
   },
   "open_decisions": [

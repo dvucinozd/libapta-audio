@@ -1,0 +1,201 @@
+{
+  "Session_or_Probe_allocations": 0,
+  "allocation_evidence": "safe fixed-storage implementation;no allocator-hook measurement",
+  "checks": {
+    "HS03_release": 6,
+    "HS03_schedules": 6120,
+    "HS04_release_integration": 7,
+    "HS04_release_internal": 1,
+    "NOT_RUN_reason": "APTA_C_CONTEXT_LIFETIME_ORACLE absent",
+    "checker_preflight": {
+      "accepted": 3,
+      "refused": 13
+    },
+    "debug_integration": 5,
+    "debug_internal": 2,
+    "default_context_NOT_RUN": 1,
+    "default_context_release": 5,
+    "fmt": "PASS",
+    "focused_clippy_D_warnings": "PASS",
+    "grid_controls_release": 12,
+    "ignored_new_tests": 0,
+    "long_candidate_cases_before_checkpoint": "NOT_RUN",
+    "probe_schedules_per_build": 170,
+    "python_compile": "PASS",
+    "registration_consistency": "PASS",
+    "release_CLI_build": "PASS",
+    "release_integration": 5,
+    "release_internal": 2,
+    "sequence_schedules_per_build": 480
+  },
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "9a4aea4860eafe6a88d070df9f715e3d0f7c2884e205a66cd26d594cdacedccd",
+    "rust/runtime/src/bin/apta-compact-neural-synthetic.rs": "25aef0a4a043c78580b371575fc3a9c2b0df0c2bfb190c9f60ce263b7b45ccde",
+    "rust/runtime/src/compact_neural.rs": "f50d69c409176ec9830af6572bf967c8513416498ab580cb9d9319c58493a0ef",
+    "rust/runtime/src/lib.rs": "1c136a2e9aa159350fdc64b5474237559139f3a49f25f2039d2f6f83fc4dcddc",
+    "rust/runtime/tests/compact_neural.rs": "a182c1ba6fe361add634a496a97924436f4c349723a437643824e18824285122",
+    "tools/apta_compact_neural_synthetic.py": "19f0f84cf53838d37a43254c660479fa391a68c7cddf9c4ff98e2005d19e4d81"
+  },
+  "date": "2026-10-27",
+  "default_enabled": false,
+  "development_fixes": [
+    "Require positive softmax sum after all terms,not after a leading zero exponent",
+    "Decode fixed probe input bits at runtime for declared Rust1.81 MSRV;no rust-version bump"
+  ],
+  "development_preflight": {
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\product-host-neural-preflight-20261027",
+    "enforcement": {
+      "address_space": "REFUSED_AS_EXPECTED",
+      "output": "REFUSED_AS_EXPECTED",
+      "rss": "REFUSED_AS_EXPECTED",
+      "wall": "REFUSED_AS_EXPECTED"
+    },
+    "file_manifest": {
+      "enforcement-address/stdout.txt": {
+        "bytes": 12,
+        "sha256": "6f622d4a4bace364e1b65ab6561b11f3f9a483a4638be60b03c9a49575d1f626"
+      },
+      "enforcement-output/probe.resources.json": {
+        "bytes": 319,
+        "sha256": "dcf70f4177be8017cfc32c5ee6f4d68cfb9bfd55cdd7080ac9f570e34c9aa44d"
+      },
+      "enforcement-output/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-output/probe.stdout": {
+        "bytes": 65536,
+        "sha256": "1f8745f0d2d1387ec1af2211a3cf417b2e9e885e853472649c1d979d0e9370e3"
+      },
+      "enforcement-rss/probe.resources.json": {
+        "bytes": 309,
+        "sha256": "9461095cb06eed42bb66c68aac7b6e4f37666c1be0f89824af0f544080e79ef9"
+      },
+      "enforcement-rss/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/probe.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/supervisor.resources.json": {
+        "bytes": 291,
+        "sha256": "ab763d5d5c4bfdad7c028a3da6d43b733c3a38c390cc901b5cbc762400f895bc"
+      },
+      "enforcement-rss/supervisor.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-rss/supervisor.stdout": {
+        "bytes": 18,
+        "sha256": "22e6fdf53e4f456dfcb47a19bf87a9cad7847b575709e5e945ad9e88dcc6dfb6"
+      },
+      "enforcement-wall/probe.resources.json": {
+        "bytes": 314,
+        "sha256": "f5da89ac4827e186f5a8b7cbefdd9a7165c240a6e9627f7a0698dc1fa396c87f"
+      },
+      "enforcement-wall/probe.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement-wall/probe.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "enforcement.json": {
+        "bytes": 145,
+        "sha256": "032cd11f2902579d390ec7c64a03b3922b694d85a0bab5effdec020878d675e7"
+      },
+      "fixtures.child.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "fixtures.json": {
+        "bytes": 15515,
+        "sha256": "b62972ec927afef4f811888a76e8ef2844478695bf470e20327005fb6477b8ab"
+      },
+      "fixtures.pipe-receipt.json": {
+        "bytes": 32063,
+        "sha256": "3bf4eb7dfc1005706394137bb8ca58860221e84bffeb0f467f0865b4b9996b6e"
+      },
+      "fixtures.runtime.json": {
+        "bytes": 15852,
+        "sha256": "21f8a8d18c132ae470d4148456707235f6d0c6ccd0a8056916e5af1c9d51c724"
+      }
+    },
+    "validated_observations": 46
+  },
+  "document_sha256": "245218ec542bdc7c28cded5802b4f5de9b287c850dba66c956d62df8cf127621",
+  "feature": "experimental-compact-neural",
+  "format": "libapta-host-neural-implementation-1",
+  "frozen_authority_sha256": {
+    "Cargo.lock": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4",
+    "VERSION": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7",
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70",
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb",
+    "docs/rust/PRODUCT-HOST-FRONTEND-COUNT-ERRATUM.md": "f631071fb2fa24779040caab3d4c04bd962e7612194b0dd4148c7e5458c58981",
+    "docs/rust/PRODUCT-HOST-FRONTEND-IMPLEMENTATION.json": "468b83372e170e319df9ce54da17c2bd90efaf3a83442dd67ae292d752e11519",
+    "docs/rust/PRODUCT-HOST-FRONTEND-IMPLEMENTATION.md": "495d895d407cc29963f50ed1b420938e35e680c4d62b219b8e296a0be5ae2f8b",
+    "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.json": "27cb6fe41fe4f94d22dbeac65c778feef0f2094c42aee267108d80ac17112b1f",
+    "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.md": "30c1bc9e502a2b84836e90fc0d42280230adbbef19851c5b5563d43cd23a8c33",
+    "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.json": "02d1aa9eeabee380c7fd433dbefb2679aece22e203308ae2eaa2f55a1a7ca59c",
+    "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.md": "991aeedf21671478c4114ec550c1e34dd032d467d100ceadb6b94f7fd495c872",
+    "docs/rust/PRODUCT-HOST-GRID-RESULT.json": "bb0ee548c0a9591f628a4d2729a7b2f02829f6fe781ef5a593c8e996f3084e06",
+    "docs/rust/PRODUCT-HOST-HMM-RESULT.json": "fcc63ee24f25dda3f123b67b04d7479a90b193e01a178269a8d160a53de076ef",
+    "docs/rust/PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json": "e4ba271e5eb17e83e84cd2857d6c2df46c812171a1bff94a128fe59e881e8703",
+    "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4",
+    "docs/rust/PRODUCT-HOST-RESAMPLER-RESULT.json": "b3f99ac9b189bca82b1eb51d749a22ae2961d5812b5779ea6c99e5b984d2fd6c",
+    "docs/rust/fixtures/product-compact-cs02/assets/manifest.json": "280eea340f04c9101bc057b9569f9e514fb19647bc7ca23c5d49be3246be9db1",
+    "docs/rust/fixtures/product-host-frontend-hs04/cases.json": "eac3d477ed099ca5558ba91e6cea8dc7a3b10f49f5b55b77b5c17a1c90e4c89a",
+    "docs/rust/fixtures/product-host-frontend-hs04/frontend_reference.py": "5c54e074e92880bf439ecabfec71d4bdd833ee478a6bf8d598967dedf7dbd7bb",
+    "docs/rust/fixtures/product-host-frontend-hs04/verify_registration.py": "ba5cd6a90caa41e8c81769f8c32bd2aec2c8ee77d5afa50ecf936ad580b2a740",
+    "docs/rust/fixtures/product-host-resampler-hs03/cases.json": "7c34cf873eec465b9ef6395559aea8813d3db1df7bac2971a2d0c52774c474b0",
+    "docs/rust/fixtures/product-host-resampler-hs03/resampler_reference.py": "3db457d04ad8bc9b62859b9a51894dd3d632828fa60f465ce68180432191473c",
+    "rust/runtime/src/bin/apta-compact-frontend-synthetic.rs": "254b0a61e1f15625a92d76e7e5c50d62d2008b9d2f6e8368f4acacae9e4eee8c",
+    "rust/runtime/src/bin/apta-compact-resampler-synthetic.rs": "05cc59b2033ff548f768e273bc52901a12157984ba0d3b63c744a7f52e936dff",
+    "rust/runtime/src/compact_frontend.rs": "dd568715f3ed87029496fab19288991fad5a2bcdd12ebcaf62ffa7335289f8a8",
+    "rust/runtime/src/compact_grid.rs": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a",
+    "rust/runtime/src/compact_hmm.rs": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+    "rust/runtime/src/compact_resampler.rs": "2f1232b9cc1a013e51a4ecc8f2f926c309c4dff760da69851a61c96fe76b06b7",
+    "rust/runtime/tests/compact_frontend.rs": "d40c230f4bf9de65b9614c7877a3a3869000ff5bb419d14f8576755c8765701e",
+    "rust/runtime/tests/compact_resampler.rs": "ec8b3dd79eff4a0550ce6a0109110ebc7beb8056ee88f6ba8ca479d00860cbd3",
+    "rust/src/grid.rs": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e",
+    "rust/src/waveform.rs": "0d6c9ca94493b1e328737dd4f8df339faea693d7fec8dbc09ef3006461c7e8cc",
+    "rust/tests/product_grid_contract.rs": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa",
+    "tools/apta_compact_frontend_synthetic.py": "3f7db3978e18a38e1f88c9e68dee146b2c8626953ee40153643596edd85b856d",
+    "tools/apta_compact_resampler_synthetic.py": "25dfe0d495fbca0c5546d47380c1b0502f6f50de7baf66958a47573b62892899",
+    "tools/apta_dense_runner_support.py": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+  },
+  "new_dependencies": false,
+  "protocol_sha256": "8942bed1390a9bba5db3779c73a508b8933b1ee3aa242e2e0870d65c8403c058",
+  "remaining_gates": [
+    "five clean fixed host cases",
+    "model rights",
+    "training independence",
+    "full-size graph parity",
+    "PF01 physical budgets",
+    "PF04 product analysis"
+  ],
+  "source_baseline": "e16fa435c10baef83ebb0fb86bf67f5fcc43047b",
+  "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+  "storage": {
+    "driver_value_bytes": 1464,
+    "input_buffer_bytes": 768,
+    "output_buffer_bytes": 12,
+    "payload_bytes": 256,
+    "physical_P4_peak": "NOT_MEASURED",
+    "probe_alignment": 8,
+    "probe_value_bytes": 512,
+    "profile_bank_bytes": 1808,
+    "session_alignment": 8,
+    "session_value_bytes": 352,
+    "snapshot_bytes": 32,
+    "transport_record_bytes": 51
+  },
+  "trained_model_music_or_device_executed": false
+}

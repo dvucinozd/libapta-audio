@@ -6,7 +6,22 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: implement registered HS-05 artificial neural primitives.** See the
+**Current next: freeze/push HS-05 implementation,then five clean measured cases.**
+The [implementation receipt](PRODUCT-HOST-NEURAL-IMPLEMENTATION.md) records the
+opt-in toy affine/two-layer LSTM2/head3 kernel with exact172-unit/76-affine-MAC
+rows,private state staging,atomic Commit,reset/cancel/EOF/cap fences and bounded
+fixed ProbeSession. Five integration plus two internal tests pass debug/release;
+480 sequence and170 probe schedules/build. HS04/HS03/grid/context release controls
+pass with one C-oracle ignore NOT_RUN. Host Session352B,Probe512B,Driver1464B are
+type layouts,not physical peaks. Independent fixture worker verifies46 observations/
+90 rows;all four violation probes are refused. No long candidate measurement yet.
+Commit/push before the five fixed clean cases,then audit/result and separate push.
+No trained model or larger product port is enabled;rights/provenance,PF01 physical
+budgets,full-size parity and PF04 remain open. Old authorities/assets unchanged.
+
+### Prior registration checkpoint — 2026-10-27
+
+**Prior next: implement registered HS-05 artificial neural primitives.** See the
 [protocol](PRODUCT-HOST-NEURAL-PROTOCOL.md),[machine registration](PRODUCT-HOST-NEURAL-PROTOCOL.json)
 and [public cases](fixtures/product-host-neural-hs05/cases.json). This is a toy
 linear3->2/two-layer LSTM2/head3 graph,not a trained checkpoint or full product

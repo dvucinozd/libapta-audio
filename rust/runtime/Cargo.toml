@@ -9,6 +9,7 @@ description = "Safe desktop concurrent result publication for native libapta ses
 publish = false
 
 [features]
+experimental-compact-neural = []
 experimental-compact-frontend = ["experimental-compact-resampler"]
 experimental-compact-resampler = []
 experimental-compact-grid = ["experimental-compact-hmm"]
@@ -17,6 +18,11 @@ history-diagnostics = ["libapta/experimental-s6-attack-grid"]
 onset-diagnostics = ["history-diagnostics", "libapta/experimental-s6-onset-grid"]
 onset-trace-diagnostics = ["onset-diagnostics", "libapta/experimental-s6-onset-trace"]
 temporal-trace-diagnostics = ["onset-trace-diagnostics", "libapta/experimental-s6-temporal-trace"]
+
+[[bin]]
+name = "apta-compact-neural-synthetic"
+path = "src/bin/apta-compact-neural-synthetic.rs"
+required-features = ["experimental-compact-neural"]
 
 [[bin]]
 name = "apta-compact-frontend-synthetic"

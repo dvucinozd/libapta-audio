@@ -10,6 +10,8 @@ pub mod compact_frontend;
 pub mod compact_grid;
 #[cfg(feature = "experimental-compact-hmm")]
 pub mod compact_hmm;
+#[cfg(feature = "experimental-compact-neural")]
+pub mod compact_neural;
 #[cfg(feature = "experimental-compact-resampler")]
 pub mod compact_resampler;
 mod context;
