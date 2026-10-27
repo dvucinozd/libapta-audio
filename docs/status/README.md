@@ -3,6 +3,14 @@
 Start with [`APTA-ROADMAP-STATUS.md`](APTA-ROADMAP-STATUS.md), the current
 whole-project release and validation boundary.
 
+Native Rust continuation on `rust-rewrite` is **paused by the owner until board
+arrival** (2026-10-27). RC-04A preparation is complete; RC-04B physical execution
+and runtime capabilities remain open. See the
+[board-arrival handoff](../rust/BOARD-ARRIVAL-HANDOFF.md),
+[live status](../rust/PRODUCT-FIRST-STATUS.json) and
+[Rust documentation index](../rust/README.md). This does not change the C 1.1
+release blockers or qualify the Guition board.
+
 Active post-1.0 development:
 
 - [`APTA-1.1-ALGORITHM-IMPLEMENTATION-PLAN.md`](APTA-1.1-ALGORITHM-IMPLEMENTATION-PLAN.md)

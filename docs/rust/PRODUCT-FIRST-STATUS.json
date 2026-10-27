@@ -1,7 +1,13 @@
 {
-  "active_phase": "RC-04A-3_TARGET_ADAPTER_PACKAGE",
-  "active_phase_status": "PREPARATION_COMPLETE_BUILD_ONLY_EXECUTION_BLOCKED",
-  "active_phase_verdict": "AUDIT_PASS_BUILD_ONLY_PHYSICAL_AND_RUNTIME_GATES_OPEN",
+  "active_phase": "RC-04B_WAITING_FOR_BOARD",
+  "active_phase_status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD",
+  "active_phase_verdict": "RC04A_PREPARATION_COMPLETE_PHYSICAL_AND_RUNTIME_GATES_OPEN",
+  "board_arrival_handoff": {
+    "input_checkpoint": "8c32fdc47b4afcaa1b4752349423d5df904ae427",
+    "path": "docs/rust/BOARD-ARRIVAL-HANDOFF.md",
+    "sha256": "ae2924ec52adfd0d9ad5db81d5a63e4945f515961b064dbd8607c64b20862d3d",
+    "status": "CURRENT_OWNER_PAUSE_AND_RESTART_CHECKLIST"
+  },
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
@@ -114,9 +120,9 @@
       {
         "evidence": [],
         "id": "RC-04",
-        "reason": "User accepted RC04A host preparation before board;RC04B physical evidence remains blocked",
+        "reason": "RC04A1/2/3 software preparation complete; owner paused development until board arrival; RC04B runtime and physical evidence remain open",
         "source_revision": null,
-        "status": "IN_PROGRESS_SOFTWARE_ONLY",
+        "status": "PAUSED_BY_OWNER_PHYSICAL_PENDING",
         "substeps": [
           {
             "evidence": [
@@ -201,6 +207,7 @@
     ],
     "plan_id": "PRODUCT-CONTINUATION-20261027",
     "plan_path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json",
+    "status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD",
     "updated_date": "2026-10-27"
   },
   "contract_document": {
@@ -227,6 +234,15 @@
     },
     "quarter_beats": 3000,
     "status": "DERIVED_NOT_MEASURED"
+  },
+  "development_hold": {
+    "board": "JC1060P470C_I_W_Y",
+    "changes_existing_evidence_verdicts": false,
+    "date": "2026-10-27",
+    "resume_condition": "Owner confirms board arrival/access; refresh exact-unit and runtime prerequisites before physical execution",
+    "scope": "Documentation closeout only; no new implementation, model/corpus experiment or physical execution while waiting",
+    "source": "Direct user request: update and reconcile complete documentation, commit/push; development resumes when the board arrives",
+    "status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD"
   },
   "diagnostic_implementation": {
     "DSP_behavior_changed": false,
@@ -506,6 +522,14 @@
       "source_baseline": "489e5af0beac1cef53c1276a3aad65d7687255b8",
       "status": "PREPARATION_COMPLETE_BUILD_ONLY_EXECUTION_BLOCKED",
       "verdict": "AUDIT_PASS_BUILD_ONLY"
+    },
+    {
+      "date": "2026-10-27",
+      "handoff_path": "docs/rust/BOARD-ARRIVAL-HANDOFF.md",
+      "phase": "DOCUMENTATION_HANDOFF",
+      "source_baseline": "8c32fdc47b4afcaa1b4752349423d5df904ae427",
+      "status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD",
+      "verdict": "DOCUMENTATION_ONLY_EXISTING_EVIDENCE_UNCHANGED"
     }
   ],
   "host_frontend_experiment": {
@@ -649,7 +673,7 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Obtain exact JC1060 identity/access/recovery/programming evidence and qualify arming/transport,reusable full trial schedule,numeric output verification,resident metrics and asynchronous cancellation before physical protocol execution;link-check package is not execution-ready",
+    "action": "Wait for owner-confirmed JC1060 board arrival/access, then follow BOARD-ARRIVAL-HANDOFF.md to refresh exact-unit/recovery/layout and qualify runtime capabilities before physical protocol execution",
     "large_port_allowed": false,
     "missing_capabilities": [
       "exact unit/recovery/programming layout",
@@ -659,10 +683,11 @@
       "resident BSP/allocator/stack telemetry",
       "asynchronous cancel requester and physical timing/placement"
     ],
-    "mode": "RESOLVE_RUNTIME_AND_EXACT_UNIT_PREREQUISITES",
+    "mode": "WAIT_FOR_BOARD_ARRIVAL",
     "phase": "RC-04B",
     "ready": false,
-    "state": "BLOCKED_EXTERNAL_AND_RUNTIME_CAPABILITY"
+    "resume_mode": "RESOLVE_RUNTIME_AND_EXACT_UNIT_PREREQUISITES",
+    "state": "PAUSED_BY_OWNER_WAITING_FOR_BOARD"
   },
   "open_decisions": [
     {
@@ -900,6 +925,7 @@
     "tools/apta_1_1_neural_inference.py": "8fafc7b22268700ee2b822c7877c47035597394b8d9571ae76243ad249bfd2d8",
     "tools/apta_dense_decoder.py": "782e66ab56ec143d8214f73b74c181a3b2cd393fb56e3364b849cfd7c9c920ca"
   },
+  "reviewed_source_sha256_scope": "Original source review snapshot at source_baseline; maintained documentation may change later; not a current-tree hash inventory",
   "route_decision_preparation": {
     "decision": "WAIT_EXTERNAL",
     "large_port_allowed": false,
@@ -1045,6 +1071,13 @@
       "source": "Direct user continuation of the next separate frontend registration after HS03",
       "status": "CONFIRMED",
       "value": "SYNTHETIC_FRONTEND_REGISTRATION_ONLY_NO_MODEL_DEVICE_OR_PRODUCT_ACTIVATION"
+    },
+    {
+      "date": "2026-10-27",
+      "id": "DEVELOPMENT-PAUSE-BOARD-ARRIVAL",
+      "source": "Direct user request: documentation reconciliation, commit/push; development continues when board arrives",
+      "status": "CONFIRMED",
+      "value": "PAUSED_BY_OWNER_WAITING_FOR_BOARD"
     }
   ]
 }

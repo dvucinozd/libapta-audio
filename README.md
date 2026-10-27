@@ -28,6 +28,13 @@ standard and its portable ISO C11 reference implementation.
 > This branch is not a tagged
 > 1.1 release.
 
+> **Rust continuation — 2026-10-27:** development on `rust-rewrite` is paused
+> at the owner's request until the JC1060P470C_I_W_Y board arrives. RC-04A
+> software preparation is complete; the five audited target images are
+> `BUILD_ONLY_LINKCHECK`, with `execution_ready=false`. Start with the
+> [board-arrival handoff](docs/rust/BOARD-ARRIVAL-HANDOFF.md) and
+> [current Rust status](docs/rust/PRODUCT-FIRST-STATUS.json).
+
 APTA provides progressive, bounded and portable audio analysis for waveform,
 tempo, local beatgrid, global beatgrid and dynamic-tempo data. The host retains
 control of decoding, playback, storage, scheduling and device resources.
@@ -218,6 +225,13 @@ validation, and bounded selective stream I/O. Native result ownership and
 scheduling remain incomplete. It does not yet replace the C API/ABI or complete DSP.
 See the [migration checklist](docs/rust/MIGRATION.md) and
 [Rust build and verification instructions](rust/README.md).
+
+The [Rust documentation index](docs/rust/README.md) distinguishes current status
+from frozen plans, registrations and measured results. Synthetic host results
+and target compile/link evidence do not establish musical accuracy, physical
+memory/timing or product readiness. RC-04B still needs exact-unit/recovery
+evidence and qualified runtime instrumentation before physical execution;
+board arrival alone does not close those gates.
 
 ## Building and testing
 

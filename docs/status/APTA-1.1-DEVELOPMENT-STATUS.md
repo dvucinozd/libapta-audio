@@ -1,6 +1,6 @@
 # APTA 1.1 development status
 
-- **Branch:** `1.1.0` — the branch ref is authoritative for the current development head; this document intentionally does not mirror a mutable head SHA.
+- **C development branch:** `1.1.0` — the branch ref is authoritative for that development line; this document intentionally does not mirror a mutable head SHA. The separate native continuation uses `rust-rewrite`.
 - **Last DSP/serialization qualification baseline:** `d17c3671ff5318d58847643537d7e0da7667e262` (native key/meter CLI integration and MTRD/grid fixes).
 - **Current qualification-tooling baseline at this audit:** `2953401f6ee46fcf966f0b384364e510b974bf4e` (privacy-safe corpus runner plus canonical corpus preparation/labeling); its PR exact-head CI, Security, native all-feature smoke, corpus preparation/labeling, tempo and confidence workflows passed.
 - **Release status:** development; no `v1.1.0` release claim. `VERSION` remains `1.0.1`.
@@ -131,6 +131,18 @@ The stable authority remains APTA 1.0 / package 1.0.1. The frozen 1.0 normative 
 
 ## Experimental native Rust consumer continuation
 
+**Current handoff — 2026-10-27:** development on `rust-rewrite` is paused at the
+owner's request until the JC1060P470C_I_W_Y arrives. RC-04A-1/2/3 software
+preparation is complete. The [clean five-image package](../rust/PRODUCT-TARGET-ADAPTER-PACKAGE.md)
+passes compile/link and integrity checks, with `execution_ready=false` and
+`NOT_QUALIFIED`. There is no Guition execution, physical budget or product GO.
+RC-04B still requires exact-unit/recovery/layout and qualified trial/control/
+telemetry/numerical/cancel capabilities. Use the
+[board-arrival handoff](../rust/BOARD-ARRIVAL-HANDOFF.md),
+[live status](../rust/PRODUCT-FIRST-STATUS.json) and
+[Rust index](../rust/README.md) for continuation. The dated consumer milestones
+below retain their original evidence scope and do not supersede this handoff.
+
 The additive Rust rewrite now includes constant-storage WAV framing and block
 PCM decode, consumed directly by Pajoniiir's experimental two-pass hashed source
 adapter. See [the migration record](../rust/MIGRATION.md#bounded-streaming-wav-consumer--2026-10-04)
@@ -140,7 +152,7 @@ consumer software progress does not close the original DSP accuracy, embedded
 hardware/release or deferred C compatibility gates above.
 
 The native request-reservation and PCM-cursor continuation is recorded in
-[the latest migration section](../rust/MIGRATION.md#native-request-reservation-and-pcm-cursor-consumer--2026-10-05).
+[the dated migration section](../rust/MIGRATION.md#native-request-reservation-and-pcm-cursor-consumer--2026-10-05).
 It expands software ownership and multi-format consumer evidence; the same
 production, hardware, DSP and C compatibility gates remain in force.
 

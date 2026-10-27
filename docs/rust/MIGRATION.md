@@ -1,28 +1,41 @@
 # Native Rust migration
 
-Status: development checkpoint 2026-10-27; no release, ABI replacement, full profile,
+Status: paused by the owner pending board arrival, 2026-10-27;
+no release, ABI replacement, full profile,
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-04B prerequisites, blocked on runtime capabilities and exact unit.**
+**PAUSED_BY_OWNER_WAITING_FOR_BOARD.** The owner requested documentation closeout,
+commit/push and continuation when the JC1060P470C_I_W_Y arrives. Start with the
+[board-arrival handoff](BOARD-ARRIVAL-HANDOFF.md),
+[live machine status](PRODUCT-FIRST-STATUS.json) and [Rust index](README.md).
+No further development or experiment starts while waiting.
+
+**Next after arrival: RC-04B prerequisites**, still blocked on runtime
+capabilities and exact-unit/recovery/layout evidence. Board arrival alone is
+insufficient for physical trials or product GO.
 RC-04A-3 is complete for adapter/link/package preparation:
 [clean package result](PRODUCT-TARGET-ADAPTER-PACKAGE.md) and
 [machine receipt](PRODUCT-TARGET-ADAPTER-PACKAGE.json). All five target ELF/map/
-disassembly variants build once from clean pushed489e5af;49 files/39411271B and
-the separate audit pass.14 source files,24174 registry files,tools and395 frozen
-bindings recheck. Seven debug/release adapter tests,six WSL package controls,
+disassembly variants built once from clean pushed `489e5af`; 49 files / 39,411,271 B
+and the separate audit pass. Fourteen source files, 24,174 registry files, tools
+and 395 frozen bindings recheck. Seven debug/release adapter tests, six WSL package controls,
 19 telemetry controls and Rust-producer/Python-parser interoperability pass.
 The [implementation](PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.md) supplies nominal
-HAL microsecond clock,phase budgets,timing result fences and null-metric producer.
-Boot idles;retained probe entry is uncalled,single-use link scaffolding. Package
-execution_ready=false/NOT_QUALIFIED;no board was flashed,booted or measured.
-Physical execution still requires exact-unit/recovery/layout,qualified arming/
-transport,reusable complete warm-up/trial scheduling,numeric verification/digests,
-resident BSP/allocator/stack/error metrics and asynchronous requester. These are
-explicit remaining runtime capabilities,not implied by the ELF. Parent RC-04,
-all nine PF01 allowances,model rights/provenance and product GO remain open.
+HAL microsecond clock, phase budgets, timing result fences and null-metric producer.
+Boot idles; the retained probe entry is uncalled, single-use link scaffolding.
+Package `execution_ready=false` / `NOT_QUALIFIED`; no board was flashed, booted or
+measured. Physical execution still requires exact-unit/recovery/layout, qualified
+arming/transport, reusable complete warm-up/trial scheduling, numeric verification/
+digests, resident BSP/allocator/stack/error metrics and an asynchronous requester.
+These are explicit remaining runtime capabilities, not implied by the ELF.
+Parent RC-04, all nine PF01 allowances, model rights/provenance and product GO
+remain open. The pause does not change recorded test or experiment verdicts.
+
+### Completed continuation checkpoints and preserved dependencies
+
 RC-04A-2 is complete:[implementation](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.md)
 and [machine receipt](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.json). Registration
 9ece658 preceded the standalone safe no_std crate. Copy,both projection dtypes and
@@ -39,8 +52,9 @@ relations,explicit null metrics and immutable raw evidence output. Nineteen
 synthetic integrity/CLI tests pass on Windows Python3.11.2 and WSL Python3.12.3.
 The example returns VALID_WITH_UNKNOWN_METRICS/NOT_QUALIFIED;no device or target
 code ran. See the [implementation receipt](PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json).
-Parent RC-04 remains incomplete. RC-04A-3 must bind timer,producer,placement and
-actual target code generation without bypassing board guards or activating a model.
+Parent RC-04 remains incomplete. RC-04A-3 now binds the nominal timer, bounded
+producer and real target code generation; physical placement, calibration and
+execution remain RC-04B obligations. No board guard or model activation changed.
 The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
 [machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
 packages, paths, commands, validation, stop conditions and commit/push boundaries.
@@ -69,8 +83,9 @@ Physical RC-04B still requires observed unit/revision/recovery plus qualified BS
 allocator/largest-block/stack/timer/cancel capabilities and a separately frozen
 probe implementation. The prepared protocol is NOT_EXECUTION_READY. No target
 build,device,model or new synthetic stage ran during this source-only preparation.
-RC-05 may record WAIT if prerequisites remain absent;RC-06 cannot start from that
-decision. Avoid repeating unchanged audits or creating another toy stage while waiting.
+After development resumes, RC-05 may record WAIT if prerequisites remain absent;
+RC-06 cannot start from that decision. Avoid repeating unchanged audits or
+creating another toy stage while waiting.
 After HS06, prioritize the whole-pipeline resource/rights decision and exact-board
 budgets before another large implementation. Hardware/rights blockers must remain
 explicit; do not replace them with an unbounded series of small synthetic stages.

@@ -6,10 +6,23 @@ crate performs its own PCM, waveform, default musical analysis, WAV and containe
 work; it does not link C.
 It is not yet a full API/ABI or conformance replacement.
 
-The [current product-first plan](../docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md)
-owns continuation: first define the deliverable, resource budgets and output
-contract, then qualify one algorithm and its native consumer path. Earlier dated
-checkpoints in the migration document remain historical evidence.
+**Continuation — 2026-10-27: PAUSED_BY_OWNER_WAITING_FOR_BOARD.** Development
+resumes when the JC1060P470C_I_W_Y arrives. Follow the
+[board-arrival handoff](../docs/rust/BOARD-ARRIVAL-HANDOFF.md),
+[live status](../docs/rust/PRODUCT-FIRST-STATUS.json) and
+[documentation index](../docs/rust/README.md).
+RC-04A-1/2/3 software preparation is complete. The
+[five-variant target package](../docs/rust/PRODUCT-TARGET-ADAPTER-PACKAGE.md)
+passes build/link and integrity checks; its boot path idles and its retained
+probe entry is uncalled. It is not runtime measurement firmware.
+
+The [product-first plan](../docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md)
+and [ordered RC continuation plan](../docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.md)
+are initial snapshots; their original "next" instructions do not override live
+progress or the owner's pause. The next package is RC-04B prerequisite resolution
+after board arrival. Physical budgets, runtime trial integration, model
+rights/provenance and product activation remain open. Earlier dated checkpoints
+below retain their original scope and test counts.
 
 The optional `experimental-s6-history` feature adds bounded caller-owned window
 diagnostics through `Session::enable_global_history`. See the

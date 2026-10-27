@@ -4,6 +4,33 @@ The desktop tools are informative integrations built on the same stable
 `apta::core` implementation. They are not separate DSP implementations and are
 not stable exported package components.
 
+## Rust target preparation tools — 2026-10-27
+
+Native development is paused by the owner until board arrival. See the
+[board-arrival handoff](../docs/rust/BOARD-ARRIVAL-HANDOFF.md) and
+[Rust documentation index](../docs/rust/README.md) before using experimental tools.
+
+- [`apta_target_probe_telemetry.py`](apta_target_probe_telemetry.py) validates an
+  explicit manifest and dedicated bounded JSONL log, retaining unknown metrics
+  as null. Parser validity alone does not establish physical qualification.
+- [`apta_target_probe_package.py`](apta_target_probe_package.py) builds and
+  verifies the five separate `BUILD_ONLY_LINKCHECK` images. `build` uses the
+  pinned Linux/WSL toolchain, locked offline dependencies and new external
+  output/build directories. `verify --package PATH` checks a retained package.
+  Neither command flashes, captures a serial port or runs trials. Capture
+  templates still require actual unit/schedule/arming data and are not ingest
+  manifests. `execution_ready` remains false.
+
+The [frozen package result](../docs/rust/PRODUCT-TARGET-ADAPTER-PACKAGE.md) binds
+the clean build source and external artifact hashes. Preserve those artifacts;
+rebuilds or later runtime firmware need their own source/identity records. The
+standalone `rust/probes/resource-core` and `rust/probes/target-adapter` crates
+are outside the default workspace and need their own explicit manifests for
+tests/builds. No new build, model/corpus run or physical test is requested while
+development is paused.
+
+## Existing desktop and experimental workflows
+
 Build them with the native adapters:
 
 ```bash

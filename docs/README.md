@@ -9,6 +9,13 @@ For the current project state, start with
 that identify a source commit or CI run are milestone evidence snapshots; their
 test counts and forward-looking sections describe that recorded baseline.
 
+For the `rust-rewrite` continuation, use the [Rust index](rust/README.md),
+[live machine status](rust/PRODUCT-FIRST-STATUS.json) and
+[board-arrival handoff](rust/BOARD-ARRIVAL-HANDOFF.md). As of 2026-10-27,
+RC-04A software preparation is complete and development is paused by the owner
+until the JC1060P470C_I_W_Y arrives. RC-04B physical/runtime gates remain open;
+the clean five-image package is build/link evidence only.
+
 The root README, the whole-project roadmap status and documents labelled as
 current implementation contracts are maintained against the current source
 tree. Evidence snapshots retain their recorded commit, CI run and test totals
@@ -38,6 +45,8 @@ are maintained in [`../CONTRIBUTING.md`](../CONTRIBUTING.md),
 - [`reviews/`](reviews/) — technical audits and resolved-review records.
 - [`scheduler/`](scheduler/README.md) — reference scheduler policy.
 - [`status/`](status/README.md) — current roadmap status and stage evidence snapshots.
+- [`rust/`](rust/README.md) — native Rust continuation, current handoff and frozen
+  product/experiment evidence.
 - [`decisions/`](decisions/) — reserved Architecture Decision Record
   directory.
 - [`roadmap/`](roadmap/) — original implementation plans and stage definitions.
