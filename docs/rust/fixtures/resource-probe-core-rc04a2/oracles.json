@@ -1,0 +1,50 @@
+{
+  "assets": {
+    "copy.u32le": {
+      "bytes": 65536,
+      "sha256": "4a295a426d5e466e621f2025f7c8fcd60c8e58245590b35eb255538a7050ad3e"
+    },
+    "nonlinear.f64le": {
+      "bytes": 224,
+      "sha256": "3ab3253b10d6526ecca86731a2e6b6472f23718d528ce685e1d96c65d55d42f3"
+    },
+    "projection.i32le": {
+      "bytes": 9600,
+      "sha256": "709e2f9067a60c7cb8748c300829f93e29c490b585e1e16589bc4977acb4c910"
+    }
+  },
+  "counts": {
+    "copy_passes": 32,
+    "copy_words": 16384,
+    "nonlinear_outputs_per_kind": 28672,
+    "nonlinear_palette": 7,
+    "projection_MACs": 360000,
+    "projection_outputs": 2400
+  },
+  "format": "libapta-resource-probe-core-oracles-1",
+  "independent_verification": "verify.py,Decimal precision120 and recurrence/Fraction projection reconstruction",
+  "log_input_bits": [
+    0,
+    2147483648,
+    1,
+    1028443341,
+    1051372203,
+    1056964608,
+    1065353216
+  ],
+  "nonlinear_order": [
+    "sigmoid",
+    "tanh",
+    "log",
+    "log_div15"
+  ],
+  "projection": {
+    "denominator": 2048,
+    "f32_sha256": "8e6c387147f593f7c774626e9eacc22aeaa32e29c8eb4f40812d4477bf5042c3",
+    "f64_sha256": "2471b42ecc84cfcb06e3ef6ef836323d66b42a75161acae248ed85f26ce22518",
+    "inputs": 150,
+    "outputs": 150,
+    "rows": 16
+  },
+  "source": "Public fixed mathematical recipes only;no model/audio data"
+}

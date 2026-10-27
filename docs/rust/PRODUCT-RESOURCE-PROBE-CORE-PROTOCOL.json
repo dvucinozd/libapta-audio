@@ -1,0 +1,99 @@
+{
+  "authority_bindings": {
+    "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650",
+    "docs/rust/PRODUCT-RC04-SOFTWARE-SPLIT.md": "691b70d2aa2015d3fb6526e43cbd0622cf9010f7f95e8c7412fdeffb3025c28f",
+    "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0",
+    "docs/rust/PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json": "029f7394c7f89ce64a548739da92877ce9c02d7fa8e4abe0d2e3105aefb77c5a"
+  },
+  "backend": {
+    "default_features": false,
+    "installation_allowed": false,
+    "libm": "=0.2.16",
+    "source": "Already cached local registry package"
+  },
+  "benchmark_execution": false,
+  "cases": {
+    "copy": {
+      "passes": 32,
+      "units": 1589249,
+      "words": 16384
+    },
+    "nonlinear": {
+      "activation_absolute": 2e-06,
+      "activation_relative": 2e-05,
+      "kinds": [
+        "Sigmoid",
+        "Tanh",
+        "Log",
+        "LogDiv15"
+      ],
+      "log_absolute": 4e-13,
+      "outputs_per_kind": 28672,
+      "units_per_kind": 57345,
+      "zero_log": "exact -Inf"
+    },
+    "projection": {
+      "MACs": 360000,
+      "input_dim": 150,
+      "output_dim": 150,
+      "required_elements": [
+        2400,
+        22500,
+        2400
+      ],
+      "rows": 16,
+      "units": 387301
+    }
+  },
+  "date": "2026-10-27",
+  "device_execution": false,
+  "document": {
+    "path": "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.md",
+    "sha256": "157682f3d55a0eef6f3c0282cff14a3b4761192136d1518d16cb948c71be098e"
+  },
+  "format": "libapta-resource-probe-core-registration-1",
+  "id": "RC-04A-2",
+  "next": "Implement isolated no_std fixed probe core;test/freeze/push before target adapter",
+  "oracles": {
+    "docs/rust/fixtures/resource-probe-core-rc04a2/.gitattributes": {
+      "bytes": 45,
+      "sha256": "a47c5e296ec238b2af309e2cdac7e15f59c3ce6b70fcc98f4bb882eb2511c0e1"
+    },
+    "docs/rust/fixtures/resource-probe-core-rc04a2/copy.u32le": {
+      "bytes": 65536,
+      "sha256": "4a295a426d5e466e621f2025f7c8fcd60c8e58245590b35eb255538a7050ad3e"
+    },
+    "docs/rust/fixtures/resource-probe-core-rc04a2/nonlinear.f64le": {
+      "bytes": 224,
+      "sha256": "3ab3253b10d6526ecca86731a2e6b6472f23718d528ce685e1d96c65d55d42f3"
+    },
+    "docs/rust/fixtures/resource-probe-core-rc04a2/oracles.json": {
+      "bytes": 1340,
+      "sha256": "1a3b9e68a2e3e1b301162bdf63988aa060a17e9bd41d7db0b99e5ec837831ae5"
+    },
+    "docs/rust/fixtures/resource-probe-core-rc04a2/projection.i32le": {
+      "bytes": 9600,
+      "sha256": "709e2f9067a60c7cb8748c300829f93e29c490b585e1e16589bc4977acb4c910"
+    },
+    "docs/rust/fixtures/resource-probe-core-rc04a2/verify.py": {
+      "bytes": 3305,
+      "sha256": "67bc128f8914fcb173158909dfbb3e28bd482c938d2a202572c3acfe241c394e"
+    }
+  },
+  "planned_source_paths": [
+    "rust/probes/resource-core/Cargo.toml",
+    "rust/probes/resource-core/Cargo.lock",
+    "rust/probes/resource-core/src/lib.rs",
+    "rust/probes/resource-core/tests/probes.rs"
+  ],
+  "source_baseline": "7d1d7a3167c695b61858ec59812bc0ff88059c39",
+  "source_default_changed": false,
+  "status": "REGISTERED_NOT_IMPLEMENTED",
+  "test_quotas": [
+    1,
+    31,
+    4096,
+    "usize::MAX"
+  ],
+  "trained_model": false
+}

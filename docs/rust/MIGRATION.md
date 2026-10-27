@@ -7,6 +7,12 @@ reference. This document owns the migration checklist and next-step handoff.
 ## Current continuation plan — 2026-10-27
 
 **Current next: RC-04A-2, prepare the fixed HAL-independent probe arithmetic.**
+RC-04A-2 [registration](PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.md) freezes the
+standalone no_std crate paths,existing libm0.2.16 backend,copy/projection/nonlinear
+recipes,caller-owned buffers,exact units and cancellation/lifetime tests. Public
+copy16384-word,projection2400-output and28 nonlinear reference scalars are verified
+independently before code. Registration commit/push precedes implementation;
+no candidate,device or trained model has run at this registration checkpoint.
 The accepted [RC-04 split](PRODUCT-RC04-SOFTWARE-SPLIT.md) permits host software
 preparation while the physical RC-04B prerequisites remain open. RC-04A-1 is
 complete: [telemetry V1](PRODUCT-TARGET-TELEMETRY-V1.md) and its offline parser

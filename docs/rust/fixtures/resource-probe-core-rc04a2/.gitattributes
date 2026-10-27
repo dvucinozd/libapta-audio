@@ -1,0 +1,3 @@
+*.i32le binary
+*.u32le binary
+*.f64le binary

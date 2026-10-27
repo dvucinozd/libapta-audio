@@ -1,7 +1,7 @@
 {
-  "active_phase": "RC-04A-1_TELEMETRY_INTEGRITY",
-  "active_phase_status": "COMPLETE_HOST_INTEGRITY_ONLY",
-  "active_phase_verdict": "HOST_FORMAT_PARSER_TESTS_PASS_PHYSICAL_GATES_OPEN",
+  "active_phase": "RC-04A-2_RESOURCE_CORE_REGISTRATION",
+  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
+  "active_phase_verdict": "PUBLIC_MATH_REGISTRATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
@@ -45,7 +45,7 @@
     "status": "INITIAL_PLAN_SNAPSHOT_PROGRESS_TRACKED_IN_CONTINUATION_PROGRESS"
   },
   "continuation_progress": {
-    "execution_scope": "RC04A1 neutral host telemetry/parser synthetic tests only;no device/target build/model/corpus;parent RC04 not complete",
+    "execution_scope": "RC04A2 public math/reference registration;candidate implementation not yet added",
     "last_completed_package": "RC-03",
     "last_completed_substep": "RC-04A-1",
     "next_package": "RC-04A-2",
@@ -128,10 +128,13 @@
             "status": "COMPLETE"
           },
           {
-            "evidence": [],
+            "evidence": [
+              "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.md",
+              "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.json"
+            ],
             "id": "RC-04A-2",
-            "source_revision": null,
-            "status": "NOT_RUN"
+            "source_revision": "7d1d7a3167c695b61858ec59812bc0ff88059c39",
+            "status": "REGISTERED_NOT_IMPLEMENTED"
           },
           {
             "evidence": [],
@@ -627,9 +630,9 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Register exact pure-core paths,independent fixed arithmetic/oracles,work units/cancellation/capacity contracts,then implement fixed copy/math probes under accepted RC04 software split;no board/provider or trained model activation",
+    "action": "After registration commit/push implement standalone no_std resource-core crate with fixed caller buffers,libm0.2.16,registered units/cancel/oracles;no device timing or model",
     "large_port_allowed": false,
-    "mode": "HAL_INDEPENDENT_FIXED_PROBE_PREPARATION",
+    "mode": "IMPLEMENT_REGISTERED_FIXED_PROBE_CORE",
     "phase": "RC-04A-2",
     "physical_phase": "RC-04B",
     "physical_state": "BLOCKED_EXTERNAL_AND_CAPABILITY",
@@ -840,6 +843,11 @@
     "sha256": "691b70d2aa2015d3fb6526e43cbd0622cf9010f7f95e8c7412fdeffb3025c28f"
   },
   "real_execution_readiness": "NOT_READY",
+  "resource_probe_core_registration": {
+    "path": "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.json",
+    "sha256": "db3aeff785a57c3536bda5ec3dad65b008f32f77fd3e92f99ad7daa8c47f4880",
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "reviewed_source_sha256": {
     "docs/rust/DENSE-DECODER-DD05-20261023.md": "cfaa37c35a0d2283fda5faec2b2baf187e68c154cb6c44cb736dc0770ab2a16d",
     "docs/rust/METER-CONTEXT-P4-BUDGET-20261025.md": "da2565e17803d61e64a7807dd0d69b723948b8ecc0834bdc48347bc46e66694d",
