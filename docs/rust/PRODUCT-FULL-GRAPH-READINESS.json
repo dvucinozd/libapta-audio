@@ -1,0 +1,420 @@
+{
+  "HS05_assets_verified": 28,
+  "consumer": {
+    "files": {
+      "docs/M1_RUST_ARCHITECTURE.md": {
+        "bytes": 7078,
+        "sha256": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94"
+      },
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": {
+        "bytes": 22139,
+        "sha256": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": {
+        "bytes": 2235,
+        "sha256": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/README.md": {
+        "bytes": 7482,
+        "sha256": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": {
+        "bytes": 15672,
+        "sha256": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36"
+      },
+      "firmware-rust/crates/ruzina-track-analysis/src/lib.rs": {
+        "bytes": 22004,
+        "sha256": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+      }
+    },
+    "libapta_pin": "25d09de364e9507532c0508c838a8fecf0772d13",
+    "local_checkout_not_used_as_current_source": true,
+    "origin_main_verified": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+    "runtime_experiment_adoption": "NOT_IMPLEMENTED"
+  },
+  "date": "2026-10-27",
+  "decision": {
+    "PF04": "NOT_RUN",
+    "full_trained_graph_native_product": "NO_GO_GATES_OPEN_NOT_A_MUSICAL_REJECTION",
+    "large_port_allowed": false,
+    "narrow_artificial_probability_adapter_registration": "GO_REGISTRATION_ONLY"
+  },
+  "declared_composition_scenario": {
+    "components": {
+      "HMM_typed_graph_vectors_with_classes": 235304,
+      "PF01_declared_overlap_once": 898890,
+      "materialized_f64_densities": 720000,
+      "postprocessor_state_map": 33660,
+      "reserved_event_scratch": 24576,
+      "retained_f32_probabilities": 360000,
+      "trace_workspace_including_60000_path": 16575840
+    },
+    "excludes": [
+      "additional raw asset residency/copies",
+      "allocator capacity/alignment/fragmentation",
+      "codec/UI/USB/audio/DMA and stack reserves",
+      "full neural scratch if retained",
+      "retained/pending product copies"
+    ],
+    "includes_graph_numeric_and_derived_classes_plus_postprocessor_map": true,
+    "placement_or_allocator_capacities_proven": false,
+    "scenario_is_measured_peak": false,
+    "sum_bytes": 18848270,
+    "weights_not_reclaimed_add_at_least": 3068500,
+    "without_PF01_overlap_bytes": 17949380
+  },
+  "document": {
+    "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md",
+    "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2"
+  },
+  "evidence_directory": "D:\\AI\\LIBAPTA\\outputs\\full-graph-readiness-20261027",
+  "evidence_manifest": {
+    "consumer/docs/M1_RUST_ARCHITECTURE.md": {
+      "bytes": 7078,
+      "sha256": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94"
+    },
+    "consumer/docs/M1_RUST_PRODUCT_REQUIREMENTS.md": {
+      "bytes": 22139,
+      "sha256": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537"
+    },
+    "consumer/firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": {
+      "bytes": 2235,
+      "sha256": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48"
+    },
+    "consumer/firmware-rust/crates/ruzina-apta-adapter/README.md": {
+      "bytes": 7482,
+      "sha256": "50aef8b3b405328c59340ce19d5fffb6050fb44a65af0cb42c0bdea2e1cbcfa8"
+    },
+    "consumer/firmware-rust/crates/ruzina-apta-adapter/src/lib.rs": {
+      "bytes": 15672,
+      "sha256": "0321b125ade1b2182f8178b83d0e4f6373bec0be0edac315dfdcac97cf04aa36"
+    },
+    "consumer/firmware-rust/crates/ruzina-track-analysis/src/lib.rs": {
+      "bytes": 22004,
+      "sha256": "9fcd8b351a38ce5c22a73e998062aeef612f7d4344c2be7c278cd5af06df547a"
+    },
+    "model-pinned-exact.py": {
+      "bytes": 10375,
+      "sha256": "8e675773974c304faeebc355169f99ba0c5dc5ee208586b37dd39c4524851956"
+    },
+    "remote/branch-main.json": {
+      "bytes": 4748,
+      "sha256": "997d5241cb4f8aea045b7ce162190859327294ea30cdcb864c1e6f85bb3c3276"
+    },
+    "remote/comments-1.json": {
+      "bytes": 11487,
+      "sha256": "2a509360ba25a9c088b4814891611af0ba61d813503732e727860c0bcc69b89a"
+    },
+    "remote/comments-2.json": {
+      "bytes": 4729,
+      "sha256": "d83989dd07e4523fc0c239bc233c7ef280a4c8644e99ca78bb1c7f5c585e0a9c"
+    },
+    "remote/issue-1.json": {
+      "bytes": 2526,
+      "sha256": "ee71e265857a5ff2c6750c7af5d7fd161054af5ce884b5a645bc2030e5489ee2"
+    },
+    "remote/issue-2.json": {
+      "bytes": 2432,
+      "sha256": "54bcc0e07e29c738bdd3f2a421f72cc0240a0568c4174c6518889ff933bd9a48"
+    },
+    "remote/license-comments-4.json": {
+      "bytes": 3202,
+      "sha256": "eeccc87020d29747a53c9b60d746ab0ee1dd34472f7478c32827b36c2866a4e4"
+    },
+    "remote/license-issue-4.json": {
+      "bytes": 2646,
+      "sha256": "61e21289e9e800d32a05a305291b25e6f5f2d742a512f3904eef7fc1d21c9305"
+    },
+    "remote/model-blob-response.json": {
+      "bytes": 10819,
+      "sha256": "0350778f1c90fc233e9e05cdaf9ddf00e14d589d0e8395433244eebf33a1af14"
+    },
+    "remote/pinned-tree.json": {
+      "bytes": 8963,
+      "sha256": "20679a196c06d43086fe22fd2050a356c2d9fbafc8dd576c3fc472d020b83ece"
+    },
+    "remote/repository.json": {
+      "bytes": 5279,
+      "sha256": "0c1be2d1380f760964c6343f19b127ae00c13fe93503463f981023ae01404bdc"
+    },
+    "static-audit.json": {
+      "bytes": 9343,
+      "sha256": "3f1946f50eb56dac9b11faed9512fbfe737d495ad72c820a9c202c4476972a05"
+    }
+  },
+  "execution": {
+    "candidate_code_changed": false,
+    "candidate_or_model_executed": false,
+    "checkpoint_weight_bytes_read": false,
+    "consumer_branch_pin_provider_changed": false,
+    "corpus_or_labels_read": false,
+    "device_accessed": false,
+    "external_message_sent": false
+  },
+  "format": "libapta-full-graph-readiness-static-audit-1",
+  "frozen_authorities_verified": 40,
+  "frozen_evidence_sha256": {
+    "docs/rust/PRODUCT-BUDGETS.json": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380",
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7",
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b",
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539",
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70",
+    "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.json": "02d1aa9eeabee380c7fd433dbefb2679aece22e203308ae2eaa2f55a1a7ca59c",
+    "docs/rust/PRODUCT-HOST-GRID-RESULT.json": "bb0ee548c0a9591f628a4d2729a7b2f02829f6fe781ef5a593c8e996f3084e06",
+    "docs/rust/PRODUCT-HOST-HMM-RESULT.json": "fcc63ee24f25dda3f123b67b04d7479a90b193e01a178269a8d160a53de076ef",
+    "docs/rust/PRODUCT-HOST-NEURAL-RESULT.json": "4bf13da8feb6b69c24b7421afe02e26443036656ec7185e353585fd6e15174a9",
+    "docs/rust/PRODUCT-HOST-RESAMPLER-RESULT.json": "b3f99ac9b189bca82b1eb51d749a22ae2961d5812b5779ea6c99e5b984d2fd6c",
+    "docs/rust/PRODUCT-SCOPE.md": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98"
+  },
+  "frozen_prior_assets_verified": 135,
+  "hardware_availability": "last owner report unavailable;no device check this audit",
+  "join_contract": {
+    "HMM_density_order": [
+      "nonbeat",
+      "beat",
+      "downbeat"
+    ],
+    "HMM_path_view_pins_workspace": true,
+    "HS02_probability_sum_tolerance": 4.76837158203125e-07,
+    "HS05_probability_sum_tolerance": 2e-06,
+    "NN_probability_order": [
+      "beat",
+      "downbeat",
+      "nonbeat"
+    ],
+    "composition_implemented": false,
+    "density_formulas": [
+      "ln(f64(p_non)/15)",
+      "ln(f64(p_beat))",
+      "ln(f64(p_down))"
+    ],
+    "materialized_density_extra_bytes": 720000,
+    "row_geometry_checks": [
+      {
+        "K": 0,
+        "N": 0,
+        "R": 0,
+        "fs": 44100
+      },
+      {
+        "K": 1,
+        "N": 1,
+        "R": 1,
+        "fs": 44100
+      },
+      {
+        "K": 1,
+        "N": 2,
+        "R": 1,
+        "fs": 44100
+      },
+      {
+        "K": 161,
+        "N": 321,
+        "R": 1,
+        "fs": 44100
+      },
+      {
+        "K": 221,
+        "N": 441,
+        "R": 1,
+        "fs": 44100
+      },
+      {
+        "K": 441,
+        "N": 882,
+        "R": 1,
+        "fs": 44100
+      },
+      {
+        "K": 13230000,
+        "N": 26459999,
+        "R": 30000,
+        "fs": 44100
+      },
+      {
+        "K": 13230000,
+        "N": 26460000,
+        "R": 30000,
+        "fs": 44100
+      },
+      {
+        "K": 0,
+        "N": 0,
+        "R": 0,
+        "fs": 48000
+      },
+      {
+        "K": 1,
+        "N": 1,
+        "R": 1,
+        "fs": 48000
+      },
+      {
+        "K": 1,
+        "N": 2,
+        "R": 1,
+        "fs": 48000
+      },
+      {
+        "K": 148,
+        "N": 321,
+        "R": 1,
+        "fs": 48000
+      },
+      {
+        "K": 203,
+        "N": 441,
+        "R": 1,
+        "fs": 48000
+      },
+      {
+        "K": 406,
+        "N": 882,
+        "R": 1,
+        "fs": 48000
+      },
+      {
+        "K": 13230000,
+        "N": 28799999,
+        "R": 30000,
+        "fs": 48000
+      },
+      {
+        "K": 13230000,
+        "N": 28800000,
+        "R": 30000,
+        "fs": 48000
+      }
+    ],
+    "short_oracle_rows_checked": 90,
+    "short_public_oracle_max_sum_error": 7.450580596923828e-08,
+    "zero": "negative infinity,no epsilon"
+  },
+  "next": "Register HS06 named probability-to-density/support/ownership bridge using public math only;materialize explicit bounded density storage for current HMM API;preserve old sources/gates",
+  "next_registration_files": [
+    "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.md",
+    "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json",
+    "docs/rust/fixtures/product-host-probability-hs06/"
+  ],
+  "physical_budget_unknowns": [
+    "internal_RAM_analysis_reserve",
+    "PSRAM_analysis_reserve",
+    "model_storage_reserve",
+    "stack_future_executor_reserve",
+    "decoder_frontend_activations_trace",
+    "owned_pending_retained_copy_reserve",
+    "source_codec_cache_USB_UI_reserve",
+    "cleanup_and_bank_lease_reclamation_deadline",
+    "fragmentation_and_safety_reserve"
+  ],
+  "public_refresh": {
+    "annotation_issue2_comments": 2,
+    "availability_issue1_comments": 5,
+    "comments": 2,
+    "issue_state": "open",
+    "license_gate": "LICENSE_UNRESOLVED",
+    "license_issue": 4,
+    "maintainer_comments": 0,
+    "owner_availability_and_planned_annotations_are_not_a_grant_or_membership_manifest": true,
+    "provenance_gate": "INDEPENDENCE_UNRESOLVED",
+    "repository_license": null,
+    "tree_entries": 36,
+    "tree_truncated": false
+  },
+  "remote_snapshots": {
+    "branch-main.json": {
+      "bytes": 4748,
+      "sha256": "997d5241cb4f8aea045b7ce162190859327294ea30cdcb864c1e6f85bb3c3276"
+    },
+    "comments-1.json": {
+      "bytes": 11487,
+      "sha256": "2a509360ba25a9c088b4814891611af0ba61d813503732e727860c0bcc69b89a"
+    },
+    "comments-2.json": {
+      "bytes": 4729,
+      "sha256": "d83989dd07e4523fc0c239bc233c7ef280a4c8644e99ca78bb1c7f5c585e0a9c"
+    },
+    "issue-1.json": {
+      "bytes": 2526,
+      "sha256": "ee71e265857a5ff2c6750c7af5d7fd161054af5ce884b5a645bc2030e5489ee2"
+    },
+    "issue-2.json": {
+      "bytes": 2432,
+      "sha256": "54bcc0e07e29c738bdd3f2a421f72cc0240a0568c4174c6518889ff933bd9a48"
+    },
+    "license-comments-4.json": {
+      "bytes": 3202,
+      "sha256": "eeccc87020d29747a53c9b60d746ab0ee1dd34472f7478c32827b36c2866a4e4"
+    },
+    "license-issue-4.json": {
+      "bytes": 2646,
+      "sha256": "61e21289e9e800d32a05a305291b25e6f5f2d742a512f3904eef7fc1d21c9305"
+    },
+    "model-blob-response.json": {
+      "bytes": 10819,
+      "sha256": "0350778f1c90fc233e9e05cdaf9ddf00e14d589d0e8395433244eebf33a1af14"
+    },
+    "pinned-tree.json": {
+      "bytes": 8963,
+      "sha256": "20679a196c06d43086fe22fd2050a356c2d9fbafc8dd576c3fc472d020b83ece"
+    },
+    "repository.json": {
+      "bytes": 5279,
+      "sha256": "0c1be2d1380f760964c6343f19b127ae00c13fe93503463f981023ae01404bdc"
+    }
+  },
+  "shape_and_cost": {
+    "MAC_ratio_full_to_toy": 10101.71052631579,
+    "affine_MACs_600_seconds": 23031900000,
+    "affine_MACs_per_row": {
+      "LSTM": 720000,
+      "conv": 5580,
+      "head": 450,
+      "linear0": 41700
+    },
+    "channel_major_flat": 278,
+    "conv_channels": 2,
+    "conv_kernel": 10,
+    "conv_length": 279,
+    "hidden": 150,
+    "input": 288,
+    "layers": 4,
+    "minimum_MACs_per_second_if_all60s_assigned": 383865000,
+    "parameters": {
+      "LSTM": 724800,
+      "conv": 22,
+      "head": 453,
+      "linear0": 41850
+    },
+    "pool_length_per_channel": 139,
+    "scalar_nonlinear_calls_600_seconds": 90090000,
+    "scalar_nonlinear_calls_per_row": 3003,
+    "timing_extrapolation_allowed": false,
+    "total_affine_MACs_per_row": 767730,
+    "total_parameters": 767125,
+    "toy_MACs_per_row": 76,
+    "weights_f32_bytes": 3068500
+  },
+  "silicon_revision": "UNOBSERVED",
+  "source_files": {
+    "rust/runtime/Cargo.toml": "9a4aea4860eafe6a88d070df9f715e3d0f7c2884e205a66cd26d594cdacedccd",
+    "rust/runtime/src/compact_frontend.rs": "dd568715f3ed87029496fab19288991fad5a2bcdd12ebcaf62ffa7335289f8a8",
+    "rust/runtime/src/compact_grid.rs": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a",
+    "rust/runtime/src/compact_hmm.rs": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+    "rust/runtime/src/compact_neural.rs": "f50d69c409176ec9830af6572bf967c8513416498ab580cb9d9319c58493a0ef",
+    "rust/runtime/src/compact_resampler.rs": "2f1232b9cc1a013e51a4ecc8f2f926c309c4dff760da69851a61c96fe76b06b7",
+    "rust/runtime/src/lib.rs": "1c136a2e9aa159350fdc64b5474237559139f3a49f25f2039d2f6f83fc4dcddc",
+    "rust/src/lib.rs": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e"
+  },
+  "source_revision": "acdbadcdd5db57e3049e6a0decb32e30c396ae8b",
+  "status": "STATIC_AUDIT_PASS_PRODUCT_NO_GO",
+  "upstream_source": {
+    "bytes": 10375,
+    "checkpoint_blob_metadata_only": "7aefd5e56ef65482be6f671c3cca8de457dad102",
+    "checkpoint_sha256_from_frozen_binding": "5bbae630b4112f3c1193654e3dbc946b850caa06a2a82e10e8de9e48bb673519",
+    "model_blob": "374218b7bc7e242bd63d2df6ee7babf99175b9b2",
+    "revision": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+    "sha256": "8e675773974c304faeebc355169f99ba0c5dc5ee208586b37dd39c4524851956"
+  }
+}

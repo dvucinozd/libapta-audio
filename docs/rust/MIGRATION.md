@@ -6,7 +6,26 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: audit full-graph coverage and open rights/resource gates.**
+**Current next: register narrow HS06 probability/density/support bridge.** The
+[full-graph readiness audit](PRODUCT-FULL-GRAPH-READINESS.md) confirms completed
+HS01-05 host boundaries but no full trained product graph. Missing Conv/pool,
+278->150/four-layer150 shapes,probability adapter and product ownership remain.
+Current HMM API requires up to720000B F64 densities alongside360000B probabilities;
+its borrowed path keeps the trace Workspace alive through HS02. HS05 sum tolerance
+2e-6 does not imply the stricter HS02/CS02 2^-21 guard. Full affine cost is767730
+MACs/row,23031900000 per600s;toy timing cannot qualify that workload.
+Fresh public upstream main/tree/license/issue checks leave rights/provenance open.
+Consumer origin/main remains4a8c660 with core pin25d09de;no adoption/pin change.
+PF01's nine unknown budgets remain unknown;board availability is last owner report,
+revision unobserved. Next registration uses public math only,explicit class/log/
+support/EOF/cancel/immutable-owner contracts and materialized density accounting;
+no frozen decoder rewrite,new trained execution,model selection or large port.
+Full product NO_GO while gates remain open;no new musical rejection. Audit changed
+documentation only;existing sources,assets,verdicts and VERSION1.0.1 are preserved.
+
+### Completed HS05 checkpoint — 2026-10-27
+
+**Prior next: audit full-graph coverage and open rights/resource gates.**
 **HS05 is complete: artificial numerical host evidence only.** The
 [result](PRODUCT-HOST-NEURAL-RESULT.md) records five fixed clean cases from pushed
 `a7fad1e887172e1bb955bc8199d32f0a8e8a642d`:50 observations,91441 emitted rows

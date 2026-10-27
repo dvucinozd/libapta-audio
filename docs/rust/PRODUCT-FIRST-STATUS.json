@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-05",
-  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
-  "active_phase_verdict": "HS05_SYNTHETIC_HOST_PASS_ONLY",
+  "active_phase": "FULL_GRAPH_READINESS_AUDIT",
+  "active_phase_status": "COMPLETE_STATIC_AUDIT_PRODUCT_GATES_OPEN",
+  "active_phase_verdict": "NARROW_BRIDGE_REGISTRATION_READY_FULL_PRODUCT_NO_GO",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS05 five clean fixed cases PASS from a7fad1e:50 observations,91441 rows including1351 cancelled provisional rows. All full cases30000 rows/2280000 affine MACs/5160000 step units;reset adds1. Numeric/state/argmax/reset/work/resource/identity gates PASS;full lifetime CPU also conservatively bounded below30s. Audit51 files/307401B,347 bindings,655 prebound worker entries. Artificial host toy only;full trained graph/model/music/product/P4 NOT_RUN or unresolved.",
+  "checks": "Static full-graph/code/lifetime/cost audit complete;40 frozen authorities,135 prior and28 HS05 assets unchanged. Source AST and checkpoint metadata agree on767125 params/767730 affine MACs per row. Current materialized density owner720000B and borrowed-path Workspace lifetime explicitly accounted. Consumer origin4a8c660 and pin25d09de unchanged;fresh upstream public checks leave licence/provenance open. No candidate/model/corpus/device execution or runtime changes.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -128,6 +128,12 @@
     "sha256": "50f030f014a91df44cef86380031fa3e1d92cc82ca5bbd9d5ef926456dc932a3"
   },
   "format": "libapta-product-first-status-1",
+  "full_graph_readiness_audit": {
+    "next_narrow_registration_ready": true,
+    "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.json",
+    "product_ready": false,
+    "sha256": "307a8a8fac2eb72654be9d9d7baa0e74048375d5996162443e1e4d44d8cd5374"
+  },
   "hardware_availability": {
     "available": false,
     "board": "JC1060P470C_I_W_Y",
@@ -284,6 +290,12 @@
       "phase": "HS-05",
       "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
       "verdict": "HS05_SYNTHETIC_HOST_PASS_ONLY"
+    },
+    {
+      "phase": "FULL_GRAPH_READINESS_AUDIT",
+      "source_baseline": "acdbadcdd5db57e3049e6a0decb32e30c396ae8b",
+      "status": "COMPLETE_STATIC_AUDIT_PRODUCT_GATES_OPEN",
+      "verdict": "NARROW_BRIDGE_REGISTRATION_READY_FULL_PRODUCT_NO_GO"
     }
   ],
   "host_frontend_experiment": {
@@ -394,10 +406,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Statically audit remaining full-graph shapes/Conv-pool and cost-lifetimes plus rights/provenance/physical-budget gates before selecting/registering another implementation;no automatic full-size port or checkpoint",
+    "action": "Register HS06 named probability-to-density/support/ownership bridge using public math only;materialize explicit bounded density storage for current HMM API;preserve old sources/gates",
     "large_port_allowed": false,
-    "mode": "STATIC_READINESS_AUDIT_ONLY",
-    "phase": "FULL_GRAPH_READINESS_AUDIT"
+    "mode": "REGISTER_NARROW_SYNTHETIC_ONLY",
+    "phase": "HS-06_PROBABILITY_BRIDGE_REGISTRATION"
   },
   "open_decisions": [
     {
