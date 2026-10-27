@@ -1,0 +1,220 @@
+{
+  "accepted_rows_including_invalid_and_cancel_prefixes": 61002,
+  "artifacts": {
+    "build_complete": {
+      "bytes": 1096,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-build-20261027-rc02-01\\build-complete.json",
+      "sha256": "2416fcd2e50f6bfd383fa2bbb6ae54065f9a2cf0b6647135e9c027bf9b006dd0"
+    },
+    "build_metadata_directory": "D:\\AI\\LIBAPTA\\outputs\\hs06-build-20261027-rc02-01",
+    "build_metadata_files": 6,
+    "manifest": {
+      "bytes": 7387,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-measured-20261027-rc02-01\\artifact-manifest.json",
+      "sha256": "c9bc81ed4c3c887b8b824516d95a606628cb3a0b01c85ba82b837fe12ef13ceb"
+    },
+    "raw_result": {
+      "bytes": 59624,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-measured-20261027-rc02-01\\result.json",
+      "sha256": "538826144fe1d7a4003e9dc60d47c71ec2e99afd9f4f1757bf44427d97f8293c"
+    },
+    "run_directory": "D:\\AI\\LIBAPTA\\outputs\\hs06-measured-20261027-rc02-01",
+    "run_files": 46,
+    "scope": "Includes final audit, manifest, build logs/metadata and audit script; excludes executable/build cache and unretained transient pipe bytes",
+    "total_bytes": 464481,
+    "total_files": 52
+  },
+  "cancellation": {
+    "accepted_rows": 138,
+    "asynchronous_or_P4_or_product_fence": "NOT_RUN",
+    "committed_rows": 137,
+    "phase": "NonBeatLog",
+    "scope": "Pending flag only; density-prefix diagnostic hash is not independently certified; no result or resume.",
+    "seconds": 4.21e-07,
+    "units": 686
+  },
+  "candidate_repairs_or_retries": 0,
+  "case_order": [
+    "fixtures",
+    "full-mixed",
+    "full-no-support",
+    "cancel"
+  ],
+  "cases": [
+    {
+      "accepted_rows": 864,
+      "cancel_seconds": null,
+      "case": "fixtures",
+      "certified_rows": 850,
+      "combined_cpu_seconds": 2.8552429999999998,
+      "committed_rows": 864,
+      "complete_records": 859,
+      "complete_waited_cpu_seconds": 2.9621119999999994,
+      "composition_seconds": 0.393474363,
+      "max_rss_kib": 20288,
+      "max_step_seconds": 7.795e-06,
+      "observations": 35,
+      "pipe_seconds": 0.000128106,
+      "step_seconds": 5.9548e-05,
+      "supervision_wall_seconds": 18.816028985000003,
+      "transport_bytes": 67340,
+      "units": 4353,
+      "worker_wall_seconds": 14.832905405000005
+    },
+    {
+      "accepted_rows": 30000,
+      "cancel_seconds": null,
+      "case": "full-mixed",
+      "certified_rows": 30000,
+      "combined_cpu_seconds": 1.0162239999999998,
+      "committed_rows": 30000,
+      "complete_records": 30001,
+      "complete_waited_cpu_seconds": 1.1440559999999995,
+      "composition_seconds": 0,
+      "max_rss_kib": 20124,
+      "max_step_seconds": 3.0617e-05,
+      "observations": 1,
+      "pipe_seconds": 0.255444241,
+      "step_seconds": 0.004543635000000062,
+      "supervision_wall_seconds": 4.802167969999999,
+      "transport_bytes": 1291137,
+      "units": 150001,
+      "worker_wall_seconds": 0.9544589190000039
+    },
+    {
+      "accepted_rows": 30000,
+      "cancel_seconds": null,
+      "case": "full-no-support",
+      "certified_rows": 30000,
+      "combined_cpu_seconds": 0.7846679999999998,
+      "committed_rows": 30000,
+      "complete_records": 30001,
+      "complete_waited_cpu_seconds": 0.8852350000000007,
+      "composition_seconds": 0,
+      "max_rss_kib": 20180,
+      "max_step_seconds": 0.000116018,
+      "observations": 1,
+      "pipe_seconds": 0.174602076,
+      "step_seconds": 0.006349328000000134,
+      "supervision_wall_seconds": 4.42142109800001,
+      "transport_bytes": 1291147,
+      "units": 150001,
+      "worker_wall_seconds": 0.6637566519999893
+    },
+    {
+      "accepted_rows": 138,
+      "cancel_seconds": 4.21e-07,
+      "case": "cancel",
+      "certified_rows": 0,
+      "combined_cpu_seconds": 0.635112,
+      "committed_rows": 137,
+      "complete_records": 1,
+      "complete_waited_cpu_seconds": 0.7839109999999998,
+      "composition_seconds": 0,
+      "max_rss_kib": 20208,
+      "max_step_seconds": 4.8383e-05,
+      "observations": 1,
+      "pipe_seconds": 0,
+      "step_seconds": 5.498699999999999e-05,
+      "supervision_wall_seconds": 4.748431924000002,
+      "transport_bytes": 1133,
+      "units": 686,
+      "worker_wall_seconds": 0.598402121999996
+    }
+  ],
+  "certified_final_rows": 60850,
+  "checker_preflight": {
+    "accepted": 3,
+    "refused": 17
+  },
+  "committed_rows_including_invalid_and_cancel_prefixes": 61001,
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "271c2e6fa9907ff400d0746303d25da6bdfab4412029161bec71003d34cb2202",
+    "rust/runtime/src/bin/apta-compact-probabilities-synthetic.rs": "323c5407304b18b6fd5a399b389aee31e8cef76fb86d73459f189fffa4c922ec",
+    "rust/runtime/src/compact_probabilities.rs": "1232a8a297093196ca09ec111b6c89a5b09f07bd523fb3499453cfc9923ac893",
+    "rust/runtime/src/lib.rs": "7c0586c4b6008f6ae33d6255f7b71480a5eb091e22b5c4ac4cab2d3da85c100a",
+    "rust/runtime/tests/compact_probabilities.rs": "f424cdc417a7cfd791eb6ace88be423a666edef36d04f467f289e5d725f81701",
+    "tools/apta_compact_probabilities_synthetic.py": "9ea96028fb85712f9489e3ba95d493a8aab8d32426cdc6dc3bb6161199a1e34b"
+  },
+  "continuation_package": "RC-02",
+  "date": "2026-10-27",
+  "default_core_wire_consumer_changed": false,
+  "document_sha256": "570258283accb65b8a8b4afc0d0e42da3886bd10b5dba48902bda9b0f7053c2f",
+  "enforcement": {
+    "address_space": "REFUSED_AS_EXPECTED",
+    "output": "REFUSED_AS_EXPECTED",
+    "rss": "REFUSED_AS_EXPECTED",
+    "wall": "REFUSED_AS_EXPECTED"
+  },
+  "executable_sha256": "cf4af69082f418b3f20cc3be0482ba3df5ba4c96b3ff38cc43607c2e904010ce",
+  "format": "libapta-host-probability-measured-result-1",
+  "frozen_registration_bindings_unchanged": 395,
+  "full_size_graph_parity": "NOT_RUN",
+  "implementation_source_revision": "9d33af765ed8b5fd4f6d581f5d361ea9108bf3a0",
+  "independent_audit": {
+    "bytes": 11088,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-measured-20261027-rc02-01\\audit.json",
+    "scope": "Every-row tolerance comparisons ran in registered worker; post-run audit checks retained stream receipts/trailers/digests/counters and rederives inputs and full reference identities. Raw full tensors are not retained or replayed.",
+    "script": {
+      "bytes": 13116,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-build-20261027-rc02-01\\audit_hs06.py",
+      "sha256": "1e877f19d769ca026f773208f7eb056a864b4f78b09645e21d314853edfc36c4"
+    },
+    "sha256": "47fa6b5a4d9c05e8810e136f18d28384060a3fb0436492fc0a2f90624a070935",
+    "status": "AUDIT_PASS"
+  },
+  "model_corpus_or_device_executed": false,
+  "model_rights": "UNRESOLVED",
+  "next_action": "RC-03 whole-route resource/rights decision preparation and bounded exact-target probe registration; large port remains gated",
+  "operational_caps": {
+    "address_space_bytes": 134217728,
+    "aggregate_retained_artifact_bytes": 1048576,
+    "complete_supervision_wall_seconds": 45,
+    "cpu_seconds_worker_and_waited_descendants": 30,
+    "rss_bytes_per_process": 67108864
+  },
+  "parent_bindings": 537,
+  "physical_P4_memory_or_timing": "NOT_RUN",
+  "prelaunch_incident": "One shell quoting error before validation/build/output/candidate run; corrected stdin validation; not a measured retry",
+  "prior_implementation_tests": {
+    "C_context_oracle": "IGNORED_NOT_RUN",
+    "path": "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.json",
+    "reexecuted_this_checkpoint": false,
+    "sha256": "776a8f913347ba8de415302267f02e70c230d37b54c844332204da248470b353"
+  },
+  "product_PF04": "NOT_RUN",
+  "protocol_sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "selectors": 11,
+  "small_compositions": 8,
+  "source_clean_at_run_and_audit": true,
+  "source_revision": "d6644460b1a19dd77d80abad81e52a2a8b7f0b8d",
+  "status": "HS06_SYNTHETIC_HOST_PASS_ONLY",
+  "storage": {
+    "density_array_bytes_at_30000": 720000,
+    "host_Driver_bytes": 960,
+    "host_Session_bytes": 144,
+    "maximum_process_hwm_or_envelope_kib": 20288,
+    "physical_peak": "NOT_MEASURED",
+    "probability_array_bytes_at_30000": 360000
+  },
+  "toolchain": {
+    "feature": "experimental-compact-probabilities",
+    "tools": {
+      "cargo": {
+        "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "sha256": "841072d1d92f9e841d9ba5b0814182a0adf064acf4527cd120967b7bc49dcb66",
+        "version_verbose": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\nrelease: 1.95.0\ncommit-hash: f2d3ce0bd7f24a49f8f72d9000448f8838c4e850\ncommit-date: 2026-03-21\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.2 (sys:0.20.4 vendored)\nlibcurl: 8.15.0-DEV (sys:0.4.83+curl-8.15.0 vendored ssl:OpenSSL/3.5.4)\nssl: OpenSSL 3.5.4 30 Sep 2025\nos: Ubuntu 24.4.0 (noble) [64-bit]\n"
+      },
+      "rustc": {
+        "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "sha256": "bff349e72704ff70bc08a234a3847338e797065bbedde5e556808bc87b7bf7c6",
+        "version_verbose": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2\n"
+      }
+    }
+  },
+  "total_units_including_invalid_and_cancel_prefixes": 305041,
+  "training_independence": "UNRESOLVED",
+  "validated_observations": 38,
+  "worker_runtime_entries_checked": 540
+}

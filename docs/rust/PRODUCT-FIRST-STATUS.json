@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-06_PROBABILITY_BRIDGE_IMPLEMENTATION",
-  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_FOUR_CASE_RUN_PENDING",
-  "active_phase_verdict": "HOST_IMPLEMENTATION_PREFLIGHT_ONLY_PRODUCT_GATES_OPEN",
+  "active_phase": "HS-06_PROBABILITY_BRIDGE_RESULT",
+  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+  "active_phase_verdict": "HS06_SYNTHETIC_HOST_PASS_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS06 eight integration+one new internal tests pass debug/release;700 schedules/build,11 selectors,eight small compositions,two compile-fail lifetime tests. Independent fixture preflight35 observations/850 result rows/859 records;17 malformed refusals and four resource refusals pass. HS01-05,product-grid and default-context controls pass;one C-oracle ignore NOT_RUN. All395 registration bindings unchanged;no full30000-row candidate or registered measured-cancel case.",
+  "checks": "RC02 fixed four-case HS06 run and separate receipt audit PASS:38 observations,60850 certified rows,11 selectors,eight small compositions;395 frozen bindings,537 parent bindings,540 worker runtime entries. Registered CPU/wall/RSS/AS/output and malformed/refusal gates PASS.52 retained files/464481B including build metadata/audit/manifest. Earlier hash-bound implementation tests reused,not rerun;C oracle NOT_RUN. Full model/music/P4 NOT_RUN.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -45,9 +45,9 @@
     "status": "INITIAL_PLAN_SNAPSHOT_PROGRESS_TRACKED_IN_CONTINUATION_PROGRESS"
   },
   "continuation_progress": {
-    "execution_scope": "RC01 documentation reconciliation only; no new DSP, model, corpus, hardware or HS06 measured execution",
-    "last_completed_package": "RC-01",
-    "next_package": "RC-02",
+    "execution_scope": "RC02 registered four-case synthetic bridge run and separate audit only;no model/corpus/device/provider execution",
+    "last_completed_package": "RC-02",
+    "next_package": "RC-03",
     "packages": [
       {
         "checks": [
@@ -87,16 +87,20 @@
         ]
       },
       {
-        "evidence": [],
+        "closed_obstacle": "Clean registered HS06 full-length adapter/cancel/short-composition and resource/identity gates audited;synthetic bridge only",
+        "evidence": [
+          "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.md",
+          "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.json"
+        ],
         "id": "RC-02",
-        "reason": "Next ready package after RC01 commit/push; four clean HS06 cases and result audit not run",
-        "source_revision": null,
-        "status": "NOT_RUN"
+        "source_revision": "d6644460b1a19dd77d80abad81e52a2a8b7f0b8d",
+        "status": "COMPLETE",
+        "verdict": "HS06_SYNTHETIC_HOST_PASS_ONLY"
       },
       {
         "evidence": [],
         "id": "RC-03",
-        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "reason": "Next ready package after RC02 result commit/push;whole-route decision and target-probe preparation;larger execution gates remain open",
         "source_revision": null,
         "status": "NOT_RUN"
       },
@@ -210,7 +214,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "synthetic host implementation/tests and dirty-development fixture preflight; clean four-case experiment NOT_RUN",
+  "evidence_level": "Clean fixed four-case synthetic host bridge measurement and independent receipt/identity/resource audit; no musical or physical qualification",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -227,7 +231,7 @@
     "HS05_synthetic_measured_run_complete": true,
     "HS06_candidate_executed": true,
     "HS06_registration_only": false,
-    "HS06_synthetic_measured_run_complete": false,
+    "HS06_synthetic_measured_run_complete": true,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
     "experimental_host_decoder_added": true,
@@ -421,6 +425,14 @@
       "source_baseline": "acdbadcdd5db57e3049e6a0decb32e30c396ae8b",
       "status": "COMPLETE_STATIC_AUDIT_PRODUCT_GATES_OPEN",
       "verdict": "NARROW_BRIDGE_REGISTRATION_READY_FULL_PRODUCT_NO_GO"
+    },
+    {
+      "continuation_package": "RC-02",
+      "implementation_source_revision": "9d33af765ed8b5fd4f6d581f5d361ea9108bf3a0",
+      "phase": "HS-06",
+      "source_baseline": "d6644460b1a19dd77d80abad81e52a2a8b7f0b8d",
+      "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+      "verdict": "HS06_SYNTHETIC_HOST_PASS_ONLY"
     }
   ],
   "host_frontend_experiment": {
@@ -515,8 +527,8 @@
     "trained_checkpoint_executed": false
   },
   "host_probability_experiment": {
-    "cancellation_evidence_planned": "pending prefix tested without timing; registered measured pending-cancel and asynchronous/P4 NOT_RUN",
-    "candidate_tests_or_measurement": "TESTS_AND_DEVELOPMENT_PREFLIGHT_PASS_FIXED_RUN_NOT_RUN",
+    "cancellation_evidence_planned": "Measured pending flag only:0.000421ms at686units;asynchronous/P4/publication fence NOT_RUN",
+    "candidate_tests_or_measurement": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "case_counts": {
       "cases": 35,
       "composition_cases": 8,
@@ -536,11 +548,16 @@
       "path": "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.json",
       "sha256": "776a8f913347ba8de415302267f02e70c230d37b54c844332204da248470b353"
     },
+    "measured_cases": 4,
     "path": "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json",
     "product_ready": false,
     "registration_validation": "PASS_MATH_AND_IDENTITIES_ONLY",
+    "result": {
+      "path": "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.json",
+      "sha256": "03b0d3fbfa36d22e4861e1c9b63709b3e0f034778e53c8b1cf80e5c3bed69c84"
+    },
     "sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650",
-    "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_FOUR_CASE_RUN_PENDING"
+    "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "host_resampler_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
@@ -559,11 +576,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "RC-02: from clean pushed source matching all six frozen implementation hashes, build exclusive external binary, execute fixtures/full-mixed/full-no-support/cancel once under registered caps, audit and publish separate result; preserve any failure",
+    "action": "Prepare whole-pipeline live-owner/lifetime/cost ledger,rights/provenance evidence or missing inputs,and bounded exact-target probe protocol under continuation plan;record UNKNOWN/device blockers;no new synthetic stage or full model implementation",
     "large_port_allowed": false,
-    "mode": "RUN_REGISTERED_SYNTHETIC_ONLY_FROM_CLEAN_PUSHED_IMPLEMENTATION",
-    "phase": "RC-02",
-    "underlying_registered_phase": "HS-06_FIXED_FOUR_CASE_RUN"
+    "mode": "WHOLE_ROUTE_RESOURCE_RIGHTS_DECISION_AND_TARGET_PROBE_PREPARATION",
+    "phase": "RC-03"
   },
   "open_decisions": [
     {

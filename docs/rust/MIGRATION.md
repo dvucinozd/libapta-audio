@@ -6,7 +6,7 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-02, execute and audit the four fixed HS06 cases.**
+**Current next: RC-03, prepare the whole-route decision and target-probe protocol.**
 The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
 [machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
 packages, paths, commands, validation, stop conditions and commit/push boundaries.
@@ -15,8 +15,15 @@ now match their existing result receipts and independent AUDIT_PASS records.
 Result/Markdown hashes and measured-source ancestry were checked against input
 checkpoint `1913615970b5bf7bb3e4afff68d7a5788f7a8b24`. This reconciliation
 changed only status/handoff documents; no new DSP or measured cases ran.
-All RC-02 onward packages remain NOT_RUN, with RC-04 explicitly BLOCKED_EXTERNAL.
-HS06 implementation/preflight remains complete; its four-case clean run is pending.
+RC-02 is complete: the [HS06 measured result](PRODUCT-HOST-PROBABILITY-RESULT.md)
+and [machine receipt](PRODUCT-HOST-PROBABILITY-RESULT.json) record all four cases
+passing once from clean pushed source `d6644460b1a19dd77d80abad81e52a2a8b7f0b8d`.
+There are38 observations/60850 certified final rows,11 selectors,eight small
+compositions;all395 frozen bindings,537 parent bindings and540 worker runtime
+entries pass the separate receipt audit. All resource/refusal gates pass;
+52 retained files/464481B include audit,manifest and build metadata. Pending
+host cancel is0.000421ms;asynchronous/product/P4 cancellation remains NOT_RUN.
+RC-03 onward remain NOT_RUN, with RC-04 explicitly BLOCKED_EXTERNAL.
 After HS06, prioritize the whole-pipeline resource/rights decision and exact-board
 budgets before another large implementation. Hardware/rights blockers must remain
 explicit; do not replace them with an unbounded series of small synthetic stages.
