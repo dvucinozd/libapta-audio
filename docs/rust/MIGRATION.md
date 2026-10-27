@@ -6,16 +6,20 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-01, reconcile mutable status; then RC-02, the fixed HS06 run.**
+**Current next: RC-02, execute and audit the four fixed HS06 cases.**
 The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
 [machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
 packages, paths, commands, validation, stop conditions and commit/push boundaries.
-This is PLAN_ONLY: no RC package or new measured case ran while writing it.
+RC-01 is complete: mutable HS04/HS05 execution/registration/measured-run flags
+now match their existing result receipts and independent AUDIT_PASS records.
+Result/Markdown hashes and measured-source ancestry were checked against input
+checkpoint `1913615970b5bf7bb3e4afff68d7a5788f7a8b24`. This reconciliation
+changed only status/handoff documents; no new DSP or measured cases ran.
+All RC-02 onward packages remain NOT_RUN, with RC-04 explicitly BLOCKED_EXTERNAL.
 HS06 implementation/preflight remains complete; its four-case clean run is pending.
 After HS06, prioritize the whole-pipeline resource/rights decision and exact-board
 budgets before another large implementation. Hardware/rights blockers must remain
 explicit; do not replace them with an unbounded series of small synthetic stages.
-RC-01 will correct stale HS04 execution flags; they are not repaired in this plan.
 The existing product scope, frozen protocols/results and VERSION1.0.1 are unchanged.
 The plan JSON is an initial snapshot; subsequent progress belongs in
 `PRODUCT-FIRST-STATUS.json.continuation_progress`, not in rewritten plan history.

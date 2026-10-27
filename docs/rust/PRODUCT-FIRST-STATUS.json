@@ -42,7 +42,117 @@
     "path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json",
     "progress_key": "continuation_progress",
     "sha256": "b8a37af116bb001b32569704048974a67d2162e6d4517f17fa56200e3171ca0a",
-    "status": "PLAN_ONLY_NO_PACKAGES_EXECUTED"
+    "status": "INITIAL_PLAN_SNAPSHOT_PROGRESS_TRACKED_IN_CONTINUATION_PROGRESS"
+  },
+  "continuation_progress": {
+    "execution_scope": "RC01 documentation reconciliation only; no new DSP, model, corpus, hardware or HS06 measured execution",
+    "last_completed_package": "RC-01",
+    "next_package": "RC-02",
+    "packages": [
+      {
+        "checks": [
+          "Bound HS04/HS05 result, Markdown and independent audit hashes/verdicts",
+          "Measured source commits are ancestors of current HEAD",
+          "JSON/progress consistency and unchanged frozen authorities",
+          "Selective two-file diff and whitespace validation"
+        ],
+        "closed_obstacle": "Mutable execution flags now agree with completed HS04/HS05 receipts; HS06 clean measurement remains pending",
+        "evidence": [
+          "docs/rust/PRODUCT-FIRST-STATUS.json",
+          "docs/rust/MIGRATION.md"
+        ],
+        "id": "RC-01",
+        "source_revision": "1913615970b5bf7bb3e4afff68d7a5788f7a8b24",
+        "source_revision_scope": "Input checkpoint for status reconciliation; no new candidate measurement",
+        "status": "COMPLETE",
+        "verified_result_receipts": [
+          {
+            "audit_path": "D:\\AI\\LIBAPTA\\outputs\\product-host-frontend-audit-ee2a488-20261027.json",
+            "audit_sha256": "94a1c54e659d50ec24cb456f08476aa6e9170be5ccf47e1c578a6d09445e034b",
+            "audit_status": "AUDIT_PASS",
+            "measured_source_revision": "ee2a488ee8a309b7b8ba92407a5e648e2f79d91b",
+            "path": "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.json",
+            "sha256": "02d1aa9eeabee380c7fd433dbefb2679aece22e203308ae2eaa2f55a1a7ca59c",
+            "verdict": "HS04_SYNTHETIC_HOST_PASS_ONLY"
+          },
+          {
+            "audit_path": "D:\\AI\\LIBAPTA\\outputs\\product-host-neural-audit-a7fad1e-20261027.json",
+            "audit_sha256": "2186a8371b20eea59f131053eb4b04a00ea43c376fc2af48f55619e44e5099e2",
+            "audit_status": "AUDIT_PASS",
+            "measured_source_revision": "a7fad1e887172e1bb955bc8199d32f0a8e8a642d",
+            "path": "docs/rust/PRODUCT-HOST-NEURAL-RESULT.json",
+            "sha256": "4bf13da8feb6b69c24b7421afe02e26443036656ec7185e353585fd6e15174a9",
+            "verdict": "HS05_SYNTHETIC_HOST_PASS_ONLY"
+          }
+        ]
+      },
+      {
+        "evidence": [],
+        "id": "RC-02",
+        "reason": "Next ready package after RC01 commit/push; four clean HS06 cases and result audit not run",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-03",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-04",
+        "reason": "Exact JC1060 availability, observed revision/port/image and registered target probe required; last owner report unavailable",
+        "source_revision": null,
+        "status": "BLOCKED_EXTERNAL"
+      },
+      {
+        "evidence": [],
+        "id": "RC-05",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-06",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-07",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-08",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-09",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "evidence": [],
+        "id": "RC-10",
+        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "source_revision": null,
+        "status": "NOT_RUN"
+      }
+    ],
+    "plan_id": "PRODUCT-CONTINUATION-20261027",
+    "plan_path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json",
+    "updated_date": "2026-10-27"
   },
   "contract_document": {
     "path": "docs/rust/PRODUCT-GRID-CONTRACT.json",
@@ -109,8 +219,12 @@
     "HS02_synthetic_measured_run_complete": true,
     "HS03_clean_measured_run_complete": true,
     "HS03_synthetic_preflight_executed": true,
-    "HS04_candidate_executed": false,
-    "HS04_registration_only": true,
+    "HS04_candidate_executed": true,
+    "HS04_registration_only": false,
+    "HS04_synthetic_measured_run_complete": true,
+    "HS05_candidate_executed": true,
+    "HS05_registration_only": false,
+    "HS05_synthetic_measured_run_complete": true,
     "HS06_candidate_executed": true,
     "HS06_registration_only": false,
     "HS06_synthetic_measured_run_complete": false,
@@ -445,10 +559,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "RC-01 reconcile mutable HS04/HS05 execution status from existing evidence, commit/push; then RC-02 run and audit four fixed HS06 cases under the continuation plan",
+    "action": "RC-02: from clean pushed source matching all six frozen implementation hashes, build exclusive external binary, execute fixtures/full-mixed/full-no-support/cancel once under registered caps, audit and publish separate result; preserve any failure",
     "large_port_allowed": false,
-    "mode": "DOCUMENTATION_STATUS_RECONCILIATION_THEN_REGISTERED_RUN",
-    "phase": "RC-01",
+    "mode": "RUN_REGISTERED_SYNTHETIC_ONLY_FROM_CLEAN_PUSHED_IMPLEMENTATION",
+    "phase": "RC-02",
     "underlying_registered_phase": "HS-06_FIXED_FOUR_CASE_RUN"
   },
   "open_decisions": [
