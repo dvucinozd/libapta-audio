@@ -1,0 +1,274 @@
+{
+  "actual_chip_revision": null,
+  "aggregate_retained_attempt_bytes": 8388608,
+  "automatic_retry": false,
+  "blockers": [
+    {
+      "id": "BOARD_ACCESS",
+      "owner": "Product owner/device operator",
+      "required": "Exact JC1060 unit availability,observed chip/panel/PCB revision,service port/transport,verified factory backup/recovery/programming procedure",
+      "state": "BLOCKED_EXTERNAL",
+      "value": null
+    },
+    {
+      "id": "RESIDENT_BSP",
+      "owner": "M1 platform engineering",
+      "required": "Qualified Guition owner bindings;current product features are compile-guarded and integration-check does not start owners",
+      "source": {
+        "anchor": "product owner features require",
+        "line": 24,
+        "path": "firmware-rust/apps/m1-firmware/src/platform/mod.rs",
+        "sha256": "876b0c168efc68410d0ddad9ba486f65fb9d2dbe2fa6edd66baa6652e7fd7267",
+        "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+      },
+      "state": "BLOCKED_CAPABILITY",
+      "value": null
+    },
+    {
+      "id": "MEMORY_TELEMETRY",
+      "owner": "M1 platform engineering",
+      "required": "Single qualified allocator/memory-class owner plus used/free/minimum/largest-block,stack/future instrumentation; existing64KiB boot scratch has no allocator",
+      "state": "BLOCKED_CAPABILITY",
+      "value": null
+    },
+    {
+      "id": "TIMING_AND_CANCEL",
+      "owner": "M1 platform engineering",
+      "required": "Actual timer frequency/resolution<=1ms,CPU/PSRAM clocks/core affinity,independent in-flight requester,guarded report/cleanup transport",
+      "state": "UNRESOLVED",
+      "value": null
+    },
+    {
+      "id": "PROBE_IMPLEMENTATION",
+      "owner": "Engineering",
+      "required": "Opt-in fixed probe and collector,independent oracle verification,exact dependency/backend and feature set,compile/link/map,clean pushed freeze",
+      "state": "NOT_IMPLEMENTED",
+      "value": null
+    }
+  ],
+  "board": "JC1060P470C_I_W_Y",
+  "case_order": [
+    "TP-00",
+    "TP-01",
+    "TP-02",
+    "TP-03",
+    "TP-04",
+    "TP-05",
+    "TP-06"
+  ],
+  "cases": [
+    {
+      "claims_resident_budget": false,
+      "command": "python3 firmware-rust/tools/guition_first_boot.py build --probe memory --output NEW_EXTERNAL_PACKAGE --target-dir NEW_EXTERNAL_BUILD",
+      "host_capture_seconds": 300,
+      "id": "TP-00",
+      "implementation_state": "EXISTS_BUILD_ONLY",
+      "kind": "Existing boot/memory diagnostic",
+      "reference": "Existing board-profile memory and first-boot strict ingest; read-only RDID/exclusive64KiB scratch only",
+      "source_path": "firmware-rust/tools/guition_first_boot.py"
+    },
+    {
+      "claims_microbenchmark": false,
+      "host_wall_seconds": 35,
+      "id": "TP-01",
+      "implementation_state": "BLOCKED_CAPABILITY",
+      "kind": "Resident stopped-deck baseline",
+      "metrics": [
+        "used",
+        "free",
+        "minimum_free",
+        "largest_contiguous_free",
+        "memory_class",
+        "stack_high_water",
+        "live_owner_mask",
+        "audio_USB_error_counters"
+      ],
+      "missing_metric": null,
+      "sample_period_ms": 100,
+      "scheduled_samples": 300,
+      "seconds": 30
+    },
+    {
+      "alignment": 4,
+      "buffer_count": 2,
+      "bytes_copied_per_trial": 2097152,
+      "bytes_per_buffer": 65536,
+      "capacity_refusal": "No smaller fallback;unsupported capacity prevents full probe PASS",
+      "checksum_scope": "Final little-endian source/destination byte identity; verify each completed copy separately outside kernel timing",
+      "copies_per_trial": 32,
+      "id": "TP-02",
+      "implementation_state": "PLANNED",
+      "kind": "CPU cached copy",
+      "oracle_sha256": "4a295a426d5e466e621f2025f7c8fcd60c8e58245590b35eb255538a7050ad3e",
+      "source_word": "u32(i*2654435761)",
+      "variants": [
+        "internal",
+        "PSRAM"
+      ]
+    },
+    {
+      "MAC_per_trial": 360000,
+      "dot": "ascending k,separate multiply/add,bias0",
+      "f32_output_sha256": "8e6c387147f593f7c774626e9eacc22aeaa32e29c8eb4f40812d4477bf5042c3",
+      "f32_payload_bytes": 109200,
+      "f64_output_sha256": "2471b42ecc84cfcb06e3ef6ef836323d66b42a75161acae248ed85f26ce22518",
+      "f64_payload_bytes": 218400,
+      "id": "TP-03",
+      "implementation_state": "PLANNED",
+      "input_dim": 150,
+      "kind": "Power-of-two projection",
+      "max_MACs_per_cancel_chunk": 32,
+      "numeric_gate": "Exact bits for power-of-two rational public reference only",
+      "output_dim": 150,
+      "output_numerators_ref": {
+        "json_key": "projection.output_numerators",
+        "path": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01\\public-math-preparation.json"
+      },
+      "rows": 16,
+      "variants": [
+        "f32",
+        "f64"
+      ],
+      "w": "(((5*k+7*j)%19)-9)/64",
+      "x": "(((r+3*k)%17)-8)/32"
+    },
+    {
+      "activation_gate": "2e-6+2e-5*abs(reference)",
+      "activation_points": [
+        -20,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        20
+      ],
+      "functions": [
+        "sigmoid_f32",
+        "tanh_f32",
+        "ln_f64",
+        "ln_div15_f64"
+      ],
+      "id": "TP-04",
+      "implementation_state": "PLANNED_BACKEND_UNRESOLVED",
+      "kind": "Scalar nonlinear/log primitives",
+      "log_gate_absolute": 4e-13,
+      "log_input_f32_bits": [
+        0,
+        2147483648,
+        1,
+        1028443341,
+        1051372203,
+        1056964608,
+        1065353216
+      ],
+      "points_per_function": 28672,
+      "repeats": 4096,
+      "target_math_backend": null,
+      "zero_log": "exact -Inf;no epsilon"
+    },
+    {
+      "id": "TP-05",
+      "implementation_state": "REQUESTER_TIMER_UNRESOLVED",
+      "kind": "In-flight cancel",
+      "no_result_resume_required": true,
+      "race_terminal": "INCOMPLETE;no retry or workload enlargement",
+      "request_point": "After first completed chunk while subsequent fixed work is active;no workload extension",
+      "requester": null,
+      "timeout_ms": 50,
+      "trials_per_phase": 1,
+      "whole_product_fence_qualified": false
+    },
+    {
+      "cycles": 5,
+      "host_wall_seconds": 180,
+      "id": "TP-06",
+      "implementation_state": "BLOCKED_RESIDENT_BSP",
+      "kind": "Product transition coexistence",
+      "model_allocated": false,
+      "old_result_retained": true,
+      "seconds_per_cycle": 30,
+      "states": [
+        "stopped",
+        "playback-request",
+        "idle"
+      ]
+    }
+  ],
+  "consumer_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d",
+  "consumer_snapshot": {
+    "bytes": 5187,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01\\consumer-source-manifest.json",
+    "sha256": "c4e67099d7271ac7e79b860a6a961cf0576c0cec1a8dc3de48f6b9031746d96e"
+  },
+  "date": "2026-10-27",
+  "device_executed": false,
+  "document": {
+    "path": "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.md",
+    "sha256": "f4bd9fccac9e04b1222afd1d6af992362120733a68da661fbf6af57c85142c40"
+  },
+  "execution_ready": false,
+  "flash_command": null,
+  "format": "libapta-target-resource-probe-preparation-1",
+  "id": "RC03-TARGET-PROBE",
+  "implementation_added": false,
+  "measured_trials": 3,
+  "per_capture_maximum_bytes": 1048576,
+  "per_numeric_variant_host_wall_seconds": 60,
+  "per_trial_device_wall_seconds": 10,
+  "port": null,
+  "product_resident_features": null,
+  "programming_layout": null,
+  "public_math_preparation": {
+    "bytes": 27982,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01\\public-math-preparation.json",
+    "sha256": "e2850a7d71793db9a27b229ff9fe3950498c101299a80e791a55cf9838f1532b"
+  },
+  "recovery_observed": false,
+  "required_timer_resolution_ms": 1,
+  "source_bindings": {
+    "docs/rust/PRODUCT-BUDGETS.json": {
+      "bytes": 17537,
+      "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
+    },
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": {
+      "bytes": 7552,
+      "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
+    },
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": {
+      "bytes": 28581,
+      "sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b"
+    },
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": {
+      "bytes": 10121,
+      "sha256": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70"
+    },
+    "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json": {
+      "bytes": 12209,
+      "sha256": "b8a37af116bb001b32569704048974a67d2162e6d4517f17fa56200e3171ca0a"
+    },
+    "docs/rust/PRODUCT-FULL-GRAPH-READINESS.json": {
+      "bytes": 14614,
+      "sha256": "307a8a8fac2eb72654be9d9d7baa0e74048375d5996162443e1e4d44d8cd5374"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-PROTOCOL.json": {
+      "bytes": 64821,
+      "sha256": "8942bed1390a9bba5db3779c73a508b8933b1ee3aa242e2e0870d65c8403c058"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.json": {
+      "bytes": 9642,
+      "sha256": "776a8f913347ba8de415302267f02e70c230d37b54c844332204da248470b353"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.json": {
+      "bytes": 9426,
+      "sha256": "03b0d3fbfa36d22e4861e1c9b63709b3e0f034778e53c8b1cf80e5c3bed69c84"
+    }
+  },
+  "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779",
+  "status": "PREPARED_WITH_EXPLICIT_BLOCKERS_NOT_EXECUTION_READY",
+  "stop_and_preserve": true,
+  "target_math_backend": null,
+  "telemetry_API": null,
+  "timer_frequency_hz": null,
+  "warmup_trials": 1
+}

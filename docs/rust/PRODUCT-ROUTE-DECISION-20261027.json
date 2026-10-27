@@ -1,0 +1,1314 @@
+{
+  "PF01_nine_categories": [
+    {
+      "name": "internal_RAM",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "PSRAM",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "model_storage",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "stack_future_executor",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "decoder_frontend_trace",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "owned_pending_retained_copies",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "codec_cache_USB_UI",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "cleanup_reclamation",
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "name": "fragmentation_safety_reserve",
+      "status": "UNKNOWN",
+      "value": null
+    }
+  ],
+  "RC05_positive_GO": false,
+  "approved_analysis_allowances": null,
+  "arithmetic_evidence": {
+    "bytes": 897,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01\\static-arithmetic.json",
+    "sha256": "852994c0f3d1bac6654b47e1700bca5440ba43d27fbb79d9832d3407dfd522fe"
+  },
+  "artifacts": {
+    "bytes_including_manifest": 193530,
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01",
+    "files_including_manifest": 22,
+    "manifest": {
+      "bytes": 3973,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01\\artifact-manifest.json",
+      "sha256": "a55b097ed3410f1b07dd426bb57ae8d8fe310ec2088d1b9c6eb20aab72af0f4a"
+    },
+    "scope": "18 consumer snapshots,source manifest,arithmetic,public math preparation and artifact manifest"
+  },
+  "baseline_savings_applied": false,
+  "blockers": [
+    {
+      "id": "BOARD_ACCESS",
+      "owner": "Product owner/device operator",
+      "required": "Exact JC1060 unit availability,observed chip/panel/PCB revision,service port/transport,verified factory backup/recovery/programming procedure",
+      "state": "BLOCKED_EXTERNAL",
+      "value": null
+    },
+    {
+      "id": "RESIDENT_BSP",
+      "owner": "M1 platform engineering",
+      "required": "Qualified Guition owner bindings;current product features are compile-guarded and integration-check does not start owners",
+      "source": {
+        "anchor": "product owner features require",
+        "line": 24,
+        "path": "firmware-rust/apps/m1-firmware/src/platform/mod.rs",
+        "sha256": "876b0c168efc68410d0ddad9ba486f65fb9d2dbe2fa6edd66baa6652e7fd7267",
+        "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+      },
+      "state": "BLOCKED_CAPABILITY",
+      "value": null
+    },
+    {
+      "id": "MEMORY_TELEMETRY",
+      "owner": "M1 platform engineering",
+      "required": "Single qualified allocator/memory-class owner plus used/free/minimum/largest-block,stack/future instrumentation; existing64KiB boot scratch has no allocator",
+      "state": "BLOCKED_CAPABILITY",
+      "value": null
+    },
+    {
+      "id": "TIMING_AND_CANCEL",
+      "owner": "M1 platform engineering",
+      "required": "Actual timer frequency/resolution<=1ms,CPU/PSRAM clocks/core affinity,independent in-flight requester,guarded report/cleanup transport",
+      "state": "UNRESOLVED",
+      "value": null
+    },
+    {
+      "id": "PROBE_IMPLEMENTATION",
+      "owner": "Engineering",
+      "required": "Opt-in fixed probe and collector,independent oracle verification,exact dependency/backend and feature set,compile/link/map,clean pushed freeze",
+      "state": "NOT_IMPLEMENTED",
+      "value": null
+    },
+    {
+      "id": "EXACT_ARTIFACT_RIGHTS",
+      "owner": "Rights holder via user-authorized channel",
+      "required": "Affirmative code/checkpoint digest-bound use/modification/redistribution terms and third-party obligations",
+      "state": "LICENSE_UNRESOLVED",
+      "value": null
+    },
+    {
+      "id": "CHECKPOINT_PROVENANCE",
+      "owner": "Checkpoint maintainer and evaluation engineering",
+      "required": "Checkpoint-specific lineage/train/validation/test/selection membership plus recording-level duplicate/overlap review",
+      "state": "INDEPENDENCE_UNRESOLVED",
+      "value": null
+    }
+  ],
+  "checks": {
+    "Rust_tests_run": false,
+    "consumer_fetch_and_exact_source_read": true,
+    "device_run": false,
+    "model_corpus_run": false,
+    "owner_sources_and_lines_bound": true,
+    "probe_implementation": false,
+    "public_math_preparation_only": true,
+    "static_formula_recomputed": true,
+    "target_build": false
+  },
+  "consumer": {
+    "files": {
+      "docs/M1_RUST_ARCHITECTURE.md": {
+        "bytes": 7078,
+        "line_anchors": {
+          "PSRAM": [
+            112
+          ]
+        },
+        "sha256": "b3f95b278839ee8e33d6ff4a37c164e3ce8af7287f4d95ede0b18308c2bc3a94"
+      },
+      "docs/M1_RUST_PRODUCT_REQUIREMENTS.md": {
+        "bytes": 22139,
+        "line_anchors": {
+          "M1R-P1-001": [
+            191
+          ],
+          "PSRAM": [
+            28,
+            248
+          ]
+        },
+        "sha256": "bd95809eb573d5427cf36e4aed136bfca9e0dc7aa98ffae3a5c87e32dbb49537"
+      },
+      "docs/adr/ADR-008-memory-and-unsafe-policy.md": {
+        "bytes": 1048,
+        "line_anchors": {
+          "PSRAM": [
+            8,
+            15,
+            22
+          ]
+        },
+        "sha256": "173b2877b9a49fea5e7d472351c6d12d21712334fc76093a585285cdc3b96553"
+      },
+      "docs/boards/GUITION_FIRST_BOOT_2026-10-20.md": {
+        "bytes": 5478,
+        "line_anchors": {
+          "## Before replacing": [
+            6
+          ],
+          "PSRAM": [
+            10,
+            50
+          ]
+        },
+        "sha256": "826d7ea31740dcedfb8fa45aac359728b81c210133a20256abdb9216e1c4886b"
+      },
+      "docs/boards/GUITION_HARDWARE_MATRIX_2026-10-20.md": {
+        "bytes": 10068,
+        "line_anchors": {
+          "PSRAM": [
+            38
+          ]
+        },
+        "sha256": "c4d0c37fed0f3ea05503e6115475299d6c92f688ee73e20d00df78367ec1ae96"
+      },
+      "firmware-rust/apps/m1-firmware/.cargo/config.toml": {
+        "bytes": 283,
+        "line_anchors": {},
+        "sha256": "ebe4f4e2a6f21f493436a085e555643e97970c09f010d59a3dc77cb02134e686"
+      },
+      "firmware-rust/apps/m1-firmware/Cargo.toml": {
+        "bytes": 6657,
+        "line_anchors": {
+          "PSRAM": [
+            33,
+            44,
+            60
+          ]
+        },
+        "sha256": "2513266f133ed57bc800ec89a9ccd580f8011dc9c1522b5bc3fa9da08590645c"
+      },
+      "firmware-rust/apps/m1-firmware/src/analysis_product.rs": {
+        "bytes": 12043,
+        "line_anchors": {},
+        "sha256": "61db0481529b878c64f10a4cedd76b8de601cfb55deabc84e8775204aac28231"
+      },
+      "firmware-rust/apps/m1-firmware/src/deck_effect_owners.rs": {
+        "bytes": 25571,
+        "line_anchors": {},
+        "sha256": "5de7cc0909e3c3692369485653ab930d10846d257546e82905b9a5747d5a4b7c"
+      },
+      "firmware-rust/apps/m1-firmware/src/main.rs": {
+        "bytes": 1870,
+        "line_anchors": {
+          "CpuClock::max": [
+            64
+          ],
+          "PSRAM": [
+            10
+          ]
+        },
+        "sha256": "997f82df71122ce880c86cba76fb988d74d6e10b11348c48a85c4b352b942a61"
+      },
+      "firmware-rust/apps/m1-firmware/src/platform/diagnostics.rs": {
+        "bytes": 2882,
+        "line_anchors": {
+          "fn report_task": [
+            14
+          ]
+        },
+        "sha256": "f619ca8218f46e5fc1c5bd703ccdaecec7ca62f45ee92bf47a4449cd85554a03"
+      },
+      "firmware-rust/apps/m1-firmware/src/platform/memory.rs": {
+        "bytes": 3872,
+        "line_anchors": {
+          "PSRAM": [
+            37,
+            64
+          ],
+          "TEST_WORDS": [
+            8,
+            54,
+            90,
+            93,
+            98
+          ],
+          "fn psram_test": [
+            36
+          ]
+        },
+        "sha256": "c106194f75f2b319e8adb5dc4cad5078b9c1d9ab37fa74ba76d991cf5f46dbc8"
+      },
+      "firmware-rust/apps/m1-firmware/src/platform/mod.rs": {
+        "bytes": 3866,
+        "line_anchors": {
+          "PSRAM": [
+            67,
+            87
+          ],
+          "compile_error!": [
+            6,
+            11,
+            23,
+            30,
+            35,
+            40,
+            42
+          ]
+        },
+        "sha256": "876b0c168efc68410d0ddad9ba486f65fb9d2dbe2fa6edd66baa6652e7fd7267"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/Cargo.toml": {
+        "bytes": 2235,
+        "line_anchors": {},
+        "sha256": "db1fa3d6259f9539235b4d6014b7bc64084346c52fb28bc8d5a1e1fd60debd48"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/src/storage.rs": {
+        "bytes": 5033,
+        "line_anchors": {
+          "pub struct LocalTempoStorage": [
+            17
+          ]
+        },
+        "sha256": "701285755ad212884e0afda083f10b3b0e1d889469766d5c48fdf57c566d00ea"
+      },
+      "firmware-rust/crates/ruzina-apta-adapter/src/streaming.rs": {
+        "bytes": 24866,
+        "line_anchors": {
+          "pub struct StreamLimits": [
+            17
+          ]
+        },
+        "sha256": "8b5482edc0be082ba72be74b6b77b206e34df5cba29cdeb31dc262c9b36b6fc7"
+      },
+      "firmware-rust/rust-toolchain.toml": {
+        "bytes": 130,
+        "line_anchors": {},
+        "sha256": "bc2d868cb37a212d8f0a87863f48c8446c89671f5b3734a6140938dbc4cc0c57"
+      },
+      "firmware-rust/tools/guition_first_boot.py": {
+        "bytes": 20372,
+        "line_anchors": {
+          "PSRAM": [
+            104,
+            184,
+            186,
+            189,
+            190,
+            331
+          ],
+          "def build": [
+            55
+          ]
+        },
+        "sha256": "49ae828e679ba563fad74611c140dc312ea2ddbd99b2a31d7e493f8e7410a58c"
+      }
+    },
+    "libapta_pin": "25d09de364e9507532c0508c838a8fecf0772d13",
+    "local_checkout_modified": false,
+    "origin_url": "https://github.com/dvucinozd/Ruzina.git",
+    "product_runtime_available": false,
+    "product_runtime_guard": {
+      "anchor": "product owner features require",
+      "line": 24,
+      "path": "firmware-rust/apps/m1-firmware/src/platform/mod.rs",
+      "sha256": "876b0c168efc68410d0ddad9ba486f65fb9d2dbe2fa6edd66baa6652e7fd7267",
+      "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+    },
+    "snapshot": {
+      "bytes": 5187,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\route-decision-20261027-rc03-01\\consumer-source-manifest.json",
+      "sha256": "c4e67099d7271ac7e79b860a6a961cf0576c0cec1a8dc3de48f6b9031746d96e"
+    },
+    "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+  },
+  "date": "2026-10-27",
+  "decision": "WAIT_EXTERNAL",
+  "document": {
+    "path": "docs/rust/PRODUCT-ROUTE-DECISION-20261027.md",
+    "sha256": "84a26a4a0f15a31283b4eda9687b5a17500fb7b469cc27552e89646f40fafc7b"
+  },
+  "format": "libapta-whole-route-decision-preparation-1",
+  "host_measurements_are_pipeline_timing": false,
+  "id": "RC-03",
+  "large_port_allowed": false,
+  "neural_intermediate_shapes_bytes": {
+    "conv": 2232,
+    "gate_vector_single": 600,
+    "pool": 1112,
+    "projection": 600
+  },
+  "next": {
+    "RC05_if_still_missing": "WAIT_EXTERNAL;no RC06 or new synthetic series",
+    "action": "Obtain exact-unit access/recovery evidence and qualified BSP/resident allocator/telemetry capabilities;resolve probe registration and implementation freeze before measurement",
+    "package": "RC-04",
+    "state": "BLOCKED_EXTERNAL_AND_CAPABILITY"
+  },
+  "optimization_alternatives": [
+    {
+      "id": "OWNED_PATH",
+      "implemented": false,
+      "postprocess_reclaim_bytes": 16515840,
+      "reduces_trace_stage_peak": false,
+      "required": "Owned-path API and lifetime/parity/work/cleanup tests",
+      "transient_extra_bytes": 60000
+    },
+    {
+      "extra_work": "Logs during scores,trace and replay;boundedness unresolved",
+      "id": "LAZY_DENSITIES",
+      "implemented": false,
+      "nominal_removed_bytes": 720000,
+      "required": "New immutable density source API,zero/log/decision/replay parity and cancellation"
+    },
+    {
+      "id": "OTHER_TRACEBACK",
+      "implemented": false,
+      "required": "Concrete new layout,checkpoint/path/tie/score oracle,work and cancel proof",
+      "saving_bytes": null
+    }
+  ],
+  "owner_ledger": [
+    {
+      "accounting_note": "PF01 declared READ_BYTES+PCM_SAMPLES*4, included in composite overlap; codec cache/futures extra",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "PF01-composite-overlap",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "source_scratch_bytes =",
+        "line": 64,
+        "path": "firmware-rust/crates/ruzina-apta-adapter/src/storage.rs",
+        "sha256": "701285755ad212884e0afda083f10b3b0e1d889469766d5c48fdf57c566d00ea",
+        "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+      },
+      "id": "source-scratch",
+      "logical_elements": null,
+      "logical_payload_bytes": 6144,
+      "phases": [
+        "source",
+        "cancel",
+        "cleanup"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Bounded byte/PCM scratch"
+    },
+    {
+      "accounting_note": "Embedded in host Session368B; do not add ring again to Session total",
+      "alignment": 4,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "resampler",
+      "element_bytes": 4,
+      "evidence": {
+        "anchor": "pub struct Session",
+        "line": 90,
+        "path": "rust/runtime/src/compact_resampler.rs",
+        "sha256": "2f1232b9cc1a013e51a4ecc8f2f926c309c4dff760da69851a61c96fe76b06b7",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "resampler",
+      "logical_elements": 65,
+      "logical_payload_bytes": 260,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Fixed Session ring"
+    },
+    {
+      "accounting_note": "Static image residency may persist outside phase; flash/cache copies not target verified",
+      "alignment": 8,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "resampler-tables",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "static F64 tables",
+        "line": 36,
+        "path": "docs/rust/PRODUCT-HOST-RESAMPLER-RESULT.md",
+        "sha256": "73f3e1ad6e146841feb5df1f238ec0c81c2ee2c5932674948e8684be9ae0a05f",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "resampler-tables",
+      "logical_elements": null,
+      "logical_payload_bytes": 76960,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Static coefficient tables"
+    },
+    {
+      "accounting_note": "Host whole type, includes40760B arrays; target layout unknown",
+      "alignment": 8,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "frontend",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "pub struct Session",
+        "line": 312,
+        "path": "rust/runtime/src/compact_frontend.rs",
+        "sha256": "dd568715f3ed87029496fab19288991fad5a2bcdd12ebcaf62ffa7335289f8a8",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "frontend",
+      "logical_elements": null,
+      "logical_payload_bytes": 41448,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Frontend Session"
+    },
+    {
+      "accounting_note": "Static image residency can persist; placement not inferred",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "frontend-tables",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "pub const TABLE_BYTES",
+        "line": 11,
+        "path": "rust/runtime/src/compact_frontend.rs",
+        "sha256": "dd568715f3ed87029496fab19288991fad5a2bcdd12ebcaf62ffa7335289f8a8",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "frontend-tables",
+      "logical_elements": null,
+      "logical_payload_bytes": 50476,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Static frontend tables"
+    },
+    {
+      "accounting_note": "Already in frontend; separate consumer copy only if coordinator requires it; whole34560000B tensor excluded",
+      "alignment": 4,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "frontend",
+      "element_bytes": 4,
+      "evidence": {
+        "anchor": "row: [f32; FEATURES]",
+        "line": 318,
+        "path": "rust/runtime/src/compact_frontend.rs",
+        "sha256": "dd568715f3ed87029496fab19288991fad5a2bcdd12ebcaf62ffa7335289f8a8",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "feature-handoff",
+      "logical_elements": 288,
+      "logical_payload_bytes": 1152,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "One bounded feature row"
+    },
+    {
+      "accounting_note": "Raw checkpoint ZIP is separate3072890B; no silent duplicate or release assumption",
+      "alignment": 4,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "weights",
+      "element_bytes": 4,
+      "evidence": {
+        "anchor": "Weights are3068500B",
+        "line": 66,
+        "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md",
+        "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "weights",
+      "logical_elements": 767125,
+      "logical_payload_bytes": 3068500,
+      "phases": [
+        "source",
+        "score3-if-retained",
+        "score4-if-retained",
+        "trace-if-retained"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Full graph f32 weights"
+    },
+    {
+      "accounting_note": "Shape derivation only; full kernel absent",
+      "alignment": 4,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "recurrent-committed",
+      "element_bytes": 4,
+      "evidence": {
+        "anchor": "hidden+cell state",
+        "line": 66,
+        "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md",
+        "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "recurrent-committed",
+      "logical_elements": 1200,
+      "logical_payload_bytes": 4800,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Four-layer h/c state"
+    },
+    {
+      "accounting_note": "Conditional separate pending owner; actual staging strategy unresolved",
+      "alignment": 4,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "recurrent-pending",
+      "element_bytes": 4,
+      "evidence": {
+        "anchor": "hidden+cell state",
+        "line": 66,
+        "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md",
+        "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "recurrent-pending",
+      "logical_elements": 1200,
+      "logical_payload_bytes": 4800,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Potential staged h/c state"
+    },
+    {
+      "accounting_note": "Individual shapes:conv2232,pool1112,projection600 bytes; gates/overlap/accumulation and controls unknown",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "neural-scratch",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| Conv1d |",
+        "line": 58,
+        "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md",
+        "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "neural-scratch",
+      "logical_elements": null,
+      "logical_payload_bytes": null,
+      "phases": [
+        "source"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Conv/pool/projection/gate temporaries"
+    },
+    {
+      "accounting_note": "Actual HS06 full buffer capacity verified on host; target allowance unknown",
+      "alignment": 4,
+      "allocation_capacity_bytes": 360000,
+      "allocation_group": "probabilities",
+      "element_bytes": 12,
+      "evidence": {
+        "anchor": "probabilities:",
+        "line": 99,
+        "path": "rust/runtime/src/compact_probabilities.rs",
+        "sha256": "1232a8a297093196ca09ec111b6c89a5b09f07bd523fb3499453cfc9923ac893",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "probabilities",
+      "logical_elements": 30000,
+      "logical_payload_bytes": 360000,
+      "phases": [
+        "source",
+        "score3",
+        "score4",
+        "trace",
+        "postprocess",
+        "cancel"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Full immutable input probabilities"
+    },
+    {
+      "accounting_note": "Not replaced by probabilities under existing Decoder API",
+      "alignment": 8,
+      "allocation_capacity_bytes": 720000,
+      "allocation_group": "densities",
+      "element_bytes": 24,
+      "evidence": {
+        "anchor": "densities:",
+        "line": 100,
+        "path": "rust/runtime/src/compact_probabilities.rs",
+        "sha256": "1232a8a297093196ca09ec111b6c89a5b09f07bd523fb3499453cfc9923ac893",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "densities",
+      "logical_elements": 30000,
+      "logical_payload_bytes": 720000,
+      "phases": [
+        "source",
+        "score3",
+        "score4",
+        "trace",
+        "postprocess",
+        "cancel"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Full immutable density triples"
+    },
+    {
+      "accounting_note": "Includes36B staged payload; borrow pins both output buffers",
+      "alignment": 8,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "bridge-control",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "pub struct Session<'a>",
+        "line": 148,
+        "path": "rust/runtime/src/compact_probabilities.rs",
+        "sha256": "1232a8a297093196ca09ec111b6c89a5b09f07bd523fb3499453cfc9923ac893",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "bridge-control",
+      "logical_elements": null,
+      "logical_payload_bytes": 144,
+      "phases": [
+        "source",
+        "score3",
+        "score4",
+        "trace",
+        "postprocess"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "HS06 host Session"
+    },
+    {
+      "accounting_note": "Sequential with score4; length payload vs actual allocator capacity distinction remains",
+      "alignment": 8,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "score3",
+      "element_bytes": 8,
+      "evidence": {
+        "anchor": "pub struct StoragePlan",
+        "line": 75,
+        "path": "rust/runtime/src/compact_hmm.rs",
+        "sha256": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "score3",
+      "logical_elements": 16830,
+      "logical_payload_bytes": 134640,
+      "phases": [
+        "score3"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Meter3 score Workspace"
+    },
+    {
+      "accounting_note": "Sequential with score3",
+      "alignment": 8,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "score4",
+      "element_bytes": 8,
+      "evidence": {
+        "anchor": "pub struct StoragePlan",
+        "line": 75,
+        "path": "rust/runtime/src/compact_hmm.rs",
+        "sha256": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "score4",
+      "logical_elements": 22440,
+      "logical_payload_bytes": 179520,
+      "phases": [
+        "score4"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Meter4 score Workspace"
+    },
+    {
+      "accounting_note": "Checkpoint/parent/path recipe from static-arithmetic; mixed f64/u16 arrays have separate alignments; borrowed path retains whole owner",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "trace",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "pub struct Workspace",
+        "line": 117,
+        "path": "rust/runtime/src/compact_hmm.rs",
+        "sha256": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "trace",
+      "logical_elements": null,
+      "logical_payload_bytes": 16575840,
+      "phases": [
+        "trace",
+        "postprocess",
+        "cancel"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Winner4 Trace Workspace"
+    },
+    {
+      "accounting_note": "Numeric slice lengths; actual private capacities/raw copies not measured",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "graph",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "pub struct Graph<'a>",
+        "line": 27,
+        "path": "rust/runtime/src/compact_hmm.rs",
+        "sha256": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "graph",
+      "logical_elements": null,
+      "logical_payload_bytes": 235304,
+      "phases": [
+        "score4",
+        "trace",
+        "postprocess"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "One typed meter4 graph"
+    },
+    {
+      "accounting_note": "Additional to graph class vector; source raw/static residency can persist",
+      "alignment": 1,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "state-map",
+      "element_bytes": 3,
+      "evidence": {
+        "anchor": "| postprocessor state map",
+        "line": 136,
+        "path": "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md",
+        "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "state-map",
+      "logical_elements": 11220,
+      "logical_payload_bytes": 33660,
+      "phases": [
+        "postprocess"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "HS02 meter4 3-byte state map"
+    },
+    {
+      "accounting_note": "Declared scenario may reserve during whole job; no freeing assumed without coordinator",
+      "alignment": 4,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "events",
+      "element_bytes": 8,
+      "evidence": {
+        "anchor": "pub const MAX_EVENTS",
+        "line": 5,
+        "path": "rust/runtime/src/compact_grid.rs",
+        "sha256": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "events",
+      "logical_elements": 3072,
+      "logical_payload_bytes": 24576,
+      "phases": [
+        "postprocess"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Event scratch"
+    },
+    {
+      "accounting_note": "Composite conditional PF01 total; source/banks/output records inside it are not summed separately",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "PF01-composite-overlap",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| 48000 | 32768",
+        "line": 51,
+        "path": "docs/rust/PRODUCT-BUDGETS.md",
+        "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "native-results",
+      "logical_elements": null,
+      "logical_payload_bytes": 898890,
+      "phases": [
+        "admit",
+        "source",
+        "score3",
+        "score4",
+        "trace",
+        "postprocess",
+        "publish",
+        "cancel",
+        "cleanup"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Native generations plus selected consumer overlap"
+    },
+    {
+      "accounting_note": "38464B per example payload; actual number/metadata/cues unknown; old readers may retain banks",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "pending-retained",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| Jedna owned beat/preview kopija",
+        "line": 81,
+        "path": "docs/rust/PRODUCT-BUDGETS.md",
+        "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "pending-retained",
+      "logical_elements": null,
+      "logical_payload_bytes": null,
+      "phases": [
+        "publish",
+        "cancel",
+        "cleanup"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Additional pending/retained consumer copies"
+    },
+    {
+      "accounting_note": "At879 columns*4B*2=7032B, included in selected PF01 overlap; actual resolution/adoption unknown",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "PF01-composite-overlap",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "rendered_banks_bytes",
+        "line": 26,
+        "path": "firmware-rust/crates/ruzina-apta-adapter/src/storage.rs",
+        "sha256": "701285755ad212884e0afda083f10b3b0e1d889469766d5c48fdf57c566d00ea",
+        "source_revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
+      },
+      "id": "waveform-banks",
+      "logical_elements": null,
+      "logical_payload_bytes": null,
+      "phases": [
+        "source",
+        "publish",
+        "cancel",
+        "cleanup"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Two rendered waveform banks"
+    },
+    {
+      "accounting_note": "Paused playback does not release storage; not included in17949380 analysis subtotal",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "audio-FX",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| Dva audio FX prostora",
+        "line": 78,
+        "path": "docs/rust/PRODUCT-BUDGETS.md",
+        "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "audio-FX",
+      "logical_elements": null,
+      "logical_payload_bytes": 1540704,
+      "phases": [
+        "all-if-enabled"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Conditional resident FX"
+    },
+    {
+      "accounting_note": "BSS/resident product evidence independent of analysis arrays",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "audio-history",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| Dva canonical source history",
+        "line": 79,
+        "path": "docs/rust/PRODUCT-BUDGETS.md",
+        "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "audio-history",
+      "logical_elements": null,
+      "logical_payload_bytes": 131072,
+      "phases": [
+        "all-if-enabled"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Conditional source histories"
+    },
+    {
+      "accounting_note": "1228800 single or2457600 double; mutually exclusive scenario, actual class/DMA owner unresolved",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "display",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| JC1060 RGB565",
+        "line": 80,
+        "path": "docs/rust/PRODUCT-BUDGETS.md",
+        "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "display",
+      "logical_elements": null,
+      "logical_payload_bytes": null,
+      "phases": [
+        "all-if-enabled"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Framebuffer candidates"
+    },
+    {
+      "accounting_note": "Used/free/minimum/largest block, runtime residual allowance and fragmentation safety reserve all unknown",
+      "alignment": null,
+      "allocation_capacity_bytes": null,
+      "allocation_group": "platform-overhead",
+      "element_bytes": null,
+      "evidence": {
+        "anchor": "| Codec cache",
+        "line": 83,
+        "path": "docs/rust/PRODUCT-BUDGETS.md",
+        "sha256": "edf07d58213ff4297d0e091ee95814935ef71d034eaf348a3455df12fd4ff524",
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779"
+      },
+      "id": "platform-overhead",
+      "logical_elements": null,
+      "logical_payload_bytes": null,
+      "phases": [
+        "all-if-enabled"
+      ],
+      "target_memory_class": null,
+      "target_peak_status": "UNKNOWN",
+      "target_reservation_bytes": null,
+      "target_size_verified": false,
+      "title": "Codec/cache/USB/UI/task stacks/futures/allocator/reserve"
+    }
+  ],
+  "rights": {
+    "checkpoint_blob": "7aefd5e56ef65482be6f671c3cca8de457dad102",
+    "checkpoint_sha256": "5bbae630b4112f3c1193654e3dbc946b850caa06a2a82e10e8de9e48bb673519",
+    "code_revision": "bb90eb0a9065b101a4b4c4cb2b2061950266cb4b",
+    "external_message_sent": false,
+    "fresh_upstream_review_this_checkpoint": false,
+    "historical_receipt": "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json",
+    "provenance": "INDEPENDENCE_UNRESOLVED",
+    "request_draft_in_document": true,
+    "status": "LICENSE_UNRESOLVED",
+    "training_manifest_received": false
+  },
+  "source_bindings": {
+    "docs/rust/PRODUCT-BUDGETS.json": {
+      "bytes": 17537,
+      "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
+    },
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": {
+      "bytes": 7552,
+      "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
+    },
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": {
+      "bytes": 28581,
+      "sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b"
+    },
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": {
+      "bytes": 10121,
+      "sha256": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70"
+    },
+    "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json": {
+      "bytes": 12209,
+      "sha256": "b8a37af116bb001b32569704048974a67d2162e6d4517f17fa56200e3171ca0a"
+    },
+    "docs/rust/PRODUCT-FULL-GRAPH-READINESS.json": {
+      "bytes": 14614,
+      "sha256": "307a8a8fac2eb72654be9d9d7baa0e74048375d5996162443e1e4d44d8cd5374"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-PROTOCOL.json": {
+      "bytes": 64821,
+      "sha256": "8942bed1390a9bba5db3779c73a508b8933b1ee3aa242e2e0870d65c8403c058"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.json": {
+      "bytes": 9642,
+      "sha256": "776a8f913347ba8de415302267f02e70c230d37b54c844332204da248470b353"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.json": {
+      "bytes": 9426,
+      "sha256": "03b0d3fbfa36d22e4861e1c9b63709b3e0f034778e53c8b1cf80e5c3bed69c84"
+    }
+  },
+  "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779",
+  "static_arithmetic": {
+    "MAC_per_full_source": 23031900000,
+    "MAC_per_row": {
+      "LSTM": 720000,
+      "conv": 5580,
+      "head": 450,
+      "projection": 41700
+    },
+    "lazy_density_nominal_saving_bytes": 720000,
+    "materialized_scenario_components": {
+      "densities": 720000,
+      "event_scratch": 24576,
+      "probabilities": 360000,
+      "state_map": 33660,
+      "trace_workspace": 16575840,
+      "typed_graph": 235304
+    },
+    "nonlinear_calls_per_full_source": 90090000,
+    "nonlinear_calls_per_row": 3003,
+    "owned_path_copy_transient_extra_bytes": 60000,
+    "owned_path_postprocess_reclaim_bytes": 16515840,
+    "required_MAC_per_second_if_all_60_seconds": 383865000.0,
+    "target_measurement": false,
+    "trace_components": {
+      "checkpoints": 10591680,
+      "parents": 5744640,
+      "path": 60000,
+      "scores": 179520
+    },
+    "with_overlap": 18848270,
+    "with_overlap_and_weights": 21916770,
+    "without_overlap": 17949380
+  },
+  "status": "PREPARATION_COMPLETE_WAIT_EXTERNAL",
+  "target_probe": {
+    "path": "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json",
+    "sha256": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0"
+  },
+  "timeline": [
+    {
+      "owners": [
+        "native-results",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "admit"
+    },
+    {
+      "owners": [
+        "source-scratch",
+        "resampler",
+        "resampler-tables",
+        "frontend",
+        "frontend-tables",
+        "feature-handoff",
+        "weights",
+        "recurrent-committed",
+        "recurrent-pending",
+        "neural-scratch",
+        "probabilities",
+        "densities",
+        "bridge-control",
+        "native-results",
+        "waveform-banks",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "source"
+    },
+    {
+      "owners": [
+        "probabilities",
+        "densities",
+        "bridge-control",
+        "score3",
+        "native-results",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "score3"
+    },
+    {
+      "owners": [
+        "probabilities",
+        "densities",
+        "bridge-control",
+        "score4",
+        "graph",
+        "native-results",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "score4"
+    },
+    {
+      "owners": [
+        "probabilities",
+        "densities",
+        "bridge-control",
+        "trace",
+        "graph",
+        "native-results",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "trace"
+    },
+    {
+      "owners": [
+        "probabilities",
+        "densities",
+        "bridge-control",
+        "trace",
+        "graph",
+        "state-map",
+        "events",
+        "native-results",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "postprocess"
+    },
+    {
+      "owners": [
+        "native-results",
+        "pending-retained",
+        "waveform-banks",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "publish"
+    },
+    {
+      "owners": [
+        "source-scratch",
+        "probabilities",
+        "densities",
+        "trace",
+        "native-results",
+        "pending-retained",
+        "waveform-banks",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "cancel"
+    },
+    {
+      "owners": [
+        "source-scratch",
+        "native-results",
+        "pending-retained",
+        "waveform-banks",
+        "audio-FX",
+        "audio-history",
+        "display",
+        "platform-overhead"
+      ],
+      "per_class_actual_peak_bytes": null,
+      "phase": "cleanup"
+    }
+  ],
+  "whole_pipeline_peak_bytes": null
+}

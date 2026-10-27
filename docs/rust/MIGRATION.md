@@ -6,7 +6,7 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-03, prepare the whole-route decision and target-probe protocol.**
+**Current next: RC-04, blocked on exact-unit access and target capabilities.**
 The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
 [machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
 packages, paths, commands, validation, stop conditions and commit/push boundaries.
@@ -23,7 +23,20 @@ compositions;all395 frozen bindings,537 parent bindings and540 worker runtime
 entries pass the separate receipt audit. All resource/refusal gates pass;
 52 retained files/464481B include audit,manifest and build metadata. Pending
 host cancel is0.000421ms;asynchronous/product/P4 cancellation remains NOT_RUN.
-RC-03 onward remain NOT_RUN, with RC-04 explicitly BLOCKED_EXTERNAL.
+RC-03 preparation is complete: [route decision](PRODUCT-ROUTE-DECISION-20261027.md)
+and [probe protocol](PRODUCT-TARGET-PROBE-PROTOCOL.md) bind26 owners,nine phases,
+18 consumer source snapshots and seven bounded prepared probe cases. The decision
+is WAIT_EXTERNAL;all nine physical allowances and exact-model rights/provenance
+remain unresolved. Consumer origin/main was fetched at4a8c660 without checkout edits.
+Its platform guards prohibit resident product owner execution on Guition;
+integration-check does not start those owners,and the64KiB boot probe has no
+allocator. Board access alone will not close the residual product-memory gate.
+RC-04 requires observed unit/revision/recovery plus qualified BSP/resident
+allocator/largest-block/stack/timer/cancel capabilities and a separately frozen
+probe implementation. The prepared protocol is NOT_EXECUTION_READY. No target
+build,device,model or new synthetic stage ran during this source-only preparation.
+RC-05 may record WAIT if prerequisites remain absent;RC-06 cannot start from that
+decision. Avoid repeating unchanged audits or creating another toy stage while waiting.
 After HS06, prioritize the whole-pipeline resource/rights decision and exact-board
 budgets before another large implementation. Hardware/rights blockers must remain
 explicit; do not replace them with an unbounded series of small synthetic stages.

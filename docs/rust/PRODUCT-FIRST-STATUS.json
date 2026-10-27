@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-06_PROBABILITY_BRIDGE_RESULT",
-  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
-  "active_phase_verdict": "HS06_SYNTHETIC_HOST_PASS_ONLY",
+  "active_phase": "RC-03_WHOLE_ROUTE_DECISION_PREPARATION",
+  "active_phase_status": "PREPARATION_COMPLETE_WAIT_EXTERNAL",
+  "active_phase_verdict": "WAIT_EXTERNAL_NO_LARGE_PORT_GO",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "RC02 fixed four-case HS06 run and separate receipt audit PASS:38 observations,60850 certified rows,11 selectors,eight small compositions;395 frozen bindings,537 parent bindings,540 worker runtime entries. Registered CPU/wall/RSS/AS/output and malformed/refusal gates PASS.52 retained files/464481B including build metadata/audit/manifest. Earlier hash-bound implementation tests reused,not rerun;C oracle NOT_RUN. Full model/music/P4 NOT_RUN.",
+  "checks": "RC03 static preparation:26 owner entries,9 lifecycle phases,recomputed full-shape compute/conditional storage,18 exact consumer source snapshots at fetched origin/main4a8c660,7 fixed target-probe preparation cases with explicit unresolved capabilities. JSON/source/hash/line/formula/link checks pass;395 prior registration bindings and six implementation sources preserved. No candidate/model/corpus/target build/device execution; rights and all nine PF01 allowances remain unresolved.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -45,9 +45,9 @@
     "status": "INITIAL_PLAN_SNAPSHOT_PROGRESS_TRACKED_IN_CONTINUATION_PROGRESS"
   },
   "continuation_progress": {
-    "execution_scope": "RC02 registered four-case synthetic bridge run and separate audit only;no model/corpus/device/provider execution",
-    "last_completed_package": "RC-02",
-    "next_package": "RC-03",
+    "execution_scope": "RC03 source/owner/cost/rights/probe preparation only;no model/corpus/device/target build or new component execution",
+    "last_completed_package": "RC-03",
+    "next_package": "RC-04",
     "packages": [
       {
         "checks": [
@@ -98,23 +98,29 @@
         "verdict": "HS06_SYNTHETIC_HOST_PASS_ONLY"
       },
       {
-        "evidence": [],
+        "closed_obstacle": "Whole-route owner/lifetime/compute decision and bounded probe preparation made reviewable;external/capability gates explicit,not cleared",
+        "evidence": [
+          "docs/rust/PRODUCT-ROUTE-DECISION-20261027.md",
+          "docs/rust/PRODUCT-ROUTE-DECISION-20261027.json",
+          "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.md",
+          "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json"
+        ],
         "id": "RC-03",
-        "reason": "Next ready package after RC02 result commit/push;whole-route decision and target-probe preparation;larger execution gates remain open",
-        "source_revision": null,
-        "status": "NOT_RUN"
+        "source_revision": "1e029785500e8a0ae3d674b63c56bede77cf3779",
+        "status": "COMPLETE",
+        "verdict": "PREPARATION_COMPLETE_WAIT_EXTERNAL"
       },
       {
         "evidence": [],
         "id": "RC-04",
-        "reason": "Exact JC1060 availability, observed revision/port/image and registered target probe required; last owner report unavailable",
+        "reason": "Requires exact JC1060 access/recovery/identity and qualified resident BSP,allocator/stack/largest-block telemetry,timer/cancel and frozen probe implementation;existing boot64KiB test is insufficient",
         "source_revision": null,
         "status": "BLOCKED_EXTERNAL"
       },
       {
         "evidence": [],
         "id": "RC-05",
-        "reason": "Dependencies and required gates remain as defined in the continuation plan",
+        "reason": "No positive GO: rights/provenance and physical resident allowance evidence missing;may record WAIT_EXTERNAL after RC03 without pretending RC04 completed",
         "source_revision": null,
         "status": "NOT_RUN"
       },
@@ -214,7 +220,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "Clean fixed four-case synthetic host bridge measurement and independent receipt/identity/resource audit; no musical or physical qualification",
+  "evidence_level": "Source-bound static whole-route preparation and public mathematical references;physical execution and approved budgets NOT_RUN",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -433,6 +439,13 @@
       "source_baseline": "d6644460b1a19dd77d80abad81e52a2a8b7f0b8d",
       "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
       "verdict": "HS06_SYNTHETIC_HOST_PASS_ONLY"
+    },
+    {
+      "decision_path": "docs/rust/PRODUCT-ROUTE-DECISION-20261027.json",
+      "phase": "RC-03",
+      "source_baseline": "1e029785500e8a0ae3d674b63c56bede77cf3779",
+      "status": "PREPARATION_COMPLETE_WAIT_EXTERNAL",
+      "verdict": "WAIT_EXTERNAL_NO_LARGE_PORT_GO"
     }
   ],
   "host_frontend_experiment": {
@@ -576,10 +589,18 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Prepare whole-pipeline live-owner/lifetime/cost ledger,rights/provenance evidence or missing inputs,and bounded exact-target probe protocol under continuation plan;record UNKNOWN/device blockers;no new synthetic stage or full model implementation",
+    "action": "Obtain exact JC1060 unit access/recovery/observed revision and qualified resident BSP/allocator/memory/stack/timing capabilities;resolve and freeze target probe implementation before measurement. If prerequisites remain absent,record RC05 WAIT_EXTERNAL;do not start RC06 or another synthetic series.",
+    "blocking_evidence": [
+      "BOARD_ACCESS",
+      "RESIDENT_BSP",
+      "MEMORY_TELEMETRY",
+      "TIMING_AND_CANCEL",
+      "PROBE_IMPLEMENTATION"
+    ],
     "large_port_allowed": false,
-    "mode": "WHOLE_ROUTE_RESOURCE_RIGHTS_DECISION_AND_TARGET_PROBE_PREPARATION",
-    "phase": "RC-03"
+    "mode": "WAIT_FOR_EXACT_BOARD_AND_TARGET_CAPABILITIES",
+    "phase": "RC-04",
+    "ready": false
   },
   "open_decisions": [
     {
@@ -801,6 +822,13 @@
     "tools/apta_1_1_neural_inference.py": "8fafc7b22268700ee2b822c7877c47035597394b8d9571ae76243ad249bfd2d8",
     "tools/apta_dense_decoder.py": "782e66ab56ec143d8214f73b74c181a3b2cd393fb56e3364b849cfd7c9c920ca"
   },
+  "route_decision_preparation": {
+    "decision": "WAIT_EXTERNAL",
+    "large_port_allowed": false,
+    "path": "docs/rust/PRODUCT-ROUTE-DECISION-20261027.json",
+    "sha256": "790f66f634fa5522f84654aff3e9537a282d3d50e1d979e2deaa454a187e1f00",
+    "status": "PREPARATION_COMPLETE_WAIT_EXTERNAL"
+  },
   "scope_document": {
     "path": "docs/rust/PRODUCT-SCOPE.md",
     "sha256": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98"
@@ -816,6 +844,12 @@
   ],
   "source_baseline": "99f6ba6a5e57c5dc60eb536c699ec5d30623fbe5",
   "stable_version": "1.0.1",
+  "target_probe_preparation": {
+    "execution_ready": false,
+    "path": "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json",
+    "sha256": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0",
+    "status": "PREPARED_WITH_EXPLICIT_BLOCKERS_NOT_EXECUTION_READY"
+  },
   "user_decisions": [
     {
       "date": "2026-10-26",
