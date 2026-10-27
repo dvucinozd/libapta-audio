@@ -1,0 +1,193 @@
+{
+  "binary_sha256": "cf4af69082f418b3f20cc3be0482ba3df5ba4c96b3ff38cc43607c2e904010ce",
+  "component_sha256": {
+    "rust/runtime/Cargo.toml": "271c2e6fa9907ff400d0746303d25da6bdfab4412029161bec71003d34cb2202",
+    "rust/runtime/src/bin/apta-compact-probabilities-synthetic.rs": "323c5407304b18b6fd5a399b389aee31e8cef76fb86d73459f189fffa4c922ec",
+    "rust/runtime/src/compact_probabilities.rs": "1232a8a297093196ca09ec111b6c89a5b09f07bd523fb3499453cfc9923ac893",
+    "rust/runtime/src/lib.rs": "7c0586c4b6008f6ae33d6255f7b71480a5eb091e22b5c4ac4cab2d3da85c100a",
+    "rust/runtime/tests/compact_probabilities.rs": "f424cdc417a7cfd791eb6ace88be423a666edef36d04f467f289e5d725f81701",
+    "tools/apta_compact_probabilities_synthetic.py": "9ea96028fb85712f9489e3ba95d493a8aab8d32426cdc6dc3bb6161199a1e34b"
+  },
+  "date": "2026-10-27",
+  "document": {
+    "bytes": 7757,
+    "path": "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.md",
+    "sha256": "d8a9b32bf3a589d2cac110c38c03e4b30c95f2083f4cc9f6897168a0ec659f22"
+  },
+  "feature": {
+    "default_enabled": false,
+    "depends_on": [
+      "experimental-compact-grid"
+    ],
+    "name": "experimental-compact-probabilities",
+    "new_dependencies": false
+  },
+  "format": "libapta-host-probability-implementation-1",
+  "id": "HS-06",
+  "layout_probe": {
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\hs06-layout-probe-20261027",
+    "files": {
+      "compiler-artifact.json": {
+        "bytes": 981,
+        "sha256": "219b79008e13ac3b7d7562431331352e010e1c1efb2d13201000de2584bab31d"
+      },
+      "layout.rs": {
+        "bytes": 231,
+        "sha256": "93a1fddf112be9598d0ae5cdd464da37a6573ddaae4f814c3a26ff13d02759cc"
+      },
+      "layout.txt": {
+        "bytes": 12,
+        "sha256": "59d60f02766e7c623c463ac5a01ab36f211dd06f5f2c8e4159f9ea7be703ecc3"
+      }
+    },
+    "processed_rows": 0,
+    "result": "144 8 960 8"
+  },
+  "next": {
+    "action": "Commit/push implementation then clean exact-source new exclusive build/binary/output and four fixed cases; separate audited result/push",
+    "fixed_case_order": [
+      "fixtures",
+      "full-mixed",
+      "full-no-support",
+      "cancel"
+    ],
+    "large_port_allowed": false
+  },
+  "preflight": {
+    "accepted_rows_including_invalid_prefixes": 864,
+    "artifact_bytes_including_manifest": 358016,
+    "artifact_files_including_manifest": 24,
+    "case_order": [
+      "fixtures"
+    ],
+    "checker_probes": {
+      "accepted": 3,
+      "refused": 17
+    },
+    "complete_waited_worker_and_descendants_cpu_seconds": 2.891666,
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\hs06-implementation-preflight-20261027-b",
+    "kind": "DIRTY_DEVELOPMENT_WITH_EXACT_COMPONENT_HASHES_NOT_FIXED_CLEAN_RUN",
+    "manifest": {
+      "bytes": 3553,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-implementation-preflight-20261027-b\\artifact-manifest.json",
+      "sha256": "822061e78874c5a3e58b38cc8548c77e17c37428224ec2efe4d2b7f8b448aec3"
+    },
+    "observations": 35,
+    "parent_bindings": 537,
+    "prefix_density_hash_scope": "diagnostic metadata only; no emitted view/certificate on failure/cancel",
+    "resource_refusals": {
+      "address_space": "REFUSED_AS_EXPECTED",
+      "output": "REFUSED_AS_EXPECTED",
+      "rss": "REFUSED_AS_EXPECTED",
+      "wall": "REFUSED_AS_EXPECTED"
+    },
+    "result": {
+      "bytes": 51343,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\hs06-implementation-preflight-20261027-b\\result.json",
+      "sha256": "318b59a3423a3913228acda42e8cb2b7a6855abc2e35ad0cfafe46e606f00846"
+    },
+    "transport_bytes": 67462,
+    "transport_records": 859,
+    "valid_result_rows": 850,
+    "work_units": 4353,
+    "worker_runtime_bindings": 135
+  },
+  "protocol": {
+    "bytes": 80475,
+    "path": "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json",
+    "sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650"
+  },
+  "registration_revision": "48ca634a67bebaf9ae9ca5aa9f14bf0a6469846d",
+  "remaining_gates": [
+    "rights/provenance",
+    "full-size neural graph parity/resources",
+    "PF01 exact-board memory/placement/coexistence/timing",
+    "PF04 and consumer lifecycle/physical qualification"
+  ],
+  "scope": {
+    "default_core_wire_consumer_changed": false,
+    "fixed_four_case_measured_run": false,
+    "full_30000_candidate_run": false,
+    "measured_pending_cancel": false,
+    "no_new_dependencies": true,
+    "prior_kernels_assets_changed": false,
+    "trained_model_music_corpus_device_provider_release": false
+  },
+  "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_FOUR_CASE_RUN_PENDING",
+  "storage": {
+    "density_bytes_at_30000": 720000,
+    "graph_payload_scope": "numeric slice lengths, not private Vec capacity or allocator residency",
+    "host_driver_alignment": 8,
+    "host_driver_value_bytes": 960,
+    "host_session_alignment": 8,
+    "host_session_value_bytes": 144,
+    "input_buffer_bytes": 768,
+    "physical_peak": "NOT_MEASURED",
+    "private_payload_bytes": 36,
+    "probability_bytes_at_30000": 360000,
+    "workspace_event_payload_scope": "actual allocated capacity"
+  },
+  "tests": {
+    "Python_compile": "PASS",
+    "compile_fail_lifetime_tests": 2,
+    "composition_HMM_quotas": [
+      4096,
+      "usize::MAX"
+    ],
+    "compositions_per_build": 8,
+    "controls": {
+      "C_context_oracle": "IGNORED_NOT_RUN",
+      "HS01_integration": 12,
+      "HS01_internal": 1,
+      "HS02_integration": 7,
+      "HS02_internal": 1,
+      "HS03_integration": 6,
+      "HS04_integration": 7,
+      "HS04_internal": 1,
+      "HS05_integration": 5,
+      "HS05_internal": 2,
+      "default_context": 5,
+      "product_grid": 12
+    },
+    "fmt": "PASS",
+    "focused_clippy_D_warnings": "PASS",
+    "frozen_bindings_unchanged": 395,
+    "maximum_geometry_cancel_test": "138 accepted/137 committed/686 units; no full candidate run or timing claim",
+    "new_integration_debug": 8,
+    "new_integration_release": 8,
+    "new_internal_debug": 1,
+    "new_internal_release": 1,
+    "release_CLI_build": "PASS",
+    "selector_cases": 11,
+    "short_schedules_per_build": 700
+  },
+  "toolchain": {
+    "feature": "experimental-compact-probabilities",
+    "tools": {
+      "cargo": {
+        "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "sha256": "841072d1d92f9e841d9ba5b0814182a0adf064acf4527cd120967b7bc49dcb66",
+        "version_verbose": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\nrelease: 1.95.0\ncommit-hash: f2d3ce0bd7f24a49f8f72d9000448f8838c4e850\ncommit-date: 2026-03-21\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.2 (sys:0.20.4 vendored)\nlibcurl: 8.15.0-DEV (sys:0.4.83+curl-8.15.0 vendored ssl:OpenSSL/3.5.4)\nssl: OpenSSL 3.5.4 30 Sep 2025\nos: Ubuntu 24.4.0 (noble) [64-bit]\n"
+      },
+      "rustc": {
+        "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "sha256": "bff349e72704ff70bc08a234a3847338e797065bbedde5e556808bc87b7bf7c6",
+        "version_verbose": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2\n"
+      }
+    }
+  },
+  "validation_commands": [
+    "cargo test --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --features experimental-compact-probabilities --lib --test compact_probabilities --target-dir /home/daniel/libapta-hs06-build",
+    "cargo test --release --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --features experimental-compact-probabilities --lib --test compact_probabilities --target-dir /home/daniel/libapta-hs06-build",
+    "cargo test --doc --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --features experimental-compact-probabilities --target-dir /home/daniel/libapta-hs06-build compact_probabilities",
+    "cargo test --release --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --features experimental-compact-probabilities,experimental-compact-neural,experimental-compact-frontend --lib --test compact_probabilities --test compact_neural --test compact_frontend --test compact_resampler --test compact_grid --test compact_hmm --test context --target-dir /home/daniel/libapta-hs06-build",
+    "cargo test --release --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/Cargo.toml --test product_grid_contract --target-dir /home/daniel/libapta-hs06-build",
+    "cargo test --release --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --test context --target-dir /home/daniel/libapta-hs06-build",
+    "cargo fmt --check --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml",
+    "cargo clippy --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --features experimental-compact-probabilities --lib --bin apta-compact-probabilities-synthetic --test compact_probabilities --target-dir /home/daniel/libapta-hs06-build -- -D warnings",
+    "cargo build --release --manifest-path /mnt/d/AI/LIBAPTA/libapta-audio/rust/runtime/Cargo.toml --features experimental-compact-probabilities --bin apta-compact-probabilities-synthetic --target-dir /home/daniel/libapta-hs06-build",
+    "Python ast.parse/compile and py_compile.compile of tools/apta_compact_probabilities_synthetic.py with external cache",
+    "python docs/rust/fixtures/product-host-probability-hs06/verify_registration.py",
+    "python3 tools/apta_compact_probabilities_synthetic.py --preflight --executable /home/daniel/libapta-hs06-build/release/apta-compact-probabilities-synthetic --output /mnt/d/AI/LIBAPTA/outputs/hs06-implementation-preflight-20261027-b"
+  ]
+}

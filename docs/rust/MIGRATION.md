@@ -6,7 +6,28 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: implement registered HS06 probability/density/support bridge.**
+**Current next: run the four registered HS06 cases from clean pushed source.**
+The [implementation receipt](PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.md) records
+the opt-in caller-buffer probability/density/support adapter,selector,fixed CLI
+and independent checker. Eight integration plus one new internal test pass debug/
+release;700 short schedules/build,eight small HMM/grid compositions under two
+quotas and two compile-fail lifetime tests pass. Old HS01-05,product-grid and
+default-context controls pass;one unavailable C-oracle test stays NOT_RUN.
+Host Session144B/align8,Driver960B/align8;full output arrays remain1080000B.
+Final development preflight B checks35 observations/850 complete result rows,
+859 pipe records/67462B;three valid checker probes and17 malformed refusals,
+all four resource violations refused. Parent537 bindings and135 worker runtime
+entries pass. All395 frozen registration bindings and prior sources are unchanged.
+No full30000-row candidate case or registered measured pending-cancel case ran.
+Commit/push this implementation before a new exclusive external build/binary/
+output and exactly fixtures,full-mixed,full-no-support,cancel. Preserve all caps/
+failures,then audit a separate result and commit/push before another stage.
+No trained model,music,device,consumer/provider activation or release. Full-size
+graph,rights/provenance,PF01 actual-board budgets and PF04 remain open.
+
+### Completed HS06 registration — 2026-10-27
+
+**Prior next: implement registered HS06 probability/density/support bridge.**
 The [protocol](PRODUCT-HOST-PROBABILITY-PROTOCOL.md) and
 [machine registration](PRODUCT-HOST-PROBABILITY-PROTOCOL.json) freeze named
 `[beat,downbeat,nonbeat]` f32 input,2^-21 sum validation,ordered F64 logs with

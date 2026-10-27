@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-06_PROBABILITY_BRIDGE_REGISTRATION",
-  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
-  "active_phase_verdict": "REGISTRATION_MATH_IDENTITIES_PASS_ONLY",
+  "active_phase": "HS-06_PROBABILITY_BRIDGE_IMPLEMENTATION",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_FOUR_CASE_RUN_PENDING",
+  "active_phase_verdict": "HOST_IMPLEMENTATION_PREFLIGHT_ONLY_PRODUCT_GATES_OPEN",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS06 registration verifier passes:35 short cases/878 rows,2550 valid short density scalars,60000 long reference rows,395 bound files;35 raw mathematical assets/10536B,11 selector cases,8 small compositions. No candidate code/tests/measurement. Old sources/authorities/assets preserved;VERSION1.0.1.",
+  "checks": "HS06 eight integration+one new internal tests pass debug/release;700 schedules/build,11 selectors,eight small compositions,two compile-fail lifetime tests. Independent fixture preflight35 observations/850 result rows/859 records;17 malformed refusals and four resource refusals pass. HS01-05,product-grid and default-context controls pass;one C-oracle ignore NOT_RUN. All395 registration bindings unchanged;no full30000-row candidate or registered measured-cancel case.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,7 +92,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "public mathematical probability/density/support registration only; Rust candidate NOT_RUN",
+  "evidence_level": "synthetic host implementation/tests and dirty-development fixture preflight; clean four-case experiment NOT_RUN",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -103,8 +103,8 @@
     "HS03_synthetic_preflight_executed": true,
     "HS04_candidate_executed": false,
     "HS04_registration_only": true,
-    "HS06_candidate_executed": false,
-    "HS06_registration_only": true,
+    "HS06_candidate_executed": true,
+    "HS06_registration_only": false,
     "HS06_synthetic_measured_run_complete": false,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
@@ -393,8 +393,8 @@
     "trained_checkpoint_executed": false
   },
   "host_probability_experiment": {
-    "cancellation_evidence_planned": "pending host flag only; asynchronous/P4 NOT_RUN",
-    "candidate_tests_or_measurement": "NOT_RUN",
+    "cancellation_evidence_planned": "pending prefix tested without timing; registered measured pending-cancel and asynchronous/P4 NOT_RUN",
+    "candidate_tests_or_measurement": "TESTS_AND_DEVELOPMENT_PREFLIGHT_PASS_FIXED_RUN_NOT_RUN",
     "case_counts": {
       "cases": 35,
       "composition_cases": 8,
@@ -409,11 +409,16 @@
       "valid_short_rows": 850
     },
     "id": "HS-06",
+    "implementation": {
+      "bytes": 9642,
+      "path": "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.json",
+      "sha256": "776a8f913347ba8de415302267f02e70c230d37b54c844332204da248470b353"
+    },
     "path": "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json",
     "product_ready": false,
     "registration_validation": "PASS_MATH_AND_IDENTITIES_ONLY",
     "sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650",
-    "status": "REGISTERED_NOT_IMPLEMENTED"
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_FOUR_CASE_RUN_PENDING"
   },
   "host_resampler_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
@@ -432,10 +437,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "After registration commit/push implement six bound paths,700 short schedules/build,selector and eight existing-HMM/grid compositions;separate implementation receipt/push before four fixed clean cases;no large port or model execution",
+    "action": "After implementation commit/push,new exclusive external release build/binary/output;run fixtures,full-mixed,full-no-support,cancel exactly once under frozen gates;separate audit/result/commit/push before later work",
     "large_port_allowed": false,
-    "mode": "IMPLEMENT_REGISTERED_NARROW_SYNTHETIC_ONLY",
-    "phase": "HS-06_PROBABILITY_BRIDGE_IMPLEMENTATION"
+    "mode": "RUN_REGISTERED_SYNTHETIC_ONLY_FROM_CLEAN_PUSHED_IMPLEMENTATION",
+    "phase": "HS-06_FIXED_FOUR_CASE_RUN"
   },
   "open_decisions": [
     {

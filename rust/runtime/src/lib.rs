@@ -12,6 +12,8 @@ pub mod compact_grid;
 pub mod compact_hmm;
 #[cfg(feature = "experimental-compact-neural")]
 pub mod compact_neural;
+#[cfg(feature = "experimental-compact-probabilities")]
+pub mod compact_probabilities;
 #[cfg(feature = "experimental-compact-resampler")]
 pub mod compact_resampler;
 mod context;
