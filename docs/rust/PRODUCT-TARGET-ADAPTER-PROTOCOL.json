@@ -1,0 +1,58 @@
+{
+  "authority_bindings": {
+    "docs/rust/PRODUCT-RC04-SOFTWARE-SPLIT.md": "691b70d2aa2015d3fb6526e43cbd0622cf9010f7f95e8c7412fdeffb3025c28f",
+    "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.json": "ad4853906f09849c1c07a366371eb0fad1ae95b7ad8be2666f93469e6a2feeef",
+    "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.json": "db3aeff785a57c3536bda5ec3dad65b008f32f77fd3e92f99ad7daa8c47f4880",
+    "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0",
+    "docs/rust/PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json": "029f7394c7f89ce64a548739da92877ce9c02d7fa8e4abe0d2e3105aefb77c5a",
+    "docs/rust/PRODUCT-TARGET-TELEMETRY-V1.md": "8a692aba0720b732ebd8819a09ddd46f77dc1662af28062361e6b524598fa0b5"
+  },
+  "cached_dependencies": {
+    "esp_hal": "1.2.2",
+    "static_cell": "2.1.1"
+  },
+  "compiler": "1.95.0",
+  "consumer_changes_allowed": false,
+  "document": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-PROTOCOL.md",
+    "sha256": "38ee8e588857ab721a86898e611e755abea06e5be7da3937a229e026c7abcdf7"
+  },
+  "execution_ready": false,
+  "format": "libapta-target-adapter-preparation-registration-1",
+  "hardware_or_model_execution": false,
+  "id": "RC-04A-3",
+  "max_step_units": 32,
+  "max_trial_seconds": 10,
+  "minimum_chip_policy": 302,
+  "nominal_HAL_timer_hz": 1000000,
+  "package_kind": "BUILD_ONLY_LINKCHECK",
+  "planned_source_paths": [
+    "rust/probes/target-adapter/Cargo.toml",
+    "rust/probes/target-adapter/Cargo.lock",
+    "rust/probes/target-adapter/.cargo/config.toml",
+    "rust/probes/target-adapter/src/lib.rs",
+    "rust/probes/target-adapter/src/bin/linkcheck.rs",
+    "rust/probes/target-adapter/tests/adapter.rs",
+    "rust/probes/target-adapter/examples/telemetry_fixture.rs",
+    "tools/apta_target_probe_package.py",
+    "tools/tests/test_apta_target_probe_package.py"
+  ],
+  "source_baseline": "1dbba07dc8eb9d5b81b19aecfb47bf167f86c219",
+  "source_freeze_before_final_package": true,
+  "static_caller_buffer_bytes": [
+    131072,
+    109200,
+    218400,
+    114688,
+    229376
+  ],
+  "status": "REGISTERED_NOT_IMPLEMENTED",
+  "target": "riscv32imafc-unknown-none-elf",
+  "variants": [
+    "copy",
+    "projection32",
+    "projection64",
+    "activation",
+    "logs"
+  ]
+}

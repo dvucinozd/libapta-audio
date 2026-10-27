@@ -1,7 +1,7 @@
 {
-  "active_phase": "RC-04A-2_RESOURCE_CORE_IMPLEMENTATION",
-  "active_phase_status": "COMPLETE_NO_STD_SOFTWARE_TESTS_ONLY",
-  "active_phase_verdict": "PURE_CORE_NUMERIC_AND_BOUNDED_WORK_PASS_PHYSICAL_GATES_OPEN",
+  "active_phase": "RC-04A-3_TARGET_ADAPTER_REGISTRATION",
+  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
+  "active_phase_verdict": "SOFTWARE_PREPARATION_REGISTRATION_PHYSICAL_GATES_OPEN",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
@@ -638,7 +638,7 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Inspect consumer worktree/source and resolve timer/math/ownership/producer interfaces for guarded opt-in adapter and compile/link/map/capture package;reuse fixed no_std core and telemetry V1. Keep missing hardware bindings guarded;no provider/core pin activation or board-guard bypass.",
+    "action": "Implement registered no_std clock/result-fence/telemetry adapter and guarded idle target link-check binaries/package tooling;host test then freeze/push before clean build-only package",
     "large_port_allowed": false,
     "mode": "GUARDED_TARGET_ADAPTER_AND_PACKAGE_PREPARATION",
     "phase": "RC-04A-3",
@@ -904,6 +904,11 @@
   ],
   "source_baseline": "99f6ba6a5e57c5dc60eb536c699ec5d30623fbe5",
   "stable_version": "1.0.1",
+  "target_adapter_registration": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-PROTOCOL.json",
+    "sha256": "9efce4ae38aecc7bcc04cd82058cd7688d8f556ad4749ddef0aaf005940ec64d",
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "target_probe_preparation": {
     "execution_ready": false,
     "path": "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json",
