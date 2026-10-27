@@ -6,13 +6,15 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-04A-2, prepare the fixed HAL-independent probe arithmetic.**
-RC-04A-2 [registration](PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.md) freezes the
-standalone no_std crate paths,existing libm0.2.16 backend,copy/projection/nonlinear
-recipes,caller-owned buffers,exact units and cancellation/lifetime tests. Public
-copy16384-word,projection2400-output and28 nonlinear reference scalars are verified
-independently before code. Registration commit/push precedes implementation;
-no candidate,device or trained model has run at this registration checkpoint.
+**Current next: RC-04A-3, prepare the guarded target adapter and firmware package.**
+RC-04A-2 is complete:[implementation](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.md)
+and [machine receipt](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.json). Registration
+9ece658 preceded the standalone safe no_std crate. Copy,both projection dtypes and
+four nonlinear kinds match frozen public references under four quotas:28 full
+workload/schedule combinations per build. Nine integration,two internal and two
+compile-fail lifetime tests pass debug/release;Clippy/fmt,19 telemetry controls and
+RV32 release library build pass. This is no HAL firmware,boot or device timing
+qualification. Locked cached libm0.2.16 sources match the package archive.
 The accepted [RC-04 split](PRODUCT-RC04-SOFTWARE-SPLIT.md) permits host software
 preparation while the physical RC-04B prerequisites remain open. RC-04A-1 is
 complete: [telemetry V1](PRODUCT-TARGET-TELEMETRY-V1.md) and its offline parser
@@ -21,8 +23,8 @@ relations,explicit null metrics and immutable raw evidence output. Nineteen
 synthetic integrity/CLI tests pass on Windows Python3.11.2 and WSL Python3.12.3.
 The example returns VALID_WITH_UNKNOWN_METRICS/NOT_QUALIFIED;no device or target
 code ran. See the [implementation receipt](PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json).
-Parent RC-04 remains incomplete;next pure-core work needs its own fixed path/
-oracle/arithmetic/bounded-work registration,not a full model or board activation.
+Parent RC-04 remains incomplete. RC-04A-3 must bind timer,producer,placement and
+actual target code generation without bypassing board guards or activating a model.
 The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
 [machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
 packages, paths, commands, validation, stop conditions and commit/push boundaries.

@@ -1,0 +1,13 @@
+[package]
+name = "libapta-resource-probe-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.81"
+license = "Apache-2.0"
+publish = false
+description = "Opt-in fixed no_std resource probe arithmetic; no device qualification"
+
+[dependencies]
+libm = { version = "=0.2.16", default-features = false }
+
+[workspace]

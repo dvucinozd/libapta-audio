@@ -1,0 +1,251 @@
+{
+  "HAL_adapter_implemented": false,
+  "artifacts": {
+    "checks": {
+      "bytes": 3682,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a2-core-validation-20261027-02\\checks.json",
+      "sha256": "b4c13ad359baa5baeedcf62b34dadcd75834c36f17d3ee0f5d2a3da28a109363"
+    },
+    "combined_retained_bytes": 58673,
+    "combined_retained_files": 37,
+    "compiled_artifacts": {
+      "/home/daniel/libapta-rc04a2-core-build/release/deps/liblibapta_resource_probe_core-51a039a3e3ce74ef.rlib": {
+        "bytes": 98988,
+        "sha256": "08cf94d5f5bf574ad4ebb8e7eebef98220eb36e544587f7696b9180be70952f8"
+      },
+      "/home/daniel/libapta-rc04a2-core-build/riscv32imafc-unknown-none-elf/release/liblibapta_resource_probe_core.rlib": {
+        "bytes": 95648,
+        "sha256": "a54972c83e36d8517e0b87af07e8f1e8e516e34dd7dcf8ca3df159905ae6adce"
+      }
+    },
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\rc04a2-core-validation-20261027-02",
+    "files_including_manifest": 18,
+    "manifest": {
+      "bytes": 2404,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a2-core-validation-20261027-02\\artifact-manifest.json",
+      "sha256": "c2f5a3eeb53553dde2d4534b5dcdf90504943a79084546110dd9d6d51b0b58d6"
+    },
+    "previous_development_bytes": 29750,
+    "previous_development_directory": "D:/AI/LIBAPTA/outputs/rc04a2-core-validation-20261027-01",
+    "previous_development_files": 19,
+    "total_bytes": 28923
+  },
+  "backend": {
+    "archive_sha256": "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981",
+    "cached_sources_match_package_archive": true,
+    "libm": "0.2.16",
+    "new_installation": false,
+    "receipt": {
+      "bytes": 15049,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a2-core-validation-20261027-02\\backend.json",
+      "sha256": "616f9c6766fb62a76d1669420effecc27c1dfba480918a774d2dc28d334cd98a"
+    }
+  },
+  "benchmark_or_device_run": false,
+  "commands": [
+    {
+      "command": [
+        "/home/daniel/.cargo/bin/cargo",
+        "fmt",
+        "--manifest-path",
+        "rust/probes/resource-core/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "name": "fmt",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/home/daniel/.cargo/bin/cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "rust/probes/resource-core/Cargo.toml",
+        "--target-dir",
+        "/home/daniel/libapta-rc04a2-core-build"
+      ],
+      "name": "debug",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/home/daniel/.cargo/bin/cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--release",
+        "--manifest-path",
+        "rust/probes/resource-core/Cargo.toml",
+        "--target-dir",
+        "/home/daniel/libapta-rc04a2-core-build"
+      ],
+      "name": "release",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/home/daniel/.cargo/bin/cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "rust/probes/resource-core/Cargo.toml",
+        "--all-targets",
+        "--target-dir",
+        "/home/daniel/libapta-rc04a2-core-build",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "name": "clippy",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/home/daniel/.cargo/bin/cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--release",
+        "--lib",
+        "--manifest-path",
+        "rust/probes/resource-core/Cargo.toml",
+        "--target",
+        "riscv32imafc-unknown-none-elf",
+        "--target-dir",
+        "/home/daniel/libapta-rc04a2-core-build"
+      ],
+      "name": "rv32-library",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "docs/rust/fixtures/resource-probe-core-rc04a2/verify.py"
+      ],
+      "name": "oracles",
+      "returncode": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_apta_target_probe_telemetry.py",
+        "-v"
+      ],
+      "name": "telemetry-control",
+      "returncode": 0
+    }
+  ],
+  "component_sha256": {
+    "rust/probes/resource-core/Cargo.lock": "7f86b0ff4040cfee69114f56ff8f3a74ef4a4fd209f37929d7ce420ca1ec317a",
+    "rust/probes/resource-core/Cargo.toml": "46a1cbc577bd02419c74a73d33aef6c323338e825e7f6ca8023caa91b0dba383",
+    "rust/probes/resource-core/src/lib.rs": "d9808e819a8a73ee27b52472fdc8ebcafd7bd520ea059f57805995770e3ad76e",
+    "rust/probes/resource-core/tests/probes.rs": "f95a4384d26a9991da0c811ef66d8775b2dc5ea21c7e753cfbce4d1470a220a8"
+  },
+  "consumer_pin_provider_changed": false,
+  "date": "2026-10-27",
+  "document": {
+    "path": "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.md",
+    "sha256": "6f70e56d753561a39ce9d675d9a27efb3e45160fcfedb02d28e51f087bbdeace"
+  },
+  "format": "libapta-resource-probe-core-implementation-1",
+  "full_model_or_music_run": false,
+  "id": "RC-04A-2",
+  "metadata_collection_incident": {
+    "bytes": 404,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a2-core-validation-20261027-01\\metadata-incident.json",
+    "sha256": "c15103960ce4ffe5e8702750f4c88550ddb2228572320ba39231b0ffb4527431"
+  },
+  "next": "RC-04A-3 guarded target adapter/compile-link-map/capture preparation;no board guard bypass or model activation",
+  "numerical_or_cap_changes": false,
+  "optimization_barriers": "core::hint::black_box best effort;not volatile or proof of final firmware traffic/code generation",
+  "registration": {
+    "path": "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.json",
+    "sha256": "db3aeff785a57c3536bda5ec3dad65b008f32f77fd3e92f99ad7daa8c47f4880"
+  },
+  "registration_revision": "9ece658b238cb221fb387ca5748c8c94aa647528",
+  "remaining": [
+    "RC04A3 exact-target adapter/timer/ownership/producer/link-map/package",
+    "RC04B exact-unit physical qualification and approved PF01 allowances",
+    "model rights and provenance",
+    "full product timing and integration"
+  ],
+  "stable_version": "1.0.1",
+  "status": "COMPLETE_NO_STD_SOFTWARE_TESTS_ONLY",
+  "storage": {
+    "allocation_in_library": false,
+    "control_sizes_target_placement_peak": "NOT_MEASURED",
+    "copy_caller_payload_bytes": 131072,
+    "nonlinear_f32_output_bytes": 114688,
+    "nonlinear_f64_output_bytes": 229376,
+    "projection_f32_caller_payload_bytes": 109200,
+    "projection_f64_caller_payload_bytes": 218400,
+    "unsafe_in_library": false
+  },
+  "tests": {
+    "MSRV1_81_execution": "NOT_RUN",
+    "RV32_no_std_release_library": "PASS",
+    "clippy_all_targets_D_warnings": "PASS",
+    "debug": {
+      "compile_fail": 2,
+      "integration": 9,
+      "internal": 2
+    },
+    "fmt": "PASS",
+    "full_workload_schedules_per_build": 28,
+    "independent_public_reference_verifier": "PASS",
+    "release": {
+      "compile_fail": 2,
+      "integration": 9,
+      "internal": 2
+    },
+    "telemetry_WSL_controls": 19
+  },
+  "toolchain": {
+    "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\nrelease: 1.95.0\ncommit-hash: f2d3ce0bd7f24a49f8f72d9000448f8838c4e850\ncommit-date: 2026-03-21\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.2 (sys:0.20.4 vendored)\nlibcurl: 8.15.0-DEV (sys:0.4.83+curl-8.15.0 vendored ssl:OpenSSL/3.5.4)\nssl: OpenSSL 3.5.4 30 Sep 2025\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2\n"
+  },
+  "work_limits": {
+    "copy": {
+      "passes": 32,
+      "units": 1589249,
+      "words": 16384
+    },
+    "nonlinear": {
+      "activation_absolute": 2e-06,
+      "activation_relative": 2e-05,
+      "kinds": [
+        "Sigmoid",
+        "Tanh",
+        "Log",
+        "LogDiv15"
+      ],
+      "log_absolute": 4e-13,
+      "outputs_per_kind": 28672,
+      "units_per_kind": 57345,
+      "zero_log": "exact -Inf"
+    },
+    "projection": {
+      "MACs": 360000,
+      "input_dim": 150,
+      "output_dim": 150,
+      "required_elements": [
+        2400,
+        22500,
+        2400
+      ],
+      "rows": 16,
+      "units": 387301
+    }
+  }
+}
