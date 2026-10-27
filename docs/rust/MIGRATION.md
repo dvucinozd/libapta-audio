@@ -4,9 +4,25 @@ Status: development checkpoint 2026-10-27; no release, ABI replacement, full pro
 DSP accuracy, or physical hardware qualification claim. C remains the working
 reference. This document owns the migration checklist and next-step handoff.
 
-## Current implementation handoff — 2026-10-27
+## Current continuation plan — 2026-10-27
 
-**Current next: run the four registered HS06 cases from clean pushed source.**
+**Current next: RC-01, reconcile mutable status; then RC-02, the fixed HS06 run.**
+The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
+[machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
+packages, paths, commands, validation, stop conditions and commit/push boundaries.
+This is PLAN_ONLY: no RC package or new measured case ran while writing it.
+HS06 implementation/preflight remains complete; its four-case clean run is pending.
+After HS06, prioritize the whole-pipeline resource/rights decision and exact-board
+budgets before another large implementation. Hardware/rights blockers must remain
+explicit; do not replace them with an unbounded series of small synthetic stages.
+RC-01 will correct stale HS04 execution flags; they are not repaired in this plan.
+The existing product scope, frozen protocols/results and VERSION1.0.1 are unchanged.
+The plan JSON is an initial snapshot; subsequent progress belongs in
+`PRODUCT-FIRST-STATUS.json.continuation_progress`, not in rewritten plan history.
+
+## Prior implementation handoff — 2026-10-27
+
+**At this checkpoint, next: run the four registered HS06 cases from clean pushed source.**
 The [implementation receipt](PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.md) records
 the opt-in caller-buffer probability/density/support adapter,selector,fixed CLI
 and independent checker. Eight integration plus one new internal test pass debug/

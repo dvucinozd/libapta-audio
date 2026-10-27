@@ -36,6 +36,14 @@
     "ref": "fetched origin/main",
     "revision": "4a8c660183910b0950ae7ddabce9e8b395a2f10d"
   },
+  "continuation_plan": {
+    "document": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.md",
+    "initial_next_package": "RC-01",
+    "path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json",
+    "progress_key": "continuation_progress",
+    "sha256": "b8a37af116bb001b32569704048974a67d2162e6d4517f17fa56200e3171ca0a",
+    "status": "PLAN_ONLY_NO_PACKAGES_EXECUTED"
+  },
   "contract_document": {
     "path": "docs/rust/PRODUCT-GRID-CONTRACT.json",
     "sha256": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb"
@@ -437,10 +445,11 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "After implementation commit/push,new exclusive external release build/binary/output;run fixtures,full-mixed,full-no-support,cancel exactly once under frozen gates;separate audit/result/commit/push before later work",
+    "action": "RC-01 reconcile mutable HS04/HS05 execution status from existing evidence, commit/push; then RC-02 run and audit four fixed HS06 cases under the continuation plan",
     "large_port_allowed": false,
-    "mode": "RUN_REGISTERED_SYNTHETIC_ONLY_FROM_CLEAN_PUSHED_IMPLEMENTATION",
-    "phase": "HS-06_FIXED_FOUR_CASE_RUN"
+    "mode": "DOCUMENTATION_STATUS_RECONCILIATION_THEN_REGISTERED_RUN",
+    "phase": "RC-01",
+    "underlying_registered_phase": "HS-06_FIXED_FOUR_CASE_RUN"
   },
   "open_decisions": [
     {

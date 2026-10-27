@@ -1,0 +1,331 @@
+{
+  "HS06": {
+    "aggregate_retained_run_artifact_cap_bytes": 1048576,
+    "case_order": [
+      "fixtures",
+      "full-mixed",
+      "full-no-support",
+      "cancel"
+    ],
+    "complete_numeric_rows": 60850,
+    "implementation_revision": "9d33af765ed8b5fd4f6d581f5d361ea9108bf3a0",
+    "measured_run_status": "NOT_RUN",
+    "measured_source_revision": "resolve from actual clean pushed HEAD after documentation checkpoints",
+    "per_case_caps": {
+      "address_space_bytes": 134217728,
+      "cpu_seconds_worker_and_waited_descendants": 30,
+      "rss_bytes_per_process": 67108864,
+      "wall_seconds": 45
+    },
+    "protocol_sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650",
+    "retry": "Stop and preserve; no automatic retry, subset, overwrite, tolerance/cap/backend rescue"
+  },
+  "boundaries": [
+    "VERSION1.0.1 unchanged",
+    "frozen protocols/assets/results unchanged",
+    "no default provider or consumer pin changes in early packages",
+    "no external author messages without explicit authorization",
+    "no automatic model/training/quantization/offload or product-target changes",
+    "hardware availability is last owner report, not a current device observation",
+    "future Rust paths are proposed until registered",
+    "no musical or P4 PASS from synthetic host evidence"
+  ],
+  "branch": "rust-rewrite",
+  "date": "2026-10-27",
+  "document": {
+    "path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.md",
+    "sha256": "de5a373d6e2e7260086d27ba1f2fe6deba37f61ceeb0a821a2ae85e7a963c8a2"
+  },
+  "execution_this_checkpoint": {
+    "DSP_changed": false,
+    "RC01_status_repair": false,
+    "hardware_run": false,
+    "model_or_corpus_run": false,
+    "registered_HS06_run": false
+  },
+  "format": "libapta-continuation-plan-1",
+  "id": "PRODUCT-CONTINUATION-20261027",
+  "initial_next_package": "RC-01",
+  "mutable_progress_file": "docs/rust/PRODUCT-FIRST-STATUS.json",
+  "mutable_progress_key": "continuation_progress",
+  "plan_snapshot_is_not_execution_evidence": true,
+  "product_targets": {
+    "cancel_quiescence_and_fence_ms": 50,
+    "final_ms": 60000,
+    "first_outputs": [
+      "waveform",
+      "BPM",
+      "beatgrid",
+      "meter"
+    ],
+    "first_useful_ms": 5000,
+    "later_outputs": [
+      "key",
+      "calibrated_confidence"
+    ],
+    "maximum_seconds": 600,
+    "physical_validation": "NOT_RUN"
+  },
+  "reviewed_source_revision": "9d33af765ed8b5fd4f6d581f5d361ea9108bf3a0",
+  "source_bindings": {
+    "docs/rust/PRODUCT-BUDGETS.json": {
+      "bytes": 17537,
+      "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
+    },
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": {
+      "bytes": 10121,
+      "sha256": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70"
+    },
+    "docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md": {
+      "bytes": 29349,
+      "sha256": "04dcfa7a661e287017dec68863b9518dc2e5f63f619cd806fbe2a807cbdff029"
+    },
+    "docs/rust/PRODUCT-FULL-GRAPH-READINESS.json": {
+      "bytes": 14614,
+      "sha256": "307a8a8fac2eb72654be9d9d7baa0e74048375d5996162443e1e4d44d8cd5374"
+    },
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": {
+      "bytes": 18135,
+      "sha256": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.json": {
+      "bytes": 48169,
+      "sha256": "02d1aa9eeabee380c7fd433dbefb2679aece22e203308ae2eaa2f55a1a7ca59c"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-RESULT.json": {
+      "bytes": 49810,
+      "sha256": "4bf13da8feb6b69c24b7421afe02e26443036656ec7185e353585fd6e15174a9"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-IMPLEMENTATION.json": {
+      "bytes": 9642,
+      "sha256": "776a8f913347ba8de415302267f02e70c230d37b54c844332204da248470b353"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json": {
+      "bytes": 80475,
+      "sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650"
+    },
+    "docs/rust/PRODUCT-SCOPE.md": {
+      "bytes": 9047,
+      "sha256": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98"
+    }
+  },
+  "status": "PLAN_ONLY",
+  "steps": [
+    {
+      "commit_push_before_next": true,
+      "depends_on": [],
+      "done": "Current execution flags agree with bound HS04/HS05 results; HS06 measured remains false; commit/push verified",
+      "executed": false,
+      "id": "RC-01",
+      "initial_state": "READY",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-FIRST-STATUS.json",
+        "docs/rust/MIGRATION.md"
+      ],
+      "required_conditions": [],
+      "title": "Reconcile mutable status"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-01"
+      ],
+      "done": "Complete registered run audited, or complete failure/incomplete-attempt record preserved; separate result pushed",
+      "executed": false,
+      "id": "RC-02",
+      "initial_state": "WAITING_DEPENDENCY",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.md",
+        "docs/rust/PRODUCT-HOST-PROBABILITY-RESULT.json",
+        "docs/rust/PRODUCT-FIRST-STATUS.json",
+        "docs/rust/MIGRATION.md"
+      ],
+      "required_conditions": [
+        "clean_pushed_source",
+        "six_implementation_hashes_match",
+        "395_registration_bindings_match"
+      ],
+      "title": "Run and independently audit fixed HS06 cases"
+    },
+    {
+      "commit_push_before_next": true,
+      "dependency_semantics": "RC02 must have a preserved final outcome; failure does not block static RC03 but blocks downstream implementation",
+      "depends_on": [
+        "RC-01",
+        "RC-02"
+      ],
+      "done": "Owner/lifetime/cost ledger, rights/provenance evidence or unknowns, executable probe plan or explicit blockers, and decision criteria pushed",
+      "executed": false,
+      "id": "RC-03",
+      "initial_state": "WAITING_DEPENDENCY",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-ROUTE-DECISION-20261027.md",
+        "docs/rust/PRODUCT-ROUTE-DECISION-20261027.json",
+        "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.md",
+        "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json"
+      ],
+      "required_conditions": [],
+      "title": "Prepare whole-route decision and target probe protocol"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-03"
+      ],
+      "done": "Exact-image measurements and justified allowances recorded; unmeasured categories remain unknown",
+      "executed": false,
+      "id": "RC-04",
+      "initial_state": "BLOCKED_EXTERNAL",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-P4-BUDGET-RESULT.md",
+        "docs/rust/PRODUCT-P4-BUDGET-RESULT.json"
+      ],
+      "required_conditions": [
+        "exact_board_available",
+        "observed_revision_port_and_image",
+        "target_protocol_frozen_and_resolved"
+      ],
+      "title": "Measure exact-board budgets and bounded representative workload"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-03"
+      ],
+      "done": "Evidence-backed decision and single next action; positive GO requires RC04 plus rights/provenance and HS06 PASS",
+      "early_terminal_decision_allowed": "WAIT_EXTERNAL or evidence-backed NO_GO may be recorded before RC04; no positive GO or downstream execution follows",
+      "executed": false,
+      "id": "RC-05",
+      "initial_state": "WAITING_GATES",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-ROUTE-DECISION-20261027.md",
+        "docs/rust/PRODUCT-ROUTE-DECISION-20261027.json"
+      ],
+      "positive_go_requires": [
+        "RC-04_COMPLETE",
+        "HS06_SYNTHETIC_HOST_PASS_ONLY",
+        "code_and_exact_checkpoint_rights_closed",
+        "checkpoint_provenance_closed",
+        "approved_allowances_and_conservative_owner_scenario",
+        "credible_target_basis_with_full_pipeline_timing_still_unqualified"
+      ],
+      "required_conditions": [],
+      "title": "Issue scoped GO, NO_GO or WAIT decision"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-02",
+        "RC-05"
+      ],
+      "done": "Full-shape numerical and operational gates pass; implementation and measured results have separate clean pushed checkpoints",
+      "executed": false,
+      "id": "RC-06",
+      "initial_state": "WAITING_GATES",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-EXPERIMENT.md",
+        "docs/rust/PRODUCT-EXPERIMENT.json",
+        "rust/runtime/src/product_neural.rs",
+        "rust/runtime/tests/product_neural.rs"
+      ],
+      "required_conditions": [
+        "HS06_SYNTHETIC_HOST_PASS_ONLY",
+        "GO_SCOPED_HOST_IMPLEMENTATION",
+        "new_numeric_and_resource_protocol_frozen"
+      ],
+      "title": "Register, implement and measure full-shape neural host path"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-06"
+      ],
+      "done": "Full-source host path plus separate development and independent-transfer gates pass; no spent-holdout relabeling",
+      "executed": false,
+      "id": "RC-07",
+      "initial_state": "WAITING_GATES",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-PREFLIGHT.md",
+        "docs/rust/PRODUCT-PREFLIGHT.json",
+        "docs/rust/PRODUCT-DEVELOPMENT-RESULT.md",
+        "docs/rust/PRODUCT-DEVELOPMENT-RESULT.json",
+        "docs/rust/PRODUCT-TRANSFER.md",
+        "docs/rust/PRODUCT-TRANSFER.json"
+      ],
+      "required_conditions": [
+        "permitted_exact_checkpoint",
+        "PF04_to_PF07_registered_gates",
+        "independent_transfer_membership_verified"
+      ],
+      "title": "Qualify whole host job and musical development/transfer"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-07"
+      ],
+      "done": "Native ownership/storage/numerics/lifecycle and target compile gates pass; physical qualification separate",
+      "executed": false,
+      "id": "RC-08",
+      "initial_state": "WAITING_GATES",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-NATIVE-API.md",
+        "rust/src/product_analysis/mod.rs",
+        "rust/src/product_analysis/storage.rs",
+        "rust/src/product_analysis/job.rs",
+        "rust/tests/product_analysis.rs"
+      ],
+      "required_conditions": [
+        "PF08_API_and_storage_contract_frozen",
+        "approved_current_target_budgets"
+      ],
+      "title": "Implement native coordinator and target port"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-08"
+      ],
+      "done": "Required codecs, ownership, memory, coexistence and physical 5s/60s/50ms gates pass on exact image",
+      "executed": false,
+      "id": "RC-09",
+      "initial_state": "WAITING_GATES",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-INTEGRATION.md",
+        "docs/rust/PRODUCT-P4-RESULT.md",
+        "docs/rust/PRODUCT-P4-RESULT.json"
+      ],
+      "required_conditions": [
+        "current_consumer_adoption_requirements_met",
+        "exact_board_available",
+        "physical_workload_registered"
+      ],
+      "title": "Integrate M1 and qualify exact image and input scope"
+    },
+    {
+      "commit_push_before_next": true,
+      "depends_on": [
+        "RC-09"
+      ],
+      "done": "First M1 scope documented with evidence; full C replacement and stable release remain separately gated",
+      "executed": false,
+      "id": "RC-10",
+      "initial_state": "WAITING_GATES",
+      "planned_outputs": [
+        "docs/rust/PRODUCT-RELEASE-CHECKLIST.md"
+      ],
+      "required_conditions": [
+        "all_required_scope_gates_pass"
+      ],
+      "title": "Record delivery criteria and remaining separate goals"
+    }
+  ],
+  "validation_for_this_plan": [
+    "JSON parse and dependency/gate consistency",
+    "local existing authority links and hashes",
+    "unchanged six HS06 implementation source hashes and 395 frozen bindings",
+    "only four planned documentation paths changed",
+    "git diff --check and staged review; commit/push remote SHA verification"
+  ],
+  "waiting_policy": "Finish independent registered/documentary work, then report exact missing input; do not create replacement synthetic stages or poll unchanged blockers"
+}
