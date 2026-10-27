@@ -1,0 +1,87 @@
+{
+  "DSP_model_corpus_executed": false,
+  "component_sha256": {
+    "docs/rust/PRODUCT-RC04-SOFTWARE-SPLIT.md": "691b70d2aa2015d3fb6526e43cbd0622cf9010f7f95e8c7412fdeffb3025c28f",
+    "docs/rust/PRODUCT-TARGET-TELEMETRY-V1.md": "8a692aba0720b732ebd8819a09ddd46f77dc1662af28062361e6b524598fa0b5",
+    "docs/rust/fixtures/target-probe-telemetry-rc04a/example-manifest.json": "a90526a9d7fe053cc66883002f45bca4044f6026323b26e56c14fb403c02abb5",
+    "docs/rust/fixtures/target-probe-telemetry-rc04a/example.jsonl": "b32d833c4f60d6e733877f048a882b2489ad8df7435e4691fce22c3e7375b7d0",
+    "tools/apta_target_probe_telemetry.py": "8d0775ccc1d1e3d631ada64fb7da23eaf74ed315cbcfbadbc22ddf551df98438",
+    "tools/tests/test_apta_target_probe_telemetry.py": "ee8cb5ee4e46d25665f78e78fbb282139163ca5e054e5383b06cbbd7b9378be7"
+  },
+  "date": "2026-10-27",
+  "existing_consumer_checkout_modified": false,
+  "existing_frozen_protocols_modified": false,
+  "format": "libapta-target-telemetry-implementation-1",
+  "hardware_flashed": false,
+  "id": "RC-04A-1",
+  "limits": {
+    "line_bytes": 8192,
+    "log_bytes": 1048576,
+    "manifest_bytes": 131072,
+    "observations": 1024,
+    "retained_output_bytes": 2097152
+  },
+  "new_dependencies": false,
+  "next": "RC-04A-2:register fixed pure-core paths/oracles/units/cancel then implement math/copy probe;physical RC04B remains blocked",
+  "physical_protocol_execution_ready": false,
+  "qualification": "NOT_QUALIFIED",
+  "scope": "Neutral offline host format/parser/CLI and synthetic tests;no target producer/live capture/device/model",
+  "serial_port_opened": false,
+  "source_baseline": "a6fcfa2390291d23b417ce41e995d4f7813d9824",
+  "status": "COMPLETE_HOST_INTEGRITY_ONLY",
+  "synthetic_example": {
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\rc04a1-telemetry-example-20261027-01",
+    "files": {
+      "manifest.json": {
+        "bytes": 868,
+        "sha256": "a90526a9d7fe053cc66883002f45bca4044f6026323b26e56c14fb403c02abb5"
+      },
+      "raw.log": {
+        "bytes": 2796,
+        "sha256": "b32d833c4f60d6e733877f048a882b2489ad8df7435e4691fce22c3e7375b7d0"
+      },
+      "result.json": {
+        "bytes": 1993,
+        "sha256": "76e0dea84f211f87f2a1a6477e8d1706700327ad756c0dac9d51090fe24080d4"
+      }
+    },
+    "observations": 2,
+    "physical_measurement_verified": false,
+    "status": "VALID_WITH_UNKNOWN_METRICS",
+    "unknown_metrics": 1
+  },
+  "target_build": false,
+  "tests": {
+    "WSL": {
+      "failed": 0,
+      "ignored": 0,
+      "passed": 19,
+      "python": "3.12.3"
+    },
+    "Windows": {
+      "failed": 0,
+      "ignored": 0,
+      "passed": 19,
+      "python": "3.11.2"
+    },
+    "commands": [
+      "python -B -m unittest discover -s tools/tests -p test_apta_target_probe_telemetry.py -v",
+      "WSL:python3 -B -m unittest discover -s tools/tests -p test_apta_target_probe_telemetry.py -v"
+    ],
+    "coverage": [
+      "complete/unknown captures",
+      "all identity fields and no synthetic-to-device promotion",
+      "failed/cancelled/unsupported diagnostics",
+      "duplicate/unknown/missing fields",
+      "malformed UTF8/JSON/floats/nonfinite/deep nesting",
+      "memory/stack/counter domains and consistency",
+      "32/64-bit tick wrap/clock/cap checks",
+      "duplicate/reordered/unplanned sequences",
+      "partial/missing/incorrect terminal and trailing records",
+      "bounded manifest/line/log retention",
+      "exclusive output/no overwrite",
+      "published synthetic example",
+      "CLI exit codes/arbitrary argument refusal"
+    ]
+  }
+}

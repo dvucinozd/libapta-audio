@@ -1,13 +1,13 @@
 {
-  "active_phase": "RC-03_WHOLE_ROUTE_DECISION_PREPARATION",
-  "active_phase_status": "PREPARATION_COMPLETE_WAIT_EXTERNAL",
-  "active_phase_verdict": "WAIT_EXTERNAL_NO_LARGE_PORT_GO",
+  "active_phase": "RC-04A-1_TELEMETRY_INTEGRITY",
+  "active_phase_status": "COMPLETE_HOST_INTEGRITY_ONLY",
+  "active_phase_verdict": "HOST_FORMAT_PARSER_TESTS_PASS_PHYSICAL_GATES_OPEN",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "RC03 static preparation:26 owner entries,9 lifecycle phases,recomputed full-shape compute/conditional storage,18 exact consumer source snapshots at fetched origin/main4a8c660,7 fixed target-probe preparation cases with explicit unresolved capabilities. JSON/source/hash/line/formula/link checks pass;395 prior registration bindings and six implementation sources preserved. No candidate/model/corpus/target build/device execution; rights and all nine PF01 allowances remain unresolved.",
+  "checks": "RC04A1 format/offline parser/CLI implemented;19 synthetic tests pass on Windows3.11.2 and WSL3.12.3. Public two-observation example has one unknown metric and NOT_QUALIFIED. Exact identity/order/tick/memory/null/JSON/cap/no-overwrite controls tested. No target producer,live capture,device,model or corpus;physical protocol and full product gates remain open.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -45,9 +45,10 @@
     "status": "INITIAL_PLAN_SNAPSHOT_PROGRESS_TRACKED_IN_CONTINUATION_PROGRESS"
   },
   "continuation_progress": {
-    "execution_scope": "RC03 source/owner/cost/rights/probe preparation only;no model/corpus/device/target build or new component execution",
+    "execution_scope": "RC04A1 neutral host telemetry/parser synthetic tests only;no device/target build/model/corpus;parent RC04 not complete",
     "last_completed_package": "RC-03",
-    "next_package": "RC-04",
+    "last_completed_substep": "RC-04A-1",
+    "next_package": "RC-04A-2",
     "packages": [
       {
         "checks": [
@@ -113,9 +114,39 @@
       {
         "evidence": [],
         "id": "RC-04",
-        "reason": "Requires exact JC1060 access/recovery/identity and qualified resident BSP,allocator/stack/largest-block telemetry,timer/cancel and frozen probe implementation;existing boot64KiB test is insufficient",
+        "reason": "User accepted RC04A host preparation before board;RC04B physical evidence remains blocked",
         "source_revision": null,
-        "status": "BLOCKED_EXTERNAL"
+        "status": "IN_PROGRESS_SOFTWARE_ONLY",
+        "substeps": [
+          {
+            "evidence": [
+              "docs/rust/PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json"
+            ],
+            "id": "RC-04A-1",
+            "source_revision": "a6fcfa2390291d23b417ce41e995d4f7813d9824",
+            "source_revision_scope": "Input baseline;implementation hashes in receipt",
+            "status": "COMPLETE"
+          },
+          {
+            "evidence": [],
+            "id": "RC-04A-2",
+            "source_revision": null,
+            "status": "NOT_RUN"
+          },
+          {
+            "evidence": [],
+            "id": "RC-04A-3",
+            "source_revision": null,
+            "status": "NOT_RUN"
+          },
+          {
+            "evidence": [],
+            "id": "RC-04B",
+            "reason": "Exact unit/recovery/observed revision and qualified BSP/resident allocator/stack/largest-block/timing plus physical execution freeze required",
+            "source_revision": null,
+            "status": "BLOCKED_EXTERNAL_AND_CAPABILITY"
+          }
+        ]
       },
       {
         "evidence": [],
@@ -220,7 +251,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "Source-bound static whole-route preparation and public mathematical references;physical execution and approved budgets NOT_RUN",
+  "evidence_level": "Host telemetry format/ingestion integrity and synthetic tests only;no physical resource or numerical probe measurement",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -446,6 +477,13 @@
       "source_baseline": "1e029785500e8a0ae3d674b63c56bede77cf3779",
       "status": "PREPARATION_COMPLETE_WAIT_EXTERNAL",
       "verdict": "WAIT_EXTERNAL_NO_LARGE_PORT_GO"
+    },
+    {
+      "implementation_path": "docs/rust/PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json",
+      "phase": "RC-04A-1",
+      "source_baseline": "a6fcfa2390291d23b417ce41e995d4f7813d9824",
+      "status": "COMPLETE_HOST_INTEGRITY_ONLY",
+      "verdict": "HOST_FORMAT_PARSER_TESTS_PASS_PHYSICAL_GATES_OPEN"
     }
   ],
   "host_frontend_experiment": {
@@ -589,18 +627,13 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Obtain exact JC1060 unit access/recovery/observed revision and qualified resident BSP/allocator/memory/stack/timing capabilities;resolve and freeze target probe implementation before measurement. If prerequisites remain absent,record RC05 WAIT_EXTERNAL;do not start RC06 or another synthetic series.",
-    "blocking_evidence": [
-      "BOARD_ACCESS",
-      "RESIDENT_BSP",
-      "MEMORY_TELEMETRY",
-      "TIMING_AND_CANCEL",
-      "PROBE_IMPLEMENTATION"
-    ],
+    "action": "Register exact pure-core paths,independent fixed arithmetic/oracles,work units/cancellation/capacity contracts,then implement fixed copy/math probes under accepted RC04 software split;no board/provider or trained model activation",
     "large_port_allowed": false,
-    "mode": "WAIT_FOR_EXACT_BOARD_AND_TARGET_CAPABILITIES",
-    "phase": "RC-04",
-    "ready": false
+    "mode": "HAL_INDEPENDENT_FIXED_PROBE_PREPARATION",
+    "phase": "RC-04A-2",
+    "physical_phase": "RC-04B",
+    "physical_state": "BLOCKED_EXTERNAL_AND_CAPABILITY",
+    "ready": true
   },
   "open_decisions": [
     {
@@ -800,6 +833,12 @@
     "scope_B_required": false,
     "whole_source_required": true
   },
+  "rc04_software_split": {
+    "authorization": "Direct user acceptance of software preparation without board;format/parser/tests first",
+    "path": "docs/rust/PRODUCT-RC04-SOFTWARE-SPLIT.md",
+    "physical_gates_unchanged": true,
+    "sha256": "691b70d2aa2015d3fb6526e43cbd0622cf9010f7f95e8c7412fdeffb3025c28f"
+  },
   "real_execution_readiness": "NOT_READY",
   "reviewed_source_sha256": {
     "docs/rust/DENSE-DECODER-DD05-20261023.md": "cfaa37c35a0d2283fda5faec2b2baf187e68c154cb6c44cb736dc0770ab2a16d",
@@ -849,6 +888,11 @@
     "path": "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json",
     "sha256": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0",
     "status": "PREPARED_WITH_EXPLICIT_BLOCKERS_NOT_EXECUTION_READY"
+  },
+  "target_telemetry_implementation": {
+    "path": "docs/rust/PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json",
+    "sha256": "029f7394c7f89ce64a548739da92877ce9c02d7fa8e4abe0d2e3105aefb77c5a",
+    "status": "COMPLETE_HOST_INTEGRITY_ONLY"
   },
   "user_decisions": [
     {

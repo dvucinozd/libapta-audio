@@ -6,7 +6,17 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-04, blocked on exact-unit access and target capabilities.**
+**Current next: RC-04A-2, prepare the fixed HAL-independent probe arithmetic.**
+The accepted [RC-04 split](PRODUCT-RC04-SOFTWARE-SPLIT.md) permits host software
+preparation while the physical RC-04B prerequisites remain open. RC-04A-1 is
+complete: [telemetry V1](PRODUCT-TARGET-TELEMETRY-V1.md) and its offline parser
+validate bounded manifests/dedicated JSONL,exact identity/order/tick/memory
+relations,explicit null metrics and immutable raw evidence output. Nineteen
+synthetic integrity/CLI tests pass on Windows Python3.11.2 and WSL Python3.12.3.
+The example returns VALID_WITH_UNKNOWN_METRICS/NOT_QUALIFIED;no device or target
+code ran. See the [implementation receipt](PRODUCT-TARGET-TELEMETRY-IMPLEMENTATION.json).
+Parent RC-04 remains incomplete;next pure-core work needs its own fixed path/
+oracle/arithmetic/bounded-work registration,not a full model or board activation.
 The [detailed continuation plan](PRODUCT-CONTINUATION-PLAN-20261027.md) and
 [machine plan](PRODUCT-CONTINUATION-PLAN-20261027.json) define ordered work
 packages, paths, commands, validation, stop conditions and commit/push boundaries.
@@ -31,7 +41,7 @@ remain unresolved. Consumer origin/main was fetched at4a8c660 without checkout e
 Its platform guards prohibit resident product owner execution on Guition;
 integration-check does not start those owners,and the64KiB boot probe has no
 allocator. Board access alone will not close the residual product-memory gate.
-RC-04 requires observed unit/revision/recovery plus qualified BSP/resident
+Physical RC-04B still requires observed unit/revision/recovery plus qualified BSP/resident
 allocator/largest-block/stack/timer/cancel capabilities and a separately frozen
 probe implementation. The prepared protocol is NOT_EXECUTION_READY. No target
 build,device,model or new synthetic stage ran during this source-only preparation.

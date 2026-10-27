@@ -1,0 +1,34 @@
+{
+  "clock_hz": 1000000,
+  "counter_bits": 32,
+  "identity": {
+    "board": "JC1060P470C_I_W_Y",
+    "chip_revision": 302,
+    "elf_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_kind": "synthetic",
+    "image_id": "synthetic-image",
+    "protocol_sha256": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0",
+    "run_id": "synthetic-run",
+    "source_revision": "a6fcfa2390291d23b417ce41e995d4f7813d9824",
+    "unit_id": "synthetic-unit"
+  },
+  "observations": [
+    {
+      "case": "TP-01",
+      "id": "baseline-0",
+      "max_elapsed_ms": 100,
+      "phase": "sample",
+      "trial": 0,
+      "variant": "resident"
+    },
+    {
+      "case": "TP-01",
+      "id": "baseline-1",
+      "max_elapsed_ms": 100,
+      "phase": "sample",
+      "trial": 1,
+      "variant": "resident"
+    }
+  ],
+  "schema": 1
+}
