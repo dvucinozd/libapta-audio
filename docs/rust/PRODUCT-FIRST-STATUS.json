@@ -1,13 +1,13 @@
 {
   "active_phase": "HS-05",
-  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
-  "active_phase_verdict": "SYNTHETIC_NEURAL_IMPLEMENTATION_PREFLIGHT_ONLY",
+  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+  "active_phase_verdict": "HS05_SYNTHETIC_HOST_PASS_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS05 five integration plus two internal tests PASS debug/release;480 sequence and170 probe schedules/build. HS04 7+1,HS03 6/6120 schedules,grid12,context5 release controls PASS;one C-oracle test NOT_RUN. fmt,Clippy,build,Python,46 independent fixture observations and four cap refusals PASS. Long candidate cases NOT_RUN before implementation checkpoint.",
+  "checks": "HS05 five clean fixed cases PASS from a7fad1e:50 observations,91441 rows including1351 cancelled provisional rows. All full cases30000 rows/2280000 affine MACs/5160000 step units;reset adds1. Numeric/state/argmax/reset/work/resource/identity gates PASS;full lifetime CPU also conservatively bounded below30s. Audit51 files/307401B,347 bindings,655 prebound worker entries. Artificial host toy only;full trained graph/model/music/product/P4 NOT_RUN or unresolved.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -278,6 +278,12 @@
       "source_baseline": "e16fa435c10baef83ebb0fb86bf67f5fcc43047b",
       "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
       "step": "implementation preflight"
+    },
+    {
+      "checkpoint": "a7fad1e887172e1bb955bc8199d32f0a8e8a642d",
+      "phase": "HS-05",
+      "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
+      "verdict": "HS05_SYNTHETIC_HOST_PASS_ONLY"
     }
   ],
   "host_frontend_experiment": {
@@ -343,7 +349,7 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "host_neural_experiment": {
-    "candidate_tests_or_measurement": "SYNTHETIC_PREFLIGHT_PASS_CLEAN_MEASUREMENT_PENDING",
+    "candidate_tests_or_measurement": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "id": "HS-05",
     "implementation": {
       "path": "docs/rust/PRODUCT-HOST-NEURAL-IMPLEMENTATION.json",
@@ -362,9 +368,13 @@
       "sha256": "0830c238d20049aab36f68552a0636571b7d8760f6ad365eca235999d38add62",
       "status": "STATIC_REGISTRATION_CONSISTENCY_PASS"
     },
+    "result": {
+      "path": "docs/rust/PRODUCT-HOST-NEURAL-RESULT.json",
+      "sha256": "4bf13da8feb6b69c24b7421afe02e26443036656ec7185e353585fd6e15174a9"
+    },
     "short_cases": 12,
     "short_rows": 90,
-    "status": "IMPLEMENTATION_PREFLIGHT_PASS_MEASUREMENT_PENDING",
+    "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
     "trained_checkpoint_executed": false
   },
   "host_resampler_experiment": {
@@ -384,10 +394,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "After implementation commit-push,run all five fixed HS05 cases from clean exact source; audit and separately commit-push result",
+    "action": "Statically audit remaining full-graph shapes/Conv-pool and cost-lifetimes plus rights/provenance/physical-budget gates before selecting/registering another implementation;no automatic full-size port or checkpoint",
     "large_port_allowed": false,
-    "mode": "RUN_FIXED_SYNTHETIC_HOST_ONLY",
-    "phase": "HS-05"
+    "mode": "STATIC_READINESS_AUDIT_ONLY",
+    "phase": "FULL_GRAPH_READINESS_AUDIT"
   },
   "open_decisions": [
     {

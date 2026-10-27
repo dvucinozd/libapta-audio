@@ -6,7 +6,24 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: freeze/push HS-05 implementation,then five clean measured cases.**
+**Current next: audit full-graph coverage and open rights/resource gates.**
+**HS05 is complete: artificial numerical host evidence only.** The
+[result](PRODUCT-HOST-NEURAL-RESULT.md) records five fixed clean cases from pushed
+`a7fad1e887172e1bb955bc8199d32f0a8e8a642d`:50 observations,91441 emitted rows
+including1351 cancelled provisional rows. Each30000-row case performs2280000
+affine MACs/5160000 step units;reset case adds one unit. All primitive/state/
+probability/argmax/reset/work/resource/identity gates pass. Worker wall2.958–3.129s,
+Session.step totals0.043889–0.057619s are for the tiny toy,not the full trained graph.
+Cancel2.246270ms in AcceptRow;no final certificate/resume. Host Session352B,
+Probe512B,Driver1464B;no physical peak claim. Audit51 files/307401B,347 parent
+bindings and655 prebound worker runtime entries passes. Next statically compare
+remaining Conv/pool/full affine/LSTM shapes and cost/lifetimes with rights/provenance
+and exact-device gates before choosing/registering another implementation scope.
+No trained checkpoint,new model,larger product port or corpus is enabled.
+
+### Implementation checkpoint before measurement — 2026-10-27
+
+**At this checkpoint: freeze/push HS-05 implementation,then five clean cases.**
 The [implementation receipt](PRODUCT-HOST-NEURAL-IMPLEMENTATION.md) records the
 opt-in toy affine/two-layer LSTM2/head3 kernel with exact172-unit/76-affine-MAC
 rows,private state staging,atomic Commit,reset/cancel/EOF/cap fences and bounded
