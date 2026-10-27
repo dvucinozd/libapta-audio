@@ -1,0 +1,181 @@
+{
+  "actual_compiler": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2\n",
+  "actual_toolchain": {
+    "cargo": {
+      "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/cargo",
+      "sha256": "841072d1d92f9e841d9ba5b0814182a0adf064acf4527cd120967b7bc49dcb66"
+    },
+    "rustc": {
+      "path": "/home/daniel/.rustup/toolchains/1.95.0-x86_64-unknown-linux-gnu/bin/rustc",
+      "sha256": "bff349e72704ff70bc08a234a3847338e797065bbedde5e556808bc87b7bf7c6"
+    }
+  },
+  "audit": {
+    "bytes": 10940,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a3-package-audit-489e5af-20261027\\audit.json",
+    "sha256": "2b16faef669c4208cdffc7e8b10bb84e16a6a07782fb751bfa90fe22e857f994",
+    "status": "AUDIT_PASS_BUILD_ONLY"
+  },
+  "build_order": [
+    "copy",
+    "projection32",
+    "projection64",
+    "activation",
+    "logs"
+  ],
+  "consumer_checkout_provider_pin_changed": false,
+  "date": "2026-10-27",
+  "dependency_source_files_checked": 24174,
+  "development": false,
+  "document": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-PACKAGE.md",
+    "sha256": "92902e8514e2d8277abaaa65902600babb48fbd1bdb3067fd2376d3393883503"
+  },
+  "execution_ready": false,
+  "format": "libapta-target-adapter-package-result-1",
+  "hardware_or_model_run": false,
+  "host_operational_caps": {
+    "build_wall_seconds": 180,
+    "inspection_command_seconds": 60,
+    "per_process_rss_bytes": 2147483648,
+    "retained_package_bytes": 67108864
+  },
+  "id": "RC-04A-3",
+  "implementation": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.json",
+    "sha256": "66a6ecd779f8cf3908e55de83bf5d4adaf77a6a6e3789888da577e081e16f68d"
+  },
+  "kind": "BUILD_ONLY_LINKCHECK",
+  "missing_capabilities": [
+    "exact unit/recovery/programming layout",
+    "qualified producer/control transport and operator arming",
+    "reusable physical warmup/trial scheduler",
+    "numeric output verification/digests",
+    "resident BSP/allocator/stack telemetry",
+    "asynchronous cancel requester and physical timing/placement"
+  ],
+  "next": "RC-04B prerequisite resolution and qualified runtime integration/physical execution;no product/model GO",
+  "old_frozen_bindings_checked": 395,
+  "package": {
+    "bytes": 39411271,
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\rc04a3-package-clean-489e5af-20261027",
+    "files": 49,
+    "manifest": {
+      "bytes": 32676,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a3-package-clean-489e5af-20261027\\package.json",
+      "sha256": "9c460c062c54a2622185a2b464d25d2f98963f5b24aa845c4288e6cf56752a95"
+    }
+  },
+  "qualification": "NOT_QUALIFIED",
+  "scope": "Real target ELF/link/map/disassembly and package integrity;no boot,programming,physical numeric/timing/memory qualification",
+  "source_clean_at_build_and_audit": true,
+  "source_component_sha256": {
+    "docs/rust/PRODUCT-TARGET-ADAPTER-PROTOCOL.json": "9efce4ae38aecc7bcc04cd82058cd7688d8f556ad4749ddef0aaf005940ec64d",
+    "rust/probes/resource-core/Cargo.lock": "7f86b0ff4040cfee69114f56ff8f3a74ef4a4fd209f37929d7ce420ca1ec317a",
+    "rust/probes/resource-core/Cargo.toml": "46a1cbc577bd02419c74a73d33aef6c323338e825e7f6ca8023caa91b0dba383",
+    "rust/probes/resource-core/src/lib.rs": "d9808e819a8a73ee27b52472fdc8ebcafd7bd520ea059f57805995770e3ad76e",
+    "rust/probes/resource-core/tests/probes.rs": "f95a4384d26a9991da0c811ef66d8775b2dc5ea21c7e753cfbce4d1470a220a8",
+    "rust/probes/target-adapter/.cargo/config.toml": "ef1aad24a503c5dca12ccf1bdfdc13abe1c40a05008bcec925e880b815e69385",
+    "rust/probes/target-adapter/Cargo.lock": "c3c2bec5cb646c5ec67f4f08aae0585feb7613f5532ce3cdb50540bdf63e535a",
+    "rust/probes/target-adapter/Cargo.toml": "cefd932184c633a8155cb15ba765b03938f57a7a827c6a7e3e1cf7bb87101910",
+    "rust/probes/target-adapter/examples/telemetry_fixture.rs": "0bcf9d4fee30df1267f8a488b874ed6bea584f1b08ddce802441e725565df8e0",
+    "rust/probes/target-adapter/src/bin/linkcheck.rs": "0e53fb0af0bb005291917cfe3530ea506e2ae154b0463ab2b6547e03e073249a",
+    "rust/probes/target-adapter/src/lib.rs": "2f2c72e4a43bbd18738ee8eabb1a406dd6ef05a9284c433f03acc7e7cd76b8ad",
+    "rust/probes/target-adapter/tests/adapter.rs": "9fdd8394c079889e859d13c6b31c093a581fde582f9c18255977da75a28c0940",
+    "tools/apta_target_probe_package.py": "76ce00cbc164cd66e35e0067bda3040f20ec31151fe0ad176ee713e6a8d520e4",
+    "tools/apta_target_probe_telemetry.py": "8d0775ccc1d1e3d631ada64fb7da23eaf74ed315cbcfbadbc22ddf551df98438"
+  },
+  "source_files_checked": 14,
+  "source_revision": "489e5af0beac1cef53c1276a3aad65d7687255b8",
+  "status": "PREPARATION_COMPLETE_BUILD_ONLY_EXECUTION_BLOCKED",
+  "tools": {
+    "cargo": {
+      "path": "/home/daniel/.cargo/bin/cargo",
+      "sha256": "5be191e8c70a5007074254cb74d78dbfdd25cd5a61c27de7b8e5410122ec24f4"
+    },
+    "objdump": {
+      "path": "/usr/bin/llvm-objdump-18",
+      "sha256": "4f98b86448d23bd1f858c50e93fbfc799f1c3640961a95e3b6c89d229a1b91bb"
+    },
+    "readelf": {
+      "path": "/usr/bin/readelf",
+      "sha256": "64c58e15274bbbb5153f31078e455e9e77ee5f51489e709bba5bb788ce9df2b0"
+    },
+    "rustc": {
+      "path": "/home/daniel/.cargo/bin/rustc",
+      "sha256": "5be191e8c70a5007074254cb74d78dbfdd25cd5a61c27de7b8e5410122ec24f4"
+    }
+  },
+  "variants": [
+    {
+      "ELF_bytes": 4072104,
+      "bss_bytes": 114876,
+      "caller_buffer_payload_bytes": 114688,
+      "elf_sha256": "425f13496ad310d35b6b12d2c6ae88cf41c9553c5bfe15253a34643af492aeaa",
+      "host_build_wall_seconds": 0.8155683229999937,
+      "host_observed_max_process_rss_kib": 153288,
+      "variant": "activation",
+      "whole_image_fadd_s": 30,
+      "whole_image_fmul_s": 32,
+      "whole_image_fused_f32": 0,
+      "whole_image_has_soft_double_add": true,
+      "whole_image_has_soft_double_multiply": true
+    },
+    {
+      "ELF_bytes": 4066880,
+      "bss_bytes": 131260,
+      "caller_buffer_payload_bytes": 131072,
+      "elf_sha256": "4863151f114028481626f4ad336bf014efba9fae783742b6467d5f24e99c2ad2",
+      "host_build_wall_seconds": 32.732712203,
+      "host_observed_max_process_rss_kib": 976128,
+      "variant": "copy",
+      "whole_image_fadd_s": 0,
+      "whole_image_fmul_s": 0,
+      "whole_image_fused_f32": 0,
+      "whole_image_has_soft_double_add": true,
+      "whole_image_has_soft_double_multiply": true
+    },
+    {
+      "ELF_bytes": 4072172,
+      "bss_bytes": 229568,
+      "caller_buffer_payload_bytes": 229376,
+      "elf_sha256": "1056bf143eae137228a303148eb78031d2f14d9ed7e3da355b39cc7577a96e7d",
+      "host_build_wall_seconds": 0.8921054150000032,
+      "host_observed_max_process_rss_kib": 91836,
+      "variant": "logs",
+      "whole_image_fadd_s": 30,
+      "whole_image_fmul_s": 32,
+      "whole_image_fused_f32": 0,
+      "whole_image_has_soft_double_add": true,
+      "whole_image_has_soft_double_multiply": true
+    },
+    {
+      "ELF_bytes": 4074128,
+      "bss_bytes": 109388,
+      "caller_buffer_payload_bytes": 109200,
+      "elf_sha256": "ed6342b99f0bd27844e3203b61ff55c730cd325f00bd2ae75baa540158ad392d",
+      "host_build_wall_seconds": 0.9175221059999927,
+      "host_observed_max_process_rss_kib": 154200,
+      "variant": "projection32",
+      "whole_image_fadd_s": 1,
+      "whole_image_fmul_s": 5,
+      "whole_image_fused_f32": 0,
+      "whole_image_has_soft_double_add": true,
+      "whole_image_has_soft_double_multiply": true
+    },
+    {
+      "ELF_bytes": 4072228,
+      "bss_bytes": 218592,
+      "caller_buffer_payload_bytes": 218400,
+      "elf_sha256": "5d4ab1bf7feda8296b22d220b74c79c68d95b4dcd425cc9a4a651960991839d4",
+      "host_build_wall_seconds": 0.8556478889999966,
+      "host_observed_max_process_rss_kib": 154432,
+      "variant": "projection64",
+      "whole_image_fadd_s": 0,
+      "whole_image_fmul_s": 0,
+      "whole_image_fused_f32": 0,
+      "whole_image_has_soft_double_add": true,
+      "whole_image_has_soft_double_multiply": true
+    }
+  ]
+}

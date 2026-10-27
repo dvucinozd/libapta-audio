@@ -6,16 +6,23 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current continuation plan — 2026-10-27
 
-**Current next: RC-04A-3, prepare the guarded target adapter and firmware package.**
-RC-04A-3 [implementation](PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.md) passes seven
-debug/release adapter tests,six WSL package controls,19 telemetry controls and
-Rust-producer/Python-parser interoperability. Development target variants link;
-the strengthened final implementation must be committed/pushed before the clean
-five-variant package build and separate result. Nominal HAL microsecond clock,
-phase budgets,timing result fences and null-metric formatter are implemented.
-Link-check boot idles;no physical runner,arming,transport or qualification is
-enabled. The [registration](PRODUCT-TARGET-ADAPTER-PROTOCOL.md) preserves these
-scope boundaries. Parent RC-04 and all physical/model gates remain open.
+**Current next: RC-04B prerequisites, blocked on runtime capabilities and exact unit.**
+RC-04A-3 is complete for adapter/link/package preparation:
+[clean package result](PRODUCT-TARGET-ADAPTER-PACKAGE.md) and
+[machine receipt](PRODUCT-TARGET-ADAPTER-PACKAGE.json). All five target ELF/map/
+disassembly variants build once from clean pushed489e5af;49 files/39411271B and
+the separate audit pass.14 source files,24174 registry files,tools and395 frozen
+bindings recheck. Seven debug/release adapter tests,six WSL package controls,
+19 telemetry controls and Rust-producer/Python-parser interoperability pass.
+The [implementation](PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.md) supplies nominal
+HAL microsecond clock,phase budgets,timing result fences and null-metric producer.
+Boot idles;retained probe entry is uncalled,single-use link scaffolding. Package
+execution_ready=false/NOT_QUALIFIED;no board was flashed,booted or measured.
+Physical execution still requires exact-unit/recovery/layout,qualified arming/
+transport,reusable complete warm-up/trial scheduling,numeric verification/digests,
+resident BSP/allocator/stack/error metrics and asynchronous requester. These are
+explicit remaining runtime capabilities,not implied by the ELF. Parent RC-04,
+all nine PF01 allowances,model rights/provenance and product GO remain open.
 RC-04A-2 is complete:[implementation](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.md)
 and [machine receipt](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.json). Registration
 9ece658 preceded the standalone safe no_std crate. Copy,both projection dtypes and
