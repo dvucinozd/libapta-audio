@@ -6,7 +6,29 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: register narrow HS06 probability/density/support bridge.** The
+**Current next: implement registered HS06 probability/density/support bridge.**
+The [protocol](PRODUCT-HOST-PROBABILITY-PROTOCOL.md) and
+[machine registration](PRODUCT-HOST-PROBABILITY-PROTOCOL.json) freeze named
+`[beat,downbeat,nonbeat]` f32 input,2^-21 sum validation,ordered F64 logs with
+exact zero->-Inf,global support/EOF and immutable materialized owners. At30000
+rows retain360000B probabilities plus720000B densities;do not retrofit lazy
+densities into the frozen HMM or reclaim its borrowed-path Workspace before HS02.
+Public registration has35 cases/878 rows,35 raw assets/10536B,11 selector cases
+and8 small compositions. Four input capacities/five quotas fix700 schedules per
+build. Independent verifier checks2550 short density scalars,60000 long reference
+rows and395 old/new bindings;this is registration math/identity validation only.
+No candidate code,feature,tests or performance run is added here. Exact four
+future measured cases are fixtures,full-mixed,full-no-support,cancel;the cancel
+case measures a pending flag at686 units,not asynchronous or physical response.
+After this registration commit/push,follow the six source paths and ordered API/
+numeric/lifetime/failure/composition tests. Separate implementation receipt/push
+precedes clean fixed measurement;separate audited result/push precedes later work.
+Existing authorities/default/core/wire/consumer/HS01-05 and VERSION1.0.1 unchanged.
+Full-size graph,rights/provenance,PF01 actual-board budgets and PF04 remain open.
+
+### Completed full-graph readiness audit — 2026-10-27
+
+**Prior next: register narrow HS06 probability/density/support bridge.** The
 [full-graph readiness audit](PRODUCT-FULL-GRAPH-READINESS.md) confirms completed
 HS01-05 host boundaries but no full trained product graph. Missing Conv/pool,
 278->150/four-layer150 shapes,probability adapter and product ownership remain.

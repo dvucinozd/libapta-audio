@@ -1,0 +1,1919 @@
+{
+  "API": {
+    "constructor": "new(Geometry,&mut[[f32;3]],&mut[[f64;3]])->Result<Session,Error>",
+    "controls": [
+      "finish_input",
+      "cancel"
+    ],
+    "errors": [
+      "UnsupportedProfile",
+      "Capacity",
+      "SourceOffset",
+      "SourceLength",
+      "InvalidProbability",
+      "TruncatedSource",
+      "NumericalFailure",
+      "ArithmeticOverflow",
+      "ZeroBudget",
+      "InvalidScore"
+    ],
+    "flows": [
+      "Budget",
+      "NeedInput",
+      "Terminal"
+    ],
+    "input": "InputBlock{first_row:u64,rows:&[[f32;3]]}",
+    "nonterminal_session_error": "ZeroBudget; InvalidScore belongs only to pure selector",
+    "phases": [
+      "AcceptRow",
+      "NonBeatLog",
+      "BeatLog",
+      "DownbeatLog",
+      "CommitRow",
+      "Finalize",
+      "Terminal"
+    ],
+    "priority": [
+      "quota0 inert",
+      "stable terminal",
+      "pending cancel",
+      "offset/count",
+      "per-unit cancel then work"
+    ],
+    "progress": [
+      "accepted_rows",
+      "committed_rows",
+      "units",
+      "cancellation_phase"
+    ],
+    "publication": "no result while Running/Failed/Cancelled; buffer prefixes uncertified; no reset/resume",
+    "queries": [
+      "status",
+      "phase",
+      "progress",
+      "result"
+    ],
+    "result": "Ready/NoEvidence immutable full R-row slices; decoder_densities only with support; view lifetime tied to &self",
+    "statuses": [
+      "Running",
+      "Ready",
+      "NoEvidence",
+      "Cancelled",
+      "Failed"
+    ],
+    "step": "step(quota,input,&AtomicBool)->StepReport",
+    "step_report": [
+      "consumed_rows",
+      "committed_rows",
+      "first_committed_row",
+      "units",
+      "flow",
+      "status",
+      "error"
+    ],
+    "unit_count_on_error": "invalid AcceptRow is charged; bad row not consumed; unit cap refused before writes"
+  },
+  "arithmetic": {
+    "candidate_schedule_bytes": "exact",
+    "densities": [
+      "ln(f64(nonbeat)/15.0)",
+      "ln(f64(beat))",
+      "ln(f64(downbeat))"
+    ],
+    "density_order": [
+      "nonbeat",
+      "beat",
+      "downbeat"
+    ],
+    "finite_log_absolute_tolerance": 4e-13,
+    "input_bits": "exact including signed zero",
+    "input_order": [
+      "beat",
+      "downbeat",
+      "nonbeat"
+    ],
+    "repair_allowed": false,
+    "sum_tolerance": 4.76837158203125e-07,
+    "validation": "finite [0,1]; ordered binary64 sum, inclusive abs(sum-1)<=2^-21",
+    "zero": "including -0 => exact -Inf; no log call"
+  },
+  "asset_root": "docs/rust/fixtures/product-host-probability-hs06",
+  "bindings": {
+    "Cargo.lock": {
+      "bytes": 2675,
+      "sha256": "bf081cb059621bf90bb22963bcfab506e866187adfdb2d7b6c48c0d0cc6a11a4"
+    },
+    "VERSION": {
+      "bytes": 6,
+      "sha256": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066"
+    },
+    "docs/rust/PRODUCT-COMPACT-BINDING.json": {
+      "bytes": 7552,
+      "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
+    },
+    "docs/rust/PRODUCT-COMPACT-CANDIDATE-SPEC.json": {
+      "bytes": 28581,
+      "sha256": "e294256101bf3ad6c8c91ff06fce0ad2166024af8d2fa9b5a86027756dbbac0b"
+    },
+    "docs/rust/PRODUCT-COMPACT-RESOURCE-ORACLES.json": {
+      "bytes": 17293,
+      "sha256": "bf76726107e5e461803c0ca71cff538ed5fe7bf5f82a3ca28b27019ae3d19539"
+    },
+    "docs/rust/PRODUCT-COMPACT-RIGHTS-REVIEW.json": {
+      "bytes": 10121,
+      "sha256": "27c808b11260bf6e00d90035031608f3ac8837382fa041abbaca77ec5acc2c70"
+    },
+    "docs/rust/PRODUCT-FULL-GRAPH-READINESS.json": {
+      "bytes": 14614,
+      "sha256": "307a8a8fac2eb72654be9d9d7baa0e74048375d5996162443e1e4d44d8cd5374"
+    },
+    "docs/rust/PRODUCT-FULL-GRAPH-READINESS.md": {
+      "bytes": 15029,
+      "sha256": "856a9550e9ae6f685e8858b9182f4c0f6ac6e1411200fdb06ae97e95ca5dcbb2"
+    },
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": {
+      "bytes": 18135,
+      "sha256": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-COUNT-ERRATUM.md": {
+      "bytes": 893,
+      "sha256": "f631071fb2fa24779040caab3d4c04bd962e7612194b0dd4148c7e5458c58981"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-IMPLEMENTATION.json": {
+      "bytes": 10984,
+      "sha256": "468b83372e170e319df9ce54da17c2bd90efaf3a83442dd67ae292d752e11519"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-IMPLEMENTATION.md": {
+      "bytes": 5799,
+      "sha256": "495d895d407cc29963f50ed1b420938e35e680c4d62b219b8e296a0be5ae2f8b"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.json": {
+      "bytes": 59087,
+      "sha256": "27cb6fe41fe4f94d22dbeac65c778feef0f2094c42aee267108d80ac17112b1f"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-PROTOCOL.md": {
+      "bytes": 22113,
+      "sha256": "30c1bc9e502a2b84836e90fc0d42280230adbbef19851c5b5563d43cd23a8c33"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.json": {
+      "bytes": 48169,
+      "sha256": "02d1aa9eeabee380c7fd433dbefb2679aece22e203308ae2eaa2f55a1a7ca59c"
+    },
+    "docs/rust/PRODUCT-HOST-FRONTEND-RESULT.md": {
+      "bytes": 5318,
+      "sha256": "991aeedf21671478c4114ec550c1e34dd032d467d100ceadb6b94f7fd495c872"
+    },
+    "docs/rust/PRODUCT-HOST-GRID-RESULT.json": {
+      "bytes": 13038,
+      "sha256": "bb0ee548c0a9591f628a4d2729a7b2f02829f6fe781ef5a593c8e996f3084e06"
+    },
+    "docs/rust/PRODUCT-HOST-HMM-RESULT.json": {
+      "bytes": 9019,
+      "sha256": "fcc63ee24f25dda3f123b67b04d7479a90b193e01a178269a8d160a53de076ef"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-IMPLEMENTATION.json": {
+      "bytes": 10895,
+      "sha256": "cf8ed215ae3e4e8f8dd3788b9c6874dd287412dc2d32deacd55ed05765c749a8"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-IMPLEMENTATION.md": {
+      "bytes": 5931,
+      "sha256": "245218ec542bdc7c28cded5802b4f5de9b287c850dba66c956d62df8cf127621"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-PROTOCOL.json": {
+      "bytes": 64821,
+      "sha256": "8942bed1390a9bba5db3779c73a508b8933b1ee3aa242e2e0870d65c8403c058"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-PROTOCOL.md": {
+      "bytes": 22072,
+      "sha256": "e1f888fcacd421ff2051f5d540dd370753408736393e46baf3470aceefa585b1"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-RESULT.json": {
+      "bytes": 49810,
+      "sha256": "4bf13da8feb6b69c24b7421afe02e26443036656ec7185e353585fd6e15174a9"
+    },
+    "docs/rust/PRODUCT-HOST-NEURAL-RESULT.md": {
+      "bytes": 5899,
+      "sha256": "b1c59672aa9a738a4e5e6b526f99cfafa133efe7943a6a124d06c6c4fbe90ea1"
+    },
+    "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.md": {
+      "bytes": 19820,
+      "sha256": "34201e7d9b98c8074137df50f282409414f2951fb6112cd0b04d475fa4aa3c97"
+    },
+    "docs/rust/PRODUCT-HOST-RESAMPLER-IMPLEMENTATION.json": {
+      "bytes": 5918,
+      "sha256": "e4ba271e5eb17e83e84cd2857d6c2df46c812171a1bff94a128fe59e881e8703"
+    },
+    "docs/rust/PRODUCT-HOST-RESAMPLER-PROTOCOL.json": {
+      "bytes": 10092,
+      "sha256": "e30230da61a739b74cd5df8e15b9b0944a8a87e60074dd9729853ac20d0de9a4"
+    },
+    "docs/rust/PRODUCT-HOST-RESAMPLER-RESULT.json": {
+      "bytes": 12715,
+      "sha256": "b3f99ac9b189bca82b1eb51d749a22ae2961d5812b5779ea6c99e5b984d2fd6c"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/dft-roots-1764.f64le": {
+      "bytes": 28224,
+      "sha256": "42f7feaacbbf14a92b2268e1ec771cfdcd593a0d57bd6416cf8756ef4827453d"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/filter-edge-bins.u16le": {
+      "bytes": 292,
+      "sha256": "8853eb45538aa3f51dc41a9b73407b87eda8a24c55cc43f90e89c3ca9acfe94d"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/filter-offsets.u32le": {
+      "bytes": 580,
+      "sha256": "9f2abf187b20ebf9a837332c28b18ebe7937a38ca9871869d789828c90b4f0d3"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/filter-starts.u16le": {
+      "bytes": 288,
+      "sha256": "9f1e147d29a259d1c8221c9cdf0972457dbba1a5509d34c5138626b5500e857a"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/filter-weights.f32le": {
+      "bytes": 6980,
+      "sha256": "d317df76a5a013b700469090c3cfdc104cf3d3d40af3982a4396d815d2696f0a"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/fir-44100.f64le": {
+      "bytes": 520,
+      "sha256": "0ea7547740cd8bb98d5e1241def77faeed99f3dad5b60a5b89e187e3045b1cd6"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/fir-48000.f64le": {
+      "bytes": 76440,
+      "sha256": "0abf15aae616314f39a8c732562225561ade41a37db638e484121ce8a48411b3"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hann-1764.f64le": {
+      "bytes": 14112,
+      "sha256": "31a4d75c241af5f8e951234bca91333eb0337a68b990a53df810e3d82022cf0f"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm3-logp.f64le": {
+      "bytes": 107520,
+      "sha256": "ee4c4d1e05f58dfbdb14d6e79511e51453a2e4e53639cc4fd13a72780c3bff5e"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm3-pointers.u32le": {
+      "bytes": 33664,
+      "sha256": "a22e4463e82febfab33271c426480ed30846eee470bc3e9648299814f0a60cd7"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm3-previous.u16le": {
+      "bytes": 26880,
+      "sha256": "2b92b3ace5adb198067eaeaddc7e8c7bae46cf58790112dbc663e1351bcb8132"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm3-state-map.u8": {
+      "bytes": 25245,
+      "sha256": "53849fd8a1a19f3df6326ea625c28202da7a878a1c2e0d0f7df4660c9c5203ca"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm4-logp.f64le": {
+      "bytes": 143360,
+      "sha256": "79784569c68e2ff98a7649f9388e6b0ffe599419c09d77a4ce2c777aff1b2999"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm4-pointers.u32le": {
+      "bytes": 44884,
+      "sha256": "fbf8c5332a7be2b0db31526b9506766d9aa7caf74683b75d2750bfaab0bc9a67"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm4-previous.u16le": {
+      "bytes": 35840,
+      "sha256": "7c77868e6f00a6563aeadc68fbb10c0be4efc86987965e255bff24084db173bc"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/hmm4-state-map.u8": {
+      "bytes": 33660,
+      "sha256": "ccf052b1bf78ed639dd0a30d314e99067cf4cd9b690ec50fbcdfe088c0938d18"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/manifest.json": {
+      "bytes": 4933,
+      "sha256": "280eea340f04c9101bc057b9569f9e514fb19647bc7ca23c5d49be3246be9db1"
+    },
+    "docs/rust/fixtures/product-compact-cs02/assets/oracles.json": {
+      "bytes": 3640,
+      "sha256": "2aa80590acef1916a6733065f5a290753f55e2f970da706b68c5e9b3850858c8"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/alt2-1764-features.f32le": {
+      "bytes": 4608,
+      "sha256": "3dcb9ce4103570e92368941936831f3f4a1975c6e95f34d9f2b8dbdbce9f8c7c"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/alt2-1764-ideal.f64le": {
+      "bytes": 9216,
+      "sha256": "2488f4ba8f11dad51b8ecf2f62bf312f1737f61fb895b898304979aa0bab23fc"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/alt2-1764-input.f32le": {
+      "bytes": 7056,
+      "sha256": "fc042067dfbd4c378321ae75a05319faec57423d0cb34b7856503dfea7c4eb22"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-44100-1-features.f32le": {
+      "bytes": 1152,
+      "sha256": "d49433bfd82a12dee30cfda42951f03827428903dd933162021876cc980fa528"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-44100-1-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "05fd642a461aa0af7a28b6fbe7e9a1bbc51a8c7ed5ee5cbecfb6d512d23ef471"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-44100-1-input.f32le": {
+      "bytes": 644,
+      "sha256": "ed4f653f6459da7fa5eedaac37eb393b3f1f86b9993b1046477db096185a2559"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-44100-2-features.f32le": {
+      "bytes": 1152,
+      "sha256": "5c6f45f5478b71127def6164afaf81c0cbb192ed948c8f222f60337e9a5515be"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-44100-2-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "7c6b1b71b48605a3d745185d7881ee37d90db49ad7640b0940ed86f498ae272d"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-44100-2-input.f32le": {
+      "bytes": 644,
+      "sha256": "3067c9c8cdb51751f0c5c31a5e23c824cd8f8cd7f7bdcf7ffac15b1a2d328e42"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-48000-1-features.f32le": {
+      "bytes": 1152,
+      "sha256": "96339a2f5a4317ff4e81f54c087c9fdcf42363e991407b1df6b314e9fea9e40f"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-48000-1-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "ad8e902b26ae5f16e8726d7edff750990cdcce783154fa6b438addd5bc05c0f5"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-48000-1-input.f32le": {
+      "bytes": 592,
+      "sha256": "8361ba628da2d30752a14c8c725192bb389d6ca4718d2a0328821a74b147d2e7"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-48000-2-features.f32le": {
+      "bytes": 1152,
+      "sha256": "450486666017cd364731d9fa0d5c14309cd77784294e1434b79b3d01f5ceab9b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-48000-2-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "565d48df2498165322f4edabcf74c4c5dc9a35e3fdbebbdb164a249836a2eff4"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/composition-48000-2-input.f32le": {
+      "bytes": 592,
+      "sha256": "3af23e11fc4c7bc435ed646b433f3afb702a402835c5f2196ed403c5c7e1c7d2"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/constant-a1-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "a97e8780373fb02d92172da8ab0d5bdfa047f51ffa803d4700e4ddb3d6242135"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/constant-a1-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "97fd3d45c0e073a1151a16b9b8e6079d746eb2ceeecda2283514668b0ee7efbb"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/constant-a1-input.f32le": {
+      "bytes": 7056,
+      "sha256": "6820f5b58718c6628bc9251523d1c961b02d6790c95b55b29a949c48c26cf7fd"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/constant-a2-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "bc259481a6a17fb799a672eb6059f3aef04352b61a9cf6a3d2b9def5c64692c2"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/constant-a2-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "192f46ad486e5eb52d9087558d596ea4d3d5a13bece6297e0d46436c21627de2"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/constant-a2-input.f32le": {
+      "bytes": 7056,
+      "sha256": "abcbe3aa6fd053d93cc12989b4e4844089433d54dca461766d4a49d5b77188c9"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-1764-features.f32le": {
+      "bytes": 4608,
+      "sha256": "0949fdb2b0f4a10bc6599b010f14d47d10906eb549ff32eb4f121e430d4b078b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-1764-ideal.f64le": {
+      "bytes": 9216,
+      "sha256": "294502708e83dffa698e8a04080308d6ef883ed469e0c4786b56da058575c564"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-1764-input.f32le": {
+      "bytes": 7056,
+      "sha256": "aff8a6fecb8df3bbafc4f6ea7a4a976b08e7534c4a9911d127e896ba266bbcd3"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-a1-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "9cc5d363dd85877b5cf9ca9092835b3f287a8a1ae301e649e3b1a4dc5948648e"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-a1-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "7d19c97044e67c8d8378c4c41ecf1f10235ee5d56ea8dae0989534e24df71474"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-a1-input.f32le": {
+      "bytes": 7056,
+      "sha256": "60a490ef0010b4a4a0922050674c51a57d2d85b03b680b9f8bb356e165b1a0f7"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-a2-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "ad078a1b2bfcb5f2f448cd54db0585cb4074a784a51224c3d59195ea22cdd777"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-a2-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "b26902294aa4846d0d5129f1b0bb0c57ac40cc3ee87be90d3227ae4a56db0939"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/cos7-a2-input.f32le": {
+      "bytes": 7056,
+      "sha256": "aff8a6fecb8df3bbafc4f6ea7a4a976b08e7534c4a9911d127e896ba266bbcd3"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/dc1-882-features.f32le": {
+      "bytes": 2304,
+      "sha256": "7a7817d4ccfd102ad717010a6a476a764edfc678f9d80e5810444c85dd5816f5"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/dc1-882-ideal.f64le": {
+      "bytes": 4608,
+      "sha256": "b4a29f595f0dcac0466f390c8d3ae4086161e1f1bdaad947122a86a663776cc6"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/dc1-882-input.f32le": {
+      "bytes": 3528,
+      "sha256": "3e17d7c79720df4a79d518b50e7ee88bc9972994ac56487dfd619974724f9aaf"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/dc2-1764-features.f32le": {
+      "bytes": 4608,
+      "sha256": "c036cc69c990eb7638cdf4a7a84ff358a0170e9c081964174d7eafa408b31611"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/dc2-1764-ideal.f64le": {
+      "bytes": 9216,
+      "sha256": "564e171c84daf3362017277b33321df6ad33dcf8088ada54f79be727abab3fde"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/dc2-1764-input.f32le": {
+      "bytes": 7056,
+      "sha256": "abcbe3aa6fd053d93cc12989b4e4844089433d54dca461766d4a49d5b77188c9"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta0-a1-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "9e9d903a5b6c864037436173e0daf1967b5d68880315ab6cb7b9ebfa4bb152a3"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta0-a1-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "9e9d903a5b6c864037436173e0daf1967b5d68880315ab6cb7b9ebfa4bb152a3"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta0-a1-input.f32le": {
+      "bytes": 7056,
+      "sha256": "ad41c12476e0b99ff22ecab8c94651083e820f0e09e88cd0db8c6963cae5840f"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta0-a2-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "91e2a976a274dc5df1d7c854dd6d7cd24903a1d431e2626fb04ce9765056f377"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta0-a2-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "91e2a976a274dc5df1d7c854dd6d7cd24903a1d431e2626fb04ce9765056f377"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta0-a2-input.f32le": {
+      "bytes": 7056,
+      "sha256": "16b41cbfecc873e3b61a2b36f4cd4fbfe443989c67d43722a8922f2b0d044b47"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta3-a1-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "ec0956468dfe0715e4e1280a84cb752640b98d85aa1c3ac627111de6c32037ee"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta3-a1-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "788d27e820a0d388b62a7fc60060f303e5e2e3dae981090f3ef81289e948c8e1"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta3-a1-input.f32le": {
+      "bytes": 7056,
+      "sha256": "4bac588ef9e79179fc611857436803b093d42511856102fd0530e369bd1d6a39"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta3-a2-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "af69e13370e00d634b4a34be603bc9f17870d36c84d0cd95f907360d43fad3f1"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta3-a2-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "a68989ae307256f0c876cf0610c4326aababf8de1f6a248a3889909e54b5466e"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/delta3-a2-input.f32le": {
+      "bytes": 7056,
+      "sha256": "8404c7e42930fc79c43725936114a10e2208b34a8310b47d84daa406ad8296a9"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/empty-features.f32le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/empty-ideal.f64le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/empty-input.f32le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class0-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "02fcf5d607ca7e469c402693da155125c1e1fdad624e2e9b5b4e666ebbcfe0bb"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class0-logs.f32le": {
+      "bytes": 576,
+      "sha256": "6520a92b700cdf1c64001a3a75adeb4e421d09e648d88abdad85c67c2dc3168c"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class1-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "f2009d18e5773330f82397eae9518f7a10a0f28b657704e70b1d68b3b6f6a5c0"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class1-logs.f32le": {
+      "bytes": 576,
+      "sha256": "98ad72fb127a14cdb55ec62521800617f7d63cc52a4a3154323987c5c6a464e7"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class2-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "4f3ba141cabbdfa5256df8d1b9aa320e0010fb6ec638c3dbdb414ad5e340efdc"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class2-logs.f32le": {
+      "bytes": 576,
+      "sha256": "cebe921e875e0960660a8df6bb3d4f5879835521f935f2bfab455b14b8ec9c00"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class3-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "4f3ba141cabbdfa5256df8d1b9aa320e0010fb6ec638c3dbdb414ad5e340efdc"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class3-logs.f32le": {
+      "bytes": 576,
+      "sha256": "cebe921e875e0960660a8df6bb3d4f5879835521f935f2bfab455b14b8ec9c00"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class4-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "2bac0ad038655613d24fc5fb559f7e6b62bdcbd13dc5c114f05787faf04abcc5"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullalternating2-48000-class4-logs.f32le": {
+      "bytes": 576,
+      "sha256": "7dc85a15f85875231affe415577c204b88b52fbed55fa806087b796d5c1c1913"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class0-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "4e5fdf12fc84e312af7388edf1f73abc9935715b617f062f416b8e0def52212b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class0-logs.f32le": {
+      "bytes": 576,
+      "sha256": "1f290058e7723bccb805d9311f862d1e160525307eb2eb04127e3e99df8fe14a"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class1-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "6fc687d6069721802e6ec7324391f3506cc26ee0532608cf76d195258cfce294"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class1-logs.f32le": {
+      "bytes": 576,
+      "sha256": "da08a52ed3af3a39f3513a17eb5686cb9a29c9a86cc2f45379eb195cf1909d40"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class2-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "7349cb48ff32a98cd636a5f5eb79c39390d91ee51fe7db13440711dccb911a37"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class2-logs.f32le": {
+      "bytes": 576,
+      "sha256": "609386677fa20f7dbae7c909658dbbbac1ee9847b2de0202ecc741a216c9c902"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class3-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "49e53b7227a2fe7ca34e4d9979870de6574c992270a30279588effeffc679cc8"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fulldc2-44100-class3-logs.f32le": {
+      "bytes": 576,
+      "sha256": "a7fde3e580cc8c9b904122f66c8ab79483e37c5e61293c47059655cdfeddbd06"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class0-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "3fd0623d0aa7119e17e5d4741c917ad771f85e205dd768d023f2c1aba4d81c69"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class0-logs.f32le": {
+      "bytes": 576,
+      "sha256": "a7c3da397cf7d65c4c77911ab786774a52b4eaa31a1173ea254e0d4d682f999a"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class1-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "84615ce5be423793fb67abe79960708997e1264ef237ab42a71c93ab82462077"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class1-logs.f32le": {
+      "bytes": 576,
+      "sha256": "6bc2d6b5790ebb914edf4258bc705566394e2436d5c3665bdcd2e8caa2213fdc"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class2-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "84615ce5be423793fb67abe79960708997e1264ef237ab42a71c93ab82462077"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class2-logs.f32le": {
+      "bytes": 576,
+      "sha256": "6bc2d6b5790ebb914edf4258bc705566394e2436d5c3665bdcd2e8caa2213fdc"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class3-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "774b3c3bfe3780fe45249043957e14750f8b714d2b8dc872d29fc1c8dc7c089e"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullpulse441-48000-class3-logs.f32le": {
+      "bytes": 576,
+      "sha256": "555fac4a13edd8f2b0cba992e7aec4be065f67539726792872f9e8491f36e848"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullzero-44100-class0-ideal.f64le": {
+      "bytes": 1152,
+      "sha256": "4cf9816ed1062189ff0c8d427fba5e912cc68fc9af76cf7f08fd255977de3b33"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/fullzero-44100-class0-logs.f32le": {
+      "bytes": 576,
+      "sha256": "1a0295f4bf5986c5f74eca9153a6a4cb10b073a01a76ba4a457fd862c78966a4"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulse0-1764-features.f32le": {
+      "bytes": 4608,
+      "sha256": "ea95ee86966e2b13b54ac23c10245236e2265c91fd8d43cbc98d135adb75e2ec"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulse0-1764-ideal.f64le": {
+      "bytes": 9216,
+      "sha256": "992bed154e24a5fa7ef2c6881fa3aea5188c5b120261b37243127641bef9161a"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulse0-1764-input.f32le": {
+      "bytes": 7056,
+      "sha256": "16b41cbfecc873e3b61a2b36f4cd4fbfe443989c67d43722a8922f2b0d044b47"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulse882-1764-features.f32le": {
+      "bytes": 4608,
+      "sha256": "deda2bc9e50429e74d752ba42b88e8bc8355be16b9d84fc33f665de5cf7555f3"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulse882-1764-ideal.f64le": {
+      "bytes": 9216,
+      "sha256": "57f8aa233a11548935af1939b5130e0ca9184827751f6aea4b26069a0030906e"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulse882-1764-input.f32le": {
+      "bytes": 7056,
+      "sha256": "8e4e5367244c01cf981a8252bd1c3f6b208518056637a8b2cee3872f9599972b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulseEOF-1765-features.f32le": {
+      "bytes": 5760,
+      "sha256": "5686e946d38c96b45bf16b0d1e93034eadaa72f4b5b207a43eb583b54ec07b32"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulseEOF-1765-ideal.f64le": {
+      "bytes": 11520,
+      "sha256": "7f00b56343bb2d63abe788d7cabe79b4b1ceb07d70b70ca4dba7c8f58972ef3c"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/impulseEOF-1765-input.f32le": {
+      "bytes": 7060,
+      "sha256": "02c0cb2264f2e4633dcba4818b7bca3ad4f31dd38f5dc9a746840db939f531dd"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/negative-dc2-1765-features.f32le": {
+      "bytes": 5760,
+      "sha256": "1df7ba02cbf456f2ecbe3964ce68e868fdd0d0f577b15a504d911f85606b1909"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/negative-dc2-1765-ideal.f64le": {
+      "bytes": 11520,
+      "sha256": "6701aed747890ebb72e50ad2273becba8fa7b04361c577d3c26f048b29cf8921"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/negative-dc2-1765-input.f32le": {
+      "bytes": 7060,
+      "sha256": "e201710be9e13abe0b823d1303b5907b66ca7e930bde01b09b0e4a94f15bb057"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/nyquist-a1-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "6a610c3f8faa7aa08c32951f4a09d37cff88df12e129ffdd2ed4a05848f2273b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/nyquist-a1-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "228fdfa26f9fdfd44b1eba6b0368e394cab953bccad1ca8b252eaa81eddedc6b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/nyquist-a1-input.f32le": {
+      "bytes": 7056,
+      "sha256": "b9a869c59a18e48ba4ccc14a31cd8a83f9cccb395dd1fbac5586bde42654394f"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/nyquist-a2-analytic.f64le": {
+      "bytes": 28224,
+      "sha256": "58af216ccfc48b9c282941d4ec27cead45c87231c0ae005392617b669925583d"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/nyquist-a2-direct.f64le": {
+      "bytes": 28224,
+      "sha256": "39b85fd44a4e33ea7fa23691a7705f1a6dbb934e6448020d6306ae8917917a71"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/nyquist-a2-input.f32le": {
+      "bytes": 7056,
+      "sha256": "fc042067dfbd4c378321ae75a05319faec57423d0cb34b7856503dfea7c4eb22"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/one-impulse-features.f32le": {
+      "bytes": 1152,
+      "sha256": "9bbceabdc5634e884f5c4ae9561d1dcca691cf6722db4db38ad151cb035f1c82"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/one-impulse-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "0a2869c53b2298bb8431a852f823fb18c1fcb4ccecb78d68e89c3f09d3790e35"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/one-impulse-input.f32le": {
+      "bytes": 4,
+      "sha256": "d88c86f15bbea365d658ad95a81d45367c465f7af6f7264fb077f01747ddc77d"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/periodic257-1323-features.f32le": {
+      "bytes": 3456,
+      "sha256": "7c6ff96f6ce73ea3214c1568ccc6783e2d021c9c9faa7ad18864a957bdfbd8d2"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/periodic257-1323-ideal.f64le": {
+      "bytes": 6912,
+      "sha256": "a4cb62e24211c26478e199148c80fd4f97e58d30b9abd636bf126e502e9bb60a"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/periodic257-1323-input.f32le": {
+      "bytes": 5292,
+      "sha256": "f09fb30637b4a9a297592e361aec174c0a2de670269c609afaf92dd629d926d3"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/pulse441-2205-features.f32le": {
+      "bytes": 5760,
+      "sha256": "178a83aa10c19cacab60eaa0271c008ce6d16b8ff8bf30a12004284fd2ccb0f1"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/pulse441-2205-ideal.f64le": {
+      "bytes": 11520,
+      "sha256": "8663a6d37c44664f34bc2bf5672f980a4fbfb445061f80fa7acf3609392f095f"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/pulse441-2205-input.f32le": {
+      "bytes": 8820,
+      "sha256": "e178004380ab2cc651f1542d0bd35fcc065ee9756fbf202c009974d654ffd6a8"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/step2-2205-features.f32le": {
+      "bytes": 5760,
+      "sha256": "6300a19d0e3f5f832ac8236c0a7cce7cb743dcb048a12082f65a051a6d1defc6"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/step2-2205-ideal.f64le": {
+      "bytes": 11520,
+      "sha256": "0c4689b63ebf98374b01774a40460706ed82223392b5e6d987dc256a0862885c"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/step2-2205-input.f32le": {
+      "bytes": 8820,
+      "sha256": "7d895ba16fcdc1fd71ab9b876a8fc26432fded8b85c2ed86d2f3f109f091dc74"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero440-features.f32le": {
+      "bytes": 1152,
+      "sha256": "4cf9816ed1062189ff0c8d427fba5e912cc68fc9af76cf7f08fd255977de3b33"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero440-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "cfc335996cfae29fdf14fd2db7ea853366d350a5d387aa3c322616e81dacd56b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero440-input.f32le": {
+      "bytes": 1760,
+      "sha256": "52e28210c0be3be4e312d3ec209b5c49fc69abdd4c4aed923f1ce29ad25b0350"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero441-features.f32le": {
+      "bytes": 1152,
+      "sha256": "4cf9816ed1062189ff0c8d427fba5e912cc68fc9af76cf7f08fd255977de3b33"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero441-ideal.f64le": {
+      "bytes": 2304,
+      "sha256": "cfc335996cfae29fdf14fd2db7ea853366d350a5d387aa3c322616e81dacd56b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero441-input.f32le": {
+      "bytes": 1764,
+      "sha256": "f9a8c9b949a6f1bb9a980b9575944abeaeac8907c22d7386c95909c67e11982a"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero442-features.f32le": {
+      "bytes": 2304,
+      "sha256": "cfc335996cfae29fdf14fd2db7ea853366d350a5d387aa3c322616e81dacd56b"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero442-ideal.f64le": {
+      "bytes": 4608,
+      "sha256": "606f558e014930f9c1669f03c71c28945c4631568e39cd308c6c7f4077c7bfb9"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/assets/zero442-input.f32le": {
+      "bytes": 1768,
+      "sha256": "7314b978571ffc723887d81a40c88dbd2de4b221b4a0149d14f284b074eec9f9"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/cases.json": {
+      "bytes": 103559,
+      "sha256": "eac3d477ed099ca5558ba91e6cea8dc7a3b10f49f5b55b77b5c17a1c90e4c89a"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/frontend_reference.py": {
+      "bytes": 6012,
+      "sha256": "5c54e074e92880bf439ecabfec71d4bdd833ee478a6bf8d598967dedf7dbd7bb"
+    },
+    "docs/rust/fixtures/product-host-frontend-hs04/verify_registration.py": {
+      "bytes": 11055,
+      "sha256": "ba5cd6a90caa41e8c81769f8c32bd2aec2c8ee77d5afa50ecf936ad580b2a740"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-impulse-input.f32le": {
+      "bytes": 96,
+      "sha256": "2617738989cee8870ece5fc5010e255200155534aebcec811a77d1f05cd3e053"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-impulse-trace.f32le": {
+      "bytes": 352,
+      "sha256": "e5cc8f04556127033dc483155620a6a6886ad3c846b77971a17cd8d2cd9aa211"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-periodic-input.f32le": {
+      "bytes": 192,
+      "sha256": "7d6464d7d284b6eadd6987b1b444f500d844f9f281139b03132933125c693591"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-periodic-trace.f32le": {
+      "bytes": 704,
+      "sha256": "66f54bf2c7452d015b46c12913be864c05b00126a23a7d28714d647d7bfed0f5"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-prefix-one-input.f32le": {
+      "bytes": 12,
+      "sha256": "26f14877573148ca8f1c60da00ef812c4bc0973980d51e2b4f2d0d31e3d72157"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-prefix-one-trace.f32le": {
+      "bytes": 44,
+      "sha256": "deb3d3b02a3a4a8cd16d55c610bfda56ce3710a011c73aa067f24e0be4972a66"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-reset-every-input.f32le": {
+      "bytes": 96,
+      "sha256": "eb6ad23fd907efe6a4863aa02c5524f33e2c4f8ac232fa37683691198537da44"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-reset-every-trace.f32le": {
+      "bytes": 352,
+      "sha256": "52e247285c135118a5c455dc438489d86afc7d2afa544338154887ebc795c220"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-reset-input.f32le": {
+      "bytes": 192,
+      "sha256": "7d6464d7d284b6eadd6987b1b444f500d844f9f281139b03132933125c693591"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-reset-last-input.f32le": {
+      "bytes": 96,
+      "sha256": "eb6ad23fd907efe6a4863aa02c5524f33e2c4f8ac232fa37683691198537da44"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-reset-last-trace.f32le": {
+      "bytes": 352,
+      "sha256": "0ecc4245b5dc4151ef7770b394a663671115bd975adab1e30fad29e7975e6e41"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/asym-reset-trace.f32le": {
+      "bytes": 704,
+      "sha256": "cf686f4fed5931bae9ff4f993a9c266593c430f8da249b6c2348e5e6ba07c1d6"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/empty-input.f32le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/empty-trace.f32le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/gated-alternating-input.f32le": {
+      "bytes": 96,
+      "sha256": "d5a44e649051bc9f43ba4a253c526d2f2a8fc74463071e0390e5d221aa887873"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/gated-alternating-trace.f32le": {
+      "bytes": 352,
+      "sha256": "5e7ba7cac6b94a1aeeb89bddc8f541777a4e0c75758513a009554c3837935ef0"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/gated-reset-input.f32le": {
+      "bytes": 96,
+      "sha256": "d5a44e649051bc9f43ba4a253c526d2f2a8fc74463071e0390e5d221aa887873"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/gated-reset-trace.f32le": {
+      "bytes": 352,
+      "sha256": "0c47935e27b935188a24a5261d8053dd26551c3e1de9c7d27366d92c243c0408"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/parameters-asymmetric.f32le": {
+      "bytes": 452,
+      "sha256": "b187bb621f7aa7f2c11a97e8e6f11e44f279c1b64c6e5446ea88422d230163dc"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/parameters-gate-tagged.f32le": {
+      "bytes": 452,
+      "sha256": "05f2d8f43e23b0af9ea8b365fa49ca011c20b4578f4ccb692cac134ace16772d"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/parameters-rounding.f32le": {
+      "bytes": 452,
+      "sha256": "f10ca888bc964881fa483510602b7ccee8ade9d8c2bafa87fd4da6299d13cd7c"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/parameters-zero.f32le": {
+      "bytes": 452,
+      "sha256": "89f3bda768dd22407bc38aa71eb80b084fa6ea9376c75c67cca0099ccdb3f792"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/rounding-nine-input.f32le": {
+      "bytes": 108,
+      "sha256": "d53986eb6b8bbf385af591428dc14ac7e991f750b243c19cf6716723908e47f0"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/rounding-nine-trace.f32le": {
+      "bytes": 396,
+      "sha256": "ffa6838138cb318742015f23d6490147004e8a0dcc643642992431a7f9f5d9e9"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/zero-seven-input.f32le": {
+      "bytes": 84,
+      "sha256": "2a0b66eaa295cb195c2cbe757ed7c1dac0fa138818b73a17d6af3a91c87c9195"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/zero-seven-trace.f32le": {
+      "bytes": 308,
+      "sha256": "32c78bba3a57089b8529f536ca84b81961d35676d0f2b58f289bf2e415ff018c"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/zero-single-input.f32le": {
+      "bytes": 12,
+      "sha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/assets/zero-single-trace.f32le": {
+      "bytes": 44,
+      "sha256": "9e966ef1aa6ac4c4c85c707341c66cdf7d972c79ac3cdf79b39d33691feac33a"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/cases.json": {
+      "bytes": 57190,
+      "sha256": "aa89f7adec6eed8b66ad106f79653d254395922e4484760a888f409604f921ed"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/scalar_reference.py": {
+      "bytes": 6129,
+      "sha256": "5b0ade80533b6a822e88f715b8148c51c72e6121455c0600cb7a30014a583083"
+    },
+    "docs/rust/fixtures/product-host-neural-hs05/verify_registration.py": {
+      "bytes": 12965,
+      "sha256": "7ff91ef4d8212042a80d5abe85b826a638241d4f055c117b78911a4c20663fb4"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/.gitattributes": {
+      "bytes": 22,
+      "sha256": "70484388b9c4b4e712c0c23a85187b1d0df9e4260b8e525b40f25dfdef77d4ab"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/above-one-down.f32le": {
+      "bytes": 48,
+      "sha256": "0af8210fd4a5228ffcbe949f5215e84edd4f8adc37b078e0ec437d657104e053"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/all-zero.f32le": {
+      "bytes": 48,
+      "sha256": "af9edda91eba08b7775b717bb63ec4b038d4ec6e7bde2b7b63801a5ad6e73e40"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/beat.f32le": {
+      "bytes": 12,
+      "sha256": "480376c6bf738a0227f2bbf2b3506b7cde209152c0ba9a9077e5527169eb292e"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-3-0.f32le": {
+      "bytes": 2100,
+      "sha256": "811ff561a489d306acea7e994bd094491e7ccf93c7275eae0d67a6a8abeabfdc"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-3-2.f32le": {
+      "bytes": 2124,
+      "sha256": "0fe9ba1e393d41c5cb5ef3bcad8ec7de5790f93d3490f949a6bf7d87889e7662"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-4-0.f32le": {
+      "bytes": 2700,
+      "sha256": "d582543a694d9060fd2a0b84c7a749f6399ea01243922f2348de8362db5912ef"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-4-2.f32le": {
+      "bytes": 2724,
+      "sha256": "cdbf0c76417db24d7f99b42f1c8c0db6c29d992f0cf673c6cdf532bc9e6d0864"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-empty.f32le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-insufficient.f32le": {
+      "bytes": 12,
+      "sha256": "3695fc5961dab4c804313662c5662248a3536224fb1dd93f8fb23304c437ff0c"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-no-path.f32le": {
+      "bytes": 96,
+      "sha256": "d11e8bde7c98cd813386e2d484d767c87d6aaa42d390fb15644027b368c607d0"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/composition-no-support.f32le": {
+      "bytes": 108,
+      "sha256": "8e954db553f3edc932ef6b54826a1aaa4d88b802169fd74ce0d2a24e4a9af756"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/downbeat.f32le": {
+      "bytes": 12,
+      "sha256": "3695fc5961dab4c804313662c5662248a3536224fb1dd93f8fb23304c437ff0c"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/empty.f32le": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/inf-down.f32le": {
+      "bytes": 48,
+      "sha256": "488592b2dda4fd8d5ffe2f771ad3edc2988946d55ec5d0efb1047299ed6cae8b"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/nan-beat.f32le": {
+      "bytes": 48,
+      "sha256": "acf6e034192fd940519decf89050746f70ec3f9832892230c41a80c1d980a200"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/negative-beat.f32le": {
+      "bytes": 48,
+      "sha256": "c56c32e03b6bfec48ffd7c1fbbee139477c10f88f608fee176431ef3237e08d9"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/negative-inf-non.f32le": {
+      "bytes": 48,
+      "sha256": "e220a9934d8fd94e4e0a0f4b0a0540ec00ccc31a6620c7b09e81be90aa6a288a"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/nonbeat.f32le": {
+      "bytes": 12,
+      "sha256": "caccb9a8fbd2401135207066c4b53d6e88467839318ea2f1e8bfadf8fef6844e"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/signed-zero.f32le": {
+      "bytes": 12,
+      "sha256": "5c4619c330c8f51e21bec2fd79d9673f9c912ce727069d9c75312d48300eda15"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/subnormal-beat.f32le": {
+      "bytes": 12,
+      "sha256": "bd88ae3c5344040592205d705f0e31e6a4dc9bbbc2b9a9e039df27b5206c5110"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/subnormal-down.f32le": {
+      "bytes": 12,
+      "sha256": "1ba6f4f9640775ff0e71b678ea581f47505dfc894b5884f1a5347c784d7daa14"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/subnormal-non.f32le": {
+      "bytes": 12,
+      "sha256": "7b8df39167401c38071398198332de9515b5a563cca706330aeeb6fe4fc7e2b6"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/sum-between-old-bounds.f32le": {
+      "bytes": 48,
+      "sha256": "0b3c1fbf50d56ccd219e265dc24e90fe14614cd78568af532b38a61b826c7807"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/sum-exact.f32le": {
+      "bytes": 12,
+      "sha256": "06b106a27c94ad7845a05b99ee98dff3d8fb8cfbac1b21a5360986720625029f"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/sum-inside.f32le": {
+      "bytes": 12,
+      "sha256": "fbd7df812073cf2fed0ec277c87c2a1907c225de39a5bdc44685c7451cbf28a8"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/support-exclusive-tail.f32le": {
+      "bytes": 48,
+      "sha256": "f5aa96a06569a2339ede422db1d2f186c0dd7632bcff2a108e8bf8ea93115b05"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/support-gap.f32le": {
+      "bytes": 60,
+      "sha256": "15cd2bae0edb8cad6c19c1cecab08c4be969901a1a5885ed5828fe6d2c379ee2"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/support-row-zero.f32le": {
+      "bytes": 36,
+      "sha256": "8f728c38a2e35c4fdc4ec27f3171dcc90889f3273d25134617c44ac1ef65822d"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/threshold-above-beat.f32le": {
+      "bytes": 12,
+      "sha256": "3c1ef1a075cc47a03c843b261d2ce14a698f1c93caf245d74e2b299582907d85"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/threshold-above-down.f32le": {
+      "bytes": 12,
+      "sha256": "c31fec1498a8f186a0dafa09ffeee6909a92424d6e6bd0d78aa6942e27c866d3"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/threshold-at-beat.f32le": {
+      "bytes": 12,
+      "sha256": "997529d7458f054e316ba6af3adb72275d7101ab062a49c446fd8e484814d3e2"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/threshold-at-down.f32le": {
+      "bytes": 12,
+      "sha256": "6681a822da5315d6715fa81711598819186b071c46f5c0803a660b7d088bb28a"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/threshold-below-beat.f32le": {
+      "bytes": 12,
+      "sha256": "0acd434d9fe8f8f623145946bffbba96c5433ce6ea2956144c92b2189f88f2c5"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/threshold-below-down.f32le": {
+      "bytes": 12,
+      "sha256": "949401dc9278b2bbd039f6d31ffe44a2040126bc7edfbc42903663f08a5ef6ed"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/assets/uniform.f32le": {
+      "bytes": 12,
+      "sha256": "243fc92316ed345bb0378dd51299c87d07fe5a2a173fee2bb0ea3809cf12a51b"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/cases.json": {
+      "bytes": 132287,
+      "sha256": "6d77d2ef1a2138cb24f3bf383bb9c6639326e6e8a0eac35ac2e484c47bb9c573"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/scalar_reference.py": {
+      "bytes": 9985,
+      "sha256": "0c0ce5706d7cf5461d763440d8d68618cc16f3065f9ad8b352ab429c51cf0a82"
+    },
+    "docs/rust/fixtures/product-host-probability-hs06/verify_registration.py": {
+      "bytes": 13603,
+      "sha256": "60d7b5e5ef6b0306e90303a63448e0a46f0c2a2c68a78befa64a66c188aabe4b"
+    },
+    "docs/rust/fixtures/product-host-resampler-hs03/cases.json": {
+      "bytes": 96994,
+      "sha256": "7c34cf873eec465b9ef6395559aea8813d3db1df7bac2971a2d0c52774c474b0"
+    },
+    "docs/rust/fixtures/product-host-resampler-hs03/resampler_reference.py": {
+      "bytes": 6329,
+      "sha256": "3db457d04ad8bc9b62859b9a51894dd3d632828fa60f465ce68180432191473c"
+    },
+    "rust/runtime/src/bin/apta-compact-frontend-synthetic.rs": {
+      "bytes": 7603,
+      "sha256": "254b0a61e1f15625a92d76e7e5c50d62d2008b9d2f6e8368f4acacae9e4eee8c"
+    },
+    "rust/runtime/src/bin/apta-compact-grid-synthetic.rs": {
+      "bytes": 5483,
+      "sha256": "b691fa0a9fca25850994cbceade1d8b685576c4c762b0452ff77e092bd71f56a"
+    },
+    "rust/runtime/src/bin/apta-compact-hmm-synthetic.rs": {
+      "bytes": 7620,
+      "sha256": "576f01fbcc9ace3b93161e19f48b9e9e27bfee7a9fa7764a34fd2d92d167041c"
+    },
+    "rust/runtime/src/bin/apta-compact-neural-synthetic.rs": {
+      "bytes": 8184,
+      "sha256": "25aef0a4a043c78580b371575fc3a9c2b0df0c2bfb190c9f60ce263b7b45ccde"
+    },
+    "rust/runtime/src/bin/apta-compact-resampler-synthetic.rs": {
+      "bytes": 5142,
+      "sha256": "05cc59b2033ff548f768e273bc52901a12157984ba0d3b63c744a7f52e936dff"
+    },
+    "rust/runtime/src/bin/apta-history-diagnostic.rs": {
+      "bytes": 13131,
+      "sha256": "347405656fd14e6b0e742f9ae41210c9295c5443481f0361685e026e23dd6c9d"
+    },
+    "rust/runtime/src/bin/apta-native.rs": {
+      "bytes": 16418,
+      "sha256": "25881ac378062f6928b6132fd9a1a48c6d1df6b39f7c069a6e75899bcb5544fb"
+    },
+    "rust/runtime/src/compact_frontend.rs": {
+      "bytes": 34945,
+      "sha256": "dd568715f3ed87029496fab19288991fad5a2bcdd12ebcaf62ffa7335289f8a8"
+    },
+    "rust/runtime/src/compact_grid.rs": {
+      "bytes": 93188,
+      "sha256": "ea37bb0c7b0ee51d1f97a5905453064e0c1b2afcb4c6535a7a80c226d915ce3a"
+    },
+    "rust/runtime/src/compact_hmm.rs": {
+      "bytes": 21030,
+      "sha256": "dbd13592b2682a4c02616a2c1dc3c4cedc10832d824976ce88d43f9d61f7acc4"
+    },
+    "rust/runtime/src/compact_neural.rs": {
+      "bytes": 42151,
+      "sha256": "f50d69c409176ec9830af6572bf967c8513416498ab580cb9d9319c58493a0ef"
+    },
+    "rust/runtime/src/compact_resampler.rs": {
+      "bytes": 71538,
+      "sha256": "2f1232b9cc1a013e51a4ecc8f2f926c309c4dff760da69851a61c96fe76b06b7"
+    },
+    "rust/runtime/src/context.rs": {
+      "bytes": 5217,
+      "sha256": "25843fd8c1f637307921abeb313e1460ac89f9e7c5d8038c80fac21e789d5bbb"
+    },
+    "rust/runtime/src/growing.rs": {
+      "bytes": 23773,
+      "sha256": "dcac12934c84ff4b7c685e0b296f918d7b45a7abae12b8c995e580b5de59ef86"
+    },
+    "rust/runtime/src/growing_pull.rs": {
+      "bytes": 8328,
+      "sha256": "816e16834c09764074d6d9d47d7b15ac81f328a47e460b915c6f680c426fda9f"
+    },
+    "rust/runtime/src/heap.rs": {
+      "bytes": 15767,
+      "sha256": "8bd59b069685eed7742b4c8bf4c19b3e46d0a4fb611581a139beab122a4c36ee"
+    },
+    "rust/runtime/src/owned_sparse.rs": {
+      "bytes": 24398,
+      "sha256": "b087edb79f497f782261f5b0636e6f77c67a69bafac16050e309105e9fdbdd29"
+    },
+    "rust/runtime/src/owned_sparse_pull.rs": {
+      "bytes": 9419,
+      "sha256": "3aa2c7758b29db31da504d96600ba003f4c63a13fcf43d519205b83df9486410"
+    },
+    "rust/runtime/tests/compact_frontend.rs": {
+      "bytes": 15279,
+      "sha256": "d40c230f4bf9de65b9614c7877a3a3869000ff5bb419d14f8576755c8765701e"
+    },
+    "rust/runtime/tests/compact_grid.rs": {
+      "bytes": 9165,
+      "sha256": "3a310268595cb7e67e904e7dc66312310d5c7aed2774e7b6d55ae91c42cf8e68"
+    },
+    "rust/runtime/tests/compact_hmm.rs": {
+      "bytes": 11964,
+      "sha256": "4b5f9c003ad286f1fd38773f8127bd82fd9443fcebeb5e0720ded8997efd61c6"
+    },
+    "rust/runtime/tests/compact_neural.rs": {
+      "bytes": 24813,
+      "sha256": "a182c1ba6fe361add634a496a97924436f4c349723a437643824e18824285122"
+    },
+    "rust/runtime/tests/compact_resampler.rs": {
+      "bytes": 12967,
+      "sha256": "ec8b3dd79eff4a0550ce6a0109110ebc7beb8056ee88f6ba8ca479d00860cbd3"
+    },
+    "rust/runtime/tests/concurrent_results.rs": {
+      "bytes": 18082,
+      "sha256": "cd591aebb91972fffdf5e800f39b39dd619ff863757c02aa4f651d81aa2ddd50"
+    },
+    "rust/runtime/tests/context.rs": {
+      "bytes": 7114,
+      "sha256": "ac619ccb332d6bdac8209315b570a16e4cb39ea5c729d45a672b976c81ad7e40"
+    },
+    "rust/runtime/tests/desktop_tools.rs": {
+      "bytes": 14854,
+      "sha256": "7a44dd01fbfc7f90a3f5ccb0a2d65ab85c548c11e8d6882ada4373623882a59c"
+    },
+    "rust/runtime/tests/growing_allocation.rs": {
+      "bytes": 9032,
+      "sha256": "895a88a2bf6750fe1381a4d7b04cc3ac5bda8e8f7cf81692610fef1fe98419a3"
+    },
+    "rust/runtime/tests/growing_pull.rs": {
+      "bytes": 8271,
+      "sha256": "e8d5deb94dc931f7efb1f5f800e03f4f460e9f1a0a17c9103db8897ac6f276c5"
+    },
+    "rust/runtime/tests/growing_session.rs": {
+      "bytes": 13597,
+      "sha256": "2ca4ea169bcc37353679dc637c99aace1fd89f4526889a71170124ff270d09e6"
+    },
+    "rust/runtime/tests/heap_graph.rs": {
+      "bytes": 12188,
+      "sha256": "815f53afc404da1a92a20afb3a827e608a4bd84cdac8fa10da59dde7cf0a46b9"
+    },
+    "rust/runtime/tests/owned_sparse.rs": {
+      "bytes": 28048,
+      "sha256": "7273fdad7c8e2e6f3273f3905bcba340e74670821e70d8a5061936142504a89c"
+    },
+    "rust/runtime/tests/owned_sparse_pull.rs": {
+      "bytes": 15649,
+      "sha256": "2165c9b3d99b1ee4c95856a08acbce04a5abc8b24491d801e83bcd82824a5612"
+    },
+    "rust/runtime/tests/owning_mutations.rs": {
+      "bytes": 12792,
+      "sha256": "53847bbca4e5acc23822a2b8bcd8e2f84001a448850fe5590a061d4918e2aef1"
+    },
+    "rust/runtime/tests/owning_waveform.rs": {
+      "bytes": 9470,
+      "sha256": "9f2b5a9648a7639ad45c69112a32879717a5f940649d50454291b0f2e8a22fc5"
+    },
+    "rust/runtime/tests/source_identity.rs": {
+      "bytes": 5813,
+      "sha256": "2b6b3e09c7995f50318defe0562db2e9683a049d98eaf25687b6d2933fa49c45"
+    },
+    "rust/src/analysis.rs": {
+      "bytes": 42261,
+      "sha256": "380d1b56d031cb5477a902fb3141cf54707c286da8e6a03c742b824e929abf4d"
+    },
+    "rust/src/attack_grid.rs": {
+      "bytes": 10011,
+      "sha256": "83ddba0fed087d401f273754c18c4051b0c911cc0bd8f1ac05c7dbf2ce647ef9"
+    },
+    "rust/src/band.rs": {
+      "bytes": 3931,
+      "sha256": "975777f4b4ce54da94c7c6957ca39e8ac786fdee885faf3ea79489ba316fb81d"
+    },
+    "rust/src/builder.rs": {
+      "bytes": 22105,
+      "sha256": "8d9e2de10782136417cd1c6b4065bd6165836a82f901fb6303e6c55d4377a04e"
+    },
+    "rust/src/container.rs": {
+      "bytes": 31669,
+      "sha256": "29881e1bd71c644dc880d935c45b5ea70a3cbf8cf7a56ba117de3723fbf30faf"
+    },
+    "rust/src/deadline.rs": {
+      "bytes": 1255,
+      "sha256": "abe2acd07edb7ab81498c46dd5e3e3be56c8c6b16db09fcc242f4f2947d1de52"
+    },
+    "rust/src/detail.rs": {
+      "bytes": 12430,
+      "sha256": "b5612edb98860f17d55d10561a124141f25a6eb7c864e7afbf0d3a097c17e65e"
+    },
+    "rust/src/detail_analysis.rs": {
+      "bytes": 13575,
+      "sha256": "a647be2105797a252899b8a34440fe2558323115f59cd2fece2b5fd9274f2136"
+    },
+    "rust/src/dj.rs": {
+      "bytes": 18288,
+      "sha256": "636daa4c3f4735805183d7c38920a1c3204f41fb909bff1e7a79ac9ffa24b1ea"
+    },
+    "rust/src/global_analysis.rs": {
+      "bytes": 42498,
+      "sha256": "8b29a2cccd42166c431a86c74e71710d6de82bb25eaf43c049d0b43c1bc07a8a"
+    },
+    "rust/src/global_history.rs": {
+      "bytes": 16611,
+      "sha256": "2d08b473e6f6512d3a06af8ee46d8429141640b3325c2ed986ecf513813cb8c5"
+    },
+    "rust/src/grid.rs": {
+      "bytes": 24244,
+      "sha256": "30e14b04584521cc53be4f5a4a9dd814313199e6e0e87f8b61299249051119a7"
+    },
+    "rust/src/history_grid.rs": {
+      "bytes": 13965,
+      "sha256": "62f71b8a7acf8dffcc51f76e6fb284343417474732385d866c83a4456a43ad80"
+    },
+    "rust/src/history_meter.rs": {
+      "bytes": 14350,
+      "sha256": "2be5adda5cfb1c54e7dd6c9736dd2b16ec191997c621a94b6ebedc15c37b65ba"
+    },
+    "rust/src/history_publication.rs": {
+      "bytes": 9462,
+      "sha256": "136f6115116aded2bec41bdb7a03416dc97618641d82cf85f0d9043cd10533a0"
+    },
+    "rust/src/key_analysis.rs": {
+      "bytes": 15249,
+      "sha256": "d8797d0d48ca8b5efc5d6e19ae3e8f8fe7f6b5779ffc21b25c08c65bc9a69ba5"
+    },
+    "rust/src/lib.rs": {
+      "bytes": 1229,
+      "sha256": "03ec1034f90616ae05f0109266b73ef6dc939ba57c832f816263a92c9ed8cd8e"
+    },
+    "rust/src/meta.rs": {
+      "bytes": 11454,
+      "sha256": "fea749d1ba96b945e938277081484eebf8e2c0426111db63a18f596eacfe7d53"
+    },
+    "rust/src/native_validation.rs": {
+      "bytes": 32363,
+      "sha256": "028707aa4998d9a2df060d052f9ce1c4d40a2cfea887fc0e0b3bc0566302f797"
+    },
+    "rust/src/onset_grid.rs": {
+      "bytes": 16041,
+      "sha256": "e4b06567b61d7bab0dbab7d7a68a3dfb1b36d1348f9581ce3c2eed18727ead34"
+    },
+    "rust/src/owned_result.rs": {
+      "bytes": 24976,
+      "sha256": "f2c1c89b6f2b708864e52e2e6a7503848d7446f10bf5dbf89827fe143a8b3836"
+    },
+    "rust/src/publication.rs": {
+      "bytes": 70805,
+      "sha256": "28329e47a923687e7c7409b3800b4669d2f967280b5f74a30f2d9f5c4525058e"
+    },
+    "rust/src/pull.rs": {
+      "bytes": 12218,
+      "sha256": "8bc01fd86a1737ce6a139b67b44d24207d4d7587bdbae489d5f1d8662f112677"
+    },
+    "rust/src/result.rs": {
+      "bytes": 24918,
+      "sha256": "3ccff847fb1c15be90b4a03b22f1763979365d1e31267751901f40685124935a"
+    },
+    "rust/src/scheduler.rs": {
+      "bytes": 27814,
+      "sha256": "a2a1095439c3d431e66b1e87101d7ef7fe22371b18e5712b65931d3fea1c529f"
+    },
+    "rust/src/session.rs": {
+      "bytes": 40172,
+      "sha256": "0846c321fffe100354c85430c292adc8a5cfa773fc49f7e2597219d1c5b74b0a"
+    },
+    "rust/src/session_snapshot.rs": {
+      "bytes": 4979,
+      "sha256": "584b13d624dfda02439eb7b8020e80b308da906f01659166cd5d1ae05e44f5a2"
+    },
+    "rust/src/sparse.rs": {
+      "bytes": 57858,
+      "sha256": "28f061e3d3a15067e8c7d9b24285ad1eeb88a063ab7852bcc0c9dd78d2039285"
+    },
+    "rust/src/sparse_pull.rs": {
+      "bytes": 7311,
+      "sha256": "2419b575c06050049ac77389d035074812adaffacec2f24194565a76efe563d8"
+    },
+    "rust/src/stream.rs": {
+      "bytes": 18370,
+      "sha256": "c1b999b41198c34bda31407f798b141316a1fae4353236d94d3515b762c07a54"
+    },
+    "rust/src/stream_write.rs": {
+      "bytes": 15164,
+      "sha256": "da61cb11fbd652e6b32f7934d7b6f91498bc1f620908cacc6ef5ee294ef1b99d"
+    },
+    "rust/src/tempo.rs": {
+      "bytes": 9313,
+      "sha256": "93eab112477179f176746a16d10872d35d395efd991c24f6c8ea3abf342fe086"
+    },
+    "rust/src/types.rs": {
+      "bytes": 13907,
+      "sha256": "c587be97196b2c2f1246463bcb42a5198fb51d69d98ee355ff5edb5d6ec138dc"
+    },
+    "rust/src/wav.rs": {
+      "bytes": 6811,
+      "sha256": "cf4da4482894db99130bbcd89bd22d90b17c06f51c847820fd8b377e3493f1dc"
+    },
+    "rust/src/wav/streaming.rs": {
+      "bytes": 6480,
+      "sha256": "4a617cd09224d6518ac07be30270833b47d925284f1a248d21ca937dc1e683b5"
+    },
+    "rust/src/waveform.rs": {
+      "bytes": 11343,
+      "sha256": "0d6c9ca94493b1e328737dd4f8df339faea693d7fec8dbc09ef3006461c7e8cc"
+    },
+    "rust/tests/band.rs": {
+      "bytes": 19872,
+      "sha256": "ce1d3e51a7fd8b144c77e6288e837ca4f862cc3630a28a6edcd27a08096dc93e"
+    },
+    "rust/tests/builder.rs": {
+      "bytes": 11760,
+      "sha256": "ea4193aa310dbdb1d35c97ce53964289474e6347f462647656e010391baebe24"
+    },
+    "rust/tests/container_conformance.rs": {
+      "bytes": 13423,
+      "sha256": "1f4abfbe0a5ed1d15f34fb789b1cb860116d8ad995e96c9b483a2fba4bd0ac0b"
+    },
+    "rust/tests/deadline.rs": {
+      "bytes": 16283,
+      "sha256": "28bcc915e277f503c7deaec350a56180d504120e28fbae1bc465331028a1ee85"
+    },
+    "rust/tests/dense_trace.rs": {
+      "bytes": 5569,
+      "sha256": "5b729f9d7832fe5293a4e2510dbceb8a9ef972a61a67070079635c3cfcdd1a65"
+    },
+    "rust/tests/detail.rs": {
+      "bytes": 9832,
+      "sha256": "500fd10a7804c691a303426f8b02abea48eeb2f0bdacf4c8875b2154bba934a9"
+    },
+    "rust/tests/detail_analysis.rs": {
+      "bytes": 12435,
+      "sha256": "55e85e187335a133c445bc14b715214c0a927aff4875da9baf21abba009303df"
+    },
+    "rust/tests/detail_pull_oracle.rs": {
+      "bytes": 13922,
+      "sha256": "ab078a243de9a6438e0593e8da63ce9c94f3825c7dd3bac126b966c08272f5f0"
+    },
+    "rust/tests/detail_scheduler.rs": {
+      "bytes": 6296,
+      "sha256": "5cae1787f769d753984e1a821ea8678aa47ea4626cbecb438d6de77e0b5358c8"
+    },
+    "rust/tests/detail_scheduler_oracle.rs": {
+      "bytes": 13926,
+      "sha256": "8e4a647441c1cd8c03d97b840b86278ecedd7b7bb51bf1de8566b23836a5b29e"
+    },
+    "rust/tests/detail_session.rs": {
+      "bytes": 5751,
+      "sha256": "90574d7cf97bf7906184c03f3bee123d02be95f90f7c0d1f518e7b5dd84a5b99"
+    },
+    "rust/tests/dj.rs": {
+      "bytes": 10727,
+      "sha256": "42f912e507feb88bcd746b57de40e384208fa52fb3475d4186b6a479499f70c8"
+    },
+    "rust/tests/fixtures/allocation_contract_oracle.c": {
+      "bytes": 9009,
+      "sha256": "4ad962f878b31e8bbfe3b612d3c1b26800b1717265ed027a4c2209b226439c33"
+    },
+    "rust/tests/fixtures/band_oracle.c": {
+      "bytes": 5578,
+      "sha256": "381c76abf406d3ca505579c11ed92419523d3329033111aab2adc86d744695c1"
+    },
+    "rust/tests/fixtures/clock_oracle.c": {
+      "bytes": 3878,
+      "sha256": "33b1e72b7bcbe054a001c809512ec2c0744baa8b00b50668a1b97a075937e7e7"
+    },
+    "rust/tests/fixtures/container_oracle.c": {
+      "bytes": 1326,
+      "sha256": "eedeb2cc4320eedb2814b6a881418c25007156c22a2e4cfdb9573944586c097f"
+    },
+    "rust/tests/fixtures/context_lifetime_oracle.c": {
+      "bytes": 1328,
+      "sha256": "5fde0181d903d3c086259aa9bf1dfaea34aa2a7e9c2ad134a7fbf11c00fa557c"
+    },
+    "rust/tests/fixtures/detail_analysis_oracle.c": {
+      "bytes": 3918,
+      "sha256": "c755ee5527a647e7eb2880513ab8a787c76f807dfe769ed75338d671b27b3502"
+    },
+    "rust/tests/fixtures/detail_pull_oracle.c": {
+      "bytes": 10240,
+      "sha256": "4b1cb6706fe941199422ca79218b895a9900258257450d243dda038132c448fd"
+    },
+    "rust/tests/fixtures/detail_scheduler_oracle.c": {
+      "bytes": 6654,
+      "sha256": "48798af3dcd3f8e44107e29bf279dff4d8527fa0a67ec0b31454d8b94350012f"
+    },
+    "rust/tests/fixtures/detail_session_oracle.c": {
+      "bytes": 2841,
+      "sha256": "beaa41d623f1077a7fa7e01725218e376fd7cec59cd6425171495d74bc1bc8f2"
+    },
+    "rust/tests/fixtures/key_math_oracle.c": {
+      "bytes": 2929,
+      "sha256": "1e889e05103c50f5b75fb59d8a677353ef6bb79f4e8de65cae14f667f4ebd8f5"
+    },
+    "rust/tests/fixtures/key_rounding.py": {
+      "bytes": 1361,
+      "sha256": "9b93d541bef59a58b37d352822ec445553f2aeacf4e8b9cb7b41ef8078bd50b3"
+    },
+    "rust/tests/fixtures/musical_failure_oracle.c": {
+      "bytes": 5784,
+      "sha256": "b7347682e6e2428a2e86ae46a3ae02d4da0814dba0a1a57ff63f26732b191621"
+    },
+    "rust/tests/fixtures/musical_lifecycle_oracle.c": {
+      "bytes": 10125,
+      "sha256": "6467b9c3fb499c9009c1c8800cae986606cd8a5fedb4010ba1e30d2624cc4307"
+    },
+    "rust/tests/fixtures/native_result_oracle.c": {
+      "bytes": 6605,
+      "sha256": "1e9d859ab855b108f425e4d333e9b17c172d3ed9e31559238cf37b177066a5a8"
+    },
+    "rust/tests/fixtures/publication_oracle.c": {
+      "bytes": 6602,
+      "sha256": "3d04f8a0ca08793867fcbc0cf7329d2b49b71517536eadb5fcde70f5a8be663b"
+    },
+    "rust/tests/fixtures/scheduler_oracle.c": {
+      "bytes": 5533,
+      "sha256": "ac4be196d7ba2ef6490a7846ee38065e0f3c5f2290c8542b8a2bbe207feae6b2"
+    },
+    "rust/tests/fixtures/seed_oracle.c": {
+      "bytes": 13180,
+      "sha256": "49f094dd38afb30c65bbe16991af09f97e85e342a88e85d4a9a9498580a2ca56"
+    },
+    "rust/tests/fixtures/source_identity_oracle.c": {
+      "bytes": 3284,
+      "sha256": "092b540acd06c2dc48e9489419e2db0b0b6dddbd02840b3c0388fe8a2daf7a0e"
+    },
+    "rust/tests/fixtures/sparse_capacity_oracle.c": {
+      "bytes": 4068,
+      "sha256": "73757a30759e826ee4cfd8666f2eaf5602edea6ca3f9c266f1004965be400a6c"
+    },
+    "rust/tests/fixtures/sparse_oracle.c": {
+      "bytes": 7276,
+      "sha256": "28812d33687a4416eca1e37101250695b0747b1ddd82e26b9b9e48ed3ea90bad"
+    },
+    "rust/tests/fixtures/sparse_pull_oracle.c": {
+      "bytes": 6807,
+      "sha256": "3c8a34282cb74643c939437e2c14dc5199b61b954a4110dacb3c2a5a197bcc1b"
+    },
+    "rust/tests/fixtures/stream_oracle.c": {
+      "bytes": 2294,
+      "sha256": "f3ac6fed6df48506e1a895a0c99bd2fc4684bd86e9bebda6b7564766b2dd8cb7"
+    },
+    "rust/tests/fixtures/tempo_analysis_oracle.c": {
+      "bytes": 6786,
+      "sha256": "9532eb8c4eaf4cf2dd796b4c85cfc08b7171231586ecde8a8412dd44e40f2383"
+    },
+    "rust/tests/fixtures/unknown_sparse_oracle.c": {
+      "bytes": 2892,
+      "sha256": "22374ecf787df5a6006ccd0f1ef9bd862f05d232a57671cbe79a7f3a5414373f"
+    },
+    "rust/tests/fixtures/waveform_oracle.c": {
+      "bytes": 3029,
+      "sha256": "b52b545d4bf2d7780e47012188eec1a910cb5709fa5ad7ba0452d9d598891cec"
+    },
+    "rust/tests/global_history.rs": {
+      "bytes": 8364,
+      "sha256": "1cf78ee6b1bf0230f03e672bde5f35834d3006208d8719c1968398d12926977f"
+    },
+    "rust/tests/grid.rs": {
+      "bytes": 7984,
+      "sha256": "55db1a8f419078526dc990268dd86004c8fa8b4deffb2c8eb13b9a93c34ea38d"
+    },
+    "rust/tests/history_grid.rs": {
+      "bytes": 10167,
+      "sha256": "7db8527c843fe83947ba438cbf086cd649621eaa0e3055a4fdf074c97e50a259"
+    },
+    "rust/tests/history_lattice.rs": {
+      "bytes": 24169,
+      "sha256": "8f86769a9a96c061b10851e01309f4cd81576c124de173192492004596ce5079"
+    },
+    "rust/tests/meta.rs": {
+      "bytes": 11092,
+      "sha256": "f643b5f2df51eca6836904c68569d5ebe245f30e3f4506d1630edf932813b35a"
+    },
+    "rust/tests/meter_binding.rs": {
+      "bytes": 9431,
+      "sha256": "747d4270ea17bcd8fd298d1e489610e689f783f50751355e3bec7bd75b84c9ca"
+    },
+    "rust/tests/musical_publication.rs": {
+      "bytes": 60793,
+      "sha256": "a14c946242e213cb00f3656413f6668b08388b4fbb1c668d42688b1ba055bd97"
+    },
+    "rust/tests/native_coordinates.rs": {
+      "bytes": 3868,
+      "sha256": "dc1d9c7de4c4a713a6e18c2dde9f9cd2f39d7c07350c12a721c7ec6af50abd43"
+    },
+    "rust/tests/native_result_oracle.rs": {
+      "bytes": 11159,
+      "sha256": "1d0dad87ff8d21af2abf33395e44e0a29aa0c189975ed860fe29c30a943acec3"
+    },
+    "rust/tests/native_validation.rs": {
+      "bytes": 9714,
+      "sha256": "be57bcb9e8fdbffbd784fc49d8534b072009a9d9b6b0c328439afd804e8947b9"
+    },
+    "rust/tests/native_wire.rs": {
+      "bytes": 13814,
+      "sha256": "4d36196338d5c790c7ecd1cf789a91ef1a0ec124762747aa5b64bc57c116a16c"
+    },
+    "rust/tests/owned_result.rs": {
+      "bytes": 19891,
+      "sha256": "2b1fc69279729c8480854c6b4e431b4cc932c1a476cc6c22e99b0ef214d34bf0"
+    },
+    "rust/tests/pipeline.rs": {
+      "bytes": 3690,
+      "sha256": "c6a4c328d210502e969f648b574ba60fd7b3e0e1d0b21e100fc13e2c32a9c426"
+    },
+    "rust/tests/product_grid_contract.rs": {
+      "bytes": 13237,
+      "sha256": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa"
+    },
+    "rust/tests/publication.rs": {
+      "bytes": 18657,
+      "sha256": "90c4512886e4f3250f5b7213bf1368694e0e9e61e24e8e01eebd4aa09cc1502e"
+    },
+    "rust/tests/publication_oracle.rs": {
+      "bytes": 8674,
+      "sha256": "7be28b20edbc137aabada1be3840f00cc9f52718491f18b8baf77856d07fe5e2"
+    },
+    "rust/tests/published_sequential_detail.rs": {
+      "bytes": 11575,
+      "sha256": "6b81bab24d839b158896afc870ab936a2b1253107aec535af8af729ad0d600bc"
+    },
+    "rust/tests/pull.rs": {
+      "bytes": 14561,
+      "sha256": "fc0b0f7ec88fa70694d172a5eb6adaff6eb0628d47a915f2efdb8f4ab5d006b5"
+    },
+    "rust/tests/reference_contracts.rs": {
+      "bytes": 2173,
+      "sha256": "57a51bbb108ac26266b3afec52e01ce2e4c85354bc53309efdd754ff3a934602"
+    },
+    "rust/tests/result.rs": {
+      "bytes": 9423,
+      "sha256": "094da08fc3aeeaf2a5925c91f672aced497e91087154c6699d0aab72cb56f399"
+    },
+    "rust/tests/result_allocation.rs": {
+      "bytes": 50408,
+      "sha256": "3718c049df4faf6312ea54074f0e99269b56d1b57ad8433285055ac6171bf5f8"
+    },
+    "rust/tests/s6_coverage.rs": {
+      "bytes": 8481,
+      "sha256": "da2ea80659b0e645ceb6d0369ca02aef0af2673741da174bdc813251a8c22d16"
+    },
+    "rust/tests/s6_ring.rs": {
+      "bytes": 22223,
+      "sha256": "507129ed9aabd590c9bd083099643e1d014ec96876acfe4edaae7ec7cfd12f54"
+    },
+    "rust/tests/scheduler.rs": {
+      "bytes": 9206,
+      "sha256": "be3c5e36a3832640b84ee4b791b1f65d1c242fd3e9d56266b6c505f81784ace7"
+    },
+    "rust/tests/scheduler_oracle.rs": {
+      "bytes": 14416,
+      "sha256": "af39c241d98b639e5faeb402227a533b757672d1ec891819aeda6f114e83d59a"
+    },
+    "rust/tests/seed.rs": {
+      "bytes": 5231,
+      "sha256": "450c80eeeb44ad34f8823ab69dd61b8cc7cf969ac4225f4078068aac6cf75c51"
+    },
+    "rust/tests/seed_oracle.rs": {
+      "bytes": 26185,
+      "sha256": "74cdcb0fd540094bdb1f1696645dd76e8a39207397ebceae96d8c10ded50bc3a"
+    },
+    "rust/tests/sequential_detail.rs": {
+      "bytes": 9183,
+      "sha256": "5fa6b9fde542336e4f382e4be8a268ee1a16ceabf24df3fab96cb5b1c8b16630"
+    },
+    "rust/tests/session.rs": {
+      "bytes": 13990,
+      "sha256": "c9c914735289e356faafb4ad0275a7332275439ea64b88d063ef919fa6b5c417"
+    },
+    "rust/tests/session_allocation.rs": {
+      "bytes": 17900,
+      "sha256": "45a8edc731622837b30fbea641f87979f7ed14029fa43d2cc0eb91f6ae41bc7f"
+    },
+    "rust/tests/sparse.rs": {
+      "bytes": 7209,
+      "sha256": "d542bb5db28279e868e3a7a91a532fb7b4abf38d90886c730b2c548e6035823a"
+    },
+    "rust/tests/sparse_oracle.rs": {
+      "bytes": 15612,
+      "sha256": "e5d06fe3efa6879d93b842826112b6035697cc4aea7aa025d7941b87da6f6f00"
+    },
+    "rust/tests/sparse_publication.rs": {
+      "bytes": 5195,
+      "sha256": "8fb21272e269889d238ad8b115ef51bbcf6b5174ae94a22f221330bfca3270e5"
+    },
+    "rust/tests/sparse_pull.rs": {
+      "bytes": 8837,
+      "sha256": "3bf24c3a33aed631ec78ffa1475e5380f347cc671d4b3c57bd361e02d7edffd8"
+    },
+    "rust/tests/sparse_pull_oracle.rs": {
+      "bytes": 9684,
+      "sha256": "25bf7a14dd62ddf42c294e8d09f44fd57664ec584266d0cd929febab0f1a0171"
+    },
+    "rust/tests/stream.rs": {
+      "bytes": 10855,
+      "sha256": "ea8e2597b72b63ce94be40c6956de328c30aaa9480cf51b01f3dcd902a57743a"
+    },
+    "rust/tests/stream_write.rs": {
+      "bytes": 13884,
+      "sha256": "cec50ca657049ddf5bcd5f6edfc4698852fa2a4e348c52725578a679b16353a7"
+    },
+    "rust/tests/tempo.rs": {
+      "bytes": 7879,
+      "sha256": "cf18d197117652946e28dcf030e9a4aa79ee1e39e8606292088d4273cf140e03"
+    },
+    "rust/tests/tempo_analysis.rs": {
+      "bytes": 26453,
+      "sha256": "27719688978520eb6d8871ae8ef364a95771720f2daf10b9fddacad5d358b60c"
+    },
+    "rust/tests/wav.rs": {
+      "bytes": 8233,
+      "sha256": "d04910fbbcd41b138f08655045c7d4b05e265fcd4746882c46d2f22f86d28923"
+    },
+    "rust/tests/waveform.rs": {
+      "bytes": 16171,
+      "sha256": "fbe356d8b13f32c7db488139e2ea528e4ad3b13fe0179139399dd535a12258fb"
+    },
+    "rust/tests/waveform_result.rs": {
+      "bytes": 9656,
+      "sha256": "32bf9accf4858d72cb2ca2d5569e2d5e18a759fe7d4cf48de9389612c5b6a17e"
+    },
+    "tools/apta_compact_frontend_synthetic.py": {
+      "bytes": 24661,
+      "sha256": "3f7db3978e18a38e1f88c9e68dee146b2c8626953ee40153643596edd85b856d"
+    },
+    "tools/apta_compact_grid_synthetic.py": {
+      "bytes": 14391,
+      "sha256": "dff6ecb32f33fa1fb362c28323fbf1ead798f0ac2d3643dc15c5ce93d8b71892"
+    },
+    "tools/apta_compact_hmm_synthetic.py": {
+      "bytes": 11015,
+      "sha256": "90633086d61f9ecf50dd1a33763f23ac65384bb3e6d298f0d700a74015918a2c"
+    },
+    "tools/apta_compact_neural_synthetic.py": {
+      "bytes": 25987,
+      "sha256": "19f0f84cf53838d37a43254c660479fa391a68c7cddf9c4ff98e2005d19e4d81"
+    },
+    "tools/apta_compact_resampler_synthetic.py": {
+      "bytes": 14956,
+      "sha256": "25dfe0d495fbca0c5546d47380c1b0502f6f50de7baf66958a47573b62892899"
+    },
+    "tools/apta_dense_runner_support.py": {
+      "bytes": 8408,
+      "sha256": "25b062d358efe52c383fd73837388385aa057091363088a0df409d3dde2f7f89"
+    }
+  },
+  "branch": "rust-rewrite",
+  "cancellation": {
+    "P4_proven": false,
+    "accepted_rows_before_flag": 138,
+    "asynchronous_live_compute_proven": false,
+    "committed_rows_before_flag": 137,
+    "flag_to_return_maximum_ms": 50,
+    "kind": "PENDING_FLAG_HOST_ONLY",
+    "new_units_after_flag": 0,
+    "phase_before_flag": "NonBeatLog",
+    "result_present": false,
+    "resume_allowed": false,
+    "source": "full-mixed",
+    "units_before_flag": 686
+  },
+  "case_counts": {
+    "cases": 35,
+    "composition_cases": 8,
+    "full_reference_rows": 60000,
+    "invalid_cases": 7,
+    "raw_assets": 35,
+    "raw_bytes": 10536,
+    "schedules_per_case": 20,
+    "selector_cases": 11,
+    "short_rows": 878,
+    "short_schedules": 700,
+    "valid_short_rows": 850
+  },
+  "checkpoint_sequence": [
+    "registration commit/push",
+    "implementation/tests/preflight receipt commit/push",
+    "four clean fixed cases once",
+    "audited separate result commit/push"
+  ],
+  "composition": {
+    "base_oracle": "frozen HS02 two_small_hmm_compositions_preserve_rows_period_and_phase",
+    "block_rows": 256,
+    "cases": 8,
+    "immutability": "hash probabilities/densities before and after every Score/Trace pass",
+    "new_numeric_HMM_oracle": false,
+    "no_path_oracle": "independent boolean reachability on frozen graph",
+    "shift_gate": "identical support slices => same scores/path bytes; +2 global event rows and source anchor offset",
+    "trace_score_gate": "unchanged HS01 numeric gate",
+    "unsupported_oracle": "one-row downbeat selects meter3; one event <2*3+1",
+    "wire": "existing native/wire validation for GridReady; owned wire survives reuse of all input/scratch/trace owners"
+  },
+  "controls": [
+    "HS05 tests",
+    "HS04 tests",
+    "HS03 tests",
+    "HS02 tests",
+    "HS01 tests",
+    "product grid contract",
+    "default context; C-oracle ignores NOT_RUN"
+  ],
+  "date": "2026-10-27",
+  "document": {
+    "bytes": 19820,
+    "path": "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.md",
+    "sha256": "34201e7d9b98c8074137df50f282409414f2951fb6112cd0b04d475fa4aa3c97"
+  },
+  "evidence_level": "PUBLIC_MATH_REGISTRATION_ONLY",
+  "feature": {
+    "default_enabled": false,
+    "depends_on": [
+      "experimental-compact-grid"
+    ],
+    "name": "experimental-compact-probabilities",
+    "new_dependencies": false
+  },
+  "fixed_case_order": [
+    "fixtures",
+    "full-mixed",
+    "full-no-support",
+    "cancel"
+  ],
+  "format": "libapta-host-probability-protocol-1",
+  "geometry": {
+    "empty": "diagnostic NoEvidence; do not call HS02 with N0",
+    "full_source_endpoint": "exclusive N unchanged",
+    "maximum_rows": 30000,
+    "maximum_seconds": 600,
+    "rows": "ceil(50*N/fs), checked integer arithmetic",
+    "sample_rates": [
+      44100,
+      48000
+    ],
+    "support": "first and last global row with promoted beat>=binary64(0.05) or downbeat>=binary64(0.05); [first,last+1); internal gaps retained"
+  },
+  "hypothesis": "Bounded materialized named probability/log-density/support adapter preserves immutable evidence for both frozen HMM meter scores, trace and HS02",
+  "id": "HS-06",
+  "limits": {
+    "AS_MiB": 128,
+    "CPU_scope": "worker SELF plus waited CHILDREN <=30s; inherited hard limits also enforced",
+    "CPU_seconds": 30,
+    "RSS_MiB_per_process": 64,
+    "aggregate_retained_attempt_bytes": 1048576,
+    "child_HWM": "fork/exec included, not isolated Rust peak",
+    "wall_seconds": 45
+  },
+  "measured_schedule": {
+    "HMM_quota": 4096,
+    "fixtures_input_capacity": 7,
+    "input_capacity": 64,
+    "quota": 31
+  },
+  "no_regression_veto": "frozen sources/authorities/assets/default/core/wire/consumer unchanged; six future paths only; no numeric/cap/tolerance rescue",
+  "outcomes": {
+    "integrity_resource_incomplete": "INVALID/INCOMPLETE",
+    "pass": "HS06_SYNTHETIC_HOST_PASS_ONLY",
+    "semantic": "SYNTHETIC_FAIL"
+  },
+  "permitted_existing_edit_baselines": {
+    "rust/runtime/Cargo.toml": {
+      "bytes": 1759,
+      "sha256": "9a4aea4860eafe6a88d070df9f715e3d0f7c2884e205a66cd26d594cdacedccd"
+    },
+    "rust/runtime/src/lib.rs": {
+      "bytes": 5131,
+      "sha256": "1c136a2e9aa159350fdc64b5474237559139f3a49f25f2039d2f6f83fc4dcddc"
+    }
+  },
+  "planned_source_paths": [
+    "rust/runtime/Cargo.toml",
+    "rust/runtime/src/lib.rs",
+    "rust/runtime/src/compact_probabilities.rs",
+    "rust/runtime/src/bin/apta-compact-probabilities-synthetic.rs",
+    "rust/runtime/tests/compact_probabilities.rs",
+    "tools/apta_compact_probabilities_synthetic.py"
+  ],
+  "preflight_refusals": [
+    "wall0.05s vs sleeping child1s",
+    "RSS16MiB vs64MiB allocating child",
+    "AS128MiB vs256MiB allocation",
+    "output4096B vs65536B",
+    "malformed transport and CLI inputs",
+    "group cleanup and final supervisor status"
+  ],
+  "remaining_product_gates": [
+    "rights/provenance",
+    "full-size neural graph parity/resources",
+    "PF01 exact-board memory/placement/coexistence/timing",
+    "PF04 and consumer lifecycle/physical qualification"
+  ],
+  "schedules": {
+    "composition_HMM_quotas": [
+      4096,
+      "usize::MAX"
+    ],
+    "input_capacities": [
+      1,
+      2,
+      7,
+      64
+    ],
+    "per_build": 700,
+    "per_case": 20,
+    "quotas": [
+      1,
+      2,
+      5,
+      31,
+      "usize::MAX"
+    ]
+  },
+  "scope": {
+    "candidate_run": false,
+    "model_training": false,
+    "music_labels": false,
+    "product_activation": false,
+    "registration_only": true,
+    "release": false,
+    "trained_checkpoint": false
+  },
+  "selector": {
+    "API": "choose_meter(score3:f64,score4:f64)->Result<MeterChoice,Error>",
+    "both_negative_infinity": "NoPath",
+    "domain": "finite<=0 or -Inf",
+    "invalid": "InvalidScore",
+    "score_inputs": "identical support density slice for both meters",
+    "tie": 3
+  },
+  "source_baseline": "406e4d4b13bc61dd338caf565fd17a0ec7063030",
+  "status": "REGISTERED_NOT_IMPLEMENTED",
+  "stop": "preserve failures; no subset/retry/overwrite; disclosed repair requires new clean implementation checkpoint",
+  "storage": {
+    "arrays_graphs_workspace_events_accounted_separately": true,
+    "audited_conditional_full_trace_bytes_with_PF01_overlap": 18848270,
+    "audited_conditional_full_trace_bytes_without_overlap": 17949380,
+    "density_bytes_at_30000": 720000,
+    "driver_input_bytes": 768,
+    "driver_input_rows": 64,
+    "materialized_output_bytes_at_30000": 1080000,
+    "maximum_driver_control_value_bytes": 4096,
+    "maximum_session_value_bytes": 512,
+    "no_heap_in_session": true,
+    "owners": "Session/buffers immutable through both scores/trace/grid; trace Decoder and whole Workspace retained through HS02; sequential meter graph/workspace allocation",
+    "payload_bytes": 36,
+    "pending_density_bytes": 24,
+    "pending_probability_bytes": 12,
+    "physical_peak": "NOT_MEASURED",
+    "probability_bytes_at_30000": 360000
+  },
+  "transport": {
+    "composition_layout": "u16 case_index,u16 count,count*Event8; one per composition,0 when not GridReady",
+    "composition_tag": 2,
+    "endian": "little",
+    "header": "HS06BIN1",
+    "maximum_transient_cancel_bytes": 65549,
+    "maximum_transient_fixture_bytes": 102395,
+    "maximum_transient_full_bytes": 1355549,
+    "nonfinite": "only exact -Inf density for zero input allowed; scores -Inf and invalid selector inputs use explicit JSON strings",
+    "retained": "exact header/trailer,digests/count,last record,bounded failure witness,stderr; no full tensor spool",
+    "row_layout": "u16 case_index,u32 global_row,3*f32 inputs,3*f64 densities",
+    "row_record_bytes": 43,
+    "row_tag": 1,
+    "trailer_layout": "u32 UTF8 JSON length,strict JSON,immediate EOF",
+    "trailer_maximum_bytes": 65536,
+    "trailer_tag": 3
+  },
+  "work": {
+    "commit_bytes": 36,
+    "empty_units": 0,
+    "finalize_units": 1,
+    "formula": "5*R+1 for R>0",
+    "maximum_logs_per_full_source": 90000,
+    "maximum_units": 150001,
+    "no_memoization": true,
+    "row_units": {
+      "AcceptRow": 1,
+      "BeatLog": 1,
+      "CommitRow": 1,
+      "DownbeatLog": 1,
+      "NonBeatLog": 1
+    }
+  }
+}

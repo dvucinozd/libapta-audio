@@ -1,13 +1,13 @@
 {
-  "active_phase": "FULL_GRAPH_READINESS_AUDIT",
-  "active_phase_status": "COMPLETE_STATIC_AUDIT_PRODUCT_GATES_OPEN",
-  "active_phase_verdict": "NARROW_BRIDGE_REGISTRATION_READY_FULL_PRODUCT_NO_GO",
+  "active_phase": "HS-06_PROBABILITY_BRIDGE_REGISTRATION",
+  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
+  "active_phase_verdict": "REGISTRATION_MATH_IDENTITIES_PASS_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "Static full-graph/code/lifetime/cost audit complete;40 frozen authorities,135 prior and28 HS05 assets unchanged. Source AST and checkpoint metadata agree on767125 params/767730 affine MACs per row. Current materialized density owner720000B and borrowed-path Workspace lifetime explicitly accounted. Consumer origin4a8c660 and pin25d09de unchanged;fresh upstream public checks leave licence/provenance open. No candidate/model/corpus/device execution or runtime changes.",
+  "checks": "HS06 registration verifier passes:35 short cases/878 rows,2550 valid short density scalars,60000 long reference rows,395 bound files;35 raw mathematical assets/10536B,11 selector cases,8 small compositions. No candidate code/tests/measurement. Old sources/authorities/assets preserved;VERSION1.0.1.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -92,7 +92,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "public mathematical frontend registration and static source inspection only",
+  "evidence_level": "public mathematical probability/density/support registration only; Rust candidate NOT_RUN",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -103,6 +103,9 @@
     "HS03_synthetic_preflight_executed": true,
     "HS04_candidate_executed": false,
     "HS04_registration_only": true,
+    "HS06_candidate_executed": false,
+    "HS06_registration_only": true,
+    "HS06_synthetic_measured_run_complete": false,
     "consumer_files_changed": false,
     "default_DSP_changed": false,
     "experimental_host_decoder_added": true,
@@ -389,6 +392,29 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
     "trained_checkpoint_executed": false
   },
+  "host_probability_experiment": {
+    "cancellation_evidence_planned": "pending host flag only; asynchronous/P4 NOT_RUN",
+    "candidate_tests_or_measurement": "NOT_RUN",
+    "case_counts": {
+      "cases": 35,
+      "composition_cases": 8,
+      "full_reference_rows": 60000,
+      "invalid_cases": 7,
+      "raw_assets": 35,
+      "raw_bytes": 10536,
+      "schedules_per_case": 20,
+      "selector_cases": 11,
+      "short_rows": 878,
+      "short_schedules": 700,
+      "valid_short_rows": 850
+    },
+    "id": "HS-06",
+    "path": "docs/rust/PRODUCT-HOST-PROBABILITY-PROTOCOL.json",
+    "product_ready": false,
+    "registration_validation": "PASS_MATH_AND_IDENTITIES_ONLY",
+    "sha256": "50082ad1d7a9fccac4b939cc42f7f4709b78eff0735bdc8ef221b07dc12a5650",
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "host_resampler_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "id": "HS-03",
@@ -406,10 +432,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Register HS06 named probability-to-density/support/ownership bridge using public math only;materialize explicit bounded density storage for current HMM API;preserve old sources/gates",
+    "action": "After registration commit/push implement six bound paths,700 short schedules/build,selector and eight existing-HMM/grid compositions;separate implementation receipt/push before four fixed clean cases;no large port or model execution",
     "large_port_allowed": false,
-    "mode": "REGISTER_NARROW_SYNTHETIC_ONLY",
-    "phase": "HS-06_PROBABILITY_BRIDGE_REGISTRATION"
+    "mode": "IMPLEMENT_REGISTERED_NARROW_SYNTHETIC_ONLY",
+    "phase": "HS-06_PROBABILITY_BRIDGE_IMPLEMENTATION"
   },
   "open_decisions": [
     {
