@@ -1,13 +1,13 @@
 {
-  "active_phase": "HS-04",
-  "active_phase_status": "COMPLETE_SYNTHETIC_HOST_ONLY",
-  "active_phase_verdict": "HS04_SYNTHETIC_HOST_PASS_ONLY",
+  "active_phase": "HS-05",
+  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
+  "active_phase_verdict": "SYNTHETIC_NEURAL_PRIMITIVES_REGISTRATION_ONLY",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "HS04 six clean fixed cases PASS from ee2a488:35 observations,120068 emitted rows including14 provisional cancel rows. Four600s streams each13230000 samples/30000 rows/1270080000 complex MACs;worker wall21.604-21.701s. Both numeric oracles,work/cancel/resources/identities pass. Audit58 files/320752B,294 parent bindings,774 prebound runtime entries. Synthetic host only;P4,model,music/product gates remain open.",
+  "checks": "HS05 static registration passes:34 primitive probes/302 checked result scalars,12 sequences/90 Decimal-checked rows;independent scalar recheck of90000 full reference rows. Four public artificial113-parameter profiles;28 finite assets/6848B. All40 authority files and135 prior assets unchanged. Candidate Rust code/tests/measurements and trained checkpoint execution NOT_RUN.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -265,6 +265,13 @@
       "phase": "HS-04",
       "status": "COMPLETE_SYNTHETIC_HOST_ONLY",
       "verdict": "HS04_SYNTHETIC_HOST_PASS_ONLY"
+    },
+    {
+      "phase": "HS-05",
+      "source_baseline": "5a29a77de78c3e98542594a68e2bd199096da858",
+      "status": "REGISTERED_NOT_IMPLEMENTED",
+      "step": "registration",
+      "verdict": "SYNTHETIC_NEURAL_PRIMITIVES_REGISTRATION_ONLY"
     }
   ],
   "host_frontend_experiment": {
@@ -329,6 +336,27 @@
     },
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
+  "host_neural_experiment": {
+    "candidate_tests_or_measurement": "NOT_RUN",
+    "id": "HS-05",
+    "measured_cases": 5,
+    "new_public_asset_files": 28,
+    "primitive_cases": 34,
+    "product_gates_bypassed": false,
+    "profile_parameters": 113,
+    "profiles": 4,
+    "protocol_path": "docs/rust/PRODUCT-HOST-NEURAL-PROTOCOL.json",
+    "protocol_sha256": "8942bed1390a9bba5db3779c73a508b8933b1ee3aa242e2e0870d65c8403c058",
+    "registration_validation": {
+      "path": "D:\\AI\\LIBAPTA\\outputs\\product-host-neural-registration-20261027\\static-validation.json",
+      "sha256": "0830c238d20049aab36f68552a0636571b7d8760f6ad365eca235999d38add62",
+      "status": "STATIC_REGISTRATION_CONSISTENCY_PASS"
+    },
+    "short_cases": 12,
+    "short_rows": 90,
+    "status": "REGISTERED_NOT_IMPLEMENTED",
+    "trained_checkpoint_executed": false
+  },
   "host_resampler_experiment": {
     "candidate_or_measured_execution": "FIXED_SYNTHETIC_RUN_COMPLETE",
     "id": "HS-03",
@@ -346,10 +374,10 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Register narrow synthetic linear/LSTM/state/softmax f32 oracles and bounded contract before new code; trained checkpoint and larger product port remain gated",
+    "action": "Implement registered HS05 tiny affine/LSTM/softmax bounded state machine and probes; pass frozen tests/lints then implementation commit-push before the five clean measured cases",
     "large_port_allowed": false,
-    "mode": "REGISTER_NARROW_SYNTHETIC_ONLY",
-    "phase": "HS-05_PROPOSED"
+    "mode": "IMPLEMENT_REGISTERED_SYNTHETIC_HOST_ONLY",
+    "phase": "HS-05"
   },
   "open_decisions": [
     {

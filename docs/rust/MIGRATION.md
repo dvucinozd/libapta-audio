@@ -6,7 +6,26 @@ reference. This document owns the migration checklist and next-step handoff.
 
 ## Current implementation handoff — 2026-10-27
 
-**Current next: register separate narrow synthetic neural primitives before code.**
+**Current next: implement registered HS-05 artificial neural primitives.** See the
+[protocol](PRODUCT-HOST-NEURAL-PROTOCOL.md),[machine registration](PRODUCT-HOST-NEURAL-PROTOCOL.json)
+and [public cases](fixtures/product-host-neural-hs05/cases.json). This is a toy
+linear3->2/two-layer LSTM2/head3 graph,not a trained checkpoint or full product
+graph. It fixes scalar f32 dot/bias/gate/state/softmax order,atomic state/output
+commit,reset and bounded-work/cancellation contracts. Four artificial profiles
+contain113 parameters each;28 finite raw assets/6848B bind34 primitive probes
+and12 sequences/90 rows. Independent100-digit Decimal checks cover302 primitive
+scalars and all90 short rows;independent scalar streams verify90000 full reference
+rows. Registration validation passes;candidate implementation/tests/measurements
+remain NOT_RUN. Follow six planned source paths and ordered handoff. Separate
+implementation/tests/lints/commit-push precede five clean fixed measured cases
+and separate audited result/push. No new runtime feature/code/dependency is added
+by registration. All old authorities/assets/default/core/consumer/wire/HS01-04
+remain frozen,VERSION1.0.1 unchanged. Model rights/provenance,full-size parity,
+PF01 physical budgets and PF04 remain open;H1 deferred.
+
+### Completed frontend checkpoint — 2026-10-27
+
+**Prior next: register separate narrow synthetic neural primitives before code.**
 **HS-04 is complete: synthetic host frontend evidence only.** The
 [result](PRODUCT-HOST-FRONTEND-RESULT.md) records six fixed cases from clean pushed
 `ee2a488ee8a309b7b8ba92407a5e648e2f79d91b`:35 validated observations,120068 rows
