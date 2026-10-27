@@ -7,6 +7,15 @@ reference. This document owns the migration checklist and next-step handoff.
 ## Current continuation plan — 2026-10-27
 
 **Current next: RC-04A-3, prepare the guarded target adapter and firmware package.**
+RC-04A-3 [implementation](PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.md) passes seven
+debug/release adapter tests,six WSL package controls,19 telemetry controls and
+Rust-producer/Python-parser interoperability. Development target variants link;
+the strengthened final implementation must be committed/pushed before the clean
+five-variant package build and separate result. Nominal HAL microsecond clock,
+phase budgets,timing result fences and null-metric formatter are implemented.
+Link-check boot idles;no physical runner,arming,transport or qualification is
+enabled. The [registration](PRODUCT-TARGET-ADAPTER-PROTOCOL.md) preserves these
+scope boundaries. Parent RC-04 and all physical/model gates remain open.
 RC-04A-2 is complete:[implementation](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.md)
 and [machine receipt](PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.json). Registration
 9ece658 preceded the standalone safe no_std crate. Copy,both projection dtypes and

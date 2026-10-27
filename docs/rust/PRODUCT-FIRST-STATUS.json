@@ -1,13 +1,13 @@
 {
-  "active_phase": "RC-04A-3_TARGET_ADAPTER_REGISTRATION",
-  "active_phase_status": "REGISTERED_NOT_IMPLEMENTED",
-  "active_phase_verdict": "SOFTWARE_PREPARATION_REGISTRATION_PHYSICAL_GATES_OPEN",
+  "active_phase": "RC-04A-3_TARGET_ADAPTER_IMPLEMENTATION",
+  "active_phase_status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_PACKAGE_PENDING",
+  "active_phase_verdict": "HOST_ADAPTER_AND_DEVELOPMENT_LINKCHECKS_PASS_CLEAN_PACKAGE_PENDING",
   "branch": "rust-rewrite",
   "budgets_document": {
     "path": "docs/rust/PRODUCT-BUDGETS.json",
     "sha256": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380"
   },
-  "checks": "RC04A2 standalone safe no_std copy/projection/nonlinear crate:9 integration+2 internal+2 compile-fail tests pass debug/release;28 full schedules/build,independent public oracles,fmt,Clippy-Dwarnings,RV32 release library and19 telemetry controls pass. Locked cached libm0.2.16 sources match archive. Existing395 bindings/default/core/runtime unchanged. No HAL image/device/benchmark/model/music execution;physical gates remain open.",
+  "checks": "RC04A3 adapter7 debug/release tests,6 WSL package controls,19 telemetry controls,host/target Clippy and fmt pass;real Rust producer/canonical parser interop retains19 unknown metrics. Five earlier development ELF/maps link;fresh-job/embedded identity guards refined before final freeze. Clean final package pending;no board/model/runtime measurements.",
   "compact_binding": {
     "path": "docs/rust/PRODUCT-COMPACT-BINDING.json",
     "sha256": "4271e9947d1f5f85e59863b0b8dec5886783920677df537c81509d8b130e62e7"
@@ -138,10 +138,13 @@
             "status": "COMPLETE"
           },
           {
-            "evidence": [],
+            "evidence": [
+              "docs/rust/PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.md",
+              "docs/rust/PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.json"
+            ],
             "id": "RC-04A-3",
-            "source_revision": null,
-            "status": "NOT_RUN"
+            "source_revision": "7d5151bc6d85f5431c9589457df707acdcab4ff4",
+            "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_PACKAGE_PENDING"
           },
           {
             "evidence": [],
@@ -255,7 +258,7 @@
     },
     "variable_tempo": "only when representable by accepted algorithm and current continuous full-source consumer contract"
   },
-  "evidence_level": "Fixed public numerical/ownership/work host tests and no_std RV32 library compilation;no target firmware or measured physical performance",
+  "evidence_level": "Host lifecycle/format integrity and development target link-check preparation;no physical execution or product qualification",
   "execution": {
     "DSP_changed": false,
     "HS02_candidate_executed": true,
@@ -638,9 +641,9 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Implement registered no_std clock/result-fence/telemetry adapter and guarded idle target link-check binaries/package tooling;host test then freeze/push before clean build-only package",
+    "action": "After implementation commit/push,new external output/build,run locked offline five-variant package build and verify;publish separate receipt;execution_ready stays false",
     "large_port_allowed": false,
-    "mode": "GUARDED_TARGET_ADAPTER_AND_PACKAGE_PREPARATION",
+    "mode": "BUILD_CLEAN_SOURCE_LINKCHECK_PACKAGE",
     "phase": "RC-04A-3",
     "physical_phase": "RC-04B",
     "physical_state": "BLOCKED_EXTERNAL_AND_CAPABILITY",
@@ -904,6 +907,11 @@
   ],
   "source_baseline": "99f6ba6a5e57c5dc60eb536c699ec5d30623fbe5",
   "stable_version": "1.0.1",
+  "target_adapter_implementation": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.json",
+    "sha256": "66a6ecd779f8cf3908e55de83bf5d4adaf77a6a6e3789888da577e081e16f68d",
+    "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_PACKAGE_PENDING"
+  },
   "target_adapter_registration": {
     "path": "docs/rust/PRODUCT-TARGET-ADAPTER-PROTOCOL.json",
     "sha256": "9efce4ae38aecc7bcc04cd82058cd7688d8f556ad4749ddef0aaf005940ec64d",

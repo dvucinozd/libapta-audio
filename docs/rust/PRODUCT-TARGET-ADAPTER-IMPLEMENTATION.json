@@ -1,0 +1,74 @@
+{
+  "HAL_idle_boot_only": true,
+  "compiled_packages_are_execution_ready": false,
+  "component_sha256": {
+    "rust/probes/target-adapter/.cargo/config.toml": "ef1aad24a503c5dca12ccf1bdfdc13abe1c40a05008bcec925e880b815e69385",
+    "rust/probes/target-adapter/Cargo.lock": "c3c2bec5cb646c5ec67f4f08aae0585feb7613f5532ce3cdb50540bdf63e535a",
+    "rust/probes/target-adapter/Cargo.toml": "cefd932184c633a8155cb15ba765b03938f57a7a827c6a7e3e1cf7bb87101910",
+    "rust/probes/target-adapter/examples/telemetry_fixture.rs": "0bcf9d4fee30df1267f8a488b874ed6bea584f1b08ddce802441e725565df8e0",
+    "rust/probes/target-adapter/src/bin/linkcheck.rs": "0e53fb0af0bb005291917cfe3530ea506e2ae154b0463ab2b6547e03e073249a",
+    "rust/probes/target-adapter/src/lib.rs": "2f2c72e4a43bbd18738ee8eabb1a406dd6ef05a9284c433f03acc7e7cd76b8ad",
+    "rust/probes/target-adapter/tests/adapter.rs": "9fdd8394c079889e859d13c6b31c093a581fde582f9c18255977da75a28c0940",
+    "tools/apta_target_probe_package.py": "76ce00cbc164cd66e35e0067bda3040f20ec31151fe0ad176ee713e6a8d520e4",
+    "tools/tests/test_apta_target_probe_package.py": "f5a5692f90f6ae570ca43911516d66897051042bc160eee8d52c4b52d1cfc0cf"
+  },
+  "consumer_checkout_modified": false,
+  "date": "2026-10-27",
+  "development_target_package": {
+    "bytes": 39386242,
+    "directory": "D:/AI/LIBAPTA/outputs/rc04a3-package-development-20261027-01",
+    "files": 49,
+    "identity_guards_refined_after_development": true,
+    "kind": "DEVELOPMENT_BUILD_ONLY_NOT_FINAL_SOURCE",
+    "variants": 5
+  },
+  "document": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-IMPLEMENTATION.md",
+    "sha256": "b759e4eb5027b2073bccb294d8539f7d2ae5a9b48ab1919189ac6babe2e3da8a"
+  },
+  "format": "libapta-target-adapter-implementation-1",
+  "id": "RC-04A-3",
+  "next": "Commit/push implementation;build and verify new clean-source five-variant package,then separate package receipt/push",
+  "physical_or_model_execution": false,
+  "producer_metrics": "Unknown allocator/stack/counters serialize null;numeric digest not fabricated",
+  "protocol": {
+    "path": "docs/rust/PRODUCT-TARGET-ADAPTER-PROTOCOL.json",
+    "sha256": "9efce4ae38aecc7bcc04cd82058cd7688d8f556ad4749ddef0aaf005940ec64d"
+  },
+  "registration_revision": "7d5151bc6d85f5431c9589457df707acdcab4ff4",
+  "remaining_runtime_capabilities": [
+    "exact unit/recovery/layout",
+    "qualified arming and telemetry transport",
+    "reusable warmup/trial buffer owner",
+    "numeric output verifier/digests",
+    "resident BSP/allocator/stack/error metrics",
+    "async cancel requester and physical timing/placement"
+  ],
+  "status": "IMPLEMENTATION_PREFLIGHT_PASS_CLEAN_PACKAGE_PENDING",
+  "tests": {
+    "WSL_package": 6,
+    "Windows_package_pass": 5,
+    "Windows_package_platform_skip": "1 Linux-only overwrite/symlink test NOT_RUN on Windows",
+    "clippy_host": "PASS",
+    "clippy_target_copy": "PASS",
+    "debug_adapter": 7,
+    "fmt": "PASS",
+    "interop": "Real Rust synthetic producer -> canonical Python parser;one observation/19 nulls/NOT_QUALIFIED",
+    "release_adapter": 7,
+    "telemetry_controls": 19,
+    "variant_guards": "Both intended select-exactly-one errors verified in development logs"
+  },
+  "validation": {
+    "checks": {
+      "bytes": 3839,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a3-final-checks-20261027-01\\checks.json",
+      "sha256": "4e75a218ea8a8dc697821c6e3ecfbbffcfa9857fcbc544ce64f84c4ed61acde4"
+    },
+    "directory": "D:\\AI\\LIBAPTA\\outputs\\rc04a3-final-checks-20261027-01",
+    "manifest": {
+      "bytes": 2762,
+      "path": "D:\\AI\\LIBAPTA\\outputs\\rc04a3-final-checks-20261027-01\\artifact-manifest.json",
+      "sha256": "b0818d51c59e5f74a3cde70a143d0fedcea7a67075861d610b1262845048214a"
+    }
+  }
+}

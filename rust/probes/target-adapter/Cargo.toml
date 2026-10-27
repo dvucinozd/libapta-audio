@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "libapta-target-probe-adapter"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.95.0"
+license = "Apache-2.0"
+publish = false
+
+[features]
+default = []
+esp32p4 = ["dep:esp-hal", "dep:static_cell"]
+copy = []
+projection32 = []
+projection64 = []
+activation = []
+logs = []
+
+[dependencies]
+libapta-resource-probe-core = { path = "../resource-core" }
+esp-hal = { version = "=1.2.2", features = ["esp32p4", "unstable"], optional = true }
+static_cell = { version = "=2.1.1", optional = true }
+
+[[bin]]
+name = "apta-probe-linkcheck"
+path = "src/bin/linkcheck.rs"
+required-features = ["esp32p4"]
+
+[profile.release]
+panic = "abort"
+debug = 1
+
+[workspace]
