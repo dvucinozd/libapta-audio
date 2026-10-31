@@ -1,0 +1,69 @@
+{
+  "consumer": {
+    "checkout_modified": false,
+    "repository": "https://github.com/dvucinozd/Ruzina.git",
+    "source_revision": "926e90506c4698cc68ada045347d21ded84f649a",
+    "source_sha256": {
+      "docs/boards/JC1060_ARRIVAL_2026-10-30.md": "5ceaf5ff0d8e79af20402c8cb2d3cd1f0f1bc9b3f4b07bfd5fd9100ef03057e3",
+      "docs/boards/JC1060_LEGACY_RECOVERY.md": "97c3e21982cffbe2d602402761c3148373a8c5198ed66a1d383c603a6c4fc1de",
+      "docs/boards/evidence/jc1060-20261030-com3/backup-verification.json": "48c21df03654f18964594cc92c0f388abf0c00eb4bc2c48c3ecb84dfd5fc0c3a",
+      "docs/boards/evidence/jc1060-20261030-com3/efuse-revision-word.log": "ca2d1ca35cc5557a1742e8c64c2d6dd99dfe9593d626773b77c93aa61d081c58",
+      "docs/boards/evidence/jc1060-20261030-com3/identity-flash-id.log": "14193ca3b3612f1dd8ca07f62ea4a0155acf4ecee23a2b4fe47d6af2e4c815ef",
+      "docs/boards/evidence/jc1060-20261030-com3/s04-manual-rom-result.json": "53ee10026e3322707e2b5d9bfd6ba8f1591b1cd7e4d15a4a35446308afbaae03",
+      "docs/boards/readiness/jc1060-20261030-com3.json": "33527d98c905a6eaccc5033dc65178f665a71d082f9b0c77c726d3c54eeb963c",
+      "firmware-idf/legacy-jc1060/README.md": "f8b536a6b0ea5889283963608ff6fa1eac0ca8802169b5ca4e75ebcfacb8ff57",
+      "firmware-rust/apps/m1-firmware/.cargo/config.toml": "ebe4f4e2a6f21f493436a085e555643e97970c09f010d59a3dc77cb02134e686"
+    },
+    "source_sha256_basis": "GIT_BLOB_BYTES; Windows checkout CRLF normalized only for comparison"
+  },
+  "date": "2026-10-31",
+  "document": {
+    "path": "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.md",
+    "sha256": "3378d6b2328c114c33d98d294739fc225c6ccb1303a2a5e03242f9ec19bc7c79"
+  },
+  "execution_ready": false,
+  "existing_frozen_protocols_results_unchanged": true,
+  "factory_backup_recheck": {
+    "all_match": true,
+    "bytes_each": 16777216,
+    "copies": 4,
+    "factory_restore_executed_this_step": false,
+    "sha256": "27d5782978aeb3c42f8b49659e793d3ca8f59543f62e419d7b1981de2c492060"
+  },
+  "firmware_changed_this_step": false,
+  "flash_write_this_step": false,
+  "format": "libapta-board-arrival-reconciliation-1",
+  "hardware": {
+    "available": "OWNER_CONFIRMED",
+    "board": "JC1060P470C_I_W_Y",
+    "chip_revision": 103,
+    "chip_revision_evidence_date": "2026-10-30",
+    "identity_evidence_scope": "INHERITED_COMMITTED_EXACT_UNIT_RECORD_NOT_FRESH_ROM_ID",
+    "identity_live_reconfirmed_this_step": false,
+    "native_HAL_minimum_revision": 300,
+    "native_package_compatible": false,
+    "native_package_minimum_revision": 302,
+    "port": "COM3",
+    "unit_id": "JC1060-20261030-COM3",
+    "windows_vid_pid": "303A:1001:MI_00"
+  },
+  "libapta_input_revision": "1f9a7558df626acfe4f77a09ad3a9a6843b82da0",
+  "model_or_corpus_executed": false,
+  "next": "Register separate legacy ESP-IDF resource-probe backend/telemetry identity domain before implementation; no frozen V1 or v3.x guard relaxation",
+  "observation": {
+    "bytes": 9424,
+    "command_bytes_written": 0,
+    "error": null,
+    "explicit_reset": false,
+    "path": "D:\\AI\\LIBAPTA\\outputs\\rc04b-arrival-20261031-com3-01\\observation.json",
+    "raw_path": "D:\\AI\\LIBAPTA\\outputs\\rc04b-arrival-20261031-com3-01\\passive.log",
+    "raw_sha256": "6ddff3ecf072204fcebdec5d6d9192d2ef37dceff5dddc412db913a63543a296",
+    "seconds": 8.015999999999622,
+    "sha256": "fc1b2c04f94af73e7baccfc50437d5407ceb3f8667d1fbe6bec7de820a365c51"
+  },
+  "physical_TP_cases_executed": false,
+  "qualification": "NOT_QUALIFIED",
+  "resource_allowances_closed": false,
+  "scope": "READ_ONLY_ARRIVAL_RECONCILIATION_NOT_TP00_OR_RESOURCE_QUALIFICATION",
+  "status": "BOARD_AVAILABLE_NATIVE_PACKAGE_INCOMPATIBLE_LEGACY_REGISTRATION_NEXT"
+}

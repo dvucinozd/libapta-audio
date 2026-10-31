@@ -1,9 +1,12 @@
 # Nastavak nakon dolaska ploče
 
-Datum usklađenja: **2026-10-27**. Grana: **rust-rewrite**.
-Stanje: **PAUSED_BY_OWNER_WAITING_FOR_BOARD**.
-Korisnik traži usklađenje dokumentacije, commit/push i nastavak razvoja kad
-stigne ploča. Do tada nema novog implementacijskog ili eksperimentalnog koraka.
+Datum usklađenja: **2026-10-31**. Grana: **rust-rewrite**.
+Stanje: **BOARD_AVAILABLE; NATIVE_PACKAGE_INCOMPATIBLE**.
+Korisnik potvrđuje da je ploča stigla i spojena na COM3; prethodna pauza do
+dolaska ploče time je završena. [Zapis dolaska](PRODUCT-BOARD-ARRIVAL-20261031.md)
+veže pasivni COM3 log, provjeru četiri backupa i naslijeđeni identitet P4 v1.3.
+Pripremljeni native paket traži v3.2 i ne smije se koristiti na ovoj jedinici.
+Slijedi registracija zasebnog legacy ESP-IDF probe/telemetry puta.
 
 Aktualni napredak vodi [PRODUCT-FIRST-STATUS.json](PRODUCT-FIRST-STATUS.json).
 [Indeks](README.md) razdvaja aktivne dokumente od zamrznutih zapisa;
@@ -20,7 +23,7 @@ protokole, budžete, numeričke tolerancije ili rezultate.
 | RC-04A-1 | Telemetry V1, offline parser i 19 kontrola integriteta | Nema live transporta ili fizičke kvalifikacije |
 | RC-04A-2 | Fiksni no_std copy/math probe core, javne reference i quota/cancel provjere | Nema fizičkog izvođenja ili mjerenja |
 | RC-04A-3 | Guarded adapter i pet čistih ELF/map/disassembly paketa; audit prolazi | BUILD_ONLY_LINKCHECK; execution_ready=false; NOT_QUALIFIED |
-| RC-04B | Pripremljeni zahtjevi za točan uređaj i fizičke pokuse | NOT_RUN; nedostaju ploča i kvalificirane runtime mogućnosti |
+| RC-04B | Dostupna ploča, pasivni log i ponovno provjereni backupi; naslijeđeni v1.3 identitet | TP pokusi NOT_RUN; native backend nekompatibilan, legacy put i runtime uvjeti otvoreni |
 | RC-05–RC-10 | Zadržan redoslijed nastavka | Nisu izvršeni; nema GO za puni model ili aktivaciju |
 
 **RC-04A priprema je dovršena; roditeljski RC-04 nije dovršen.**
@@ -31,8 +34,9 @@ za registrirana mjerenja.
 
 ## Točne baze i sačuvani artefakti
 
-- Posljednji objavljeni checkpoint prije ovog usklađenja dokumentacije:
-  `8c32fdc47b4afcaa1b4752349423d5df904ae427`.
+- Objavljeni checkpoint pauze i dokumentacije prije dolaska ploče:
+  `1f9a7558df626acfe4f77a09ad3a9a6843b82da0`. Zasebni package-result checkpoint
+  je `8c32fdc47b4afcaa1b4752349423d5df904ae427`.
 - Čist i pushan izvor svih pet target varijanti:
   `489e5af0beac1cef53c1276a3aad65d7687255b8`.
 - [Rezultat paketa](PRODUCT-TARGET-ADAPTER-PACKAGE.md) i
@@ -61,12 +65,19 @@ sam clone ne donosi vanjske artefakte. Sačuvati navedene direktorije i provjeri
 njihovu dostupnost pri nastavku. Novi firmware ili novi pokus trebaju vlastiti
 izvorni SHA, image i novi izlazni direktorij; ne prepisivati stari dokaz.
 
-## Što nedostaje
+## Stvarni uređaj i preostali uvjeti
 
-Cilj je **Guition JC1060P470C_I_W_Y**. Posljednja potvrda vlasnika kaže da ploča
-nije dostupna. Revizija 3.2 je pretpostavka; očitana revizija, unit ID i servisni
-port su UNKNOWN. Policy minimum 302 nije očitanje čipa. Dokazi s JC8012 ili
-drugog ESP32-P4 uređaja ne kvalificiraju ovu ploču.
+Cilj je **Guition JC1060P470C_I_W_Y**, sada dostupan na **COM3**. Consumer zapis
+od 2026-10-30 identificira jedinicu `JC1060-20261030-COM3` kao P4 **v1.3 / 103**;
+ranija pretpostavka v3.2 nije potvrđena. Današnji pasivni log potvrđuje aktivnu
+konzolu, ali ne očitava ponovno MAC/reviziju ni hash trenutačnog firmwarea.
+Policy 302 i esp-hal 1.2.2 ostaju nekompatibilni s ovom revizijom. Telemetry V1
+također zahtijeva >=302: potreban je zaseban registrirani legacy ugovor, bez
+snižavanja starih zaštita ili lažiranja identiteta. Dokazi s JC8012 ne prenose se.
+
+Četiri kopije tvorničkog backupa ponovno su hash-provjerene. Consumer ima ranije
+dokaze manual ROM ulaska i zasebnog IDF 6.1/Rust backenda. Potpuni factory restore
+ostaje NOT_RUN; postojeći scalar layout nije novi LIBAPTA programming plan.
 
 Prije fizičkog pokusa trebaju biti zatvoreni sljedeći uvjeti:
 
@@ -91,20 +102,23 @@ Detalje i ograničenja pokusa određuje
 [pripremljeni fizički protokol](PRODUCT-TARGET-PROBE-PROTOCOL.md) uz
 [adapter registraciju](PRODUCT-TARGET-ADAPTER-PROTOCOL.md).
 
-## Redoslijed kad ploča stigne
+## Redoslijed nakon provjere dolaska
 
 1. Pročitati ovaj handoff, vrh MIGRATION.md, live status i lokalni AGENTS.md.
    Provjeriti radno stablo, worktreeove i remote na `rust-rewrite`; pregledati
    nove commitove prije nastavka. Sačuvati paralelni rad i vanjske artefakte.
-2. Zabilježiti stvarno dostupnu jedinicu i očitane identitete, pa zatvoriti
-   backup/recovery/layout uvjete prije programiranja. Ne pretpostaviti COM port,
-   flash offsete, slobodnu PSRAM ili reviziju iz policy minimuma.
+2. Koristiti dokaz od 2026-10-31 za početnu procjenu kompatibilnosti. Prije novog
+   programiranja ponovno vezati stvarnu jedinicu i konkretan layout/recovery uz
+   novi image. Ne pretpostaviti flash offsete ili slobodnu PSRAM iz starih logova.
 3. Pregledati aktualni consumer izvor i prikladan izolirani checkout za RC-04B.
-   Dosadašnja snimka consumer origin/main je
-   `4a8c660183910b0950ae7ddabce9e8b395a2f10d`; to je povijesna baza koju treba
-   osvježiti, ne tvrdnja o budućem remote HEAD-u. Sačuvati nepovezane lokalne
+   Snimka consumer origin/main pri dolasku je
+   `926e90506c4698cc68ada045347d21ded84f649a`; raniji RC-03 `4a8c660` ostaje
+   povijesni dokaz. Ponovno osvježiti ref prije implementacije. Sačuvati nepovezane lokalne
    datoteke/worktreeove. Consumer pin/provider i Guition zaštite ostaju važeći.
-4. Registrirati točne runtime/BSP/transport/metric promjene i sposobnosti te
+4. Prvo registrirati zaseban legacy IDF 6.1 backend s uskim C ABI-jem prema
+   fiksnom HAL-independent Rust coreu i zaseban telemetry identity ugovor za103.
+   IDF posjeduje startup, FreeRTOS, drivere i memoriju; ne kombinirati esp-hal
+   startup u istom imageu. Zatim registrirati runtime/BSP/transport/metric promjene te
    kvalificirati nedostajući runner/verifier/cancel put. Ne uklanjati guard kao
    zamjenu za BSP. Za ovu promjenu trebaju zasebni testovi, source freeze,
    commit/push i provjeren puni remote SHA prije stvarnog mjerenja.
@@ -117,9 +131,10 @@ Detalje i ograničenja pokusa određuje
    WAIT. RC-06/puni port ne počinje bez potrebnih GO uvjeta i zasebnog odobrenog
    opsega; uspješan izolirani probe nije produktni GO.
 
-Ne ponavljati nepromijenjene audite i ne stvarati novi mali sintetički pokus kao
-zamjenu za nedostajući uređaj. Ovaj dokument završava pripremu za čekanje;
-ne započinje novu implementaciju niti kontaktiranje autora modela.
+Ne ponavljati nepromijenjene audite niti stvarati novi mali DSP pokus kao zamjenu
+za port. Ovaj checkpoint zaključuje read-only prijem i provjeru kompatibilnosti;
+legacy implementacija i fizička mjerenja imaju vlastite registracije. Nema
+kontaktiranja autora modela.
 
 ## Granice isporuke ostaju iste
 
@@ -137,9 +152,9 @@ sa svojim izvornim značenjem.
 
 ## Provjera ovog usklađenja
 
-Ovo je dokumentacijska promjena. Provjerene su lokalne poveznice i Markdown
-sidra u promijenjenim dokumentima, JSON sintaksa, veza handoff/status i
-neizmijenjeni hashovi izvora i sačuvanog paketa. Status zadržava ranije rezultate,
-hardverske UNKNOWN vrijednosti i sve otvorene produktne uvjete. Brojevi testova
+Checkpoint sadrži read-only observation i provjeru postojećih backupa, uz
+usklađenje lokalnih poveznica, JSON sintakse i veze handoff/status. Neizmijenjeni
+hashovi izvora i sačuvanog paketa čuvaju ranije dokaze. Status razlikuje naslijeđeni
+chip identitet od današnjeg pasivnog loga i zadržava sve otvorene produktne uvjete. Brojevi testova
 u povezanim receiptima odnose se na njihove izvorne checkpointove; testovi DSP-a,
 target build i pokusi nisu ponovno pokretani radi ove dokumentacijske promjene.

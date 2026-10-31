@@ -131,11 +131,13 @@ The stable authority remains APTA 1.0 / package 1.0.1. The frozen 1.0 normative 
 
 ## Experimental native Rust consumer continuation
 
-**Current handoff — 2026-10-27:** development on `rust-rewrite` is paused at the
-owner's request until the JC1060P470C_I_W_Y arrives. RC-04A-1/2/3 software
+**Current handoff — 2026-10-31:** the JC1060P470C_I_W_Y is available on COM3.
+Its committed unit record identifies P4 v1.3, incompatible with our prepared
+v3.2 native backend. The owner pause is resolved; next is separate legacy
+ESP-IDF probe/telemetry registration. RC-04A-1/2/3 software
 preparation is complete. The [clean five-image package](../rust/PRODUCT-TARGET-ADAPTER-PACKAGE.md)
 passes compile/link and integrity checks, with `execution_ready=false` and
-`NOT_QUALIFIED`. There is no Guition execution, physical budget or product GO.
+`NOT_QUALIFIED`. There is no LIBAPTA probe execution, physical budget or product GO.
 RC-04B still requires exact-unit/recovery/layout and qualified trial/control/
 telemetry/numerical/cancel capabilities. Use the
 [board-arrival handoff](../rust/BOARD-ARRIVAL-HANDOFF.md),

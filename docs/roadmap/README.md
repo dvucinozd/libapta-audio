@@ -4,8 +4,9 @@ Implementation stages, milestones, release criteria, dependencies and completion
 
 For the current native Rust continuation, start with the
 [Rust index](../rust/README.md) and [board-arrival handoff](../rust/BOARD-ARRIVAL-HANDOFF.md).
-Development is paused by the owner until the JC1060P470C_I_W_Y arrives
-(2026-10-27). The original roadmap and dated plans remain historical task
+The JC1060P470C_I_W_Y is available on COM3 (2026-10-31); its recorded v1.3
+silicon needs a separate legacy backend registration before LIBAPTA execution.
+The original roadmap and dated plans remain historical task
 definitions; live progress is in [PRODUCT-FIRST-STATUS.json](../rust/PRODUCT-FIRST-STATUS.json).
 
 - [`APTA-IMPLEMENTATION-ROADMAP-0.1.md`](APTA-IMPLEMENTATION-ROADMAP-0.1.md) —

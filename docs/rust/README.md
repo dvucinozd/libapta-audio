@@ -1,15 +1,17 @@
 # Native Rust documentation
 
-Current handoff: **2026-10-27 — PAUSED_BY_OWNER_WAITING_FOR_BOARD**.
-The owner requested documentation closeout, commit/push and continuation when
-the **JC1060P470C_I_W_Y** arrives. RC-04A software preparation is complete;
-RC-04B runtime prerequisites and physical measurements remain open.
+Current handoff: **2026-10-31 — BOARD_AVAILABLE; NATIVE_PACKAGE_INCOMPATIBLE**.
+The **JC1060P470C_I_W_Y** is on COM3. Its inherited unit evidence identifies
+P4 v1.3, so the prepared v3.2-minimum native backend cannot run on this unit.
+See the [arrival checkpoint](PRODUCT-BOARD-ARRIVAL-20261031.md). The owner pause
+is resolved; separate legacy probe registration is next. RC-04A preparation
+remains complete; RC-04B runtime/physical gates remain open.
 
 ## Read first
 
 | Document | Authority |
 |---|---|
-| [Board-arrival handoff](BOARD-ARRIVAL-HANDOFF.md) | Pause, retained artifacts and ordered restart checklist |
+| [Board-arrival handoff](BOARD-ARRIVAL-HANDOFF.md) | Unit compatibility, retained artifacts and ordered continuation |
 | [PRODUCT-FIRST-STATUS.json](PRODUCT-FIRST-STATUS.json) | Live phase/progress, owner decisions, blockers and evidence references |
 | [MIGRATION.md](MIGRATION.md) | Current handoff at the top; dated implementation history below |
 | [Rust source README](../../rust/README.md) | Native API/build guidance and dated software checkpoints |

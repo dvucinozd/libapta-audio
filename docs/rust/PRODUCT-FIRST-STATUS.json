@@ -1,12 +1,17 @@
 {
-  "active_phase": "RC-04B_WAITING_FOR_BOARD",
-  "active_phase_status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD",
-  "active_phase_verdict": "RC04A_PREPARATION_COMPLETE_PHYSICAL_AND_RUNTIME_GATES_OPEN",
+  "active_phase": "RC-04B_LEGACY_BACKEND_REGISTRATION",
+  "active_phase_status": "BOARD_AVAILABLE_NATIVE_PACKAGE_INCOMPATIBLE",
+  "active_phase_verdict": "READ_ONLY_ARRIVAL_RECONCILED_LEGACY_REGISTRATION_NEXT_NO_PHYSICAL_QUALIFICATION",
+  "board_arrival_checkpoint": {
+    "path": "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json",
+    "sha256": "b2928de88b7cb83e52efe13ac944949ae4c7e3eebd10731f8c3e7ccad80d9606",
+    "status": "BOARD_AVAILABLE_NATIVE_PACKAGE_INCOMPATIBLE_LEGACY_REGISTRATION_NEXT"
+  },
   "board_arrival_handoff": {
-    "input_checkpoint": "8c32fdc47b4afcaa1b4752349423d5df904ae427",
+    "input_checkpoint": "1f9a7558df626acfe4f77a09ad3a9a6843b82da0",
     "path": "docs/rust/BOARD-ARRIVAL-HANDOFF.md",
-    "sha256": "ae2924ec52adfd0d9ad5db81d5a63e4945f515961b064dbd8607c64b20862d3d",
-    "status": "CURRENT_OWNER_PAUSE_AND_RESTART_CHECKLIST"
+    "sha256": "94ab41c5fa57618a0ff9b8e14108baaa8ec2a837857cc6c44d2d3f4e12aa041c",
+    "status": "CURRENT_BOARD_COMPATIBILITY_AND_LEGACY_CONTINUATION"
   },
   "branch": "rust-rewrite",
   "budgets_document": {
@@ -120,9 +125,9 @@
       {
         "evidence": [],
         "id": "RC-04",
-        "reason": "RC04A1/2/3 software preparation complete; owner paused development until board arrival; RC04B runtime and physical evidence remain open",
+        "reason": "Board available; passive console and backups rechecked; native package incompatible with inherited revision103; legacy registration/runtime/physical gates open",
         "source_revision": null,
-        "status": "PAUSED_BY_OWNER_PHYSICAL_PENDING",
+        "status": "IN_PROGRESS_PREREQUISITE_RECONCILIATION",
         "substeps": [
           {
             "evidence": [
@@ -154,11 +159,14 @@
             "status": "COMPLETE_PREPARATION_ONLY"
           },
           {
-            "evidence": [],
+            "evidence": [
+              "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.md",
+              "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json"
+            ],
             "id": "RC-04B",
-            "reason": "Exact unit/access/recovery/layout and qualified arming/transport,reusable physical trial scheduler,numeric verifier/digests,resident BSP/allocator/stack/error telemetry,async requester and physical placement/timing remain required",
+            "reason": "Available unit has inherited revision103 versus native minimum302; separate legacy backend/telemetry registration and exact-image runtime/physical prerequisites required",
             "source_revision": null,
-            "status": "BLOCKED_EXTERNAL_AND_CAPABILITY"
+            "status": "BLOCKED_NATIVE_BACKEND_AND_RUNTIME_CAPABILITY"
           }
         ]
       },
@@ -207,8 +215,8 @@
     ],
     "plan_id": "PRODUCT-CONTINUATION-20261027",
     "plan_path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json",
-    "status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD",
-    "updated_date": "2026-10-27"
+    "status": "IN_PROGRESS_NATIVE_BACKEND_INCOMPATIBLE_LEGACY_REGISTRATION_NEXT",
+    "updated_date": "2026-10-31"
   },
   "contract_document": {
     "path": "docs/rust/PRODUCT-GRID-CONTRACT.json",
@@ -219,7 +227,7 @@
     "path": "rust/tests/product_grid_contract.rs",
     "sha256": "395f04e34d001899bc7226f9c4f6666503200f454b6e25fd0a5ee50b783ea7fa"
   },
-  "date": "2026-10-27",
+  "date": "2026-10-31",
   "deferred_runtime": [
     "H1-P",
     "H1-Q"
@@ -239,10 +247,12 @@
     "board": "JC1060P470C_I_W_Y",
     "changes_existing_evidence_verdicts": false,
     "date": "2026-10-27",
+    "resolution": "Owner confirms JC1060 arrival on COM3; read-only observation succeeds; prepared native backend incompatible with inherited unit revision103",
+    "resolved_date": "2026-10-31",
     "resume_condition": "Owner confirms board arrival/access; refresh exact-unit and runtime prerequisites before physical execution",
     "scope": "Documentation closeout only; no new implementation, model/corpus experiment or physical execution while waiting",
     "source": "Direct user request: update and reconcile complete documentation, commit/push; development resumes when the board arrives",
-    "status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD"
+    "status": "RESOLVED_OWNER_CONFIRMED_BOARD_ARRIVAL"
   },
   "diagnostic_implementation": {
     "DSP_behavior_changed": false,
@@ -325,12 +335,19 @@
     "sha256": "307a8a8fac2eb72654be9d9d7baa0e74048375d5996162443e1e4d44d8cd5374"
   },
   "hardware_availability": {
-    "available": false,
+    "available": true,
     "board": "JC1060P470C_I_W_Y",
-    "chip_revision_observed": null,
+    "chip_revision_evidence_scope": "Inherited committed consumer exact-unit record;not freshly read in this step",
+    "chip_revision_observation_date": "2026-10-30",
+    "chip_revision_observed": 103,
+    "evidence": "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json",
+    "identity_live_reconfirmed_this_step": false,
+    "native_package_compatible": false,
     "physical_budget_phase": "NEEDS_MEASUREMENT",
-    "source": "Direct user answer: Jos nije dostupna",
-    "status": "OWNER_CONFIRMED_UNAVAILABLE"
+    "port": "COM3",
+    "source": "Direct owner arrival/COM3 report2026-10-31; Windows enumeration and passive console observed",
+    "status": "OWNER_CONFIRMED_AVAILABLE_PORT_OBSERVED",
+    "unit_id": "JC1060-20261030-COM3"
   },
   "historical_protocols_results_unchanged": true,
   "history": [
@@ -530,6 +547,14 @@
       "source_baseline": "8c32fdc47b4afcaa1b4752349423d5df904ae427",
       "status": "PAUSED_BY_OWNER_WAITING_FOR_BOARD",
       "verdict": "DOCUMENTATION_ONLY_EXISTING_EVIDENCE_UNCHANGED"
+    },
+    {
+      "date": "2026-10-31",
+      "evidence": "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json",
+      "phase": "RC-04B_ARRIVAL_RECONCILIATION",
+      "source_baseline": "1f9a7558df626acfe4f77a09ad3a9a6843b82da0",
+      "status": "BOARD_AVAILABLE_NATIVE_PACKAGE_INCOMPATIBLE",
+      "verdict": "PASSIVE_OBSERVATION_AND_BACKUP_RECHECK_ONLY_PHYSICAL_TP_CASES_NOT_RUN"
     }
   ],
   "host_frontend_experiment": {
@@ -673,9 +698,11 @@
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
   "next": {
-    "action": "Wait for owner-confirmed JC1060 board arrival/access, then follow BOARD-ARRIVAL-HANDOFF.md to refresh exact-unit/recovery/layout and qualify runtime capabilities before physical protocol execution",
+    "action": "Register separate legacy ESP-IDF resource-probe backend and revision103 telemetry identity domain;reuse existing consumer legacy platform and HAL-independent Rust core;preserve native302 and frozen V1",
+    "execution_ready": false,
     "large_port_allowed": false,
     "missing_capabilities": [
+      "legacy-compatible backend and separate telemetry identity contract",
       "exact unit/recovery/programming layout",
       "qualified producer/control transport and operator arming",
       "reusable physical warmup/trial scheduler",
@@ -683,11 +710,11 @@
       "resident BSP/allocator/stack telemetry",
       "asynchronous cancel requester and physical timing/placement"
     ],
-    "mode": "WAIT_FOR_BOARD_ARRIVAL",
+    "mode": "REGISTER_LEGACY_PROBE_BACKEND_AND_TELEMETRY",
     "phase": "RC-04B",
-    "ready": false,
-    "resume_mode": "RESOLVE_RUNTIME_AND_EXACT_UNIT_PREREQUISITES",
-    "state": "PAUSED_BY_OWNER_WAITING_FOR_BOARD"
+    "ready": true,
+    "scope": "Registration only;not code/model port or physical trial authorization",
+    "state": "REGISTRATION_ONLY_READY_PHYSICAL_EXECUTION_BLOCKED"
   },
   "open_decisions": [
     {
@@ -696,7 +723,7 @@
         "final_ms": 60000,
         "first_useful_ms": 5000
       },
-      "device_availability": "OWNER_CONFIRMED_UNAVAILABLE",
+      "device_availability": "OWNER_CONFIRMED_AVAILABLE_NATIVE_BACKEND_INCOMPATIBLE",
       "id": "PF01-RESOURCES",
       "owner": "engineering and product owner",
       "required": [
@@ -1078,6 +1105,17 @@
       "source": "Direct user request: documentation reconciliation, commit/push; development continues when board arrives",
       "status": "CONFIRMED",
       "value": "PAUSED_BY_OWNER_WAITING_FOR_BOARD"
+    },
+    {
+      "date": "2026-10-31",
+      "id": "BOARD-ARRIVAL-COM3",
+      "source": "Direct user report: board arrived and connected on COM3",
+      "status": "CONFIRMED",
+      "value": {
+        "available": true,
+        "pause_until_arrival_resolved": true,
+        "port": "COM3"
+      }
     }
   ]
 }

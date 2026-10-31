@@ -4,9 +4,10 @@ The desktop tools are informative integrations built on the same stable
 `apta::core` implementation. They are not separate DSP implementations and are
 not stable exported package components.
 
-## Rust target preparation tools — 2026-10-27
+## Rust target preparation tools — 2026-10-31
 
-Native development is paused by the owner until board arrival. See the
+The board is available on COM3; its recorded P4 v1.3 identity is incompatible
+with the prepared native images. See the
 [board-arrival handoff](../docs/rust/BOARD-ARRIVAL-HANDOFF.md) and
 [Rust documentation index](../docs/rust/README.md) before using experimental tools.
 
@@ -26,8 +27,9 @@ the clean build source and external artifact hashes. Preserve those artifacts;
 rebuilds or later runtime firmware need their own source/identity records. The
 standalone `rust/probes/resource-core` and `rust/probes/target-adapter` crates
 are outside the default workspace and need their own explicit manifests for
-tests/builds. No new build, model/corpus run or physical test is requested while
-development is paused.
+tests/builds. Next is registration of a separate legacy backend, not execution
+of these native images. Telemetry V1 requires revision >=302; it must not be
+silently relaxed or given a fabricated identity for the legacy unit.
 
 ## Existing desktop and experimental workflows
 

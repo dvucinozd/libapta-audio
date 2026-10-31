@@ -28,10 +28,11 @@ standard and its portable ISO C11 reference implementation.
 > This branch is not a tagged
 > 1.1 release.
 
-> **Rust continuation — 2026-10-27:** development on `rust-rewrite` is paused
-> at the owner's request until the JC1060P470C_I_W_Y board arrives. RC-04A
-> software preparation is complete; the five audited target images are
-> `BUILD_ONLY_LINKCHECK`, with `execution_ready=false`. Start with the
+> **Rust continuation — 2026-10-31:** the JC1060P470C_I_W_Y is available on
+> COM3. Its committed unit evidence identifies P4 v1.3, incompatible with the
+> prepared v3.2-minimum native images. RC-04A preparation remains complete;
+> next is separate legacy ESP-IDF probe registration. The five audited native
+> images remain `BUILD_ONLY_LINKCHECK`, with `execution_ready=false`. Start with the
 > [board-arrival handoff](docs/rust/BOARD-ARRIVAL-HANDOFF.md) and
 > [current Rust status](docs/rust/PRODUCT-FIRST-STATUS.json).
 

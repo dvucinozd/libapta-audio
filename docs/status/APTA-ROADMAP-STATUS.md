@@ -2,7 +2,7 @@
 
 - **Current completed stage:** S9 — APTA 1.0
 - **C 1.1 development line:** `1.1.0`; tempo/grid ensemble and calibrated confidence accepted and integrated (2026-08-25); the independently verified final DJ attempt is formally rejected, so remaining gates are a passing replacement candidate/corpus, physical ESP32-P4 measurements, and the release freeze
-- **Native Rust continuation:** `rust-rewrite`; RC-04A software preparation complete, paused by the owner until JC1060P470C_I_W_Y board arrival (2026-10-27); RC-04B runtime/physical gates remain open
+- **Native Rust continuation:** `rust-rewrite`; board available on COM3 (2026-10-31), recorded P4 v1.3 incompatible with the prepared v3.2 native backend; RC-04A complete, separate legacy probe registration next, RC-04B runtime/physical gates open
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1
@@ -45,17 +45,21 @@ the maintained `v1.0.1` release.
 
 ## APTA 1.1 implementation status
 
-### Native Rust continuation boundary — 2026-10-27
+### Native Rust continuation boundary — 2026-10-31
 
 The separate `rust-rewrite` line has audited synthetic HS01–HS06 host components,
 the offline telemetry contract/parser, fixed no_std resource probes and a guarded
 target adapter. Five clean-source target ELF/map/disassembly variants and their
 package audit pass. They are `BUILD_ONLY_LINKCHECK`, `execution_ready=false` and
-`NOT_QUALIFIED`; no JC1060 physical execution is established.
+`NOT_QUALIFIED`; these LIBAPTA probes have not executed on the JC1060.
 
-The owner paused development until the board arrives. The next work is RC-04B
-exact-unit/recovery/layout and runtime prerequisites, followed by registered
-physical measurements when ready. Qualified arming/transport, repeatable complete
+The owner confirms arrival on COM3. Inherited exact-unit evidence identifies
+P4 v1.3, incompatible with the native v3.2 policy and pinned HAL. A passive
+console observation and four backup-copy rehashes pass; no LIBAPTA firmware
+was flashed or probe run. See the [arrival checkpoint](../rust/PRODUCT-BOARD-ARRIVAL-20261031.md).
+Next is registration of a separate legacy ESP-IDF probe backend and telemetry
+identity domain, using existing consumer legacy platform work. The original
+native guards and frozen telemetry V1 remain unchanged. Qualified arming/transport, repeatable complete
 trial scheduling, numerical verification, resident memory/stack telemetry and
 asynchronous cancellation remain missing. Whole-product resource allowances,
 model rights/provenance, a complete trained graph and product activation remain
