@@ -1,0 +1,189 @@
+{
+  "abi": {
+    "caller_pointer_validity": "Caller precondition;range checks cannot authenticate arbitrary foreign pointers",
+    "limit_us_max": 10000000,
+    "limit_us_min": 1,
+    "phase_slots": 12,
+    "pointer_retention": false,
+    "quota_max": 32,
+    "quota_min": 1,
+    "report_bytes": 168,
+    "rust_allocation": false,
+    "selectors": [
+      "copy",
+      "projection32",
+      "projection64",
+      "sigmoid",
+      "tanh",
+      "log",
+      "log_div15"
+    ],
+    "symbols": [
+      "apta_lp_v1_run",
+      "apta_lp_v1_report_bytes"
+    ],
+    "unwind": false,
+    "version": 1
+  },
+  "authority_sha256": {
+    "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json": "b2928de88b7cb83e52efe13ac944949ae4c7e3eebd10731f8c3e7ccad80d9606",
+    "docs/rust/PRODUCT-BUDGETS.json": "37b911c9cde6a767e4c3bfeab2c097777c0d59afc608c093479bd4b167125380",
+    "docs/rust/PRODUCT-GRID-CONTRACT.json": "f5ebdbd844872ad4b927aed8d9d7e15cf58c0d4e2a3e9e4a1230d506de4b0aeb",
+    "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-IMPLEMENTATION.json": "ad4853906f09849c1c07a366371eb0fad1ae95b7ad8be2666f93469e6a2feeef",
+    "docs/rust/PRODUCT-RESOURCE-PROBE-CORE-PROTOCOL.json": "db3aeff785a57c3536bda5ec3dad65b008f32f77fd3e92f99ad7daa8c47f4880",
+    "docs/rust/PRODUCT-SCOPE.md": "090b3bd2e08113d2c2cde7a7fc3c3ad3a29c1a34a4dc05498ce377be193d4a98",
+    "docs/rust/PRODUCT-TARGET-ADAPTER-PACKAGE.json": "5ea6e3304196cad0add380046df17d9d8482ccff378c88b685f24dad4b0be800",
+    "docs/rust/PRODUCT-TARGET-ADAPTER-PROTOCOL.json": "9efce4ae38aecc7bcc04cd82058cd7688d8f556ad4749ddef0aaf005940ec64d",
+    "docs/rust/PRODUCT-TARGET-PROBE-PROTOCOL.json": "c00a48c1bb95c639643cd72f67ff1da5e662dfe687b210061fc429e481de21b0",
+    "docs/rust/PRODUCT-TARGET-TELEMETRY-V1.md": "8a692aba0720b732ebd8819a09ddd46f77dc1662af28062361e6b524598fa0b5",
+    "docs/rust/fixtures/resource-probe-core-rc04a2/copy.u32le": "4a295a426d5e466e621f2025f7c8fcd60c8e58245590b35eb255538a7050ad3e",
+    "docs/rust/fixtures/resource-probe-core-rc04a2/nonlinear.f64le": "3ab3253b10d6526ecca86731a2e6b6472f23718d528ce685e1d96c65d55d42f3",
+    "docs/rust/fixtures/resource-probe-core-rc04a2/oracles.json": "1a3b9e68a2e3e1b301162bdf63988aa060a17e9bd41d7db0b99e5ec837831ae5",
+    "docs/rust/fixtures/resource-probe-core-rc04a2/projection.i32le": "709e2f9067a60c7cb8748c300829f93e29c490b585e1e16589bc4977acb4c910"
+  },
+  "build_package": {
+    "arming_implemented_in_slice": false,
+    "boot_runs_probe": false,
+    "flash_capture_serial_options": false,
+    "images": 1,
+    "inspection_seconds": 60,
+    "kind": "BUILD_ONLY_LINKCHECK",
+    "max_payload_bytes": 229376,
+    "memory_class": "internal;no PSRAM fallback",
+    "process_tree_RSS_bytes": 4294967296,
+    "retained_bytes": 134217728,
+    "selectors_linked": 7,
+    "supervision": "sum live-descendant RSS per sequential OS stage;WSL launcher RSS alone insufficient",
+    "wall_seconds": 900
+  },
+  "candidate_executed": false,
+  "consumer_reference": {
+    "changes_allowed": false,
+    "hash_basis": "Git blob bytes",
+    "repository": "https://github.com/dvucinozd/Ruzina.git",
+    "source_revision": "926e90506c4698cc68ada045347d21ded84f649a",
+    "source_sha256": {
+      "firmware-idf/legacy-jc1060/CMakeLists.txt": "56c9f63f04eaba311f5f9a9bf08999680af5ecdeb558a62d5818c42b56508c6e",
+      "firmware-idf/legacy-jc1060/main/CMakeLists.txt": "d72ebf1f5c7a2549f6b5c00ca5108dad5283f2dc1df7a058aae7a3ae10a32e9c",
+      "firmware-idf/legacy-jc1060/main/probe.c": "78feb8586a273498ef3720ac98b57d75c7946dd53012cb3d46990f998f1bc7ae",
+      "firmware-idf/legacy-jc1060/rust-core/Cargo.toml": "7f4b2864347558f694838eb44d90ea9402948a02f2960500c3cbc3ea2fb4d6e7",
+      "firmware-idf/legacy-jc1060/rust-core/src/lib.rs": "c83dd9df7ee599d45451540983c4af3aa1b0775901bdbff3fa859aaf6a3be2f8",
+      "firmware-idf/legacy-jc1060/sdkconfig.defaults": "841a8ac0a9b920c1c2fa1abde9283a0b51a541450400014bc4cc74e0d3ab38c1",
+      "firmware-idf/legacy-jc1060/tools/build_legacy.py": "818d7528dcaba09482bdfc4f7fb6f2435f205d0af6e7400ddadd11233f101375",
+      "firmware-idf/legacy-jc1060/tools/check_config.cmake": "698e3b16bc5b54902f2632dc0323c725ba08c354a8eb980548c025b4948b5909"
+    }
+  },
+  "date": "2026-10-31",
+  "document": {
+    "path": "docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md",
+    "sha256": "3a1f535e9277bbffcaeff2191dd2861cbcefb811ad86a7e7f4d3e4d5239782e2"
+  },
+  "execution_ready": false,
+  "existing_source_sha256": {
+    "rust/probes/resource-core/Cargo.lock": "7f86b0ff4040cfee69114f56ff8f3a74ef4a4fd209f37929d7ce420ca1ec317a",
+    "rust/probes/resource-core/Cargo.toml": "46a1cbc577bd02419c74a73d33aef6c323338e825e7f6ca8023caa91b0dba383",
+    "rust/probes/resource-core/src/lib.rs": "d9808e819a8a73ee27b52472fdc8ebcafd7bd520ea059f57805995770e3ad76e",
+    "rust/probes/target-adapter/Cargo.lock": "c3c2bec5cb646c5ec67f4f08aae0585feb7613f5532ce3cdb50540bdf63e535a",
+    "rust/probes/target-adapter/Cargo.toml": "cefd932184c633a8155cb15ba765b03938f57a7a827c6a7e3e1cf7bb87101910",
+    "rust/probes/target-adapter/src/lib.rs": "2f2c72e4a43bbd18738ee8eabb1a406dd6ef05a9284c433f03acc7e7cd76b8ad",
+    "tools/apta_target_probe_telemetry.py": "8d0775ccc1d1e3d631ada64fb7da23eaf74ed315cbcfbadbc22ddf551df98438",
+    "tools/tests/test_apta_target_probe_telemetry.py": "ee8cb5ee4e46d25665f78e78fbb282139163ca5e054e5383b06cbbd7b9378be7"
+  },
+  "format": "libapta-legacy-idf-probe-registration-1",
+  "hardware_access_performed": false,
+  "id": "RC-04B-L1",
+  "implementation_performed": false,
+  "next": "RC-04B-L2_IMPLEMENTATION;freeze/push before one clean-source package and separate receipt;physical execution remains gated",
+  "planned_new_paths": [
+    "rust/probes/legacy-idf/Cargo.toml",
+    "rust/probes/legacy-idf/Cargo.lock",
+    "rust/probes/legacy-idf/src/lib.rs",
+    "rust/probes/legacy-idf/src/telemetry.rs",
+    "rust/probes/legacy-idf/include/apta_legacy_probe.h",
+    "rust/probes/legacy-idf/tests/ffi.rs",
+    "rust/probes/legacy-idf/tests/layout.c",
+    "rust/probes/legacy-idf/examples/telemetry_fixture.rs",
+    "ports/espidf/legacy-resource-probe/CMakeLists.txt",
+    "ports/espidf/legacy-resource-probe/sdkconfig.defaults",
+    "ports/espidf/legacy-resource-probe/main/CMakeLists.txt",
+    "ports/espidf/legacy-resource-probe/main/Kconfig.projbuild",
+    "ports/espidf/legacy-resource-probe/main/probe.c",
+    "tools/apta_legacy_probe_package.py",
+    "tools/apta_legacy_probe_telemetry.py",
+    "tools/tests/test_apta_legacy_probe_package.py",
+    "tools/tests/test_apta_legacy_probe_telemetry.py",
+    "docs/rust/fixtures/legacy-probe-telemetry-v2/example-manifest.json",
+    "docs/rust/fixtures/legacy-probe-telemetry-v2/example.jsonl"
+  ],
+  "platform": {
+    "clock_hz": 1000000,
+    "console": "USB Serial/JTAG",
+    "cpu_mhz": 360,
+    "flash_bytes": 16777216,
+    "flash_mhz": 40,
+    "flash_mode": "dio",
+    "freertos_hz": 1000,
+    "main_stack_bytes": 12288,
+    "ownership": "C/IDF owns startup,drivers,heap,buffers,task lifetime;no esp-hal startup",
+    "psram": false,
+    "revision_max": 199,
+    "revision_min": 100,
+    "timer": "esp_timer_get_time;nonnegative i64;microseconds",
+    "unit_revision_expected": 103
+  },
+  "qualification": "NOT_QUALIFIED",
+  "source_baseline": "790480fca57936eccea0ac2134f814fbf9f94985",
+  "status": "REGISTERED_NOT_IMPLEMENTED",
+  "telemetry": {
+    "V1_identity_conversion_shim": false,
+    "V1_source_changes": false,
+    "all_null_timing_statuses": [
+      "FAILED",
+      "CANCELLED",
+      "NOT_SUPPORTED"
+    ],
+    "backend": "esp-idf-6.1-p4-legacy",
+    "caps": {
+      "line_bytes": 8192,
+      "log_bytes": 1048576,
+      "manifest_bytes": 131072,
+      "observations": 1024,
+      "retained_bytes": 2097152
+    },
+    "clock_hz": 1000000,
+    "counter_bits": 64,
+    "identity_added_fields": [
+      "backend",
+      "consumer_revision",
+      "idf_revision",
+      "app_sha256"
+    ],
+    "mixed_null_timing": false,
+    "prefix": "M1_LEGACY_RESOURCE_PROBE_V2 ",
+    "revision_max": 199,
+    "revision_min": 100,
+    "schema": 2,
+    "ticks_max": 9223372036854775807
+  },
+  "toolchain": {
+    "ABI_mismatch_suppression": false,
+    "abi": "rv32imafc/ilp32f",
+    "gcc": "esp-15.2.0_20251204",
+    "idf_revision": "fff9895c82d744c7237be8847347bdd1b07c6643",
+    "idf_version": "6.1.0",
+    "libm": "0.2.16",
+    "locked_offline": true,
+    "new_registry_dependencies": false,
+    "rust": "1.95.0",
+    "target": "riscv32imafc-unknown-none-elf"
+  },
+  "vetoes": [
+    "frozen core/oracle/default changes",
+    "native302 or V1 relaxation",
+    "mixed IDF/esp-hal startup",
+    "ABI mismatch suppression",
+    "consumer/provider/pin changes",
+    "trained model/corpus execution",
+    "resource/product/release qualification from build/link"
+  ]
+}

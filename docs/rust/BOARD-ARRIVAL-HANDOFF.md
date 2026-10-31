@@ -6,7 +6,9 @@ Korisnik potvrđuje da je ploča stigla i spojena na COM3; prethodna pauza do
 dolaska ploče time je završena. [Zapis dolaska](PRODUCT-BOARD-ARRIVAL-20261031.md)
 veže pasivni COM3 log, provjeru četiri backupa i naslijeđeni identitet P4 v1.3.
 Pripremljeni native paket traži v3.2 i ne smije se koristiti na ovoj jedinici.
-Slijedi registracija zasebnog legacy ESP-IDF probe/telemetry puta.
+[Legacy ESP-IDF probe/telemetry ugovor](PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md) je
+registriran i zamrznut kao RC-04B-L1. Slijedi RC-04B-L2 implementacija i zaseban
+disarmed build/link paket; fizičko izvršavanje ostaje zatvoreno preduvjetima.
 
 Aktualni napredak vodi [PRODUCT-FIRST-STATUS.json](PRODUCT-FIRST-STATUS.json).
 [Indeks](README.md) razdvaja aktivne dokumente od zamrznutih zapisa;

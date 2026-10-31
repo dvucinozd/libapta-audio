@@ -21,8 +21,8 @@ probe entry is uncalled. It is not runtime measurement firmware.
 The [product-first plan](../docs/rust/PRODUCT-FIRST-IMPLEMENTATION-PLAN-20261026.md)
 and [ordered RC continuation plan](../docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.md)
 are initial snapshots; their original "next" instructions do not override live
-progress. The next RC-04B task is registration of a separate legacy ESP-IDF
-probe backend and telemetry identity contract. Do not lower the native v3.2
+progress. The [legacy ESP-IDF probe/telemetry contract](../docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md)
+is registered. Next is RC-04B-L2 implementation and a disarmed build-only package. Do not lower the native v3.2
 policy or report revision 302 for this unit. Physical budgets, runtime trial integration, model
 rights/provenance and product activation remain open. Earlier dated checkpoints
 below retain their original scope and test counts.

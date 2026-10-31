@@ -18,9 +18,12 @@ The consumer has a separate legacy IDF 6.1/Rust platform path. Start with the
 [live machine status](PRODUCT-FIRST-STATUS.json) and [Rust index](README.md).
 The prior owner pause is resolved by arrival.
 
-**Next: register a separate legacy resource-probe backend and telemetry domain**
-within RC-04B prerequisite work, before implementation. Reuse the existing IDF
-legacy startup/ownership and fixed no_std Rust core through a narrow C ABI.
+**RC-04B-L1 registered; next: RC-04B-L2 implementation and disarmed build/link package.**
+The [legacy protocol](PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md) and
+[machine registration](PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.json) freeze19 new paths,
+ABI version1/report168B, seven selectors, IDF6.1 legacy ownership and telemetry V2.
+Native302/V1/core/oracles remain unchanged. Registration ran no code or device.
+Reuse the reviewed IDF architecture and fixed no_std Rust core through a narrow C ABI.
 Physical trials still require a fresh exact-unit/image match, reviewed layout/
 recovery and qualified runtime capabilities. Arrival is insufficient for product GO.
 RC-04A-3 is complete for adapter/link/package preparation:

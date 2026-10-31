@@ -2,7 +2,7 @@
 
 - **Current completed stage:** S9 — APTA 1.0
 - **C 1.1 development line:** `1.1.0`; tempo/grid ensemble and calibrated confidence accepted and integrated (2026-08-25); the independently verified final DJ attempt is formally rejected, so remaining gates are a passing replacement candidate/corpus, physical ESP32-P4 measurements, and the release freeze
-- **Native Rust continuation:** `rust-rewrite`; board available on COM3 (2026-10-31), recorded P4 v1.3 incompatible with the prepared v3.2 native backend; RC-04A complete, separate legacy probe registration next, RC-04B runtime/physical gates open
+- **Native Rust continuation:** `rust-rewrite`; board available on COM3 (2026-10-31), recorded P4 v1.3 incompatible with the prepared v3.2 native backend; RC-04A complete, legacy probe contract registered, implementation/build-only package next, RC-04B runtime/physical gates open
 - **Stable specification:** APTA 1.0
 - **Stable public API:** 1.0.0
 - **Maintained package:** 1.0.1
@@ -57,8 +57,9 @@ The owner confirms arrival on COM3. Inherited exact-unit evidence identifies
 P4 v1.3, incompatible with the native v3.2 policy and pinned HAL. A passive
 console observation and four backup-copy rehashes pass; no LIBAPTA firmware
 was flashed or probe run. See the [arrival checkpoint](../rust/PRODUCT-BOARD-ARRIVAL-20261031.md).
-Next is registration of a separate legacy ESP-IDF probe backend and telemetry
-identity domain, using existing consumer legacy platform work. The original
+The [separate legacy probe/telemetry contract](../rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md)
+is registered. Next is its implementation and disarmed build-only package, using
+the reviewed consumer legacy platform architecture. The original
 native guards and frozen telemetry V1 remain unchanged. Qualified arming/transport, repeatable complete
 trial scheduling, numerical verification, resident memory/stack telemetry and
 asynchronous cancellation remain missing. Whole-product resource allowances,

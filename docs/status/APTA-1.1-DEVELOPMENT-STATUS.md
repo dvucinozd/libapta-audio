@@ -133,8 +133,9 @@ The stable authority remains APTA 1.0 / package 1.0.1. The frozen 1.0 normative 
 
 **Current handoff — 2026-10-31:** the JC1060P470C_I_W_Y is available on COM3.
 Its committed unit record identifies P4 v1.3, incompatible with our prepared
-v3.2 native backend. The owner pause is resolved; next is separate legacy
-ESP-IDF probe/telemetry registration. RC-04A-1/2/3 software
+v3.2 native backend. The owner pause is resolved; the separate legacy
+ESP-IDF probe/telemetry contract is registered. Implementation/build-only verification
+is next. RC-04A-1/2/3 software
 preparation is complete. The [clean five-image package](../rust/PRODUCT-TARGET-ADAPTER-PACKAGE.md)
 passes compile/link and integrity checks, with `execution_ready=false` and
 `NOT_QUALIFIED`. There is no LIBAPTA probe execution, physical budget or product GO.

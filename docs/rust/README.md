@@ -4,7 +4,8 @@ Current handoff: **2026-10-31 — BOARD_AVAILABLE; NATIVE_PACKAGE_INCOMPATIBLE**
 The **JC1060P470C_I_W_Y** is on COM3. Its inherited unit evidence identifies
 P4 v1.3, so the prepared v3.2-minimum native backend cannot run on this unit.
 See the [arrival checkpoint](PRODUCT-BOARD-ARRIVAL-20261031.md). The owner pause
-is resolved; separate legacy probe registration is next. RC-04A preparation
+is resolved; the [legacy contract](PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md) is registered.
+Implementation/build-only verification is next. RC-04A preparation
 remains complete; RC-04B runtime/physical gates remain open.
 
 ## Read first

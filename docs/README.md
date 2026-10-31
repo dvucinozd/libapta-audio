@@ -14,7 +14,7 @@ For the `rust-rewrite` continuation, use the [Rust index](rust/README.md),
 [board-arrival handoff](rust/BOARD-ARRIVAL-HANDOFF.md). As of 2026-10-31,
 the JC1060P470C_I_W_Y is available on COM3. Its recorded P4 v1.3 identity is
 incompatible with the prepared v3.2 native backend. RC-04A preparation remains
-complete; next is separate legacy probe registration. RC-04B physical/runtime
+complete; the legacy probe contract is registered and implementation is next. RC-04B physical/runtime
 gates remain open. See the [arrival checkpoint](rust/PRODUCT-BOARD-ARRIVAL-20261031.md).
 
 The root README, the whole-project roadmap status and documents labelled as

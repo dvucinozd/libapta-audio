@@ -27,8 +27,9 @@ the clean build source and external artifact hashes. Preserve those artifacts;
 rebuilds or later runtime firmware need their own source/identity records. The
 standalone `rust/probes/resource-core` and `rust/probes/target-adapter` crates
 are outside the default workspace and need their own explicit manifests for
-tests/builds. Next is registration of a separate legacy backend, not execution
-of these native images. Telemetry V1 requires revision >=302; it must not be
+tests/builds. The [legacy probe contract](../docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md)
+is registered; its tools are planned and not yet implemented. Next is a separate
+legacy backend implementation/build-only package, not execution of these native images. Telemetry V1 requires revision >=302; it must not be
 silently relaxed or given a fabricated identity for the legacy unit.
 
 ## Existing desktop and experimental workflows

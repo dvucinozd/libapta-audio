@@ -1,7 +1,7 @@
 {
-  "active_phase": "RC-04B_LEGACY_BACKEND_REGISTRATION",
-  "active_phase_status": "BOARD_AVAILABLE_NATIVE_PACKAGE_INCOMPATIBLE",
-  "active_phase_verdict": "READ_ONLY_ARRIVAL_RECONCILED_LEGACY_REGISTRATION_NEXT_NO_PHYSICAL_QUALIFICATION",
+  "active_phase": "RC-04B-L1_LEGACY_REGISTRATION",
+  "active_phase_status": "COMPLETE_REGISTRATION_ONLY",
+  "active_phase_verdict": "LEGACY_ABI_TELEMETRY_AND_BUILD_SCOPE_REGISTERED_IMPLEMENTATION_AND_PHYSICAL_GATES_OPEN",
   "board_arrival_checkpoint": {
     "path": "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json",
     "sha256": "b2928de88b7cb83e52efe13ac944949ae4c7e3eebd10731f8c3e7ccad80d9606",
@@ -10,7 +10,7 @@
   "board_arrival_handoff": {
     "input_checkpoint": "1f9a7558df626acfe4f77a09ad3a9a6843b82da0",
     "path": "docs/rust/BOARD-ARRIVAL-HANDOFF.md",
-    "sha256": "94ab41c5fa57618a0ff9b8e14108baaa8ec2a837857cc6c44d2d3f4e12aa041c",
+    "sha256": "b632dc68c3098a4f1181e80b821a6601928253ae3bceac9d576af9ddb0e40289",
     "status": "CURRENT_BOARD_COMPATIBILITY_AND_LEGACY_CONTINUATION"
   },
   "branch": "rust-rewrite",
@@ -56,10 +56,10 @@
     "status": "INITIAL_PLAN_SNAPSHOT_PROGRESS_TRACKED_IN_CONTINUATION_PROGRESS"
   },
   "continuation_progress": {
-    "execution_scope": "RC04A3 adapter software and five clean link-check images/package only;no physical execution,model or musical corpus",
+    "execution_scope": "RC04B-L1 legacy ABI/V2/build boundary registration only;no implementation,build,serial or physical experiment in this checkpoint;RC04A evidence preserved",
     "last_completed_package": "RC-03",
-    "last_completed_substep": "RC-04A-3",
-    "next_package": "RC-04B",
+    "last_completed_substep": "RC-04B-L1",
+    "next_package": "RC-04B-L2",
     "packages": [
       {
         "checks": [
@@ -125,7 +125,7 @@
       {
         "evidence": [],
         "id": "RC-04",
-        "reason": "Board available; passive console and backups rechecked; native package incompatible with inherited revision103; legacy registration/runtime/physical gates open",
+        "reason": "Native backend remains incompatible;legacy preparation contract registered;L2 implementation/build and later physical/runtime gates remain",
         "source_revision": null,
         "status": "IN_PROGRESS_PREREQUISITE_RECONCILIATION",
         "substeps": [
@@ -164,9 +164,25 @@
               "docs/rust/PRODUCT-BOARD-ARRIVAL-20261031.json"
             ],
             "id": "RC-04B",
-            "reason": "Available unit has inherited revision103 versus native minimum302; separate legacy backend/telemetry registration and exact-image runtime/physical prerequisites required",
+            "preparation_substeps": [
+              {
+                "evidence": [
+                  "docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.md",
+                  "docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.json"
+                ],
+                "id": "RC-04B-L1",
+                "input_revision": "790480fca57936eccea0ac2134f814fbf9f94985",
+                "status": "COMPLETE_REGISTRATION_ONLY"
+              },
+              {
+                "execution_ready": false,
+                "id": "RC-04B-L2",
+                "status": "READY_SOFTWARE_IMPLEMENTATION_ONLY"
+              }
+            ],
+            "reason": "Arrival and legacy contract resolved preparation decisions only;no probe build or physical execution in this registration",
             "source_revision": null,
-            "status": "BLOCKED_NATIVE_BACKEND_AND_RUNTIME_CAPABILITY"
+            "status": "LEGACY_REGISTRATION_COMPLETE_IMPLEMENTATION_AND_PHYSICAL_PENDING"
           }
         ]
       },
@@ -215,7 +231,7 @@
     ],
     "plan_id": "PRODUCT-CONTINUATION-20261027",
     "plan_path": "docs/rust/PRODUCT-CONTINUATION-PLAN-20261027.json",
-    "status": "IN_PROGRESS_NATIVE_BACKEND_INCOMPATIBLE_LEGACY_REGISTRATION_NEXT",
+    "status": "LEGACY_CONTRACT_REGISTERED_IMPLEMENTATION_NEXT",
     "updated_date": "2026-10-31"
   },
   "contract_document": {
@@ -555,6 +571,14 @@
       "source_baseline": "1f9a7558df626acfe4f77a09ad3a9a6843b82da0",
       "status": "BOARD_AVAILABLE_NATIVE_PACKAGE_INCOMPATIBLE",
       "verdict": "PASSIVE_OBSERVATION_AND_BACKUP_RECHECK_ONLY_PHYSICAL_TP_CASES_NOT_RUN"
+    },
+    {
+      "date": "2026-10-31",
+      "evidence": "docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.json",
+      "phase": "RC-04B-L1",
+      "source_baseline": "790480fca57936eccea0ac2134f814fbf9f94985",
+      "status": "COMPLETE_REGISTRATION_ONLY",
+      "verdict": "NO_CODE_DEVICE_OR_CANDIDATE_RUN"
     }
   ],
   "host_frontend_experiment": {
@@ -697,12 +721,18 @@
     },
     "status": "COMPLETE_SYNTHETIC_HOST_ONLY"
   },
+  "legacy_idf_probe_registration": {
+    "execution_ready": false,
+    "path": "docs/rust/PRODUCT-LEGACY-IDF-PROBE-PROTOCOL.json",
+    "sha256": "de34fd7e90e7ee0bebbea9bd62a9115303893b94161c9766d76a214190b9ac9c",
+    "status": "REGISTERED_NOT_IMPLEMENTED"
+  },
   "next": {
-    "action": "Register separate legacy ESP-IDF resource-probe backend and revision103 telemetry identity domain;reuse existing consumer legacy platform and HAL-independent Rust core;preserve native302 and frozen V1",
+    "action": "Implement only19 registered new paths:standalone Rust C ABI/V2 producer,strict offline V2 parser and disarmed internal-memory IDF6.1 package;test/freeze/push before one clean-source build/result;no serial/flash/model execution",
     "execution_ready": false,
     "large_port_allowed": false,
     "missing_capabilities": [
-      "legacy-compatible backend and separate telemetry identity contract",
+      "legacy backend and V2 implementation/build-only verification",
       "exact unit/recovery/programming layout",
       "qualified producer/control transport and operator arming",
       "reusable physical warmup/trial scheduler",
@@ -710,11 +740,11 @@
       "resident BSP/allocator/stack telemetry",
       "asynchronous cancel requester and physical timing/placement"
     ],
-    "mode": "REGISTER_LEGACY_PROBE_BACKEND_AND_TELEMETRY",
-    "phase": "RC-04B",
+    "mode": "IMPLEMENT_LEGACY_ABI_V2_AND_DISARMED_PACKAGE",
+    "phase": "RC-04B-L2",
     "ready": true,
-    "scope": "Registration only;not code/model port or physical trial authorization",
-    "state": "REGISTRATION_ONLY_READY_PHYSICAL_EXECUTION_BLOCKED"
+    "scope": "Software implementation and build/link preparation only;physical execution needs a separate admission/registration",
+    "state": "READY_SOFTWARE_ONLY_PHYSICAL_EXECUTION_BLOCKED"
   },
   "open_decisions": [
     {

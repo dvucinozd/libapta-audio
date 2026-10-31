@@ -5,7 +5,7 @@ whole-project release and validation boundary.
 
 Native Rust continuation on `rust-rewrite` has **board arrival confirmed on COM3**
 (2026-10-31). Recorded P4 v1.3 identity blocks the prepared v3.2 native backend;
-next is separate legacy probe registration. RC-04A preparation is complete;
+the separate legacy probe contract is registered; implementation is next. RC-04A preparation is complete;
 RC-04B physical execution and runtime capabilities remain open. See the
 [board-arrival handoff](../rust/BOARD-ARRIVAL-HANDOFF.md),
 [live status](../rust/PRODUCT-FIRST-STATUS.json) and
