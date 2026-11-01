@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload Linux conformance reports
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: apta-conformance-linux-attempt-${{ github.run_attempt }}
           path: |
@@ -140,7 +140,7 @@ jobs:
 
       - name: Upload Windows conformance reports
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: apta-conformance-windows-attempt-${{ github.run_attempt }}
           path: |
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload ILP32 conformance reports
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: apta-conformance-ilp32-attempt-${{ github.run_attempt }}
           path: build-32/conformance-reports/*.json
@@ -273,7 +273,7 @@ jobs:
 
       - name: Upload P7 security evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: apta-security-campaign-attempt-${{ github.run_attempt }}
           path: |
